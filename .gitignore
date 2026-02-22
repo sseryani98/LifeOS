@@ -1,0 +1,31 @@
+# Node
+node_modules/
+
+# CAP generated
+gen/
+@cds-models/
+.cds-services.json
+
+# Secrets
+.env
+
+# Runtime logs
+logs/
+
+# Test artifacts
+coverage/
+project/test-reports/
+
+# TypeScript build cache
+*.tsbuildinfo
+
+# CAP local env overrides
+default-env.json
+
+# IDE
+.vscode/
+
+# OS
+Thumbs.db
+Desktop.ini
+.DS_Store
