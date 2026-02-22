@@ -1,127 +1,184 @@
-# Financial Planner - Project Context
+# Financial Planner — Build Phase
 
 ## What This Is
 
-A personal financial management system for a Canadian credit card churner. The system automates transaction ingestion, tracks churning performance metrics, manages budgeting, and provides a consolidated financial picture.
+Personal financial management system for a Canadian credit card churner. TypeScript + SAP CAP + SAPUI5 + PostgreSQL. Single user, local deployment.
 
-## Owner
+## Current Sprint
 
-Sandro - solo user, SAP implementation consultant by day, credit card churner by hobby.
+<!-- Updated each sprint -->
+**Sprint:** W1-S1 — Foundation & Seed Data
+**Branch:** sprint/W1-S1
+**Goal:** Reference data seeded, config tables editable via SM30-style CRUD
+**Stories:** CNV-002, CNV-003, FRM-009
 
-## Key Architecture Decisions
+## Architecture
 
-- **Automation is the foundation** - without auto-import, nothing gets used. Manual effort killed the Excel approach.
-- **SimpleFIN Bridge is the V1 transaction source** (D-30) - MX backend has direct API partnerships with CIBC and Amex. TD via screen scraping. Scotiabank via CSV import (D-31). Architecture is provider-abstracted to support future CDB (open banking) transition.
-- **In-house categorization engine** (D-32) - SimpleFIN data is sparse (raw bank descriptions, no categories). System normalizes merchant names and assigns categories in-house, learning from user corrections.
-- **Two independent categorization taxonomies** - Purchase Type (budget) and Earning Category (churning), both auto-learned.
-- **Desktop-first web app** - no mobile optimization needed for V1.
-- **Single user, local deployment** - no auth, no multi-tenancy.
-- **All 4 build waves ship together** (D-35) - no MVP release. Waves (23/8/9/3 objects) define build order and testable increments, not release phases.
+- **Backend:** CAP with @cap-js/postgres — 4 CDS services (Transaction, Churning, Budget, Admin)
+- **Frontend:** SAPUI5 — Fiori Elements for CRUD (8 apps), Freestyle for dashboards/wizards (14 apps)
+- **API:** OData V4 auto-generated from CDS
+- **Theme:** sap_horizon + custom overrides in `app/shared/css/theme-overrides.css`
+- **Background jobs:** node-cron inside CAP process via `cds.spawn()`
 
-## Repository Structure
+## Folder Structure
 
 ```
-Financial Planner/
-├── CLAUDE.md                                  ← You are here. Project context for Claude Code
-├── design/                                    ← All design work lives here
-│   ├── PROBLEM_STATEMENT_AND_VISION.md        ← Foundation document, everything traces back here
-│   ├── BUSINESS_ARCHITECTURE.md               ← FRICEW catalog — 43 objects with IDs, traceability, and wave plan (§9)
-│   ├── DATA_MODEL.md                          ← 42 entities with attributes, relationships, computed values (Step 5)
-│   ├── TECH_STACK.md                          ← Tech stack decisions, libraries, project structure, personas (Step 6)
-│   ├── PROJECT_MANAGEMENT.md                  ← Sprint methodology, sprint plan, meeting format, tracking (Step 6)
-│   ├── DESIGN_PHASE_TIMELINE.md               ← Steps to first line of code, with progress tracking
-│   ├── DESIGN_WORKSHOP.md                     ← Workshop methodology, spec grouping, template, DoD (Step 7)
-│   ├── DESIGN_SYSTEM.md                       ← Theme, nav, layout, colors, charts, status indicators (Step 8)
-│   ├── THEME.md                               ← Custom theme overrides on sap_horizon — palette, border radius, components (Step 14)
-│   ├── TECHNICAL_STANDARDS.md                 ← CDS, TypeScript, handler patterns, linting, logging, encryption (Step 9)
-│   ├── TEST_STRATEGY.md                       ← Test framework, boundaries, coverage, test data strategy (Step 10)
-│   ├── VERSION_CONTROL.md                     ← Git strategy, branching, commits, merge, tagging (Step 11)
-│   ├── specs/                                 ← Functional specs written during Step 12 workshops
-│   │   ├── SPEC-01-INGESTION-PIPELINE.md      ← Approved — ENH-008, INT-001, INT-002, FRM-003, FRM-010
-│   │   ├── SPEC-02-TRANSACTION-PROCESSING.md  ← Approved — ENH-001, ENH-009, FRM-001
-│   │   ├── SPEC-04-BONUS-AND-POINTS.md        ← Approved — ENH-003, ENH-006
-│   │   ├── SPEC-05-BUDGET-PIPELINE.md         ← Approved — ENH-007
-│   │   ├── SPEC-06-REFERENCE-DATA-AND-SEED.md ← Approved — CNV-002, CNV-003, FRM-009
-│   │   ├── SPEC-07-CARD-RECOMMENDATION.md     ← Approved — ENH-002, RPT-006
-│   │   ├── SPEC-08-CARD-PROFITABILITY.md      ← Approved — ENH-005, RPT-005
-│   │   ├── SPEC-09-GOALS.md                   ← Approved — FRM-008, RPT-011
-│   │   ├── SPEC-10-FINANCIAL-PICTURE.md       ← Approved — FRM-011, RPT-003
-│   │   ├── SPEC-11-CHURNING-ANALYTICS.md      ← Approved — RPT-008, RPT-009, RPT-010
-│   │   ├── SPEC-12-BUDGET-ANALYTICS.md        ← Approved — RPT-007, RPT-012
-│   │   ├── SPEC-13-MARKET-INTELLIGENCE.md     ← Approved — INT-003, WFL-003, CNV-004
-│   │   ├── SPEC-14-HISTORICAL-BACKFILL.md     ← Approved — CNV-001
-│   │   ├── SPEC-15-WEEKLY-REVIEW.md            ← Approved — WFL-001
-│   │   ├── SPEC-16-ELIGIBILITY-ENGINE.md       ← Approved — ENH-004
-│   │   ├── SPEC-17-TRANSACTION-ENTRY.md        ← Approved — FRM-002
-│   │   ├── SPEC-18-MARKET-CARDS.md            ← Approved — FRM-005
-│   │   ├── SPEC-19-CHURNBOARD.md              ← Approved — RPT-001
-│   │   ├── SPEC-20-BUDGET-DASHBOARD.md        ← Approved — RPT-002
-│   │   └── SPEC-21-TROPHY-CASE.md             ← Approved — RPT-004
-│   ├── user-profile/
-│   │   ├── SANDRO.md                          ← User preferences, working style, likes/dislikes
-│   │   └── DECISIONS_LOG.md                   ← All design decisions with context and rationale (D-01 through D-313)
-│   ├── actual-csvs/                           ← Real CSV samples from all 4 issuers (Scotia, TD, CIBC, Amex)
-│   └── reference/
-│       └── ORIGINAL_SPEC_2024.md              ← Archived original spec (reference input, not governing)
-└── research/
-    ├── churning-in-canada.md                  ← Domain research on Canadian CC churning (Step 1 input)
-    ├── plaid-research.md                      ← Plaid API assessment (Step 2 input)
-    └── simplefin-research.md                  ← SimpleFIN Bridge assessment (Step 2 input)
+
+db/                          CDS entity models (9 domain folders)
+  enums.cds                  All enum types
+  common/                    Shared aspects
+  reference/schema.cds       16 reference entities
+  cards/schema.cds           7 card entities
+  transactions/schema.cds    5 transaction entities
+  points/schema.cds          2 points entities
+  budget/schema.cds          4 budget entities
+  financial/schema.cds       2 financial entities
+  integration/schema.cds     2 integration entities
+  alerts/schema.cds          1 alert entity
+  seed/                      CSV seed data (CNV-002, CNV-003)
+srv/
+  {service-name}.cds         CDS service definitions (4 services)
+  {service-name}.ts          Service entry points
+  _i18n/
+    i18n.properties          CDS field labels (PascalCase keys)
+    messages.properties      Runtime messages (camelCase.dots keys)
+  modules/
+    shared/                  BaseFacade, BaseService, Logger, MessagingUtility, constants
+    {domain}/                Per-domain: {Domain}Facade.ts, {Domain}Service.ts, {Domain}Validator.ts
+    integration/             SimpleFIN, CSV, Scheduling services
+  util/                      EncryptionUtility, DateTimeUtility, CurrencyUtility
+app/
+  shared/                    BaseController.js, controls/, util/formatter.js, css/theme-overrides.css
+  {app-name}/                One folder per UI app (23 total)
+    webapp/                  manifest.json, Component.js, i18n/, ext/ or views/
+    annotations/             Entity-based CDS annotation files (Fiori Elements apps only)
+test/
+  unit/{domain}/             Per-module unit tests
+  integration/               Per-CDS-service integration tests
+  integration/scenarios/     FUT multi-step scenario tests
+  data/                      Test data factories, named constants, seeds.ts
+project/
+  SPRINT_BOARD.md            Current sprint status
+  DEFECT_LOG.md              Running defect log
+  sprints/                   Sprint checkpoint reports
+
 ```
 
-## Design Progress
+## Coding Patterns
 
-- **Steps 0–14 complete** — problem statement, domain research, aggregator spike, data model, tech stack, project management, workshop methodology, design system, technical standards, test strategy, version control, functional specs, information architecture, theme build
-- **313 design decisions logged** (D-01 through D-313)
-- **DM-001 amendments tracked** — System Config, Import Log, Redemption Type, GoalForecastItem, Financial Contribution, Financial Account (+5 fields), Financial Account Type (seed expansion), Points Transfer, ScrapeRun, ScrapeQueueItem, ScrapeMapping, and field-level changes across multiple specs
+### CDS
 
-## Project Terminology
+- **Entities:** PascalCase singular (`Transaction`, `CardInstance`)
+- **Fields:** camelCase (`lifecycleState`, `activationDate`)
+- **FKs:** CAP auto-generated (`cardInstance_ID`)
+- **Namespace:** `com.financialplanner`
+- **Schema:** One `schema.cds` per domain folder under `db/`
 
-Sandro uses SAP FRICEW terminology for design objects:
+### TypeScript (srv/ and db/ only)
 
-- **F** - Forms (UI screens)
-- **R** - Reports (dashboards, analytics)
-- **I** - Interfaces (APIs, integrations, data feeds)
-- **C** - Conversions (data migration, historical loading)
-- **E** - Enhancements (custom business logic)
-- **W** - Workflows (process flows, state machines)
+- `strict: true` with all sub-flags
+- Entity imports: `import { Transaction } from '#cds-models/com/financialplanner'`
+- Handler registration: pass entity references, not strings
+- Custom types in `{domain}/types.ts`
+- No `any` — ever
 
-Each object gets an ID: `FRM-001`, `RPT-001`, `INT-001`, `CNV-001`, `ENH-001`, `WFL-001`
+### Handler Pattern — Always 3 Files
 
-## Document Status Convention
+| Layer | File | Does | Calls |
+|-------|------|------|-------|
+| Facade | `{Domain}Facade.ts` | Handler registration + `wrapHandler` | Service |
+| Service | `{Domain}Service.ts` | Business logic, CDS reads/writes | Validator, other Services |
+| Validator | `{Domain}Validator.ts` | Input validation, `req.error()` accumulation | Nothing |
 
-Every design document carries a **Status** field in its header block. The status determines whether the document is evolving or frozen.
+- Facades: NO `if`/`for`/`while`, NO `try`/`catch` — enforced by ESLint
+- All handlers wrapped with `wrapHandler` from `BaseFacade`
+- Private methods: `_` prefix, placed at bottom of class
 
-| Status | Meaning | Change History? |
-|--------|---------|-----------------|
-| Draft | Being written, not yet reviewed | Yes |
-| Active | In use and being updated | Yes |
-| In Review | Under review | Yes |
-| Approved | Reviewed and approved, may receive amendments | Yes |
-| Final | Frozen - no further changes | No |
-| Archived | Superseded, kept for reference only | No |
+### Error Handling
 
-**Rules:**
+- `req.error({ code, message, target, status: 400 })` — Validator, accumulates
+- `req.reject(status, message)` — Service/Facade, fatal (404/409/500/502)
+- Always i18n keys via `MessagingUtility` — never hardcoded strings
 
-- Evolving documents (Draft, Active, In Review, Approved) must have a **Change History** table as section 1
-- Frozen documents (Final, Archived) do not get a change history
-- Change History format: `| Date | Author | Description |`
-- When editing an evolving document, Claude **must** add an entry to its Change History table describing the change
-- Claude must **never** edit a frozen document (Final or Archived) without explicit approval from Sandro
+### Logging
 
-**Exempt from versioning:** `CLAUDE.md` and `SANDRO.md` — these are project config and user profile files, not design deliverables
+- `Logger` class wrapping `cds.log()`, structured JSON
+- Correlation ID from `req.id`
+- Dual output: `logs/app.log` + `logs/error.log`
+- Never log decrypted card numbers, CVV, access URLs
+- `_redact()` before any DEBUG-level `req.data` logging
 
-## Conventions
+### i18n — Three Tiers
 
-- Currency: CAD (foreign currency not tracked for now)
-- Budget periods: Monthly, no rollover
-- All design decisions are documented with rationale in the design folder
-- Plan thoroughly before coding - no code until design is approved
-- No duplication across documents - single source of truth per piece of information, reference from elsewhere
+| Tier | File | Key Format |
+|------|------|------------|
+| CDS labels | `srv/_i18n/i18n.properties` | `PascalCase` |
+| Runtime messages | `srv/_i18n/messages.properties` | `camelCase.dots` |
+| UI5 app messages | `app/{name}/webapp/i18n/i18n.properties` | `camelCase` |
+
+### SAPUI5 (app/ — JavaScript, not TypeScript)
+
+- XML views only — no JS views
+- All controllers extend `BaseController.js`
+- Extensions: `{ViewType}Ext.js` (ListReportExt, ObjectPageExt)
+- Annotations: entity-based files in `app/{name}/annotations/`
+- Hungarian notation: `sName`, `oModel`, `aItems`, `bIsValid`, `iCount`, `fnCallback`
+- Event handlers: `on` prefix (`onPressSubmit`, `onSelectCard`)
+- Max 10 `sap.ui.define` dependencies
+
+### Encryption
+
+- AES-256-GCM via `EncryptionUtility.ts` — `encrypt(plaintext)` / `decrypt(stored)`
+- 4 encrypted fields: `card_number_enc`, `cvv_enc`, `expiry_date_enc`, `access_url_enc`
+- Key in `.env` as `ENCRYPTION_KEY` (gitignored)
+- No raw `crypto` calls outside EncryptionUtility
+
+## Test Rules
+
+- **TDD:** Red-Green-Refactor for Validators, Services, Utilities, ENH engines
+- **Framework:** Jest + ts-jest (backend), QUnit + OPA5 (frontend)
+- **Unit tests:** No DB, mocked CDS. Validators fully tested (pure). Services tested with CDS mocked + real Validator.
+- **Integration tests:** `cds.test()` + SQLite. One file per CDS service.
+- **Test data:** Hybrid factories + named constants (UPPER_SNAKE_CASE) in `test/data/`. Semantic names. No real card numbers.
+- **Coverage targets:** Validators/Utilities 100%/100%, Services 90%/85%, Overall 85%/80%
+- **Facades excluded** from unit testing (zero logic by design)
+
+## Git Workflow
+
+- **Branch:** `sprint/W{wave}-S{sprint}` off `main`
+- **Commits:** `type(scope): description` — Conventional Commits
+  - Types: `feat`, `fix`, `refactor`, `test`, `docs`, `chore`
+  - FRICEW IDs in body, `Co-Authored-By` on agent commits
+- **Merge:** `--no-ff` merge commits at sprint checkpoint
+- **Tags:** `v{wave}.{sprint}` annotated tags, `v1.0.0` at go-live
+
+## Design References
+
+Look up details here — do not duplicate:
+
+| Topic | Document |
+|-------|----------|
+| Entity definitions | [DATA_MODEL.md](design/DATA_MODEL.md) |
+| Functional specs | [design/specs/SPEC-{nn}-*.md](design/specs/) |
+| Business rules | Spec §5 (Business Rules) per FRICEW object |
+| Wave plan & FRICEW catalog | [BUSINESS_ARCHITECTURE.md](design/BUSINESS_ARCHITECTURE.md) |
+| Sprint plan & personas | [PROJECT_MANAGEMENT.md](design/PROJECT_MANAGEMENT.md) |
+| Full coding standards | [TECHNICAL_STANDARDS.md](design/TECHNICAL_STANDARDS.md) |
+| Test strategy details | [TEST_STRATEGY.md](design/TEST_STRATEGY.md) |
+| Design system | [DESIGN_SYSTEM.md](design/DESIGN_SYSTEM.md) |
+| Theme overrides | [THEME.md](design/THEME.md) |
+| Navigation & IA | [INFORMATION_ARCHITECTURE.md](design/INFORMATION_ARCHITECTURE.md) |
+| Cross-sprint contracts | [BUILD_PLAN.md](design/BUILD_PLAN.md) §2 |
+| All decisions | [DECISIONS_LOG.md](design/user-profile/DECISIONS_LOG.md) |
 
 ## Do NOT
 
-- Write any application code until the design phase is complete and approved
-- Skip the design review process
-- Make assumptions about business rules - ask Sandro
-- Add features beyond what's been discussed and documented
+- Add features beyond what the functional spec defines
+- Skip TDD — write failing tests before implementation
+- Hardcode user-facing strings — always i18n keys
+- Put logic in Facades — they are pure wiring
+- Use `any` type in TypeScript
+- Log decrypted sensitive data
+- Use `!important` in CSS overrides
+- Duplicate information already in design docs — reference it
+- Commit `.env`, `logs/`, `node_modules/`, `gen/`
