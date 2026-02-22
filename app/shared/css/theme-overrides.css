@@ -1,0 +1,91 @@
+/*
+ * Financial Planner — Custom Theme Overrides
+ * Layered on top of SAP Horizon Light (sap_horizon).
+ * Loaded via <link> in index.html after SAPUI5 bootstrap.
+ *
+ * Layer 1: CSS Custom Properties (:root block)
+ *   — Covers ~90% of overrides. All components referencing
+ *     these properties update automatically.
+ *
+ * Layer 2: Targeted Selectors
+ *   — Component-specific tweaks where custom properties alone
+ *     don't achieve the desired result. Used sparingly.
+ *
+ * Brand Palette:
+ *   Primary (Warm Charcoal): #3D3A38
+ *   Hover (Dark Charcoal):   #2E2B29
+ *   Active (Deep Charcoal):  #252220
+ *   Selection (Warm Mist):   #EDECEB
+ *   Shell Hover (Ash):       #4A4745
+ *
+ * No !important — ever. Match Horizon selector specificity exactly.
+ * See THEME.md §7 for full mapping table.
+ */
+
+/* ===== Layer 1: CSS Custom Properties ===== */
+
+:root {
+  /* --- Brand & Selection --- */
+  --sapBrandColor: #3D3A38;
+  --sapHighlightColor: #3D3A38;
+  --sapActiveColor: #2E2B29;
+  --sapSelectedColor: #3D3A38;
+  --sapContent_FocusColor: #3D3A38;
+
+  /* --- Shell --- */
+  --sapShellColor: #3D3A38;
+  --sapShell_TextColor: #FFFFFF;
+  --sapShell_InteractiveTextColor: #FFFFFF;
+  --sapShell_Hover_Background: #4A4745;
+
+  /* --- Buttons: Emphasized --- */
+  --sapButton_Emphasized_Background: #3D3A38;
+  --sapButton_Emphasized_BorderColor: #3D3A38;
+  --sapButton_Emphasized_TextColor: #FFFFFF;
+  --sapButton_Emphasized_Hover_Background: #2E2B29;
+  --sapButton_Emphasized_Hover_BorderColor: #2E2B29;
+  --sapButton_Emphasized_Active_Background: #252220;
+  --sapButton_Emphasized_Active_BorderColor: #252220;
+
+  /* --- Buttons: Default --- */
+  --sapButton_TextColor: #3D3A38;
+  --sapButton_BorderColor: #3D3A38;
+  --sapButton_Hover_Background: #EDECEB;
+  --sapButton_Hover_BorderColor: #2E2B29;
+
+  /* --- Input Fields --- */
+  --sapField_Focus_BorderColor: #3D3A38;
+  --sapField_Hover_BorderColor: #3D3A38;
+  --sapField_Active_BorderColor: #2E2B29;
+
+  /* --- Lists & Tables --- */
+  --sapList_Hover_Background: #EDECEB;
+  --sapList_SelectionBackgroundColor: #EDECEB;
+  --sapList_Active_Background: #3D3A38;
+  --sapList_Active_TextColor: #FFFFFF;
+
+  /* --- Border Radius: 0 on all containers/interactive controls --- */
+  --sapButton_BorderCornerRadius: 0;
+  --sapField_BorderCornerRadius: 0;
+  --sapElement_BorderCornerRadius: 0;
+  --sapPopover_BorderCornerRadius: 0;
+  --sapTile_BorderCornerRadius: 0;
+}
+
+/* ===== Layer 2: Targeted Selectors ===== */
+
+/*
+ * Layer 2 overrides are determined during build by inspecting the running DOM.
+ * Each selector gets a comment noting the component and SAPUI5 version it targets.
+ * Known candidates (verify against actual DOM):
+ *
+ * - ShellBar dark treatment (.sapMShellBarCont or equivalent)
+ *   May need explicit background-color/color if --sapShellColor
+ *   doesn't cascade to all internal ShellBar elements.
+ *
+ * - Side Navigation active indicator (.sapTntNavLI.sapTntNavLISelected or equivalent)
+ *   May need border-left-color/color if --sapHighlightColor
+ *   doesn't fully drive the active nav state.
+ *
+ * Add selectors here only when Layer 1 custom properties are insufficient.
+ */

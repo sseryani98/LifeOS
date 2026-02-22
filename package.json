@@ -1,0 +1,71 @@
+{
+  "name": "financial-planner",
+  "version": "0.0.1",
+  "description": "Personal financial management system for a Canadian credit card churner",
+  "private": true,
+  "type": "module",
+  "imports": {
+    "#cds-models/*": "./@cds-models/*/index.js"
+  },
+  "scripts": {
+    "start": "cds-serve",
+    "build": "cds build",
+    "test": "jest --json --outputFile=coverage/test-results.json --coverage",
+    "posttest": "tsx scripts/generate-test-report.ts",
+    "generate-key": "tsx scripts/generate-key.ts"
+  },
+  "dependencies": {
+    "@sap/cds": "^9",
+    "@cap-js/postgres": "^2",
+    "axios": "^1",
+    "papaparse": "^5",
+    "fuse.js": "^7",
+    "node-cron": "^3",
+    "cheerio": "^1"
+  },
+  "devDependencies": {
+    "@cap-js/cds-types": "^0.15",
+    "@cap-js/cds-typer": ">=0.1",
+    "@types/node": "^20",
+    "typescript": "^5",
+    "tsx": "^4",
+    "ts-jest": "^29",
+    "jest": "^29",
+    "@types/jest": "^29",
+    "eslint": "^9",
+    "@typescript-eslint/parser": "^8",
+    "@typescript-eslint/eslint-plugin": "^8",
+    "@sap/eslint-plugin-cds": "^3",
+    "eslint-plugin-jsdoc": "^50",
+    "eslint-plugin-import": "^2",
+    "ts-node": "^10",
+    "@types/papaparse": "^5",
+    "@types/node-cron": "^3",
+    "@types/cheerio": "^0.22"
+  },
+  "cds": {
+    "requires": {
+      "db": {
+        "kind": "postgres",
+        "impl": "@cap-js/postgres",
+        "credentials": {
+          "host": "localhost",
+          "port": 5432,
+          "user": "postgres",
+          "password": "",
+          "database": "financial_planner"
+        }
+      }
+    },
+    "i18n": {
+      "folders": [
+        "srv/_i18n"
+      ]
+    },
+    "log": {
+      "levels": {
+        "app": "info"
+      }
+    }
+  }
+}
