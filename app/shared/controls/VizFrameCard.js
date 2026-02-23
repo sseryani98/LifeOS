@@ -1,6 +1,6 @@
 sap.ui.define([
   "sap/ui/core/Control"
-], function (Control) {
+], (Control) => {
   "use strict";
 
   /**
@@ -30,7 +30,7 @@ sap.ui.define([
       events: {}
     },
 
-    renderer: function (oRm, oControl) {
+    renderer(oRm, oControl) {
       oRm.openStart("div", oControl);
       oRm.class("fpVizFrameCard");
       oRm.style("width", oControl.getWidth());
@@ -39,11 +39,11 @@ sap.ui.define([
       oRm.close("div");
     },
 
-    onAfterRendering: function () {
+    onAfterRendering() {
       // VizFrame initialization will be implemented when chart data is available
     },
 
-    exit: function () {
+    exit() {
       // Destroy VizFrame instance to prevent memory leaks
     }
   });

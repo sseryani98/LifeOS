@@ -1,6 +1,6 @@
 sap.ui.define([
   "sap/ui/core/Control"
-], function (Control) {
+], (Control) => {
   "use strict";
 
   /**
@@ -30,7 +30,7 @@ sap.ui.define([
       events: {}
     },
 
-    renderer: function (oRm, oControl) {
+    renderer(oRm, oControl) {
       oRm.openStart("div", oControl);
       oRm.class("fpApexChartCard");
       oRm.style("width", oControl.getWidth());
@@ -39,11 +39,11 @@ sap.ui.define([
       oRm.close("div");
     },
 
-    onAfterRendering: function () {
+    onAfterRendering() {
       // ApexCharts initialization will be implemented when chart data is available
     },
 
-    exit: function () {
+    exit() {
       // Destroy ApexCharts instance to prevent memory leaks
     }
   });

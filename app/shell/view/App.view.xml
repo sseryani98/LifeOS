@@ -1,0 +1,79 @@
+<mvc:View
+  controllerName="com.financialplanner.shell.controller.App"
+  xmlns:mvc="sap.ui.core.mvc"
+  xmlns="sap.m"
+  xmlns:tnt="sap.tnt"
+  displayBlock="true">
+
+  <tnt:ToolPage id="toolPage" sideExpanded="true">
+
+    <!-- Header -->
+    <tnt:header>
+      <tnt:ToolHeader>
+        <Title text="{i18n>appTitle}" level="H4" class="sapUiSmallMarginBegin"/>
+        <ToolbarSpacer/>
+      </tnt:ToolHeader>
+    </tnt:header>
+
+    <!-- Side Navigation (IA-001 §3.2) -->
+    <!-- Wave-gating (D-307): items hidden until built. W1-S1 shows Admin > Master Data only. -->
+    <tnt:sideContent>
+      <tnt:SideNavigation id="sideNav" itemSelect=".onNavItemSelect">
+        <tnt:NavigationList>
+
+          <!-- Group: Transactions -->
+          <tnt:NavigationListItem text="{i18n>navTransactions}" icon="sap-icon://payment-approval" expanded="false" visible="false">
+            <tnt:NavigationListItem text="{i18n>navWeeklyReview}" key="WFL-001" visible="false"/>
+            <tnt:NavigationListItem text="{i18n>navTransactionList}" key="FRM-001" visible="false"/>
+            <tnt:NavigationListItem text="{i18n>navCsvImport}" key="FRM-003" visible="false"/>
+          </tnt:NavigationListItem>
+
+          <!-- Group: Churning — Cards -->
+          <tnt:NavigationListItem text="{i18n>navChurningCards}" icon="sap-icon://credit-card" expanded="false" visible="false">
+            <tnt:NavigationListItem text="{i18n>navMyCards}" key="FRM-004" visible="false"/>
+            <tnt:NavigationListItem text="{i18n>navMarketCards}" key="FRM-005" visible="false"/>
+          </tnt:NavigationListItem>
+
+          <!-- Group: Churning — Analytics -->
+          <tnt:NavigationListItem text="{i18n>navChurningAnalytics}" icon="sap-icon://business-objects-experience" expanded="false" visible="false">
+            <tnt:NavigationListItem text="{i18n>navChurnboard}" key="RPT-001" visible="false"/>
+            <tnt:NavigationListItem text="{i18n>navTrophyCase}" key="RPT-004" visible="false"/>
+            <tnt:NavigationListItem text="{i18n>navCardAnalytics}" key="RPT-005" visible="false"/>
+            <tnt:NavigationListItem text="{i18n>navRecommendationMatrix}" key="RPT-006" visible="false"/>
+            <tnt:NavigationListItem text="{i18n>navPerkTracker}" key="RPT-008" visible="false"/>
+            <tnt:NavigationListItem text="{i18n>navPointsDashboard}" key="RPT-010" visible="false"/>
+            <tnt:NavigationListItem text="{i18n>navAnnualSummary}" key="RPT-009" visible="false"/>
+          </tnt:NavigationListItem>
+
+          <!-- Group: Finances -->
+          <tnt:NavigationListItem text="{i18n>navFinances}" icon="sap-icon://wallet" expanded="false" visible="false">
+            <tnt:NavigationListItem text="{i18n>navBudgetDashboard}" key="RPT-002" visible="false"/>
+            <tnt:NavigationListItem text="{i18n>navIncomeEntry}" key="FRM-007" visible="false"/>
+            <tnt:NavigationListItem text="{i18n>navGoals}" key="FRM-008" visible="false"/>
+            <tnt:NavigationListItem text="{i18n>navGoalProgress}" key="RPT-011" visible="false"/>
+            <tnt:NavigationListItem text="{i18n>navSpendingTrends}" key="RPT-007" visible="false"/>
+            <tnt:NavigationListItem text="{i18n>navIncomeVsExpenses}" key="RPT-012" visible="false"/>
+            <tnt:NavigationListItem text="{i18n>navFinancialPictureEntry}" key="FRM-011" visible="false"/>
+            <tnt:NavigationListItem text="{i18n>navFinancialPictureDashboard}" key="RPT-003" visible="false"/>
+          </tnt:NavigationListItem>
+
+          <!-- Group: Admin -->
+          <tnt:NavigationListItem text="{i18n>navAdmin}" icon="sap-icon://action-settings" expanded="true" visible="true">
+            <tnt:NavigationListItem text="{i18n>navMasterData}" key="FRM-009" visible="true"/>
+            <tnt:NavigationListItem text="{i18n>navSimplefinConnections}" key="FRM-010" visible="false"/>
+            <tnt:NavigationListItem text="{i18n>navScraperApprovals}" key="WFL-003" visible="false"/>
+          </tnt:NavigationListItem>
+
+        </tnt:NavigationList>
+      </tnt:SideNavigation>
+    </tnt:sideContent>
+
+    <!-- Content Area -->
+    <tnt:mainContents>
+      <Page id="appContent" showHeader="false">
+        <Text text="{i18n>welcomeText}" class="sapUiMediumMargin"/>
+      </Page>
+    </tnt:mainContents>
+
+  </tnt:ToolPage>
+</mvc:View>

@@ -11,8 +11,12 @@
     data-sap-ui-theme="sap_horizon"
     data-sap-ui-compatVersion="edge"
     data-sap-ui-async="true"
-    data-sap-ui-resourceroots='{ "com.financialplanner": "./" }'
-    data-sap-ui-libs="sap.m, sap.tnt, sap.f, sap.ui.layout, sap.uxap">
+    data-sap-ui-resourceroots='{
+      "com.financialplanner.shell": "./shell/",
+      "com.financialplanner.shared": "./shared/"
+    }'
+    data-sap-ui-libs="sap.m, sap.tnt, sap.f, sap.ui.layout, sap.uxap"
+    data-sap-ui-oninit="module:sap/ui/core/ComponentSupport">
   </script>
 
   <!-- Theme overrides — loaded after Horizon, wins by cascade order -->
@@ -23,155 +27,13 @@
     body { overflow: hidden; }
     #content { height: 100%; }
   </style>
-
-  <script>
-    sap.ui.getCore().attachInit(function () {
-      "use strict";
-
-      // Apply compact density
-      document.body.classList.add("sapUiSizeCompact");
-
-      sap.ui.require([
-        "sap/tnt/ToolPage",
-        "sap/tnt/SideNavigation",
-        "sap/tnt/NavigationList",
-        "sap/tnt/NavigationListItem",
-        "sap/tnt/ToolHeader",
-        "sap/m/Title",
-        "sap/m/ToolbarSpacer",
-        "sap/m/Button",
-        "sap/m/Text",
-        "sap/m/Page",
-        "sap/m/MessageToast"
-      ], function (
-        ToolPage, SideNavigation, NavigationList, NavigationListItem,
-        ToolHeader, Title, ToolbarSpacer, Button, Text, Page, MessageToast
-      ) {
-
-        // --- Navigation Structure (IA-001 §3.2) ---
-        // Wave-gating (D-307): items hidden until built.
-        // W1-S1 only shows Admin > Master Data (FRM-009).
-
-        var oNavList = new NavigationList({
-          items: [
-            // === Group: Transactions ===
-            new NavigationListItem({
-              text: "Transactions",
-              icon: "sap-icon://payment-approval",
-              expanded: false,
-              visible: false, // Hidden until W1-S3
-              items: [
-                new NavigationListItem({ text: "Weekly Review", key: "WFL-001", visible: false }),    // W1-S5
-                new NavigationListItem({ text: "Transaction List", key: "FRM-001", visible: false }), // W1-S3
-                new NavigationListItem({ text: "CSV Import", key: "FRM-003", visible: false })        // W1-S3
-              ]
-            }),
-
-            // === Group: Churning — Cards ===
-            new NavigationListItem({
-              text: "Churning \u2014 Cards",
-              icon: "sap-icon://credit-card",
-              expanded: false,
-              visible: false, // Hidden until W1-S5
-              items: [
-                new NavigationListItem({ text: "My Cards", key: "FRM-004", visible: false }),    // W1-S5
-                new NavigationListItem({ text: "Market Cards", key: "FRM-005", visible: false }) // W3-S1
-              ]
-            }),
-
-            // === Group: Churning — Analytics ===
-            new NavigationListItem({
-              text: "Churning \u2014 Analytics",
-              icon: "sap-icon://business-objects-experience",
-              expanded: false,
-              visible: false, // Hidden until W1-S5
-              items: [
-                new NavigationListItem({ text: "Churnboard", key: "RPT-001", visible: false }),             // W1-S5
-                new NavigationListItem({ text: "Trophy Case", key: "RPT-004", visible: false }),            // W2-S2
-                new NavigationListItem({ text: "Card Analytics", key: "RPT-005", visible: false }),         // W2-S1
-                new NavigationListItem({ text: "Recommendation Matrix", key: "RPT-006", visible: false }), // W2-S1
-                new NavigationListItem({ text: "Perk Tracker", key: "RPT-008", visible: false }),           // W3-S2
-                new NavigationListItem({ text: "Points Dashboard", key: "RPT-010", visible: false }),       // W3-S2
-                new NavigationListItem({ text: "Annual Summary", key: "RPT-009", visible: false })          // W3-S2
-              ]
-            }),
-
-            // === Group: Finances ===
-            new NavigationListItem({
-              text: "Finances",
-              icon: "sap-icon://wallet",
-              expanded: false,
-              visible: false, // Hidden until W1-S4
-              items: [
-                new NavigationListItem({ text: "Budget Dashboard", key: "RPT-002", visible: false }),           // W1-S5
-                new NavigationListItem({ text: "Income Entry", key: "FRM-007", visible: false }),               // W1-S4
-                new NavigationListItem({ text: "Goals", key: "FRM-008", visible: false }),                      // W2-S2
-                new NavigationListItem({ text: "Goal Progress", key: "RPT-011", visible: false }),              // W2-S2
-                new NavigationListItem({ text: "Spending Trends", key: "RPT-007", visible: false }),            // W3-S1
-                new NavigationListItem({ text: "Income vs Expenses", key: "RPT-012", visible: false }),         // W3-S1
-                new NavigationListItem({ text: "Financial Picture Entry", key: "FRM-011", visible: false }),     // W3-S1
-                new NavigationListItem({ text: "Financial Picture Dashboard", key: "RPT-003", visible: false }) // W3-S1
-              ]
-            }),
-
-            // === Group: Admin ===
-            new NavigationListItem({
-              text: "Admin",
-              icon: "sap-icon://action-settings",
-              expanded: true,
-              visible: true, // Visible — contains W1-S1 item
-              items: [
-                new NavigationListItem({ text: "Master Data", key: "FRM-009", visible: true }),          // W1-S1 ✓
-                new NavigationListItem({ text: "SimpleFIN Connections", key: "FRM-010", visible: false }), // W1-S2
-                new NavigationListItem({ text: "Scraper Approvals", key: "WFL-003", visible: false })     // W4-S1
-              ]
-            })
-          ]
-        });
-
-        // --- Side Navigation ---
-        var oSideNav = new SideNavigation({
-          item: oNavList,
-          itemSelect: function (oEvent) {
-            var sKey = oEvent.getParameter("item").getKey();
-            if (sKey) {
-              MessageToast.show("Navigate to: " + sKey);
-              // Router navigation will be implemented when app pages are built
-            }
-          }
-        });
-
-        // --- Header ---
-        var oHeader = new ToolHeader({
-          content: [
-            new Title({ text: "Financial Planner", level: "H4" }).addStyleClass("sapUiSmallMarginBegin"),
-            new ToolbarSpacer()
-          ]
-        });
-
-        // --- Content Area ---
-        var oContent = new Page({
-          showHeader: false,
-          content: [
-            new Text({
-              text: "Welcome to Financial Planner. Select Master Data from the Admin menu to begin."
-            }).addStyleClass("sapUiMediumMargin")
-          ]
-        });
-
-        // --- Tool Page Shell ---
-        var oToolPage = new ToolPage({
-          header: oHeader,
-          sideContent: oSideNav,
-          mainContents: [oContent],
-          sideExpanded: true
-        });
-
-        oToolPage.placeAt("content");
-      });
-    });
-  </script>
 </head>
-<body class="sapUiBody" id="content">
+<body class="sapUiBody sapUiSizeCompact" id="content">
+  <div data-sap-ui-component
+    data-name="com.financialplanner.shell"
+    data-id="shellContainer"
+    data-settings='{ "id": "shell" }'
+    style="height: 100%">
+  </div>
 </body>
 </html>
