@@ -12,7 +12,8 @@
     "build": "cds build",
     "test": "jest --json --outputFile=coverage/test-results.json --coverage",
     "posttest": "tsx scripts/generate-test-report.ts",
-    "generate-key": "tsx scripts/generate-key.ts"
+    "generate-key": "tsx scripts/generate-key.ts",
+    "lint:i18n": "tsx scripts/lint-i18n.ts"
   },
   "dependencies": {
     "@sap/cds": "^9",

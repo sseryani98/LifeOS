@@ -1,7 +1,7 @@
 sap.ui.define([
   "sap/ui/core/mvc/Controller",
   "sap/ui/core/routing/History"
-], function (Controller, History) {
+], (Controller, History) => {
   "use strict";
 
   /**
@@ -15,7 +15,7 @@ sap.ui.define([
      * Returns the router for this component.
      * @returns {sap.ui.core.routing.Router} the router instance
      */
-    getRouter: function () {
+    getRouter() {
       return this.getOwnerComponent().getRouter();
     },
 
@@ -24,7 +24,7 @@ sap.ui.define([
      * @param {string} sName - the model name (undefined for default model)
      * @returns {sap.ui.model.Model} the model instance
      */
-    getModel: function (sName) {
+    getModel(sName) {
       return this.getView().getModel(sName);
     },
 
@@ -33,7 +33,7 @@ sap.ui.define([
      * @param {sap.ui.model.Model} oModel - the model instance
      * @param {string} sName - the model name (undefined for default model)
      */
-    setModel: function (oModel, sName) {
+    setModel(oModel, sName) {
       this.getView().setModel(oModel, sName);
     },
 
@@ -41,9 +41,9 @@ sap.ui.define([
      * Navigates back in history, or to a fallback route if no history exists.
      * @param {string} sFallbackRoute - route name to navigate to if no history
      */
-    onNavBack: function (sFallbackRoute) {
-      var oHistory = History.getInstance();
-      var sPreviousHash = oHistory.getPreviousHash();
+    onNavBack(sFallbackRoute) {
+      const oHistory = History.getInstance();
+      const sPreviousHash = oHistory.getPreviousHash();
 
       if (sPreviousHash !== undefined) {
         window.history.go(-1);

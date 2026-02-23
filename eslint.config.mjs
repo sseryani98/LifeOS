@@ -182,8 +182,10 @@ export default [
       'complexity': ['warn', 10],
       'max-depth': ['warn', 4],
       'no-console': ['warn', { allow: ['warn', 'error'] }],
-      'no-var': 'off', // SAPUI5 uses var in sap.ui.define patterns
-      'prefer-const': 'off', // SAPUI5 compatibility
+      'no-var': 'error',
+      'prefer-const': 'error',
+      'object-shorthand': ['error', 'always'],
+      'prefer-arrow-callback': 'error',
     },
   },
 ];

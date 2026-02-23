@@ -1,4 +1,4 @@
-sap.ui.define([], function () {
+sap.ui.define([], () => {
   "use strict";
 
   /**
@@ -11,7 +11,7 @@ sap.ui.define([], function () {
      * @param {number} fAmount - the amount to format
      * @returns {string} formatted currency string (e.g., "$1,234.56")
      */
-    formatCurrency: function (fAmount) {
+    formatCurrency(fAmount) {
       if (fAmount === null || fAmount === undefined) {
         return "";
       }
@@ -26,11 +26,11 @@ sap.ui.define([], function () {
      * @param {string} sDate - ISO date string (YYYY-MM-DD or full ISO)
      * @returns {string} formatted date string (e.g., "Feb 21, 2026")
      */
-    formatDate: function (sDate) {
+    formatDate(sDate) {
       if (!sDate) {
         return "";
       }
-      var oDate = new Date(sDate);
+      const oDate = new Date(sDate);
       return oDate.toLocaleDateString("en-CA", {
         year: "numeric",
         month: "short",
@@ -43,11 +43,11 @@ sap.ui.define([], function () {
      * @param {string} sStatus - the status code
      * @returns {string} human-readable status text
      */
-    formatStatus: function (sStatus) {
+    formatStatus(sStatus) {
       if (!sStatus) {
         return "";
       }
-      var mStatusMap = {
+      const mStatusMap = {
         focus: "Focus",
         active: "Active",
         toCancel: "To Cancel",
