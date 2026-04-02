@@ -1,14 +1,11 @@
 {
   "build": {
-    "target": "."
+    "target": "gen"
+  },
+  "features": {
+    "assert_integrity": "db"
   },
   "hana": {
     "deploy-format": "hdbtable"
-  },
-  "requires": {
-    "db": {
-      "kind": "postgres",
-      "impl": "@cap-js/postgres"
-    }
   }
 }

@@ -1,10 +1,10 @@
-ID,issuer_ID,rewardsProgram_ID,ruleType,parameterCount,parameterDays,appliesToCardType,appliesToSegment,referenceDate,marketCard_ID,description
-a1b2c3d4-0010-4000-8000-000000000001,a1b2c3d4-0001-4000-8000-000000000002,,MAX_CONCURRENT,4,,credit,,,,"Max 4 Amex credit cards held at once (charge cards exempt)"
-a1b2c3d4-0010-4000-8000-000000000002,a1b2c3d4-0001-4000-8000-000000000002,,APPS_IN_WINDOW,2,90,credit,,,,"Max 2 Amex credit card approvals per 90 days"
-a1b2c3d4-0010-4000-8000-000000000003,a1b2c3d4-0001-4000-8000-000000000002,,ONCE_PER_LIFETIME,,,,,,,Welcome bonus once per lifetime per Amex product
-a1b2c3d4-0010-4000-8000-000000000004,a1b2c3d4-0001-4000-8000-000000000001,,PRODUCT_COOLDOWN,,365,,,,,12-month same-product bonus cooldown for TD
-a1b2c3d4-0010-4000-8000-000000000005,a1b2c3d4-0001-4000-8000-000000000001,,PRODUCT_COOLDOWN,,180,,,,,6-month cooldown for TD First Class Travel
-a1b2c3d4-0010-4000-8000-000000000006,a1b2c3d4-0001-4000-8000-000000000003,,PRODUCT_COOLDOWN,,365,,,,,12-month product-family cooldown for CIBC
-a1b2c3d4-0010-4000-8000-000000000007,a1b2c3d4-0001-4000-8000-000000000004,,ISSUER_COOLDOWN,,730,,,,,2-year cooldown since ANY Scotiabank card
-a1b2c3d4-0010-4000-8000-000000000008,a1b2c3d4-0001-4000-8000-000000000006,,APPS_IN_WINDOW,1,90,,,,,Max 1 RBC application per 90 days
-a1b2c3d4-0010-4000-8000-000000000009,,a1b2c3d4-0002-4000-8000-000000000001,TIER_LIFETIME_LIMIT,5,,,,,,Max 5 Aeroplan tier bonuses cross-issuer lifetime
+ID,issuer_ID,rewardsProgram_ID,ruleType,parameterCount,parameterDays,appliesToCardType,appliesToSegment,referenceDate,description
+a1b2c3d4-0010-4000-8000-000000000001,a1b2c3d4-0001-4000-8000-000000000002,,MAX_CONCURRENT,4,,credit,,,"Max 4 Amex credit cards held at once (charge cards exempt)"
+a1b2c3d4-0010-4000-8000-000000000002,a1b2c3d4-0001-4000-8000-000000000002,,APPS_IN_WINDOW,2,90,credit,,,"Max 2 Amex credit card approvals per 90 days"
+a1b2c3d4-0010-4000-8000-000000000003,a1b2c3d4-0001-4000-8000-000000000002,,ONCE_PER_LIFETIME,,,,,,Welcome bonus once per lifetime per Amex product
+a1b2c3d4-0010-4000-8000-000000000004,a1b2c3d4-0001-4000-8000-000000000001,,PRODUCT_COOLDOWN,,365,,,,12-month same-product bonus cooldown for TD
+a1b2c3d4-0010-4000-8000-000000000005,a1b2c3d4-0001-4000-8000-000000000001,,PRODUCT_COOLDOWN,,180,,,,6-month cooldown for TD First Class Travel
+a1b2c3d4-0010-4000-8000-000000000006,a1b2c3d4-0001-4000-8000-000000000003,,PRODUCT_COOLDOWN,,365,,,,12-month product-family cooldown for CIBC
+a1b2c3d4-0010-4000-8000-000000000007,a1b2c3d4-0001-4000-8000-000000000004,,ISSUER_COOLDOWN,,730,,,,2-year cooldown since ANY Scotiabank card
+a1b2c3d4-0010-4000-8000-000000000008,a1b2c3d4-0001-4000-8000-000000000006,,APPS_IN_WINDOW,1,90,,,,Max 1 RBC application per 90 days
+a1b2c3d4-0010-4000-8000-000000000009,,a1b2c3d4-0002-4000-8000-000000000001,TIER_LIFETIME_LIMIT,5,,,,,Max 5 Aeroplan tier bonuses cross-issuer lifetime

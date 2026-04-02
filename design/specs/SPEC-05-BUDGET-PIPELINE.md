@@ -12,8 +12,8 @@
 
 ## 1. Change History
 
-| Date | Author | Description |
-|------|--------|-------------|
+| Date       | Author          | Description                                                       |
+| ---------- | --------------- | ----------------------------------------------------------------- |
 | 2026-02-17 | Sandro & Claude | Initial creation — workshop complete. D-131 through D-135 logged. |
 
 ---
@@ -30,18 +30,18 @@ Key decisions: D-07 (refund reversal), D-08 (split share), D-11 (goals), D-12 (n
 
 ## 3. Data Model References
 
-| Entity | Role | DM-001 Ref | Amendment? |
-|--------|------|------------|------------|
-| Income Entry | Monthly income by source type | §5.5 | — |
-| Income Source Type | Reference lookup for income entries | §3.8 | — |
-| Budget Allocation | Per-Purchase Type budget ratios (time-bound) | §4.14 | — |
-| Purchase Type | Budget taxonomy, `excludes_from_budget` flag | §3.3 | — |
-| Recurrent Expense | Forecasting only — not a formula input (D-131) | §4.10 | — |
-| Goal | `monthly_allocation` deducted from income | §4.11 | — |
-| Transaction | Actual spend source | §5.1 | — |
-| Transaction Split | `my_share_amount` for budget (D-08) | §5.2 | — |
-| Alert | Budget alerts | §6.1 | — |
-| System Config | `BUDGET_WARNING_THRESHOLD_PCT` | §3.17 | Add config key |
+| Entity             | Role                                           | DM-001 Ref | Amendment?     |
+| ------------------ | ---------------------------------------------- | ---------- | -------------- |
+| Income Entry       | Monthly income by source type                  | §5.5       | —              |
+| Income Source Type | Reference lookup for income entries            | §3.8       | —              |
+| Budget Allocation  | Per-Purchase Type budget ratios (time-bound)   | §4.14      | —              |
+| Purchase Type      | Budget taxonomy, `excludes_from_budget` flag   | §3.3       | —              |
+| Recurrent Expense  | Forecasting only — not a formula input (D-131) | §4.10      | —              |
+| Goal               | `monthly_allocation` deducted from income      | §4.11      | —              |
+| Transaction        | Actual spend source                            | §5.1       | —              |
+| Transaction Split  | `my_share_amount` for budget (D-08)            | §5.2       | —              |
+| Alert              | Budget alerts                                  | §6.1       | —              |
+| System Config      | `BUDGET_WARNING_THRESHOLD_PCT`                 | §3.17      | Add config key |
 
 ### DM-001 Amendments
 
@@ -59,18 +59,18 @@ Recurrent Expenses are no longer a formula input. They remain as master data for
 
 **System Config Addition (D-134):**
 
-| Key | Default | Description |
-|-----|---------|-------------|
-| `BUDGET_WARNING_THRESHOLD_PCT` | `80` | Percentage threshold at which category approaching-limit alert is generated |
+| Key                            | Default | Description                                                                 |
+| ------------------------------ | ------- | --------------------------------------------------------------------------- |
+| `BUDGET_WARNING_THRESHOLD_PCT` | `80`    | Percentage threshold at which category approaching-limit alert is generated |
 
 **Alert Type Additions (D-134):**
 
-| Alert Type | Description |
-|------------|-------------|
-| `budget_category_warning` | Purchase Type spend approaching budgeted limit |
-| `budget_category_overspend` | Purchase Type actual spend exceeds budget |
-| `budget_overspend` | Total actual spend exceeds total budget |
-| `budget_goals_exceed_income` | Total goal allocations exceed total income |
+| Alert Type                   | Description                                    |
+| ---------------------------- | ---------------------------------------------- |
+| `budget_category_warning`    | Purchase Type spend approaching budgeted limit |
+| `budget_category_overspend`  | Purchase Type actual spend exceeds budget      |
+| `budget_overspend`           | Total actual spend exceeds total budget        |
+| `budget_goals_exceed_income` | Total goal allocations exceed total income     |
 
 ---
 
@@ -82,38 +82,38 @@ Recurrent Expenses are no longer a formula input. They remain as master data for
 
 **Outputs:**
 
-| Field | Type | Notes |
-|-------|------|-------|
-| `month` | date | First of month |
-| `totalIncome` | decimal | Sum of Income Entry.amount for the month |
-| `totalGoalAllocations` | decimal | Sum of active Goal.monthly_allocation |
-| `totalBudget` | decimal | `totalIncome - totalGoalAllocations` |
-| `categories` | array | Per-Purchase Type breakdown (see below) |
-| `uncategorized` | decimal | Spend on transactions with no purchase_type_id |
-| `totalActualSpend` | decimal | Sum of all category actuals + uncategorized |
-| `totalRemaining` | decimal | `totalBudget - totalActualSpend` |
+| Field                  | Type    | Notes                                          |
+| ---------------------- | ------- | ---------------------------------------------- |
+| `month`                | date    | First of month                                 |
+| `totalIncome`          | decimal | Sum of Income Entry.amount for the month       |
+| `totalGoalAllocations` | decimal | Sum of active Goal.monthly_allocation          |
+| `totalBudget`          | decimal | `totalIncome - totalGoalAllocations`           |
+| `categories`           | array   | Per-Purchase Type breakdown (see below)        |
+| `uncategorized`        | decimal | Spend on transactions with no purchase_type_id |
+| `totalActualSpend`     | decimal | Sum of all category actuals + uncategorized    |
+| `totalRemaining`       | decimal | `totalBudget - totalActualSpend`               |
 
 **Per-category output:**
 
-| Field | Type | Notes |
-|-------|------|-------|
-| `purchaseTypeId` | UUID | Top-level Purchase Type |
-| `purchaseTypeName` | string | |
-| `ratio` | decimal | From Budget Allocation |
-| `budgeted` | decimal | `totalBudget × ratio / 100` |
-| `actual` | decimal | Sum of included transactions for this type + subtypes |
-| `remaining` | decimal | `budgeted - actual` |
-| `status` | enum | `over_budget` · `warning` · `on_track` |
+| Field                | Type    | Notes                                                         |
+| -------------------- | ------- | ------------------------------------------------------------- |
+| `purchaseTypeId`     | UUID    | Top-level Purchase Type                                       |
+| `purchaseTypeName`   | string  |                                                               |
+| `ratio`              | decimal | From Budget Allocation                                        |
+| `budgeted`           | decimal | `totalBudget × ratio / 100`                                   |
+| `actual`             | decimal | Sum of included transactions for this type + subtypes         |
+| `remaining`          | decimal | `budgeted - actual`                                           |
+| `status`             | enum    | `over_budget` · `warning` · `on_track`                        |
 | `recurrentsExpected` | decimal | Sum of active Recurrent Expense for this type (informational) |
 
 **Consumers:**
 
-| Consumer | Usage |
-|----------|-------|
-| RPT-002 (Monthly Budget Dashboard) | Primary consumer — full budget breakdown |
-| RPT-007 (Spending Trends) | Historical budget data for trend analysis |
-| RPT-012 (Income vs Expenses Trend) | Income and spend totals over time |
-| WFL-001 (Weekly Review Session) | Budget status in weekly review |
+| Consumer                           | Usage                                     |
+| ---------------------------------- | ----------------------------------------- |
+| RPT-002 (Monthly Budget Dashboard) | Primary consumer — full budget breakdown  |
+| RPT-007 (Spending Trends)          | Historical budget data for trend analysis |
+| RPT-012 (Income vs Expenses Trend) | Income and spend totals over time         |
+| WFL-001 (Weekly Review Session)    | Budget status in weekly review            |
 
 #### Budget Formula
 
@@ -169,22 +169,22 @@ Active means: `effective_from <= last day of month` AND (`effective_to IS NULL` 
 
 #### Category Status
 
-| Status | Condition |
-|--------|-----------|
-| `over_budget` | `actual > budgeted` |
-| `warning` | `actual / budgeted ≥ BUDGET_WARNING_THRESHOLD_PCT / 100` AND `actual ≤ budgeted` |
-| `on_track` | `actual / budgeted < BUDGET_WARNING_THRESHOLD_PCT / 100` |
+| Status        | Condition                                                                        |
+| ------------- | -------------------------------------------------------------------------------- |
+| `over_budget` | `actual > budgeted`                                                              |
+| `warning`     | `actual / budgeted ≥ BUDGET_WARNING_THRESHOLD_PCT / 100` AND `actual ≤ budgeted` |
+| `on_track`    | `actual / budgeted < BUDGET_WARNING_THRESHOLD_PCT / 100`                         |
 
 When `budgeted ≤ 0` (negative total budget), status is `over_budget` if any spend exists, `on_track` if zero.
 
 #### Alert Generation (D-134)
 
-| Alert Type | Trigger | Condition |
-|------------|---------|-----------|
-| `budget_category_warning` | Transaction processing | Category spend crosses `BUDGET_WARNING_THRESHOLD_PCT` threshold |
-| `budget_category_overspend` | Transaction processing | Category spend exceeds budgeted amount |
-| `budget_overspend` | Transaction processing | Total spend exceeds total budget |
-| `budget_goals_exceed_income` | Income Entry save / Goal save | Total goal allocations > total income for the current month |
+| Alert Type                   | Trigger                       | Condition                                                       |
+| ---------------------------- | ----------------------------- | --------------------------------------------------------------- |
+| `budget_category_warning`    | Transaction processing        | Category spend crosses `BUDGET_WARNING_THRESHOLD_PCT` threshold |
+| `budget_category_overspend`  | Transaction processing        | Category spend exceeds budgeted amount                          |
+| `budget_overspend`           | Transaction processing        | Total spend exceeds total budget                                |
+| `budget_goals_exceed_income` | Income Entry save / Goal save | Total goal allocations > total income for the current month     |
 
 Alert entity fields:
 
@@ -201,43 +201,43 @@ Month: March 2026
 
 **Income:**
 
-| Source | Amount |
-|--------|--------|
-| Salary | $5,000 |
-| Churn Reward | $200 |
+| Source           | Amount     |
+| ---------------- | ---------- |
+| Salary           | $5,000     |
+| Churn Reward     | $200       |
 | **Total Income** | **$5,200** |
 
 **Goal Allocations:**
 
-| Goal | Monthly Allocation |
-|------|-------------------|
-| Japan Vacation (spending) | $500 |
-| Emergency Fund (saving) | $300 |
-| **Total Goal Allocations** | **$800** |
+| Goal                       | Monthly Allocation |
+| -------------------------- | ------------------ |
+| Japan Vacation (spending)  | $500               |
+| Emergency Fund (saving)    | $300               |
+| **Total Goal Allocations** | **$800**           |
 
 **Total Budget:** $5,200 − $800 = **$4,400**
 
 **Budget Allocations (sum = 100%):**
 
-| Purchase Type | Ratio | Budgeted |
-|---------------|-------|----------|
-| Housing | 35% | $1,540 |
-| Groceries | 20% | $880 |
-| Transportation | 15% | $660 |
-| Dining | 10% | $440 |
-| Entertainment | 10% | $440 |
-| Personal | 10% | $440 |
+| Purchase Type  | Ratio | Budgeted |
+| -------------- | ----- | -------- |
+| Housing        | 35%   | $1,540   |
+| Groceries      | 20%   | $880     |
+| Transportation | 15%   | $660     |
+| Dining         | 10%   | $440     |
+| Entertainment  | 10%   | $440     |
+| Personal       | 10%   | $440     |
 
 **Actual Spend (March transactions):**
 
-| Purchase Type | Transactions | Actual | Status |
-|---------------|-------------|--------|--------|
-| Housing | Rent $1,500 | $1,500 | on_track (97%) |
-| Groceries | Various $720 | $720 | warning (82%) |
-| Transportation | Gas $180, Insurance $200 | $380 | on_track (58%) |
-| Dining | Restaurants $500, Refund -$30 | $470 | over_budget (107%) |
-| Entertainment | Netflix $15, Games $40 | $55 | on_track (13%) |
-| Personal | Clothing $200 | $200 | on_track (45%) |
+| Purchase Type  | Transactions                  | Actual | Status             |
+| -------------- | ----------------------------- | ------ | ------------------ |
+| Housing        | Rent $1,500                   | $1,500 | on_track (97%)     |
+| Groceries      | Various $720                  | $720   | warning (82%)      |
+| Transportation | Gas $180, Insurance $200      | $380   | on_track (58%)     |
+| Dining         | Restaurants $500, Refund -$30 | $470   | over_budget (107%) |
+| Entertainment  | Netflix $15, Games $40        | $55    | on_track (13%)     |
+| Personal       | Clothing $200                 | $200   | on_track (45%)     |
 
 Uncategorized: $85 (two transactions without purchase_type_id)
 
@@ -251,13 +251,13 @@ Uncategorized: $85 (two transactions without purchase_type_id)
 
 #### Field List
 
-| Field | Type | Required | Validation | Notes |
-|-------|------|----------|------------|-------|
-| `month` | date | yes | Must be first of month | Default: current month first day |
-| `income_source_type_id` | FK | yes | Must be valid Income Source Type | ValueHelp |
-| `amount` | decimal | yes | > 0 | |
-| `description` | text | no | Max 255 chars | |
-| `notes` | text | no | Max 1000 chars | |
+| Field                   | Type    | Required | Validation                       | Notes                            |
+| ----------------------- | ------- | -------- | -------------------------------- | -------------------------------- |
+| `month`                 | date    | yes      | Must be first of month           | Default: current month first day |
+| `income_source_type_id` | FK      | yes      | Must be valid Income Source Type | ValueHelp                        |
+| `amount`                | decimal | yes      | > 0                              |                                  |
+| `description`           | text    | no       | Max 255 chars                    |                                  |
+| `notes`                 | text    | no       | Max 1000 chars                   |                                  |
 
 #### List Report
 
@@ -268,12 +268,12 @@ Standard Fiori Elements List Report. Columns: Month, Income Source Type, Amount,
 
 #### Actions
 
-| Action | Location | Behavior |
-|--------|----------|----------|
-| Create | Table toolbar | Standard FE create with defaults: month = current month first day |
-| Copy from Previous Month | Table toolbar | Custom action (see below) |
-| Edit | Inline or Object Page | Standard FE edit |
-| Delete | Object Page | Standard FE delete with confirmation |
+| Action                   | Location              | Behavior                                                          |
+| ------------------------ | --------------------- | ----------------------------------------------------------------- |
+| Create                   | Table toolbar         | Standard FE create with defaults: month = current month first day |
+| Copy from Previous Month | Table toolbar         | Custom action (see below)                                         |
+| Edit                     | Inline or Object Page | Standard FE edit                                                  |
+| Delete                   | Object Page           | Standard FE delete with confirmation                              |
 
 **Copy from Previous Month logic:**
 
@@ -290,63 +290,63 @@ Standard Fiori Elements List Report. Columns: Month, Income Source Type, Amount,
 
 ### ENH-007 — Budget Engine
 
-| Rule | Description |
-|------|-------------|
-| BR-01 | Budget formula: `Total Income − Total Goal Allocations = Total Budget`. Recurrent Expenses are not a formula input (D-131). |
-| BR-02 | Total Income = sum of Income Entry.amount for entries in the target month. |
-| BR-03 | Total Goal Allocations = sum of Goal.monthly_allocation for goals where `is_active = true`. |
-| BR-04 | Per-category budget = `Total Budget × Budget Allocation.ratio / 100`. |
-| BR-05 | Only top-level, non-excluded Purchase Types participate in budget computation (SPEC-06 BR-08). |
-| BR-06 | Subtype transactions roll up to parent Purchase Type for budget spend. |
-| BR-07 | Budget Allocations selected by time overlap with the target month. Mid-month changes apply retroactively to the entire month (D-135). |
-| BR-08 | If active Budget Allocation ratios ≠ 100%, category-level computation is skipped. Totals still computed (D-94, SPEC-06 BR-10). |
-| BR-09 | Transaction inclusion: `is_excluded = false`, `goal_id IS NULL` (D-132), Purchase Type not excluded (D-97), within calendar month. |
-| BR-10 | Split transactions: use `my_share_amount` for budget. Fully reimbursed splits (`my_share_amount = 0`) excluded (D-08). |
-| BR-11 | Split remainder is implicitly excluded — no storage, budget engine just uses `my_share_amount` (D-119). |
-| BR-12 | Refunds (positive amount) reduce actual spend in their Purchase Type (D-07). |
-| BR-13 | Uncategorized transactions (`purchase_type_id IS NULL`) summed into virtual bucket, outside allocation ratios. Included in `totalActualSpend`. |
-| BR-14 | Category status: `over_budget` when actual > budgeted; `warning` when actual/budgeted ≥ `BUDGET_WARNING_THRESHOLD_PCT` / 100; `on_track` otherwise. |
+| Rule  | Description                                                                                                                                                                 |
+| ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| BR-01 | Budget formula: `Total Income − Total Goal Allocations = Total Budget`. Recurrent Expenses are not a formula input (D-131).                                                 |
+| BR-02 | Total Income = sum of Income Entry.amount for entries in the target month.                                                                                                  |
+| BR-03 | Total Goal Allocations = sum of Goal.monthly_allocation for goals where `is_active = true`.                                                                                 |
+| BR-04 | Per-category budget = `Total Budget × Budget Allocation.ratio / 100`.                                                                                                       |
+| BR-05 | Only top-level, non-excluded Purchase Types participate in budget computation (SPEC-06 BR-08).                                                                              |
+| BR-06 | Subtype transactions roll up to parent Purchase Type for budget spend.                                                                                                      |
+| BR-07 | Budget Allocations selected by time overlap with the target month. Mid-month changes apply retroactively to the entire month (D-135).                                       |
+| BR-08 | If active Budget Allocation ratios ≠ 100%, category-level computation is skipped. Totals still computed (D-94, SPEC-06 BR-10).                                              |
+| BR-09 | Transaction inclusion: `is_excluded = false`, `goal_id IS NULL` (D-132), Purchase Type not excluded (D-97), within calendar month.                                          |
+| BR-10 | Split transactions: use `my_share_amount` for budget. Fully reimbursed splits (`my_share_amount = 0`) excluded (D-08).                                                      |
+| BR-11 | Split remainder is implicitly excluded — no storage, budget engine just uses `my_share_amount` (D-119).                                                                     |
+| BR-12 | Refunds (positive amount) reduce actual spend in their Purchase Type (D-07).                                                                                                |
+| BR-13 | Uncategorized transactions (`purchase_type_id IS NULL`) summed into virtual bucket, outside allocation ratios. Included in `totalActualSpend`.                              |
+| BR-14 | Category status: `over_budget` when actual > budgeted; `warning` when actual/budgeted ≥ `BUDGET_WARNING_THRESHOLD_PCT` / 100; `on_track` otherwise.                         |
 | BR-15 | `budget_category_warning` alert when spend crosses threshold. `budget_category_overspend` when actual exceeds budget. Both triggered during transaction processing (D-134). |
-| BR-16 | `budget_overspend` alert when total spend exceeds total budget. Triggered during transaction processing. |
-| BR-17 | `budget_goals_exceed_income` alert when total goal allocations > total income. Triggered on Income Entry save or Goal save (D-133). |
-| BR-18 | Budget alerts are idempotent per alert type + month + Purchase Type combination. |
-| BR-19 | Recurrent Expense amounts reported per category as `recurrentsExpected` — informational forecasting only (D-131). |
-| BR-20 | Budget computed on-demand at read time. No persisted snapshots. Engine accepts any month parameter for historical queries. |
-| BR-21 | Calendar month boundaries. No rollover between months (D-12). |
+| BR-16 | `budget_overspend` alert when total spend exceeds total budget. Triggered during transaction processing.                                                                    |
+| BR-17 | `budget_goals_exceed_income` alert when total goal allocations > total income. Triggered on Income Entry save or Goal save (D-133).                                         |
+| BR-18 | Budget alerts are idempotent per alert type + month + Purchase Type combination.                                                                                            |
+| BR-19 | Recurrent Expense amounts reported per category as `recurrentsExpected` — informational forecasting only (D-131).                                                           |
+| BR-20 | Budget computed on-demand at read time. No persisted snapshots. Engine accepts any month parameter for historical queries.                                                  |
+| BR-21 | Calendar month boundaries. No rollover between months (D-12).                                                                                                               |
 
 ### FRM-007 — Income Entry
 
-| Rule | Description |
-|------|-------------|
-| BR-22 | Multiple Income Entry records per month allowed. |
-| BR-23 | `month` field must be first of month (e.g., 2026-03-01). |
-| BR-24 | Amount must be > 0. |
+| Rule  | Description                                                                                                                      |
+| ----- | -------------------------------------------------------------------------------------------------------------------------------- |
+| BR-22 | Multiple Income Entry records per month allowed.                                                                                 |
+| BR-23 | `month` field must be first of month (e.g., 2026-03-01).                                                                         |
+| BR-24 | Amount must be > 0.                                                                                                              |
 | BR-25 | Copy from Previous Month copies all entries from previous month with new month value. Skips if target month already has entries. |
-| BR-26 | Copied entries created in draft mode for user review. Notes field not copied. |
+| BR-26 | Copied entries created in draft mode for user review. Notes field not copied.                                                    |
 
 ---
 
 ## 6. Error Handling
 
-| Condition | Response | i18n Key Pattern |
-|-----------|----------|------------------|
-| No Income Entry for target month | Compute normally with totalIncome = 0 | — |
-| Goal allocations exceed income | Compute with negative totalBudget; trigger `budget_goals_exceed_income` alert (D-133) | `budget.goalsExceedIncome` |
-| Budget Allocations ≠ 100% | Skip category computation; return totals only | `budget.allocationIncomplete` |
-| No Budget Allocations active for month | Skip category computation; return totals only | `budget.noAllocations` |
-| Purchase Type has `excludes_from_budget = true` | Excluded from budget computation silently | — |
-| Transaction has no Purchase Type | Counted in uncategorized bucket | — |
-| Copy from Previous Month — target month has entries | Warning message; copy aborted | `income.copyExists` |
-| Copy from Previous Month — no entries in previous month | Info message; nothing to copy | `income.copyEmpty` |
-| Income Entry amount ≤ 0 | Validation error | `income.invalidAmount` |
-| Income Entry month not first of month | Validation error | `income.invalidMonth` |
+| Condition                                               | Response                                                                              | i18n Key Pattern              |
+| ------------------------------------------------------- | ------------------------------------------------------------------------------------- | ----------------------------- |
+| No Income Entry for target month                        | Compute normally with totalIncome = 0                                                 | —                             |
+| Goal allocations exceed income                          | Compute with negative totalBudget; trigger `budget_goals_exceed_income` alert (D-133) | `budget.goalsExceedIncome`    |
+| Budget Allocations ≠ 100%                               | Skip category computation; return totals only                                         | `budget.allocationIncomplete` |
+| No Budget Allocations active for month                  | Skip category computation; return totals only                                         | `budget.noAllocations`        |
+| Purchase Type has `excludes_from_budget = true`         | Excluded from budget computation silently                                             | —                             |
+| Transaction has no Purchase Type                        | Counted in uncategorized bucket                                                       | —                             |
+| Copy from Previous Month — target month has entries     | Warning message; copy aborted                                                         | `income.copyExists`           |
+| Copy from Previous Month — no entries in previous month | Info message; nothing to copy                                                         | `income.copyEmpty`            |
+| Income Entry amount ≤ 0                                 | Validation error                                                                      | `income.invalidAmount`        |
+| Income Entry month not first of month                   | Validation error                                                                      | `income.invalidMonth`         |
 
 ---
 
 ## 7. Open Items
 
-| OI | Resolution |
-|----|------------|
+| OI    | Resolution                                                                                                                                                                                                               |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | OI-06 | Partially resolved. Budget alerts (`budget_category_warning`, `budget_category_overspend`, `budget_overspend`, `budget_goals_exceed_income`) defined in this spec. Other alert types deferred to their respective specs. |
 
 ---
@@ -797,16 +797,16 @@ Standard Fiori Elements List Report. Columns: Month, Income Source Type, Amount,
 
 ## 9. Cross-Spec Notes
 
-| Target Spec | Note |
-|-------------|------|
-| SPEC-01 (Ingestion Pipeline) | New transactions trigger budget alert evaluation as part of transaction processing. |
-| SPEC-02 (Transaction Processing) | Budget uses `my_share_amount` from splits (D-08). Split remainder implicitly excluded (D-119). |
-| SPEC-04 (Bonus & Points) | ENH-007 and ENH-003/ENH-006 are peer computation engines in W1-S4. No direct dependency between them. |
-| SPEC-06 (Reference Data & Seed) | Budget Allocation rules (BR-08 through BR-13) govern ENH-007's allocation selection. Alert types seeded: `budget_category_warning`, `budget_category_overspend`, `budget_overspend`, `budget_goals_exceed_income`. System Config key: `BUDGET_WARNING_THRESHOLD_PCT`. **DM-001 §8 amendment:** Budget Status formula updated per D-131. |
-| SPEC-09 (Goals) | Goal.monthly_allocation feeds into ENH-007 formula. Spending goal transactions (goal_id set) excluded from Purchase Type budget (D-132). |
-| SPEC-20 (Monthly Budget Dashboard) | RPT-002 is the primary consumer of ENH-007 output. |
-| SPEC-12 (Budget Analytics) | RPT-007 and RPT-012 consume ENH-007 for historical budget data. |
+| Target Spec                        | Note                                                                                                                                                                                                                                                                                                                                    |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| SPEC-01 (Ingestion Pipeline)       | New transactions trigger budget alert evaluation as part of transaction processing.                                                                                                                                                                                                                                                     |
+| SPEC-02 (Transaction Processing)   | Budget uses `my_share_amount` from splits (D-08). Split remainder implicitly excluded (D-119).                                                                                                                                                                                                                                          |
+| SPEC-04 (Bonus & Points)           | ENH-007 and ENH-003/ENH-006 are peer computation engines in W1-S4. No direct dependency between them.                                                                                                                                                                                                                                   |
+| SPEC-06 (Reference Data & Seed)    | Budget Allocation rules (BR-08 through BR-13) govern ENH-007's allocation selection. Alert types seeded: `budget_category_warning`, `budget_category_overspend`, `budget_overspend`, `budget_goals_exceed_income`. System Config key: `BUDGET_WARNING_THRESHOLD_PCT`. **DM-001 §8 amendment:** Budget Status formula updated per D-131. |
+| SPEC-09 (Goals)                    | Goal.monthly_allocation feeds into ENH-007 formula. Spending goal transactions (goal_id set) excluded from Purchase Type budget (D-132).                                                                                                                                                                                                |
+| SPEC-20 (Monthly Budget Dashboard) | RPT-002 is the primary consumer of ENH-007 output.                                                                                                                                                                                                                                                                                      |
+| SPEC-12 (Budget Analytics)         | RPT-007 and RPT-012 consume ENH-007 for historical budget data.                                                                                                                                                                                                                                                                         |
 
 ---
 
-*This spec traces to [Business Architecture](../BUSINESS_ARCHITECTURE.md) objects ENH-007, FRM-007 and [Data Model](../DATA_MODEL.md) entities listed in §3. New decisions D-131–D-135 logged in [Decisions Log](../user-profile/DECISIONS_LOG.md).*
+_This spec traces to [Business Architecture](../BUSINESS_ARCHITECTURE.md) objects ENH-007, FRM-007 and [Data Model](../DATA_MODEL.md) entities listed in §3. New decisions D-131–D-135 logged in [Decisions Log](../user-profile/DECISIONS_LOG.md)._

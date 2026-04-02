@@ -9,10 +9,10 @@
 
 ## 1. Change History
 
-| Date | Author | Description |
-|------|--------|-------------|
-| 2026-02-21 | Sandro & Claude | Initial creation — Step 15 in progress. |
-| 2026-02-21 | Sandro | Approved. All 7 sections complete — cross-sprint contracts, CLAUDE.md update, scaffold prompt, sprint checklists, prompt playbook (32 prompts), quick reference. |
+| Date       | Author          | Description                                                                                                                                                      |
+| ---------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-02-21 | Sandro & Claude | Initial creation — Step 15 in progress.                                                                                                                          |
+| 2026-02-21 | Sandro          | Approved. All 7 sections complete — cross-sprint contracts, CLAUDE.md update, scaffold prompt, sprint checklists, prompt playbook (32 prompts), quick reference. |
 
 ---
 
@@ -40,98 +40,98 @@ W1-S1 (Foundation) ──→ W1-S2 (Ingestion) ──→ W1-S3 (Txn Processing) 
 
 #### W1-S1 → W1-S2
 
-| Produces | Consumed By | Contract |
-|----------|-------------|----------|
-| All reference data entities (CDS models + CSV seed data) | Every subsequent sprint | `db/reference/schema.cds` deployed, `db/seed/` CSV files loaded via `cds deploy` |
-| System Config parameters (18 values) | INT-001 (poll interval, retry, stale thresholds), ENH-003 (MSR_DEADLINE_ALERT_DAYS), ENH-007 (BUDGET_WARNING_THRESHOLD_PCT) | `SystemConfig` entity queryable by `key` field |
-| CSV Format Config per issuer (Scotia, TD, CIBC, Amex) | INT-002, CNV-001 | `CSVFormatConfig` records with column mappings, date formats, amount handling |
-| Sandro's card portfolio (13 active + 3 closed Card Instances, Market Cards, Offers, Earning Multipliers, Soft Perks) | INT-001 (card-to-account mapping), ENH-003 (bonus tracking), ENH-006 (points), FRM-004 | `CardInstance`, `MarketCard`, `Offer`, `OfferTranche`, `EarningMultiplier`, `SoftPerkDefinition`, `CardPerk` populated |
-| Issuer Application Rules (9 rules) | ENH-004 (eligibility engine in W2-S1) | `IssuerApplicationRule` records seeded per issuer |
-| Rewards Programs + CPP valuations | ENH-006 (points valuation), RPT-004 (trophy case) | `RewardsProgram` with `cppValuation` field |
-| FRM-009 (Master Data CRUD) | Ongoing — all sprints can edit reference data | AdminService CRUD for all reference tables |
-| Alert Type seeds (23 types) | SPEC-01, SPEC-04, SPEC-05 alert generation | `AlertType` records queryable by `key` field |
+| Produces                                                                                                             | Consumed By                                                                                                                 | Contract                                                                                                               |
+| -------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| All reference data entities (CDS models + CSV seed data)                                                             | Every subsequent sprint                                                                                                     | `db/reference/schema.cds` deployed, `db/seed/` CSV files loaded via `cds deploy`                                       |
+| System Config parameters (18 values)                                                                                 | INT-001 (poll interval, retry, stale thresholds), ENH-003 (MSR_DEADLINE_ALERT_DAYS), ENH-007 (BUDGET_WARNING_THRESHOLD_PCT) | `SystemConfig` entity queryable by `key` field                                                                         |
+| CSV Format Config per issuer (Scotia, TD, CIBC, Amex)                                                                | INT-002, CNV-001                                                                                                            | `CSVFormatConfig` records with column mappings, date formats, amount handling                                          |
+| Sandro's card portfolio (13 active + 3 closed Card Instances, Market Cards, Offers, Earning Multipliers, Soft Perks) | INT-001 (card-to-account mapping), ENH-003 (bonus tracking), ENH-006 (points), FRM-004                                      | `CardInstance`, `MarketCard`, `Offer`, `OfferTranche`, `EarningMultiplier`, `SoftPerkDefinition`, `CardPerk` populated |
+| Issuer Application Rules (9 rules)                                                                                   | ENH-004 (eligibility engine in W2-S1)                                                                                       | `IssuerApplicationRule` records seeded per issuer                                                                      |
+| Rewards Programs + CPP valuations                                                                                    | ENH-006 (points valuation), RPT-004 (trophy case)                                                                           | `RewardsProgram` with `cppValuation` field                                                                             |
+| FRM-009 (Master Data CRUD)                                                                                           | Ongoing — all sprints can edit reference data                                                                               | AdminService CRUD for all reference tables                                                                             |
+| Alert Type seeds (23 types)                                                                                          | SPEC-01, SPEC-04, SPEC-05 alert generation                                                                                  | `AlertType` records queryable by `key` field                                                                           |
 
 #### W1-S2 → W1-S3
 
-| Produces | Consumed By | Contract |
-|----------|-------------|----------|
-| INT-001 SimpleFIN sync service | WFL-001 (weekly review), FRM-010 (manual sync) | `SimpleFINIntegrationService.syncTransactions()` — creates Transaction records with `source = 'simplefin'`, `externalId` populated |
-| INT-002 CSV parsing engine | CNV-001 (backfill), FRM-003 (ongoing CSV import) | `CSVImportService.parseFile(file, cardInstanceId)` — returns parsed rows per CSVFormatConfig |
-| ENH-008 dedup engine | INT-001 (auto-dedup), INT-002 (dedup review), CNV-001 (backfill dedup) | `DeduplicationService.evaluate(transaction)` → returns `new` / `duplicate` / `reconciliation` |
-| FRM-003 CSV Import Wizard | CNV-001 (uses same parsing path) | Wizard UI functional with upload → review → save flow |
-| FRM-010 Connection Manager | WFL-001 (connection health check) | Connection list with health status, last sync time, manual sync trigger |
-| Provider Connection + Provider Account records | INT-001 sync, FRM-010 display | `ProviderConnection` and `ProviderAccount` entities with SimpleFIN access URL (encrypted) |
+| Produces                                       | Consumed By                                                            | Contract                                                                                                                           |
+| ---------------------------------------------- | ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| INT-001 SimpleFIN sync service                 | WFL-001 (weekly review), FRM-010 (manual sync)                         | `SimpleFINIntegrationService.syncTransactions()` — creates Transaction records with `source = 'simplefin'`, `externalId` populated |
+| INT-002 CSV parsing engine                     | CNV-001 (backfill), FRM-003 (ongoing CSV import)                       | `CSVImportService.parseFile(file, cardInstanceId)` — returns parsed rows per CSVFormatConfig                                       |
+| ENH-008 dedup engine                           | INT-001 (auto-dedup), INT-002 (dedup review), CNV-001 (backfill dedup) | `DeduplicationService.evaluate(transaction)` → returns `new` / `duplicate` / `reconciliation`                                      |
+| FRM-003 CSV Import Wizard                      | CNV-001 (uses same parsing path)                                       | Wizard UI functional with upload → review → save flow                                                                              |
+| FRM-010 Connection Manager                     | WFL-001 (connection health check)                                      | Connection list with health status, last sync time, manual sync trigger                                                            |
+| Provider Connection + Provider Account records | INT-001 sync, FRM-010 display                                          | `ProviderConnection` and `ProviderAccount` entities with SimpleFIN access URL (encrypted)                                          |
 
 #### W1-S3 → W1-S4
 
-| Produces | Consumed By | Contract |
-|----------|-------------|----------|
-| ENH-001 categorization engine | ENH-003 (fee detection via PT = "Credit Card Fee"), ENH-007 (budget categories), FRM-003 (pre-population) | `CategorizationService.categorize(transaction)` — sets `vendor_ID`, `purchaseType_ID`, `earningCategory_ID`, `categorizationStatus` |
-| ENH-009 split logic | ENH-007 (my_share for budget), ENH-003 (full amount for churning) | `TransactionSplit` records with `mySharePct` / `myShareAmount`. Budget uses `myShareAmount`, churning uses parent `Transaction.amount` |
-| FRM-001 Transaction List | WFL-001 (review surface) | Transaction grid with inline editing, split action, bulk categorization |
-| CNV-001 historical backfill complete | ENH-003 (retroactive bonus eval), ENH-007 (historical budget), RPT-001/002 (historical data in charts) | ~1,200-1,400 Transaction records loaded, Merchant Patterns bootstrapped for strong day-one auto-categorization |
-| Vendor + Merchant Pattern records | ENH-001 (ongoing matching) | Learned patterns from backfill corrections enable high-confidence matching on new transactions |
+| Produces                             | Consumed By                                                                                               | Contract                                                                                                                               |
+| ------------------------------------ | --------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| ENH-001 categorization engine        | ENH-003 (fee detection via PT = "Credit Card Fee"), ENH-007 (budget categories), FRM-003 (pre-population) | `CategorizationService.categorize(transaction)` — sets `vendor_ID`, `purchaseType_ID`, `earningCategory_ID`, `categorizationStatus`    |
+| ENH-009 split logic                  | ENH-007 (my_share for budget), ENH-003 (full amount for churning)                                         | `TransactionSplit` records with `mySharePct` / `myShareAmount`. Budget uses `myShareAmount`, churning uses parent `Transaction.amount` |
+| FRM-001 Transaction List             | WFL-001 (review surface)                                                                                  | Transaction grid with inline editing, split action, bulk categorization                                                                |
+| CNV-001 historical backfill complete | ENH-003 (retroactive bonus eval), ENH-007 (historical budget), RPT-001/002 (historical data in charts)    | ~1,200-1,400 Transaction records loaded, Merchant Patterns bootstrapped for strong day-one auto-categorization                         |
+| Vendor + Merchant Pattern records    | ENH-001 (ongoing matching)                                                                                | Learned patterns from backfill corrections enable high-confidence matching on new transactions                                         |
 
 #### W1-S4 → W1-S5
 
-| Produces | Consumed By | Contract |
-|----------|-------------|----------|
-| ENH-003 bonus tracker | FRM-004 (bonus progress section), RPT-001 W1 sections, WFL-002 (Focus→Active trigger) | `BonusTrackingService.getProgress(cardInstanceId)` → per-tranche MSR status (pending/in_progress/met/missed), amounts, deadlines |
-| ENH-006 points balance | RPT-001 W1 sections (points balances card), RPT-010 (W3) | `PointsService.getBalance(rewardsProgramId)` → balance, CPP valuation, per-card breakdown |
-| ENH-007 budget engine | RPT-002 W1 sections (budget overview, spending by category) | `BudgetService.compute(month)` → totalIncome, totalBudget, per-category breakdown with status |
-| FRM-007 income entry | ENH-007 (income inputs for budget) | Income Entry CRUD via BudgetService |
-| Points Adjustment records (auto-created by ENH-003) | ENH-006 (points balance), RPT-004 (W2 trophy case) | `PointsAdjustment` with `type`, `amount`, `rewardsProgram_ID` |
-| Alert records (3 bonus + 4 budget types) | RPT-001 alerts section, WFL-001 (weekly review) | `Alert` records with `alertType_ID`, `severity`, `relatedEntity`, `relatedEntityId` |
+| Produces                                            | Consumed By                                                                           | Contract                                                                                                                         |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| ENH-003 bonus tracker                               | FRM-004 (bonus progress section), RPT-001 W1 sections, WFL-002 (Focus→Active trigger) | `BonusTrackingService.getProgress(cardInstanceId)` → per-tranche MSR status (pending/in_progress/met/missed), amounts, deadlines |
+| ENH-006 points balance                              | RPT-001 W1 sections (points balances card), RPT-010 (W3)                              | `PointsService.getBalance(rewardsProgramId)` → balance, CPP valuation, per-card breakdown                                        |
+| ENH-007 budget engine                               | RPT-002 W1 sections (budget overview, spending by category)                           | `BudgetService.compute(month)` → totalIncome, totalBudget, per-category breakdown with status                                    |
+| FRM-007 income entry                                | ENH-007 (income inputs for budget)                                                    | Income Entry CRUD via BudgetService                                                                                              |
+| Points Adjustment records (auto-created by ENH-003) | ENH-006 (points balance), RPT-004 (W2 trophy case)                                    | `PointsAdjustment` with `type`, `amount`, `rewardsProgram_ID`                                                                    |
+| Alert records (3 bonus + 4 budget types)            | RPT-001 alerts section, WFL-001 (weekly review)                                       | `Alert` records with `alertType_ID`, `severity`, `relatedEntity`, `relatedEntityId`                                              |
 
 #### W1-S5 → W2-S1
 
-| Produces | Consumed By | Contract |
-|----------|-------------|----------|
-| FRM-004 My Cards | FRM-002 (card selector), RPT-001 (card name → FRM-004 navigation) | Card list + object page with bonus progress, earning & perks, fee history, lifecycle timeline |
-| FRM-006 Card Onboarding (absorbs WFL-004) | Ongoing — new card creation | Wizard: select market card → define offer → enter instance → optional SimpleFIN link |
-| RPT-001 W1 shell (partial) | W2-S1 completes remaining sections | Dashboard structure, year selector, W1 sections functional: bonus progress, points balances, CC spend, upcoming fees, alerts |
-| RPT-002 W1 shell (partial) | W2-S1 completes remaining sections | Dashboard structure, month nav, W1 sections functional: budget overview (no goals), spending vs budget, on-track indicators |
-| WFL-001 Weekly Review | Ongoing — defines weekly usage pattern | Cross-component journey: connection health → CSV import → transaction review → dashboards |
-| WFL-002 Card Lifecycle | ENH-002 (active card set), ENH-004 (eligibility history), ENH-005 (profitability period) | State machine: Focus → Active → To Cancel → Closed. `CardInstance.lifecycleState` field |
+| Produces                                  | Consumed By                                                                              | Contract                                                                                                                     |
+| ----------------------------------------- | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| FRM-004 My Cards                          | FRM-002 (card selector), RPT-001 (card name → FRM-004 navigation)                        | Card list + object page with bonus progress, earning & perks, fee history, lifecycle timeline                                |
+| FRM-006 Card Onboarding (absorbs WFL-004) | Ongoing — new card creation                                                              | Wizard: select market card → define offer → enter instance → optional SimpleFIN link                                         |
+| RPT-001 W1 shell (partial)                | W2-S1 completes remaining sections                                                       | Dashboard structure, year selector, W1 sections functional: bonus progress, points balances, CC spend, upcoming fees, alerts |
+| RPT-002 W1 shell (partial)                | W2-S1 completes remaining sections                                                       | Dashboard structure, month nav, W1 sections functional: budget overview (no goals), spending vs budget, on-track indicators  |
+| WFL-001 Weekly Review                     | Ongoing — defines weekly usage pattern                                                   | Cross-component journey: connection health → CSV import → transaction review → dashboards                                    |
+| WFL-002 Card Lifecycle                    | ENH-002 (active card set), ENH-004 (eligibility history), ENH-005 (profitability period) | State machine: Focus → Active → To Cancel → Closed. `CardInstance.lifecycleState` field                                      |
 
 #### W2-S1 → W2-S2
 
-| Produces | Consumed By | Contract |
-|----------|-------------|----------|
-| ENH-002 recommendation engine | FRM-002 (recommendation display), RPT-001 (recommendation section), RPT-006 | `RecommendationService.getRecommendation(earningCategoryId)` → recommended card, effective earn rate, bonus override flag |
-| ENH-004 eligibility engine | RPT-001 (eligibility section) | `EligibilityService.getEligibility()` → per-issuer summary (eligible_now / eligible_in_X_days / not_eligible) + per-rule detail |
-| ENH-005 profitability calculator | RPT-001 (realized value section), RPT-005 (W3), RPT-009 (W3) | `ProfitabilityService.calculate(cardInstanceId)` → net value (points×CPP + perks − fees), FYF handling |
-| FRM-002 manual transaction entry | Ongoing | Single transaction create/edit with vendor fuzzy match, dual taxonomy, card recommendation |
-| RPT-001 complete | Ongoing | All sections functional including recommendation, eligibility, profitability, yield trend |
-| RPT-002 complete | Ongoing | All sections functional including goal progress, top vendors |
+| Produces                         | Consumed By                                                                 | Contract                                                                                                                        |
+| -------------------------------- | --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| ENH-002 recommendation engine    | FRM-002 (recommendation display), RPT-001 (recommendation section), RPT-006 | `RecommendationService.getRecommendation(earningCategoryId)` → recommended card, effective earn rate, bonus override flag       |
+| ENH-004 eligibility engine       | RPT-001 (eligibility section)                                               | `EligibilityService.getEligibility()` → per-issuer summary (eligible_now / eligible_in_X_days / not_eligible) + per-rule detail |
+| ENH-005 profitability calculator | RPT-001 (realized value section), RPT-005 (W3), RPT-009 (W3)                | `ProfitabilityService.calculate(cardInstanceId)` → net value (points×CPP + perks − fees), FYF handling                          |
+| FRM-002 manual transaction entry | Ongoing                                                                     | Single transaction create/edit with vendor fuzzy match, dual taxonomy, card recommendation                                      |
+| RPT-001 complete                 | Ongoing                                                                     | All sections functional including recommendation, eligibility, profitability, yield trend                                       |
+| RPT-002 complete                 | Ongoing                                                                     | All sections functional including goal progress, top vendors                                                                    |
 
 #### W2-S2 → W3-S1
 
-| Produces | Consumed By | Contract |
-|----------|-------------|----------|
-| FRM-008 Goals Management | RPT-002 (goal progress section), RPT-011 (goal progress report), ENH-007 (goal allocations in budget) | Goal CRUD with target amount, timeline, monthly allocations, transaction linking |
-| RPT-004 Trophy Case | Ongoing | Redemption register with CRUD, KPI tags, CPP semantic coloring |
-| RPT-006 Recommendation Matrix | Ongoing | All cards × all categories matrix with optimal card highlights |
-| RPT-011 Goal Progress | Ongoing | Active goals with progress bars, projections |
+| Produces                      | Consumed By                                                                                           | Contract                                                                         |
+| ----------------------------- | ----------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| FRM-008 Goals Management      | RPT-002 (goal progress section), RPT-011 (goal progress report), ENH-007 (goal allocations in budget) | Goal CRUD with target amount, timeline, monthly allocations, transaction linking |
+| RPT-004 Trophy Case           | Ongoing                                                                                               | Redemption register with CRUD, KPI tags, CPP semantic coloring                   |
+| RPT-006 Recommendation Matrix | Ongoing                                                                                               | All cards × all categories matrix with optimal card highlights                   |
+| RPT-011 Goal Progress         | Ongoing                                                                                               | Active goals with progress bars, projections                                     |
 
 #### W3-S1 → W3-S2
 
-| Produces | Consumed By | Contract |
-|----------|-------------|----------|
-| FRM-005 Market Cards | CNV-004 (W4, market card database target), INT-003 (W4, scraper target) | Market card browser with CRUD, offer history, linked user cards |
-| FRM-011 Financial Picture Entry | RPT-003 (financial dashboard) | Manual entry of non-CC positions (investments, debts), monthly snapshots |
-| RPT-003 Financial Picture Dashboard | Ongoing | Net worth, debt trending, investment trending |
-| RPT-005 Card Analytics | Ongoing | Per-card deep dive: spend, points, profitability breakdown |
-| RPT-007 Spending Trends | Ongoing | Multi-month time-series by category, vendor concentration |
+| Produces                            | Consumed By                                                             | Contract                                                                 |
+| ----------------------------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| FRM-005 Market Cards                | CNV-004 (W4, market card database target), INT-003 (W4, scraper target) | Market card browser with CRUD, offer history, linked user cards          |
+| FRM-011 Financial Picture Entry     | RPT-003 (financial dashboard)                                           | Manual entry of non-CC positions (investments, debts), monthly snapshots |
+| RPT-003 Financial Picture Dashboard | Ongoing                                                                 | Net worth, debt trending, investment trending                            |
+| RPT-005 Card Analytics              | Ongoing                                                                 | Per-card deep dive: spend, points, profitability breakdown               |
+| RPT-007 Spending Trends             | Ongoing                                                                 | Multi-month time-series by category, vendor concentration                |
 
 #### W3-S2 → W4-S1
 
-| Produces | Consumed By | Contract |
-|----------|-------------|----------|
-| RPT-008 Perk Tracker | Ongoing | Cross-card soft perk view, realized vs unrealized |
-| RPT-009 Annual Summary | Ongoing | Year-in-review: cards, net value, best/worst, totals |
-| RPT-010 Points Dashboard | Ongoing | Per-program view: balance, earning/redemption history |
-| RPT-012 Income vs Expenses | Ongoing | Multi-month macro: income vs outflow, savings rate |
+| Produces                   | Consumed By | Contract                                              |
+| -------------------------- | ----------- | ----------------------------------------------------- |
+| RPT-008 Perk Tracker       | Ongoing     | Cross-card soft perk view, realized vs unrealized     |
+| RPT-009 Annual Summary     | Ongoing     | Year-in-review: cards, net value, best/worst, totals  |
+| RPT-010 Points Dashboard   | Ongoing     | Per-program view: balance, earning/redemption history |
+| RPT-012 Income vs Expenses | Ongoing     | Multi-month macro: income vs outflow, savings rate    |
 
 W4-S1 (CNV-004, INT-003, WFL-003) consumes the `MarketCard` entity structure established in W1-S1 (CNV-003) and browsable via W3-S1 (FRM-005). No new integration contracts beyond what already exists.
 
@@ -139,15 +139,15 @@ W4-S1 (CNV-004, INT-003, WFL-003) consumes the `MarketCard` entity structure est
 
 These are the moments where output from one sprint becomes a hard input to the next. If the producing sprint doesn't deliver correctly, the consuming sprint is blocked.
 
-| # | Sync Point | Producing Sprint | Consuming Sprint | What Must Be True |
-|---|-----------|-----------------|-----------------|-------------------|
-| 1 | **Reference data deployed** | W1-S1 | W1-S2 and all later | `cds deploy` succeeds, all 18 System Config values queryable, all seed CSVs loaded, FRM-009 CRUD functional |
-| 2 | **Card portfolio populated** | W1-S1 (CNV-003) | W1-S2 (INT-001 needs card-to-account mapping) | 13 active + 3 closed Card Instances, Market Cards, Offers, Earning Multipliers all present |
-| 3 | **Transaction ingestion operational** | W1-S2 | W1-S3 (ENH-001 needs transactions to categorize) | INT-001 or INT-002 can create Transaction records; ENH-008 dedup prevents duplicates |
-| 4 | **Categorization engine trained** | W1-S3 (CNV-001 backfill) | W1-S4 (ENH-003 needs PT for fee detection, ENH-007 needs PT for budget categories) | ENH-001 can assign vendor + dual taxonomy; Merchant Patterns learned from backfill |
-| 5 | **Computation engines deliver data** | W1-S4 | W1-S5 (dashboards need computed data to display) | ENH-003, ENH-006, ENH-007 all return structured results; Alerts generated |
-| 6 | **Dashboard shells accept new sections** | W1-S5 (RPT-001/002 partial) | W2-S1 (completes RPT-001/002) | Dashboard code structured so new sections can be added without rewriting existing ones |
-| 7 | **W2 engines expose standard interfaces** | W2-S1 | W2-S2 + W3 reports | ENH-002, ENH-004, ENH-005 each expose a clean service function callable from any report |
+| #   | Sync Point                                | Producing Sprint            | Consuming Sprint                                                                   | What Must Be True                                                                                           |
+| --- | ----------------------------------------- | --------------------------- | ---------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| 1   | **Reference data deployed**               | W1-S1                       | W1-S2 and all later                                                                | `cds deploy` succeeds, all 18 System Config values queryable, all seed CSVs loaded, FRM-009 CRUD functional |
+| 2   | **Card portfolio populated**              | W1-S1 (CNV-003)             | W1-S2 (INT-001 needs card-to-account mapping)                                      | 13 active + 3 closed Card Instances, Market Cards, Offers, Earning Multipliers all present                  |
+| 3   | **Transaction ingestion operational**     | W1-S2                       | W1-S3 (ENH-001 needs transactions to categorize)                                   | INT-001 or INT-002 can create Transaction records; ENH-008 dedup prevents duplicates                        |
+| 4   | **Categorization engine trained**         | W1-S3 (CNV-001 backfill)    | W1-S4 (ENH-003 needs PT for fee detection, ENH-007 needs PT for budget categories) | ENH-001 can assign vendor + dual taxonomy; Merchant Patterns learned from backfill                          |
+| 5   | **Computation engines deliver data**      | W1-S4                       | W1-S5 (dashboards need computed data to display)                                   | ENH-003, ENH-006, ENH-007 all return structured results; Alerts generated                                   |
+| 6   | **Dashboard shells accept new sections**  | W1-S5 (RPT-001/002 partial) | W2-S1 (completes RPT-001/002)                                                      | Dashboard code structured so new sections can be added without rewriting existing ones                      |
+| 7   | **W2 engines expose standard interfaces** | W2-S1                       | W2-S2 + W3 reports                                                                 | ENH-002, ENH-004, ENH-005 each expose a clean service function callable from any report                     |
 
 ---
 
@@ -167,6 +167,7 @@ Personal financial management system for a Canadian credit card churner. TypeScr
 ## Current Sprint
 
 <!-- Updated each sprint -->
+
 **Sprint:** W1-S1 — Foundation & Seed Data
 **Branch:** sprint/W1-S1
 **Goal:** Reference data seeded, config tables editable via SM30-style CRUD
@@ -181,46 +182,45 @@ Personal financial management system for a Canadian credit card churner. TypeScr
 - **Background jobs:** node-cron inside CAP process via `cds.spawn()`
 
 ## Folder Structure
-
 ```
 
-db/                          CDS entity models (9 domain folders)
-  enums.cds                  All enum types
-  common/                    Shared aspects
-  reference/schema.cds       16 reference entities
-  cards/schema.cds           7 card entities
-  transactions/schema.cds    5 transaction entities
-  points/schema.cds          2 points entities
-  budget/schema.cds          4 budget entities
-  financial/schema.cds       2 financial entities
-  integration/schema.cds     2 integration entities
-  alerts/schema.cds          1 alert entity
-  seed/                      CSV seed data (CNV-002, CNV-003)
+db/ CDS entity models (9 domain folders)
+enums.cds All enum types
+common/ Shared aspects
+reference/schema.cds 16 reference entities
+cards/schema.cds 7 card entities
+transactions/schema.cds 5 transaction entities
+points/schema.cds 2 points entities
+budget/schema.cds 4 budget entities
+financial/schema.cds 2 financial entities
+integration/schema.cds 2 integration entities
+alerts/schema.cds 1 alert entity
+seed/ CSV seed data (CNV-002, CNV-003)
 srv/
-  {service-name}.cds         CDS service definitions (4 services)
-  {service-name}.ts          Service entry points
-  _i18n/
-    i18n.properties          CDS field labels (PascalCase keys)
-    messages.properties      Runtime messages (camelCase.dots keys)
-  modules/
-    shared/                  BaseFacade, BaseService, Logger, MessagingUtility, constants
-    {domain}/                Per-domain: {Domain}Facade.ts, {Domain}Service.ts, {Domain}Validator.ts
-    integration/             SimpleFIN, CSV, Scheduling services
-  util/                      EncryptionUtility, DateTimeUtility, CurrencyUtility
+{service-name}.cds CDS service definitions (4 services)
+{service-name}.ts Service entry points
+\_i18n/
+i18n.properties CDS field labels (PascalCase keys)
+messages.properties Runtime messages (camelCase.dots keys)
+modules/
+shared/ BaseFacade, BaseService, Logger, MessagingUtility, constants
+{domain}/ Per-domain: {Domain}Facade.ts, {Domain}Service.ts, {Domain}Validator.ts
+integration/ SimpleFIN, CSV, Scheduling services
+util/ EncryptionUtility, DateTimeUtility, CurrencyUtility
 app/
-  shared/                    BaseController.js, controls/, util/formatter.js, css/theme-overrides.css
-  {app-name}/                One folder per UI app (23 total)
-    webapp/                  manifest.json, Component.js, i18n/, ext/ or views/
-    annotations/             Entity-based CDS annotation files (Fiori Elements apps only)
+shared/ BaseController.js, controls/, util/formatter.js, css/theme-overrides.css
+{app-name}/ One folder per UI app (23 total)
+webapp/ manifest.json, Component.js, i18n/, ext/ or views/
+annotations/ Entity-based CDS annotation files (Fiori Elements apps only)
 test/
-  unit/{domain}/             Per-module unit tests
-  integration/               Per-CDS-service integration tests
-  integration/scenarios/     FUT multi-step scenario tests
-  data/                      Test data factories, named constants, seeds.ts
+unit/{domain}/ Per-module unit tests
+integration/ Per-CDS-service integration tests
+integration/scenarios/ FUT multi-step scenario tests
+data/ Test data factories, named constants, seeds.ts
 project/
-  SPRINT_BOARD.md            Current sprint status
-  DEFECT_LOG.md              Running defect log
-  sprints/                   Sprint checkpoint reports
+SPRINT_BOARD.md Current sprint status
+DEFECT_LOG.md Running defect log
+sprints/ Sprint checkpoint reports
 
 ```
 
@@ -338,14 +338,14 @@ Look up details here — do not duplicate:
 
 ### 3.2 What Changed From Design Phase
 
-| Design-Phase CLAUDE.md | Build-Phase CLAUDE.md |
-|------------------------|----------------------|
-| "No code until design is complete" | Removed — we're building now |
+| Design-Phase CLAUDE.md                    | Build-Phase CLAUDE.md                                                  |
+| ----------------------------------------- | ---------------------------------------------------------------------- |
+| "No code until design is complete"        | Removed — we're building now                                           |
 | Repository structure shows `design/` only | Full project structure with `db/`, `srv/`, `app/`, `test/`, `project/` |
-| Design progress section | Replaced with "Current Sprint" — updated each sprint |
-| Document status convention (6 statuses) | Removed — design docs are all Approved/frozen |
-| FRICEW terminology explanation | Removed — assumed knowledge by build phase |
-| ~128 lines | ~160 lines — denser, all actionable patterns |
+| Design progress section                   | Replaced with "Current Sprint" — updated each sprint                   |
+| Document status convention (6 statuses)   | Removed — design docs are all Approved/frozen                          |
+| FRICEW terminology explanation            | Removed — assumed knowledge by build phase                             |
+| ~128 lines                                | ~160 lines — denser, all actionable patterns                           |
 
 ### 3.3 Sprint Update Protocol
 
@@ -490,21 +490,21 @@ Commit as: `chore(config): scaffold project structure`
 
 After Claude Code completes the scaffold prompt, verify:
 
-| Check | How |
-|-------|-----|
-| Folder structure matches TS-001 §7 | `ls -R` or tree view — compare against TECH_STACK.md §7 |
-| `npm install` succeeds | No dependency resolution errors |
-| `npx tsc --noEmit` passes | No TypeScript compilation errors |
-| `cds build` passes | No CDS compilation errors |
-| `.env` has a real ENCRYPTION_KEY | 64 hex characters (256-bit) |
-| `.gitignore` covers all entries from VC-001 §3.1 | Compare against VERSION_CONTROL.md |
-| `theme-overrides.css` has all 28 properties | Compare against THEME.md §7.1 |
-| `wrapHandler` in BaseFacade.ts matches §5.2 pattern | Logger context, ENTRY/EXIT logs, error re-throw |
-| `EncryptionUtility` encrypt/decrypt round-trips | Quick manual test or verify test exists |
-| ESLint config has all rules from §10.3 | Spot-check key rules |
-| Jest config has coverage thresholds from §8.3 | Global 85%/80%, Validator 100%/100% |
-| Sprint board initialized for W1-S1 | 3 stories in Backlog |
-| On branch `sprint/W1-S1` | `git branch` shows active branch |
+| Check                                               | How                                                     |
+| --------------------------------------------------- | ------------------------------------------------------- |
+| Folder structure matches TS-001 §7                  | `ls -R` or tree view — compare against TECH_STACK.md §7 |
+| `npm install` succeeds                              | No dependency resolution errors                         |
+| `npx tsc --noEmit` passes                           | No TypeScript compilation errors                        |
+| `cds build` passes                                  | No CDS compilation errors                               |
+| `.env` has a real ENCRYPTION_KEY                    | 64 hex characters (256-bit)                             |
+| `.gitignore` covers all entries from VC-001 §3.1    | Compare against VERSION_CONTROL.md                      |
+| `theme-overrides.css` has all 28 properties         | Compare against THEME.md §7.1                           |
+| `wrapHandler` in BaseFacade.ts matches §5.2 pattern | Logger context, ENTRY/EXIT logs, error re-throw         |
+| `EncryptionUtility` encrypt/decrypt round-trips     | Quick manual test or verify test exists                 |
+| ESLint config has all rules from §10.3              | Spot-check key rules                                    |
+| Jest config has coverage thresholds from §8.3       | Global 85%/80%, Validator 100%/100%                     |
+| Sprint board initialized for W1-S1                  | 3 stories in Backlog                                    |
+| On branch `sprint/W1-S1`                            | `git branch` shows active branch                        |
 
 ### 4.4 Pass/Fail Checklist
 
@@ -585,8 +585,8 @@ Applied at every sprint checkpoint meeting (PM-001 §5). Maps to the Definition 
 
 #### W1-S1 — Foundation & Seed Data
 
-| Stories | CNV-002, CNV-003, FRM-009 |
-|---------|--------------------------|
+| Stories                  | CNV-002, CNV-003, FRM-009                                   |
+| ------------------------ | ----------------------------------------------------------- |
 | **Sync point validated** | #1 — Reference data deployed, #2 — Card portfolio populated |
 
 Sprint-specific checks:
@@ -601,9 +601,9 @@ Sprint-specific checks:
 
 #### W1-S2 — Ingestion Pipeline
 
-| Stories | ENH-008, INT-001, INT-002, FRM-003, FRM-010 |
-|---------|---------------------------------------------|
-| **Sync point validated** | #3 — Transaction ingestion operational |
+| Stories                  | ENH-008, INT-001, INT-002, FRM-003, FRM-010 |
+| ------------------------ | ------------------------------------------- |
+| **Sync point validated** | #3 — Transaction ingestion operational      |
 
 Sprint-specific checks:
 
@@ -618,8 +618,8 @@ Sprint-specific checks:
 
 #### W1-S3 — Transaction Processing
 
-| Stories | ENH-001, ENH-009, FRM-001, CNV-001 |
-|---------|-------------------------------------|
+| Stories                  | ENH-001, ENH-009, FRM-001, CNV-001 |
+| ------------------------ | ---------------------------------- |
 | **Sync point validated** | #4 — Categorization engine trained |
 
 Sprint-specific checks:
@@ -635,8 +635,8 @@ Sprint-specific checks:
 
 #### W1-S4 — Computation Engines
 
-| Stories | ENH-003, ENH-006, ENH-007, FRM-007 |
-|---------|-------------------------------------|
+| Stories                  | ENH-003, ENH-006, ENH-007, FRM-007    |
+| ------------------------ | ------------------------------------- |
 | **Sync point validated** | #5 — Computation engines deliver data |
 
 Sprint-specific checks:
@@ -653,9 +653,9 @@ Sprint-specific checks:
 
 #### W1-S5 — UI + Dashboards
 
-| Stories | FRM-004, FRM-006, RPT-001 (partial), RPT-002 (partial), WFL-001, WFL-002 |
-|---------|--------------------------------------------------------------------------|
-| **Sync point validated** | #6 — Dashboard shells accept new sections |
+| Stories                  | FRM-004, FRM-006, RPT-001 (partial), RPT-002 (partial), WFL-001, WFL-002 |
+| ------------------------ | ------------------------------------------------------------------------ |
+| **Sync point validated** | #6 — Dashboard shells accept new sections                                |
 
 Sprint-specific checks:
 
@@ -673,9 +673,9 @@ Sprint-specific checks:
 
 #### W2-S1 — Churning Depth
 
-| Stories | ENH-002, ENH-004, ENH-005, FRM-002, RPT-001 (complete), RPT-002 (complete) |
-|---------|-----------------------------------------------------------------------------|
-| **Sync point validated** | #7 — W2 engines expose standard interfaces |
+| Stories                  | ENH-002, ENH-004, ENH-005, FRM-002, RPT-001 (complete), RPT-002 (complete) |
+| ------------------------ | -------------------------------------------------------------------------- |
+| **Sync point validated** | #7 — W2 engines expose standard interfaces                                 |
 
 Sprint-specific checks:
 
@@ -691,7 +691,7 @@ Sprint-specific checks:
 #### W2-S2 — Goals & Reports
 
 | Stories | FRM-008, RPT-004, RPT-006, RPT-011 |
-|---------|-------------------------------------|
+| ------- | ---------------------------------- |
 
 Sprint-specific checks:
 
@@ -705,7 +705,7 @@ Sprint-specific checks:
 #### W3-S1 — Analytics & Financial Picture
 
 | Stories | FRM-005, FRM-011, RPT-003, RPT-005, RPT-007 |
-|---------|----------------------------------------------|
+| ------- | ------------------------------------------- |
 
 Sprint-specific checks:
 
@@ -718,7 +718,7 @@ Sprint-specific checks:
 #### W3-S2 — Remaining Reports
 
 | Stories | RPT-008, RPT-009, RPT-010, RPT-012 |
-|---------|-------------------------------------|
+| ------- | ---------------------------------- |
 
 Sprint-specific checks:
 
@@ -731,7 +731,7 @@ Sprint-specific checks:
 #### W4-S1 — Market Intelligence
 
 | Stories | CNV-004, INT-003, WFL-003 |
-|---------|--------------------------|
+| ------- | ------------------------- |
 
 Sprint-specific checks:
 
@@ -2573,43 +2573,43 @@ Co-Authored-By: Claude Code <noreply@anthropic.com>`
 
 32 prompts across 10 sprints, covering all 43 FRICEW objects.
 
-| Sprint | # | Stories | Title |
-|--------|---|---------|-------|
-| **W1-S1** | 1 | CNV-002 | Reference Data Seed |
-| | 2 | CNV-003 | Card Portfolio Seed |
-| | 3 | FRM-009 | Admin CRUD |
-| **W1-S2** | 1 | ENH-008 | Deduplication Engine |
-| | 2 | INT-001, FRM-010 | SimpleFIN Sync & Connection Manager |
-| | 3 | INT-002, FRM-003 | CSV Parsing & Import Wizard |
-| **W1-S3** | 1 | ENH-001 | Categorization Engine |
-| | 2 | ENH-009, FRM-001 | Transaction Splits & Transaction List |
-| | 3 | CNV-001 | Historical Backfill |
-| **W1-S4** | 1 | ENH-003 | Bonus Tracking Engine |
-| | 2 | ENH-006 | Points Balance Engine |
-| | 3 | ENH-007, FRM-007 | Budget Engine & Income Entry |
-| **W1-S5** | 1 | FRM-004, WFL-002 | My Cards & Card Lifecycle |
-| | 2 | FRM-006 | Card Onboarding Wizard |
-| | 3 | RPT-001, RPT-002 | Dashboard Shells (W1 partial) |
-| | 4 | WFL-001 | Weekly Review Workflow |
-| **W2-S1** | 1 | ENH-002 | Card Recommendation Engine |
-| | 2 | ENH-004 | Eligibility Engine |
-| | 3 | ENH-005 | Card Profitability Calculator |
-| | 4 | FRM-002 | Manual Transaction Entry |
-| | 5 | RPT-001, RPT-002 | Dashboard Completion |
-| **W2-S2** | 1 | FRM-008 | Goals Management |
-| | 2 | RPT-004 | Trophy Case |
-| | 3 | RPT-006, RPT-011 | Recommendation Matrix & Goal Progress |
-| **W3-S1** | 1 | FRM-005 | Market Cards |
-| | 2 | FRM-011, RPT-003 | Financial Picture Entry & Dashboard |
-| | 3 | RPT-005 | Card Analytics |
-| | 4 | RPT-007 | Spending Trends |
-| **W3-S2** | 1 | RPT-008, RPT-009 | Perk Tracker & Annual Summary |
-| | 2 | RPT-010, RPT-012 | Points Dashboard & Income vs Expenses |
-| **W4-S1** | 1 | INT-003, CNV-004 | Web Scraper & Market Card Database |
-| | 2 | WFL-003 | Offer Approval Gate |
+| Sprint    | #   | Stories          | Title                                 |
+| --------- | --- | ---------------- | ------------------------------------- |
+| **W1-S1** | 1   | CNV-002          | Reference Data Seed                   |
+|           | 2   | CNV-003          | Card Portfolio Seed                   |
+|           | 3   | FRM-009          | Admin CRUD                            |
+| **W1-S2** | 1   | ENH-008          | Deduplication Engine                  |
+|           | 2   | INT-001, FRM-010 | SimpleFIN Sync & Connection Manager   |
+|           | 3   | INT-002, FRM-003 | CSV Parsing & Import Wizard           |
+| **W1-S3** | 1   | ENH-001          | Categorization Engine                 |
+|           | 2   | ENH-009, FRM-001 | Transaction Splits & Transaction List |
+|           | 3   | CNV-001          | Historical Backfill                   |
+| **W1-S4** | 1   | ENH-003          | Bonus Tracking Engine                 |
+|           | 2   | ENH-006          | Points Balance Engine                 |
+|           | 3   | ENH-007, FRM-007 | Budget Engine & Income Entry          |
+| **W1-S5** | 1   | FRM-004, WFL-002 | My Cards & Card Lifecycle             |
+|           | 2   | FRM-006          | Card Onboarding Wizard                |
+|           | 3   | RPT-001, RPT-002 | Dashboard Shells (W1 partial)         |
+|           | 4   | WFL-001          | Weekly Review Workflow                |
+| **W2-S1** | 1   | ENH-002          | Card Recommendation Engine            |
+|           | 2   | ENH-004          | Eligibility Engine                    |
+|           | 3   | ENH-005          | Card Profitability Calculator         |
+|           | 4   | FRM-002          | Manual Transaction Entry              |
+|           | 5   | RPT-001, RPT-002 | Dashboard Completion                  |
+| **W2-S2** | 1   | FRM-008          | Goals Management                      |
+|           | 2   | RPT-004          | Trophy Case                           |
+|           | 3   | RPT-006, RPT-011 | Recommendation Matrix & Goal Progress |
+| **W3-S1** | 1   | FRM-005          | Market Cards                          |
+|           | 2   | FRM-011, RPT-003 | Financial Picture Entry & Dashboard   |
+|           | 3   | RPT-005          | Card Analytics                        |
+|           | 4   | RPT-007          | Spending Trends                       |
+| **W3-S2** | 1   | RPT-008, RPT-009 | Perk Tracker & Annual Summary         |
+|           | 2   | RPT-010, RPT-012 | Points Dashboard & Income vs Expenses |
+| **W4-S1** | 1   | INT-003, CNV-004 | Web Scraper & Market Card Database    |
+|           | 2   | WFL-003          | Offer Approval Gate                   |
 
 **Execution sequence:** Scaffold (§4) → W1-S1 prompts 1–3 → merge → W1-S2 prompts 1–3 → merge → ... → W4-S1 prompts 1–2 → merge → tag `v1.0.0`
 
 ---
 
-*This document is the single source of truth for the Financial Planner build execution plan. References [PROJECT_MANAGEMENT.md](PROJECT_MANAGEMENT.md) (sprint plan, checkpoint meeting), [TECHNICAL_STANDARDS.md](TECHNICAL_STANDARDS.md) (coding patterns), [TEST_STRATEGY.md](TEST_STRATEGY.md) (test boundaries), [VERSION_CONTROL.md](VERSION_CONTROL.md) (branching, commits, tags), and all functional specs in [design/specs/](specs/).*
+_This document is the single source of truth for the Financial Planner build execution plan. References [PROJECT_MANAGEMENT.md](PROJECT_MANAGEMENT.md) (sprint plan, checkpoint meeting), [TECHNICAL_STANDARDS.md](TECHNICAL_STANDARDS.md) (coding patterns), [TEST_STRATEGY.md](TEST_STRATEGY.md) (test boundaries), [VERSION_CONTROL.md](VERSION_CONTROL.md) (branching, commits, tags), and all functional specs in [design/specs/](specs/)._

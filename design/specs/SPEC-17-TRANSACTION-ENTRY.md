@@ -10,8 +10,8 @@
 
 ## 1. Change History
 
-| Date | Author | Description |
-|------|--------|-------------|
+| Date       | Author          | Description                         |
+| ---------- | --------------- | ----------------------------------- |
 | 2026-02-20 | Sandro & Claude | Initial creation — workshop output. |
 
 ---
@@ -24,31 +24,31 @@ Fiori Elements Object Page for creating manual transactions and editing any tran
 
 ### 2.2 FRICEW Objects
 
-| ID | Name | Type | Wave |
-|----|------|------|------|
-| FRM-002 | Transaction Entry | Form | 2 |
+| ID      | Name              | Type | Wave |
+| ------- | ----------------- | ---- | ---- |
+| FRM-002 | Transaction Entry | Form | 2    |
 
 ### 2.3 CDS Service & Module
 
-| | |
-|---|---|
-| **CDS Service** | TransactionService (`/service/transactionSvcs`) |
-| **Module** | `srv/modules/transaction/` |
-| **Files** | `TransactionFacade.ts`, `TransactionService.ts`, `TransactionValidator.ts` |
+|                 |                                                                            |
+| --------------- | -------------------------------------------------------------------------- |
+| **CDS Service** | TransactionService (`/service/transactionSvcs`)                            |
+| **Module**      | `srv/modules/transaction/`                                                 |
+| **Files**       | `TransactionFacade.ts`, `TransactionService.ts`, `TransactionValidator.ts` |
 
 ### 2.4 Consumers
 
-| Consumer | Usage |
-|----------|-------|
+| Consumer                           | Usage                                                                  |
+| ---------------------------------- | ---------------------------------------------------------------------- |
 | SPEC-02 FRM-001 (Transaction List) | Create button in table toolbar navigates to Object Page in create mode |
 
 ### 2.5 Dependencies
 
-| Dependency | Usage |
-|------------|-------|
-| SPEC-02 ENH-001 (Categorization Engine) | Auto-fills PT + EC on vendor selection; learning on edits |
-| SPEC-07 ENH-002 (Card Recommendation) | Single-category mode — advisory card ranking with point calculation |
-| SPEC-02 ENH-009 (Expense Splitting) | Transaction Split entity exposed on form |
+| Dependency                              | Usage                                                               |
+| --------------------------------------- | ------------------------------------------------------------------- |
+| SPEC-02 ENH-001 (Categorization Engine) | Auto-fills PT + EC on vendor selection; learning on edits           |
+| SPEC-07 ENH-002 (Card Recommendation)   | Single-category mode — advisory card ranking with point calculation |
+| SPEC-02 ENH-009 (Expense Splitting)     | Transaction Split entity exposed on form                            |
 
 ---
 
@@ -56,22 +56,22 @@ Fiori Elements Object Page for creating manual transactions and editing any tran
 
 ### 3.1 Entities Used
 
-| Entity | Section | Usage |
-|--------|---------|-------|
-| Transaction | DM §5.1 | Primary entity — create and edit |
-| Transaction Split | DM §5.2 | Expense sharing — my share vs. full amount |
-| Vendor | DM §3.9 | Autocomplete, inline creation |
-| Purchase Type | DM §3.10 | Combined picker with Goal, inline creation |
-| Purchase Subtype | DM §3.11 | Filtered by selected PT, inline creation |
-| Earning Category | DM §3.12 | Category selection, inline creation |
-| Card Instance | DM §4.4 | Card picker filtered by active date |
-| Goal | DM §4.11 | Combined picker with Purchase Type |
+| Entity            | Section  | Usage                                      |
+| ----------------- | -------- | ------------------------------------------ |
+| Transaction       | DM §5.1  | Primary entity — create and edit           |
+| Transaction Split | DM §5.2  | Expense sharing — my share vs. full amount |
+| Vendor            | DM §3.9  | Autocomplete, inline creation              |
+| Purchase Type     | DM §3.10 | Combined picker with Goal, inline creation |
+| Purchase Subtype  | DM §3.11 | Filtered by selected PT, inline creation   |
+| Earning Category  | DM §3.12 | Category selection, inline creation        |
+| Card Instance     | DM §4.4  | Card picker filtered by active date        |
+| Goal              | DM §4.11 | Combined picker with Purchase Type         |
 
 ### 3.2 DM Amendments (DM-001)
 
-| Entity | Change | Decision |
-|--------|--------|----------|
-| Transaction | `source` enum: add `manual` (existing: `simplefin` · `csv`) | D-259 |
+| Entity      | Change                                                      | Decision |
+| ----------- | ----------------------------------------------------------- | -------- |
+| Transaction | `source` enum: add `manual` (existing: `simplefin` · `csv`) | D-259    |
 
 ---
 
@@ -83,10 +83,10 @@ Fiori Elements Object Page (D-252). Accessed via Create button on FRM-001 table 
 
 ### 4.2 Modes
 
-| Mode | Trigger | Source Field |
-|------|---------|--------------|
-| Create | FRM-001 Create button | `manual` (auto-set, read-only) |
-| Edit | Click any transaction in FRM-001 list | Original value (read-only) |
+| Mode   | Trigger                               | Source Field                   |
+| ------ | ------------------------------------- | ------------------------------ |
+| Create | FRM-001 Create button                 | `manual` (auto-set, read-only) |
+| Edit   | Click any transaction in FRM-001 list | Original value (read-only)     |
 
 All fields editable in both modes except source and import metadata (D-266).
 
@@ -94,52 +94,52 @@ All fields editable in both modes except source and import metadata (D-266).
 
 **Section 1 — Header**
 
-| Field | Control | Required | Default | Notes |
-|-------|---------|----------|---------|-------|
-| Transaction Date | DatePicker | Yes | Today | D-260 |
-| Amount | Input (positive number) | Yes | — | "CAD" unit label |
-| Purchase / Refund | SegmentedButton | Yes | Purchase | Refund stores negative (D-260) |
-| Source | ObjectStatus | Read-only | `manual` on create | |
-| Vendor | Input + SuggestionItems | Yes | — | 2+ chars triggers search (D-254). 5 recent vendors first (D-263). `+ Create Vendor` when no match (D-255). |
-| Card | ComboBox | Yes | — | Filtered to cards active on transaction date (D-261) |
+| Field             | Control                 | Required  | Default            | Notes                                                                                                      |
+| ----------------- | ----------------------- | --------- | ------------------ | ---------------------------------------------------------------------------------------------------------- |
+| Transaction Date  | DatePicker              | Yes       | Today              | D-260                                                                                                      |
+| Amount            | Input (positive number) | Yes       | —                  | "CAD" unit label                                                                                           |
+| Purchase / Refund | SegmentedButton         | Yes       | Purchase           | Refund stores negative (D-260)                                                                             |
+| Source            | ObjectStatus            | Read-only | `manual` on create |                                                                                                            |
+| Vendor            | Input + SuggestionItems | Yes       | —                  | 2+ chars triggers search (D-254). 5 recent vendors first (D-263). `+ Create Vendor` when no match (D-255). |
+| Card              | ComboBox                | Yes       | —                  | Filtered to cards active on transaction date (D-261)                                                       |
 
 **Section 2 — Categorization**
 
-| Field | Control | Required | Default | Notes |
-|-------|---------|----------|---------|-------|
-| Purchase Type / Goal | Combined picker | At least one of PT/EC/Goal | Auto-filled by ENH-001 | Goals at top with `sap-icon://target-group`, progress indicator, group header separator. Mutually exclusive with Goal. `+ Create Purchase Type`. |
-| Purchase Subtype | ComboBox | No | — | Filtered by selected PT. `+ Create Subtype`. |
-| Earning Category | ComboBox | At least one of PT/EC/Goal | Auto-filled by ENH-001 | `+ Create Earning Category`. |
-| Card Recommendation | Custom section (read-only) | — | — | Shows when EC + amount present (D-256, D-257). Top card: name, earn rate, projected points, bonus override. "See all cards" expands ranked list. |
+| Field                | Control                    | Required                   | Default                | Notes                                                                                                                                            |
+| -------------------- | -------------------------- | -------------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Purchase Type / Goal | Combined picker            | At least one of PT/EC/Goal | Auto-filled by ENH-001 | Goals at top with `sap-icon://target-group`, progress indicator, group header separator. Mutually exclusive with Goal. `+ Create Purchase Type`. |
+| Purchase Subtype     | ComboBox                   | No                         | —                      | Filtered by selected PT. `+ Create Subtype`.                                                                                                     |
+| Earning Category     | ComboBox                   | At least one of PT/EC/Goal | Auto-filled by ENH-001 | `+ Create Earning Category`.                                                                                                                     |
+| Card Recommendation  | Custom section (read-only) | —                          | —                      | Shows when EC + amount present (D-256, D-257). Top card: name, earn rate, projected points, bonus override. "See all cards" expands ranked list. |
 
 **Section 3 — Expense Split**
 
-| Field | Control | Required | Default | Notes |
-|-------|---------|----------|---------|-------|
-| My Share Amount | Input (dollar) | No | — | Fill one → other auto-calculates. Cannot exceed transaction amount. |
-| My Share % | Input (percentage) | No | — | |
-| Split Description | Input | No | — | e.g., "Dinner with Mike" |
-| Is Recurring | Switch | No | Off | ENH-009 suggests for repeat vendors |
+| Field             | Control            | Required | Default | Notes                                                               |
+| ----------------- | ------------------ | -------- | ------- | ------------------------------------------------------------------- |
+| My Share Amount   | Input (dollar)     | No       | —       | Fill one → other auto-calculates. Cannot exceed transaction amount. |
+| My Share %        | Input (percentage) | No       | —       |                                                                     |
+| Split Description | Input              | No       | —       | e.g., "Dinner with Mike"                                            |
+| Is Recurring      | Switch             | No       | Off     | ENH-009 suggests for repeat vendors                                 |
 
 Full amount feeds churning; my_share_amount feeds budget (D-08). Reimbursed = my_share_amount 0 (D-258).
 
 **Section 4 — Details**
 
-| Field | Control | Required | Notes |
-|-------|---------|----------|-------|
-| Notes | TextArea | No | Plain text, no length limit |
-| Import Batch | ObjectStatus | Read-only | Only shown for `simplefin`/`csv` source |
-| Import Date | ObjectStatus | Read-only | Only shown for `simplefin`/`csv` source |
-| Created Date | ObjectStatus | Read-only | |
-| Last Modified | ObjectStatus | Read-only | |
+| Field         | Control      | Required  | Notes                                   |
+| ------------- | ------------ | --------- | --------------------------------------- |
+| Notes         | TextArea     | No        | Plain text, no length limit             |
+| Import Batch  | ObjectStatus | Read-only | Only shown for `simplefin`/`csv` source |
+| Import Date   | ObjectStatus | Read-only | Only shown for `simplefin`/`csv` source |
+| Created Date  | ObjectStatus | Read-only |                                         |
+| Last Modified | ObjectStatus | Read-only |                                         |
 
 ### 4.4 Actions
 
-| Action | Location | Behavior |
-|--------|----------|----------|
-| Save | Footer | Standard Fiori save. Draft → active. |
+| Action         | Location            | Behavior                                             |
+| -------------- | ------------------- | ---------------------------------------------------- |
+| Save           | Footer              | Standard Fiori save. Draft → active.                 |
 | Create Another | Footer (after save) | New create form with date + card pre-filled (D-262). |
-| Delete | Footer | Confirmation dialog. Returns to FRM-001 list. |
+| Delete         | Footer              | Confirmation dialog. Returns to FRM-001 list.        |
 
 ### 4.5 Inline Entity Creation
 
@@ -167,77 +167,77 @@ On edit/correction of any transaction (D-266): same ENH-001 learning as FRM-001 
 
 ### Form & Field Defaults
 
-| Rule | Description |
-|------|-------------|
-| BR-01 | Transaction date defaults to today. |
-| BR-02 | Amount is always positive. Purchase/Refund toggle controls sign; Refund stores negative. |
-| BR-03 | Source set to `manual` on create; read-only on all transactions. |
-| BR-04 | Card picker shows only cards active on the transaction date. |
+| Rule  | Description                                                                                         |
+| ----- | --------------------------------------------------------------------------------------------------- |
+| BR-01 | Transaction date defaults to today.                                                                 |
+| BR-02 | Amount is always positive. Purchase/Refund toggle controls sign; Refund stores negative.            |
+| BR-03 | Source set to `manual` on create; read-only on all transactions.                                    |
+| BR-04 | Card picker shows only cards active on the transaction date.                                        |
 | BR-05 | Required: date, amount, vendor, card, and at least one of PT, EC, or Goal. Save disabled until met. |
-| BR-06 | Notes optional, plain text, no length limit. |
+| BR-06 | Notes optional, plain text, no length limit.                                                        |
 
 ### Vendor & Categorization
 
-| Rule | Description |
-|------|-------------|
-| BR-07 | Vendor SuggestionItems trigger after 2+ characters. |
-| BR-08 | 5 most recently used vendors shown first, then alphabetical. |
-| BR-09 | No match → `+ Create Vendor` at bottom of dropdown → quick-create dialog. |
-| BR-10 | Vendor selected → ENH-001 auto-fills PT and EC. Both overridable. |
-| BR-11 | Same `+ Create [Entity]` pattern for PT, Subtype, and EC value helps. |
+| Rule  | Description                                                                                        |
+| ----- | -------------------------------------------------------------------------------------------------- |
+| BR-07 | Vendor SuggestionItems trigger after 2+ characters.                                                |
+| BR-08 | 5 most recently used vendors shown first, then alphabetical.                                       |
+| BR-09 | No match → `+ Create Vendor` at bottom of dropdown → quick-create dialog.                          |
+| BR-10 | Vendor selected → ENH-001 auto-fills PT and EC. Both overridable.                                  |
+| BR-11 | Same `+ Create [Entity]` pattern for PT, Subtype, and EC value helps.                              |
 | BR-12 | PT and Goal mutually exclusive in combined picker. Goals at top with icon, progress, group header. |
-| BR-13 | Editing vendor/category on any transaction triggers ENH-001 learning. |
+| BR-13 | Editing vendor/category on any transaction triggers ENH-001 learning.                              |
 
 ### Card Recommendation
 
-| Rule | Description |
-|------|-------------|
-| BR-14 | ENH-002 fires when EC populated. Re-fires on change. |
-| BR-15 | EC + amount present → projected points per card (earn rate × amount). |
-| BR-16 | Recommendation advisory only — card field not auto-populated. |
+| Rule  | Description                                                                                  |
+| ----- | -------------------------------------------------------------------------------------------- |
+| BR-14 | ENH-002 fires when EC populated. Re-fires on change.                                         |
+| BR-15 | EC + amount present → projected points per card (earn rate × amount).                        |
+| BR-16 | Recommendation advisory only — card field not auto-populated.                                |
 | BR-17 | Panel: top card with earn rate, points, bonus override. "See all cards" expands ranked list. |
 
 ### Expense Split
 
-| Rule | Description |
-|------|-------------|
+| Rule  | Description                                                                                              |
+| ----- | -------------------------------------------------------------------------------------------------------- |
 | BR-18 | Optional split: my_share_amount (dollar) or my_share_pct (percentage). Fill one → other auto-calculates. |
-| BR-19 | my_share_amount cannot exceed transaction amount. |
-| BR-20 | Split description optional free text. |
-| BR-21 | Is Recurring defaults to off. |
-| BR-22 | Full amount feeds churning; my_share_amount feeds budget (D-08). Reimbursed = my_share_amount 0. |
+| BR-19 | my_share_amount cannot exceed transaction amount.                                                        |
+| BR-20 | Split description optional free text.                                                                    |
+| BR-21 | Is Recurring defaults to off.                                                                            |
+| BR-22 | Full amount feeds churning; my_share_amount feeds budget (D-08). Reimbursed = my_share_amount 0.         |
 
 ### Edit & Navigation
 
-| Rule | Description |
-|------|-------------|
+| Rule  | Description                                                    |
+| ----- | -------------------------------------------------------------- |
 | BR-23 | Object Page editable for any transaction regardless of source. |
-| BR-24 | All fields editable except source and import metadata. |
-| BR-25 | FRM-001 Create button → Object Page in create mode. |
-| BR-26 | Delete on Object Page with confirmation dialog. |
+| BR-24 | All fields editable except source and import metadata.         |
+| BR-25 | FRM-001 Create button → Object Page in create mode.            |
+| BR-26 | Delete on Object Page with confirmation dialog.                |
 
 ### Data Integrity & UX
 
-| Rule | Description |
-|------|-------------|
+| Rule  | Description                                                                                         |
+| ----- | --------------------------------------------------------------------------------------------------- |
 | BR-27 | Duplicate detection on save: date + amount ±10% + vendor within 3-day window. Non-blocking warning. |
-| BR-28 | Backdated budget warning if date in prior budget month. Non-blocking. |
-| BR-29 | "Create Another" after save → fresh form with date + card pre-filled. |
-| BR-30 | Fiori Elements draft handling — auto-saved until explicit Save. |
+| BR-28 | Backdated budget warning if date in prior budget month. Non-blocking.                               |
+| BR-29 | "Create Another" after save → fresh form with date + card pre-filled.                               |
+| BR-30 | Fiori Elements draft handling — auto-saved until explicit Save.                                     |
 
 ---
 
 ## 6. Error Handling
 
-| Condition | Response | i18n Key |
-|-----------|----------|----------|
-| Required field missing | Field-level validation message, Save disabled | `transaction.entry.error.requiredField` |
-| my_share_amount > transaction amount | Inline error on split amount field | `transaction.entry.error.shareExceedsAmount` |
-| Card not active on transaction date | Card excluded from picker (preventive) | — |
-| Duplicate detected on save | Non-blocking warning dialog with similar transaction details | `transaction.entry.warn.duplicateDetected` |
-| Backdated to prior budget month | Non-blocking warning dialog | `transaction.entry.warn.backdatedBudget` |
-| Vendor create fails | Error message in quick-create dialog | `transaction.entry.error.vendorCreateFailed` |
-| Draft save conflict | Standard Fiori Elements draft error handling | — |
+| Condition                            | Response                                                     | i18n Key                                     |
+| ------------------------------------ | ------------------------------------------------------------ | -------------------------------------------- |
+| Required field missing               | Field-level validation message, Save disabled                | `transaction.entry.error.requiredField`      |
+| my_share_amount > transaction amount | Inline error on split amount field                           | `transaction.entry.error.shareExceedsAmount` |
+| Card not active on transaction date  | Card excluded from picker (preventive)                       | —                                            |
+| Duplicate detected on save           | Non-blocking warning dialog with similar transaction details | `transaction.entry.warn.duplicateDetected`   |
+| Backdated to prior budget month      | Non-blocking warning dialog                                  | `transaction.entry.warn.backdatedBudget`     |
+| Vendor create fails                  | Error message in quick-create dialog                         | `transaction.entry.error.vendorCreateFailed` |
+| Draft save conflict                  | Standard Fiori Elements draft error handling                 | —                                            |
 
 ---
 

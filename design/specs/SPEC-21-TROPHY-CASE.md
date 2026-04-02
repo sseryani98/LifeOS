@@ -10,11 +10,11 @@
 
 ## 1. Change History
 
-| Date | Author | Description |
-|------|--------|-------------|
-| 2026-02-20 | Sandro & Claude | Initial creation — workshop output. |
-| 2026-02-20 | Sandro | Approved. |
-| 2026-02-20 | Claude | FUT renumbering: FUT-198–209 → FUT-199–210 (cascaded from SPEC-18 FUT collision fix). |
+| Date       | Author          | Description                                                                           |
+| ---------- | --------------- | ------------------------------------------------------------------------------------- |
+| 2026-02-20 | Sandro & Claude | Initial creation — workshop output.                                                   |
+| 2026-02-20 | Sandro          | Approved.                                                                             |
+| 2026-02-20 | Claude          | FUT renumbering: FUT-198–209 → FUT-199–210 (cascaded from SPEC-18 FUT collision fix). |
 
 ---
 
@@ -26,31 +26,31 @@ Fiori Elements Analytical List Page + Object Page for cross-program redemption h
 
 ### 2.2 FRICEW Objects
 
-| ID | Name | Type | Wave |
-|----|------|------|------|
-| RPT-004 | Trophy Case | Report | 2 |
+| ID      | Name        | Type   | Wave |
+| ------- | ----------- | ------ | ---- |
+| RPT-004 | Trophy Case | Report | 2    |
 
 ### 2.3 CDS Service & Module
 
-| | |
-|---|---|
-| **CDS Service** | ChurningService (`/service/churningSvcs`) |
-| **Module** | `srv/modules/churning/` |
-| **Files** | `ChurningFacade.ts`, `ChurningService.ts`, `ChurningValidator.ts` |
+|                 |                                                                   |
+| --------------- | ----------------------------------------------------------------- |
+| **CDS Service** | ChurningService (`/service/churningSvcs`)                         |
+| **Module**      | `srv/modules/churning/`                                           |
+| **Files**       | `ChurningFacade.ts`, `ChurningService.ts`, `ChurningValidator.ts` |
 
 ### 2.4 Consumers
 
-| Consumer | Usage |
-|----------|-------|
-| SPEC-03 FRM-004 (My Cards) | FRM-004 Section 4 removed — redemptions are program-level (D-280) |
+| Consumer                                   | Usage                                                               |
+| ------------------------------------------ | ------------------------------------------------------------------- |
+| SPEC-03 FRM-004 (My Cards)                 | FRM-004 Section 4 removed — redemptions are program-level (D-280)   |
 | SPEC-11 RPT-010 (Points Program Dashboard) | Per-program redemption view — Trophy Case is the cross-program view |
 
 ### 2.5 Dependencies
 
-| Dependency | Usage |
-|------------|-------|
-| SPEC-06 CNV-002 (Reference Data Seed) | Rewards Programs, Redemption Types must exist |
-| SPEC-11 RPT-010 (Points Program Dashboard) | Navigation target for program drill-down |
+| Dependency                                 | Usage                                         |
+| ------------------------------------------ | --------------------------------------------- |
+| SPEC-06 CNV-002 (Reference Data Seed)      | Rewards Programs, Redemption Types must exist |
+| SPEC-11 RPT-010 (Points Program Dashboard) | Navigation target for program drill-down      |
 
 ---
 
@@ -58,13 +58,13 @@ Fiori Elements Analytical List Page + Object Page for cross-program redemption h
 
 ### 3.1 Entities Used
 
-| Entity | Section | Usage |
-|--------|---------|-------|
-| Redemption | DM §5.4 | Primary entity — full CRUD |
-| Redemption Type | D-102 | FK display + visual filter grouping |
+| Entity          | Section | Usage                                                            |
+| --------------- | ------- | ---------------------------------------------------------------- |
+| Redemption      | DM §5.4 | Primary entity — full CRUD                                       |
+| Redemption Type | D-102   | FK display + visual filter grouping                              |
 | Rewards Program | DM §3.2 | FK display + visual filter grouping + CPP valuation for coloring |
-| Card Instance | DM §4.4 | Optional FK — for card-specific redemptions |
-| Market Card | DM §4.1 | Navigation display (via Card Instance) |
+| Card Instance   | DM §4.4 | Optional FK — for card-specific redemptions                      |
+| Market Card     | DM §4.1 | Navigation display (via Card Instance)                           |
 
 ### 3.2 DM Amendments (DM-001)
 
@@ -72,10 +72,10 @@ None — Redemption entity already has the correct shape (including D-102 `redem
 
 ### 3.3 Cross-Spec Amendments
 
-| Spec | Change | Decision |
-|------|--------|----------|
-| SPEC-03 | Remove FRM-004 Section 4 (Redemptions). Sections 5–8 renumber to 4–7. | D-280 |
-| TECH_STACK.md | `app/trophy-case/` changes from Freestyle to Fiori Elements (ALP + Object Page) | D-279 |
+| Spec          | Change                                                                          | Decision |
+| ------------- | ------------------------------------------------------------------------------- | -------- |
+| SPEC-03       | Remove FRM-004 Section 4 (Redemptions). Sections 5–8 renumber to 4–7.           | D-280    |
+| TECH_STACK.md | `app/trophy-case/` changes from Freestyle to Fiori Elements (ALP + Object Page) | D-279    |
 
 ---
 
@@ -87,22 +87,22 @@ Fiori Elements Analytical List Page + Object Page (D-279). Full CRUD. Side navig
 
 ### 4.2 KPI Tags
 
-| KPI | Metric | Format |
-|-----|--------|--------|
-| Total Points Redeemed | SUM(`points_spent`) | Number with thousands separator |
-| Total Dollar Value | SUM(`dollar_value`) | CAD currency |
-| Average CPP | SUM(`dollar_value`) / SUM(`points_spent`) × 100 | ¢ format |
-| Redemption Count | COUNT(*) | Number |
+| KPI                   | Metric                                          | Format                          |
+| --------------------- | ----------------------------------------------- | ------------------------------- |
+| Total Points Redeemed | SUM(`points_spent`)                             | Number with thousands separator |
+| Total Dollar Value    | SUM(`dollar_value`)                             | CAD currency                    |
+| Average CPP           | SUM(`dollar_value`) / SUM(`points_spent`) × 100 | ¢ format                        |
+| Redemption Count      | COUNT(\*)                                       | Number                          |
 
 All KPIs update dynamically with applied filters.
 
 ### 4.3 Visual Filters
 
-| Filter | Chart Type | Dimension | Measure |
-|--------|-----------|-----------|---------|
-| By Program | Donut | Rewards Program | SUM(`dollar_value`) |
-| By Type | Bar | Redemption Type | SUM(`dollar_value`) |
-| By Year | Line | Year(`redemption_date`) | COUNT(*) |
+| Filter     | Chart Type | Dimension               | Measure             |
+| ---------- | ---------- | ----------------------- | ------------------- |
+| By Program | Donut      | Rewards Program         | SUM(`dollar_value`) |
+| By Type    | Bar        | Redemption Type         | SUM(`dollar_value`) |
+| By Year    | Line       | Year(`redemption_date`) | COUNT(\*)           |
 
 ### 4.4 Chart Area
 
@@ -110,22 +110,22 @@ Horizontal bar chart sorted by `effective_cpp` descending. Top 10 redemptions. B
 
 ### 4.5 Table Columns
 
-| Column | Source | Format | Notes |
-|--------|--------|--------|-------|
-| Date | `redemption_date` | Date | Default sort: descending |
-| Program | Rewards Program.`name` | Text | Navigation link to RPT-010 |
-| Type | Redemption Type.`name` | Text | |
-| Description | `description` | Text | |
-| Points Spent | `points_spent` | Number | Thousands separator |
-| Dollar Value | `dollar_value` | Currency (CAD) | |
-| Effective CPP | `effective_cpp` | ¢ format | Semantic coloring per BR-06 |
+| Column        | Source                 | Format         | Notes                       |
+| ------------- | ---------------------- | -------------- | --------------------------- |
+| Date          | `redemption_date`      | Date           | Default sort: descending    |
+| Program       | Rewards Program.`name` | Text           | Navigation link to RPT-010  |
+| Type          | Redemption Type.`name` | Text           |                             |
+| Description   | `description`          | Text           |                             |
+| Points Spent  | `points_spent`         | Number         | Thousands separator         |
+| Dollar Value  | `dollar_value`         | Currency (CAD) |                             |
+| Effective CPP | `effective_cpp`        | ¢ format       | Semantic coloring per BR-06 |
 
 **Filters:** One filter field per column + date range + CPP range. Search field.
 
 **Actions:**
 
-| Action | Trigger | Notes |
-|--------|---------|-------|
+| Action | Trigger        | Notes                               |
+| ------ | -------------- | ----------------------------------- |
 | Create | Toolbar button | Standard Fiori create → Object Page |
 
 ### 4.6 Object Page Layout
@@ -134,32 +134,32 @@ Horizontal bar chart sorted by `effective_cpp` descending. Top 10 redemptions. B
 
 **Fields:**
 
-| Field | Control | Required | Notes |
-|-------|---------|----------|-------|
-| Program | Value Help (Rewards Program) | Yes | |
-| Redemption Type | Value Help (Redemption Type) | No | |
-| Redemption Date | Date Picker | Yes | Defaults to today |
-| Points Spent | Number Input | Yes | |
-| Dollar Value | Currency Input | Yes | |
-| Effective CPP | Display Only | — | Auto-calculated (BR-01). ¢ format with semantic coloring (BR-06). |
-| Description | Text Input | Yes | "Business class YYZ→NRT" |
-| Card Instance | Value Help | No | Filtered by selected program (BR-03) |
-| Notes | Text Area | No | |
+| Field           | Control                      | Required | Notes                                                             |
+| --------------- | ---------------------------- | -------- | ----------------------------------------------------------------- |
+| Program         | Value Help (Rewards Program) | Yes      |                                                                   |
+| Redemption Type | Value Help (Redemption Type) | No       |                                                                   |
+| Redemption Date | Date Picker                  | Yes      | Defaults to today                                                 |
+| Points Spent    | Number Input                 | Yes      |                                                                   |
+| Dollar Value    | Currency Input               | Yes      |                                                                   |
+| Effective CPP   | Display Only                 | —        | Auto-calculated (BR-01). ¢ format with semantic coloring (BR-06). |
+| Description     | Text Input                   | Yes      | "Business class YYZ→NRT"                                          |
+| Card Instance   | Value Help                   | No       | Filtered by selected program (BR-03)                              |
+| Notes           | Text Area                    | No       |                                                                   |
 
 **Actions:**
 
-| Action | Location | Behavior |
-|--------|----------|----------|
-| Create | List toolbar | Standard Fiori create |
-| Edit | Object page | Standard Fiori edit |
+| Action | Location           | Behavior                    |
+| ------ | ------------------ | --------------------------- |
+| Create | List toolbar       | Standard Fiori create       |
+| Edit   | Object page        | Standard Fiori edit         |
 | Delete | Object page footer | Confirmation dialog (BR-15) |
 
 ### 4.7 Navigation
 
-| Direction | From → To | Trigger |
-|-----------|-----------|---------|
-| Outbound | Program name → RPT-010 | Table cell click / Object Page header link |
-| Inbound | RPT-010 → RPT-004 | — (no direct link defined; user navigates via side nav) |
+| Direction | From → To              | Trigger                                                 |
+| --------- | ---------------------- | ------------------------------------------------------- |
+| Outbound  | Program name → RPT-010 | Table cell click / Object Page header link              |
+| Inbound   | RPT-010 → RPT-004      | — (no direct link defined; user navigates via side nav) |
 
 ---
 
@@ -167,62 +167,62 @@ Horizontal bar chart sorted by `effective_cpp` descending. Top 10 redemptions. B
 
 ### Redemption Data
 
-| Rule | Description |
-|------|-------------|
+| Rule  | Description                                                                                                                 |
+| ----- | --------------------------------------------------------------------------------------------------------------------------- |
 | BR-01 | `effective_cpp` is auto-calculated: (`dollar_value` / `points_spent`) × 100. Stored at save time (D-40), not user-editable. |
-| BR-02 | `rewards_program_id` is required. `card_instance_id` is optional. |
-| BR-03 | Card Instance value help SHALL filter to cards whose Market Card belongs to the selected Rewards Program. |
-| BR-04 | `redemption_date` defaults to today on create. |
-| BR-05 | Redemptions are program-level events, not card-level (D-142). |
+| BR-02 | `rewards_program_id` is required. `card_instance_id` is optional.                                                           |
+| BR-03 | Card Instance value help SHALL filter to cards whose Market Card belongs to the selected Rewards Program.                   |
+| BR-04 | `redemption_date` defaults to today on create.                                                                              |
+| BR-05 | Redemptions are program-level events, not card-level (D-142).                                                               |
 
 ### CPP Semantic Coloring
 
-| Rule | Description |
-|------|-------------|
+| Rule  | Description                                                                                                                                                                                           |
+| ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | BR-06 | CPP values SHALL be color-coded relative to the program's `cpp_valuation`: >= 2× → Positive (Green/exceptional), >= 1× → Information (Blue/above valuation), < 1× → Warning (Orange/below valuation). |
-| BR-07 | CPP coloring applies to both the table column and the horizontal bar chart. |
+| BR-07 | CPP coloring applies to both the table column and the horizontal bar chart.                                                                                                                           |
 
 ### ALP Behavior
 
-| Rule | Description |
-|------|-------------|
+| Rule  | Description                                                                                                                                                                       |
+| ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | BR-08 | KPI tags: Total Points Redeemed (SUM), Total Dollar Value (SUM), Average CPP (weighted: total value / total points × 100), Redemption Count. All update dynamically with filters. |
-| BR-09 | Visual filters: Donut by Program (`dollar_value`), Bar by Redemption Type (`dollar_value`), Line by Year (count). |
-| BR-10 | Chart area: Horizontal bar chart sorted by `effective_cpp` descending. Top 10 redemptions. Bar color follows BR-06 thresholds. |
-| BR-11 | Table default sort: `redemption_date` descending. |
-| BR-12 | Program CPP benchmark vertical reference line shown on chart when filtered to a single program. Hidden when viewing all programs. |
+| BR-09 | Visual filters: Donut by Program (`dollar_value`), Bar by Redemption Type (`dollar_value`), Line by Year (count).                                                                 |
+| BR-10 | Chart area: Horizontal bar chart sorted by `effective_cpp` descending. Top 10 redemptions. Bar color follows BR-06 thresholds.                                                    |
+| BR-11 | Table default sort: `redemption_date` descending.                                                                                                                                 |
+| BR-12 | Program CPP benchmark vertical reference line shown on chart when filtered to a single program. Hidden when viewing all programs.                                                 |
 
 ### Navigation
 
-| Rule | Description |
-|------|-------------|
+| Rule  | Description                                                                           |
+| ----- | ------------------------------------------------------------------------------------- |
 | BR-13 | Clicking a Program name in the table navigates to RPT-010 (Points Program Dashboard). |
 
 ### CRUD
 
-| Rule | Description |
-|------|-------------|
+| Rule  | Description                                                       |
+| ----- | ----------------------------------------------------------------- |
 | BR-14 | Create, Edit, and Delete actions available. No approval workflow. |
-| BR-15 | Delete requires confirmation dialog. |
+| BR-15 | Delete requires confirmation dialog.                              |
 
 ### UX Enhancements
 
-| Rule | Description |
-|------|-------------|
-| BR-16 | The highest `effective_cpp` redemption SHALL display a "Best Ever" badge icon in the table row (ENH-001). |
+| Rule  | Description                                                                                                        |
+| ----- | ------------------------------------------------------------------------------------------------------------------ |
+| BR-16 | The highest `effective_cpp` redemption SHALL display a "Best Ever" badge icon in the table row (ENH-001).          |
 | BR-17 | Object page header SHALL display the redemption's CPP rank among all redemptions (e.g., "#3 best burn") (ENH-003). |
 
 ---
 
 ## 6. Error Handling
 
-| Condition | Response | i18n Key |
-|-----------|----------|----------|
-| `points_spent` is zero or negative | Field-level error | `redemption.error.invalidPointsSpent` |
-| `dollar_value` is zero or negative | Field-level error | `redemption.error.invalidDollarValue` |
-| Required fields missing (program, date, points, value, description) | Field-level errors | `redemption.error.requiredField` |
-| No redemptions exist | Empty table with "No data available" | — |
-| Referenced Rewards Program deleted | 404 via `req.reject()` | `redemption.error.programNotFound` |
+| Condition                                                           | Response                             | i18n Key                              |
+| ------------------------------------------------------------------- | ------------------------------------ | ------------------------------------- |
+| `points_spent` is zero or negative                                  | Field-level error                    | `redemption.error.invalidPointsSpent` |
+| `dollar_value` is zero or negative                                  | Field-level error                    | `redemption.error.invalidDollarValue` |
+| Required fields missing (program, date, points, value, description) | Field-level errors                   | `redemption.error.requiredField`      |
+| No redemptions exist                                                | Empty table with "No data available" | —                                     |
+| Referenced Rewards Program deleted                                  | 404 via `req.reject()`               | `redemption.error.programNotFound`    |
 
 ---
 
@@ -477,8 +477,8 @@ No open items resolved by this spec. OI-06 (alerts): RPT-004 does not generate a
 
 ## 9. UX Enhancements
 
-| ID | Enhancement | Decision |
-|----|-------------|----------|
-| ENH-001 | **"Best Ever" badge** — Highest `effective_cpp` redemption displays a badge icon in the table row. | D-283 |
-| ENH-002 | **Program CPP benchmark line** — Vertical reference line on chart at program's `cpp_valuation`, visible when filtered to a single program. | D-284 |
-| ENH-003 | **CPP rank indicator** — Object page header shows redemption's rank among all redemptions (e.g., "#3 best burn"). | D-285 |
+| ID      | Enhancement                                                                                                                                | Decision |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------ | -------- |
+| ENH-001 | **"Best Ever" badge** — Highest `effective_cpp` redemption displays a badge icon in the table row.                                         | D-283    |
+| ENH-002 | **Program CPP benchmark line** — Vertical reference line on chart at program's `cpp_valuation`, visible when filtered to a single program. | D-284    |
+| ENH-003 | **CPP rank indicator** — Object page header shows redemption's rank among all redemptions (e.g., "#3 best burn").                          | D-285    |

@@ -2,7 +2,7 @@
   "sap.app": {
     "id": "com.financialplanner.shell",
     "type": "application",
-    "title": "Financial Planner",
+    "title": "{{appTitle}}",
     "applicationVersion": {
       "version": "1.0.0"
     }
@@ -22,7 +22,7 @@
       }
     },
     "dependencies": {
-      "minUI5Version": "1.120.0",
+      "minUI5Version": "1.136.16",
       "libs": {
         "sap.m": {},
         "sap.tnt": {},

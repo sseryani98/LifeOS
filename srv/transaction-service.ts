@@ -1,4 +1,4 @@
-import cds from '@sap/cds';
+import cds from "@sap/cds";
 
 /** TransactionService — Transaction ingestion, categorization, and listing. */
 export default class TransactionService extends cds.ApplicationService {

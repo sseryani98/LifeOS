@@ -12,8 +12,8 @@
 
 ## 1. Change History
 
-| Date | Author | Description |
-|------|--------|-------------|
+| Date       | Author          | Description                                                       |
+| ---------- | --------------- | ----------------------------------------------------------------- |
 | 2026-02-17 | Sandro & Claude | Initial creation — workshop complete. D-114 through D-122 logged. |
 
 ---
@@ -28,17 +28,17 @@ Key decisions: D-05 (two taxonomies), D-08 (splits), D-32 (in-house categorizati
 
 ## 3. Data Model References
 
-| Entity | Role | DM-001 Ref | Amendment? |
-|--------|------|------------|------------|
-| Transaction | Categorized by ENH-001, split by ENH-009, reviewed in FRM-001 | §5.1 | — |
-| Transaction Split | "My share" record for shared expenses | §5.2 | — |
-| Vendor | Matched from raw merchant descriptions | §4.8 | Remove `usage_count` |
-| Merchant Pattern | Pattern rules for vendor matching | §4.9 | Add `amount` (decimal, optional) |
-| Vendor Category Stats | Suggestion ranking for PT + EC combos | §4.15 | Convert from stored entity to CDS view |
-| Purchase Type | Budget category, one of two taxonomies | §3.3 | Remove `usage_count` |
-| Earning Category | Churning category, one of two taxonomies | §3.4 | Remove `usage_count` |
-| Card Instance | Transaction attribution, supp card reassignment | §4.4 | — |
-| Goal | Optional transaction linking for spending goals | §4.11 | — |
+| Entity                | Role                                                          | DM-001 Ref | Amendment?                             |
+| --------------------- | ------------------------------------------------------------- | ---------- | -------------------------------------- |
+| Transaction           | Categorized by ENH-001, split by ENH-009, reviewed in FRM-001 | §5.1       | —                                      |
+| Transaction Split     | "My share" record for shared expenses                         | §5.2       | —                                      |
+| Vendor                | Matched from raw merchant descriptions                        | §4.8       | Remove `usage_count`                   |
+| Merchant Pattern      | Pattern rules for vendor matching                             | §4.9       | Add `amount` (decimal, optional)       |
+| Vendor Category Stats | Suggestion ranking for PT + EC combos                         | §4.15      | Convert from stored entity to CDS view |
+| Purchase Type         | Budget category, one of two taxonomies                        | §3.3       | Remove `usage_count`                   |
+| Earning Category      | Churning category, one of two taxonomies                      | §3.4       | Remove `usage_count`                   |
+| Card Instance         | Transaction attribution, supp card reassignment               | §4.4       | —                                      |
+| Goal                  | Optional transaction linking for spending goals               | §4.11      | —                                      |
 
 ### DM-001 Amendments
 
@@ -67,9 +67,9 @@ ENH-001 queries this view for category suggestions. Always accurate, zero mainte
 
 **Amendment 3 — Amount field on Merchant Pattern (D-118):**
 
-| New Attribute | Type | Required | Notes |
-|---------------|------|----------|-------|
-| `amount` | decimal | no | When set, pattern only matches if description AND amount match. Null = amount ignored. |
+| New Attribute | Type    | Required | Notes                                                                                  |
+| ------------- | ------- | -------- | -------------------------------------------------------------------------------------- |
+| `amount`      | decimal | no       | When set, pattern only matches if description AND amount match. Null = amount ignored. |
 
 Enables same-description-different-vendor matching (e.g., APPLE.COM/BILL at $13.99 = YouTube Premium, at $3.99 = iCloud).
 
@@ -93,33 +93,33 @@ Add "Merge Into..." action on FRM-009 Vendor object page:
 
 **Outputs:**
 
-| Field | Type | Notes |
-|-------|------|-------|
-| `vendor_id` | UUID or null | Best match, null if no match |
-| `vendor_name` | string or null | For display |
-| `purchase_type_id` | UUID or null | Top-ranked from Vendor Category Stats view |
-| `earning_category_id` | UUID or null | Top-ranked from Vendor Category Stats view |
-| `confidence` | high / medium / low | From the matching Merchant Pattern |
-| `alternatives` | array | Other (PT, EC) combos ranked by count |
+| Field                 | Type                | Notes                                      |
+| --------------------- | ------------------- | ------------------------------------------ |
+| `vendor_id`           | UUID or null        | Best match, null if no match               |
+| `vendor_name`         | string or null      | For display                                |
+| `purchase_type_id`    | UUID or null        | Top-ranked from Vendor Category Stats view |
+| `earning_category_id` | UUID or null        | Top-ranked from Vendor Category Stats view |
+| `confidence`          | high / medium / low | From the matching Merchant Pattern         |
+| `alternatives`        | array               | Other (PT, EC) combos ranked by count      |
 
 **Callers:**
 
-| Caller | Context | Behavior on match | Behavior on no match |
-|--------|---------|-------------------|---------------------|
-| INT-001 (SimpleFIN sync) | Per transaction, automated | Auto-apply, status = `auto` | Status = `uncategorized` |
-| FRM-003 (CSV wizard) | Per row, user reviewing | Pre-populate suggestions | Empty fields, user assigns |
-| CNV-001 (backfill script) | Per transaction, scripted | Auto-apply as tier 1 | Falls to Claude reasoning (tier 2) |
-| FRM-001 (transaction review) | On re-categorize action | Update suggestion | No change |
+| Caller                       | Context                    | Behavior on match           | Behavior on no match               |
+| ---------------------------- | -------------------------- | --------------------------- | ---------------------------------- |
+| INT-001 (SimpleFIN sync)     | Per transaction, automated | Auto-apply, status = `auto` | Status = `uncategorized`           |
+| FRM-003 (CSV wizard)         | Per row, user reviewing    | Pre-populate suggestions    | Empty fields, user assigns         |
+| CNV-001 (backfill script)    | Per transaction, scripted  | Auto-apply as tier 1        | Falls to Claude reasoning (tier 2) |
+| FRM-001 (transaction review) | On re-categorize action    | Update suggestion           | No change                          |
 
 **Matching Pipeline (D-114):**
 
 Executed in priority order against all active Merchant Patterns:
 
-| Priority | Match Type | Description |
-|----------|-----------|-------------|
-| 1 | Exact | `raw_description` (trimmed, case-insensitive) equals `pattern` exactly |
-| 2 | Starts-with | `raw_description` starts with `pattern` (case-insensitive) |
-| 3 | Contains | `raw_description` contains `pattern` as substring (case-insensitive) |
+| Priority | Match Type  | Description                                                            |
+| -------- | ----------- | ---------------------------------------------------------------------- |
+| 1        | Exact       | `raw_description` (trimmed, case-insensitive) equals `pattern` exactly |
+| 2        | Starts-with | `raw_description` starts with `pattern` (case-insensitive)             |
+| 3        | Contains    | `raw_description` contains `pattern` as substring (case-insensitive)   |
 
 **Tie-breaking within same match tier (D-114):**
 
@@ -150,7 +150,7 @@ When a user assigns or corrects a transaction's vendor + categories:
    - `amount` = `null`
    - `is_active` = `true`
 
-2. **Amount discriminator (D-118):** When the transaction's description already matched a *different* vendor (user is correcting, not creating from scratch), the auto-created pattern includes the transaction's `amount`. This handles the APPLE.COM/BILL scenario where the same description maps to different vendors by amount.
+2. **Amount discriminator (D-118):** When the transaction's description already matched a _different_ vendor (user is correcting, not creating from scratch), the auto-created pattern includes the transaction's `amount`. This handles the APPLE.COM/BILL scenario where the same description maps to different vendors by amount.
 
 3. **Vendor Category Stats view auto-updates** — no explicit write needed. The confirmed transaction's (vendor, PT, EC) combination is reflected in the view because the transaction now has those FKs set.
 
@@ -162,10 +162,10 @@ When a user assigns or corrects a transaction's vendor + categories:
 
 **Split Computation:**
 
-| Input | Stored Values |
-|-------|---------------|
-| Percentage entered | `my_share_pct` = entered value, `my_share_amount` = `transaction.amount × my_share_pct` |
-| Dollar amount entered | `my_share_pct` = null, `my_share_amount` = entered value |
+| Input                 | Stored Values                                                                           |
+| --------------------- | --------------------------------------------------------------------------------------- |
+| Percentage entered    | `my_share_pct` = entered value, `my_share_amount` = `transaction.amount × my_share_pct` |
+| Dollar amount entered | `my_share_pct` = null, `my_share_amount` = entered value                                |
 
 `my_share_amount` is always populated — it's what the budget engine reads.
 
@@ -186,13 +186,13 @@ A fully reimbursed transaction is a split with `my_share_pct = 0`, `my_share_amo
 
 **Recurring Splits (D-120):**
 
-| Element | Detail |
-|---------|--------|
-| Matching key | `vendor_id` — same vendor triggers suggestion |
-| Template | Most recent `is_recurring = true` split for the vendor |
-| Percentage-based | Recalculates on new amount (`$120 × 20% = $24`) |
-| Dollar-based | Keeps fixed amount regardless of transaction amount |
-| Auto-apply | Never — suggestion only. User confirms during review (FRM-001). |
+| Element          | Detail                                                          |
+| ---------------- | --------------------------------------------------------------- |
+| Matching key     | `vendor_id` — same vendor triggers suggestion                   |
+| Template         | Most recent `is_recurring = true` split for the vendor          |
+| Percentage-based | Recalculates on new amount (`$120 × 20% = $24`)                 |
+| Dollar-based     | Keeps fixed amount regardless of transaction amount             |
+| Auto-apply       | Never — suggestion only. User confirms during review (FRM-001). |
 
 **`is_recurring` flag:**
 
@@ -209,19 +209,19 @@ A fully reimbursed transaction is a split with `my_share_pct = 0`, `my_share_amo
 
 **Columns:**
 
-| Column | Source | Editable | Notes |
-|--------|--------|----------|-------|
-| Date | `posted_at` | No | Default sort descending |
-| Description | `raw_description` | No | Full bank text |
-| Vendor | `vendor.name` | Yes | Value help with fuse.js fuzzy search, on-the-fly creation |
-| Amount | `amount` | No | Formatted CAD, negative = charge |
-| Purchase Type | `purchase_type.name` | Yes | Dropdown with subtypes indented |
-| Earning Category | `earning_category.name` | Yes | Dropdown |
-| Card | `card_instance → market_card.name` | No | Short name |
-| Status | `categorization_status` | No | ObjectStatus: auto (green), user_corrected (blue), uncategorized (orange) |
-| Split | indicator | No | Icon if Transaction Split exists |
-| Source | `source` | No | simplefin / csv |
-| Notes | `notes` | Yes | Free text |
+| Column           | Source                             | Editable | Notes                                                                     |
+| ---------------- | ---------------------------------- | -------- | ------------------------------------------------------------------------- |
+| Date             | `posted_at`                        | No       | Default sort descending                                                   |
+| Description      | `raw_description`                  | No       | Full bank text                                                            |
+| Vendor           | `vendor.name`                      | Yes      | Value help with fuse.js fuzzy search, on-the-fly creation                 |
+| Amount           | `amount`                           | No       | Formatted CAD, negative = charge                                          |
+| Purchase Type    | `purchase_type.name`               | Yes      | Dropdown with subtypes indented                                           |
+| Earning Category | `earning_category.name`            | Yes      | Dropdown                                                                  |
+| Card             | `card_instance → market_card.name` | No       | Short name                                                                |
+| Status           | `categorization_status`            | No       | ObjectStatus: auto (green), user_corrected (blue), uncategorized (orange) |
+| Split            | indicator                          | No       | Icon if Transaction Split exists                                          |
+| Source           | `source`                           | No       | simplefin / csv                                                           |
+| Notes            | `notes`                            | Yes      | Free text                                                                 |
 
 **Default filter:** `categorization_status = uncategorized` + date range = last 7 days.
 
@@ -239,11 +239,11 @@ A fully reimbursed transaction is a split with `my_share_pct = 0`, `my_share_amo
 
 **Actions:**
 
-| Action | Behavior |
-|--------|----------|
-| Split | Select row → popover/dialog with split fields (my share %, my share amount, description, recurring toggle). Pre-populated with recurring suggestion if applicable (ENH-009). |
-| Apply Categories | Multi-select rows → set vendor, PT, EC once → applied to all selected. Learning mechanism fires per unique `raw_description`. |
-| Re-categorize | Re-runs ENH-001 on selected rows. Skips `user_corrected` transactions. Updates suggestions for `uncategorized` and `auto` rows. |
+| Action           | Behavior                                                                                                                                                                     |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Split            | Select row → popover/dialog with split fields (my share %, my share amount, description, recurring toggle). Pre-populated with recurring suggestion if applicable (ENH-009). |
+| Apply Categories | Multi-select rows → set vendor, PT, EC once → applied to all selected. Learning mechanism fires per unique `raw_description`.                                                |
+| Re-categorize    | Re-runs ENH-001 on selected rows. Skips `user_corrected` transactions. Updates suggestions for `uncategorized` and `auto` rows.                                              |
 
 #### Object Page
 
@@ -256,31 +256,31 @@ A fully reimbursed transaction is a split with `my_share_pct = 0`, `my_share_amo
 
 **Section 1 — Transaction Details:**
 
-| Field | Editable | Notes |
-|-------|----------|-------|
-| Raw Description | No | Original bank text, never modified |
-| Vendor | Yes | Value help with fuse.js fuzzy search, on-the-fly creation |
-| Purchase Type | Yes | Dropdown, subtypes indented |
-| Earning Category | Yes | Dropdown |
-| Amount | No | Immutable from source |
-| Posted Date | No | |
-| Transaction Date | No | If available from source |
-| Card | Yes | Dropdown — for supp card reassignment |
-| Source | No | simplefin / csv |
-| Goal | Yes | Optional link to spending Goal |
-| Notes | Yes | Free text |
-| Excluded | Yes | Toggle — exclude from all computation |
+| Field            | Editable | Notes                                                     |
+| ---------------- | -------- | --------------------------------------------------------- |
+| Raw Description  | No       | Original bank text, never modified                        |
+| Vendor           | Yes      | Value help with fuse.js fuzzy search, on-the-fly creation |
+| Purchase Type    | Yes      | Dropdown, subtypes indented                               |
+| Earning Category | Yes      | Dropdown                                                  |
+| Amount           | No       | Immutable from source                                     |
+| Posted Date      | No       |                                                           |
+| Transaction Date | No       | If available from source                                  |
+| Card             | Yes      | Dropdown — for supp card reassignment                     |
+| Source           | No       | simplefin / csv                                           |
+| Goal             | Yes      | Optional link to spending Goal                            |
+| Notes            | Yes      | Free text                                                 |
+| Excluded         | Yes      | Toggle — exclude from all computation                     |
 
 **Section 2 — Split:**
 
 Only visible when split exists or user initiates.
 
-| Field | Editable | Notes |
-|-------|----------|-------|
-| My Share % | Yes | Percentage input |
-| My Share Amount | Yes | Dollar input — either/or with percentage |
-| Description | Yes | "Padel with friends" |
-| Recurring | Yes | Toggle |
+| Field           | Editable | Notes                                    |
+| --------------- | -------- | ---------------------------------------- |
+| My Share %      | Yes      | Percentage input                         |
+| My Share Amount | Yes      | Dollar input — either/or with percentage |
+| Description     | Yes      | "Padel with friends"                     |
+| Recurring       | Yes      | Toggle                                   |
 
 Pre-populated with recurring suggestion if applicable (ENH-009).
 
@@ -299,75 +299,75 @@ Helps the user understand why the system suggested what it did and pick alternat
 
 ### ENH-001 — Transaction Categorization Engine
 
-| Rule | Description |
-|------|-------------|
-| BR-01 | Matching pipeline priority: exact > starts_with > contains on `raw_description` (trimmed, case-insensitive). |
-| BR-02 | Within same match tier: patterns with matching `amount` preferred over `amount = null` patterns. |
-| BR-03 | Remaining ties broken by: confidence level (high > medium > low) → longer pattern → higher vendor transaction count (computed). |
-| BR-04 | Only the top-scoring match is used. No ambiguity resolution. |
-| BR-05 | No match → transaction stays `uncategorized`, no vendor assigned. ENH-001 never auto-creates vendors. |
-| BR-06 | Once vendor matched, PT and EC suggested from Vendor Category Stats CDS view, ranked by usage count. Top combo auto-assigned. |
-| BR-07 | `categorization_status` set to `auto` when ENH-001 assigns vendor + categories. `uncategorized` when no match. |
+| Rule  | Description                                                                                                                                                                                                                                      |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| BR-01 | Matching pipeline priority: exact > starts_with > contains on `raw_description` (trimmed, case-insensitive).                                                                                                                                     |
+| BR-02 | Within same match tier: patterns with matching `amount` preferred over `amount = null` patterns.                                                                                                                                                 |
+| BR-03 | Remaining ties broken by: confidence level (high > medium > low) → longer pattern → higher vendor transaction count (computed).                                                                                                                  |
+| BR-04 | Only the top-scoring match is used. No ambiguity resolution.                                                                                                                                                                                     |
+| BR-05 | No match → transaction stays `uncategorized`, no vendor assigned. ENH-001 never auto-creates vendors.                                                                                                                                            |
+| BR-06 | Once vendor matched, PT and EC suggested from Vendor Category Stats CDS view, ranked by usage count. Top combo auto-assigned.                                                                                                                    |
+| BR-07 | `categorization_status` set to `auto` when ENH-001 assigns vendor + categories. `uncategorized` when no match.                                                                                                                                   |
 | BR-08 | On user correction of an unmatched transaction: auto-create Merchant Pattern — `pattern` = full `raw_description` (trimmed), `match_type` = exact, `pattern_source` = learned, `confidence_level` = medium, `amount` = null, `is_active` = true. |
-| BR-09 | On user correction where description already matched a different vendor: auto-created pattern includes `amount` as discriminator. |
-| BR-10 | Vendor Category Stats is a CDS view computed from transactions — no stored counters. |
-| BR-11 | Re-categorize action: re-runs ENH-001 on selected transactions. Skips `user_corrected` rows. Updates `uncategorized` and `auto` rows. |
+| BR-09 | On user correction where description already matched a different vendor: auto-created pattern includes `amount` as discriminator.                                                                                                                |
+| BR-10 | Vendor Category Stats is a CDS view computed from transactions — no stored counters.                                                                                                                                                             |
+| BR-11 | Re-categorize action: re-runs ENH-001 on selected transactions. Skips `user_corrected` rows. Updates `uncategorized` and `auto` rows.                                                                                                            |
 
 ### ENH-009 — Split Transaction Logic
 
-| Rule | Description |
-|------|-------------|
-| BR-12 | User enters either `my_share_pct` or `my_share_amount` — not both. |
-| BR-13 | `my_share_amount` always populated. If percentage entered, computed as `amount × my_share_pct`. |
-| BR-14 | Churning metrics (points, MSR progress) always use full `transaction.amount`. |
-| BR-15 | Budget uses `my_share_amount` under the transaction's Purchase Type. Remainder (`amount - my_share_amount`) is implicitly Reimbursable (excluded from budget via D-97). |
-| BR-16 | Reimbursed transaction = split with `my_share_pct = 0`, `my_share_amount = 0`. |
+| Rule  | Description                                                                                                                                                                                                            |
+| ----- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| BR-12 | User enters either `my_share_pct` or `my_share_amount` — not both.                                                                                                                                                     |
+| BR-13 | `my_share_amount` always populated. If percentage entered, computed as `amount × my_share_pct`.                                                                                                                        |
+| BR-14 | Churning metrics (points, MSR progress) always use full `transaction.amount`.                                                                                                                                          |
+| BR-15 | Budget uses `my_share_amount` under the transaction's Purchase Type. Remainder (`amount - my_share_amount`) is implicitly Reimbursable (excluded from budget via D-97).                                                |
+| BR-16 | Reimbursed transaction = split with `my_share_pct = 0`, `my_share_amount = 0`.                                                                                                                                         |
 | BR-17 | Recurring split suggestion: when incoming transaction matches a vendor with an existing `is_recurring = true` split, suggest same terms. Percentage-based recalculates on new amount; dollar-based keeps fixed amount. |
-| BR-18 | Recurring splits are suggested only, never auto-applied. User confirms during review. |
+| BR-18 | Recurring splits are suggested only, never auto-applied. User confirms during review.                                                                                                                                  |
 
 ### FRM-001 — Transaction List & Review
 
-| Rule | Description |
-|------|-------------|
-| BR-19 | Fiori Elements List Report + Object Page. TransactionService. |
-| BR-20 | Default filter: `categorization_status = uncategorized` + date range = last 7 days. |
-| BR-21 | Inline-editable on list: Vendor (value help), Purchase Type (dropdown), Earning Category (dropdown), Notes (text). |
-| BR-22 | Object page: full transaction detail, split section, goal linking, card reassignment, excluded toggle. |
+| Rule  | Description                                                                                                                                                                  |
+| ----- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| BR-19 | Fiori Elements List Report + Object Page. TransactionService.                                                                                                                |
+| BR-20 | Default filter: `categorization_status = uncategorized` + date range = last 7 days.                                                                                          |
+| BR-21 | Inline-editable on list: Vendor (value help), Purchase Type (dropdown), Earning Category (dropdown), Notes (text).                                                           |
+| BR-22 | Object page: full transaction detail, split section, goal linking, card reassignment, excluded toggle.                                                                       |
 | BR-23 | Split action button on list toolbar. Popover/dialog with: my share %, my share amount, description, recurring toggle. Pre-populated with recurring suggestion if applicable. |
-| BR-24 | Bulk action: multi-select rows → "Apply Categories" → set vendor, PT, EC once → applied to all selected. |
-| BR-25 | On save (inline or object page): learning mechanism fires — Merchant Pattern created per BR-08/BR-09. |
-| BR-26 | Re-categorize action on list toolbar: re-runs ENH-001 on selected rows. Skips `user_corrected` transactions. |
-| BR-27 | Categorization suggestions section on object page: shows matched pattern, confidence, and alternative (PT, EC) combos. |
+| BR-24 | Bulk action: multi-select rows → "Apply Categories" → set vendor, PT, EC once → applied to all selected.                                                                     |
+| BR-25 | On save (inline or object page): learning mechanism fires — Merchant Pattern created per BR-08/BR-09.                                                                        |
+| BR-26 | Re-categorize action on list toolbar: re-runs ENH-001 on selected rows. Skips `user_corrected` transactions.                                                                 |
+| BR-27 | Categorization suggestions section on object page: shows matched pattern, confidence, and alternative (PT, EC) combos.                                                       |
 
 ### Vendor Merge (SPEC-06 Amendment — D-122)
 
-| Rule | Description |
-|------|-------------|
-| BR-28 | "Merge Into..." action on FRM-009 Vendor object page. User selects target vendor. |
+| Rule  | Description                                                                                                      |
+| ----- | ---------------------------------------------------------------------------------------------------------------- |
+| BR-28 | "Merge Into..." action on FRM-009 Vendor object page. User selects target vendor.                                |
 | BR-29 | Merge reassigns all transactions from source → target, moves Merchant Patterns to target, deletes source vendor. |
 
 ---
 
 ## 6. Error Handling
 
-| Condition | Response | i18n Key Pattern |
-|-----------|----------|------------------|
-| Vendor value help: no match for typed text | Show "Create new vendor" option | `transaction.vendor.createNew` |
-| Split: both percentage and amount entered | Validation error — enter one or the other | `transaction.split.enterOneInput` |
-| Split: percentage outside 0–100 range | Validation error | `transaction.split.invalidPercentage` |
-| Split: my_share_amount exceeds transaction amount | Validation error | `transaction.split.amountExceedsTotal` |
-| Re-categorize: no rows selected | Warning — select at least one row | `transaction.recategorize.noSelection` |
-| Vendor merge: target has same ID as source | Validation error | `admin.vendor.mergeSameVendor` |
-| Vendor merge: source vendor has 0 transactions | Warning — nothing to merge (allow delete instead) | `admin.vendor.mergeEmpty` |
-| Goal linking: goal is inactive | Validation error — select an active goal | `transaction.goal.inactive` |
-| Inline edit: vendor created on the fly with duplicate name | Warning with existing vendor suggestion | `transaction.vendor.duplicateName` |
+| Condition                                                  | Response                                          | i18n Key Pattern                       |
+| ---------------------------------------------------------- | ------------------------------------------------- | -------------------------------------- |
+| Vendor value help: no match for typed text                 | Show "Create new vendor" option                   | `transaction.vendor.createNew`         |
+| Split: both percentage and amount entered                  | Validation error — enter one or the other         | `transaction.split.enterOneInput`      |
+| Split: percentage outside 0–100 range                      | Validation error                                  | `transaction.split.invalidPercentage`  |
+| Split: my_share_amount exceeds transaction amount          | Validation error                                  | `transaction.split.amountExceedsTotal` |
+| Re-categorize: no rows selected                            | Warning — select at least one row                 | `transaction.recategorize.noSelection` |
+| Vendor merge: target has same ID as source                 | Validation error                                  | `admin.vendor.mergeSameVendor`         |
+| Vendor merge: source vendor has 0 transactions             | Warning — nothing to merge (allow delete instead) | `admin.vendor.mergeEmpty`              |
+| Goal linking: goal is inactive                             | Validation error — select an active goal          | `transaction.goal.inactive`            |
+| Inline edit: vendor created on the fly with duplicate name | Warning with existing vendor suggestion           | `transaction.vendor.duplicateName`     |
 
 ---
 
 ## 7. Open Items
 
-| OI | Resolution |
-|----|------------|
+| OI    | Resolution                                                                                                  |
+| ----- | ----------------------------------------------------------------------------------------------------------- |
 | OI-04 | Card status transition rules remain open — addressed by SPEC-03 (Card Lifecycle). Not in scope for SPEC-02. |
 
 ---
@@ -697,16 +697,16 @@ Helps the user understand why the system suggested what it did and pick alternat
 
 ## 9. Cross-Spec Notes
 
-| Target Spec | Note |
-|-------------|------|
-| SPEC-01 (Ingestion Pipeline) | ENH-001 called by FRM-003 (BR-20 in SPEC-01) to pre-populate vendor/category suggestions during CSV review. |
+| Target Spec                     | Note                                                                                                                                                 |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| SPEC-01 (Ingestion Pipeline)    | ENH-001 called by FRM-003 (BR-20 in SPEC-01) to pre-populate vendor/category suggestions during CSV review.                                          |
 | SPEC-06 (Reference Data & Seed) | Amendment: add "Merge Into..." action on FRM-009 Vendor object page (D-122). Vendor merge reassigns transactions and consolidates Merchant Patterns. |
-| SPEC-06 (Reference Data & Seed) | Corrects D-105 reference: vendor merge is SPEC-02's domain, not "SPEC-04." |
-| SPEC-09 (Budget Engine) | ENH-007 must handle split transactions: use `my_share_amount` for budget, attribute remainder to Reimbursable. |
-| SPEC-09 (Budget Engine) | Vendor Category Stats is a CDS view, not a stored entity. Budget engine and dropdown ranking query it directly. |
-| SPEC-14 (Historical Backfill) | ENH-001 is tier 1 of three-tier backfill categorization. Patterns bootstrapped by CNV-001 corrections feed into learned patterns. |
-| SPEC-03 (Card Lifecycle) | Card reassignment dropdown on FRM-001 object page — needs card lifecycle states for filtering (exclude Closed). |
+| SPEC-06 (Reference Data & Seed) | Corrects D-105 reference: vendor merge is SPEC-02's domain, not "SPEC-04."                                                                           |
+| SPEC-09 (Budget Engine)         | ENH-007 must handle split transactions: use `my_share_amount` for budget, attribute remainder to Reimbursable.                                       |
+| SPEC-09 (Budget Engine)         | Vendor Category Stats is a CDS view, not a stored entity. Budget engine and dropdown ranking query it directly.                                      |
+| SPEC-14 (Historical Backfill)   | ENH-001 is tier 1 of three-tier backfill categorization. Patterns bootstrapped by CNV-001 corrections feed into learned patterns.                    |
+| SPEC-03 (Card Lifecycle)        | Card reassignment dropdown on FRM-001 object page — needs card lifecycle states for filtering (exclude Closed).                                      |
 
 ---
 
-*This spec traces to [Business Architecture](../BUSINESS_ARCHITECTURE.md) objects ENH-001, ENH-009, FRM-001 and [Data Model](../DATA_MODEL.md) entities listed in §3. New decisions D-114–D-122 logged in [Decisions Log](../user-profile/DECISIONS_LOG.md).*
+_This spec traces to [Business Architecture](../BUSINESS_ARCHITECTURE.md) objects ENH-001, ENH-009, FRM-001 and [Data Model](../DATA_MODEL.md) entities listed in §3. New decisions D-114–D-122 logged in [Decisions Log](../user-profile/DECISIONS_LOG.md)._

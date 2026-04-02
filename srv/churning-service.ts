@@ -1,4 +1,4 @@
-import cds from '@sap/cds';
+import cds from "@sap/cds";
 
 /** ChurningService — Card lifecycle, points tracking, recommendations. */
 export default class ChurningService extends cds.ApplicationService {

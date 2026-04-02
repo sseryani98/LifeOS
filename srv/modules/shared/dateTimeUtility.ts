@@ -5,7 +5,7 @@
 export class DateTimeUtility {
   /** Formats a Date object to ISO date string (YYYY-MM-DD). */
   static formatDate(date: Date): string {
-    return date.toISOString().split('T')[0];
+    return date.toISOString().split("T")[0];
   }
 
   /** Returns the first day of the month for the given date. */

@@ -12,8 +12,8 @@
 
 ## 1. Change History
 
-| Date | Author | Description |
-|------|--------|-------------|
+| Date       | Author          | Description                                                               |
+| ---------- | --------------- | ------------------------------------------------------------------------- |
 | 2026-02-20 | Sandro & Claude | Initial creation — SPEC-20 workshop complete. D-224 through D-229 logged. |
 
 ---
@@ -28,22 +28,22 @@ Key decisions: D-224 (layout), D-225 (hero KPI), D-226 (no wave split), D-227 (b
 
 ## 3. Data Model References
 
-| Entity | Role |
-|--------|------|
-| Transaction | Spend data aggregated per category/card/vendor/month |
-| Transaction Split | Split transactions use my_share_amount for budget |
-| Income Entry | Monthly income driving the budget formula |
-| Goal | Active goals with monthly allocations deducted from income |
-| Budget Allocation | Per-purchase-type ratio (must sum to 100%) |
-| Purchase Type | Budget category hierarchy (parent/child subtypes) |
-| Recurrent Expense | Expected recurring amounts per category (informational) |
-| Card Instance | Card identity for CC Spend by Card section |
-| Market Card | Card product metadata — issuer for color mapping |
-| Issuer | Issuer identity — domain-mapped chart colors (SPEC-19 §4.1.13) |
-| Vendor | Vendor identity for Top Vendors section |
-| Alert | Stored alerts filtered to budget-related types |
-| Alert Type | Alert type definitions for filtering and display |
-| System Config | BUDGET_WARNING_THRESHOLD_PCT (default 80%) |
+| Entity            | Role                                                           |
+| ----------------- | -------------------------------------------------------------- |
+| Transaction       | Spend data aggregated per category/card/vendor/month           |
+| Transaction Split | Split transactions use my_share_amount for budget              |
+| Income Entry      | Monthly income driving the budget formula                      |
+| Goal              | Active goals with monthly allocations deducted from income     |
+| Budget Allocation | Per-purchase-type ratio (must sum to 100%)                     |
+| Purchase Type     | Budget category hierarchy (parent/child subtypes)              |
+| Recurrent Expense | Expected recurring amounts per category (informational)        |
+| Card Instance     | Card identity for CC Spend by Card section                     |
+| Market Card       | Card product metadata — issuer for color mapping               |
+| Issuer            | Issuer identity — domain-mapped chart colors (SPEC-19 §4.1.13) |
+| Vendor            | Vendor identity for Top Vendors section                        |
+| Alert             | Stored alerts filtered to budget-related types                 |
+| Alert Type        | Alert type definitions for filtering and display               |
+| System Config     | BUDGET_WARNING_THRESHOLD_PCT (default 80%)                     |
 
 No DM-001 amendments required. This spec is a read-only consumer of existing entities and engines.
 
@@ -57,14 +57,14 @@ Freestyle dashboard using `sap.f.GridContainer` with 2-column base grid per DS-0
 
 #### 4.1.1 Dashboard Layout
 
-| Row | Left (half) | Right (half) |
-|-----|-------------|--------------|
-| 1 | Budget Overview Hero KPI (full-width) | — |
-| 2 | Spending vs Budget by Category (full-width) | — |
-| 3 | CC Spend by Card | Top Spending Subtypes |
-| 4 | Top Vendors | Uncategorized |
-| 5 | Goal Progress (full-width) | — |
-| 6 | Alerts (full-width) | — |
+| Row | Left (half)                                 | Right (half)          |
+| --- | ------------------------------------------- | --------------------- |
+| 1   | Budget Overview Hero KPI (full-width)       | —                     |
+| 2   | Spending vs Budget by Category (full-width) | —                     |
+| 3   | CC Spend by Card                            | Top Spending Subtypes |
+| 4   | Top Vendors                                 | Uncategorized         |
+| 5   | Goal Progress (full-width)                  | —                     |
+| 6   | Alerts (full-width)                         | —                     |
 
 Ordering logic: headline → active work → analysis → goals → actions.
 
@@ -84,15 +84,15 @@ When the selected month has no income entry but other data exists, a warning ban
 
 Full-width card. Consumes ENH-007 output for the selected month.
 
-| Element | Content |
-|---------|---------|
-| Primary number | Total Remaining = totalBudget − totalActualSpend |
-| Semantic color | Success (green) if ≥ 0, Error (red) if negative |
-| Subtitle | "Budget: $X,XXX \| Spent: $X,XXX" |
-| Secondary line | "Income: $X,XXX − Goals: $X,XXX = Budget: $X,XXX" |
-| Burn rate | "Spending $X/day vs $X/day pace" with semantic color |
-| Days remaining | "X days remaining" (current month only, hidden for past months) |
-| Projected | "Projected: $X,XXX by month end" with semantic color (current month only, shows actual for past months) |
+| Element         | Content                                                                                                                          |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Primary number  | Total Remaining = totalBudget − totalActualSpend                                                                                 |
+| Semantic color  | Success (green) if ≥ 0, Error (red) if negative                                                                                  |
+| Subtitle        | "Budget: $X,XXX \| Spent: $X,XXX"                                                                                                |
+| Secondary line  | "Income: $X,XXX − Goals: $X,XXX = Budget: $X,XXX"                                                                                |
+| Burn rate       | "Spending $X/day vs $X/day pace" with semantic color                                                                             |
+| Days remaining  | "X days remaining" (current month only, hidden for past months)                                                                  |
+| Projected       | "Projected: $X,XXX by month end" with semantic color (current month only, shows actual for past months)                          |
 | Trend indicator | MoM delta on total spend vs previous month, up/down arrow with amount. Hidden if selected month is the earliest month with data. |
 
 Burn rate computation: daily actual = totalActualSpend ÷ days elapsed; daily pace = totalBudget ÷ days in month. Semantic color: Success (green) if daily actual < daily pace, Warning (orange) if within 10% of pace, Error (red) if over pace.
@@ -103,17 +103,17 @@ Projected month-end: (totalActualSpend ÷ days elapsed) × days in month. Succes
 
 Full-width table. Consumes ENH-007 per-category breakdown.
 
-| Column | Content | Width |
-|--------|---------|-------|
-| Category | Purchase type name (link → FRM-001 filtered to type + month) | 16% |
-| Status | ObjectStatus (on_track = Success, warning = Warning, over_budget = Error) | 8% |
-| Budgeted | Dollar amount (totalBudget × ratio) | 10% |
-| Spent | Actual dollar amount | 10% |
-| Prev Month | Previous month's actual for same category. "—" if no data. | 10% |
-| Progress | `sap.m.ProgressIndicator` (actual / budgeted), color matches status | 16% |
-| Remaining | Dollars left (budgeted − actual). Negative shown in red. | 10% |
-| Recurrents | Expected recurrent amount (informational, greyed out) | 10% |
-| Ratio | Allocation percentage | 10% |
+| Column     | Content                                                                   | Width |
+| ---------- | ------------------------------------------------------------------------- | ----- |
+| Category   | Purchase type name (link → FRM-001 filtered to type + month)              | 16%   |
+| Status     | ObjectStatus (on_track = Success, warning = Warning, over_budget = Error) | 8%    |
+| Budgeted   | Dollar amount (totalBudget × ratio)                                       | 10%   |
+| Spent      | Actual dollar amount                                                      | 10%   |
+| Prev Month | Previous month's actual for same category. "—" if no data.                | 10%   |
+| Progress   | `sap.m.ProgressIndicator` (actual / budgeted), color matches status       | 16%   |
+| Remaining  | Dollars left (budgeted − actual). Negative shown in red.                  | 10%   |
+| Recurrents | Expected recurrent amount (informational, greyed out)                     | 10%   |
+| Ratio      | Allocation percentage                                                     | 10%   |
 
 Sorted by status severity descending (over_budget first, then warning, then on_track), then by spent descending within each group.
 
@@ -149,27 +149,27 @@ Half-width card. Horizontal bar chart showing spend by vendor for the selected m
 
 Half-width KPI card. Consumes ENH-007 `uncategorized` output.
 
-| Element | Content |
-|---------|---------|
-| Primary number | Uncategorized amount ($X,XXX) |
-| Semantic color | Warning (orange) if > 0, Success (green) if 0 |
-| Subtitle | "X transactions" (count) |
-| Action link | "Review in Transaction Manager" → FRM-001 filtered to uncategorized + selected month |
+| Element        | Content                                                                              |
+| -------------- | ------------------------------------------------------------------------------------ |
+| Primary number | Uncategorized amount ($X,XXX)                                                        |
+| Semantic color | Warning (orange) if > 0, Success (green) if 0                                        |
+| Subtitle       | "X transactions" (count)                                                             |
+| Action link    | "Review in Transaction Manager" → FRM-001 filtered to uncategorized + selected month |
 
 #### 4.1.10 Goal Progress
 
 Full-width table. Shows active goals only (status = active). Completed and cancelled goals excluded.
 
-| Column | Content | Width |
-|--------|---------|-------|
-| Goal | Goal name (link → FRM-008 goal detail) | 18% |
-| Direction | "Saving" or "Spending" | 8% |
-| Target | Target amount | 10% |
-| Allocated | monthly_allocation × months elapsed since start_date | 12% |
-| Progress | `sap.m.ProgressIndicator` (allocated / target_amount) | 16% |
-| Status | ObjectStatus per SPEC-09: Ahead = Success, On Track = Information, Behind = Warning | 10% |
-| Target Date | Date if set, "—" if open-ended | 10% |
-| Monthly | Monthly allocation amount | 8% |
+| Column      | Content                                                                             | Width |
+| ----------- | ----------------------------------------------------------------------------------- | ----- |
+| Goal        | Goal name (link → FRM-008 goal detail)                                              | 18%   |
+| Direction   | "Saving" or "Spending"                                                              | 8%    |
+| Target      | Target amount                                                                       | 10%   |
+| Allocated   | monthly_allocation × months elapsed since start_date                                | 12%   |
+| Progress    | `sap.m.ProgressIndicator` (allocated / target_amount)                               | 16%   |
+| Status      | ObjectStatus per SPEC-09: Ahead = Success, On Track = Information, Behind = Warning | 10%   |
+| Target Date | Date if set, "—" if open-ended                                                      | 10%   |
+| Monthly     | Monthly allocation amount                                                           | 8%    |
 
 Open-ended goals (no target_date) show status as "Active" with Information (blue) ObjectStatus.
 
@@ -181,36 +181,36 @@ Card subtitle: "Monthly Allocations: $X,XXX" (sum of all active goal monthly_all
 
 Full-width table. Shows unacknowledged alerts of **budget-related types only**: budget_category_warning, budget_category_overspend, budget_overspend, budget_goals_exceed_income. Month-independent.
 
-| Column | Content | Width |
-|--------|---------|-------|
-| Type | Alert type icon + label | 15% |
-| Message | Alert description text | 35% |
-| Related Category | Purchase type name if applicable | 20% |
-| Date | Alert generation date | 15% |
-| Action | Contextual action button | 15% |
+| Column           | Content                          | Width |
+| ---------------- | -------------------------------- | ----- |
+| Type             | Alert type icon + label          | 15%   |
+| Message          | Alert description text           | 35%   |
+| Related Category | Purchase type name if applicable | 20%   |
+| Date             | Alert generation date            | 15%   |
+| Action           | Contextual action button         | 15%   |
 
 Sorted by date descending (newest first).
 
 **Contextual actions per alert type:**
 
-| Alert Type | Action Label | Navigation |
-|------------|-------------|------------|
-| budget_category_warning | View Transactions | FRM-001 filtered to purchase type + current month |
-| budget_category_overspend | View Transactions | FRM-001 filtered to purchase type + current month |
-| budget_overspend | View Transactions | FRM-001 filtered to current month |
-| budget_goals_exceed_income | Manage Goals | FRM-008 |
-| (default) | Dismiss | Marks alert acknowledged |
+| Alert Type                 | Action Label      | Navigation                                        |
+| -------------------------- | ----------------- | ------------------------------------------------- |
+| budget_category_warning    | View Transactions | FRM-001 filtered to purchase type + current month |
+| budget_category_overspend  | View Transactions | FRM-001 filtered to purchase type + current month |
+| budget_overspend           | View Transactions | FRM-001 filtered to current month                 |
+| budget_goals_exceed_income | Manage Goals      | FRM-008                                           |
+| (default)                  | Dismiss           | Marks alert acknowledged                          |
 
 All alert types also have Dismiss as a secondary action.
 
 #### 4.1.12 Cross-Navigation
 
-| Source Element | Target |
-|----------------|--------|
+| Source Element                           | Target                                                        |
+| ---------------------------------------- | ------------------------------------------------------------- |
 | Category name (Spending vs Budget table) | FRM-001 Transaction Manager filtered to purchase type + month |
-| Goal name (Goal Progress table) | FRM-008 Goals → goal detail |
-| Uncategorized action link | FRM-001 Transaction Manager filtered to uncategorized + month |
-| Alert row contextual action | Per alert type (see §4.1.11) |
+| Goal name (Goal Progress table)          | FRM-008 Goals → goal detail                                   |
+| Uncategorized action link                | FRM-001 Transaction Manager filtered to uncategorized + month |
+| Alert row contextual action              | Per alert type (see §4.1.11)                                  |
 
 No chart click-through navigation per D-61 (VizFrame default interactions only).
 
@@ -309,14 +309,14 @@ No chart click-through navigation per D-61 (VizFrame default interactions only).
 
 ## 6. Error Handling
 
-| Condition | Response | i18n Key |
-|-----------|----------|----------|
-| ENH-007 computation fails | Hero KPI and category table show "Unable to calculate budget" | `budgetDashboard.error.budgetUnavailable` |
-| Goal data query fails | Goal Progress shows "Unable to load goal data" | `budgetDashboard.error.goalsUnavailable` |
-| Alert query fails | Alerts section shows "Unable to load alerts" | `budgetDashboard.error.alertsUnavailable` |
-| No transactions in selected month | Month-scoped sections show "No spending data for [Month YYYY]" | `budgetDashboard.info.noDataForMonth` |
-| No income and no transactions exist | Full-page empty state with FRM-007 link | `budgetDashboard.info.noIncome` |
-| No income for selected month | Warning banner with FRM-007 action link | `budgetDashboard.warn.noIncomeForMonth` |
+| Condition                           | Response                                                       | i18n Key                                  |
+| ----------------------------------- | -------------------------------------------------------------- | ----------------------------------------- |
+| ENH-007 computation fails           | Hero KPI and category table show "Unable to calculate budget"  | `budgetDashboard.error.budgetUnavailable` |
+| Goal data query fails               | Goal Progress shows "Unable to load goal data"                 | `budgetDashboard.error.goalsUnavailable`  |
+| Alert query fails                   | Alerts section shows "Unable to load alerts"                   | `budgetDashboard.error.alertsUnavailable` |
+| No transactions in selected month   | Month-scoped sections show "No spending data for [Month YYYY]" | `budgetDashboard.info.noDataForMonth`     |
+| No income and no transactions exist | Full-page empty state with FRM-007 link                        | `budgetDashboard.info.noIncome`           |
+| No income for selected month        | Warning banner with FRM-007 action link                        | `budgetDashboard.warn.noIncomeForMonth`   |
 
 Each section fails independently — a failure in one engine does not prevent other sections from rendering.
 
@@ -324,8 +324,8 @@ Each section fails independently — a failure in one engine does not prevent ot
 
 ## 7. Open Items
 
-| OI | Status | Resolution |
-|----|--------|------------|
+| OI    | Status      | Resolution                                                                                                                                 |
+| ----- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
 | OI-06 | Incremental | RPT-002 does not generate alerts. It consumes and displays budget-related alerts generated by SPEC-05 (ENH-007) and SPEC-09 (goal alerts). |
 
 ---
@@ -982,4 +982,4 @@ Each section fails independently — a failure in one engine does not prevent ot
 
 ---
 
-*This spec traces to [Business Architecture](../BUSINESS_ARCHITECTURE.md) (RPT-002), [Data Model](../DATA_MODEL.md), [Design System](../DESIGN_SYSTEM.md) (D-56 through D-62), and [Decisions Log](../user-profile/DECISIONS_LOG.md) (D-224 through D-229). Consumes ENH-007 from [SPEC-05](SPEC-05-BUDGET-PIPELINE.md). Goal data from [SPEC-09](SPEC-09-GOALS.md). Alert types from [SPEC-05](SPEC-05-BUDGET-PIPELINE.md) and [SPEC-09](SPEC-09-GOALS.md). Issuer colors from [SPEC-19](SPEC-19-CHURNBOARD.md) (§4.1.13).*
+_This spec traces to [Business Architecture](../BUSINESS_ARCHITECTURE.md) (RPT-002), [Data Model](../DATA_MODEL.md), [Design System](../DESIGN_SYSTEM.md) (D-56 through D-62), and [Decisions Log](../user-profile/DECISIONS_LOG.md) (D-224 through D-229). Consumes ENH-007 from [SPEC-05](SPEC-05-BUDGET-PIPELINE.md). Goal data from [SPEC-09](SPEC-09-GOALS.md). Alert types from [SPEC-05](SPEC-05-BUDGET-PIPELINE.md) and [SPEC-09](SPEC-09-GOALS.md). Issuer colors from [SPEC-19](SPEC-19-CHURNBOARD.md) (§4.1.13)._

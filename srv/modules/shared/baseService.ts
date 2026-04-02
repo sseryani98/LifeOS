@@ -1,4 +1,4 @@
-import { Logger } from './Logger.js';
+import { Logger } from "./logger.js";
 
 /**
  * Base class for all Service modules.

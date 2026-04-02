@@ -12,10 +12,10 @@
 
 ## 1. Change History
 
-| Date | Author | Description |
-|------|--------|-------------|
-| 2026-02-20 | Sandro & Claude | Initial creation — SPEC-19 workshop complete. D-209 through D-223 logged. |
-| 2026-02-20 | Claude | Post-audit: Fixed alert type names — bonus_deadline_near→msr_deadline, sync_error→connection_error, over_budget→budget_overspend. |
+| Date       | Author          | Description                                                                                                                       |
+| ---------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-02-20 | Sandro & Claude | Initial creation — SPEC-19 workshop complete. D-209 through D-223 logged.                                                         |
+| 2026-02-20 | Claude          | Post-audit: Fixed alert type names — bonus_deadline_near→msr_deadline, sync_error→connection_error, over_budget→budget_overspend. |
 
 ---
 
@@ -29,20 +29,20 @@ Key decisions: D-209 (layout), D-210 (hero KPI), D-211–D-219 (per-section), D-
 
 ## 3. Data Model References
 
-| Entity | Role |
-|--------|------|
-| Card Instance | Card portfolio — lifecycle state, activation date, fees |
-| Market Card | Card product metadata — issuer, rewards program |
-| Issuer | Issuer identity — name, color mapping |
-| Offer | Signup offers linked to card instances |
-| Offer Tranche | Per-tranche bonus targets and progress (via ENH-003) |
-| Transaction | Spend data aggregated per card/month/year |
-| Earning Multiplier | Yield rates per card × earning category (via ENH-002) |
-| Rewards Program | Points program identity and valuation (via ENH-006) |
-| Points Ledger | Points balance computation source (via ENH-006) |
-| Issuer Application Rule | Eligibility rules per issuer (via ENH-004) |
-| Alert | Stored alerts filtered to churning-related types |
-| Alert Type | Alert type definitions for filtering and display |
+| Entity                  | Role                                                    |
+| ----------------------- | ------------------------------------------------------- |
+| Card Instance           | Card portfolio — lifecycle state, activation date, fees |
+| Market Card             | Card product metadata — issuer, rewards program         |
+| Issuer                  | Issuer identity — name, color mapping                   |
+| Offer                   | Signup offers linked to card instances                  |
+| Offer Tranche           | Per-tranche bonus targets and progress (via ENH-003)    |
+| Transaction             | Spend data aggregated per card/month/year               |
+| Earning Multiplier      | Yield rates per card × earning category (via ENH-002)   |
+| Rewards Program         | Points program identity and valuation (via ENH-006)     |
+| Points Ledger           | Points balance computation source (via ENH-006)         |
+| Issuer Application Rule | Eligibility rules per issuer (via ENH-004)              |
+| Alert                   | Stored alerts filtered to churning-related types        |
+| Alert Type              | Alert type definitions for filtering and display        |
 
 No DM-001 amendments required. This spec is a read-only consumer of existing entities and engines.
 
@@ -56,15 +56,15 @@ Freestyle dashboard using `sap.f.GridContainer` with 2-column base grid per DS-0
 
 #### 4.1.1 Dashboard Layout
 
-| Row | Left (half) | Right (half) |
-|-----|-------------|--------------|
-| 1 | Net Value Hero KPI (full-width) | — |
-| 2 | Bonus Progress (full-width) | — |
-| 3 | CC Spend by Card | Reward Yield Trend |
-| 4 | Realized Value vs Fees | Points Balances |
-| 5 | Upcoming Fees | Issuer Eligibility |
-| 6 | Card Recommendation by Category (full-width) | — |
-| 7 | Alerts (full-width) | — |
+| Row | Left (half)                                  | Right (half)       |
+| --- | -------------------------------------------- | ------------------ |
+| 1   | Net Value Hero KPI (full-width)              | —                  |
+| 2   | Bonus Progress (full-width)                  | —                  |
+| 3   | CC Spend by Card                             | Reward Yield Trend |
+| 4   | Realized Value vs Fees                       | Points Balances    |
+| 5   | Upcoming Fees                                | Issuer Eligibility |
+| 6   | Card Recommendation by Category (full-width) | —                  |
+| 7   | Alerts (full-width)                          | —                  |
 
 Ordering logic: headline → active work → analysis → decisions → actions.
 
@@ -78,28 +78,28 @@ When no cards exist in the system, the dashboard shows a single message: "Add yo
 
 Full-width card. Consumes ENH-005 (Card Profitability) aggregated across all cards with any activity in the selected year, regardless of current lifecycle status.
 
-| Element | Content |
-|---------|---------|
-| Primary number | Net Churning Value = Σ(rewards earned − annual fees paid) |
-| Semantic color | Success (green) if ≥ 0, Error (red) if negative |
-| Subtitle | "Rewards: ${total} \| Fees: ${total}" |
+| Element         | Content                                                                                          |
+| --------------- | ------------------------------------------------------------------------------------------------ |
+| Primary number  | Net Churning Value = Σ(rewards earned − annual fees paid)                                        |
+| Semantic color  | Success (green) if ≥ 0, Error (red) if negative                                                  |
+| Subtitle        | "Rewards: ${total} \| Fees: ${total}"                                                            |
 | Trend indicator | YoY delta with up/down arrow and amount. Hidden if selected year is the earliest year with data. |
 
 #### 4.1.4 Bonus Progress
 
 Full-width table. Consumes ENH-003 (Signup Bonus Tracker). Shows only tranches with status **In Progress** or **Pending**. Focus cards grouped at top with visual separator, Active cards below.
 
-| Column | Content | Width |
-|--------|---------|-------|
-| Card | Card name + issuer (link → FRM-004 object page) | 20% |
-| Tranche | "Tranche N of M" | 10% |
-| Status | ObjectStatus (In Progress = Information, Pending = None) | 10% |
-| Qualifying Spend | Dollar amount so far | 10% |
-| Target | Tranche threshold | 10% |
-| Progress | `sap.m.ProgressIndicator` (qualifying spend / target) | 15% |
-| Remaining | Dollars left to hit target | 10% |
-| Days Left | Days until tranche deadline. Semantic color: Success (green) >30d, Warning (orange) 8–30d, Error (red) ≤7d | 8% |
-| Reward | Points/value for hitting this tranche | 7% |
+| Column           | Content                                                                                                    | Width |
+| ---------------- | ---------------------------------------------------------------------------------------------------------- | ----- |
+| Card             | Card name + issuer (link → FRM-004 object page)                                                            | 20%   |
+| Tranche          | "Tranche N of M"                                                                                           | 10%   |
+| Status           | ObjectStatus (In Progress = Information, Pending = None)                                                   | 10%   |
+| Qualifying Spend | Dollar amount so far                                                                                       | 10%   |
+| Target           | Tranche threshold                                                                                          | 10%   |
+| Progress         | `sap.m.ProgressIndicator` (qualifying spend / target)                                                      | 15%   |
+| Remaining        | Dollars left to hit target                                                                                 | 10%   |
+| Days Left        | Days until tranche deadline. Semantic color: Success (green) >30d, Warning (orange) 8–30d, Error (red) ≤7d | 8%    |
+| Reward           | Points/value for hitting this tranche                                                                      | 7%    |
 
 #### 4.1.5 CC Spend by Card
 
@@ -131,11 +131,11 @@ Half-width card. Diverging horizontal bar chart showing net value (rewards − f
 
 Half-width table. Consumes ENH-006 (Points Balance & Valuation). **Year-independent** — shows current balances.
 
-| Column | Content | Width |
-|--------|---------|-------|
-| Program | Rewards program name (link → RPT-010) | 40% |
-| Balance | Points count formatted with thousands separator | 30% |
-| Value | Dollar equivalent | 30% |
+| Column  | Content                                         | Width |
+| ------- | ----------------------------------------------- | ----- |
+| Program | Rewards program name (link → RPT-010)           | 40%   |
+| Balance | Points count formatted with thousands separator | 30%   |
+| Value   | Dollar equivalent                               | 30%   |
 
 Sorted by dollar value descending.
 
@@ -143,14 +143,14 @@ Sorted by dollar value descending.
 
 Half-width table. Shows cards with annual fees due within the next 90 days from today. **Year-independent.**
 
-| Column | Content | Width |
-|--------|---------|-------|
-| Card | Card name + issuer (link → FRM-004 object page) | 25% |
-| AF Amount | Dollar amount | 15% |
-| AF Date | Next annual fee date | 15% |
-| Days Until | Countdown | 10% |
-| Net Value | Card's YTD net value (ENH-005) | 15% |
-| Keep/Cancel | Success (green ✓) if YTD net value ≥ AF amount, Error (red ✗) if not | 20% |
+| Column      | Content                                                              | Width |
+| ----------- | -------------------------------------------------------------------- | ----- |
+| Card        | Card name + issuer (link → FRM-004 object page)                      | 25%   |
+| AF Amount   | Dollar amount                                                        | 15%   |
+| AF Date     | Next annual fee date                                                 | 15%   |
+| Days Until  | Countdown                                                            | 10%   |
+| Net Value   | Card's YTD net value (ENH-005)                                       | 15%   |
+| Keep/Cancel | Success (green ✓) if YTD net value ≥ AF amount, Error (red ✗) if not | 20%   |
 
 Sorted by Days Until ascending (most urgent first).
 
@@ -158,12 +158,12 @@ Sorted by Days Until ascending (most urgent first).
 
 Half-width table. Consumes ENH-004 (Issuer Eligibility Engine). **Year-independent** — reflects current state.
 
-| Column | Content | Width |
-|--------|---------|-------|
-| Issuer | Issuer name | 25% |
-| Status | ObjectStatus: Eligible = Success, Cooldown = Warning, At Limit = Error | 25% |
-| Active Cards | Count of current active cards | 25% |
-| Next Eligible | Date if Cooldown, "Now" if Eligible, "—" if At Limit | 25% |
+| Column        | Content                                                                | Width |
+| ------------- | ---------------------------------------------------------------------- | ----- |
+| Issuer        | Issuer name                                                            | 25%   |
+| Status        | ObjectStatus: Eligible = Success, Cooldown = Warning, At Limit = Error | 25%   |
+| Active Cards  | Count of current active cards                                          | 25%   |
+| Next Eligible | Date if Cooldown, "Now" if Eligible, "—" if At Limit                   | 25%   |
 
 Only issuers where the user has or has had at least one card are shown.
 
@@ -171,39 +171,39 @@ Only issuers where the user has or has had at least one card are shown.
 
 Full-width table. Consumes ENH-002 (Card Recommendation Engine) condensed output. **Year-independent.**
 
-| Column | Content | Width |
-|--------|---------|-------|
-| Earning Category | Category name (link → RPT-006) | 25% |
-| Best Card | Best wallet card for this category | 20% |
-| Yield | Earn rate (e.g., "4x" or "4%") | 10% |
-| Runner-Up | Second-best wallet card | 20% |
-| Runner-Up Yield | Runner-up earn rate | 10% |
-| Wallet Gap | Warning indicator if market best yields >2x user's best | 15% |
+| Column           | Content                                                 | Width |
+| ---------------- | ------------------------------------------------------- | ----- |
+| Earning Category | Category name (link → RPT-006)                          | 25%   |
+| Best Card        | Best wallet card for this category                      | 20%   |
+| Yield            | Earn rate (e.g., "4x" or "4%")                          | 10%   |
+| Runner-Up        | Second-best wallet card                                 | 20%   |
+| Runner-Up Yield  | Runner-up earn rate                                     | 10%   |
+| Wallet Gap       | Warning indicator if market best yields >2x user's best | 15%   |
 
 #### 4.1.12 Alerts
 
 Full-width table. Shows unacknowledged alerts of **churning-related types only** (af_approaching, cancel_reminder, msr_deadline, connection_error, offers_pending_approval, and similar). Budget alerts are excluded — they appear on RPT-002.
 
-| Column | Content | Width |
-|--------|---------|-------|
-| Type | Alert type icon + label | 15% |
-| Message | Alert description text | 35% |
-| Related Card | Card name if applicable (link → FRM-004) | 20% |
-| Date | Alert generation date | 15% |
-| Action | Contextual action button | 15% |
+| Column       | Content                                  | Width |
+| ------------ | ---------------------------------------- | ----- |
+| Type         | Alert type icon + label                  | 15%   |
+| Message      | Alert description text                   | 35%   |
+| Related Card | Card name if applicable (link → FRM-004) | 20%   |
+| Date         | Alert generation date                    | 15%   |
+| Action       | Contextual action button                 | 15%   |
 
 Sorted by date descending (newest first).
 
 **Contextual actions per alert type:**
 
-| Alert Type | Action Label | Navigation |
-|------------|-------------|------------|
-| af_approaching | Go to Card | FRM-004 object page |
-| cancel_reminder | Go to Card | FRM-004 object page |
-| msr_deadline | Go to Card | FRM-004 object page |
-| offers_pending_approval | View Offers | FRM-005 Market Cards |
-| connection_error | View Connection | FRM-010 SimpleFIN Manager |
-| (default) | Dismiss | Marks alert acknowledged |
+| Alert Type              | Action Label    | Navigation                |
+| ----------------------- | --------------- | ------------------------- |
+| af_approaching          | Go to Card      | FRM-004 object page       |
+| cancel_reminder         | Go to Card      | FRM-004 object page       |
+| msr_deadline            | Go to Card      | FRM-004 object page       |
+| offers_pending_approval | View Offers     | FRM-005 Market Cards      |
+| connection_error        | View Connection | FRM-010 SimpleFIN Manager |
+| (default)               | Dismiss         | Marks alert acknowledged  |
 
 All alert types also have Dismiss as a secondary action.
 
@@ -211,26 +211,26 @@ All alert types also have Dismiss as a secondary action.
 
 System-wide constants used across all charts in the application. Defined here per D-61.
 
-| Issuer | Color | CSS Token |
-|--------|-------|-----------|
-| TD | Green | `sapChart_OrderedColor_1` or custom `#00A650` |
-| Amex | Blue | `sapChart_OrderedColor_2` or custom `#006FCF` |
-| CIBC | Red | `sapChart_OrderedColor_3` or custom `#C41F3E` |
-| Scotia | Gold | `sapChart_OrderedColor_4` or custom `#EC111A` → Gold `#FFB819` |
-| BMO | Teal | `sapChart_OrderedColor_5` or custom `#0079C1` → Teal `#009B8D` |
-| RBC | Purple | `sapChart_OrderedColor_6` or custom `#005DAA` → Purple `#7B2D8E` |
-| Aggregate | Grey (dashed) | `sapNeutralColor` |
+| Issuer    | Color         | CSS Token                                                        |
+| --------- | ------------- | ---------------------------------------------------------------- |
+| TD        | Green         | `sapChart_OrderedColor_1` or custom `#00A650`                    |
+| Amex      | Blue          | `sapChart_OrderedColor_2` or custom `#006FCF`                    |
+| CIBC      | Red           | `sapChart_OrderedColor_3` or custom `#C41F3E`                    |
+| Scotia    | Gold          | `sapChart_OrderedColor_4` or custom `#EC111A` → Gold `#FFB819`   |
+| BMO       | Teal          | `sapChart_OrderedColor_5` or custom `#0079C1` → Teal `#009B8D`   |
+| RBC       | Purple        | `sapChart_OrderedColor_6` or custom `#005DAA` → Purple `#7B2D8E` |
+| Aggregate | Grey (dashed) | `sapNeutralColor`                                                |
 
 Exact hex values to be finalized during build. Issuers not in this list fall back to VizFrame's auto-assigned qualitative palette.
 
 #### 4.1.14 Cross-Navigation
 
-| Source Element | Target |
-|----------------|--------|
-| Card name (any table) | FRM-004 My Cards → card object page |
-| Earning category (recommendation table) | RPT-006 Recommendation Matrix |
-| Points program (balances table) | RPT-010 Points Dashboard |
-| Alert row contextual action | Per alert type (see §4.1.12) |
+| Source Element                          | Target                              |
+| --------------------------------------- | ----------------------------------- |
+| Card name (any table)                   | FRM-004 My Cards → card object page |
+| Earning category (recommendation table) | RPT-006 Recommendation Matrix       |
+| Points program (balances table)         | RPT-010 Points Dashboard            |
+| Alert row contextual action             | Per alert type (see §4.1.12)        |
 
 No chart click-through navigation per D-61 (VizFrame default interactions only).
 
@@ -331,15 +331,15 @@ No chart click-through navigation per D-61 (VizFrame default interactions only).
 
 ## 6. Error Handling
 
-| Condition | Response | i18n Key |
-|-----------|----------|----------|
-| ENH-005 computation fails | Hero KPI shows "Unable to calculate" placeholder | `churnboard.error.profitabilityUnavailable` |
-| ENH-003 computation fails | Bonus Progress shows "Unable to load bonus data" | `churnboard.error.bonusUnavailable` |
-| ENH-006 computation fails | Points Balances shows "Unable to load balances" | `churnboard.error.pointsUnavailable` |
-| ENH-004 computation fails | Issuer Eligibility shows "Unable to load eligibility" | `churnboard.error.eligibilityUnavailable` |
-| ENH-002 computation fails | Card Recommendation shows "Unable to load recommendations" | `churnboard.error.recommendationUnavailable` |
-| No transactions in selected year | Year-scoped sections show "No data for [year]" | `churnboard.info.noDataForYear` |
-| No cards exist | Full-page empty state with FRM-006 link | `churnboard.info.noCards` |
+| Condition                        | Response                                                   | i18n Key                                     |
+| -------------------------------- | ---------------------------------------------------------- | -------------------------------------------- |
+| ENH-005 computation fails        | Hero KPI shows "Unable to calculate" placeholder           | `churnboard.error.profitabilityUnavailable`  |
+| ENH-003 computation fails        | Bonus Progress shows "Unable to load bonus data"           | `churnboard.error.bonusUnavailable`          |
+| ENH-006 computation fails        | Points Balances shows "Unable to load balances"            | `churnboard.error.pointsUnavailable`         |
+| ENH-004 computation fails        | Issuer Eligibility shows "Unable to load eligibility"      | `churnboard.error.eligibilityUnavailable`    |
+| ENH-002 computation fails        | Card Recommendation shows "Unable to load recommendations" | `churnboard.error.recommendationUnavailable` |
+| No transactions in selected year | Year-scoped sections show "No data for [year]"             | `churnboard.info.noDataForYear`              |
+| No cards exist                   | Full-page empty state with FRM-006 link                    | `churnboard.info.noCards`                    |
 
 Each section fails independently — a failure in one engine does not prevent other sections from rendering.
 
@@ -347,8 +347,8 @@ Each section fails independently — a failure in one engine does not prevent ot
 
 ## 7. Open Items
 
-| OI | Status | Resolution |
-|----|--------|------------|
+| OI    | Status      | Resolution                                                                                                                                        |
+| ----- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
 | OI-06 | Incremental | RPT-001 does not generate alerts. It consumes and displays churning-related alerts generated by other specs (SPEC-03, SPEC-04, SPEC-01, SPEC-13). |
 
 **Cross-spec note for SPEC-15 (Alerts & Notifications):** Sandro requested a centralized Fiori Elements list report for all alert types across all domains (churning, budget, sync). This should be designed as part of SPEC-15. (D-223)
@@ -809,4 +809,4 @@ Each section fails independently — a failure in one engine does not prevent ot
 
 ---
 
-*This spec traces to [Business Architecture](../BUSINESS_ARCHITECTURE.md) (RPT-001), [Data Model](../DATA_MODEL.md), [Design System](../DESIGN_SYSTEM.md) (D-56 through D-62), and [Decisions Log](../user-profile/DECISIONS_LOG.md) (D-209 through D-223). Consumes engines from [SPEC-04](SPEC-04-BONUS-AND-POINTS.md) (ENH-003, ENH-006), [SPEC-07](SPEC-07-CARD-RECOMMENDATION.md) (ENH-002), [SPEC-08](SPEC-08-CARD-PROFITABILITY.md) (ENH-005), and SPEC-16 (ENH-004, pending).*
+_This spec traces to [Business Architecture](../BUSINESS_ARCHITECTURE.md) (RPT-001), [Data Model](../DATA_MODEL.md), [Design System](../DESIGN_SYSTEM.md) (D-56 through D-62), and [Decisions Log](../user-profile/DECISIONS_LOG.md) (D-209 through D-223). Consumes engines from [SPEC-04](SPEC-04-BONUS-AND-POINTS.md) (ENH-003, ENH-006), [SPEC-07](SPEC-07-CARD-RECOMMENDATION.md) (ENH-002), [SPEC-08](SPEC-08-CARD-PROFITABILITY.md) (ENH-005), and SPEC-16 (ENH-004, pending)._

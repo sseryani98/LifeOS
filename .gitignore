@@ -35,3 +35,8 @@ default-env.json
 Thumbs.db
 Desktop.ini
 .DS_Store
+financial_planner
+financial_planner-shm
+financial_planner-wal
+.mcp.json
+.playwright-mcp/

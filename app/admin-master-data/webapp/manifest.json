@@ -1,0 +1,413 @@
+{
+  "_version": "1.49.0",
+  "sap.app": {
+    "id": "com.financialplanner.adminmasterdata",
+    "type": "application",
+    "title": "{{appTitle}}",
+    "description": "{{appDescription}}",
+    "applicationVersion": {
+      "version": "1.0.0"
+    },
+    "dataSources": {
+      "AdminService": {
+        "uri": "/service/adminSvcs/",
+        "type": "OData",
+        "settings": {
+          "odataVersion": "4.0"
+        }
+      }
+    }
+  },
+  "sap.ui5": {
+    "dependencies": {
+      "minUI5Version": "1.136.16",
+      "libs": {
+        "sap.m": {},
+        "sap.fe.templates": {}
+      }
+    },
+    "models": {
+      "": {
+        "dataSource": "AdminService",
+        "preload": true,
+        "settings": {
+          "synchronizationMode": "None",
+          "operationMode": "Server",
+          "autoExpandSelect": true
+        }
+      },
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "com.financialplanner.adminmasterdata.i18n.i18n"
+        }
+      }
+    },
+    "routing": {
+      "routes": [
+        {
+          "pattern": ":?query:",
+          "name": "IssuersList",
+          "target": "IssuersList"
+        },
+        {
+          "pattern": "Issuers({key}):?query:",
+          "name": "IssuersDetail",
+          "target": "IssuersDetail"
+        },
+        {
+          "pattern": "RewardsPrograms:?query:",
+          "name": "RewardsProgramsList",
+          "target": "RewardsProgramsList"
+        },
+        {
+          "pattern": "RewardsPrograms({key}):?query:",
+          "name": "RewardsProgramsDetail",
+          "target": "RewardsProgramsDetail"
+        },
+        {
+          "pattern": "PurchaseTypes:?query:",
+          "name": "PurchaseTypesList",
+          "target": "PurchaseTypesList"
+        },
+        {
+          "pattern": "PurchaseTypes({key}):?query:",
+          "name": "PurchaseTypesDetail",
+          "target": "PurchaseTypesDetail"
+        },
+        {
+          "pattern": "EarningCategories:?query:",
+          "name": "EarningCategoriesList",
+          "target": "EarningCategoriesList"
+        },
+        {
+          "pattern": "EarningCategories({key}):?query:",
+          "name": "EarningCategoriesDetail",
+          "target": "EarningCategoriesDetail"
+        },
+        {
+          "pattern": "IssuerApplicationRules:?query:",
+          "name": "IssuerApplicationRulesList",
+          "target": "IssuerApplicationRulesList"
+        },
+        {
+          "pattern": "IssuerApplicationRules({key}):?query:",
+          "name": "IssuerApplicationRulesDetail",
+          "target": "IssuerApplicationRulesDetail"
+        },
+        {
+          "pattern": "CsvFormatConfigs:?query:",
+          "name": "CsvFormatConfigsList",
+          "target": "CsvFormatConfigsList"
+        },
+        {
+          "pattern": "CsvFormatConfigs({key}):?query:",
+          "name": "CsvFormatConfigsDetail",
+          "target": "CsvFormatConfigsDetail"
+        },
+        {
+          "pattern": "SystemConfigs:?query:",
+          "name": "SystemConfigsList",
+          "target": "SystemConfigsList"
+        },
+        {
+          "pattern": "SystemConfigs({key}):?query:",
+          "name": "SystemConfigsDetail",
+          "target": "SystemConfigsDetail"
+        },
+        {
+          "pattern": "BudgetAllocations:?query:",
+          "name": "BudgetAllocationsList",
+          "target": "BudgetAllocationsList"
+        },
+        {
+          "pattern": "BudgetAllocations({key}):?query:",
+          "name": "BudgetAllocationsDetail",
+          "target": "BudgetAllocationsDetail"
+        },
+        {
+          "pattern": "RecurrentExpenses:?query:",
+          "name": "RecurrentExpensesList",
+          "target": "RecurrentExpensesList"
+        },
+        {
+          "pattern": "RecurrentExpenses({key}):?query:",
+          "name": "RecurrentExpensesDetail",
+          "target": "RecurrentExpensesDetail"
+        }
+      ],
+      "targets": {
+        "IssuersList": {
+          "type": "Component",
+          "id": "IssuersList",
+          "name": "sap.fe.templates.ListReport",
+          "options": {
+            "settings": {
+              "contextPath": "/Issuers",
+              "variantManagement": "None",
+              "initialLoad": "Enabled",
+              "navigation": {
+                "Issuers": {
+                  "detail": {
+                    "route": "IssuersDetail"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "IssuersDetail": {
+          "type": "Component",
+          "id": "IssuersDetail",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "contextPath": "/Issuers",
+              "editableHeaderContent": true
+            }
+          }
+        },
+        "RewardsProgramsList": {
+          "type": "Component",
+          "id": "RewardsProgramsList",
+          "name": "sap.fe.templates.ListReport",
+          "options": {
+            "settings": {
+              "contextPath": "/RewardsPrograms",
+              "variantManagement": "None",
+              "initialLoad": "Enabled",
+              "navigation": {
+                "RewardsPrograms": {
+                  "detail": {
+                    "route": "RewardsProgramsDetail"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "RewardsProgramsDetail": {
+          "type": "Component",
+          "id": "RewardsProgramsDetail",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "contextPath": "/RewardsPrograms",
+              "editableHeaderContent": true
+            }
+          }
+        },
+        "PurchaseTypesList": {
+          "type": "Component",
+          "id": "PurchaseTypesList",
+          "name": "sap.fe.templates.ListReport",
+          "options": {
+            "settings": {
+              "contextPath": "/PurchaseTypes",
+              "variantManagement": "None",
+              "initialLoad": "Enabled",
+              "navigation": {
+                "PurchaseTypes": {
+                  "detail": {
+                    "route": "PurchaseTypesDetail"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "PurchaseTypesDetail": {
+          "type": "Component",
+          "id": "PurchaseTypesDetail",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "contextPath": "/PurchaseTypes",
+              "editableHeaderContent": true
+            }
+          }
+        },
+        "EarningCategoriesList": {
+          "type": "Component",
+          "id": "EarningCategoriesList",
+          "name": "sap.fe.templates.ListReport",
+          "options": {
+            "settings": {
+              "contextPath": "/EarningCategories",
+              "variantManagement": "None",
+              "initialLoad": "Enabled",
+              "navigation": {
+                "EarningCategories": {
+                  "detail": {
+                    "route": "EarningCategoriesDetail"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "EarningCategoriesDetail": {
+          "type": "Component",
+          "id": "EarningCategoriesDetail",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "contextPath": "/EarningCategories",
+              "editableHeaderContent": true
+            }
+          }
+        },
+        "IssuerApplicationRulesList": {
+          "type": "Component",
+          "id": "IssuerApplicationRulesList",
+          "name": "sap.fe.templates.ListReport",
+          "options": {
+            "settings": {
+              "contextPath": "/IssuerApplicationRules",
+              "variantManagement": "None",
+              "initialLoad": "Enabled",
+              "navigation": {
+                "IssuerApplicationRules": {
+                  "detail": {
+                    "route": "IssuerApplicationRulesDetail"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "IssuerApplicationRulesDetail": {
+          "type": "Component",
+          "id": "IssuerApplicationRulesDetail",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "contextPath": "/IssuerApplicationRules",
+              "editableHeaderContent": true
+            }
+          }
+        },
+        "CsvFormatConfigsList": {
+          "type": "Component",
+          "id": "CsvFormatConfigsList",
+          "name": "sap.fe.templates.ListReport",
+          "options": {
+            "settings": {
+              "contextPath": "/CsvFormatConfigs",
+              "variantManagement": "None",
+              "initialLoad": "Enabled",
+              "navigation": {
+                "CsvFormatConfigs": {
+                  "detail": {
+                    "route": "CsvFormatConfigsDetail"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "CsvFormatConfigsDetail": {
+          "type": "Component",
+          "id": "CsvFormatConfigsDetail",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "contextPath": "/CsvFormatConfigs",
+              "editableHeaderContent": true
+            }
+          }
+        },
+        "SystemConfigsList": {
+          "type": "Component",
+          "id": "SystemConfigsList",
+          "name": "sap.fe.templates.ListReport",
+          "options": {
+            "settings": {
+              "contextPath": "/SystemConfigs",
+              "variantManagement": "None",
+              "initialLoad": "Enabled",
+              "navigation": {
+                "SystemConfigs": {
+                  "detail": {
+                    "route": "SystemConfigsDetail"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "SystemConfigsDetail": {
+          "type": "Component",
+          "id": "SystemConfigsDetail",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "contextPath": "/SystemConfigs",
+              "editableHeaderContent": true
+            }
+          }
+        },
+        "BudgetAllocationsList": {
+          "type": "Component",
+          "id": "BudgetAllocationsList",
+          "name": "sap.fe.templates.ListReport",
+          "options": {
+            "settings": {
+              "contextPath": "/BudgetAllocations",
+              "variantManagement": "None",
+              "initialLoad": "Enabled",
+              "navigation": {
+                "BudgetAllocations": {
+                  "detail": {
+                    "route": "BudgetAllocationsDetail"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "BudgetAllocationsDetail": {
+          "type": "Component",
+          "id": "BudgetAllocationsDetail",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "contextPath": "/BudgetAllocations",
+              "editableHeaderContent": true
+            }
+          }
+        },
+        "RecurrentExpensesList": {
+          "type": "Component",
+          "id": "RecurrentExpensesList",
+          "name": "sap.fe.templates.ListReport",
+          "options": {
+            "settings": {
+              "contextPath": "/RecurrentExpenses",
+              "variantManagement": "None",
+              "initialLoad": "Enabled",
+              "navigation": {
+                "RecurrentExpenses": {
+                  "detail": {
+                    "route": "RecurrentExpensesDetail"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "RecurrentExpensesDetail": {
+          "type": "Component",
+          "id": "RecurrentExpensesDetail",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "contextPath": "/RecurrentExpenses",
+              "editableHeaderContent": true
+            }
+          }
+        }
+      }
+    }
+  }
+}

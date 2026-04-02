@@ -14,27 +14,27 @@ Canada's two credit bureaus — **Equifax** and **TransUnion** — both factor i
 
 ### Key terminology
 
-| Term | Definition |
-|------|-----------|
-| **SUB / WB** | Signup Bonus / Welcome Bonus — points received for opening a card and meeting minimum spend |
-| **MSR / MS** | Minimum Spending Requirement — the dollar amount that must be spent to unlock the bonus (typically $1,000–$15,000 within 3–6 months) |
-| **AF** | Annual Fee — yearly card fee ($0 to $799) |
-| **FYF** | First Year Free — annual fee waived in year one |
-| **PS** | Product Switch — changing a card to a different product within the same bank without a new credit application |
-| **P1 / P2 / P3** | Player 1, 2, 3 — the primary churner, their partner/spouse, and sometimes other family members |
-| **DP** | Data Point — an anecdotal report of an outcome (e.g., "PS'd to Avion, received full bonus") |
-| **HUCA** | Hang Up, Call Again — try a different customer service agent |
-| **EQ / TU** | Equifax / TransUnion — Canada's two credit bureaus |
-| **Hard Pull / Soft Pull** | Hard inquiry (affects credit score) vs. soft inquiry (no score impact) |
-| **MR** | Membership Rewards — Amex's transferable points currency |
-| **AP** | Aeroplan — Air Canada's loyalty program |
-| **GCR** | Great Canadian Rebates — cashback portal for card applications |
-| **CPP** | Cents Per Point — metric for valuing redemptions |
-| **AAoA** | Average Age of Accounts — a credit score factor |
-| **FTF** | Foreign Transaction Fee — typically 2.5% in Canada |
-| **Amexiled** | Being banned by American Express for churning behavior |
-| **NLL** | No Lifetime Language — an Amex offer that omits the once-per-lifetime restriction |
-| **Recon** | Reconsideration — calling an issuer to argue for approval after denial |
+| Term                      | Definition                                                                                                                           |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| **SUB / WB**              | Signup Bonus / Welcome Bonus — points received for opening a card and meeting minimum spend                                          |
+| **MSR / MS**              | Minimum Spending Requirement — the dollar amount that must be spent to unlock the bonus (typically $1,000–$15,000 within 3–6 months) |
+| **AF**                    | Annual Fee — yearly card fee ($0 to $799)                                                                                            |
+| **FYF**                   | First Year Free — annual fee waived in year one                                                                                      |
+| **PS**                    | Product Switch — changing a card to a different product within the same bank without a new credit application                        |
+| **P1 / P2 / P3**          | Player 1, 2, 3 — the primary churner, their partner/spouse, and sometimes other family members                                       |
+| **DP**                    | Data Point — an anecdotal report of an outcome (e.g., "PS'd to Avion, received full bonus")                                          |
+| **HUCA**                  | Hang Up, Call Again — try a different customer service agent                                                                         |
+| **EQ / TU**               | Equifax / TransUnion — Canada's two credit bureaus                                                                                   |
+| **Hard Pull / Soft Pull** | Hard inquiry (affects credit score) vs. soft inquiry (no score impact)                                                               |
+| **MR**                    | Membership Rewards — Amex's transferable points currency                                                                             |
+| **AP**                    | Aeroplan — Air Canada's loyalty program                                                                                              |
+| **GCR**                   | Great Canadian Rebates — cashback portal for card applications                                                                       |
+| **CPP**                   | Cents Per Point — metric for valuing redemptions                                                                                     |
+| **AAoA**                  | Average Age of Accounts — a credit score factor                                                                                      |
+| **FTF**                   | Foreign Transaction Fee — typically 2.5% in Canada                                                                                   |
+| **Amexiled**              | Being banned by American Express for churning behavior                                                                               |
+| **NLL**                   | No Lifetime Language — an Amex offer that omits the once-per-lifetime restriction                                                    |
+| **Recon**                 | Reconsideration — calling an issuer to argue for approval after denial                                                               |
 
 ### Ethical and legal considerations
 
@@ -56,36 +56,37 @@ Amex is the **single most important issuer for Canadian churners** due to the sh
 
 **Membership Rewards (MR) earning cards:**
 
-| Card | Type | AF | Welcome Bonus | MSR | Key Earn Rate |
-|------|------|-----|---------------|-----|---------------|
-| **Platinum Card** | Charge | $799 | Up to 110,000 MR (80K after $10K/3mo + 30K in months 15–17) | $10,000/3 months | 2x dining & travel, 1x other |
-| **Gold Rewards** | Charge | $250 | Up to 70,000 MR (monthly earning structure: $1K/mo × 12 + $4K/3mo) | $1,000/month | 2x gas/grocery/drugstore/travel |
-| **Cobalt** | Credit | $15.99/mo ($191.88/yr) | Up to 15,000 MR (1,250/mo × 12 months at $750/mo spend) | $750/month | **5x food & drink** (capped $2,500/mo), 3x streaming, 2x gas/transit |
-| **Green** | Credit | $0 | 10,000 MR after $1,000/3mo | $1,000/3 months | 1x all purchases |
-| **Business Platinum** | Charge | $799 | Up to 130,000 MR (90K after $15K/3mo + 40K months 15–17) | $15,000/3 months | 1.25x all purchases |
-| **Business Gold Rewards** | Charge | $199 | Up to 70,000 MR (50K after $7.5K/3mo + 20K after $30K/12mo) | $7,500/3 months | 1x all purchases |
+| Card                      | Type   | AF                     | Welcome Bonus                                                      | MSR              | Key Earn Rate                                                        |
+| ------------------------- | ------ | ---------------------- | ------------------------------------------------------------------ | ---------------- | -------------------------------------------------------------------- |
+| **Platinum Card**         | Charge | $799                   | Up to 110,000 MR (80K after $10K/3mo + 30K in months 15–17)        | $10,000/3 months | 2x dining & travel, 1x other                                         |
+| **Gold Rewards**          | Charge | $250                   | Up to 70,000 MR (monthly earning structure: $1K/mo × 12 + $4K/3mo) | $1,000/month     | 2x gas/grocery/drugstore/travel                                      |
+| **Cobalt**                | Credit | $15.99/mo ($191.88/yr) | Up to 15,000 MR (1,250/mo × 12 months at $750/mo spend)            | $750/month       | **5x food & drink** (capped $2,500/mo), 3x streaming, 2x gas/transit |
+| **Green**                 | Credit | $0                     | 10,000 MR after $1,000/3mo                                         | $1,000/3 months  | 1x all purchases                                                     |
+| **Business Platinum**     | Charge | $799                   | Up to 130,000 MR (90K after $15K/3mo + 40K months 15–17)           | $15,000/3 months | 1.25x all purchases                                                  |
+| **Business Gold Rewards** | Charge | $199                   | Up to 70,000 MR (50K after $7.5K/3mo + 20K after $30K/12mo)        | $7,500/3 months  | 1x all purchases                                                     |
 
 **Aeroplan co-branded cards:**
 
-| Card | AF | Welcome Bonus | MSR |
-|------|-----|---------------|-----|
-| **Aeroplan Reserve** | $599 | Up to 85,000 AP (60K after $10.5K/3mo + 25K in month 13) | $10,500/3 months |
+| Card                          | AF   | Welcome Bonus                                            | MSR              |
+| ----------------------------- | ---- | -------------------------------------------------------- | ---------------- |
+| **Aeroplan Reserve**          | $599 | Up to 85,000 AP (60K after $10.5K/3mo + 25K in month 13) | $10,500/3 months |
 | **Aeroplan Business Reserve** | $599 | Up to 90,000 AP (65K after $10.5K/3mo + 25K in month 13) | $10,500/3 months |
 
 **Marriott Bonvoy co-branded cards:**
 
-| Card | AF | Welcome Bonus | MSR |
-|------|-----|---------------|-----|
-| **Bonvoy Personal** | $120 | Up to 110,000 Bonvoy (80K after $6K/6mo + 30K month 15) | $6,000/6 months |
+| Card                | AF   | Welcome Bonus                                            | MSR              |
+| ------------------- | ---- | -------------------------------------------------------- | ---------------- |
+| **Bonvoy Personal** | $120 | Up to 110,000 Bonvoy (80K after $6K/6mo + 30K month 15)  | $6,000/6 months  |
 | **Bonvoy Business** | $150 | Up to 110,000 Bonvoy (80K after $10K/6mo + 30K month 15) | $10,000/6 months |
 
 **Cash back cards** (SimplyCash at $0 AF, SimplyCash Preferred) have minimal churning value but serve as holding cards.
 
 #### The "once per lifetime" rule
 
-Amex Canada's terms state: *"These offers are only available to new [Card] Cardmembers. For current or former [Card] Cardmembers, we may approve your application, but you will not be eligible for these offers."*
+Amex Canada's terms state: _"These offers are only available to new [Card] Cardmembers. For current or former [Card] Cardmembers, we may approve your application, but you will not be eligible for these offers."_
 
 Key facts about this rule:
+
 - **Each card product is treated separately.** Having the Platinum does not block the Gold welcome bonus.
 - **Personal and business versions are separate products.**
 - The **practical reset period is approximately 7 years** after closing a card (anecdotal, based on US and Canadian data points).
@@ -108,13 +109,13 @@ Key facts about this rule:
 
 Self-referral is now **explicitly prohibited** in Amex's terms. Violations can result in point clawbacks and account closure. However, **P2 cross-referrals** (referring a partner/spouse) are widely accepted.
 
-| Referring Card | Referral Bonus | Annual Cap |
-|----------------|---------------|------------|
-| Platinum | 15,000 MR | 300,000 MR (20 referrals) |
-| Business Platinum | 15,000–20,000 MR | 225,000–300,000 MR |
-| Gold Rewards | 10,000 MR | 200,000 MR |
-| Cobalt | ~2,500 MR | Varies |
-| Bonvoy cards | 10,000 Bonvoy | 150,000 Bonvoy/year |
+| Referring Card    | Referral Bonus   | Annual Cap                |
+| ----------------- | ---------------- | ------------------------- |
+| Platinum          | 15,000 MR        | 300,000 MR (20 referrals) |
+| Business Platinum | 15,000–20,000 MR | 225,000–300,000 MR        |
+| Gold Rewards      | 10,000 MR        | 200,000 MR                |
+| Cobalt            | ~2,500 MR        | Varies                    |
+| Bonvoy cards      | 10,000 Bonvoy    | 150,000 Bonvoy/year       |
 
 Amex periodically runs **double referral promotions** that double all referral bonus amounts.
 
@@ -124,14 +125,14 @@ Amex periodically runs **double referral promotions** that double all referral b
 
 TD is the **most product-switch-friendly** bank in Canada, making it a core pillar of churning strategy.
 
-| Card | AF | Welcome Bonus | MSR |
-|------|-----|---------------|-----|
-| **Aeroplan Visa Infinite** | $139 (FYF) | Up to 40,000–45,000 Aeroplan | $7,500/180 days |
-| **Aeroplan Visa Infinite Privilege** | $599 | Up to 60,000+ Aeroplan | Higher thresholds |
-| **First Class Travel Visa Infinite** | $139 (FYF) | Up to 165,000 TD Rewards (all-time high, Sep 2025) | $7,500/180 days |
-| **Platinum Travel Visa** | $89 (FYF) | Lower TD Rewards bonus | Lower threshold |
+| Card                                 | AF         | Welcome Bonus                                      | MSR               |
+| ------------------------------------ | ---------- | -------------------------------------------------- | ----------------- |
+| **Aeroplan Visa Infinite**           | $139 (FYF) | Up to 40,000–45,000 Aeroplan                       | $7,500/180 days   |
+| **Aeroplan Visa Infinite Privilege** | $599       | Up to 60,000+ Aeroplan                             | Higher thresholds |
+| **First Class Travel Visa Infinite** | $139 (FYF) | Up to 165,000 TD Rewards (all-time high, Sep 2025) | $7,500/180 days   |
+| **Platinum Travel Visa**             | $89 (FYF)  | Lower TD Rewards bonus                             | Lower threshold   |
 
-**Application rules**: TD uses a **12-month rule per product** — you're ineligible for the same card's bonus if you opened that product in the last 12 months. Different TD products don't affect each other. The TD First Class Travel card uses a **6-month rule** based on when you last *closed* the card. Aeroplan cards use the date you last *opened* the card.
+**Application rules**: TD uses a **12-month rule per product** — you're ineligible for the same card's bonus if you opened that product in the last 12 months. Different TD products don't affect each other. The TD First Class Travel card uses a **6-month rule** based on when you last _closed_ the card. Aeroplan cards use the date you last _opened_ the card.
 
 **Product switch strategy**: Done via phone only (1-800-983-8472). No hard credit pull. Full welcome bonuses are sometimes awarded when switching between different card families (e.g., Aeroplan → First Class Travel). Recommended cadence: switch every **6 months** per tradeline. Visa Infinite requires $5,000 minimum credit limit; Visa Infinite Privilege requires $10,000.
 
@@ -145,12 +146,12 @@ TD is the **most product-switch-friendly** bank in Canada, making it a core pill
 
 CIBC is among the **most churning-friendly** Big 5 banks — no official cooldown period.
 
-| Card | AF | Welcome Bonus | MSR |
-|------|-----|---------------|-----|
-| **Aventura Visa Infinite** | $120 (FYF) | Up to 60,000 Aventura | $6,000/4 months |
-| **Aventura Visa Infinite Privilege** | $499 | Up to 80,000 Aventura | $6,000/4 months + $25K/12mo for anniversary |
-| **Aeroplan Visa Infinite** | $139 (FYF) | Up to 40,000–45,000 Aeroplan | $6,000/6 months |
-| **Aeroplan Visa Infinite Privilege** | $599 | Up to 100,000 Aeroplan | Higher thresholds |
+| Card                                 | AF         | Welcome Bonus                | MSR                                         |
+| ------------------------------------ | ---------- | ---------------------------- | ------------------------------------------- |
+| **Aventura Visa Infinite**           | $120 (FYF) | Up to 60,000 Aventura        | $6,000/4 months                             |
+| **Aventura Visa Infinite Privilege** | $499       | Up to 80,000 Aventura        | $6,000/4 months + $25K/12mo for anniversary |
+| **Aeroplan Visa Infinite**           | $139 (FYF) | Up to 40,000–45,000 Aeroplan | $6,000/6 months                             |
+| **Aeroplan Visa Infinite Privilege** | $599       | Up to 100,000 Aeroplan       | Higher thresholds                           |
 
 **Application rules**: No official cooldown. Can sometimes open **multiple cards on a single credit inquiry** if approved for a high credit limit. CIBC rotates "global migration offers" — non-public product switch bonuses accessible via phone reps.
 
@@ -164,12 +165,12 @@ CIBC is among the **most churning-friendly** Big 5 banks — no official cooldow
 
 RBC is notable for being the only Big 5 bank that primarily pulls **TransUnion**, and for its valuable Avion transfer partners.
 
-| Card | AF | Welcome Bonus | MSR |
-|------|-----|---------------|-----|
-| **Avion Visa Infinite** | $120 | Up to 55,000 Avion (all-time high, Aug 2025) | Multi-tier spend thresholds |
-| **Avion Visa Infinite Privilege** | $399 | Up to 70,000 Avion | Multi-tier thresholds |
-| **WestJet RBC World Elite MC** | $139 | Up to 70,000 WestJet points + companion voucher | Varies |
-| **British Airways Visa Infinite** | $165 | 25,000–35,000 Avios | Varies |
+| Card                              | AF   | Welcome Bonus                                   | MSR                         |
+| --------------------------------- | ---- | ----------------------------------------------- | --------------------------- |
+| **Avion Visa Infinite**           | $120 | Up to 55,000 Avion (all-time high, Aug 2025)    | Multi-tier spend thresholds |
+| **Avion Visa Infinite Privilege** | $399 | Up to 70,000 Avion                              | Multi-tier thresholds       |
+| **WestJet RBC World Elite MC**    | $139 | Up to 70,000 WestJet points + companion voucher | Varies                      |
+| **British Airways Visa Infinite** | $165 | 25,000–35,000 Avios                             | Varies                      |
 
 **Application rules**: **1/90 rule** — RBC only approves one new credit card application every 90 days. Automatic rejection if applied sooner. Firmly enforced but not officially stated. Does not apply to product switches. RBC provides **pro-rated annual fee refunds** when you cancel.
 
@@ -178,6 +179,7 @@ RBC is notable for being the only Big 5 bank that primarily pulls **TransUnion**
 **Credit bureau**: **TransUnion** — strategically valuable since most other Big 5 banks pull Equifax.
 
 **RBC Avion transfer partners** (Elite tier required):
+
 - British Airways Avios: **1:1** (with regular 30% transfer bonuses 1–2x per year)
 - Cathay Pacific Asia Miles: **1:1** (occasional 15% bonuses)
 - American Airlines AAdvantage: **10:7**
@@ -189,13 +191,13 @@ RBC is notable for being the only Big 5 bank that primarily pulls **TransUnion**
 
 BMO has the **weakest churning bonuses** among the Big 5, but the eclipse card family has been improving.
 
-| Card | AF | Welcome Bonus | MSR |
-|------|-----|---------------|-----|
-| **eclipse Visa Infinite** | $120 (FYF) | Up to 70,000 BMO Rewards | $12,000/365 days (tiered) |
-| **eclipse Visa Infinite Privilege** | $599 | Up to 200,000 BMO Rewards (all-time high) | $75,000/365 days (tiered) |
-| **Ascend World Elite MC** | $150 | Up to 100,000–115,000 BMO Rewards | $20,000/365 days (tiered) |
-| **Air Miles World Elite MC** | $120 | Up to 7,000 Air Miles | $4,500/110 days |
-| **eclipse rise Visa** | $0 | Up to 25,000 BMO Rewards | $1,500/3 months |
+| Card                                | AF         | Welcome Bonus                             | MSR                       |
+| ----------------------------------- | ---------- | ----------------------------------------- | ------------------------- |
+| **eclipse Visa Infinite**           | $120 (FYF) | Up to 70,000 BMO Rewards                  | $12,000/365 days (tiered) |
+| **eclipse Visa Infinite Privilege** | $599       | Up to 200,000 BMO Rewards (all-time high) | $75,000/365 days (tiered) |
+| **Ascend World Elite MC**           | $150       | Up to 100,000–115,000 BMO Rewards         | $20,000/365 days (tiered) |
+| **Air Miles World Elite MC**        | $120       | Up to 7,000 Air Miles                     | $4,500/110 days           |
+| **eclipse rise Visa**               | $0         | Up to 25,000 BMO Rewards                  | $1,500/3 months           |
 
 **Application rules**: No firm cooldown. T&Cs restrict bonuses for customers who cancelled "during the Offer Period" — partially enforced. Product switches rarely yield bonuses. The $0-AF eclipse rise Visa serves as the ideal "parking" card for maintaining a BMO tradeline.
 
@@ -211,12 +213,12 @@ BMO has the **weakest churning bonuses** among the Big 5, but the eclipse card f
 
 Scotiabank has strong everyday earning cards but a restrictive 2-year churning rule.
 
-| Card | AF | Welcome Bonus | MSR |
-|------|-----|---------------|-----|
-| **Gold American Express** | $120 (FYF) | Up to 45,000–50,000 Scene+ | $2,000/3 months + $7,500/12 months |
-| **Passport Visa Infinite** | $150 | Up to 60,000 Scene+ | $2,000/3 months + $10,000/14 months |
-| **Platinum American Express** | $399 | Up to 80,000 Scene+ | $3,000/3 months |
-| **Scene+ Visa (No Fee)** | $0 | Minimal | — |
+| Card                          | AF         | Welcome Bonus              | MSR                                 |
+| ----------------------------- | ---------- | -------------------------- | ----------------------------------- |
+| **Gold American Express**     | $120 (FYF) | Up to 45,000–50,000 Scene+ | $2,000/3 months + $7,500/12 months  |
+| **Passport Visa Infinite**    | $150       | Up to 60,000 Scene+        | $2,000/3 months + $10,000/14 months |
+| **Platinum American Express** | $399       | Up to 80,000 Scene+        | $3,000/3 months                     |
+| **Scene+ Visa (No Fee)**      | $0         | Minimal                    | —                                   |
 
 **Application rules**: T&Cs state a **2-year rule** — ineligible for a welcome bonus if you've held any Scotiabank personal credit card in the past 2 years. **Partially enforced**: you'll likely get the points but may not get the annual fee waiver. The Gold Amex has a remarkably low **$12,000 household** income requirement.
 
@@ -233,6 +235,7 @@ The **Scotiabank Gold Amex** earns **6x at Empire grocery stores** — unmatched
 The MBNA Alaska Airlines Mastercard was **discontinued September 1, 2023** — historically the most churnable card in Canada. It offered 25,000–30,000 Alaska Miles with a $1,000 MSR and could be churned every 3–6 months.
 
 **Current state**: All Alaska cards were converted to **MBNA Rewards cards**:
+
 - **MBNA Rewards World Elite MC**: 30,000 points bonus (20K after $2K/90 days + 10K for paperless). $99/year. Points worth ~1 cpp for travel.
 - Product switching remains available between MBNA products.
 - A promised permanent transfer to Alaska Airlines Mileage Plan **never materialized** — only a one-time legacy transfer window was offered.
@@ -241,8 +244,8 @@ The MBNA Alaska Airlines Mastercard was **discontinued September 1, 2023** — h
 
 ### National Bank of Canada
 
-| Card | AF | Welcome Bonus | MSR |
-|------|-----|---------------|-----|
+| Card               | AF                        | Welcome Bonus                            | MSR                                 |
+| ------------------ | ------------------------- | ---------------------------------------- | ----------------------------------- |
 | **World Elite MC** | $150 (FYF via promotions) | Up to 50,000 points (via partner offers) | $5,000/3 months + $20,000/12 months |
 
 Features a **$150 annual travel credit** and free unlimited access to the **National Bank Lounge at Montreal-Trudeau (YUL)**. Earns up to 5 pts/$ on groceries & restaurants. Named Best Travel Credit Card by Milesopedia 2023–2026. Must not have held a National Bank MC in the past 12–24 months to qualify for welcome bonus. **Credit bureau**: Equifax.
@@ -258,16 +261,16 @@ Features a **$150 annual travel credit** and free unlimited access to the **Nati
 
 ### Credit bureau pull summary
 
-| Issuer | Primary Bureau |
-|--------|---------------|
-| TD | Equifax |
-| CIBC | Equifax |
-| RBC | **TransUnion** |
-| BMO | Equifax |
-| Scotiabank | Equifax |
-| Amex | TransUnion (first card hard pull; soft for existing) |
-| MBNA | TransUnion |
-| National Bank | Equifax |
+| Issuer        | Primary Bureau                                       |
+| ------------- | ---------------------------------------------------- |
+| TD            | Equifax                                              |
+| CIBC          | Equifax                                              |
+| RBC           | **TransUnion**                                       |
+| BMO           | Equifax                                              |
+| Scotiabank    | Equifax                                              |
+| Amex          | TransUnion (first card hard pull; soft for existing) |
+| MBNA          | TransUnion                                           |
+| National Bank | Equifax                                              |
 
 ---
 
@@ -280,6 +283,7 @@ Features a **$150 annual travel credit** and free unlimited access to the **Nati
 **How it works**: Register for free → log in → find desired card → click through to issuer → complete application in same browser session → if approved, rebate posts to GCR account within 48–72 hours (up to 21 days) → payout via direct deposit, PayPal, or eGift card when balance exceeds ~$12 for 58+ days.
 
 **Typical rebate ranges**:
+
 - Amex Cobalt: ~$120
 - Amex premium cards: ~$100
 - Scotiabank cards: ~$50–$100
@@ -297,6 +301,7 @@ Features a **$150 annual travel credit** and free unlimited access to the **Nati
 ### Example stacking on a single application
 
 Apply for TD Aeroplan Visa Infinite through GCR:
+
 - **Welcome bonus**: 40,000 Aeroplan points (~$1,000 value)
 - **GCR cashback**: ~$100
 - **FYF**: saves $139 annual fee
@@ -315,6 +320,7 @@ Aeroplan is the dominant loyalty program in Canada, earning points via **11 co-b
 **Point valuation**: **~2.5 cpp CAD** (Prince of Travel benchmark). Economy redemptions typically yield 1.2–1.6 cpp; business/first class partner redemptions routinely yield **3–7+ cpp**.
 
 **Transfer partners into Aeroplan**:
+
 - Amex MR (Canada): **1:1**
 - Amex MR (US): 1:1
 - Chase Ultimate Rewards (US): 1:1
@@ -325,6 +331,7 @@ Aeroplan is the dominant loyalty program in Canada, earning points via **11 co-b
 **Redemption structure**: Air Canada flights use **dynamic pricing** (variable points cost, any purchasable seat bookable). Most Star Alliance partners use a **fixed distance-based award chart** with predictable pricing. No carrier surcharges on partner awards — a massive advantage.
 
 **Sweet spot redemptions**:
+
 - **Short-haul under 500 mi**: 6,000 points economy (e.g., Montreal–NYC, Toronto–Chicago)
 - **ANA Business Class** (West Coast–Tokyo): ~55,000 points one-way; cash fares $3,000+ = 5+ cpp
 - **Lufthansa First Class**: ~100,000 points one-way; cash fares $7,000+ = 7+ cpp
@@ -334,13 +341,13 @@ Aeroplan is the dominant loyalty program in Canada, earning points via **11 co-b
 
 **Cross-issuer 5-tier rule (February 2024)**: Aeroplan limits welcome bonuses to **once per card tier, per lifetime, regardless of issuer**:
 
-| Tier | Example Cards |
-|------|--------------|
-| Entry | TD Aeroplan Platinum, CIBC Aeroplan Visa Card |
-| Core | TD Aeroplan VI, CIBC Aeroplan VI, Amex Aeroplan Card |
-| Premium | TD Aeroplan VIP, CIBC Aeroplan VIP, Amex Aeroplan Reserve |
-| Core Business | CIBC Aeroplan Visa Business |
-| Premium Business | Amex Aeroplan Business Reserve |
+| Tier             | Example Cards                                             |
+| ---------------- | --------------------------------------------------------- |
+| Entry            | TD Aeroplan Platinum, CIBC Aeroplan Visa Card             |
+| Core             | TD Aeroplan VI, CIBC Aeroplan VI, Amex Aeroplan Card      |
+| Premium          | TD Aeroplan VIP, CIBC Aeroplan VIP, Amex Aeroplan Reserve |
+| Core Business    | CIBC Aeroplan Visa Business                               |
+| Premium Business | Amex Aeroplan Business Reserve                            |
 
 Getting a TD Aeroplan VI bonus means you **cannot** also get the CIBC Aeroplan VI bonus. Maximum 5 Aeroplan card welcome bonuses lifetime. Aeroplan has conducted clawbacks for violations.
 
@@ -352,16 +359,16 @@ MR is the **most flexible points currency** in Canada. Points pool across all MR
 
 **Transfer partners (Canada)**:
 
-| Partner | Ratio | Alliance/Type |
-|---------|-------|---------------|
-| Air Canada Aeroplan | 1:1 | Star Alliance |
-| British Airways Avios | 1:1 | oneworld |
-| Air France/KLM Flying Blue | 1:0.75 | SkyTeam |
-| Cathay Pacific Asia Miles | 1:0.75 | oneworld |
-| Delta SkyMiles | 1:0.75 | SkyTeam |
-| Etihad Guest | 1:1 | Independent |
-| Marriott Bonvoy | 1:1.2 | Hotel |
-| Hilton Honors | 1:1 (or 1:2) | Hotel |
+| Partner                    | Ratio        | Alliance/Type |
+| -------------------------- | ------------ | ------------- |
+| Air Canada Aeroplan        | 1:1          | Star Alliance |
+| British Airways Avios      | 1:1          | oneworld      |
+| Air France/KLM Flying Blue | 1:0.75       | SkyTeam       |
+| Cathay Pacific Asia Miles  | 1:0.75       | oneworld      |
+| Delta SkyMiles             | 1:0.75       | SkyTeam       |
+| Etihad Guest               | 1:1          | Independent   |
+| Marriott Bonvoy            | 1:1.2        | Hotel         |
+| Hilton Honors              | 1:1 (or 1:2) | Hotel         |
 
 Canadian MR has significantly **fewer partners** than US MR (~8 vs. ~20+). Amex runs periodic **transfer bonuses** (most commonly 30% to Marriott Bonvoy, occurring 1–3x/year).
 
@@ -371,12 +378,12 @@ Canadian MR has significantly **fewer partners** than US MR (~8 vs. ~20+). Amex 
 
 **Valuation**: ~2.0 cpp. Transfer partners require **Elite tier** (Avion credit card holders):
 
-| Partner | Ratio |
-|---------|-------|
-| British Airways Avios | 1:1 (30% bonuses 1–2x/year) |
-| Cathay Pacific Asia Miles | 1:1 (occasional 15% bonuses) |
-| American Airlines AAdvantage | 10:7 |
-| WestJet Rewards | 1:1 |
+| Partner                      | Ratio                        |
+| ---------------------------- | ---------------------------- |
+| British Airways Avios        | 1:1 (30% bonuses 1–2x/year)  |
+| Cathay Pacific Asia Miles    | 1:1 (occasional 15% bonuses) |
+| American Airlines AAdvantage | 10:7                         |
+| WestJet Rewards              | 1:1                          |
 
 The **30% Avios transfer bonus** (occurring roughly twice yearly) is the best time to convert Avion points. RBC also offers a fixed Air Travel Redemption Schedule at up to 2.3 cpp. RBC Avion is the **only Canadian bank program** that transfers to American Airlines.
 
@@ -418,6 +425,7 @@ Avios are **freely transferable** between 6 programs (BA, Qatar, Iberia, Aer Lin
 Underwent a **major overhaul April 30, 2025**: WestJet Dollars became WestJet Points at 1:100 conversion. **Dollar-value program**: 100 WestJet points = $1. Points never expire. No blackout dates. Earned via RBC WestJet cards and WestJet flights.
 
 The **companion voucher** is the primary churning draw:
+
 - World Elite: companion round-trip for **$119** (domestic/US) or **$399** (international) after first purchase and annually with $5,000 spend
 - Average savings: **$480 per voucher**
 - New options: can exchange voucher for 25% flight discount, WestJet Vacations credit, or points
@@ -436,15 +444,15 @@ The **companion voucher** is the primary churning draw:
 
 ### Optimal churning cadence
 
-| Issuer | Cooldown Rule | Recommendation |
-|--------|--------------|----------------|
-| Amex | Once per lifetime per product (~7yr reset) | Cycle through all unique products |
-| TD | 12 months per product (6 months for FCT from close date) | PS every 6 months between families |
-| CIBC | No official cooldown | Apply freely; use migration offers |
-| RBC | 1 application per 90 days | Space 90+ days apart |
-| BMO | No firm rule | Apply as desired |
-| Scotiabank | 2-year rule (partially enforced) | Wait 24 months between cards |
-| Aeroplan | Once per tier, per lifetime, across issuers | Max 5 Aeroplan card bonuses ever |
+| Issuer     | Cooldown Rule                                            | Recommendation                     |
+| ---------- | -------------------------------------------------------- | ---------------------------------- |
+| Amex       | Once per lifetime per product (~7yr reset)               | Cycle through all unique products  |
+| TD         | 12 months per product (6 months for FCT from close date) | PS every 6 months between families |
+| CIBC       | No official cooldown                                     | Apply freely; use migration offers |
+| RBC        | 1 application per 90 days                                | Space 90+ days apart               |
+| BMO        | No firm rule                                             | Apply as desired                   |
+| Scotiabank | 2-year rule (partially enforced)                         | Wait 24 months between cards       |
+| Aeroplan   | Once per tier, per lifetime, across issuers              | Max 5 Aeroplan card bonuses ever   |
 
 **Beginners**: 2–4 new cards per year. **Experienced churners**: 5–10+ cards per year across P1/P2.
 
@@ -484,6 +492,7 @@ Five core tactics: (1) Space applications 30+ days apart, (2) leverage product s
 ### Core entities and their attributes
 
 **Card (credit card product definition)**
+
 - `card_id` (unique identifier)
 - `card_name` (e.g., "TD Aeroplan Visa Infinite")
 - `issuer_id` (FK to Issuer)
@@ -501,6 +510,7 @@ Five core tactics: (1) Space applications 30+ days apart, (2) leverage product s
 - `key_benefits` (text — lounge access, insurance, etc.)
 
 **Issuer**
+
 - `issuer_id`
 - `issuer_name` (e.g., "American Express", "TD Bank", "CIBC")
 - `credit_bureau_primary` (Equifax | TransUnion)
@@ -514,6 +524,7 @@ Five core tactics: (1) Space applications 30+ days apart, (2) leverage product s
 - `anti_churning_notes` (text)
 
 **CardApplication (a specific instance of a user applying for/holding a card)**
+
 - `application_id`
 - `user_id` (FK — P1 or P2)
 - `card_id` (FK)
@@ -546,6 +557,7 @@ Five core tactics: (1) Space applications 30+ days apart, (2) leverage product s
 - `notes` (text)
 
 **User (churner profile — P1 and P2)**
+
 - `user_id`
 - `name`
 - `player_designation` (P1 | P2 | P3)
@@ -557,6 +569,7 @@ Five core tactics: (1) Space applications 30+ days apart, (2) leverage product s
 - `score_last_updated` (date)
 
 **RewardsProgram**
+
 - `program_id`
 - `program_name` (e.g., "Aeroplan", "Amex MR", "Scene+")
 - `program_type` (transferable_currency | airline_miles | hotel_points | fixed_value | cashback)
@@ -565,6 +578,7 @@ Five core tactics: (1) Space applications 30+ days apart, (2) leverage product s
 - `expiry_rules` (text, nullable)
 
 **TransferPartner**
+
 - `transfer_id`
 - `source_program_id` (FK — e.g., Amex MR)
 - `destination_program_id` (FK — e.g., Aeroplan)
@@ -574,6 +588,7 @@ Five core tactics: (1) Space applications 30+ days apart, (2) leverage product s
 - `periodic_bonus_typical` (text, nullable — e.g., "30% bonus 1-2x/year")
 
 **PointsBalance (current balance tracking per program per user)**
+
 - `balance_id`
 - `user_id` (FK)
 - `program_id` (FK)
@@ -581,6 +596,7 @@ Five core tactics: (1) Space applications 30+ days apart, (2) leverage product s
 - `last_updated` (date)
 
 **BonusEligibility (tracks whether a user is eligible for a specific card's bonus)**
+
 - `eligibility_id`
 - `user_id` (FK)
 - `card_id` (FK)
@@ -592,19 +608,19 @@ Five core tactics: (1) Space applications 30+ days apart, (2) leverage product s
 
 ### Key date-driven reminders the app should generate
 
-| Reminder Type | Trigger | Priority |
-|--------------|---------|----------|
-| **Minimum spend deadline approaching** | 14 days, 7 days, 3 days before MSR deadline | Critical |
-| **Annual fee renewal approaching** | 30 days before AF date — decide: keep, cancel, or PS | High |
-| **GCR holdback ending** | When safe to cancel without losing cashback (~90 days) | Medium |
-| **Cooldown period ending** | When eligible to reapply at a specific issuer | Medium |
-| **12-month card anniversary** | Minimum hold period to avoid Amex clawback | High |
-| **Product switch window** | 6 months after last PS (TD) or 90 days (RBC) | Medium |
-| **Transfer bonus alert** | When a periodic transfer bonus is active (e.g., 30% Avion→Avios) | High |
-| **Companion voucher expiry** | WestJet voucher approaching expiration | Medium |
-| **Free night certificate expiry** | Marriott Bonvoy FNA approaching 12-month expiry | Medium |
-| **Credit score check** | Monthly reminder to check both bureaus | Low |
-| **Welcome bonus second tranche** | Cards with month 13/15 bonuses (Amex Platinum, Bonvoy) | High |
+| Reminder Type                          | Trigger                                                          | Priority |
+| -------------------------------------- | ---------------------------------------------------------------- | -------- |
+| **Minimum spend deadline approaching** | 14 days, 7 days, 3 days before MSR deadline                      | Critical |
+| **Annual fee renewal approaching**     | 30 days before AF date — decide: keep, cancel, or PS             | High     |
+| **GCR holdback ending**                | When safe to cancel without losing cashback (~90 days)           | Medium   |
+| **Cooldown period ending**             | When eligible to reapply at a specific issuer                    | Medium   |
+| **12-month card anniversary**          | Minimum hold period to avoid Amex clawback                       | High     |
+| **Product switch window**              | 6 months after last PS (TD) or 90 days (RBC)                     | Medium   |
+| **Transfer bonus alert**               | When a periodic transfer bonus is active (e.g., 30% Avion→Avios) | High     |
+| **Companion voucher expiry**           | WestJet voucher approaching expiration                           | Medium   |
+| **Free night certificate expiry**      | Marriott Bonvoy FNA approaching 12-month expiry                  | Medium   |
+| **Credit score check**                 | Monthly reminder to check both bureaus                           | Low      |
+| **Welcome bonus second tranche**       | Cards with month 13/15 bonuses (Amex Platinum, Bonvoy)           | High     |
 
 ### Entity relationship summary
 
@@ -637,6 +653,7 @@ CardApplication ──── can PS to ───→ CardApplication (self-refere
 ### Suggested seed data priorities
 
 The app should ship with pre-populated reference data for:
+
 1. All current card products from the 8+ issuers documented above, with current welcome bonuses, AFs, MSRs, and earn rates
 2. Issuer rules (cooldown periods, credit bureau, max cards, PS support)
 3. All rewards programs with point valuations and transfer partner maps

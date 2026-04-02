@@ -12,8 +12,8 @@
 
 ## 1. Change History
 
-| Date | Author | Description |
-|------|--------|-------------|
+| Date       | Author          | Description                                                       |
+| ---------- | --------------- | ----------------------------------------------------------------- |
 | 2026-02-17 | Sandro & Claude | Initial creation — workshop complete. D-148 through D-156 logged. |
 
 ---
@@ -32,16 +32,16 @@ Key decisions: D-11 (unified goals concept), D-131 (budget formula), D-132 (goal
 
 ## 3. Data Model References
 
-| Entity | Role | DM-001 Ref | Amendment? |
-|--------|------|------------|------------|
-| Goal | Saving or spending target with monthly allocation | §4.11 | Yes — `is_active` → `status` enum |
-| GoalForecastItem | Optional line-item breakdown of target amount | — | Yes — new composition entity |
-| Transaction | Spending goal transactions linked via `goal_id` | §4.6 | — |
-| Purchase Type | Mutually exclusive with Goal on Transaction | §3.3 | — |
-| Budget Allocation | Goal allocations feed budget formula | §4.10 | — |
-| Income Entry | Goal allocations compared against income | §4.9 | — |
-| System Config | Alert thresholds | §— | Yes — 2 new keys |
-| Alert | Goal-related alert notifications | §4.14 | Yes — 4 new Alert Type seed values |
+| Entity            | Role                                              | DM-001 Ref | Amendment?                         |
+| ----------------- | ------------------------------------------------- | ---------- | ---------------------------------- |
+| Goal              | Saving or spending target with monthly allocation | §4.11      | Yes — `is_active` → `status` enum  |
+| GoalForecastItem  | Optional line-item breakdown of target amount     | —          | Yes — new composition entity       |
+| Transaction       | Spending goal transactions linked via `goal_id`   | §4.6       | —                                  |
+| Purchase Type     | Mutually exclusive with Goal on Transaction       | §3.3       | —                                  |
+| Budget Allocation | Goal allocations feed budget formula              | §4.10      | —                                  |
+| Income Entry      | Goal allocations compared against income          | §4.9       | —                                  |
+| System Config     | Alert thresholds                                  | §—         | Yes — 2 new keys                   |
+| Alert             | Goal-related alert notifications                  | §4.14      | Yes — 4 new Alert Type seed values |
 
 ### DM-001 Amendments
 
@@ -51,30 +51,30 @@ Remove `is_active` (Boolean). Add `status` (enum: `active`, `completed`, `cancel
 
 **2. GoalForecastItem — new composition entity (D-150)**
 
-| Attribute | Type | Nullable | Notes |
-|-----------|------|----------|-------|
-| id | UUID | No | PK |
-| goal_id | UUID | No | FK → Goal (composition parent) |
-| description | String(200) | No | Line item name |
-| estimated_amount | Decimal(15,2) | No | Estimated cost |
+| Attribute        | Type          | Nullable | Notes                          |
+| ---------------- | ------------- | -------- | ------------------------------ |
+| id               | UUID          | No       | PK                             |
+| goal_id          | UUID          | No       | FK → Goal (composition parent) |
+| description      | String(200)   | No       | Line item name                 |
+| estimated_amount | Decimal(15,2) | No       | Estimated cost                 |
 
 When forecast items exist, `Goal.target_amount` = sum of `estimated_amount` (computed, read-only on form). When no forecast items exist, `target_amount` is directly editable.
 
 **3. New System Config keys (D-156)**
 
-| Key | Default | Description |
-|-----|---------|-------------|
-| `GOAL_DEADLINE_ALERT_DAYS` | 30 | Days before target_date to fire goal_deadline_approaching alert |
-| `GOAL_SPENDING_WARNING_PCT` | 80 | Percentage of target_amount at which goal_spending_warning alert fires |
+| Key                         | Default | Description                                                            |
+| --------------------------- | ------- | ---------------------------------------------------------------------- |
+| `GOAL_DEADLINE_ALERT_DAYS`  | 30      | Days before target_date to fire goal_deadline_approaching alert        |
+| `GOAL_SPENDING_WARNING_PCT` | 80      | Percentage of target_amount at which goal_spending_warning alert fires |
 
 **4. New Alert Type seed values (D-155)**
 
-| Alert Type | Severity | Description |
-|------------|----------|-------------|
-| `goal_deadline_approaching` | Medium | Goal with target_date is behind schedule and deadline is approaching |
-| `goal_completed` | Low | Goal cumulative allocations have reached target_amount |
-| `goal_spending_warning` | Medium | Spending goal linked transactions reached warning threshold |
-| `goal_spending_overspend` | High | Spending goal linked transactions exceeded target_amount |
+| Alert Type                  | Severity | Description                                                          |
+| --------------------------- | -------- | -------------------------------------------------------------------- |
+| `goal_deadline_approaching` | Medium   | Goal with target_date is behind schedule and deadline is approaching |
+| `goal_completed`            | Low      | Goal cumulative allocations have reached target_amount               |
+| `goal_spending_warning`     | Medium   | Spending goal linked transactions reached warning threshold          |
+| `goal_spending_overspend`   | High     | Spending goal linked transactions exceeded target_amount             |
 
 ---
 
@@ -86,15 +86,15 @@ When forecast items exist, `Goal.target_amount` = sum of `estimated_amount` (com
 
 #### List Report
 
-| Column | Source | Notes |
-|--------|--------|-------|
-| Name | `name` | — |
-| Direction | `direction` | Saving / Spending with semantic color |
-| Status | `status` | Active (green), Completed (blue), Cancelled (grey) |
-| Target Amount | `target_amount` | Currency formatted |
-| Progress | Computed | % of target reached — allocation-based |
-| Monthly Allocation | `monthly_allocation` | Currency formatted |
-| Target Date | `target_date` | Blank if open-ended |
+| Column             | Source               | Notes                                              |
+| ------------------ | -------------------- | -------------------------------------------------- |
+| Name               | `name`               | —                                                  |
+| Direction          | `direction`          | Saving / Spending with semantic color              |
+| Status             | `status`             | Active (green), Completed (blue), Cancelled (grey) |
+| Target Amount      | `target_amount`      | Currency formatted                                 |
+| Progress           | Computed             | % of target reached — allocation-based             |
+| Monthly Allocation | `monthly_allocation` | Currency formatted                                 |
+| Target Date        | `target_date`        | Blank if open-ended                                |
 
 **Default filter:** `status = active`. Toggle to include completed/cancelled.
 
@@ -135,11 +135,11 @@ When forecast items exist, `Goal.target_amount` = sum of `estimated_amount` (com
 
 #### Actions
 
-| Action | Precondition | Effect |
-|--------|-------------|--------|
-| **Complete** | `status = active` | Sets `status = completed`. Goal allocation removed from budget formula next computation. |
-| **Cancel** | `status = active` | Sets `status = cancelled`. Same budget effect as Complete. |
-| **Reactivate** | `status = completed` or `cancelled` | Sets `status = active`. Goal allocation resumes in budget formula. |
+| Action         | Precondition                        | Effect                                                                                   |
+| -------------- | ----------------------------------- | ---------------------------------------------------------------------------------------- |
+| **Complete**   | `status = active`                   | Sets `status = completed`. Goal allocation removed from budget formula next computation. |
+| **Cancel**     | `status = active`                   | Sets `status = cancelled`. Same budget effect as Complete.                               |
+| **Reactivate** | `status = completed` or `cancelled` | Sets `status = active`. Goal allocation resumes in budget formula.                       |
 
 #### Transaction Linking via FRM-001 (D-151, D-152)
 
@@ -167,16 +167,16 @@ Selecting a Purchase Type from the picker:
 
 Card grid with one card per active goal:
 
-| Element | Content |
-|---------|---------|
-| Title | Goal name |
-| Subtitle | Direction badge (Saving / Spending) |
-| Progress bar | Allocation progress % toward target_amount |
-| Target Amount | ObjectNumber with currency |
-| Monthly Allocation | Below progress bar |
-| Projected Completion | Computed: `today + (remaining / monthly_allocation)` months |
-| On-Track Status | ObjectStatus — Ahead (green), On Track (neutral), Behind (red). Only shown when `target_date` is set. |
-| Actual Spend | Spending goals only — sum of linked transactions vs target |
+| Element              | Content                                                                                               |
+| -------------------- | ----------------------------------------------------------------------------------------------------- |
+| Title                | Goal name                                                                                             |
+| Subtitle             | Direction badge (Saving / Spending)                                                                   |
+| Progress bar         | Allocation progress % toward target_amount                                                            |
+| Target Amount        | ObjectNumber with currency                                                                            |
+| Monthly Allocation   | Below progress bar                                                                                    |
+| Projected Completion | Computed: `today + (remaining / monthly_allocation)` months                                           |
+| On-Track Status      | ObjectStatus — Ahead (green), On Track (neutral), Behind (red). Only shown when `target_date` is set. |
+| Actual Spend         | Spending goals only — sum of linked transactions vs target                                            |
 
 #### Section 2 — Timeline Visualization (full-width)
 
@@ -191,12 +191,12 @@ Horizontal bar chart showing all active goals:
 
 Table of completed goals:
 
-| Column | Content |
-|--------|---------|
-| Name | Goal name |
-| Direction | Saving / Spending |
-| Target Amount | Original target |
-| Duration | `start_date` to completion date |
+| Column          | Content                            |
+| --------------- | ---------------------------------- |
+| Name            | Goal name                          |
+| Direction       | Saving / Spending                  |
+| Target Amount   | Original target                    |
+| Duration        | `start_date` to completion date    |
 | Completion Date | Date status changed to `completed` |
 
 Default: collapsed. Expands on click.
@@ -212,55 +212,55 @@ Default: collapsed. Expands on click.
 
 ### FRM-008 — Goals Management
 
-| Rule | Description |
-|------|-------------|
-| BR-01 | Goal.status enum: `active`, `completed`, `cancelled`. Replaces `is_active` boolean. Default: `active` (D-148). |
-| BR-02 | Status transitions are manual only. System never auto-changes status. "Complete" and "Cancel" actions on FRM-008 object page (D-149). |
-| BR-03 | Reactivate action sets `completed` or `cancelled` back to `active`. Goal allocation resumes in budget formula (D-149). |
-| BR-04 | GoalForecastItem is a composition of Goal. Fields: `description` (String), `estimated_amount` (Decimal). Cascade delete with parent (D-150). |
-| BR-05 | When forecast items exist, `target_amount` = sum of `estimated_amount`. Field is read-only on the form (D-150). |
-| BR-06 | When no forecast items exist, `target_amount` is directly editable (D-150). |
-| BR-07 | Goal and Purchase Type are mutually exclusive on a transaction. Setting `goal_id` clears `purchase_type_ID` and vice versa (D-151). |
+| Rule  | Description                                                                                                                                       |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| BR-01 | Goal.status enum: `active`, `completed`, `cancelled`. Replaces `is_active` boolean. Default: `active` (D-148).                                    |
+| BR-02 | Status transitions are manual only. System never auto-changes status. "Complete" and "Cancel" actions on FRM-008 object page (D-149).             |
+| BR-03 | Reactivate action sets `completed` or `cancelled` back to `active`. Goal allocation resumes in budget formula (D-149).                            |
+| BR-04 | GoalForecastItem is a composition of Goal. Fields: `description` (String), `estimated_amount` (Decimal). Cascade delete with parent (D-150).      |
+| BR-05 | When forecast items exist, `target_amount` = sum of `estimated_amount`. Field is read-only on the form (D-150).                                   |
+| BR-06 | When no forecast items exist, `target_amount` is directly editable (D-150).                                                                       |
+| BR-07 | Goal and Purchase Type are mutually exclusive on a transaction. Setting `goal_id` clears `purchase_type_ID` and vice versa (D-151).               |
 | BR-08 | Active spending goals appear as a separate group in the Purchase Type picker on FRM-001. Saving goals and non-active goals do not appear (D-152). |
-| BR-09 | Linked transactions shown read-only on the Goal object page, spending goals only. Running total of linked transaction amounts displayed (D-152). |
-| BR-10 | `direction` is immutable after creation — cannot change a saving goal to spending or vice versa. |
-| BR-11 | Completing or cancelling a goal removes its `monthly_allocation` from the budget formula (SPEC-05 BR-03 only sums active goals). |
+| BR-09 | Linked transactions shown read-only on the Goal object page, spending goals only. Running total of linked transaction amounts displayed (D-152).  |
+| BR-10 | `direction` is immutable after creation — cannot change a saving goal to spending or vice versa.                                                  |
+| BR-11 | Completing or cancelling a goal removes its `monthly_allocation` from the budget formula (SPEC-05 BR-03 only sums active goals).                  |
 
 ### Progress & Status Computation
 
-| Rule | Description |
-|------|-------------|
-| BR-12 | Goal progress (saving goals) = `monthly_allocation × months_elapsed / target_amount × 100`. Computed, no contribution ledger (D-153). |
-| BR-13 | Goal progress (spending goals) = same allocation-based formula. Separately, actual spend = sum of linked transaction amounts (D-153). |
-| BR-14 | `months_elapsed` = number of full months from `start_date` to current date. Partial months counted proportionally. |
-| BR-15 | On-track status requires `target_date` (D-154). Expected progress = `(months_elapsed / total_months) × target_amount`. |
-| BR-16 | Status thresholds: Ahead = actual > expected. On Track = actual within 5% of expected. Behind = actual < 95% of expected (D-154). |
+| Rule  | Description                                                                                                                                |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| BR-12 | Goal progress (saving goals) = `monthly_allocation × months_elapsed / target_amount × 100`. Computed, no contribution ledger (D-153).      |
+| BR-13 | Goal progress (spending goals) = same allocation-based formula. Separately, actual spend = sum of linked transaction amounts (D-153).      |
+| BR-14 | `months_elapsed` = number of full months from `start_date` to current date. Partial months counted proportionally.                         |
+| BR-15 | On-track status requires `target_date` (D-154). Expected progress = `(months_elapsed / total_months) × target_amount`.                     |
+| BR-16 | Status thresholds: Ahead = actual > expected. On Track = actual within 5% of expected. Behind = actual < 95% of expected (D-154).          |
 | BR-17 | Projected completion = `today + (remaining_amount / monthly_allocation)` months. If `monthly_allocation = 0`, no projection shown (D-153). |
 
 ### Alerts
 
-| Rule | Description |
-|------|-------------|
-| BR-18 | `goal_deadline_approaching` — daily scheduled check. Fires when: `target_date` set, `status = active`, on-track status is `behind`, deadline within `GOAL_DEADLINE_ALERT_DAYS` (System Config, default 30) (D-155). |
-| BR-19 | `goal_completed` — daily scheduled check. Fires when cumulative allocations >= `target_amount`. Informational only, does not change status. Idempotent per goal (D-155). |
+| Rule  | Description                                                                                                                                                                                                                                                 |
+| ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| BR-18 | `goal_deadline_approaching` — daily scheduled check. Fires when: `target_date` set, `status = active`, on-track status is `behind`, deadline within `GOAL_DEADLINE_ALERT_DAYS` (System Config, default 30) (D-155).                                         |
+| BR-19 | `goal_completed` — daily scheduled check. Fires when cumulative allocations >= `target_amount`. Informational only, does not change status. Idempotent per goal (D-155).                                                                                    |
 | BR-20 | `goal_spending_warning` — triggered during transaction processing. Fires when sum of linked transactions >= `GOAL_SPENDING_WARNING_PCT` (System Config, default 80%) of `target_amount`. Spending goals only. Idempotent per goal per month (D-155, D-156). |
-| BR-21 | `goal_spending_overspend` — triggered during transaction processing. Fires when sum of linked transactions > `target_amount`. Spending goals only. Idempotent per goal per month (D-155). |
+| BR-21 | `goal_spending_overspend` — triggered during transaction processing. Fires when sum of linked transactions > `target_amount`. Spending goals only. Idempotent per goal per month (D-155).                                                                   |
 
 ---
 
 ## 6. Error Handling
 
-| Condition | Response | i18n Key Pattern |
-|-----------|----------|------------------|
-| Goal name empty or duplicate | `req.error()` 400 | `budget.goal.nameRequired` / `budget.goal.nameDuplicate` |
-| `target_amount` ≤ 0 (direct entry) | `req.error()` 400 | `budget.goal.invalidTargetAmount` |
-| `estimated_amount` ≤ 0 on forecast item | `req.error()` 400 | `budget.goal.invalidForecastAmount` |
-| `monthly_allocation` < 0 | `req.error()` 400 | `budget.goal.invalidAllocation` |
-| `target_date` before `start_date` | `req.error()` 400 | `budget.goal.targetDateBeforeStart` |
-| Complete/Cancel on non-active goal | `req.error()` 400 | `budget.goal.invalidStatusTransition` |
-| Reactivate on active goal | `req.error()` 400 | `budget.goal.alreadyActive` |
-| Delete goal with linked transactions | `req.error()` 400 with count | `budget.goal.hasLinkedTransactions` |
-| `monthly_allocation = 0` with active goal | Log WARN, no projected completion on RPT-011 | `budget.goal.zeroAllocation` |
+| Condition                                 | Response                                     | i18n Key Pattern                                         |
+| ----------------------------------------- | -------------------------------------------- | -------------------------------------------------------- |
+| Goal name empty or duplicate              | `req.error()` 400                            | `budget.goal.nameRequired` / `budget.goal.nameDuplicate` |
+| `target_amount` ≤ 0 (direct entry)        | `req.error()` 400                            | `budget.goal.invalidTargetAmount`                        |
+| `estimated_amount` ≤ 0 on forecast item   | `req.error()` 400                            | `budget.goal.invalidForecastAmount`                      |
+| `monthly_allocation` < 0                  | `req.error()` 400                            | `budget.goal.invalidAllocation`                          |
+| `target_date` before `start_date`         | `req.error()` 400                            | `budget.goal.targetDateBeforeStart`                      |
+| Complete/Cancel on non-active goal        | `req.error()` 400                            | `budget.goal.invalidStatusTransition`                    |
+| Reactivate on active goal                 | `req.error()` 400                            | `budget.goal.alreadyActive`                              |
+| Delete goal with linked transactions      | `req.error()` 400 with count                 | `budget.goal.hasLinkedTransactions`                      |
+| `monthly_allocation = 0` with active goal | Log WARN, no projected completion on RPT-011 | `budget.goal.zeroAllocation`                             |
 
 ---
 
@@ -677,14 +677,14 @@ None. All design questions resolved during workshop.
 
 ## 9. Cross-Spec Notes
 
-| Target Spec | Note |
-|-------------|------|
-| SPEC-05 (Budget Pipeline) | Goal.monthly_allocation feeds ENH-007 formula (BR-01/BR-03). Only active goals included in Total Goal Allocations. Completing/cancelling a goal removes its allocation. |
+| Target Spec                      | Note                                                                                                                                                                                    |
+| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| SPEC-05 (Budget Pipeline)        | Goal.monthly_allocation feeds ENH-007 formula (BR-01/BR-03). Only active goals included in Total Goal Allocations. Completing/cancelling a goal removes its allocation.                 |
 | SPEC-02 (Transaction Processing) | Amendment: FRM-001 Purchase Type picker gains a "Goals" group showing active spending goals. Selecting a goal sets `goal_id` and clears `purchase_type_ID` (mutually exclusive, D-151). |
-| SPEC-06 (Reference Data & Seed) | GoalForecastItem follows the composition object page pattern from D-93. System Config gains 2 new keys. Alert Type gains 4 new seed values. |
-| SPEC-19 (Churnboard) | RPT-001 may include a goal summary section consuming RPT-011 data. |
-| SPEC-20 (Budget Dashboard) | RPT-002 shows budget status including goal allocation impact. Goal-linked transactions excluded from category spend. |
+| SPEC-06 (Reference Data & Seed)  | GoalForecastItem follows the composition object page pattern from D-93. System Config gains 2 new keys. Alert Type gains 4 new seed values.                                             |
+| SPEC-19 (Churnboard)             | RPT-001 may include a goal summary section consuming RPT-011 data.                                                                                                                      |
+| SPEC-20 (Budget Dashboard)       | RPT-002 shows budget status including goal allocation impact. Goal-linked transactions excluded from category spend.                                                                    |
 
 ---
 
-*This spec traces to [Business Architecture](../BUSINESS_ARCHITECTURE.md) objects FRM-008, RPT-011 and [Data Model](../DATA_MODEL.md) entities listed in §3. New decisions D-148–D-156 logged in [Decisions Log](../user-profile/DECISIONS_LOG.md).*
+_This spec traces to [Business Architecture](../BUSINESS_ARCHITECTURE.md) objects FRM-008, RPT-011 and [Data Model](../DATA_MODEL.md) entities listed in §3. New decisions D-148–D-156 logged in [Decisions Log](../user-profile/DECISIONS_LOG.md)._
