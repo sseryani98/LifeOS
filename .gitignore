@@ -26,6 +26,11 @@ default-env.json
 # IDE
 .vscode/
 
+# Claude Code (keep .claude/commands/ tracked)
+.claude/settings.json
+.claude/settings.local.json
+.claude/*.md
+
 # OS
 Thumbs.db
 Desktop.ini
