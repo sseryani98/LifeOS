@@ -12,8 +12,8 @@
 
 ## 1. Change History
 
-| Date | Author | Description |
-|------|--------|-------------|
+| Date       | Author          | Description                                                       |
+| ---------- | --------------- | ----------------------------------------------------------------- |
 | 2026-02-17 | Sandro & Claude | Initial creation — workshop complete. D-123 through D-130 logged. |
 
 ---
@@ -30,34 +30,34 @@ Key decisions: D-02 (supp card rollup), D-04 (fee exclusion), D-07 (refund not r
 
 ## 3. Data Model References
 
-| Entity | Role | DM-001 Ref | Amendment? |
-|--------|------|------------|------------|
-| Offer | Links card signup to offer terms | §4.2 | — |
-| Offer Tranche | MSR thresholds, window types, bonus amounts | §4.3 | — |
-| Card Instance | Activation date, lifecycle state, supp card parent link | §4.4 | Add `statement_close_day` |
-| Earning Multiplier | Points-per-category rates per market card | §4.5 | — |
-| Transaction | Qualifying spend source for MSR and points earning | §5.1 | — |
-| Transaction Split | Full amount used for churning (not my_share) | §5.2 | — |
-| Points Adjustment | Manual and auto-created point entries | §5.3 | — |
-| Redemption | Points spent, reduces balance | §5.4 | — |
-| Rewards Program | CPP valuation for dollar conversion | §3.2 | — |
-| Earning Category | "Everything Else" as base rate catch-all | §3.4 | — |
-| Alert | MSR deadline, bonus met, bonus missed alerts | §6.1 | — |
-| System Config | MSR_DEADLINE_ALERT_DAYS parameter | §3.17 | Add config key |
+| Entity             | Role                                                    | DM-001 Ref | Amendment?                |
+| ------------------ | ------------------------------------------------------- | ---------- | ------------------------- |
+| Offer              | Links card signup to offer terms                        | §4.2       | —                         |
+| Offer Tranche      | MSR thresholds, window types, bonus amounts             | §4.3       | —                         |
+| Card Instance      | Activation date, lifecycle state, supp card parent link | §4.4       | Add `statement_close_day` |
+| Earning Multiplier | Points-per-category rates per market card               | §4.5       | —                         |
+| Transaction        | Qualifying spend source for MSR and points earning      | §5.1       | —                         |
+| Transaction Split  | Full amount used for churning (not my_share)            | §5.2       | —                         |
+| Points Adjustment  | Manual and auto-created point entries                   | §5.3       | —                         |
+| Redemption         | Points spent, reduces balance                           | §5.4       | —                         |
+| Rewards Program    | CPP valuation for dollar conversion                     | §3.2       | —                         |
+| Earning Category   | "Everything Else" as base rate catch-all                | §3.4       | —                         |
+| Alert              | MSR deadline, bonus met, bonus missed alerts            | §6.1       | —                         |
+| System Config      | MSR_DEADLINE_ALERT_DAYS parameter                       | §3.17      | Add config key            |
 
 ### DM-001 Amendments
 
 **Amendment 1 — Statement close day on Card Instance (D-124):**
 
-| New Attribute | Type | Required | Notes |
-|---------------|------|----------|-------|
-| `statement_close_day` | integer | no | Day of month (1–31) the statement closes. Required for cards with `monthly_recurring` tranches. Used by ENH-003 to compute billing period windows. |
+| New Attribute         | Type    | Required | Notes                                                                                                                                              |
+| --------------------- | ------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `statement_close_day` | integer | no       | Day of month (1–31) the statement closes. Required for cards with `monthly_recurring` tranches. Used by ENH-003 to compute billing period windows. |
 
 **System Config Addition (D-127):**
 
-| Key | Default | Description |
-|-----|---------|-------------|
-| `MSR_DEADLINE_ALERT_DAYS` | `14` | Days before MSR window/period end to generate `msr_deadline` alert |
+| Key                       | Default | Description                                                        |
+| ------------------------- | ------- | ------------------------------------------------------------------ |
+| `MSR_DEADLINE_ALERT_DAYS` | `14`    | Days before MSR window/period end to generate `msr_deadline` alert |
 
 ---
 
@@ -69,38 +69,38 @@ Key decisions: D-02 (supp card rollup), D-04 (fee exclusion), D-07 (refund not r
 
 **Outputs (per tranche):**
 
-| Field | Type | Notes |
-|-------|------|-------|
-| `tranche_number` | integer | From Offer Tranche |
-| `msr_amount` | decimal | Target spend |
-| `qualifying_spend` | decimal | Computed sum of eligible transactions |
-| `progress_pct` | decimal | `qualifying_spend / msr_amount` (capped at 1.0) |
-| `remaining` | decimal | `msr_amount - qualifying_spend` (floored at 0) |
-| `window_start` | date | Computed from activation_date + unlock_month |
-| `window_end` | date | Computed from window_start + msr_window_months |
-| `status` | enum | `pending` · `in_progress` · `met` · `missed` |
-| `days_remaining` | integer | Calendar days until window_end (null if met/missed) |
+| Field              | Type    | Notes                                               |
+| ------------------ | ------- | --------------------------------------------------- |
+| `tranche_number`   | integer | From Offer Tranche                                  |
+| `msr_amount`       | decimal | Target spend                                        |
+| `qualifying_spend` | decimal | Computed sum of eligible transactions               |
+| `progress_pct`     | decimal | `qualifying_spend / msr_amount` (capped at 1.0)     |
+| `remaining`        | decimal | `msr_amount - qualifying_spend` (floored at 0)      |
+| `window_start`     | date    | Computed from activation_date + unlock_month        |
+| `window_end`       | date    | Computed from window_start + msr_window_months      |
+| `status`           | enum    | `pending` · `in_progress` · `met` · `missed`        |
+| `days_remaining`   | integer | Calendar days until window_end (null if met/missed) |
 
 For `monthly_recurring` tranches, outputs are **per billing period** within the tranche window:
 
-| Field | Type | Notes |
-|-------|------|-------|
-| `period_number` | integer | 1 through `msr_window_months` |
-| `period_start` | date | Billing period start |
-| `period_end` | date | Billing period end |
-| `qualifying_spend` | decimal | Spend posted within this period |
-| `progress_pct` | decimal | `qualifying_spend / msr_amount` |
-| `status` | enum | `pending` · `in_progress` · `met` · `missed` |
+| Field              | Type    | Notes                                        |
+| ------------------ | ------- | -------------------------------------------- |
+| `period_number`    | integer | 1 through `msr_window_months`                |
+| `period_start`     | date    | Billing period start                         |
+| `period_end`       | date    | Billing period end                           |
+| `qualifying_spend` | decimal | Spend posted within this period              |
+| `progress_pct`     | decimal | `qualifying_spend / msr_amount`              |
+| `status`           | enum    | `pending` · `in_progress` · `met` · `missed` |
 
 **Consumers:**
 
-| Consumer | Usage |
-|----------|-------|
-| FRM-004 (My Cards) | Bonus progress tab — tranche list with progress bars |
-| RPT-001 (Churnboard) | Bonus progress section — cards with active MSR windows |
-| WFL-002 (Card Lifecycle) | Focus→Active transition trigger when all tranches met |
-| ENH-002 (Card Recommendation) | Wave 2 — factors remaining MSR into recommendations |
-| ENH-005 (Card Profitability) | Wave 2 — bonus value as profitability input |
+| Consumer                      | Usage                                                  |
+| ----------------------------- | ------------------------------------------------------ |
+| FRM-004 (My Cards)            | Bonus progress tab — tranche list with progress bars   |
+| RPT-001 (Churnboard)          | Bonus progress section — cards with active MSR windows |
+| WFL-002 (Card Lifecycle)      | Focus→Active transition trigger when all tranches met  |
+| ENH-002 (Card Recommendation) | Wave 2 — factors remaining MSR into recommendations    |
+| ENH-005 (Card Profitability)  | Wave 2 — bonus value as profitability input            |
 
 #### One-Time Tranche Computation
 
@@ -141,15 +141,15 @@ Offer tranches:
 
 Window: 2026-01-15 → 2026-04-14 (both tranches share the same window).
 
-| Date | Transaction | Running Total |
-|------|-------------|---------------|
-| Jan 20 | Grocery $200 | $200 |
-| Feb 5 | Gas $80 | $280 |
-| Feb 15 | Electronics $1,300 | $1,580 |
-| Mar 1 | Annual Fee $139 | $1,580 (fee excluded) |
-| Mar 10 | Dining $120 | $1,700 |
-| Mar 20 | Refund +$50 | $1,700 (refund excluded, not reversed) |
-| Apr 1 | Travel $1,400 | $3,100 |
+| Date   | Transaction        | Running Total                          |
+| ------ | ------------------ | -------------------------------------- |
+| Jan 20 | Grocery $200       | $200                                   |
+| Feb 5  | Gas $80            | $280                                   |
+| Feb 15 | Electronics $1,300 | $1,580                                 |
+| Mar 1  | Annual Fee $139    | $1,580 (fee excluded)                  |
+| Mar 10 | Dining $120        | $1,700                                 |
+| Mar 20 | Refund +$50        | $1,700 (refund excluded, not reversed) |
+| Apr 1  | Travel $1,400      | $3,100                                 |
 
 Result:
 
@@ -160,12 +160,12 @@ Result:
 
 Card: Amex Cobalt, activated 2026-02-10. Statement closes on 15th. `msr_amount = $500/month`, `bonus_amount = 2,500 MR`, `msr_window_months = 12`.
 
-| Period | Window | Spend | Status | Points |
-|--------|--------|-------|--------|--------|
-| 1 | Feb 10 – Mar 14 | $620 | met | 2,500 MR |
-| 2 | Mar 15 – Apr 14 | $380 | missed | 0 |
-| 3 | Apr 15 – May 14 | $510 | met | 2,500 MR |
-| … | … | … | … | … |
+| Period | Window          | Spend | Status | Points   |
+| ------ | --------------- | ----- | ------ | -------- |
+| 1      | Feb 10 – Mar 14 | $620  | met    | 2,500 MR |
+| 2      | Mar 15 – Apr 14 | $380  | missed | 0        |
+| 3      | Apr 15 – May 14 | $510  | met    | 2,500 MR |
+| …      | …               | …     | …      | …        |
 
 Period 1 excess ($120) does NOT carry to Period 2. Period 2 is evaluated on its own $380.
 
@@ -186,11 +186,11 @@ When a tranche or monthly period status flips to `met`:
 
 #### Alert Generation
 
-| Alert Type | Trigger | Timing |
-|------------|---------|--------|
+| Alert Type     | Trigger                                    | Timing                                                                         |
+| -------------- | ------------------------------------------ | ------------------------------------------------------------------------------ |
 | `msr_deadline` | Window/period end approaching, MSR not met | `MSR_DEADLINE_ALERT_DAYS` (System Config, default 14) before window/period end |
-| `bonus_met` | Qualifying spend crosses tranche threshold | Immediately on evaluation |
-| `bonus_missed` | Window/period closes below threshold | On daily scheduled check |
+| `bonus_met`    | Qualifying spend crosses tranche threshold | Immediately on evaluation                                                      |
+| `bonus_missed` | Window/period closes below threshold       | On daily scheduled check                                                       |
 
 Alert entity fields:
 
@@ -202,10 +202,10 @@ Alert entity fields:
 
 #### Evaluation Triggers (D-128)
 
-| Trigger | Evaluates | Timing |
-|---------|-----------|--------|
-| Transaction processing | Progress recalculation for the card's in-progress tranches | After each new transaction is ingested/categorized |
-| Daily scheduled check | Time-based alerts (deadline, missed) across all active cards | Once daily (node-cron) |
+| Trigger                | Evaluates                                                    | Timing                                             |
+| ---------------------- | ------------------------------------------------------------ | -------------------------------------------------- |
+| Transaction processing | Progress recalculation for the card's in-progress tranches   | After each new transaction is ingested/categorized |
+| Daily scheduled check  | Time-based alerts (deadline, missed) across all active cards | Once daily (node-cron)                             |
 
 ### 4.2 ENH-006 — Points Balance & Valuation [Enhancement]
 
@@ -213,37 +213,37 @@ Alert entity fields:
 
 **Outputs (per rewards program):**
 
-| Field | Type | Notes |
-|-------|------|-------|
-| `rewards_program_id` | UUID | |
-| `program_name` | string | |
-| `currency_name` | string | "points", "MR", "miles" |
-| `points_earned` | integer | From transactions |
-| `points_adjusted` | integer | Net adjustments (signup bonus, referral, transfers, corrections) |
-| `points_redeemed` | integer | Sum of Redemption.points_spent |
-| `total_balance` | integer | `points_earned + points_adjusted - points_redeemed` |
-| `cpp_valuation` | decimal | From Rewards Program |
-| `dollar_value` | decimal | `total_balance × cpp_valuation / 100` |
-| `card_breakdown` | array | Per-card contribution detail |
+| Field                | Type    | Notes                                                            |
+| -------------------- | ------- | ---------------------------------------------------------------- |
+| `rewards_program_id` | UUID    |                                                                  |
+| `program_name`       | string  |                                                                  |
+| `currency_name`      | string  | "points", "MR", "miles"                                          |
+| `points_earned`      | integer | From transactions                                                |
+| `points_adjusted`    | integer | Net adjustments (signup bonus, referral, transfers, corrections) |
+| `points_redeemed`    | integer | Sum of Redemption.points_spent                                   |
+| `total_balance`      | integer | `points_earned + points_adjusted - points_redeemed`              |
+| `cpp_valuation`      | decimal | From Rewards Program                                             |
+| `dollar_value`       | decimal | `total_balance × cpp_valuation / 100`                            |
+| `card_breakdown`     | array   | Per-card contribution detail                                     |
 
 **Per-card breakdown:**
 
-| Field | Type | Notes |
-|-------|------|-------|
-| `card_instance_id` | UUID | |
-| `card_name` | string | Market Card name |
-| `points_earned` | integer | From this card's transactions |
-| `points_adjusted` | integer | Adjustments linked to this card |
-| `points_redeemed` | integer | Redemptions linked to this card |
-| `card_total` | integer | Net for this card |
+| Field              | Type    | Notes                           |
+| ------------------ | ------- | ------------------------------- |
+| `card_instance_id` | UUID    |                                 |
+| `card_name`        | string  | Market Card name                |
+| `points_earned`    | integer | From this card's transactions   |
+| `points_adjusted`  | integer | Adjustments linked to this card |
+| `points_redeemed`  | integer | Redemptions linked to this card |
+| `card_total`       | integer | Net for this card               |
 
 **Consumers:**
 
-| Consumer | Usage |
-|----------|-------|
-| RPT-001 (Churnboard) | Points balances section — per-program totals with dollar values |
-| RPT-010 (Points Program Dashboard) | Detailed per-program analytics with card breakdowns |
-| ENH-005 (Card Profitability) | Wave 2 — points earned per card as revenue input |
+| Consumer                           | Usage                                                           |
+| ---------------------------------- | --------------------------------------------------------------- |
+| RPT-001 (Churnboard)               | Points balances section — per-program totals with dollar values |
+| RPT-010 (Points Program Dashboard) | Detailed per-program analytics with card breakdowns             |
+| ENH-005 (Card Profitability)       | Wave 2 — points earned per card as revenue input                |
 
 #### Points Earned per Transaction
 
@@ -285,15 +285,15 @@ Cards earning Aeroplan:
 - CIBC Aventura: 12,000 pts earned from transactions
 - Program-level: 5,000 referral adjustment, −30,000 redemption
 
-| Component | Points |
-|-----------|--------|
-| TD Aeroplan earned | 45,000 |
-| TD Aeroplan signup bonus | +50,000 |
-| CIBC Aventura earned | 12,000 |
-| Referral (program-level) | +5,000 |
-| Redemption | −30,000 |
-| **Total Balance** | **82,000** |
-| **Dollar Value** | **$1,476.00** (82,000 × 1.8 / 100) |
+| Component                | Points                             |
+| ------------------------ | ---------------------------------- |
+| TD Aeroplan earned       | 45,000                             |
+| TD Aeroplan signup bonus | +50,000                            |
+| CIBC Aventura earned     | 12,000                             |
+| Referral (program-level) | +5,000                             |
+| Redemption               | −30,000                            |
+| **Total Balance**        | **82,000**                         |
+| **Dollar Value**         | **$1,476.00** (82,000 × 1.8 / 100) |
 
 ---
 
@@ -301,56 +301,56 @@ Cards earning Aeroplan:
 
 ### ENH-003 — Signup Bonus Tracker
 
-| Rule | Description |
-|------|-------------|
-| BR-01 | Each Offer Tranche defines an independent MSR window. Window start = `activation_date + (unlock_month - 1) months`. Window duration = `msr_window_months`. |
+| Rule  | Description                                                                                                                                                                                                      |
+| ----- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| BR-01 | Each Offer Tranche defines an independent MSR window. Window start = `activation_date + (unlock_month - 1) months`. Window duration = `msr_window_months`.                                                       |
 | BR-02 | For `msr_window_type = one_time`: qualifying spend = sum of eligible charge transactions within the window. Tranches with the same window are cumulative — spend counts toward all overlapping tranches (D-125). |
-| BR-03 | For `msr_window_type = monthly_recurring`: each billing period (based on `statement_close_day`) is evaluated independently. No carryover between periods (D-123). |
-| BR-04 | Supplementary card spend rolls up to the parent card for MSR progress (D-02). |
-| BR-05 | Fee transactions (Purchase Type = "Credit Card Fee") are excluded from qualifying spend (D-04). |
-| BR-06 | Refunds (positive amounts) are excluded from qualifying spend but do not reverse previously met progress (D-07). |
-| BR-07 | Tranche status progression: `pending` → `in_progress` → `met` or `missed`. Monthly recurring has per-period status. |
-| BR-08 | When a tranche or monthly period flips to `met`, auto-create a Points Adjustment (`adjustment_type = signup_bonus`, `amount = bonus_amount`). One per met period for monthly recurring (D-126). |
-| BR-09 | Points Adjustment auto-creation is idempotent — no duplicate if adjustment already exists for this tranche/period. |
-| BR-10 | `msr_deadline` alert fires when window/period end is within `MSR_DEADLINE_ALERT_DAYS` (System Config, default 14 days) and MSR not yet met (D-127). |
-| BR-11 | `bonus_met` alert fires when qualifying spend crosses the tranche threshold. |
-| BR-12 | `bonus_missed` alert fires when a window/period closes below threshold. |
-| BR-13 | Progress evaluation triggered by transaction processing (new transactions) and daily scheduled check (time-based alerts) (D-128). |
+| BR-03 | For `msr_window_type = monthly_recurring`: each billing period (based on `statement_close_day`) is evaluated independently. No carryover between periods (D-123).                                                |
+| BR-04 | Supplementary card spend rolls up to the parent card for MSR progress (D-02).                                                                                                                                    |
+| BR-05 | Fee transactions (Purchase Type = "Credit Card Fee") are excluded from qualifying spend (D-04).                                                                                                                  |
+| BR-06 | Refunds (positive amounts) are excluded from qualifying spend but do not reverse previously met progress (D-07).                                                                                                 |
+| BR-07 | Tranche status progression: `pending` → `in_progress` → `met` or `missed`. Monthly recurring has per-period status.                                                                                              |
+| BR-08 | When a tranche or monthly period flips to `met`, auto-create a Points Adjustment (`adjustment_type = signup_bonus`, `amount = bonus_amount`). One per met period for monthly recurring (D-126).                  |
+| BR-09 | Points Adjustment auto-creation is idempotent — no duplicate if adjustment already exists for this tranche/period.                                                                                               |
+| BR-10 | `msr_deadline` alert fires when window/period end is within `MSR_DEADLINE_ALERT_DAYS` (System Config, default 14 days) and MSR not yet met (D-127).                                                              |
+| BR-11 | `bonus_met` alert fires when qualifying spend crosses the tranche threshold.                                                                                                                                     |
+| BR-12 | `bonus_missed` alert fires when a window/period closes below threshold.                                                                                                                                          |
+| BR-13 | Progress evaluation triggered by transaction processing (new transactions) and daily scheduled check (time-based alerts) (D-128).                                                                                |
 
 ### ENH-006 — Points Balance & Valuation
 
-| Rule | Description |
-|------|-------------|
-| BR-14 | Points earned per transaction = `|amount| × earning multiplier` for the transaction's earning category on that card's market card. |
-| BR-15 | Multiplier matched by transaction `posted_at` within the multiplier's `[effective_from, effective_to]` range (D-40). |
-| BR-16 | Base earn rate modeled as an Earning Multiplier row with earning category "Everything Else". Every market card should have this row. |
-| BR-17 | Refund transactions (positive amounts) are excluded from points computation. Manual corrections via Points Adjustment (D-129). |
-| BR-18 | Points Balance per Program = Σ(transaction points) + Σ(Points Adjustments) − Σ(Redemptions.points_spent). |
+| Rule  | Description                                                                                                                                                                             |
+| ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | ---------------------------------------------------------------------------------------- |
+| BR-14 | Points earned per transaction = `                                                                                                                                                       | amount | × earning multiplier` for the transaction's earning category on that card's market card. |
+| BR-15 | Multiplier matched by transaction `posted_at` within the multiplier's `[effective_from, effective_to]` range (D-40).                                                                    |
+| BR-16 | Base earn rate modeled as an Earning Multiplier row with earning category "Everything Else". Every market card should have this row.                                                    |
+| BR-17 | Refund transactions (positive amounts) are excluded from points computation. Manual corrections via Points Adjustment (D-129).                                                          |
+| BR-18 | Points Balance per Program = Σ(transaction points) + Σ(Points Adjustments) − Σ(Redemptions.points_spent).                                                                               |
 | BR-19 | Per-card breakdown available within each program total (D-130). Program-level adjustments/redemptions (card_instance_id = null) included in program total but not attributed to a card. |
-| BR-20 | Dollar valuation = `total_balance × cpp_valuation / 100`. Changing CPP revalues the entire balance immediately. |
-| BR-21 | No alerts generated by ENH-006. |
+| BR-20 | Dollar valuation = `total_balance × cpp_valuation / 100`. Changing CPP revalues the entire balance immediately.                                                                         |
+| BR-21 | No alerts generated by ENH-006.                                                                                                                                                         |
 
 ---
 
 ## 6. Error Handling
 
-| Condition | Response | i18n Key Pattern |
-|-----------|----------|------------------|
-| Card Instance has no activation_date | Skip MSR computation for this card; log WARN | `churning.bonus.noActivationDate` |
-| Card Instance has monthly_recurring tranche but no statement_close_day | Skip monthly evaluation; generate WARN alert | `churning.bonus.noStatementDay` |
-| Offer Tranche has unlock_month but activation_date would place window in the past | Evaluate normally — status will be `met` or `missed` based on historical transactions | — |
-| Earning Multiplier not found for transaction's earning category + card | Use "Everything Else" multiplier. If that's also missing, log WARN, earn 0 points | `churning.points.noMultiplier` |
-| CPP valuation is 0 or null on Rewards Program | Dollar value = 0; log WARN | `churning.points.noCppValuation` |
-| Daily scheduled check fails | Log ERROR, retry on next scheduled run | `churning.scheduler.evaluationFailed` |
-| Duplicate Points Adjustment detected (idempotency check) | Skip creation silently; log INFO | — |
+| Condition                                                                         | Response                                                                              | i18n Key Pattern                      |
+| --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------- |
+| Card Instance has no activation_date                                              | Skip MSR computation for this card; log WARN                                          | `churning.bonus.noActivationDate`     |
+| Card Instance has monthly_recurring tranche but no statement_close_day            | Skip monthly evaluation; generate WARN alert                                          | `churning.bonus.noStatementDay`       |
+| Offer Tranche has unlock_month but activation_date would place window in the past | Evaluate normally — status will be `met` or `missed` based on historical transactions | —                                     |
+| Earning Multiplier not found for transaction's earning category + card            | Use "Everything Else" multiplier. If that's also missing, log WARN, earn 0 points     | `churning.points.noMultiplier`        |
+| CPP valuation is 0 or null on Rewards Program                                     | Dollar value = 0; log WARN                                                            | `churning.points.noCppValuation`      |
+| Daily scheduled check fails                                                       | Log ERROR, retry on next scheduled run                                                | `churning.scheduler.evaluationFailed` |
+| Duplicate Points Adjustment detected (idempotency check)                          | Skip creation silently; log INFO                                                      | —                                     |
 
 ---
 
 ## 7. Open Items
 
-| OI | Resolution |
-|----|------------|
-| OI-04 | Card status transition rules remain open — addressed by SPEC-03 (Card Lifecycle). ENH-003 provides the data for WFL-002's Focus→Active trigger but does not own the transition. |
+| OI    | Resolution                                                                                                                                                                                 |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| OI-04 | Card status transition rules remain open — addressed by SPEC-03 (Card Lifecycle). ENH-003 provides the data for WFL-002's Focus→Active trigger but does not own the transition.            |
 | OI-06 | Partially resolved. MSR-related alerts (msr_deadline, bonus_met, bonus_missed) defined in this spec. Other alert types (AF renewals, perk expirations) deferred to their respective specs. |
 
 ---
@@ -878,16 +878,16 @@ Cards earning Aeroplan:
 
 ## 9. Cross-Spec Notes
 
-| Target Spec | Note |
-|-------------|------|
-| SPEC-01 (Ingestion Pipeline) | New transactions trigger ENH-003 progress evaluation as part of transaction processing. |
-| SPEC-02 (Transaction Processing) | Churning metrics use full `transaction.amount`, not `my_share_amount` from splits. Fee transactions identified by Purchase Type = "Credit Card Fee" (D-04). |
-| SPEC-03 (Card Lifecycle) | ENH-003 provides tranche progress data for WFL-002's Focus→Active transition. All tranches `met` is the trigger condition. |
-| SPEC-06 (Reference Data & Seed) | Alert types seeded: msr_deadline, bonus_met, bonus_missed. Adjustment type seeded: signup_bonus. System Config key: MSR_DEADLINE_ALERT_DAYS. Every Market Card should have an "Everything Else" Earning Multiplier row. |
-| SPEC-08 (Card Profitability) | ENH-005 consumes per-card points earned from ENH-006 as a revenue input. |
-| SPEC-07 (Card Recommendation) | ENH-002 factors remaining MSR from ENH-003 into card recommendations. |
-| SPEC-19 (Churnboard) | RPT-001 displays bonus progress (ENH-003) and points balances (ENH-006) sections. |
+| Target Spec                      | Note                                                                                                                                                                                                                    |
+| -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| SPEC-01 (Ingestion Pipeline)     | New transactions trigger ENH-003 progress evaluation as part of transaction processing.                                                                                                                                 |
+| SPEC-02 (Transaction Processing) | Churning metrics use full `transaction.amount`, not `my_share_amount` from splits. Fee transactions identified by Purchase Type = "Credit Card Fee" (D-04).                                                             |
+| SPEC-03 (Card Lifecycle)         | ENH-003 provides tranche progress data for WFL-002's Focus→Active transition. All tranches `met` is the trigger condition.                                                                                              |
+| SPEC-06 (Reference Data & Seed)  | Alert types seeded: msr_deadline, bonus_met, bonus_missed. Adjustment type seeded: signup_bonus. System Config key: MSR_DEADLINE_ALERT_DAYS. Every Market Card should have an "Everything Else" Earning Multiplier row. |
+| SPEC-08 (Card Profitability)     | ENH-005 consumes per-card points earned from ENH-006 as a revenue input.                                                                                                                                                |
+| SPEC-07 (Card Recommendation)    | ENH-002 factors remaining MSR from ENH-003 into card recommendations.                                                                                                                                                   |
+| SPEC-19 (Churnboard)             | RPT-001 displays bonus progress (ENH-003) and points balances (ENH-006) sections.                                                                                                                                       |
 
 ---
 
-*This spec traces to [Business Architecture](../BUSINESS_ARCHITECTURE.md) objects ENH-003, ENH-006 and [Data Model](../DATA_MODEL.md) entities listed in §3. New decisions D-123–D-130 logged in [Decisions Log](../user-profile/DECISIONS_LOG.md).*
+_This spec traces to [Business Architecture](../BUSINESS_ARCHITECTURE.md) objects ENH-003, ENH-006 and [Data Model](../DATA_MODEL.md) entities listed in §3. New decisions D-123–D-130 logged in [Decisions Log](../user-profile/DECISIONS_LOG.md)._

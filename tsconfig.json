@@ -15,6 +15,7 @@
     "rootDir": ".",
     "forceConsistentCasingInFileNames": true,
     "sourceMap": true,
+    "types": ["jest", "node", "sap__cds"],
     "paths": {
       "@sap/cds": ["./node_modules/@cap-js/cds-types"],
       "#cds-models/*": ["./@cds-models/*"]

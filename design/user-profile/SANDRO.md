@@ -1,6 +1,7 @@
 # User Profile: Sandro
 
 ## Background
+
 - SAP implementation consultant (full-time job - large enterprise implementations)
 - Credit card churner in Canada (hobby, started ~2023)
 - Comfortable with structured design methodologies (FRICEW, BBP, FS, TS)
@@ -8,6 +9,7 @@
 - Thinks in terms of master data, transactional data, and reference data
 
 ## Working Style
+
 - Likes structured, phased approaches
 - Wants to validate problem statements before jumping to solutions
 - Prefers guided conversations over being handed a finished document — **never dump a complete draft; interview topic by topic**
@@ -20,6 +22,7 @@
 - Says "approved!" explicitly when satisfied — wait for this clear signal
 
 ## Design Preferences
+
 - SAP FRICEW object decomposition for tracking design artifacts
 - Each object gets a unique ID for traceability
 - Prefers diagrams and tables over walls of text
@@ -32,6 +35,7 @@
 - Provides real data samples to drive design (actual CSV exports from all issuers in `design/actual-csvs/`)
 
 ## Technical Preferences
+
 - **Expert in SAP CAP + SAPUI5/Fiori** (JavaScript) — this is his day job on large enterprise implementations
 - Knows Express decently
 - TypeScript is new — this project is the learning opportunity (JavaScript background makes it a natural transition)
@@ -43,6 +47,7 @@
 - **Next.js is permanently off the table** — personal choice, will not reconsider
 
 ## What Frustrates Sandro
+
 - Manual effort that could be automated (killed his Excel approach)
 - Tools that require too much upkeep to be useful
 - Monolithic documents that mix concerns (spec was 1000 lines of everything)
@@ -52,6 +57,7 @@
 - Too many confidence/status indicators cluttering the UI ("too much")
 
 ## What Motivates Sandro
+
 - Seeing churning performance in dollars ("is this hobby profitable?")
 - Knowing exactly where money goes without manually tracking every transaction
 - The "trophy case" of great redemptions (business class flights, hotel stays)
@@ -59,6 +65,7 @@
 - Clean data models and well-structured systems
 
 ## Financial Context
+
 - Currency: CAD
 - Income: Mix of stable and variable
 - Active churner: 13+ cards, 4 issuers, 6-8 new cards/year
@@ -68,6 +75,7 @@
 - Weekly financial review session: 15-20 minutes
 
 ## Communication Preferences
+
 - Direct and concise
 - One topic at a time for complex decisions
 - Prefers being asked questions over being told answers

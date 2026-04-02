@@ -12,10 +12,10 @@
 
 ## 1. Change History
 
-| Date | Author | Description |
-|------|--------|-------------|
+| Date       | Author          | Description                                                       |
+| ---------- | --------------- | ----------------------------------------------------------------- |
 | 2026-02-18 | Sandro & Claude | Initial creation — workshop complete. D-177 through D-187 logged. |
-| 2026-02-18 | Sandro | Approved. |
+| 2026-02-18 | Sandro          | Approved.                                                         |
 
 ---
 
@@ -29,83 +29,83 @@ Key decisions: D-14 (market card offer database), D-48 (cheerio + axios), D-49 (
 
 ## 3. Data Model References
 
-| Entity | Role | DM-001 Ref | Amendment? |
-|--------|------|------------|------------|
-| Market Card | Target for scraped card data | §4.1 | Add `source_url` (text, optional), `last_scrape_hash` (text, optional) |
-| Offer | Target for scraped/historical offers | §4.2 | — |
-| Offer Tranche | Target for offer tranche details | §4.3 | — |
-| Earning Multiplier | Target for scraped earning rates | §4.5 | — |
-| Soft Perk Definition | Target for scraped perks | §4.6 | — |
-| Issuer | FK lookup for scraped issuer names | §3.1 | — |
-| Rewards Program | FK lookup for scraped program names | §3.2 | — |
-| Earning Category | FK lookup for scraped earning labels | §3.4 | — |
-| Card Network | FK lookup for scraped network | §3.13 | — |
-| Perk Type | FK lookup for scraped perk labels | §3.9 | — |
-| Program Tier | FK lookup for Aeroplan tier | §3.16 | — |
-| Alert | OFFERS_PENDING_APPROVAL alert | §6.1 | — |
-| Alert Type | New seed value | §3.11 | Add `offers_pending_approval` to seed |
-| System Config | Scraper configuration parameters | §3.17 | Add 4 new parameters |
-| **Scrape Run** | **NEW** — One row per scraper execution | — | New entity (D-181) |
-| **Scrape Queue Item** | **NEW** — Staged change pending approval | — | New entity (D-181) |
-| **Scrape Mapping** | **NEW** — PoT label → internal FK resolution | — | New entity (D-182) |
+| Entity                | Role                                         | DM-001 Ref | Amendment?                                                             |
+| --------------------- | -------------------------------------------- | ---------- | ---------------------------------------------------------------------- |
+| Market Card           | Target for scraped card data                 | §4.1       | Add `source_url` (text, optional), `last_scrape_hash` (text, optional) |
+| Offer                 | Target for scraped/historical offers         | §4.2       | —                                                                      |
+| Offer Tranche         | Target for offer tranche details             | §4.3       | —                                                                      |
+| Earning Multiplier    | Target for scraped earning rates             | §4.5       | —                                                                      |
+| Soft Perk Definition  | Target for scraped perks                     | §4.6       | —                                                                      |
+| Issuer                | FK lookup for scraped issuer names           | §3.1       | —                                                                      |
+| Rewards Program       | FK lookup for scraped program names          | §3.2       | —                                                                      |
+| Earning Category      | FK lookup for scraped earning labels         | §3.4       | —                                                                      |
+| Card Network          | FK lookup for scraped network                | §3.13      | —                                                                      |
+| Perk Type             | FK lookup for scraped perk labels            | §3.9       | —                                                                      |
+| Program Tier          | FK lookup for Aeroplan tier                  | §3.16      | —                                                                      |
+| Alert                 | OFFERS_PENDING_APPROVAL alert                | §6.1       | —                                                                      |
+| Alert Type            | New seed value                               | §3.11      | Add `offers_pending_approval` to seed                                  |
+| System Config         | Scraper configuration parameters             | §3.17      | Add 4 new parameters                                                   |
+| **Scrape Run**        | **NEW** — One row per scraper execution      | —          | New entity (D-181)                                                     |
+| **Scrape Queue Item** | **NEW** — Staged change pending approval     | —          | New entity (D-181)                                                     |
+| **Scrape Mapping**    | **NEW** — PoT label → internal FK resolution | —          | New entity (D-182)                                                     |
 
 ### Scrape Run (NEW — D-181)
 
-| Attribute | Type | Required | Notes |
-|-----------|------|----------|-------|
-| id | PK | yes | |
-| started_at | timestamp | yes | |
-| completed_at | timestamp | no | Null while running |
-| mode | enum | yes | `scheduled` · `manual` · `bulk` |
-| status | enum | yes | `running` · `completed` · `failed` |
-| cards_discovered | integer | no | Total cards found on PoT index |
-| cards_scraped | integer | no | Cards where detail page was fetched |
-| cards_changed | integer | no | Cards with detected changes |
-| cards_skipped | integer | no | Cards skipped (unchanged hash or fetch error) |
+| Attribute        | Type      | Required | Notes                                         |
+| ---------------- | --------- | -------- | --------------------------------------------- |
+| id               | PK        | yes      |                                               |
+| started_at       | timestamp | yes      |                                               |
+| completed_at     | timestamp | no       | Null while running                            |
+| mode             | enum      | yes      | `scheduled` · `manual` · `bulk`               |
+| status           | enum      | yes      | `running` · `completed` · `failed`            |
+| cards_discovered | integer   | no       | Total cards found on PoT index                |
+| cards_scraped    | integer   | no       | Cards where detail page was fetched           |
+| cards_changed    | integer   | no       | Cards with detected changes                   |
+| cards_skipped    | integer   | no       | Cards skipped (unchanged hash or fetch error) |
 
 ### Scrape Queue Item (NEW — D-181)
 
-| Attribute | Type | Required | Notes |
-|-----------|------|----------|-------|
-| id | PK | yes | |
-| scrape_run_id | FK → Scrape Run | yes | |
-| source_url | text | yes | PoT card detail page URL |
-| change_type | enum | yes | `new_card` · `offer_change` · `multiplier_change` · `perk_change` |
-| status | enum | yes | `queued` · `approved` · `rejected` |
-| proposed_data | text (JSON) | yes | Scraped values as structured JSON |
-| existing_data | text (JSON) | no | Current DB values for diff (null for new cards) |
-| market_card_id | FK → Market Card | no | Set for changes to existing cards; null for new cards |
-| card_segment | enum | no | `personal` · `business` — user sets during approval |
-| rejection_reason | text | no | User-provided on reject |
-| resolved_at | timestamp | no | When approved or rejected |
-| has_unresolved_mappings | boolean | yes | True if any scraped labels couldn't be auto-mapped |
+| Attribute               | Type             | Required | Notes                                                             |
+| ----------------------- | ---------------- | -------- | ----------------------------------------------------------------- |
+| id                      | PK               | yes      |                                                                   |
+| scrape_run_id           | FK → Scrape Run  | yes      |                                                                   |
+| source_url              | text             | yes      | PoT card detail page URL                                          |
+| change_type             | enum             | yes      | `new_card` · `offer_change` · `multiplier_change` · `perk_change` |
+| status                  | enum             | yes      | `queued` · `approved` · `rejected`                                |
+| proposed_data           | text (JSON)      | yes      | Scraped values as structured JSON                                 |
+| existing_data           | text (JSON)      | no       | Current DB values for diff (null for new cards)                   |
+| market_card_id          | FK → Market Card | no       | Set for changes to existing cards; null for new cards             |
+| card_segment            | enum             | no       | `personal` · `business` — user sets during approval               |
+| rejection_reason        | text             | no       | User-provided on reject                                           |
+| resolved_at             | timestamp        | no       | When approved or rejected                                         |
+| has_unresolved_mappings | boolean          | yes      | True if any scraped labels couldn't be auto-mapped                |
 
 ### Scrape Mapping (NEW — D-182)
 
-| Attribute | Type | Required | Notes |
-|-----------|------|----------|-------|
-| id | PK | yes | |
-| entity_type | enum | yes | `EarningCategory` · `Issuer` · `RewardsProgram` · `PerkType` · `CardNetwork` |
-| source_text | text | yes | PoT label (e.g., "Hotels & Car Rentals") |
-| target_id | UUID | yes | FK to the corresponding reference data entity |
+| Attribute   | Type | Required | Notes                                                                        |
+| ----------- | ---- | -------- | ---------------------------------------------------------------------------- |
+| id          | PK   | yes      |                                                                              |
+| entity_type | enum | yes      | `EarningCategory` · `Issuer` · `RewardsProgram` · `PerkType` · `CardNetwork` |
+| source_text | text | yes      | PoT label (e.g., "Hotels & Car Rentals")                                     |
+| target_id   | UUID | yes      | FK to the corresponding reference data entity                                |
 
 Unique constraint on (`entity_type`, `source_text`).
 
 ### Market Card Amendments
 
-| New Attribute | Type | Required | Notes |
-|---------------|------|----------|-------|
-| source_url | text | no | PoT detail page URL (e.g., `https://princeoftravel.com/credit-cards/amex-cobalt/`). Used as matching key for change detection. |
-| last_scrape_hash | text | no | SHA-256 hash of last scraped page content. Null = never scraped. |
+| New Attribute    | Type | Required | Notes                                                                                                                          |
+| ---------------- | ---- | -------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| source_url       | text | no       | PoT detail page URL (e.g., `https://princeoftravel.com/credit-cards/amex-cobalt/`). Used as matching key for change detection. |
+| last_scrape_hash | text | no       | SHA-256 hash of last scraped page content. Null = never scraped.                                                               |
 
 ### System Config — New Parameters
 
-| Key | Default | Description |
-|-----|---------|-------------|
-| SCRAPER_ENABLED | true | Enable/disable weekly scheduled scraping |
-| SCRAPER_DAY_OF_WEEK | 0 | Day of week for scheduled scrape (0=Sunday, 6=Saturday) |
-| SCRAPER_DELAY_MS | 1500 | Milliseconds delay between page fetches (polite scraping) |
-| SCRAPER_RETRY_ATTEMPTS | 3 | HTTP retry count per individual card page |
+| Key                    | Default | Description                                               |
+| ---------------------- | ------- | --------------------------------------------------------- |
+| SCRAPER_ENABLED        | true    | Enable/disable weekly scheduled scraping                  |
+| SCRAPER_DAY_OF_WEEK    | 0       | Day of week for scheduled scrape (0=Sunday, 6=Saturday)   |
+| SCRAPER_DELAY_MS       | 1500    | Milliseconds delay between page fetches (polite scraping) |
+| SCRAPER_RETRY_ATTEMPTS | 3       | HTTP retry count per individual card page                 |
 
 ---
 
@@ -115,13 +115,13 @@ Unique constraint on (`entity_type`, `source_text`).
 
 **Data Source:**
 
-| Element | Detail |
-|---------|--------|
-| Source | Prince of Travel (princeoftravel.com) — sole V1 source (D-178) |
-| Index URL | `https://princeoftravel.com/credit-cards/` — paginated, ~98 cards across ~13 pages |
-| Detail URL | `https://princeoftravel.com/credit-cards/{slug}/` — full card data |
-| Libraries | cheerio + axios (D-48). Puppeteer fallback if PoT adds JS-rendered content. |
-| Protocol | HTTPS GET, no authentication |
+| Element    | Detail                                                                             |
+| ---------- | ---------------------------------------------------------------------------------- |
+| Source     | Prince of Travel (princeoftravel.com) — sole V1 source (D-178)                     |
+| Index URL  | `https://princeoftravel.com/credit-cards/` — paginated, ~98 cards across ~13 pages |
+| Detail URL | `https://princeoftravel.com/credit-cards/{slug}/` — full card data                 |
+| Libraries  | cheerio + axios (D-48). Puppeteer fallback if PoT adds JS-rendered content.        |
+| Protocol   | HTTPS GET, no authentication                                                       |
 
 **Discovery Process:**
 
@@ -135,30 +135,30 @@ Unique constraint on (`entity_type`, `source_text`).
 
 **Extraction — Data Mapping (PoT → Data Model):**
 
-| PoT Data | Target Entity | Target Field(s) | Transform |
-|----------|---------------|-----------------|-----------|
-| Card name | Market Card | `name` | Direct |
-| Bank name | Market Card | `issuer_id` | ScrapeMapping lookup → Issuer FK |
-| Network | Market Card | `card_network_id` | ScrapeMapping lookup → Card Network FK |
-| Annual fee | Market Card | `fee_amount` | Parse number from "$599" format |
-| Fee period | Market Card | `fee_structure` | Default `annual`; detect "monthly" from text |
-| Card name keywords | Market Card | `card_type` | "charge" if detected, else `credit` |
-| Rewards program name | Market Card | `rewards_program_id` | ScrapeMapping lookup → Rewards Program FK |
-| PoT URL | Market Card | `source_url` | Full detail page URL |
-| — | Market Card | `card_segment` | Not scraped. Set by user during approval. |
-| Welcome bonus total | Offer | `name` | Descriptive label |
-| FYF indicator | Offer | `fyf` | Boolean parse |
-| Offer dates | Offer | `offer_start_date`, `offer_end_date` | From historical section when available |
-| "Prince of Travel" | Offer | `source` | Constant |
-| Tranche spend/bonus | Offer Tranche | `msr_amount`, `bonus_amount`, `msr_window_months`, `msr_window_type` | Parse multi-tranche structure |
-| Tranche ordering | Offer Tranche | `tranche_number` | Sequential from top |
-| Delayed start | Offer Tranche | `unlock_month` | Parse "month 13" style indicators |
-| Earning rate label | Earning Multiplier | `earning_category_id` | ScrapeMapping lookup → Earning Category FK |
-| Multiplier value | Earning Multiplier | `multiplier` | Parse "3x" → 3.0 |
-| Perk name | Soft Perk Definition | `perk_type_id`, `name` | ScrapeMapping lookup → Perk Type FK |
-| Perk dollar value | Soft Perk Definition | `dollar_value` | Parse when stated |
-| Perk quantity | Soft Perk Definition | `quantity` | Parse count (e.g., "4 lounge passes") |
-| Insurance items | Soft Perk Definition | One row per type | Parse coverage name + dollar value |
+| PoT Data             | Target Entity        | Target Field(s)                                                      | Transform                                    |
+| -------------------- | -------------------- | -------------------------------------------------------------------- | -------------------------------------------- |
+| Card name            | Market Card          | `name`                                                               | Direct                                       |
+| Bank name            | Market Card          | `issuer_id`                                                          | ScrapeMapping lookup → Issuer FK             |
+| Network              | Market Card          | `card_network_id`                                                    | ScrapeMapping lookup → Card Network FK       |
+| Annual fee           | Market Card          | `fee_amount`                                                         | Parse number from "$599" format              |
+| Fee period           | Market Card          | `fee_structure`                                                      | Default `annual`; detect "monthly" from text |
+| Card name keywords   | Market Card          | `card_type`                                                          | "charge" if detected, else `credit`          |
+| Rewards program name | Market Card          | `rewards_program_id`                                                 | ScrapeMapping lookup → Rewards Program FK    |
+| PoT URL              | Market Card          | `source_url`                                                         | Full detail page URL                         |
+| —                    | Market Card          | `card_segment`                                                       | Not scraped. Set by user during approval.    |
+| Welcome bonus total  | Offer                | `name`                                                               | Descriptive label                            |
+| FYF indicator        | Offer                | `fyf`                                                                | Boolean parse                                |
+| Offer dates          | Offer                | `offer_start_date`, `offer_end_date`                                 | From historical section when available       |
+| "Prince of Travel"   | Offer                | `source`                                                             | Constant                                     |
+| Tranche spend/bonus  | Offer Tranche        | `msr_amount`, `bonus_amount`, `msr_window_months`, `msr_window_type` | Parse multi-tranche structure                |
+| Tranche ordering     | Offer Tranche        | `tranche_number`                                                     | Sequential from top                          |
+| Delayed start        | Offer Tranche        | `unlock_month`                                                       | Parse "month 13" style indicators            |
+| Earning rate label   | Earning Multiplier   | `earning_category_id`                                                | ScrapeMapping lookup → Earning Category FK   |
+| Multiplier value     | Earning Multiplier   | `multiplier`                                                         | Parse "3x" → 3.0                             |
+| Perk name            | Soft Perk Definition | `perk_type_id`, `name`                                               | ScrapeMapping lookup → Perk Type FK          |
+| Perk dollar value    | Soft Perk Definition | `dollar_value`                                                       | Parse when stated                            |
+| Perk quantity        | Soft Perk Definition | `quantity`                                                           | Parse count (e.g., "4 lounge passes")        |
+| Insurance items      | Soft Perk Definition | One row per type                                                     | Parse coverage name + dollar value           |
 
 **Historical Offer Extraction:**
 
@@ -232,21 +232,21 @@ When a hash change is detected on an existing Market Card, the scraper compares 
 
 **Transitions:**
 
-| From | To | Trigger | Guard | Side Effect |
-|------|----|---------|-------|-------------|
+| From     | To         | Trigger             | Guard                                                                                                               | Side Effect                                                                                       |
+| -------- | ---------- | ------------------- | ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
 | `queued` | `approved` | User clicks Approve | `card_segment` must be set (BR-16). All mandatory fields populated. No unresolved mappings (or user resolved them). | Write to target entities (BR-17–BR-20). Set `resolved_at`. Update `Market Card.last_scrape_hash`. |
-| `queued` | `rejected` | User clicks Reject | None | Set `resolved_at`. Store `rejection_reason`. No DB changes. |
+| `queued` | `rejected` | User clicks Reject  | None                                                                                                                | Set `resolved_at`. Store `rejection_reason`. No DB changes.                                       |
 
 No other transitions. Items cannot move from `approved`/`rejected` back to `queued`.
 
 **Approval Side Effects by Change Type:**
 
-| Change Type | On Approve |
-|-------------|------------|
-| `new_card` | Create Market Card + Offer(s) + Offer Tranche(s) + Earning Multiplier(s) + Soft Perk Definition(s). Single transaction. (BR-17) |
-| `offer_change` | End-date current Offer (`offer_end_date = today`). Create new Offer + Tranches. (BR-18) |
-| `multiplier_change` | End-date current Earning Multiplier rows (`effective_to = today`). Create new rows (`effective_from = today`). (BR-19) |
-| `perk_change` | End-date current Soft Perk Definition rows (`effective_to = today`). Create new rows (`effective_from = today`). (BR-20) |
+| Change Type         | On Approve                                                                                                                      |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `new_card`          | Create Market Card + Offer(s) + Offer Tranche(s) + Earning Multiplier(s) + Soft Perk Definition(s). Single transaction. (BR-17) |
+| `offer_change`      | End-date current Offer (`offer_end_date = today`). Create new Offer + Tranches. (BR-18)                                         |
+| `multiplier_change` | End-date current Earning Multiplier rows (`effective_to = today`). Create new rows (`effective_from = today`). (BR-19)          |
+| `perk_change`       | End-date current Soft Perk Definition rows (`effective_to = today`). Create new rows (`effective_from = today`). (BR-20)        |
 
 **UI Surface — Scraper Approvals (Standalone View):**
 
@@ -254,13 +254,13 @@ No other transitions. Items cannot move from `approved`/`rejected` back to `queu
 
 **List View:**
 
-| Column | Source |
-|--------|--------|
-| Card Name | `proposed_data.name` |
-| Change Type | `change_type` (badge: New / Offer / Multiplier / Perk) |
-| Scrape Date | `ScrapeRun.started_at` |
-| Status | `status` (color-coded: blue=queued, green=approved, grey=rejected) |
-| Warnings | Unresolved mappings indicator |
+| Column      | Source                                                             |
+| ----------- | ------------------------------------------------------------------ |
+| Card Name   | `proposed_data.name`                                               |
+| Change Type | `change_type` (badge: New / Offer / Multiplier / Perk)             |
+| Scrape Date | `ScrapeRun.started_at`                                             |
+| Status      | `status` (color-coded: blue=queued, green=approved, grey=rejected) |
+| Warnings    | Unresolved mappings indicator                                      |
 
 Default filter: `status = queued`. Toggle to show approved/rejected history.
 
@@ -303,6 +303,7 @@ Default filter: `status = queued`. Toggle to show approved/rejected history.
 **Re-run Safety:** If a bulk run fails (>50% parse failures), partial results remain queued. Re-triggering bulk mode skips cards already approved (matched by `source_url` on existing Market Cards) and cards already queued with `status = queued`. No duplicates (BR-26).
 
 **Reconciliation:** After approval, verify:
+
 - Market Card count matches expected (~98)
 - Each Market Card has ≥1 Offer with ≥1 Tranche
 - Earning Multipliers populated for cards with earning rate data
@@ -314,66 +315,66 @@ Default filter: `status = queued`. Toggle to show approved/rejected history.
 
 ### INT-003 — Offer Data Web Scraper
 
-| Rule | Description |
-|------|-------------|
-| BR-01 | INT-003 SHALL scrape Prince of Travel as the sole data source. Discovery via paginated index (`/credit-cards/`), extraction via individual card detail pages (`/credit-cards/{slug}/`). |
-| BR-02 | INT-003 SHALL run on a configurable weekly schedule (default: Sunday) AND support on-demand manual trigger via UI action. |
-| BR-03 | INT-003 SHALL store a content hash per Market Card `source_url`. If the page hash is unchanged since the last scrape, the card is skipped without deep field comparison. |
+| Rule  | Description                                                                                                                                                                                                      |
+| ----- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| BR-01 | INT-003 SHALL scrape Prince of Travel as the sole data source. Discovery via paginated index (`/credit-cards/`), extraction via individual card detail pages (`/credit-cards/{slug}/`).                          |
+| BR-02 | INT-003 SHALL run on a configurable weekly schedule (default: Sunday) AND support on-demand manual trigger via UI action.                                                                                        |
+| BR-03 | INT-003 SHALL store a content hash per Market Card `source_url`. If the page hash is unchanged since the last scrape, the card is skipped without deep field comparison.                                         |
 | BR-04 | When a hash change is detected, INT-003 SHALL compare scraped fields against existing DB records and create a ScrapeQueueItem for each detected change (new card, offer change, multiplier change, perk change). |
 | BR-05 | INT-003 SHALL resolve scraped text labels to internal FK IDs using the ScrapeMapping table. Unresolved labels SHALL be stored as raw text and flagged on the ScrapeQueueItem for manual mapping during approval. |
-| BR-06 | INT-003 SHALL insert a polite delay (minimum `SCRAPER_DELAY_MS`, default 1500ms) between page fetches and respect `robots.txt`. |
-| BR-07 | On HTTP error or timeout for an individual card page, INT-003 SHALL retry up to `SCRAPER_RETRY_ATTEMPTS` (default 3) with exponential backoff, then skip and log. Other cards continue processing. |
-| BR-08 | If >50% of card pages fail during a single run, INT-003 SHALL abort the run and set ScrapeRun status to `failed`. |
-| BR-09 | Each scraper execution SHALL create a ScrapeRun record with: timestamp, mode, status, cards_discovered, cards_scraped, cards_changed, cards_skipped. |
-| BR-10 | During CNV-004 bulk mode, INT-003 SHALL import historical offers from PoT with a cutoff of 2023-01-01. Offers dated before 2023 are ignored. |
+| BR-06 | INT-003 SHALL insert a polite delay (minimum `SCRAPER_DELAY_MS`, default 1500ms) between page fetches and respect `robots.txt`.                                                                                  |
+| BR-07 | On HTTP error or timeout for an individual card page, INT-003 SHALL retry up to `SCRAPER_RETRY_ATTEMPTS` (default 3) with exponential backoff, then skip and log. Other cards continue processing.               |
+| BR-08 | If >50% of card pages fail during a single run, INT-003 SHALL abort the run and set ScrapeRun status to `failed`.                                                                                                |
+| BR-09 | Each scraper execution SHALL create a ScrapeRun record with: timestamp, mode, status, cards_discovered, cards_scraped, cards_changed, cards_skipped.                                                             |
+| BR-10 | During CNV-004 bulk mode, INT-003 SHALL import historical offers from PoT with a cutoff of 2023-01-01. Offers dated before 2023 are ignored.                                                                     |
 
 ### WFL-003 — Offer Approval
 
-| Rule | Description |
-|------|-------------|
-| BR-11 | WFL-003 SHALL present a standalone "Scraper Approvals" view in the main navigation. |
-| BR-12 | ScrapeQueueItem status transitions: `queued` → `approved` or `queued` → `rejected`. No other transitions allowed. |
-| BR-13 | The approval view SHALL display for each queued item: proposed values (scraped), current DB values (if existing card), and a diff highlighting changes. |
-| BR-14 | User actions per item: Approve (write to DB as-is), Edit + Approve (modify proposed values then write), Reject (no DB change, item retained for audit). |
-| BR-15 | The approval view SHALL support multi-select with bulk Approve and bulk Reject actions. |
-| BR-16 | `card_segment` is mandatory on approval. The Approve action SHALL be blocked if `card_segment` is null. User must set it before approving. |
-| BR-17 | On Approve of a new card: create Market Card, Offer(s), Offer Tranche(s), Earning Multiplier(s), and Soft Perk Definition(s) in a single transaction. |
+| Rule  | Description                                                                                                                                                                           |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| BR-11 | WFL-003 SHALL present a standalone "Scraper Approvals" view in the main navigation.                                                                                                   |
+| BR-12 | ScrapeQueueItem status transitions: `queued` → `approved` or `queued` → `rejected`. No other transitions allowed.                                                                     |
+| BR-13 | The approval view SHALL display for each queued item: proposed values (scraped), current DB values (if existing card), and a diff highlighting changes.                               |
+| BR-14 | User actions per item: Approve (write to DB as-is), Edit + Approve (modify proposed values then write), Reject (no DB change, item retained for audit).                               |
+| BR-15 | The approval view SHALL support multi-select with bulk Approve and bulk Reject actions.                                                                                               |
+| BR-16 | `card_segment` is mandatory on approval. The Approve action SHALL be blocked if `card_segment` is null. User must set it before approving.                                            |
+| BR-17 | On Approve of a new card: create Market Card, Offer(s), Offer Tranche(s), Earning Multiplier(s), and Soft Perk Definition(s) in a single transaction.                                 |
 | BR-18 | On Approve of an offer change: end-date the current Offer (`offer_end_date = today`), create a new Offer record with the scraped values. Tranches are created fresh on the new Offer. |
-| BR-19 | On Approve of a multiplier change: end-date current Earning Multiplier row (`effective_to = today`), create new row with updated values (`effective_from = today`). |
-| BR-20 | On Approve of a perk change: same end-date + create pattern as BR-19, applied to Soft Perk Definition. |
-| BR-21 | When a ScrapeRun produces ≥1 queued item, the system SHALL create an `OFFERS_PENDING_APPROVAL` alert. |
-| BR-22 | Rejected items SHALL remain in the queue with status `rejected` and a user-provided rejection reason (optional). They are excluded from future duplicate detection. |
+| BR-19 | On Approve of a multiplier change: end-date current Earning Multiplier row (`effective_to = today`), create new row with updated values (`effective_from = today`).                   |
+| BR-20 | On Approve of a perk change: same end-date + create pattern as BR-19, applied to Soft Perk Definition.                                                                                |
+| BR-21 | When a ScrapeRun produces ≥1 queued item, the system SHALL create an `OFFERS_PENDING_APPROVAL` alert.                                                                                 |
+| BR-22 | Rejected items SHALL remain in the queue with status `rejected` and a user-provided rejection reason (optional). They are excluded from future duplicate detection.                   |
 
 ### CNV-004 — Market Card Database Build
 
-| Rule | Description |
-|------|-------------|
-| BR-23 | CNV-004 SHALL be executed as INT-003 in `bulk` mode — same scraper, same approval workflow. No separate code path. |
-| BR-24 | CNV-004 bulk mode SHALL scrape all cards from the PoT index and all historical offers per card back to 2023-01-01. |
-| BR-25 | CNV-004 requires CNV-002 reference data (issuers, rewards programs, earning categories, perk types) to be deployed first. |
+| Rule  | Description                                                                                                                                                                                                                |
+| ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| BR-23 | CNV-004 SHALL be executed as INT-003 in `bulk` mode — same scraper, same approval workflow. No separate code path.                                                                                                         |
+| BR-24 | CNV-004 bulk mode SHALL scrape all cards from the PoT index and all historical offers per card back to 2023-01-01.                                                                                                         |
+| BR-25 | CNV-004 requires CNV-002 reference data (issuers, rewards programs, earning categories, perk types) to be deployed first.                                                                                                  |
 | BR-26 | If bulk mode fails (>50% parse failures per BR-08), the partial results already queued SHALL remain in the approval queue. The user can re-run bulk mode; previously approved cards are skipped via `source_url` matching. |
 
 ---
 
 ## 6. Error Handling
 
-| Condition | Response | i18n Key Pattern |
-|-----------|----------|------------------|
-| PoT index unreachable (after retries) | ScrapeRun status = `failed`. No queue items created. | `scraper.pot.unreachable` |
-| Individual card page HTTP error (after retries) | Card skipped, `cards_skipped` incremented. Other cards continue. | `scraper.pot.pageError` |
-| >50% card pages failed | ScrapeRun aborted, status = `failed`. Partial queue items retained. | `scraper.pot.abortThreshold` |
-| HTML structure changed (parser returns null) | Card queued with partial data, `has_unresolved_mappings = true`. | `scraper.pot.parseWarning` |
-| Unresolved ScrapeMapping label | Item flagged, user resolves during approval. | `scraper.mapping.unresolved` |
-| Approve without `card_segment` | Validation error, approve blocked. | `approval.cardSegment.required` |
-| Bulk approve with incomplete items | Batch blocked, error lists which items need attention. | `approval.bulk.incompleteItems` |
-| Approval DB write failure | Transaction rolled back, item remains `queued`, error displayed. | `approval.write.failed` |
+| Condition                                       | Response                                                            | i18n Key Pattern                |
+| ----------------------------------------------- | ------------------------------------------------------------------- | ------------------------------- |
+| PoT index unreachable (after retries)           | ScrapeRun status = `failed`. No queue items created.                | `scraper.pot.unreachable`       |
+| Individual card page HTTP error (after retries) | Card skipped, `cards_skipped` incremented. Other cards continue.    | `scraper.pot.pageError`         |
+| >50% card pages failed                          | ScrapeRun aborted, status = `failed`. Partial queue items retained. | `scraper.pot.abortThreshold`    |
+| HTML structure changed (parser returns null)    | Card queued with partial data, `has_unresolved_mappings = true`.    | `scraper.pot.parseWarning`      |
+| Unresolved ScrapeMapping label                  | Item flagged, user resolves during approval.                        | `scraper.mapping.unresolved`    |
+| Approve without `card_segment`                  | Validation error, approve blocked.                                  | `approval.cardSegment.required` |
+| Bulk approve with incomplete items              | Batch blocked, error lists which items need attention.              | `approval.bulk.incompleteItems` |
+| Approval DB write failure                       | Transaction rolled back, item remains `queued`, error displayed.    | `approval.write.failed`         |
 
 ---
 
 ## 7. Open Items
 
-| OI | Resolution |
-|----|------------|
+| OI    | Resolution                                                                                                   |
+| ----- | ------------------------------------------------------------------------------------------------------------ |
 | OI-06 | One alert type defined: `offers_pending_approval`. Added to Alert Type seed (total now 11 across all specs). |
 
 ---
@@ -566,13 +567,13 @@ Default filter: `status = queued`. Toggle to show approved/rejected history.
 
 ## 9. Cross-Spec Notes
 
-| Target Spec | Note |
-|-------------|------|
+| Target Spec                     | Note                                                                                                                                                                                                                                                          |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | SPEC-06 (Reference Data & Seed) | ScrapeMapping entries seeded via CNV-002 for known PoT labels. Alert Type seed value added: `offers_pending_approval` (total now 11). System Config parameters added: `SCRAPER_ENABLED`, `SCRAPER_DAY_OF_WEEK`, `SCRAPER_DELAY_MS`, `SCRAPER_RETRY_ATTEMPTS`. |
-| SPEC-07 (Card Recommendation) | ENH-002 card recommendations now have access to broader market card data via CNV-004. Recommendations based on cards Sandro holds (per SPEC-07 scope), not market cards. |
-| SPEC-08 (Card Profitability) | ENH-004/ENH-005 profitability and eligibility calculations reference Market Card data that may be scraper-populated. No functional change — same entity, same fields. |
-| FRM-005 (Market Cards) | Market Cards app displays all cards including scraper-populated ones. No change needed — FRM-005 reads from Market Card entity regardless of data source. |
+| SPEC-07 (Card Recommendation)   | ENH-002 card recommendations now have access to broader market card data via CNV-004. Recommendations based on cards Sandro holds (per SPEC-07 scope), not market cards.                                                                                      |
+| SPEC-08 (Card Profitability)    | ENH-004/ENH-005 profitability and eligibility calculations reference Market Card data that may be scraper-populated. No functional change — same entity, same fields.                                                                                         |
+| FRM-005 (Market Cards)          | Market Cards app displays all cards including scraper-populated ones. No change needed — FRM-005 reads from Market Card entity regardless of data source.                                                                                                     |
 
 ---
 
-*This spec is the single source of truth for INT-003, WFL-003, and CNV-004. Market card entity definitions are in [DATA_MODEL.md](../DATA_MODEL.md). Design decisions are in [DECISIONS_LOG.md](../user-profile/DECISIONS_LOG.md).*
+_This spec is the single source of truth for INT-003, WFL-003, and CNV-004. Market card entity definitions are in [DATA_MODEL.md](../DATA_MODEL.md). Design decisions are in [DECISIONS_LOG.md](../user-profile/DECISIONS_LOG.md)._

@@ -347,7 +347,7 @@ All decisions made during the discovery and design phases. Each decision is refe
 ## D-51: Runtime Versions
 
 - **Context:** Step 6 — pinning runtime and framework versions.
-- **Decision:** Node.js 20 LTS (active LTS until April 2026, maintenance until 2027), TypeScript 5.x (latest stable), SAPUI5 1.120+ (latest CDN), CAP 8 with `@cap-js/cds-types` for TypeScript support, PostgreSQL via `@cap-js/postgres`.
+- **Decision:** Node.js 20 LTS (active LTS until April 2026, maintenance until 2027), TypeScript 5.x (latest stable), SAPUI5 1.136.16, CAP 8 with `@cap-js/cds-types` for TypeScript support, PostgreSQL via `@cap-js/postgres`.
 - **Rationale:** All current stable versions. Node.js 20 is fully supported by CAP 8. No version-specific risk.
 
 ## D-52: Ten Subagent Personas
@@ -381,7 +381,7 @@ All decisions made during the discovery and design phases. Each decision is refe
 - **Context:** Step 8 — choosing the SAPUI5 theme and content density mode for the design system.
 - **Options (theme):** A) SAP Horizon Light (`sap_horizon`). B) SAP Horizon Dark (`sap_horizon_dark`). C) SAP Quartz Light (`sap_fiori_3`).
 - **Options (density):** A) Compact (`sapUiSizeCompact`, ~32px rows). B) Cozy (`sapUiSizeCozy`, ~48px rows).
-- **Decision:** Horizon Light + Compact. Current-generation SAP theme with best SAPUI5 1.120+ component support. Compact density for desktop-first, mouse-driven, data-dense screens.
+- **Decision:** Horizon Light + Compact. Current-generation SAP theme with best SAPUI5 1.136+ component support. Compact density for desktop-first, mouse-driven, data-dense screens.
 - **Rationale:** Horizon is SAP's current direction — no reason to use older themes when not constrained by an existing landscape. Compact mode is the standard for desktop Fiori apps with no touch requirement. Transaction list and master data screens benefit from denser rows. Dark mode can be added later as a runtime theme toggle.
 
 ## D-57: Side Navigation Pattern
@@ -498,7 +498,8 @@ All decisions made during the discovery and design phases. Each decision is refe
   - **Custom rules from Enbridge (adapted):** `no-logic-in-facade`, `require-wrap-handler`, `no-try-catch-in-facade`, `require-facade-extends-base`, `require-service-extends-base`, `private-methods-at-bottom`.
   - **JSDoc:** Required on all methods (public and private). Descriptions only — no type annotations (TypeScript handles types).
   - **Hungarian notation:** Enforced in SAPUI5 controllers (`sName`, `oModel`, `aItems`, `bIsValid`, `iCount`, `fnCallback`).
-  - **Dropped from Enbridge:** `no-db-queries-in-service` (no DataService layer), `no-external-calls-in-dataservice` (same), JSDoc type annotations (redundant with TypeScript).
+  - **Dropped from Enbridge:** `no-external-calls-in-dataservice`, JSDoc type annotations (redundant with TypeScript).
+  - **Reinstated from Enbridge (W1-S1):** `no-db-queries-in-service` — DataService layer added. All CQL queries live in `{Domain}DataService.ts`; Services call DataService for DB access. `cds.run()` replaced with direct CQL awaits.
 - **Rationale:** Greenfield project — errors from day one keeps the codebase clean. Complexity stays as warning for genuine edge cases. Hungarian notation matches Sandro's Enbridge workflow. JSDoc descriptions add value even with TypeScript types.
 
 ## D-72: SAPUI5 Controller & View Conventions
@@ -550,7 +551,7 @@ All decisions made during the discovery and design phases. Each decision is refe
 - **Context:** Step 10 — how to test OData endpoints through the full CAP stack. Also establishes the test data rule.
 - **Decision:** Four sub-decisions:
   - **Setup:** `cds.test()` boots CAP with SQLite. Canonical test world seeded in `beforeAll`. Bound `axios` client for OData calls.
-  - **Per-service coverage:** CRUD operations, custom actions/functions, query options ($filter, $expand), error responses (400/404/409), sensitive field exclusion (_enc fields not in list queries).
+  - **Per-service coverage:** CRUD operations, custom actions/functions, query options ($filter, $expand), error responses (400/404/409), sensitive field exclusion (\_enc fields not in list queries).
   - **Scenario tests:** Under `test/integration/scenarios/` — multi-step OData call sequences matching FUT workflows (weekly review, card onboarding, CSV import, card lifecycle).
   - **Test data rule:** Tests never construct data inline. All data imported from `test/data/` with semantic constant names (e.g., `AMEX_COBALT_FOCUS_CARD`). Only exception: field-specific overrides directly relevant to the assertion.
 - **Rationale:** `cds.test()` + SQLite is zero-config and fast. One file per CDS service keeps tests organized. Semantic naming keeps tests readable — the test body shows intent, not setup noise.
@@ -813,12 +814,12 @@ All decisions made during the discovery and design phases. Each decision is refe
 - **Context:** SPEC-02 workshop — should ENH-001 auto-create Vendor records when encountering unknown merchant descriptions?
 - **Options:** A) Auto-create vendor from raw description. B) Leave uncategorized, user creates vendors.
 - **Decision:** B — ENH-001 is a matching engine only. It never creates Vendor or Merchant Pattern records. No match = transaction stays `uncategorized` with no vendor. Vendor creation is always a user action (FRM-001, FRM-003, or CNV-001).
-- **Rationale:** Auto-creation from noisy bank descriptions (e.g., "AMZN MKTP US*2K4R7J3M") would create junk vendor records. User-driven creation keeps the vendor list clean and intentional.
+- **Rationale:** Auto-creation from noisy bank descriptions (e.g., "AMZN MKTP US\*2K4R7J3M") would create junk vendor records. User-driven creation keeps the vendor list clean and intentional.
 
 ## D-116: Learning Mechanism — Auto-Create Merchant Pattern on User Correction
 
 - **Context:** SPEC-02 workshop — how does the system learn from user categorization corrections to improve future auto-matching?
-- **Decision:** When a user assigns a vendor to an unmatched transaction, the system auto-creates a Merchant Pattern: `pattern` = full `raw_description` (trimmed), `match_type` = exact, `pattern_source` = learned, `confidence_level` = medium, `is_active` = true. When the description already matched a *different* vendor (user is correcting), the auto-created pattern includes the transaction's `amount` as a discriminator (D-118). No pattern created if an existing pattern on the assigned vendor already matches the description.
+- **Decision:** When a user assigns a vendor to an unmatched transaction, the system auto-creates a Merchant Pattern: `pattern` = full `raw_description` (trimmed), `match_type` = exact, `pattern_source` = learned, `confidence_level` = medium, `is_active` = true. When the description already matched a _different_ vendor (user is correcting), the auto-created pattern includes the transaction's `amount` as a discriminator (D-118). No pattern created if an existing pattern on the assigned vendor already matches the description.
 - **Rationale:** Exact patterns are conservative — only match identical bank descriptions. Users can manually generalize to `contains` or `starts_with` via FRM-009 if needed. Amount discriminator handles the APPLE.COM/BILL scenario (YouTube Premium vs iCloud at different price points).
 
 ## D-117: Computed Usage Counts — Drop Stored Counters
@@ -1089,7 +1090,7 @@ All decisions made during the discovery and design phases. Each decision is refe
   2. `goal_completed` — daily check, fires when cumulative allocations reach target_amount, informational only (does not change status, per D-149)
   3. `goal_spending_warning` — transaction processing trigger, fires when linked transaction sum reaches `GOAL_SPENDING_WARNING_PCT` of target_amount (spending goals only)
   4. `goal_spending_overspend` — transaction processing trigger, fires when linked transactions exceed target_amount (spending goals only)
-  All alerts idempotent (goal_completed per goal, spending alerts per goal per month).
+     All alerts idempotent (goal_completed per goal, spending alerts per goal per month).
 - **Rationale:** Mirrors the budget alert pattern (D-134). Deadline and completion alerts are time-driven (daily check). Spending alerts are event-driven (transaction processing). Idempotency prevents alert spam.
 
 ## D-156: Separate GOAL_SPENDING_WARNING_PCT System Config
@@ -1648,7 +1649,7 @@ All decisions made during the discovery and design phases. Each decision is refe
   1. **"Why blocked?" popover** — Clicking Cooldown/At Limit on Churnboard shows per-rule detail. Cross-spec: SPEC-19.
   2. **Tier usage indicator** — "3 / 5 used" display in detail view.
   3. **"Close to clear" hint** — At Limit detail suggests To Cancel cards as close candidates.
-  4. **Hypothetical date clarification** — Italic *"If closed today"* before date when ISSUER_COOLDOWN has active cards.
+  4. **Hypothetical date clarification** — Italic _"If closed today"_ before date when ISSUER_COOLDOWN has active cards.
 - **Rationale:** Each enhancement improves eligibility comprehension without adding interaction complexity.
 
 ## D-243: WFL-001 Is a Launchpad with Checklist
@@ -2091,4 +2092,4 @@ All decisions made during the discovery and design phases. Each decision is refe
 
 - **Context:** Need a single source of truth listing every CSS custom property being overridden and its new value.
 - **Decision:** 28 CSS custom properties overridden across 7 categories (brand, shell, emphasized buttons, default buttons, input fields, lists/tables, border radius). 8 properties explicitly documented as kept at Horizon defaults (link color, 5 semantic colors, background, text color, font family). ~2 Layer 2 targeted selectors identified as candidates, exact selectors to be verified during W1-S1 scaffold.
-- **Rationale:** Documenting both overridden and explicitly-kept properties prevents ambiguity during build. Horizon default values listed are approximate (based on 1.120.x) and will be verified against the CDN-loaded theme. Override values are final.
+- **Rationale:** Documenting both overridden and explicitly-kept properties prevents ambiguity during build. Horizon default values listed are approximate (based on 1.136.16) and will be verified against the CDN-loaded theme. Override values are final.

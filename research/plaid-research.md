@@ -8,14 +8,14 @@
 
 All six Canadian issuers you listed are officially "supported" by Plaid. However, PocketSmith published granular success-rate data (February 2025) based on real user connections through both Plaid and Yodlee, and the numbers tell a very different story than "supported" implies.
 
-| Institution | Plaid success rate | Auth failure rate | Credit cards supported | Key concern |
-|---|---|---|---|---|
-| **BMO** | **88%** | 12% | ✅ Yes | Best among Big 6; manageable |
-| **American Express (CA)** | **84%** | 16% | ✅ Yes (primary account type) | ⚠️ Perpetual 2FA issue causes frequent re-auth |
-| **TD Canada Trust** | **61%** | 39% | ✅ Yes | TD sued Plaid in 2020; has Finicity agreement, not Plaid |
-| **Scotiabank** | **60%** | 40% | ✅ Yes | Moderate reliability; 2FA-driven failures |
-| **RBC** | **57%** | 43% | ✅ Yes | Has formal API agreement with Plaid (June 2022) — should improve |
-| **CIBC** | ⚠️ **4%** | **96%** | ⚠️ Technically yes, functionally no | **Essentially non-functional** via Plaid |
+| Institution               | Plaid success rate | Auth failure rate | Credit cards supported              | Key concern                                                      |
+| ------------------------- | ------------------ | ----------------- | ----------------------------------- | ---------------------------------------------------------------- |
+| **BMO**                   | **88%**            | 12%               | ✅ Yes                              | Best among Big 6; manageable                                     |
+| **American Express (CA)** | **84%**            | 16%               | ✅ Yes (primary account type)       | ⚠️ Perpetual 2FA issue causes frequent re-auth                   |
+| **TD Canada Trust**       | **61%**            | 39%               | ✅ Yes                              | TD sued Plaid in 2020; has Finicity agreement, not Plaid         |
+| **Scotiabank**            | **60%**            | 40%               | ✅ Yes                              | Moderate reliability; 2FA-driven failures                        |
+| **RBC**                   | **57%**            | 43%               | ✅ Yes                              | Has formal API agreement with Plaid (June 2022) — should improve |
+| **CIBC**                  | ⚠️ **4%**          | **96%**           | ⚠️ Technically yes, functionally no | **Essentially non-functional** via Plaid                         |
 
 **CIBC is the showstopper.** A 96% authentication failure rate means connections almost never succeed. This alone means Plaid cannot reliably serve your four must-have issuers at launch. PocketSmith noted these stats hold for both Plaid and Yodlee, suggesting CIBC's security systems are the root cause, not Plaid specifically (though Yodlee achieves 38% for CIBC — still poor but 10× better than Plaid's 4%).
 
@@ -25,15 +25,15 @@ All six Canadian issuers you listed are officially "supported" by Plaid. However
 
 ### Other Canadian institutions worth noting
 
-| Institution | Plaid success rate | Notes |
-|---|---|---|
-| Desjardins | 85% | Strong reliability |
-| National Bank | 82% | Good |
-| Canadian Tire Bank | 100% | Excellent |
-| Wise (CA) | 93% | Excellent |
-| Tangerine | 44% | Poor |
-| President's Choice Financial | 25% | Very poor |
-| Simplii Financial | 13% | Very poor |
+| Institution                  | Plaid success rate | Notes              |
+| ---------------------------- | ------------------ | ------------------ |
+| Desjardins                   | 85%                | Strong reliability |
+| National Bank                | 82%                | Good               |
+| Canadian Tire Bank           | 100%               | Excellent          |
+| Wise (CA)                    | 93%                | Excellent          |
+| Tangerine                    | 44%                | Poor               |
+| President's Choice Financial | 25%                | Very poor          |
+| Simplii Financial            | 13%                | Very poor          |
 
 ---
 
@@ -43,58 +43,66 @@ Plaid returns a comprehensive transaction object with **30+ fields**. The data i
 
 ### Core fields per transaction
 
-| Field | Type | Description |
-|---|---|---|
-| `amount` | number | Positive = debit/purchase; negative = credit/refund |
-| `iso_currency_code` | string | "CAD" for Canadian accounts |
-| `date` | string | Posted date (YYYY-MM-DD) |
-| `authorized_date` | string | Authorization date (nullable) |
-| `merchant_name` | string | **Cleaned/normalized merchant name** via ML |
-| `name` | string | Legacy lightly-cleaned description |
-| `original_description` | string | Raw bank description (opt-in) |
-| `pending` | boolean | `true` = unsettled; `false` = posted |
-| `transaction_id` | string | Unique identifier (changes when pending→posted) |
-| `pending_transaction_id` | string | Links posted txn to its former pending version |
-| `account_id` | string | Stable account identifier |
-| `payment_channel` | string | "online", "in store", or "other" |
-| `logo_url` | string | Merchant logo (100×100 PNG) |
-| `website` | string | Merchant website |
-| `location` | object | Address, city, region, postal code, lat/lon |
-| `counterparties` | array | Extracted entities with type, confidence, logos |
+| Field                    | Type    | Description                                         |
+| ------------------------ | ------- | --------------------------------------------------- |
+| `amount`                 | number  | Positive = debit/purchase; negative = credit/refund |
+| `iso_currency_code`      | string  | "CAD" for Canadian accounts                         |
+| `date`                   | string  | Posted date (YYYY-MM-DD)                            |
+| `authorized_date`        | string  | Authorization date (nullable)                       |
+| `merchant_name`          | string  | **Cleaned/normalized merchant name** via ML         |
+| `name`                   | string  | Legacy lightly-cleaned description                  |
+| `original_description`   | string  | Raw bank description (opt-in)                       |
+| `pending`                | boolean | `true` = unsettled; `false` = posted                |
+| `transaction_id`         | string  | Unique identifier (changes when pending→posted)     |
+| `pending_transaction_id` | string  | Links posted txn to its former pending version      |
+| `account_id`             | string  | Stable account identifier                           |
+| `payment_channel`        | string  | "online", "in store", or "other"                    |
+| `logo_url`               | string  | Merchant logo (100×100 PNG)                         |
+| `website`                | string  | Merchant website                                    |
+| `location`               | object  | Address, city, region, postal code, lat/lon         |
+| `counterparties`         | array   | Extracted entities with type, confidence, logos     |
 
 ### Categorization system
 
 Plaid uses a **two-tier Personal Finance Category (PFC)** taxonomy that replaced their legacy 600+ category system. The current PFC system has **16 primary categories** (e.g., FOOD_AND_DRINK, TRANSPORTATION, ENTERTAINMENT) and **~104 detailed subcategories** (e.g., FOOD_AND_DRINK_RESTAURANTS). PFC v2, default for accounts enabled after December 2025, adds 12+ new subcategories and claims **10–20% higher accuracy** over v1 using AI enhancements. Plaid states **>90% overall categorization accuracy**, with each transaction tagged with a confidence level: VERY_HIGH (>98%), HIGH (>90%), MEDIUM, LOW, or UNKNOWN.
 
-⚠️ **MCC codes are not exposed** in the standard Transactions API response. Plaid deliberately replaces raw MCC data with their own ML-driven categories. MCC is only accepted as an *input* to the `/transactions/enrich` endpoint for enhancing your own transaction data. If your application requires raw MCC codes, this is a gap.
+⚠️ **MCC codes are not exposed** in the standard Transactions API response. Plaid deliberately replaces raw MCC data with their own ML-driven categories. MCC is only accepted as an _input_ to the `/transactions/enrich` endpoint for enhancing your own transaction data. If your application requires raw MCC codes, this is a gap.
 
 ### Sample JSON response (from `/transactions/sync`)
 
 ```json
 {
-  "added": [{
-    "transaction_id": "lPNjeW1nR6CDn5okmGQ6hEpMo4lLNoSrzqDje",
-    "account_id": "BxBXxLj1m4HMXBm9WZZmCWVbPjX16EHwv99vp",
-    "amount": 89.45,
-    "iso_currency_code": "CAD",
-    "date": "2025-01-15",
-    "authorized_date": "2025-01-14",
-    "pending": false,
-    "pending_transaction_id": "no86Eox18VHMvaOVL7gPUM9ap3aR1LsAVZ5nc",
-    "merchant_name": "Loblaws",
-    "name": "LOBLAWS #1234",
-    "original_description": null,
-    "logo_url": "https://plaid-merchant-logos.plaid.com/loblaws_1100.png",
-    "website": "loblaws.ca",
-    "payment_channel": "in store",
-    "personal_finance_category": {
-      "primary": "FOOD_AND_DRINK",
-      "detailed": "FOOD_AND_DRINK_GROCERIES",
-      "confidence_level": "VERY_HIGH"
-    },
-    "location": { "city": "Toronto", "region": "ON", "country": "CA" },
-    "counterparties": [{ "name": "Loblaws", "type": "merchant", "confidence_level": "VERY_HIGH" }]
-  }],
+  "added": [
+    {
+      "transaction_id": "lPNjeW1nR6CDn5okmGQ6hEpMo4lLNoSrzqDje",
+      "account_id": "BxBXxLj1m4HMXBm9WZZmCWVbPjX16EHwv99vp",
+      "amount": 89.45,
+      "iso_currency_code": "CAD",
+      "date": "2025-01-15",
+      "authorized_date": "2025-01-14",
+      "pending": false,
+      "pending_transaction_id": "no86Eox18VHMvaOVL7gPUM9ap3aR1LsAVZ5nc",
+      "merchant_name": "Loblaws",
+      "name": "LOBLAWS #1234",
+      "original_description": null,
+      "logo_url": "https://plaid-merchant-logos.plaid.com/loblaws_1100.png",
+      "website": "loblaws.ca",
+      "payment_channel": "in store",
+      "personal_finance_category": {
+        "primary": "FOOD_AND_DRINK",
+        "detailed": "FOOD_AND_DRINK_GROCERIES",
+        "confidence_level": "VERY_HIGH"
+      },
+      "location": { "city": "Toronto", "region": "ON", "country": "CA" },
+      "counterparties": [
+        {
+          "name": "Loblaws",
+          "type": "merchant",
+          "confidence_level": "VERY_HIGH"
+        }
+      ]
+    }
+  ],
   "modified": [],
   "removed": [{ "transaction_id": "no86Eox18VHMvaOVL7gPUM9ap3aR1LsAVZ5nc" }],
   "next_cursor": "CAESKgoaChYIARIQ...",
@@ -108,7 +116,7 @@ Plaid uses a **two-tier Personal Finance Category (PFC)** taxonomy that replaced
 
 Plaid returns transactions from supplementary/authorized user cards, but **cannot reliably distinguish which physical card made a purchase**. All transactions aggregate under a single `account_id`. Plaid's documentation acknowledges this limitation directly:
 
-> *"The `account_owner` field is not typically populated and only relevant when dealing with sub-accounts. A sub-account most commonly exists in cases where a single account is linked to multiple cards... If the account does have sub-accounts, this field will typically be some combination of the sub-account owner's name and/or the sub-account mask."*
+> _"The `account_owner` field is not typically populated and only relevant when dealing with sub-accounts. A sub-account most commonly exists in cases where a single account is linked to multiple cards... If the account does have sub-accounts, this field will typically be some combination of the sub-account owner's name and/or the sub-account mask."_
 
 The `account_owner` field format is **not standardized** and varies by institution. In practice, it is frequently blank — especially on the primary cardholder's transactions. Some third-party integrations (Nexonia, Workamajig) report that sub-cards may appear as separate entries in Plaid Link, with Plaid transferring sub-card data approximately 24 hours after the primary card is connected. But this behavior is inconsistent across institutions.
 
@@ -120,11 +128,11 @@ The `account_owner` field format is **not standardized** and varies by instituti
 
 Plaid does not publish a public price list. Pricing is revealed only during the Production access application process. Here is what is known:
 
-| Tier | Minimum spend | Best for |
-|---|---|---|
-| **Pay as You Go** | None | Hobbyist/personal projects |
-| **Growth** | Annual commitment | Businesses up to ~$6K/month API usage |
-| **Custom** | Higher commitment | High-volume businesses |
+| Tier              | Minimum spend     | Best for                              |
+| ----------------- | ----------------- | ------------------------------------- |
+| **Pay as You Go** | None              | Hobbyist/personal projects            |
+| **Growth**        | Annual commitment | Businesses up to ~$6K/month API usage |
+| **Custom**        | Higher commitment | High-volume businesses                |
 
 **Free options**: The **Sandbox** environment is completely free with unlimited API calls using fake data. **Limited Production** provides **200 free API calls per product** against real bank connections — enough for approximately 2–3 months of light use with 4–5 accounts syncing weekly.
 
@@ -142,7 +150,7 @@ Plaid is **not real-time**. Transaction data refreshes automatically **1–4 tim
 
 **Recommended sync approach**: Use `/transactions/sync` (cursor-based) rather than the legacy `/transactions/get` (date-range). The sync endpoint returns `added`, `modified`, and `removed` arrays — a clean patch model for maintaining a local database. Listen for `SYNC_UPDATES_AVAILABLE` webhooks to trigger sync calls.
 
-**Pending-to-posted lifecycle**: Plaid does not update pending transactions in-place. Instead, the pending transaction is *removed* and a new posted transaction is *added* with `pending_transaction_id` linking back to the original. Amount, merchant name, and date may all change during this transition (e.g., restaurant tips added after authorization).
+**Pending-to-posted lifecycle**: Plaid does not update pending transactions in-place. Instead, the pending transaction is _removed_ and a new posted transaction is _added_ with `pending_transaction_id` linking back to the original. Amount, merchant name, and date may all change during this transition (e.g., restaurant tips added after authorization).
 
 ---
 
@@ -162,16 +170,16 @@ Only **RBC** has a confirmed OAuth-based API agreement with Plaid in Canada (Jun
 
 ### Comparison of alternatives
 
-| Alternative | Canadian coverage | Credit cards | Pricing | Personal-use viable | Assessment |
-|---|---|---|---|---|---|
-| **SimpleFIN Bridge** ⭐ | Good (via MX backend) | ✅ Yes | **$15/year** | ✅ Yes | Best option for personal use |
-| **Flinks** | Best in Canada | ✅ Yes | Enterprise only | ❌ No | Requires sales contact; not for individuals |
-| **MX** | Good | ✅ Yes | ~$15K+/year | ❌ No | Enterprise only; access via SimpleFIN instead |
-| **Yodlee** | Good globally | ✅ Yes | Enterprise | ❌ No | Dated developer experience |
-| **Akoya** | US only | N/A | N/A | ❌ No | No Canadian bank participation |
-| **Teller** | US only | N/A | Free tier available | ❌ No (US only) | Irrelevant for Canada |
-| **Wealthica** | Excellent (investments) | Limited | $50–250/year | ✅ Yes | Investment-focused, not bank transactions |
-| **Manual CSV/OFX** | All banks | ✅ Yes | Free | ✅ Yes | Manual but no dependencies |
+| Alternative             | Canadian coverage       | Credit cards | Pricing             | Personal-use viable | Assessment                                    |
+| ----------------------- | ----------------------- | ------------ | ------------------- | ------------------- | --------------------------------------------- |
+| **SimpleFIN Bridge** ⭐ | Good (via MX backend)   | ✅ Yes       | **$15/year**        | ✅ Yes              | Best option for personal use                  |
+| **Flinks**              | Best in Canada          | ✅ Yes       | Enterprise only     | ❌ No               | Requires sales contact; not for individuals   |
+| **MX**                  | Good                    | ✅ Yes       | ~$15K+/year         | ❌ No               | Enterprise only; access via SimpleFIN instead |
+| **Yodlee**              | Good globally           | ✅ Yes       | Enterprise          | ❌ No               | Dated developer experience                    |
+| **Akoya**               | US only                 | N/A          | N/A                 | ❌ No               | No Canadian bank participation                |
+| **Teller**              | US only                 | N/A          | Free tier available | ❌ No (US only)     | Irrelevant for Canada                         |
+| **Wealthica**           | Excellent (investments) | Limited      | $50–250/year        | ✅ Yes              | Investment-focused, not bank transactions     |
+| **Manual CSV/OFX**      | All banks               | ✅ Yes       | Free                | ✅ Yes              | Manual but no dependencies                    |
 
 **SimpleFIN Bridge** stands out for personal projects. At **$1.50/month** ($15/year), it provides a simple REST API backed by MX's 16,000+ institution connections. You connect banks on SimpleFIN's site, receive an access token, and pull data with simple HTTP requests. Limitations include once-daily updates, max 90 days historical data, and a 24 requests/day rate limit — all acceptable for personal budgeting. Compatible apps include Actual Budget, Buckets, and Beancount.
 

@@ -1,23 +1,36 @@
-import { randomUUID } from 'crypto';
-import { appendFileSync, existsSync, mkdirSync } from 'fs';
-import { join } from 'path';
+import { randomUUID } from "crypto";
+import { appendFileSync, existsSync, mkdirSync } from "fs";
+import { join } from "path";
 
-import cds from '@sap/cds';
+import cds from "@sap/cds";
 
 /** Valid log entry types for structured logging. */
-type LogType = 'ENTRY' | 'EXIT' | 'EXTERNAL_CALL' | 'STATE_CHANGE' | 'BATCH_RESULT' | 'ERROR';
+type LogType =
+  | "ENTRY"
+  | "EXIT"
+  | "EXTERNAL_CALL"
+  | "STATE_CHANGE"
+  | "BATCH_RESULT"
+  | "ERROR";
 
 /** Fields that must be redacted before DEBUG-level logging. */
-const SENSITIVE_FIELDS = ['card_number_enc', 'cvv_enc', 'expiry_date_enc', 'access_url_enc', 'password', 'token'];
+const SENSITIVE_FIELDS = [
+  "card_number_enc",
+  "cvv_enc",
+  "expiry_date_enc",
+  "access_url_enc",
+  "password",
+  "token",
+];
 
 /** Directory for log file output. */
-const LOG_DIR = join(process.cwd(), 'logs');
+const LOG_DIR = join(process.cwd(), "logs");
 
 /** Path to the application log file. */
-const APP_LOG = join(LOG_DIR, 'app.log');
+const APP_LOG = join(LOG_DIR, "app.log");
 
 /** Path to the error-only log file. */
-const ERROR_LOG = join(LOG_DIR, 'error.log');
+const ERROR_LOG = join(LOG_DIR, "error.log");
 
 /**
  * Structured JSON logger with dual file output and correlation ID tracking.
@@ -43,21 +56,21 @@ export class Logger {
 
   /** Logs an INFO-level structured entry. */
   info(type: LogType, message: string, data?: Record<string, unknown>): void {
-    const entry = this._createEntry('INFO', type, message, data);
+    const entry = this._createEntry("INFO", type, message, data);
     this.cdsLogger.info(JSON.stringify(entry));
     this._writeToFile(APP_LOG, entry);
   }
 
   /** Logs a WARN-level structured entry. */
   warn(type: LogType, message: string, data?: Record<string, unknown>): void {
-    const entry = this._createEntry('WARN', type, message, data);
+    const entry = this._createEntry("WARN", type, message, data);
     this.cdsLogger.warn(JSON.stringify(entry));
     this._writeToFile(APP_LOG, entry);
   }
 
   /** Logs an ERROR-level structured entry to both app.log and error.log. */
   error(type: LogType, message: string, data?: Record<string, unknown>): void {
-    const entry = this._createEntry('ERROR', type, message, data);
+    const entry = this._createEntry("ERROR", type, message, data);
     this.cdsLogger.error(JSON.stringify(entry));
     this._writeToFile(APP_LOG, entry);
     this._writeToFile(ERROR_LOG, entry);
@@ -66,7 +79,7 @@ export class Logger {
   /** Logs a DEBUG-level structured entry. Data is redacted before output. */
   debug(type: LogType, message: string, data?: Record<string, unknown>): void {
     const redactedData = data ? this._redact(data) : undefined;
-    const entry = this._createEntry('DEBUG', type, message, redactedData);
+    const entry = this._createEntry("DEBUG", type, message, redactedData);
     this.cdsLogger.debug(JSON.stringify(entry));
     this._writeToFile(APP_LOG, entry);
   }
@@ -78,7 +91,7 @@ export class Logger {
     level: string,
     type: LogType,
     message: string,
-    data?: Record<string, unknown>
+    data?: Record<string, unknown>,
   ): Record<string, unknown> {
     const entry: Record<string, unknown> = {
       timestamp: new Date().toISOString(),
@@ -86,10 +99,10 @@ export class Logger {
       type,
       module: this.moduleName,
       correlationId: this.correlationId,
-      message
+      message,
     };
     if (data) {
-      entry['data'] = data;
+      entry["data"] = data;
     }
     return entry;
   }
@@ -102,8 +115,8 @@ export class Logger {
     const redacted: Record<string, unknown> = {};
     for (const key of Object.keys(data)) {
       if (SENSITIVE_FIELDS.includes(key.toLowerCase())) {
-        redacted[key] = '[REDACTED]';
-      } else if (typeof data[key] === 'object' && data[key] !== null) {
+        redacted[key] = "[REDACTED]";
+      } else if (typeof data[key] === "object" && data[key] !== null) {
         redacted[key] = this._redact(data[key] as Record<string, unknown>);
       } else {
         redacted[key] = data[key];
@@ -122,7 +135,7 @@ export class Logger {
   /** Appends a JSON log entry to a file. */
   private _writeToFile(filePath: string, entry: Record<string, unknown>): void {
     try {
-      appendFileSync(filePath, `${JSON.stringify(entry)}\n`, 'utf-8');
+      appendFileSync(filePath, `${JSON.stringify(entry)}\n`, "utf-8");
     } catch {
       // Silently fail file writes — console output via cds.log is primary
     }

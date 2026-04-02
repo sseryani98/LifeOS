@@ -1,7 +1,7 @@
 /*
  * Financial Planner — Custom Theme Overrides
  * Layered on top of SAP Horizon Light (sap_horizon).
- * Loaded via <link> in index.html after SAPUI5 bootstrap.
+ * Loaded via includeStylesheet in shell Component.js after SAPUI5 bootstrap.
  *
  * Layer 1: CSS Custom Properties (:root block)
  *   — Covers ~90% of overrides. All components referencing
@@ -11,12 +11,17 @@
  *   — Component-specific tweaks where custom properties alone
  *     don't achieve the desired result. Used sparingly.
  *
- * Brand Palette:
- *   Primary (Warm Charcoal): #3D3A38
- *   Hover (Dark Charcoal):   #2E2B29
- *   Active (Deep Charcoal):  #252220
- *   Selection (Warm Mist):   #EDECEB
- *   Shell Hover (Ash):       #4A4745
+ * Brand Palette — "Obsidian & Amber":
+ *   Shell/Primary (Obsidian):     #2A2725
+ *   Accent (Amber):               #C8973E
+ *   Accent Hover (Dark Amber):    #A67C2E
+ *   Accent Active (Burnt Gold):   #8E6A24
+ *   Link Text (Deep Gold):        #8B6B1F
+ *   Page Background (Warm Stone): #F0EDEA
+ *   Surface (Parchment):          #FAFAF8
+ *   Side Nav (Soft Ash):          #E8E5E2
+ *   Selection (Gold Mist):        #F5EDD8
+ *   Shell Hover (Warm Smoke):     #3D3A37
  *
  * No !important — ever. Match Horizon selector specificity exactly.
  * See THEME.md §7 for full mapping table.
@@ -25,44 +30,64 @@
 /* ===== Layer 1: CSS Custom Properties ===== */
 
 :root {
+  /* --- Typography --- */
+  --sapFontFamily: "DM Sans", "72", "72full", Arial, Helvetica, sans-serif;
+
   /* --- Brand & Selection --- */
-  --sapBrandColor: #3D3A38;
-  --sapHighlightColor: #3D3A38;
-  --sapActiveColor: #2E2B29;
-  --sapSelectedColor: #3D3A38;
-  --sapContent_FocusColor: #3D3A38;
+  --sapBrandColor: #c8973e;
+  --sapHighlightColor: #c8973e;
+  --sapActiveColor: #8e6a24;
+  --sapSelectedColor: #c8973e;
+  --sapContent_FocusColor: #c8973e;
+
+  /* --- Links --- */
+  --sapLinkColor: #8b6b1f;
+
+  /* --- Page Background --- */
+  --sapBackgroundColor: #f0edea;
 
   /* --- Shell --- */
-  --sapShellColor: #3D3A38;
-  --sapShell_TextColor: #FFFFFF;
-  --sapShell_InteractiveTextColor: #FFFFFF;
-  --sapShell_Hover_Background: #4A4745;
+  --sapShellColor: #2a2725;
+  --sapShell_TextColor: #ffffff;
+  --sapShell_InteractiveTextColor: #ffffff;
+  --sapShell_Hover_Background: #3d3a37;
 
   /* --- Buttons: Emphasized --- */
-  --sapButton_Emphasized_Background: #3D3A38;
-  --sapButton_Emphasized_BorderColor: #3D3A38;
-  --sapButton_Emphasized_TextColor: #FFFFFF;
-  --sapButton_Emphasized_Hover_Background: #2E2B29;
-  --sapButton_Emphasized_Hover_BorderColor: #2E2B29;
-  --sapButton_Emphasized_Active_Background: #252220;
-  --sapButton_Emphasized_Active_BorderColor: #252220;
+  --sapButton_Emphasized_Background: #c8973e;
+  --sapButton_Emphasized_BorderColor: #c8973e;
+  --sapButton_Emphasized_TextColor: #ffffff;
+  --sapButton_Emphasized_Hover_Background: #a67c2e;
+  --sapButton_Emphasized_Hover_BorderColor: #a67c2e;
+  --sapButton_Emphasized_Active_Background: #8e6a24;
+  --sapButton_Emphasized_Active_BorderColor: #8e6a24;
 
   /* --- Buttons: Default --- */
-  --sapButton_TextColor: #3D3A38;
-  --sapButton_BorderColor: #3D3A38;
-  --sapButton_Hover_Background: #EDECEB;
-  --sapButton_Hover_BorderColor: #2E2B29;
+  --sapButton_TextColor: #2a2725;
+  --sapButton_BorderColor: #2a2725;
+  --sapButton_Hover_Background: #f5edd8;
+  --sapButton_Hover_BorderColor: #a67c2e;
+  --sapButton_Active_Background: #f5edd8;
+  --sapButton_Active_BorderColor: #8e6a24;
+  --sapButton_Active_TextColor: #2a2725;
+  --sapButton_IconColor: #2a2725;
+
+  /* --- Buttons: Transparent (Lite) --- */
+  --sapButton_Lite_TextColor: #2a2725;
+  --sapButton_Lite_Hover_Background: #f5edd8;
+  --sapButton_Lite_Hover_BorderColor: #a67c2e;
+  --sapButton_Lite_Active_Background: #f5edd8;
+  --sapButton_Lite_Active_BorderColor: #8e6a24;
 
   /* --- Input Fields --- */
-  --sapField_Focus_BorderColor: #3D3A38;
-  --sapField_Hover_BorderColor: #3D3A38;
-  --sapField_Active_BorderColor: #2E2B29;
+  --sapField_Focus_BorderColor: #c8973e;
+  --sapField_Hover_BorderColor: #c8973e;
+  --sapField_Active_BorderColor: #a67c2e;
 
   /* --- Lists & Tables --- */
-  --sapList_Hover_Background: #EDECEB;
-  --sapList_SelectionBackgroundColor: #EDECEB;
-  --sapList_Active_Background: #3D3A38;
-  --sapList_Active_TextColor: #FFFFFF;
+  --sapList_Hover_Background: #f5edd8;
+  --sapList_SelectionBackgroundColor: #f5edd8;
+  --sapList_Active_Background: #2a2725;
+  --sapList_Active_TextColor: #ffffff;
 
   /* --- Border Radius: 0 on all containers/interactive controls --- */
   --sapButton_BorderCornerRadius: 0;
@@ -74,18 +99,72 @@
 
 /* ===== Layer 2: Targeted Selectors ===== */
 
-/*
- * Layer 2 overrides are determined during build by inspecting the running DOM.
- * Each selector gets a comment noting the component and SAPUI5 version it targets.
- * Known candidates (verify against actual DOM):
- *
- * - ShellBar dark treatment (.sapMShellBarCont or equivalent)
- *   May need explicit background-color/color if --sapShellColor
- *   doesn't cascade to all internal ShellBar elements.
- *
- * - Side Navigation active indicator (.sapTntNavLI.sapTntNavLISelected or equivalent)
- *   May need border-left-color/color if --sapHighlightColor
- *   doesn't fully drive the active nav state.
- *
- * Add selectors here only when Layer 1 custom properties are insufficient.
- */
+/* Typography — Horizon 1.136.16 bakes "72" font variants directly into compiled
+   CSS rather than referencing var(--sapFontFamily). Body-scoped descendant
+   selectors needed to beat CDN specificity.  (SAPUI5 1.136.16) */
+.sapUiBody {
+  font-family: var(--sapFontFamily);
+}
+
+.sapUiBody .sapMText,
+.sapUiBody .sapMLabel,
+.sapUiBody .sapMTitle,
+.sapUiBody .sapMLink,
+.sapUiBody .sapMBtnContent,
+.sapUiBody .sapMInputBaseInner,
+.sapUiBody .sapMSLITitleOnly,
+.sapUiBody .sapMListTblCell,
+.sapUiBody .sapTntNavLI,
+.sapUiBody .sapUiTableCell,
+.sapUiBody .sapMCbLabel,
+.sapUiBody .sapMSegBBtn {
+  font-family: var(--sapFontFamily);
+}
+
+/* ToolHeader — sapContrast/sapContrastPlus no longer applies --sapShellColor
+   as background in 1.136.16. Four-class selector to beat CDN specificity.  (SAPUI5 1.136.16) */
+.sapMIBar.sapMTB.sapMOTB.sapTntToolHeader {
+  background-color: var(--sapShellColor);
+  color: var(--sapShell_TextColor);
+}
+
+/* ToolHeader title — Title control defaults to --sapTextColor (dark),
+   must inherit shell text color on the dark header bar.  (SAPUI5 1.136.16) */
+.sapTntToolHeader .sapMTitle {
+  color: var(--sapShell_TextColor);
+}
+
+/* ToolPage main content area — Horizon 1.136.16 hardcodes a cool grey (#F5F6F7)
+   that clashes with our warm --sapBackgroundColor. Override to match.  (SAPUI5 1.136.16) */
+.sapTntToolPageMain {
+  background-color: var(--sapBackgroundColor);
+}
+
+/* ObjectPage wrapper — same cool grey override needed for the scrollable
+   content area inside ObjectPageLayout.  (SAPUI5 1.136.16) */
+.sapUxAPObjectPageWrapper {
+  background-color: var(--sapBackgroundColor);
+}
+
+/* Side Navigation — give the aside panel a tinted background to create
+   three-column depth: dark shell > warm sidebar > light content.  (SAPUI5 1.136.16) */
+.sapTntToolPageAsideContent {
+  background-color: #e8e5e2;
+}
+
+/* Navigation List selected item — Horizon 1.136.16 bakes a blue gradient
+   indicator (3px left bar) and blue-tinted background directly into compiled
+   CSS rather than referencing --sapSelectedColor. Override both layers of the
+   composite background shorthand.  (SAPUI5 1.136.16) */
+.sapTntNLI.sapTntNLISelected {
+  background:
+    linear-gradient(0deg, var(--sapSelectedColor), var(--sapSelectedColor))
+      no-repeat 0px 100% / 3px 100%,
+    #f5edd8;
+}
+
+/* Navigation List selected item anchor — inner <a> also gets a hardcoded
+   blue tint background that must be overridden to match.  (SAPUI5 1.136.16) */
+.sapTntNLI.sapTntNLISelected a {
+  background-color: #f5edd8;
+}

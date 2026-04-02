@@ -1,4 +1,4 @@
-import cds from '@sap/cds';
+import cds from "@sap/cds";
 
 /** BudgetService — Budget management, income, goals, financial picture. */
 export default class BudgetService extends cds.ApplicationService {

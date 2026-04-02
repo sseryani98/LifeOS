@@ -12,8 +12,8 @@
 
 ## 1. Change History
 
-| Date | Author | Description |
-|------|--------|-------------|
+| Date       | Author          | Description                                                       |
+| ---------- | --------------- | ----------------------------------------------------------------- |
 | 2026-02-17 | Sandro & Claude | Initial creation — workshop complete. D-157 through D-164 logged. |
 
 ---
@@ -32,67 +32,67 @@ Key decisions: D-157 (dual entry workflow), D-158 (flexible frequency), D-159 (e
 
 ## 3. Data Model References
 
-| Entity | Role | DM-001 Ref | Amendment? |
-|--------|------|------------|------------|
-| Financial Account | Account master data with optional loan/asset metadata | §4.16 | Yes — 5 new optional fields |
-| Financial Account Type | Reference data — asset vs liability classification | §3.7 | Yes — expanded seed list (6 → 12) |
-| Financial Snapshot | Periodic balance observations | §5.6 | — |
-| Financial Contribution | Deposit/withdrawal events for return computation | — | Yes — new composition entity |
-| System Config | Alert threshold | §3.17 | Yes — 1 new key |
-| Alert | Stale data notification | §6.1 | Yes — 1 new Alert Type seed value |
+| Entity                 | Role                                                  | DM-001 Ref | Amendment?                        |
+| ---------------------- | ----------------------------------------------------- | ---------- | --------------------------------- |
+| Financial Account      | Account master data with optional loan/asset metadata | §4.16      | Yes — 5 new optional fields       |
+| Financial Account Type | Reference data — asset vs liability classification    | §3.7       | Yes — expanded seed list (6 → 12) |
+| Financial Snapshot     | Periodic balance observations                         | §5.6       | —                                 |
+| Financial Contribution | Deposit/withdrawal events for return computation      | —          | Yes — new composition entity      |
+| System Config          | Alert threshold                                       | §3.17      | Yes — 1 new key                   |
+| Alert                  | Stale data notification                               | §6.1       | Yes — 1 new Alert Type seed value |
 
 ### DM-001 Amendments
 
 **1. Financial Account — 5 new optional fields (D-160)**
 
-| Attribute | Type | Nullable | Notes |
-|-----------|------|----------|-------|
-| original_amount | Decimal(15,2) | Yes | Purchase price (assets) or loan principal (liabilities) |
-| start_date | Date | Yes | Acquisition date or loan origination |
-| interest_rate | Decimal(5,4) | Yes | Annual rate — liabilities only |
-| monthly_payment | Decimal(15,2) | Yes | Fixed payment — liabilities only |
-| term_months | Integer | Yes | Loan term in months — liabilities only |
+| Attribute       | Type          | Nullable | Notes                                                   |
+| --------------- | ------------- | -------- | ------------------------------------------------------- |
+| original_amount | Decimal(15,2) | Yes      | Purchase price (assets) or loan principal (liabilities) |
+| start_date      | Date          | Yes      | Acquisition date or loan origination                    |
+| interest_rate   | Decimal(5,4)  | Yes      | Annual rate — liabilities only                          |
+| monthly_payment | Decimal(15,2) | Yes      | Fixed payment — liabilities only                        |
+| term_months     | Integer       | Yes      | Loan term in months — liabilities only                  |
 
 **2. Financial Account Type — expanded seed list (D-159)**
 
-| Name | is_asset | New? |
-|------|----------|------|
-| RRSP | true | — |
-| TFSA | true | — |
-| FHSA | true | — |
-| RIF | true | — |
-| Crypto | true | Yes |
-| Vehicle | true | Yes |
-| Non-Registered | true | Yes |
-| Savings Account | true | Yes |
-| Car Loan | false | — |
-| Student Loan | false | — |
-| Mortgage | false | Yes |
-| Line of Credit | false | Yes |
+| Name            | is_asset | New? |
+| --------------- | -------- | ---- |
+| RRSP            | true     | —    |
+| TFSA            | true     | —    |
+| FHSA            | true     | —    |
+| RIF             | true     | —    |
+| Crypto          | true     | Yes  |
+| Vehicle         | true     | Yes  |
+| Non-Registered  | true     | Yes  |
+| Savings Account | true     | Yes  |
+| Car Loan        | false    | —    |
+| Student Loan    | false    | —    |
+| Mortgage        | false    | Yes  |
+| Line of Credit  | false    | Yes  |
 
 **3. Financial Contribution — new composition entity (D-162)**
 
-| Attribute | Type | Nullable | Notes |
-|-----------|------|----------|-------|
-| id | UUID | No | PK |
-| financial_account_id | UUID | No | FK → Financial Account (composition parent) |
-| amount | Decimal(15,2) | No | Positive = deposit, negative = withdrawal |
-| contribution_date | Date | No | When the contribution occurred |
-| notes | String(500) | Yes | Optional |
+| Attribute            | Type          | Nullable | Notes                                       |
+| -------------------- | ------------- | -------- | ------------------------------------------- |
+| id                   | UUID          | No       | PK                                          |
+| financial_account_id | UUID          | No       | FK → Financial Account (composition parent) |
+| amount               | Decimal(15,2) | No       | Positive = deposit, negative = withdrawal   |
+| contribution_date    | Date          | No       | When the contribution occurred              |
+| notes                | String(500)   | Yes      | Optional                                    |
 
 Composition under Financial Account. Cascade delete with parent. Relationship: Financial Contribution → Financial Account (N:1, required).
 
 **4. New System Config key (D-164)**
 
-| Key | Default | Description |
-|-----|---------|-------------|
-| `FINANCIAL_PICTURE_STALE_DAYS` | 45 | Days after which an account's snapshot data is considered stale |
+| Key                            | Default | Description                                                     |
+| ------------------------------ | ------- | --------------------------------------------------------------- |
+| `FINANCIAL_PICTURE_STALE_DAYS` | 45      | Days after which an account's snapshot data is considered stale |
 
 **5. New Alert Type seed value (D-164)**
 
-| Alert Type | Severity | Description |
-|------------|----------|-------------|
-| `financial_picture_stale` | Low | Active account has no snapshot within FINANCIAL_PICTURE_STALE_DAYS |
+| Alert Type                | Severity | Description                                                        |
+| ------------------------- | -------- | ------------------------------------------------------------------ |
+| `financial_picture_stale` | Low      | Active account has no snapshot within FINANCIAL_PICTURE_STALE_DAYS |
 
 ---
 
@@ -104,15 +104,15 @@ Composition under Financial Account. Cascade delete with parent. Relationship: F
 
 #### List Report
 
-| Column | Source | Width | Notes |
-|--------|--------|-------|-------|
-| Name | `name` | 20% | — |
-| Type | `financial_account_type.name` | 15% | — |
-| Asset/Liability | `financial_account_type.is_asset` | 10% | "Asset" (green) / "Liability" (orange) via ObjectStatus |
-| Current Balance | Latest snapshot `balance` | 15% | Currency formatted |
-| MoM Change | Computed | 15% | vs previous month ($, %) with semantic color |
-| Last Updated | Latest snapshot `snapshot_date` | 15% | Date formatted |
-| Active | `is_active` | 10% | Boolean |
+| Column          | Source                            | Width | Notes                                                   |
+| --------------- | --------------------------------- | ----- | ------------------------------------------------------- |
+| Name            | `name`                            | 20%   | —                                                       |
+| Type            | `financial_account_type.name`     | 15%   | —                                                       |
+| Asset/Liability | `financial_account_type.is_asset` | 10%   | "Asset" (green) / "Liability" (orange) via ObjectStatus |
+| Current Balance | Latest snapshot `balance`         | 15%   | Currency formatted                                      |
+| MoM Change      | Computed                          | 15%   | vs previous month ($, %) with semantic color            |
+| Last Updated    | Latest snapshot `snapshot_date`   | 15%   | Date formatted                                          |
+| Active          | `is_active`                       | 10%   | Boolean                                                 |
 
 **Default filter:** `is_active = true`.
 
@@ -120,22 +120,22 @@ Composition under Financial Account. Cascade delete with parent. Relationship: F
 
 **Actions:**
 
-| Action | Location | Effect |
-|--------|----------|--------|
+| Action              | Location       | Effect                            |
+| ------------------- | -------------- | --------------------------------- |
 | **Update Balances** | Toolbar button | Opens batch entry dialog (§4.1.1) |
-| **Create** | Standard Fiori | Create new financial account |
+| **Create**          | Standard Fiori | Create new financial account      |
 
 #### 4.1.1 Batch Entry — "Update Balances" (D-157)
 
 Dialog opened from List Report toolbar. Editable table showing all active accounts.
 
-| Column | Editable | Notes |
-|--------|----------|-------|
-| Account | No | `name` — read-only |
-| Type | No | `financial_account_type.name` — read-only |
-| Last Balance | No | Latest snapshot balance — reference |
-| New Balance | **Yes** | Pre-filled with Last Balance. User overwrites changed accounts. |
-| Date | **Yes** | Defaults to today. Single date field for all rows. |
+| Column       | Editable | Notes                                                           |
+| ------------ | -------- | --------------------------------------------------------------- |
+| Account      | No       | `name` — read-only                                              |
+| Type         | No       | `financial_account_type.name` — read-only                       |
+| Last Balance | No       | Latest snapshot balance — reference                             |
+| New Balance  | **Yes**  | Pre-filled with Last Balance. User overwrites changed accounts. |
+| Date         | **Yes**  | Defaults to today. Single date field for all rows.              |
 
 **Behavior:**
 
@@ -155,17 +155,17 @@ Dialog opened from List Report toolbar. Editable table showing all active accoun
 
 **Section 1 — Account Details (editable):**
 
-| Field | Type | Notes |
-|-------|------|-------|
-| Name | String | Required |
-| Type | FK → Financial Account Type | Required |
-| Original Amount | Decimal | Optional. Purchase price or loan principal. |
-| Start Date | Date | Optional. Acquisition or origination. |
-| Interest Rate (%) | Decimal | Optional. Annual rate. Relevant for liabilities. |
-| Monthly Payment | Decimal | Optional. Relevant for liabilities. |
-| Term (Months) | Integer | Optional. Relevant for liabilities. |
-| Active | Boolean | — |
-| Notes | Textarea | — |
+| Field             | Type                        | Notes                                            |
+| ----------------- | --------------------------- | ------------------------------------------------ |
+| Name              | String                      | Required                                         |
+| Type              | FK → Financial Account Type | Required                                         |
+| Original Amount   | Decimal                     | Optional. Purchase price or loan principal.      |
+| Start Date        | Date                        | Optional. Acquisition or origination.            |
+| Interest Rate (%) | Decimal                     | Optional. Annual rate. Relevant for liabilities. |
+| Monthly Payment   | Decimal                     | Optional. Relevant for liabilities.              |
+| Term (Months)     | Integer                     | Optional. Relevant for liabilities.              |
+| Active            | Boolean                     | —                                                |
+| Notes             | Textarea                    | —                                                |
 
 **Section 2 — Balance Trend (all accounts):**
 
@@ -175,25 +175,25 @@ VizFrame line chart: snapshot balance over time. If `original_amount` is populat
 
 Rendered only when `interest_rate`, `original_amount`, `monthly_payment`, and `term_months` are all populated.
 
-| Element | Content |
-|---------|---------|
-| Amortization Curve | VizFrame dual-line chart: projected balance (computed from loan params) vs actual balance (from snapshots). Current position marker at latest snapshot. |
-| Remaining Balance | ObjectNumber: latest snapshot balance |
-| Payments Remaining | Computed: remaining balance / (monthly_payment − interest portion) |
-| Projected Payoff | Date: computed from current balance + payment schedule |
-| Total Interest Paid | Computed from actual payment history vs principal reduction |
-| Total Interest (Life of Loan) | Computed from full amortization formula |
+| Element                       | Content                                                                                                                                                 |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Amortization Curve            | VizFrame dual-line chart: projected balance (computed from loan params) vs actual balance (from snapshots). Current position marker at latest snapshot. |
+| Remaining Balance             | ObjectNumber: latest snapshot balance                                                                                                                   |
+| Payments Remaining            | Computed: remaining balance / (monthly_payment − interest portion)                                                                                      |
+| Projected Payoff              | Date: computed from current balance + payment schedule                                                                                                  |
+| Total Interest Paid           | Computed from actual payment history vs principal reduction                                                                                             |
+| Total Interest (Life of Loan) | Computed from full amortization formula                                                                                                                 |
 
 **Section 4 — Growth & Contributions (asset accounts only, D-161, D-162):**
 
 Rendered only for accounts where `financial_account_type.is_asset = true`.
 
-| Element | Content |
-|---------|---------|
+| Element                 | Content                                                                          |
+| ----------------------- | -------------------------------------------------------------------------------- |
 | Growth vs Contributions | VizFrame stacked area chart: cumulative contributions vs market growth over time |
-| True Return | Market Growth / Total Invested Capital |
-| Total Contributions | Sum of all positive contributions |
-| Market Growth | Current Balance − (Original Amount + Total Contributions) |
+| True Return             | Market Growth / Total Invested Capital                                           |
+| Total Contributions     | Sum of all positive contributions                                                |
+| Market Growth           | Current Balance − (Original Amount + Total Contributions)                        |
 
 Only renders growth metrics when `original_amount` is populated and at least one contribution exists. Otherwise, shows balance trend only (Section 2).
 
@@ -205,12 +205,12 @@ VizFrame horizontal bar chart: MoM balance changes. Green for gains/paydown, red
 
 Inline-editable table of Financial Snapshots.
 
-| Column | Width | Notes |
-|--------|-------|-------|
-| Date | 25% | `snapshot_date` |
-| Balance | 25% | Currency formatted |
-| Change | 25% | Computed: vs previous snapshot ($, %) |
-| Notes | 25% | Optional |
+| Column  | Width | Notes                                 |
+| ------- | ----- | ------------------------------------- |
+| Date    | 25%   | `snapshot_date`                       |
+| Balance | 25%   | Currency formatted                    |
+| Change  | 25%   | Computed: vs previous snapshot ($, %) |
+| Notes   | 25%   | Optional                              |
 
 Add / Delete rows. Sorted by date descending.
 
@@ -220,12 +220,12 @@ Rendered only for accounts where `financial_account_type.is_asset = true`.
 
 Inline-editable table of Financial Contributions.
 
-| Column | Width | Notes |
-|--------|-------|-------|
-| Date | 25% | `contribution_date` |
-| Amount | 25% | Positive = deposit, negative = withdrawal |
-| Running Total | 25% | Cumulative sum to date |
-| Notes | 25% | Optional |
+| Column        | Width | Notes                                     |
+| ------------- | ----- | ----------------------------------------- |
+| Date          | 25%   | `contribution_date`                       |
+| Amount        | 25%   | Positive = deposit, negative = withdrawal |
+| Running Total | 25%   | Cumulative sum to date                    |
+| Notes         | 25%   | Optional                                  |
 
 Add / Delete rows. Sorted by date descending.
 
@@ -237,12 +237,12 @@ Add / Delete rows. Sorted by date descending.
 
 #### Row 1 — KPI Cards (half-width, 4 cards)
 
-| Card | Value | Subtext | Semantic Color |
-|------|-------|---------|----------------|
-| Net Worth | Assets − Liabilities | MoM change ($, %) | Green if positive/increasing, Red if negative/decreasing |
-| Total Assets | Sum of latest asset balances | MoM change ($, %) | — |
-| Total Liabilities | Sum of latest liability balances | MoM change ($, %) | — |
-| Debt-to-Asset Ratio | Liabilities / Assets × 100% | MoM change (pp) | Green if declining, Orange if increasing |
+| Card                | Value                            | Subtext           | Semantic Color                                           |
+| ------------------- | -------------------------------- | ----------------- | -------------------------------------------------------- |
+| Net Worth           | Assets − Liabilities             | MoM change ($, %) | Green if positive/increasing, Red if negative/decreasing |
+| Total Assets        | Sum of latest asset balances     | MoM change ($, %) | —                                                        |
+| Total Liabilities   | Sum of latest liability balances | MoM change ($, %) | —                                                        |
+| Debt-to-Asset Ratio | Liabilities / Assets × 100%      | MoM change (pp)   | Green if declining, Orange if increasing                 |
 
 #### Row 2 — Net Worth Trend (full-width)
 
@@ -250,10 +250,10 @@ VizFrame line chart. X-axis: monthly. Y-axis: net worth ($). Single series. Mont
 
 #### Row 3 — Asset Allocation + MoM Changes (half-width each)
 
-| Card | Chart Type | Content |
-|------|-----------|---------|
-| Asset Allocation | Donut (VizFrame) | % split of total assets by account type. Current month only. |
-| MoM Changes | Horizontal bar (VizFrame) | Per-account balance change from previous month. Green = gain/paydown, Red = loss/increase. Sorted by absolute change descending. |
+| Card             | Chart Type                | Content                                                                                                                          |
+| ---------------- | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Asset Allocation | Donut (VizFrame)          | % split of total assets by account type. Current month only.                                                                     |
+| MoM Changes      | Horizontal bar (VizFrame) | Per-account balance change from previous month. Green = gain/paydown, Red = loss/increase. Sorted by absolute change descending. |
 
 #### Row 4 — Assets Trend (full-width)
 
@@ -265,15 +265,15 @@ VizFrame multi-line chart. One series per active liability account. Monthly reso
 
 #### Row 6 — Account Summary Table (full-width)
 
-| Column | Notes |
-|--------|-------|
-| Account | `name` |
-| Type | `financial_account_type.name` |
-| Asset/Liability | ObjectStatus with semantic color |
-| Current Balance | Latest snapshot |
-| Previous Balance | Previous month's latest snapshot |
-| Change ($) | Current − Previous, semantic color |
-| Change (%) | Percentage change, semantic color |
+| Column           | Notes                              |
+| ---------------- | ---------------------------------- |
+| Account          | `name`                             |
+| Type             | `financial_account_type.name`      |
+| Asset/Liability  | ObjectStatus with semantic color   |
+| Current Balance  | Latest snapshot                    |
+| Previous Balance | Previous month's latest snapshot   |
+| Change ($)       | Current − Previous, semantic color |
+| Change (%)       | Percentage change, semantic color  |
 
 Sortable. Search enabled. Standard table conventions per Design System §9.1.1.
 
@@ -283,71 +283,71 @@ Sortable. Search enabled. Standard table conventions per Design System §9.1.1.
 
 ### Snapshot Resolution
 
-| Rule | Description |
-|------|-------------|
-| BR-01 | Net worth = sum(latest active asset snapshot balances) − sum(latest active liability snapshot balances). |
-| BR-02 | Monthly snapshot resolution: for months with multiple snapshots per account, use the latest (`max(snapshot_date)` within the calendar month). |
+| Rule  | Description                                                                                                                                        |
+| ----- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| BR-01 | Net worth = sum(latest active asset snapshot balances) − sum(latest active liability snapshot balances).                                           |
+| BR-02 | Monthly snapshot resolution: for months with multiple snapshots per account, use the latest (`max(snapshot_date)` within the calendar month).      |
 | BR-03 | Carry-forward: if an account has no snapshot in a given month, the dashboard uses the last known balance (most recent snapshot before that month). |
 
 ### Entry Workflow
 
-| Rule | Description |
-|------|-------------|
+| Rule  | Description                                                                                                                                                                           |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | BR-04 | Batch entry pre-fills "New Balance" with each active account's last known balance. Only creates a Financial Snapshot when New Balance ≠ Last Balance. Date defaults to today (D-157). |
-| BR-05 | Snapshots can be entered at any frequency — multiple per month allowed. Dashboard resolves to monthly granularity (D-158). |
-| BR-06 | Inactive accounts (`is_active = false`) are excluded from batch entry, all dashboard KPIs, and trend charts. |
+| BR-05 | Snapshots can be entered at any frequency — multiple per month allowed. Dashboard resolves to monthly granularity (D-158).                                                            |
+| BR-06 | Inactive accounts (`is_active = false`) are excluded from batch entry, all dashboard KPIs, and trend charts.                                                                          |
 
 ### Loan Computations
 
-| Rule | Description |
-|------|-------------|
+| Rule  | Description                                                                                                                                                                                                                         |
+| ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | BR-07 | Amortization curve computed from `interest_rate`, `original_amount`, `monthly_payment`, `start_date`, `term_months` using standard amortization formula. Projected vs actual (from snapshots) displayed as dual-line chart (D-160). |
-| BR-08 | Projected payoff date computed from current balance (latest snapshot) + remaining payments at `monthly_payment` with `interest_rate`. Updates dynamically as new snapshots are entered (D-160). |
-| BR-09 | Amortization section renders only when all four loan fields (`interest_rate`, `original_amount`, `monthly_payment`, `term_months`) are populated (D-161). |
+| BR-08 | Projected payoff date computed from current balance (latest snapshot) + remaining payments at `monthly_payment` with `interest_rate`. Updates dynamically as new snapshots are entered (D-160).                                     |
+| BR-09 | Amortization section renders only when all four loan fields (`interest_rate`, `original_amount`, `monthly_payment`, `term_months`) are populated (D-161).                                                                           |
 
 ### Investment Computations
 
-| Rule | Description |
-|------|-------------|
-| BR-10 | Market Growth = Balance Change − Net Contributions. All-time: Current Balance − (Original Amount + sum of all positive contributions) (D-162). |
-| BR-11 | True Return = Market Growth / Total Invested Capital. Total Invested Capital = `original_amount` + sum of all positive contributions (D-162). |
-| BR-12 | Contributions are entered on the account's object page only — not part of batch entry (D-162). |
+| Rule  | Description                                                                                                                                      |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| BR-10 | Market Growth = Balance Change − Net Contributions. All-time: Current Balance − (Original Amount + sum of all positive contributions) (D-162).   |
+| BR-11 | True Return = Market Growth / Total Invested Capital. Total Invested Capital = `original_amount` + sum of all positive contributions (D-162).    |
+| BR-12 | Contributions are entered on the account's object page only — not part of batch entry (D-162).                                                   |
 | BR-13 | Growth & Contributions section renders for asset-type accounts when `original_amount` is populated and at least one contribution exists (D-161). |
 
 ### Dashboard
 
-| Rule | Description |
-|------|-------------|
-| BR-14 | Dashboard defaults to All Time view. Year filter constrains all charts and KPIs to the selected year (D-163). |
-| BR-15 | Debt-to-Asset Ratio = Total Liabilities / Total Assets × 100%. Not computed when Total Assets = 0 — card displays "N/A" (D-163). |
+| Rule  | Description                                                                                                                                                                          |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| BR-14 | Dashboard defaults to All Time view. Year filter constrains all charts and KPIs to the selected year (D-163).                                                                        |
+| BR-15 | Debt-to-Asset Ratio = Total Liabilities / Total Assets × 100%. Not computed when Total Assets = 0 — card displays "N/A" (D-163).                                                     |
 | BR-16 | MoM change = current month's latest snapshot balance − previous month's latest snapshot balance, per account. For KPI cards, aggregated across all active accounts in each category. |
-| BR-17 | Asset allocation donut shows current-month data only. Groups by Financial Account Type. |
+| BR-17 | Asset allocation donut shows current-month data only. Groups by Financial Account Type.                                                                                              |
 
 ### Alerts
 
-| Rule | Description |
-|------|-------------|
+| Rule  | Description                                                                                                                                                                                                                   |
+| ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | BR-18 | `financial_picture_stale` — daily scheduled check. Fires when any active account's latest snapshot is older than `FINANCIAL_PICTURE_STALE_DAYS` (System Config, default 45). One alert per stale account. Idempotent (D-164). |
 
 ---
 
 ## 6. Error Handling
 
-| Condition | Response | i18n Key Pattern |
-|-----------|----------|------------------|
-| Account name empty | `req.error()` 400 | `budget.financialAccount.nameRequired` |
-| Account name duplicate | `req.error()` 400 | `budget.financialAccount.nameDuplicate` |
-| Account type not selected | `req.error()` 400 | `budget.financialAccount.typeRequired` |
-| Snapshot balance < 0 | `req.error()` 400 | `budget.financialSnapshot.negativeBalance` |
-| Snapshot date missing | `req.error()` 400 | `budget.financialSnapshot.dateRequired` |
-| Contribution amount = 0 | `req.error()` 400 | `budget.financialContribution.zeroAmount` |
-| Contribution date missing | `req.error()` 400 | `budget.financialContribution.dateRequired` |
-| Delete account with snapshots | `req.error()` 400 with count | `budget.financialAccount.hasSnapshots` |
-| Interest rate > 100 or < 0 | `req.error()` 400 | `budget.financialAccount.invalidInterestRate` |
-| Monthly payment < 0 | `req.error()` 400 | `budget.financialAccount.invalidPayment` |
-| Term months ≤ 0 | `req.error()` 400 | `budget.financialAccount.invalidTerm` |
-| Batch entry with no changes | No action, dismiss dialog | — |
-| No snapshots for dashboard | Cards show "No data available" | — |
+| Condition                     | Response                       | i18n Key Pattern                              |
+| ----------------------------- | ------------------------------ | --------------------------------------------- |
+| Account name empty            | `req.error()` 400              | `budget.financialAccount.nameRequired`        |
+| Account name duplicate        | `req.error()` 400              | `budget.financialAccount.nameDuplicate`       |
+| Account type not selected     | `req.error()` 400              | `budget.financialAccount.typeRequired`        |
+| Snapshot balance < 0          | `req.error()` 400              | `budget.financialSnapshot.negativeBalance`    |
+| Snapshot date missing         | `req.error()` 400              | `budget.financialSnapshot.dateRequired`       |
+| Contribution amount = 0       | `req.error()` 400              | `budget.financialContribution.zeroAmount`     |
+| Contribution date missing     | `req.error()` 400              | `budget.financialContribution.dateRequired`   |
+| Delete account with snapshots | `req.error()` 400 with count   | `budget.financialAccount.hasSnapshots`        |
+| Interest rate > 100 or < 0    | `req.error()` 400              | `budget.financialAccount.invalidInterestRate` |
+| Monthly payment < 0           | `req.error()` 400              | `budget.financialAccount.invalidPayment`      |
+| Term months ≤ 0               | `req.error()` 400              | `budget.financialAccount.invalidTerm`         |
+| Batch entry with no changes   | No action, dismiss dialog      | —                                             |
+| No snapshots for dashboard    | Cards show "No data available" | —                                             |
 
 ---
 
@@ -713,13 +713,13 @@ None. OI-06 (alert event types) incrementally addressed — `financial_picture_s
 
 ## 9. Cross-References / Dependencies
 
-| Spec | Dependency |
-|------|------------|
+| Spec                            | Dependency                                                                                                                                                                                |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | SPEC-06 (Reference Data & Seed) | Financial Account Type seeds expanded (6 → 12). System Config gains 1 new key. Alert Type gains 1 new seed value. FRM-009 maintains all reference data including Financial Account Types. |
-| SPEC-05 (Budget Pipeline) | No direct dependency. Financial picture is independent of budget computation. |
-| SPEC-20 (Budget Dashboard) | RPT-002 may reference net worth from RPT-003 for context. |
-| SPEC-19 (Churnboard) | RPT-001 may include a net worth summary section consuming RPT-003 data. |
+| SPEC-05 (Budget Pipeline)       | No direct dependency. Financial picture is independent of budget computation.                                                                                                             |
+| SPEC-20 (Budget Dashboard)      | RPT-002 may reference net worth from RPT-003 for context.                                                                                                                                 |
+| SPEC-19 (Churnboard)            | RPT-001 may include a net worth summary section consuming RPT-003 data.                                                                                                                   |
 
 ---
 
-*This spec traces to [Business Architecture](../BUSINESS_ARCHITECTURE.md) objects FRM-011, RPT-003 and [Data Model](../DATA_MODEL.md) entities listed in §3. New decisions D-157–D-164 logged in [Decisions Log](../user-profile/DECISIONS_LOG.md).*
+_This spec traces to [Business Architecture](../BUSINESS_ARCHITECTURE.md) objects FRM-011, RPT-003 and [Data Model](../DATA_MODEL.md) entities listed in §3. New decisions D-157–D-164 logged in [Decisions Log](../user-profile/DECISIONS_LOG.md)._

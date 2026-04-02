@@ -1,9 +1,9 @@
-import { readFileSync, writeFileSync, readdirSync, unlinkSync } from 'fs';
-import { join } from 'path';
+import { readFileSync, writeFileSync, readdirSync, unlinkSync } from "fs";
+import { join } from "path";
 
-const COVERAGE_DIR = join(process.cwd(), 'coverage');
-const TEST_RESULTS_FILE = join(COVERAGE_DIR, 'test-results.json');
-const REPORTS_DIR = join(process.cwd(), 'project', 'test-reports');
+const COVERAGE_DIR = join(process.cwd(), "coverage");
+const TEST_RESULTS_FILE = join(COVERAGE_DIR, "test-results.json");
+const REPORTS_DIR = join(process.cwd(), "project", "test-reports");
 const MAX_REPORTS = 5;
 
 interface TestResult {
@@ -41,28 +41,32 @@ interface CoverageSummary {
  */
 function generateReport(): void {
   const now = new Date();
-  const timestamp = now.toISOString().replace(/[:.]/g, '-').slice(0, 19);
-  const reportName = `tests_${timestamp.replace('T', '_')}.md`;
+  const timestamp = now.toISOString().replace(/[:.]/g, "-").slice(0, 19);
+  const reportName = `tests_${timestamp.replace("T", "_")}.md`;
 
   let testResults: TestResult;
   try {
-    testResults = JSON.parse(readFileSync(TEST_RESULTS_FILE, 'utf8')) as TestResult;
+    testResults = JSON.parse(
+      readFileSync(TEST_RESULTS_FILE, "utf8"),
+    ) as TestResult;
   } catch {
-    console.error('No test results found. Run tests first.');
+    console.error("No test results found. Run tests first.");
     return;
   }
 
   let coverageSummary: CoverageSummary | undefined;
   try {
-    const coveragePath = join(COVERAGE_DIR, 'coverage-summary.json');
-    coverageSummary = JSON.parse(readFileSync(coveragePath, 'utf8')) as CoverageSummary;
+    const coveragePath = join(COVERAGE_DIR, "coverage-summary.json");
+    coverageSummary = JSON.parse(
+      readFileSync(coveragePath, "utf8"),
+    ) as CoverageSummary;
   } catch {
     // Coverage summary may not exist if coverage was not collected
   }
 
   const duration = ((Date.now() - testResults.startTime) / 1000).toFixed(1);
 
-  let report = `# Test Report \u2014 ${now.toISOString().replace('T', ' ').slice(0, 19)}\n\n`;
+  let report = `# Test Report \u2014 ${now.toISOString().replace("T", " ").slice(0, 19)}\n\n`;
 
   // Summary
   report += `## Summary\n\n`;
@@ -75,14 +79,19 @@ function generateReport(): void {
   report += `| Duration | ${duration}s |\n\n`;
 
   // Failures
-  const failures: Array<{ suite: string; title: string; message: string; location: string }> = [];
+  const failures: Array<{
+    suite: string;
+    title: string;
+    message: string;
+    location: string;
+  }> = [];
   for (const suite of testResults.testResults) {
     for (const test of suite.testResults) {
-      if (test.status === 'failed') {
+      if (test.status === "failed") {
         failures.push({
           suite: suite.testFilePath,
-          title: [...test.ancestorTitles, test.title].join(' > '),
-          message: test.failureMessages.join('\n'),
+          title: [...test.ancestorTitles, test.title].join(" > "),
+          message: test.failureMessages.join("\n"),
           location: suite.testFilePath,
         });
       }
@@ -93,7 +102,7 @@ function generateReport(): void {
     report += `## Failures\n\n`;
     for (const failure of failures) {
       report += `### ${failure.title}\n`;
-      report += `- **Error:** ${failure.message.split('\n')[0]}\n`;
+      report += `- **Error:** ${failure.message.split("\n")[0]}\n`;
       report += `- **Location:** ${failure.location}\n\n`;
     }
   }
@@ -112,14 +121,18 @@ function generateReport(): void {
     writeFileSync(join(REPORTS_DIR, reportName), report);
     console.log(`Test report written: ${reportName}`);
   } catch {
-    console.error('Failed to write test report. Ensure project/test-reports/ exists.');
+    console.error(
+      "Failed to write test report. Ensure project/test-reports/ exists.",
+    );
     return;
   }
 
   // Rolling retention — delete oldest if more than MAX_REPORTS
   try {
     const files = readdirSync(REPORTS_DIR)
-      .filter((file: string) => file.startsWith('tests_') && file.endsWith('.md'))
+      .filter(
+        (file: string) => file.startsWith("tests_") && file.endsWith(".md"),
+      )
       .sort();
 
     while (files.length > MAX_REPORTS) {

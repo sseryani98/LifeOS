@@ -1,122 +1,137 @@
 namespace com.financialplanner;
 
-using { cuid, managed } from '@sap/cds/common';
-using { com.financialplanner.CardType,
-        com.financialplanner.CardSegment,
-        com.financialplanner.FeeStructure,
-        com.financialplanner.MsrWindowType,
-        com.financialplanner.LifecycleState,
-        com.financialplanner.MarketCardStatus } from '../enums';
-using { com.financialplanner.Issuer,
-        com.financialplanner.RewardsProgram,
-        com.financialplanner.CardNetwork,
-        com.financialplanner.ProgramTier,
-        com.financialplanner.EarningCategory,
-        com.financialplanner.PerkType,
-        com.financialplanner.IssuerApplicationRule } from '../reference/schema';
+using {
+  cuid,
+  managed
+} from '@sap/cds/common';
+using {
+  com.financialplanner.CardType,
+  com.financialplanner.CardSegment,
+  com.financialplanner.FeeStructure,
+  com.financialplanner.MsrWindowType,
+  com.financialplanner.LifecycleState,
+  com.financialplanner.MarketCardStatus
+} from '../enums';
+using {
+  com.financialplanner.Issuer,
+  com.financialplanner.RewardsProgram,
+  com.financialplanner.CardNetwork,
+  com.financialplanner.ProgramTier,
+  com.financialplanner.EarningCategory,
+  com.financialplanner.PerkType
+} from '../reference/schema';
 
-// ─── §4.1 Market Card ──────────────────────────────────────────────────────────
+@assert.unique: {name: [name]}
 entity MarketCard : cuid, managed {
-  name             : String(500)   not null;
-  issuer           : Association to Issuer not null;
-  rewardsProgram   : Association to RewardsProgram;
-  cardNetwork      : Association to CardNetwork not null;
-  programTier      : Association to ProgramTier;
-  cardType         : CardType      not null;
-  cardSegment      : CardSegment   not null;
-  feeStructure     : FeeStructure  not null;
-  feeAmount        : Decimal(15,2) not null;
-  status           : MarketCardStatus not null default 'active';
-  sourceUrl        : String(500);
-  lastScrapeHash   : String(64);
-  eligibilityGroup : String(100);
-  offers           : Composition of many Offer on offers.marketCard = $self;
+  name             : String(500) not null                        @mandatory  @Common.Label: '{i18n>MarketCard.name}';
+  issuer           : Association to Issuer not null              @mandatory  @Common.Label: '{i18n>MarketCard.issuer}';
+  rewardsProgram   : Association to RewardsProgram               @Common.Label: '{i18n>MarketCard.rewardsProgram}';
+  cardNetwork      : Association to CardNetwork not null         @mandatory  @Common.Label: '{i18n>MarketCard.cardNetwork}';
+  programTier      : Association to ProgramTier                  @Common.Label: '{i18n>MarketCard.programTier}';
+  cardType         : CardType not null                           @mandatory  @Common.Label: '{i18n>MarketCard.cardType}';
+  cardSegment      : CardSegment not null                        @mandatory  @Common.Label: '{i18n>MarketCard.cardSegment}';
+  feeStructure     : FeeStructure not null                       @mandatory  @Common.Label: '{i18n>MarketCard.feeStructure}';
+  feeAmount        : Decimal(15, 2) not null                     @mandatory  @Common.Label: '{i18n>MarketCard.feeAmount}';
+  status           : MarketCardStatus not null default 'active'  @mandatory  @Common.Label: '{i18n>MarketCard.status}';
+  sourceUrl        : String(500)                                 @Common.Label: '{i18n>MarketCard.sourceUrl}';
+  lastScrapeHash   : String(64)                                  @Common.Label: '{i18n>MarketCard.lastScrapeHash}';
+  eligibilityGroup : String(100)                                 @Common.Label: '{i18n>MarketCard.eligibilityGroup}';
+  offers           : Composition of many Offer
+                       on offers.marketCard = $self;
 }
 
-// ─── §4.2 Offer ────────────────────────────────────────────────────────────────
+@assert.unique: {offerName: [
+  marketCard,
+  name
+]}
 entity Offer : cuid, managed {
-  marketCard     : Association to MarketCard not null;
-  name           : String(500)   not null;
-  fyf            : Boolean       not null;
-  offerStartDate : Date;
-  offerEndDate   : Date;
-  feeAmount      : Decimal(15,2);
-  isCurrent      : Boolean       not null default false;
-  offerUrl       : String(500);
-  source         : String(200);
-  notes          : String(1000);
-  tranches       : Composition of many OfferTranche on tranches.offer = $self;
+  marketCard     : Association to MarketCard not null  @mandatory  @Common.Label: '{i18n>Offer.marketCard}';
+  name           : String(500) not null                @mandatory  @Common.Label: '{i18n>Offer.name}';
+  fyf            : Boolean not null                    @mandatory  @Common.Label: '{i18n>Offer.fyf}';
+  offerStartDate : Date                                @Common.Label: '{i18n>Offer.offerStartDate}';
+  offerEndDate   : Date                                @Common.Label: '{i18n>Offer.offerEndDate}';
+  feeAmount      : Decimal(15, 2)                      @Common.Label: '{i18n>Offer.feeAmount}';
+  isCurrent      : Boolean not null default false      @mandatory  @Common.Label: '{i18n>Offer.isCurrent}';
+  offerUrl       : String(500)                         @Common.Label: '{i18n>Offer.offerUrl}';
+  source         : String(200)                         @Common.Label: '{i18n>Offer.source}';
+  notes          : String(1000)                        @Common.Label: '{i18n>Offer.notes}';
+  tranches       : Composition of many OfferTranche
+                     on tranches.offer = $self;
 }
 
-// ─── §4.3 Offer Tranche ────────────────────────────────────────────────────────
+@assert.unique: {tranche: [
+  offer,
+  trancheNumber
+]}
 entity OfferTranche : cuid, managed {
-  offer           : Association to Offer not null;
-  trancheNumber   : Integer       not null;
-  msrAmount       : Decimal(15,2) not null;
-  msrWindowType   : MsrWindowType not null;
-  msrWindowMonths : Integer       not null;
-  bonusAmount     : Decimal(15,2) not null;
-  unlockMonth     : Integer;
+  offer           : Association to Offer not null  @mandatory  @Common.Label: '{i18n>OfferTranche.offer}';
+  trancheNumber   : Integer not null               @mandatory  @Common.Label: '{i18n>OfferTranche.trancheNumber}';
+  msrAmount       : Decimal(15, 2) not null        @mandatory  @Common.Label: '{i18n>OfferTranche.msrAmount}';
+  msrWindowType   : MsrWindowType not null         @mandatory  @Common.Label: '{i18n>OfferTranche.msrWindowType}';
+  msrWindowMonths : Integer not null               @mandatory  @Common.Label: '{i18n>OfferTranche.msrWindowMonths}';
+  bonusAmount     : Decimal(15, 2) not null        @mandatory  @Common.Label: '{i18n>OfferTranche.bonusAmount}';
+  unlockMonth     : Integer                        @Common.Label: '{i18n>OfferTranche.unlockMonth}';
 }
 
-// ─── §4.4 Card Instance ────────────────────────────────────────────────────────
 entity CardInstance : cuid, managed {
-  marketCard          : Association to MarketCard not null;
-  offer               : Association to Offer not null;
-  parentCardInstance  : Association to CardInstance;
-  lifecycleState      : LifecycleState not null;
-  applicationDate     : Date;
-  activationDate      : Date;
-  tentativeCancelDate : Date;
-  closedDate          : Date;
-  creditLimit         : Decimal(15,2);
-  cardNumberEnc       : String(1000);
-  cvvFrontEnc         : String(1000);
-  cvvBackEnc          : String(1000);
-  expiryDateEnc       : String(1000);
-  cardholderName      : String(200);
-  statementCloseDay   : Integer;
-  notes               : String(1000);
-  cardPerks           : Composition of many CardPerk on cardPerks.cardInstance = $self;
+  marketCard          : Association to MarketCard not null  @mandatory  @Common.Label: '{i18n>CardInstance.marketCard}';
+  offer               : Association to Offer not null       @mandatory  @Common.Label: '{i18n>CardInstance.offer}';
+  parentCardInstance  : Association to CardInstance         @Common.Label: '{i18n>CardInstance.parentCardInstance}';
+  lifecycleState      : LifecycleState not null             @mandatory  @Common.Label: '{i18n>CardInstance.lifecycleState}';
+  applicationDate     : Date                                @Common.Label: '{i18n>CardInstance.applicationDate}';
+  activationDate      : Date                                @Common.Label: '{i18n>CardInstance.activationDate}';
+  tentativeCancelDate : Date                                @Common.Label: '{i18n>CardInstance.tentativeCancelDate}';
+  closedDate          : Date                                @Common.Label: '{i18n>CardInstance.closedDate}';
+  creditLimit         : Decimal(15, 2)                      @Common.Label: '{i18n>CardInstance.creditLimit}';
+  cardNumberEnc       : String(1000)                        @Common.Label: '{i18n>CardInstance.cardNumberEnc}';
+  cvvFrontEnc         : String(1000)                        @Common.Label: '{i18n>CardInstance.cvvFrontEnc}';
+  cvvBackEnc          : String(1000)                        @Common.Label: '{i18n>CardInstance.cvvBackEnc}';
+  expiryDateEnc       : String(1000)                        @Common.Label: '{i18n>CardInstance.expiryDateEnc}';
+  cardholderName      : String(200)                         @Common.Label: '{i18n>CardInstance.cardholderName}';
+  statementCloseDay   : Integer                             @Common.Label: '{i18n>CardInstance.statementCloseDay}';
+  notes               : String(1000)                        @Common.Label: '{i18n>CardInstance.notes}';
+  cardPerks           : Composition of many CardPerk
+                          on cardPerks.cardInstance = $self;
 }
 
-// ─── §4.5 Earning Multiplier ───────────────────────────────────────────────────
+@assert.unique: {multiplier: [
+  marketCard,
+  earningCategory,
+  effectiveFrom
+]}
 entity EarningMultiplier : cuid, managed {
-  marketCard      : Association to MarketCard not null;
-  earningCategory : Association to EarningCategory not null;
-  cardInstance    : Association to CardInstance;
-  multiplier      : Decimal(5,2) not null;
-  effectiveFrom   : Date         not null;
-  effectiveTo     : Date;
+  marketCard      : Association to MarketCard not null       @mandatory  @Common.Label: '{i18n>EarningMultiplier.marketCard}';
+  earningCategory : Association to EarningCategory not null  @mandatory  @Common.Label: '{i18n>EarningMultiplier.earningCategory}';
+  cardInstance    : Association to CardInstance              @Common.Label: '{i18n>EarningMultiplier.cardInstance}';
+  multiplier      : Decimal(5, 2) not null                   @mandatory  @Common.Label: '{i18n>EarningMultiplier.multiplier}';
+  effectiveFrom   : Date not null                            @mandatory  @Common.Label: '{i18n>EarningMultiplier.effectiveFrom}';
+  effectiveTo     : Date not null default '9999-12-31'       @mandatory  @Common.Label: '{i18n>EarningMultiplier.effectiveTo}';
 }
 
-// ─── §4.6 Soft Perk Definition ─────────────────────────────────────────────────
 entity SoftPerkDefinition : cuid, managed {
-  marketCard    : Association to MarketCard not null;
-  cardInstance  : Association to CardInstance;
-  perkType      : Association to PerkType not null;
-  name          : String(500)   not null;
-  quantity      : Integer;
-  dollarValue   : Decimal(15,2) not null;
-  annualReset   : Boolean       not null;
-  effectiveFrom : Date          not null;
-  effectiveTo   : Date;
-  notes         : String(1000);
+  marketCard    : Association to MarketCard not null  @mandatory  @Common.Label: '{i18n>SoftPerkDefinition.marketCard}';
+  cardInstance  : Association to CardInstance         @Common.Label: '{i18n>SoftPerkDefinition.cardInstance}';
+  perkType      : Association to PerkType not null    @mandatory  @Common.Label: '{i18n>SoftPerkDefinition.perkType}';
+  name          : String(500) not null                @mandatory  @Common.Label: '{i18n>SoftPerkDefinition.name}';
+  quantity      : Integer                             @Common.Label: '{i18n>SoftPerkDefinition.quantity}';
+  dollarValue   : Decimal(15, 2) not null             @mandatory  @Common.Label: '{i18n>SoftPerkDefinition.dollarValue}';
+  annualReset   : Boolean not null                    @mandatory  @Common.Label: '{i18n>SoftPerkDefinition.annualReset}';
+  effectiveFrom : Date not null                       @mandatory  @Common.Label: '{i18n>SoftPerkDefinition.effectiveFrom}';
+  effectiveTo   : Date not null default '9999-12-31'  @mandatory  @Common.Label: '{i18n>SoftPerkDefinition.effectiveTo}';
+  notes         : String(1000)                        @Common.Label: '{i18n>SoftPerkDefinition.notes}';
 }
 
-// ─── §4.7 Card Perk ────────────────────────────────────────────────────────────
+@assert.unique: {perkPeriod: [
+  cardInstance,
+  softPerkDefinition,
+  periodStart
+]}
 entity CardPerk : cuid, managed {
-  cardInstance        : Association to CardInstance not null;
-  softPerkDefinition  : Association to SoftPerkDefinition not null;
-  periodStart         : Date          not null;
-  periodEnd           : Date          not null;
-  quantityUsed        : Integer;
-  dollarValueRealized : Decimal(15,2) not null default 0.00;
-  notes               : String(1000);
-}
-
-// ─── Cross-domain association ──────────────────────────────────────────────────
-// Replaces raw marketCard_ID : UUID in IssuerApplicationRule (reference/schema.cds)
-extend IssuerApplicationRule with {
-  marketCard : Association to MarketCard;
+  cardInstance        : Association to CardInstance not null        @mandatory  @Common.Label: '{i18n>CardPerk.cardInstance}';
+  softPerkDefinition  : Association to SoftPerkDefinition not null  @mandatory  @Common.Label: '{i18n>CardPerk.softPerkDefinition}';
+  periodStart         : Date not null                               @mandatory  @Common.Label: '{i18n>CardPerk.periodStart}';
+  periodEnd           : Date not null                               @mandatory  @Common.Label: '{i18n>CardPerk.periodEnd}';
+  quantityUsed        : Integer                                     @Common.Label: '{i18n>CardPerk.quantityUsed}';
+  dollarValueRealized : Decimal(15, 2) not null default 0.00        @mandatory  @Common.Label: '{i18n>CardPerk.dollarValueRealized}';
+  notes               : String(1000)                                @Common.Label: '{i18n>CardPerk.notes}';
 }

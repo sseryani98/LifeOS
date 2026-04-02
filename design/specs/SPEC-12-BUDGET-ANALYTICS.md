@@ -12,8 +12,8 @@
 
 ## 1. Change History
 
-| Date | Author | Description |
-|------|--------|-------------|
+| Date       | Author          | Description                                                       |
+| ---------- | --------------- | ----------------------------------------------------------------- |
 | 2026-02-18 | Sandro & Claude | Initial creation — workshop complete. D-170 through D-176 logged. |
 
 ---
@@ -34,17 +34,17 @@ Key decisions: D-12 (no rollover), D-15 (manual income), D-131 (simplified budge
 
 ## 3. Data Model References
 
-| Entity | Role | DM-001 Ref | Amendment? |
-|--------|------|------------|------------|
-| Transaction | Primary spend source — amounts, dates, categorization | §5.1 | — |
-| Transaction Split | my_share_amount for split budget calculations | §5.2 | — |
-| Income Entry | Monthly income amounts by source type | §5.5 | — |
-| Income Source Type | Income classification (Salary, Bonus, Churn Reward) | §3.5 | — |
-| Purchase Type | Two-level budget taxonomy, parent for rollup | §3.3 | — |
-| Budget Allocation | Ratio per top-level Purchase Type, time-bound | §4.14 | — |
-| Goal | monthly_allocation deducted from income by ENH-007 | §4.11 | — |
-| Vendor | Merchant names for vendor concentration analysis | §4.8 | — |
-| Recurrent Expense | Informational only — not a formula input (D-131) | §4.10 | — |
+| Entity             | Role                                                  | DM-001 Ref | Amendment? |
+| ------------------ | ----------------------------------------------------- | ---------- | ---------- |
+| Transaction        | Primary spend source — amounts, dates, categorization | §5.1       | —          |
+| Transaction Split  | my_share_amount for split budget calculations         | §5.2       | —          |
+| Income Entry       | Monthly income amounts by source type                 | §5.5       | —          |
+| Income Source Type | Income classification (Salary, Bonus, Churn Reward)   | §3.5       | —          |
+| Purchase Type      | Two-level budget taxonomy, parent for rollup          | §3.3       | —          |
+| Budget Allocation  | Ratio per top-level Purchase Type, time-bound         | §4.14      | —          |
+| Goal               | monthly_allocation deducted from income by ENH-007    | §4.11      | —          |
+| Vendor             | Merchant names for vendor concentration analysis      | §4.8       | —          |
+| Recurrent Expense  | Informational only — not a formula input (D-131)      | §4.10      | —          |
 
 ### DM-001 Amendments
 
@@ -64,12 +64,12 @@ None. SPEC-12 consumes existing entities and ENH-007 computed output. No new ent
 
 #### Section 1 — KPI Row (full-width)
 
-| KPI | Computation | Format |
-|-----|-------------|--------|
-| Total Spend YTD | Sum of `totalActualSpend` across all months in selected year | Currency (ObjectNumber, neutral) |
-| Avg Monthly Spend | Total Spend YTD / count of elapsed months in selected year | Currency (ObjectNumber, neutral) |
-| Highest-Spend Month | Month with maximum `totalActualSpend` — display month name + amount | Text + Currency |
-| Over-Budget Months | Count of months where `totalActualSpend > totalBudget` | Integer (ObjectNumber, Error if > 0, Success if 0) |
+| KPI                 | Computation                                                         | Format                                             |
+| ------------------- | ------------------------------------------------------------------- | -------------------------------------------------- |
+| Total Spend YTD     | Sum of `totalActualSpend` across all months in selected year        | Currency (ObjectNumber, neutral)                   |
+| Avg Monthly Spend   | Total Spend YTD / count of elapsed months in selected year          | Currency (ObjectNumber, neutral)                   |
+| Highest-Spend Month | Month with maximum `totalActualSpend` — display month name + amount | Text + Currency                                    |
+| Over-Budget Months  | Count of months where `totalActualSpend > totalBudget`              | Integer (ObjectNumber, Error if > 0, Success if 0) |
 
 #### Section 2 — Spend by Category Over Time (full-width)
 
@@ -141,12 +141,12 @@ When the selected year is the current year, data is shown through the current mo
 
 #### Section 1 — KPI Row (full-width)
 
-| KPI | Computation | Format |
-|-----|-------------|--------|
-| Total Income YTD | Sum of `totalIncome` across all months in selected year | Currency (ObjectNumber, neutral) |
-| Total Expenses YTD | Sum of `totalActualSpend` across all months in selected year | Currency (ObjectNumber, neutral) |
-| Net Surplus/Deficit YTD | Total Income YTD − Total Expenses YTD | Currency (ObjectNumber, Success if ≥ 0, Error if negative) |
-| Avg Savings Rate | Mean of monthly savings rates for elapsed months in selected year | Percentage (ObjectNumber, Success if ≥ 0%, Error if negative) |
+| KPI                     | Computation                                                       | Format                                                        |
+| ----------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------- |
+| Total Income YTD        | Sum of `totalIncome` across all months in selected year           | Currency (ObjectNumber, neutral)                              |
+| Total Expenses YTD      | Sum of `totalActualSpend` across all months in selected year      | Currency (ObjectNumber, neutral)                              |
+| Net Surplus/Deficit YTD | Total Income YTD − Total Expenses YTD                             | Currency (ObjectNumber, Success if ≥ 0, Error if negative)    |
+| Avg Savings Rate        | Mean of monthly savings rates for elapsed months in selected year | Percentage (ObjectNumber, Success if ≥ 0%, Error if negative) |
 
 #### Section 2 — Income vs Expenses Trend (full-width)
 
@@ -186,11 +186,11 @@ Follows D-61 default: part-of-whole → donut.
 
 #### Definitions (D-174, D-175)
 
-| Term | Definition |
-|------|------------|
-| Total outflow | `totalActualSpend` from ENH-007. Goal allocations are not included. |
-| Surplus/deficit | `totalIncome - totalActualSpend`. Positive = surplus, negative = deficit. |
-| Savings rate | `(totalIncome - totalActualSpend) / totalIncome × 100`. Division by zero (zero income month) yields 0%. |
+| Term            | Definition                                                                                              |
+| --------------- | ------------------------------------------------------------------------------------------------------- |
+| Total outflow   | `totalActualSpend` from ENH-007. Goal allocations are not included.                                     |
+| Surplus/deficit | `totalIncome - totalActualSpend`. Positive = surplus, negative = deficit.                               |
+| Savings rate    | `(totalIncome - totalActualSpend) / totalIncome × 100`. Division by zero (zero income month) yields 0%. |
 
 Goal allocations are treated as part of the surplus in this view. RPT-012 answers "how much of my income did I actually spend" rather than "how much is uncommitted."
 
@@ -204,59 +204,59 @@ Same as RPT-007. Current year shows months through today. Future months absent. 
 
 ### RPT-007 — Spending Trends
 
-| Rule | Description |
-|------|-------------|
-| BR-01 | Year selector lists all calendar years that contain at least one transaction. Default = current year (D-171). |
-| BR-02 | Partial-year behavior: current year shows months through the current month only. Future months absent from all charts and the heatmap. No YTD indicator (D-171). |
+| Rule  | Description                                                                                                                                                                                                                                        |
+| ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| BR-01 | Year selector lists all calendar years that contain at least one transaction. Default = current year (D-171).                                                                                                                                      |
+| BR-02 | Partial-year behavior: current year shows months through the current month only. Future months absent from all charts and the heatmap. No YTD indicator (D-171).                                                                                   |
 | BR-03 | All spend data sourced from ENH-007 output — same inclusion rules apply: `is_excluded = false`, goal-linked transactions excluded, splits use `my_share_amount`, refunds reduce spend. Inherits SPEC-05 BR-20, BR-21, BR-12, BR-06, BR-13 (D-172). |
-| BR-04 | KPI "Total Spend YTD" = sum of `totalActualSpend` across all months in selected year (D-172). |
-| BR-05 | KPI "Avg Monthly Spend" = Total Spend YTD / count of elapsed months in selected year (D-172). |
-| BR-06 | KPI "Highest-Spend Month" = month with maximum `totalActualSpend`. Display month name + amount (D-172). |
-| BR-07 | KPI "Over-Budget Months" = count of months where `totalActualSpend > totalBudget`. ObjectNumber with Error state if > 0, Success if 0 (D-172). |
-| BR-08 | Spend by Category Over Time: stacked bar chart. X-axis = months, stacks = top-level Purchase Types, values = `actual` per category. Uncategorized shown as its own stack segment (D-172). |
-| BR-09 | Budget vs Actual Trend: line chart, two series — `totalBudget` and `totalActualSpend` per month (D-172). |
-| BR-10 | Category Health Heatmap: rows = top-level Purchase Types, columns = months. Cell value = category `actual`. Cell color from ENH-007 `status` (`on_track` = green, `warning` = orange, `over_budget` = red). Future months blank/grey (D-172). |
-| BR-11 | Month-over-Month Comparison: table with rows = top-level Purchase Types, columns = prior month, current month, delta ($), delta (%). Current month = most recent elapsed month. If only one month exists, prior month columns blank (D-172). |
-| BR-12 | Vendor Concentration: horizontal bar, top 10 vendors by total spend for selected year. Optional Purchase Type filter dropdown (default = All). Same inclusion rules as ENH-007 (D-172). |
-| BR-13 | Uncategorized Spend Trend: combination chart. Bars = `uncategorized` amount (left Y-axis). Line = count of uncategorized transactions (right Y-axis). Per month (D-172). |
+| BR-04 | KPI "Total Spend YTD" = sum of `totalActualSpend` across all months in selected year (D-172).                                                                                                                                                      |
+| BR-05 | KPI "Avg Monthly Spend" = Total Spend YTD / count of elapsed months in selected year (D-172).                                                                                                                                                      |
+| BR-06 | KPI "Highest-Spend Month" = month with maximum `totalActualSpend`. Display month name + amount (D-172).                                                                                                                                            |
+| BR-07 | KPI "Over-Budget Months" = count of months where `totalActualSpend > totalBudget`. ObjectNumber with Error state if > 0, Success if 0 (D-172).                                                                                                     |
+| BR-08 | Spend by Category Over Time: stacked bar chart. X-axis = months, stacks = top-level Purchase Types, values = `actual` per category. Uncategorized shown as its own stack segment (D-172).                                                          |
+| BR-09 | Budget vs Actual Trend: line chart, two series — `totalBudget` and `totalActualSpend` per month (D-172).                                                                                                                                           |
+| BR-10 | Category Health Heatmap: rows = top-level Purchase Types, columns = months. Cell value = category `actual`. Cell color from ENH-007 `status` (`on_track` = green, `warning` = orange, `over_budget` = red). Future months blank/grey (D-172).      |
+| BR-11 | Month-over-Month Comparison: table with rows = top-level Purchase Types, columns = prior month, current month, delta ($), delta (%). Current month = most recent elapsed month. If only one month exists, prior month columns blank (D-172).       |
+| BR-12 | Vendor Concentration: horizontal bar, top 10 vendors by total spend for selected year. Optional Purchase Type filter dropdown (default = All). Same inclusion rules as ENH-007 (D-172).                                                            |
+| BR-13 | Uncategorized Spend Trend: combination chart. Bars = `uncategorized` amount (left Y-axis). Line = count of uncategorized transactions (right Y-axis). Per month (D-172).                                                                           |
 
 ### RPT-012 — Income vs Expenses Trend
 
-| Rule | Description |
-|------|-------------|
-| BR-14 | Year selector: same behavior as RPT-007 BR-01 and BR-02 (D-171). |
-| BR-15 | Total outflow = `totalActualSpend` from ENH-007. Goal allocations are not included in outflow (D-174). |
-| BR-16 | Savings rate = `(totalIncome - totalActualSpend) / totalIncome × 100`. If `totalIncome = 0` for a month, savings rate = 0% (D-175). |
-| BR-17 | Surplus/deficit = `totalIncome - totalActualSpend`. Positive = surplus, negative = deficit (D-174). |
-| BR-18 | KPI "Total Income YTD" = sum of `totalIncome` across all months in selected year. ObjectNumber, neutral (D-173). |
-| BR-19 | KPI "Total Expenses YTD" = sum of `totalActualSpend` across all months. ObjectNumber, neutral (D-173). |
-| BR-20 | KPI "Net Surplus/Deficit YTD" = Total Income YTD − Total Expenses YTD. ObjectNumber, Success if ≥ 0, Error if negative (D-173). |
-| BR-21 | KPI "Avg Savings Rate" = mean of monthly savings rates for elapsed months. ObjectNumber, Success if ≥ 0%, Error if negative (D-173). |
+| Rule  | Description                                                                                                                                                 |
+| ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| BR-14 | Year selector: same behavior as RPT-007 BR-01 and BR-02 (D-171).                                                                                            |
+| BR-15 | Total outflow = `totalActualSpend` from ENH-007. Goal allocations are not included in outflow (D-174).                                                      |
+| BR-16 | Savings rate = `(totalIncome - totalActualSpend) / totalIncome × 100`. If `totalIncome = 0` for a month, savings rate = 0% (D-175).                         |
+| BR-17 | Surplus/deficit = `totalIncome - totalActualSpend`. Positive = surplus, negative = deficit (D-174).                                                         |
+| BR-18 | KPI "Total Income YTD" = sum of `totalIncome` across all months in selected year. ObjectNumber, neutral (D-173).                                            |
+| BR-19 | KPI "Total Expenses YTD" = sum of `totalActualSpend` across all months. ObjectNumber, neutral (D-173).                                                      |
+| BR-20 | KPI "Net Surplus/Deficit YTD" = Total Income YTD − Total Expenses YTD. ObjectNumber, Success if ≥ 0, Error if negative (D-173).                             |
+| BR-21 | KPI "Avg Savings Rate" = mean of monthly savings rates for elapsed months. ObjectNumber, Success if ≥ 0%, Error if negative (D-173).                        |
 | BR-22 | Income vs Expenses Trend: combination chart. Clustered bars = `totalIncome` and `totalActualSpend` per month. Line = net surplus/deficit per month (D-173). |
-| BR-23 | Savings Rate Trend: line chart, single series = savings rate % per month (D-173). |
-| BR-24 | Surplus / Deficit Summary: vertical bar chart, one bar per month. Green if positive (surplus), red if negative (deficit) (D-173). |
-| BR-25 | Income Breakdown: donut chart showing YTD income by Income Source Type for the selected year (D-173). |
+| BR-23 | Savings Rate Trend: line chart, single series = savings rate % per month (D-173).                                                                           |
+| BR-24 | Surplus / Deficit Summary: vertical bar chart, one bar per month. Green if positive (surplus), red if negative (deficit) (D-173).                           |
+| BR-25 | Income Breakdown: donut chart showing YTD income by Income Source Type for the selected year (D-173).                                                       |
 
 ### Cross-cutting
 
-| Rule | Description |
-|------|-------------|
+| Rule  | Description                                                                                                                                                                                                                            |
+| ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | BR-26 | Data retrieval: a CDS function on BudgetService accepts a year parameter and returns all monthly ENH-007 results in a single call. Engine invoked server-side per month. One-vs-two function split deferred to implementation (D-176). |
-| BR-27 | No alerts for either dashboard. OI-06 considered, not applicable — these are retrospective analytics dashboards. |
-| BR-28 | No cross-chart interactions or drill-through navigation (D-61). Standard VizFrame hover tooltips only. |
+| BR-27 | No alerts for either dashboard. OI-06 considered, not applicable — these are retrospective analytics dashboards.                                                                                                                       |
+| BR-28 | No cross-chart interactions or drill-through navigation (D-61). Standard VizFrame hover tooltips only.                                                                                                                                 |
 
 ---
 
 ## 6. Error Handling
 
-| Condition | Response | i18n Key Pattern |
-|-----------|----------|------------------|
-| RPT-007: no data for selected year | Standard `noDataText` on all charts and tables | — |
-| RPT-012: no data for selected year | Standard `noDataText` on all charts and KPIs show 0 | — |
-| RPT-007: no uncategorized transactions | Uncategorized chart shows zero values / flat line | — |
-| RPT-012: zero income month | Savings rate = 0% for that month (BR-16) | — |
-| CDS function: year parameter invalid | `req.error()` 400 | `budget.trend.invalidYear` |
-| CDS function: ENH-007 computation failure | `req.reject()` 500 | `budget.trend.computationError` |
+| Condition                                 | Response                                            | i18n Key Pattern                |
+| ----------------------------------------- | --------------------------------------------------- | ------------------------------- |
+| RPT-007: no data for selected year        | Standard `noDataText` on all charts and tables      | —                               |
+| RPT-012: no data for selected year        | Standard `noDataText` on all charts and KPIs show 0 | —                               |
+| RPT-007: no uncategorized transactions    | Uncategorized chart shows zero values / flat line   | —                               |
+| RPT-012: zero income month                | Savings rate = 0% for that month (BR-16)            | —                               |
+| CDS function: year parameter invalid      | `req.error()` 400                                   | `budget.trend.invalidYear`      |
+| CDS function: ENH-007 computation failure | `req.reject()` 500                                  | `budget.trend.computationError` |
 
 ---
 
@@ -593,13 +593,13 @@ None. All design questions resolved during workshop. OI-06 (alerts) considered a
 
 ## 9. Cross-Spec Notes
 
-| Target Spec | Note |
-|-------------|------|
-| SPEC-05 (Budget Pipeline) | Both dashboards consume ENH-007 output exclusively. All business rules for transaction inclusion, category rollup, and budget formula are defined in SPEC-05. No amendments to SPEC-05 required — the CDS function wraps existing ENH-007 logic. |
-| SPEC-02 (Transaction Processing) | Vendor concentration (RPT-007 §4.1 Section 6) joins Transactions to Vendor entities created by ENH-001 categorization. |
-| SPEC-06 (Reference Data & Seed) | Purchase Type hierarchy (top-level + subtypes), Income Source Type seeds, and Budget Allocation structure are defined in SPEC-06. |
-| SPEC-20 (Monthly Budget Dashboard) | RPT-002 shows current-month budget detail. RPT-007 and RPT-012 show multi-month trends. No overlap — different time scopes, same ENH-007 engine. No cross-navigation. |
+| Target Spec                        | Note                                                                                                                                                                                                                                             |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| SPEC-05 (Budget Pipeline)          | Both dashboards consume ENH-007 output exclusively. All business rules for transaction inclusion, category rollup, and budget formula are defined in SPEC-05. No amendments to SPEC-05 required — the CDS function wraps existing ENH-007 logic. |
+| SPEC-02 (Transaction Processing)   | Vendor concentration (RPT-007 §4.1 Section 6) joins Transactions to Vendor entities created by ENH-001 categorization.                                                                                                                           |
+| SPEC-06 (Reference Data & Seed)    | Purchase Type hierarchy (top-level + subtypes), Income Source Type seeds, and Budget Allocation structure are defined in SPEC-06.                                                                                                                |
+| SPEC-20 (Monthly Budget Dashboard) | RPT-002 shows current-month budget detail. RPT-007 and RPT-012 show multi-month trends. No overlap — different time scopes, same ENH-007 engine. No cross-navigation.                                                                            |
 
 ---
 
-*This spec traces to [Business Architecture](../BUSINESS_ARCHITECTURE.md) objects RPT-007, RPT-012 and [Data Model](../DATA_MODEL.md) entities listed in §3. New decisions D-170–D-176 logged in [Decisions Log](../user-profile/DECISIONS_LOG.md).*
+_This spec traces to [Business Architecture](../BUSINESS_ARCHITECTURE.md) objects RPT-007, RPT-012 and [Data Model](../DATA_MODEL.md) entities listed in §3. New decisions D-170–D-176 logged in [Decisions Log](../user-profile/DECISIONS_LOG.md)._

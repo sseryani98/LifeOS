@@ -1,6 +1,4 @@
-sap.ui.define([
-  "sap/ui/core/Control"
-], (Control) => {
+sap.ui.define(["sap/ui/core/Control"], Control => {
   "use strict";
 
   /**
@@ -24,10 +22,10 @@ sap.ui.define([
         /** Width of the card. */
         width: { type: "sap.ui.core.CSSSize", defaultValue: "100%" },
         /** Height of the card. */
-        height: { type: "sap.ui.core.CSSSize", defaultValue: "300px" }
+        height: { type: "sap.ui.core.CSSSize", defaultValue: "300px" },
       },
       aggregations: {},
-      events: {}
+      events: {},
     },
 
     renderer(oRm, oControl) {
@@ -45,6 +43,6 @@ sap.ui.define([
 
     exit() {
       // Destroy ApexCharts instance to prevent memory leaks
-    }
+    },
   });
 });

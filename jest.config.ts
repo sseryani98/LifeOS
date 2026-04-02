@@ -1,27 +1,30 @@
-import type { Config } from 'jest';
+import type { Config } from "jest";
 
 const config: Config = {
-  preset: 'ts-jest',
-  testEnvironment: 'node',
-  roots: ['<rootDir>/test'],
-  testMatch: ['**/*.test.ts'],
-  coverageDirectory: 'coverage/',
+  preset: "ts-jest",
+  testEnvironment: "node",
+  roots: ["<rootDir>/test"],
+  testMatch: ["**/*.test.ts"],
+  moduleNameMapper: {
+    "^(\\.{1,2}/.*)\\.js$": "$1",
+  },
+  coverageDirectory: "coverage/",
   coveragePathIgnorePatterns: [
-    '**/node_modules/**',
-    '**/@cds-models/**',
-    '**/gen/**',
-    '**/*Facade.ts',
+    "**/node_modules/**",
+    "**/@cds-models/**",
+    "**/gen/**",
+    "**/*Facade.ts",
   ],
   coverageThreshold: {
     global: {
       lines: 85,
       branches: 80,
     },
-    './srv/modules/**/Validator.ts': {
+    "./srv/modules/**/Validator.ts": {
       lines: 100,
       branches: 100,
     },
-    './srv/util/**/*.ts': {
+    "./srv/util/**/*.ts": {
       lines: 100,
       branches: 100,
     },
