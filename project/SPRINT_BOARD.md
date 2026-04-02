@@ -9,7 +9,6 @@
 
 | Story | Type | Description | Status |
 |-------|------|-------------|--------|
-| CNV-002 | Conversion | Seed reference lookup tables from design specs | Backlog |
 | CNV-003 | Conversion | Seed Sandro's card portfolio and historical data | Backlog |
 | FRM-009 | Form | Master Data Maintenance — SM30-style CRUD for all config tables | Backlog |
 
@@ -19,4 +18,6 @@ _None_
 
 ### Done
 
-_None_
+| Story | Type | Description | Status |
+|-------|------|-------------|--------|
+| CNV-002 | Conversion | Seed reference lookup tables from design specs | Done |
