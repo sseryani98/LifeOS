@@ -3,6 +3,7 @@
  * Path: /service/adminSvcs
  */
 using { com.financialplanner as fp } from '../db/reference/schema';
+using from '../db/cards/schema';
 
 service AdminService @(path: '/service/adminSvcs') {
   entity Issuers as projection on fp.Issuer;
@@ -24,4 +25,13 @@ service AdminService @(path: '/service/adminSvcs') {
   entity SystemConfigs as projection on fp.SystemConfig;
   entity RedemptionTypes as projection on fp.RedemptionType;
   entity ScrapeMappings as projection on fp.ScrapeMapping;
+
+  // Card entities
+  entity MarketCards as projection on fp.MarketCard;
+  entity Offers as projection on fp.Offer;
+  entity OfferTranches as projection on fp.OfferTranche;
+  entity CardInstances as projection on fp.CardInstance;
+  entity EarningMultipliers as projection on fp.EarningMultiplier;
+  entity SoftPerkDefinitions as projection on fp.SoftPerkDefinition;
+  entity CardPerks as projection on fp.CardPerk;
 }

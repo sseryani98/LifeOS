@@ -45,7 +45,6 @@ entity IssuerApplicationRule : cuid, managed {
   appliesToCardType  : CardType;
   appliesToSegment   : CardSegment;
   referenceDate      : ReferenceDate;
-  marketCard_ID      : UUID;  // FK to MarketCard — association added in CNV-003
   description        : String(500) not null;
 }
 
