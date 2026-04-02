@@ -5,6 +5,7 @@ node_modules/
 gen/
 @cds-models/
 .cds-services.json
+*.sqlite
 
 # Secrets
 .env
