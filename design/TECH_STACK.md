@@ -9,38 +9,38 @@
 
 ## 1. Change History
 
-| Date | Author | Description |
-|------|--------|-------------|
-| 2026-02-13 | Sandro & Claude | Initial creation — Step 6 complete. D-46 through D-52 logged. |
+| Date       | Author          | Description                                                                                                                                                                                                                                                             |
+| ---------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-02-13 | Sandro & Claude | Initial creation — Step 6 complete. D-46 through D-52 logged.                                                                                                                                                                                                           |
 | 2026-02-16 | Sandro & Claude | Updated project structure: modular db/ schema (D-63), entity-based annotation folders (D-72), app/shared/ resources (D-72), .env + logs/ (D-68, D-70). Added Validators to all module folders (D-66). Cross-reference to TECHNICAL_STANDARDS.md for coding conventions. |
-| 2026-02-16 | Sandro & Claude | Expanded test/ folder structure: unit tests per module, integration tests per CDS service, scenario tests, test data factories + canonical test world (D-74 through D-78). Cross-reference to TEST_STRATEGY.md. |
-| 2026-02-20 | Claude | SPEC-21 amendment: `app/trophy-case/` changed from Freestyle to Fiori Elements ALP + Object Page (D-279). |
-| 2026-02-20 | Claude | Status → Approved. Step 12 complete — all 21 specs approved. |
+| 2026-02-16 | Sandro & Claude | Expanded test/ folder structure: unit tests per module, integration tests per CDS service, scenario tests, test data factories + canonical test world (D-74 through D-78). Cross-reference to TEST_STRATEGY.md.                                                         |
+| 2026-02-20 | Claude          | SPEC-21 amendment: `app/trophy-case/` changed from Freestyle to Fiori Elements ALP + Object Page (D-279).                                                                                                                                                               |
+| 2026-02-20 | Claude          | Status → Approved. Step 12 complete — all 21 specs approved.                                                                                                                                                                                                            |
 
 ---
 
 ## 2. Summary
 
-| Layer | Choice |
-|-------|--------|
-| **Language** | TypeScript (full-stack) |
-| **Backend Framework** | SAP CAP (Cloud Application Programming Model) |
-| **Frontend Framework** | SAPUI5 with Fiori Elements + Freestyle |
-| **Database** | PostgreSQL (local) |
-| **API Protocol** | OData V4 (auto-generated from CDS) |
-| **Runtime** | Node.js 20 LTS |
-| **Deployment** | Local — `cds-serve` + local PostgreSQL service |
+| Layer                  | Choice                                         |
+| ---------------------- | ---------------------------------------------- |
+| **Language**           | TypeScript (full-stack)                        |
+| **Backend Framework**  | SAP CAP (Cloud Application Programming Model)  |
+| **Frontend Framework** | SAPUI5 with Fiori Elements + Freestyle         |
+| **Database**           | PostgreSQL (local)                             |
+| **API Protocol**       | OData V4 (auto-generated from CDS)             |
+| **Runtime**            | Node.js 20 LTS                                 |
+| **Deployment**         | Local — `cds-serve` + local PostgreSQL service |
 
 ---
 
 ## 3. Language & Runtime
 
-| Component | Version | Decision |
-|-----------|---------|----------|
+| Component      | Version             | Decision                                                                                            |
+| -------------- | ------------------- | --------------------------------------------------------------------------------------------------- |
 | **TypeScript** | 5.x (latest stable) | D-46 — Full-stack TypeScript. Same language front-to-back. Shared type definitions for 39 entities. |
-| **Node.js** | 20 LTS | D-51 — Active LTS until April 2026, maintenance until 2027. Native `fetch`, stable `crypto`. |
-| **SAPUI5** | 1.120+ (latest CDN) | D-51 — Latest Fiori Elements features, VizFrame, Smart Controls. |
-| **CDS Types** | `@cap-js/cds-types` | Typed CDS APIs for TypeScript service handlers. |
+| **Node.js**    | 20 LTS              | D-51 — Active LTS until April 2026, maintenance until 2027. Native `fetch`, stable `crypto`.        |
+| **SAPUI5**     | 1.136.16            | D-51 — Latest Fiori Elements features, VizFrame, Smart Controls.                                    |
+| **CDS Types**  | `@cap-js/cds-types` | Typed CDS APIs for TypeScript service handlers.                                                     |
 
 Sandro's background: expert in SAP CAP + SAPUI5/Fiori (JavaScript). TypeScript is new — this project is the learning opportunity.
 
@@ -95,12 +95,12 @@ VizFrame is the primary charting library for dashboards (bar, line, donut, combi
 
 **Decision D-49:** Four CDS services aligned to problem domains.
 
-| Service | Path | Scope | Serves |
-|---------|------|-------|--------|
-| **TransactionService** | `/service/transactionSvcs` | Transactions, categorization, splits, CSV import, dedup | FRM-001, FRM-003, ENH-001, ENH-008, ENH-009, INT-002 |
-| **ChurningService** | `/service/churningSvcs` | Cards, offers, bonuses, points, eligibility, recommendations, redemptions, perks | FRM-004, FRM-005, FRM-006, RPT-001, RPT-004, RPT-005, RPT-006, RPT-008, RPT-009, RPT-010, ENH-002–006, WFL-002 |
-| **BudgetService** | `/service/budgetSvcs` | Budget, income, goals, recurrent expenses, financial picture | FRM-007, FRM-008, FRM-011, RPT-002, RPT-003, RPT-007, RPT-011, RPT-012, ENH-007 |
-| **AdminService** | `/service/adminSvcs` | Reference data CRUD, SimpleFIN connections, alerts, system config | FRM-009, FRM-010, INT-001, CNV-001–004, WFL-004 |
+| Service                | Path                       | Scope                                                                            | Serves                                                                                                         |
+| ---------------------- | -------------------------- | -------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| **TransactionService** | `/service/transactionSvcs` | Transactions, categorization, splits, CSV import, dedup                          | FRM-001, FRM-003, ENH-001, ENH-008, ENH-009, INT-002                                                           |
+| **ChurningService**    | `/service/churningSvcs`    | Cards, offers, bonuses, points, eligibility, recommendations, redemptions, perks | FRM-004, FRM-005, FRM-006, RPT-001, RPT-004, RPT-005, RPT-006, RPT-008, RPT-009, RPT-010, ENH-002–006, WFL-002 |
+| **BudgetService**      | `/service/budgetSvcs`      | Budget, income, goals, recurrent expenses, financial picture                     | FRM-007, FRM-008, FRM-011, RPT-002, RPT-003, RPT-007, RPT-011, RPT-012, ENH-007                                |
+| **AdminService**       | `/service/adminSvcs`       | Reference data CRUD, SimpleFIN connections, alerts, system config                | FRM-009, FRM-010, INT-001, CNV-001–004, WFL-004                                                                |
 
 Wave 4's market intelligence (INT-003, WFL-003, CNV-004) folds into ChurningService.
 
@@ -110,16 +110,16 @@ Wave 4's market intelligence (INT-003, WFL-003, CNV-004) folds into ChurningServ
 
 **Decision D-48.**
 
-| Need | Library | Rationale |
-|------|---------|-----------|
-| **HTTP Client** | `axios` | SimpleFIN API calls (INT-001). Handles Basic Auth natively. |
-| **CSV Parsing** | `papaparse` | INT-002, CNV-001. Auto-detects delimiters, handles headers, streaming. Maps to CSV Format Config entity. |
-| **Fuzzy Search (UI)** | `fuse.js` | Vendor name search in forms (FRM-001, FRM-002). Lightweight, zero dependencies. |
-| **Merchant Pattern Matching** | Native string operations | Merchant Pattern entity uses `exact` / `contains` / `starts_with` — `===`, `.includes()`, `.startsWith()`. No library needed. |
-| **Background Scheduling** | `node-cron` | Cron expressions for daily SimpleFIN poll and alert generation. Combined with `cds.spawn()` for CDS context. |
-| **Encryption** | Node.js built-in `crypto` | AES-256-GCM for card details (OI-07) and SimpleFIN access URL. No external dependency. |
-| **Web Scraping** | `cheerio` + `axios` | Wave 4 (INT-003). Lightweight HTML parser. Defer final choice — `puppeteer` if target sites are JS-heavy SPAs. |
-| **Dashboard Charting (fallback)** | `ApexCharts` | Embedded in custom SAPUI5 controls where VizFrame is too rigid. SVG-based, polished defaults, good interactivity. |
+| Need                              | Library                   | Rationale                                                                                                                     |
+| --------------------------------- | ------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| **HTTP Client**                   | `axios`                   | SimpleFIN API calls (INT-001). Handles Basic Auth natively.                                                                   |
+| **CSV Parsing**                   | `papaparse`               | INT-002, CNV-001. Auto-detects delimiters, handles headers, streaming. Maps to CSV Format Config entity.                      |
+| **Fuzzy Search (UI)**             | `fuse.js`                 | Vendor name search in forms (FRM-001, FRM-002). Lightweight, zero dependencies.                                               |
+| **Merchant Pattern Matching**     | Native string operations  | Merchant Pattern entity uses `exact` / `contains` / `starts_with` — `===`, `.includes()`, `.startsWith()`. No library needed. |
+| **Background Scheduling**         | `node-cron`               | Cron expressions for daily SimpleFIN poll and alert generation. Combined with `cds.spawn()` for CDS context.                  |
+| **Encryption**                    | Node.js built-in `crypto` | AES-256-GCM for card details (OI-07) and SimpleFIN access URL. No external dependency.                                        |
+| **Web Scraping**                  | `cheerio` + `axios`       | Wave 4 (INT-003). Lightweight HTML parser. Defer final choice — `puppeteer` if target sites are JS-heavy SPAs.                |
+| **Dashboard Charting (fallback)** | `ApexCharts`              | Embedded in custom SAPUI5 controls where VizFrame is too rigid. SVG-based, polished defaults, good interactivity.             |
 
 ---
 
@@ -280,35 +280,35 @@ financial-planner/
 
 ### Conventions from Enbridge (Adapted)
 
-| Convention | Pattern |
-|-----------|---------|
-| **Handler layering** | Facade (handler registration + wrapHandler) → Service (business logic) → Validator (validation) |
-| **Naming — classes** | PascalCase: `TransactionFacade`, `ChurningService` |
-| **Naming — methods** | camelCase: `readTransactions()`, `computeBonusProgress()` |
-| **Naming — private methods** | `_` prefix: `_validateAmount()`, `_getEntitySet()` |
-| **Naming — handlers** | `handle{Action}()`: `handleReadTransactions()`, `handleApprove()` |
-| **Naming — CDS entities** | PascalCase: `Transaction`, `CardInstance`, `EarningMultiplier` |
-| **Naming — CDS fields** | camelCase: `cardInstanceId`, `activationDate`, `lifecycleState` |
-| **Naming — files** | `{Domain}Facade.ts`, `{Domain}Service.ts`, `{Domain}Validator.ts` |
-| **Value help entities** | Suffix `VH`: `GasPoolStatusVH` pattern (used for config table projections) |
-| **i18n — CDS labels** | PascalCase keys in `srv/_i18n/i18n.properties` |
-| **i18n — runtime messages** | camelCase.dots in `srv/_i18n/messages.properties` |
-| **i18n — UI5** | camelCase in `app/{appname}/webapp/i18n/i18n.properties` |
-| **Annotations** | Entity-based files in `app/{name}/annotations/` folder — e.g., `Transaction.cds`, `Vendor.cds` (D-72, amends Enbridge three-file split) |
-| **Constants** | Centralized in `srv/modules/shared/constants.ts` |
-| **Error handling** | `req.error()` for validation (accumulate), `req.reject()` for fatal. Always i18n keys. |
-| **Arrow functions** | In class methods to preserve `this` context |
-| **External services** | Wrapped in integration service classes extending `BaseService` |
+| Convention                   | Pattern                                                                                                                                 |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| **Handler layering**         | Facade (handler registration + wrapHandler) → Service (business logic) → Validator (validation)                                         |
+| **Naming — classes**         | PascalCase: `TransactionFacade`, `ChurningService`                                                                                      |
+| **Naming — methods**         | camelCase: `readTransactions()`, `computeBonusProgress()`                                                                               |
+| **Naming — private methods** | `_` prefix: `_validateAmount()`, `_getEntitySet()`                                                                                      |
+| **Naming — handlers**        | `handle{Action}()`: `handleReadTransactions()`, `handleApprove()`                                                                       |
+| **Naming — CDS entities**    | PascalCase: `Transaction`, `CardInstance`, `EarningMultiplier`                                                                          |
+| **Naming — CDS fields**      | camelCase: `cardInstanceId`, `activationDate`, `lifecycleState`                                                                         |
+| **Naming — files**           | `{Domain}Facade.ts`, `{Domain}Service.ts`, `{Domain}Validator.ts`                                                                       |
+| **Value help entities**      | Suffix `VH`: `GasPoolStatusVH` pattern (used for config table projections)                                                              |
+| **i18n — CDS labels**        | PascalCase keys in `srv/_i18n/i18n.properties`                                                                                          |
+| **i18n — runtime messages**  | camelCase.dots in `srv/_i18n/messages.properties`                                                                                       |
+| **i18n — UI5**               | camelCase in `app/{appname}/webapp/i18n/i18n.properties`                                                                                |
+| **Annotations**              | Entity-based files in `app/{name}/annotations/` folder — e.g., `Transaction.cds`, `Vendor.cds` (D-72, amends Enbridge three-file split) |
+| **Constants**                | Centralized in `srv/modules/shared/constants.ts`                                                                                        |
+| **Error handling**           | `req.error()` for validation (accumulate), `req.reject()` for fatal. Always i18n keys.                                                  |
+| **Arrow functions**          | In class methods to preserve `this` context                                                                                             |
+| **External services**        | Wrapped in integration service classes extending `BaseService`                                                                          |
 
 ### What Drops (Not Needed)
 
-| Enbridge Pattern | Reason to Drop |
-|------------------|----------------|
-| `mta.yaml`, `xs-security.json` | No BTP deployment |
-| XSUAA, access rights, two-role pattern | Single user, no auth |
-| `@sap-cloud-sdk`, destination service | No BTP services |
+| Enbridge Pattern                         | Reason to Drop                                           |
+| ---------------------------------------- | -------------------------------------------------------- |
+| `mta.yaml`, `xs-security.json`           | No BTP deployment                                        |
+| XSUAA, access rights, two-role pattern   | Single user, no auth                                     |
+| `@sap-cloud-sdk`, destination service    | No BTP services                                          |
 | `@enbridge/cap-commonmodules` dependency | Build our own `BaseFacade` + `BaseService` in TypeScript |
-| External `.csn` files | No S/4HANA remoting — all local CDS entities |
+| External `.csn` files                    | No S/4HANA remoting — all local CDS entities             |
 
 ---
 
@@ -316,12 +316,12 @@ financial-planner/
 
 **Decision D-50:** Local deployment. No Docker for V1.
 
-| Component | How It Runs |
-|-----------|-------------|
-| **CAP Server** | `npm start` → `cds-serve` on localhost |
-| **PostgreSQL** | Local Windows service (installed once, always running) |
+| Component           | How It Runs                                                          |
+| ------------------- | -------------------------------------------------------------------- |
+| **CAP Server**      | `npm start` → `cds-serve` on localhost                               |
+| **PostgreSQL**      | Local Windows service (installed once, always running)               |
 | **Background Jobs** | `node-cron` starts in service `init()` — runs inside the CAP process |
-| **SAPUI5** | Loaded from SAP CDN (`sapui5.hana.ondemand.com`) |
+| **SAPUI5**          | Loaded from SAP CDN (`sapui5.hana.ondemand.com`)                     |
 
 Development workflow: `cds watch` with live reload (standard CAP DX).
 
@@ -333,18 +333,18 @@ Docker deferred to future cloud deployment.
 
 **Decision D-52:** Ten personas for the build phase. Persona list and scopes defined here. Detailed agent configurations (system prompts, checklists, rules) will be defined after Steps 7–10 are complete, before the first sprint.
 
-| # | Persona | Owns | Key Responsibilities |
-|---|---------|------|---------------------|
-| 1 | **Backend Developer** | `db/`, `srv/` | CDS models, service definitions, TypeScript handlers, Facade → Service → Validator pattern, ENH engines, utilities, i18n (CDS labels + runtime messages). |
-| 2 | **Frontend Developer** | `app/` | Fiori Elements apps (annotations, manifest.json, extensions) AND freestyle SAPUI5 (views, controllers, VizFrame/ApexCharts dashboards, wizards). UI5 i18n. |
-| 3 | **Project Manager** | Sprint board, sprint reports | Tracks progress against 43 FRICEW objects across 4 waves. Manages backlog, sprint planning, sprint reviews. Flags scope creep and dependency blockers. |
-| 4 | **Integration Specialist** | `srv/modules/integration/` | SimpleFIN API client (INT-001), CSV parsing (INT-002), web scraping (INT-003), dedup (ENH-008), scheduling, external system error handling. |
-| 5 | **Test Captain** | `test/` | Unit tests for services, OData integration tests, test data setup, edge case coverage from functional specs, test strategy enforcement. |
-| 6 | **Documentation Guardian** | `design/`, `CLAUDE.md` | Single source of truth enforcement. No duplication, no conflicting information. Updates change history on evolving documents. Validates cross-references. |
-| 7 | **Security Reviewer** | Cross-cutting | Encryption implementation (OI-07), credential handling, code audits for vulnerabilities, no sensitive data in logs/OData responses, OWASP basics. |
-| 8 | **UX/Design Reviewer** | Cross-cutting | Design system enforcement, visual consistency across all UI apps, dashboard usability, Fiori design guideline adherence. |
-| 9 | **Data Migration Specialist** | `db/seed/`, CNV-001–004 | Data cleansing, validation, reconciliation. Historical backfill quality. Seed data accuracy. |
-| 10 | **Defect Tracker** | `project/DEFECT_LOG.md` | Defect logging with severity/priority, root cause tracking, fix verification, regression flags. Running defect count across sprints. |
+| #   | Persona                       | Owns                         | Key Responsibilities                                                                                                                                       |
+| --- | ----------------------------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **Backend Developer**         | `db/`, `srv/`                | CDS models, service definitions, TypeScript handlers, Facade → Service → Validator pattern, ENH engines, utilities, i18n (CDS labels + runtime messages).  |
+| 2   | **Frontend Developer**        | `app/`                       | Fiori Elements apps (annotations, manifest.json, extensions) AND freestyle SAPUI5 (views, controllers, VizFrame/ApexCharts dashboards, wizards). UI5 i18n. |
+| 3   | **Project Manager**           | Sprint board, sprint reports | Tracks progress against 43 FRICEW objects across 4 waves. Manages backlog, sprint planning, sprint reviews. Flags scope creep and dependency blockers.     |
+| 4   | **Integration Specialist**    | `srv/modules/integration/`   | SimpleFIN API client (INT-001), CSV parsing (INT-002), web scraping (INT-003), dedup (ENH-008), scheduling, external system error handling.                |
+| 5   | **Test Captain**              | `test/`                      | Unit tests for services, OData integration tests, test data setup, edge case coverage from functional specs, test strategy enforcement.                    |
+| 6   | **Documentation Guardian**    | `design/`, `CLAUDE.md`       | Single source of truth enforcement. No duplication, no conflicting information. Updates change history on evolving documents. Validates cross-references.  |
+| 7   | **Security Reviewer**         | Cross-cutting                | Encryption implementation (OI-07), credential handling, code audits for vulnerabilities, no sensitive data in logs/OData responses, OWASP basics.          |
+| 8   | **UX/Design Reviewer**        | Cross-cutting                | Design system enforcement, visual consistency across all UI apps, dashboard usability, Fiori design guideline adherence.                                   |
+| 9   | **Data Migration Specialist** | `db/seed/`, CNV-001–004      | Data cleansing, validation, reconciliation. Historical backfill quality. Seed data accuracy.                                                               |
+| 10  | **Defect Tracker**            | `project/DEFECT_LOG.md`      | Defect logging with severity/priority, root cause tracking, fix verification, regression flags. Running defect count across sprints.                       |
 
 Operational details for how these personas interact during sprint checkpoint meetings are defined in [PROJECT_MANAGEMENT.md](PROJECT_MANAGEMENT.md).
 
@@ -354,16 +354,16 @@ Operational details for how these personas interact during sprint checkpoint mee
 
 Decisions made during tech stack selection (Step 6):
 
-| ID | Title | Summary |
-|----|-------|---------|
-| D-46 | TypeScript Full-Stack | Single language front-to-back. Shared types for 39 entities. |
+| ID   | Title                     | Summary                                                                                                                          |
+| ---- | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| D-46 | TypeScript Full-Stack     | Single language front-to-back. Shared types for 39 entities.                                                                     |
 | D-47 | CAP + SAPUI5 Architecture | CAP backend + SAPUI5 frontend. Fiori Elements for CRUD, freestyle for dashboards/wizards. VizFrame primary, ApexCharts fallback. |
-| D-48 | Library Selections | axios, papaparse, fuse.js, node-cron, native crypto, cheerio, ApexCharts. |
-| D-49 | Four CDS Services | TransactionService, ChurningService, BudgetService, AdminService. |
-| D-50 | Local Deployment | cds-serve + local PostgreSQL. No Docker for V1. |
-| D-51 | Runtime Versions | Node.js 20 LTS, TypeScript 5.x, SAPUI5 1.120+. |
-| D-52 | Ten Subagent Personas | Backend Dev, Frontend Dev, PM, Integration, Test, Docs, Security, UX, Migration, Defect Tracker. |
+| D-48 | Library Selections        | axios, papaparse, fuse.js, node-cron, native crypto, cheerio, ApexCharts.                                                        |
+| D-49 | Four CDS Services         | TransactionService, ChurningService, BudgetService, AdminService.                                                                |
+| D-50 | Local Deployment          | cds-serve + local PostgreSQL. No Docker for V1.                                                                                  |
+| D-51 | Runtime Versions          | Node.js 20 LTS, TypeScript 5.x, SAPUI5 1.136.16.                                                                                 |
+| D-52 | Ten Subagent Personas     | Backend Dev, Frontend Dev, PM, Integration, Test, Docs, Security, UX, Migration, Defect Tracker.                                 |
 
 ---
 
-*This document is the single source of truth for the Financial Planner tech stack. All technology choices trace back to the [Problem Statement & Vision](PROBLEM_STATEMENT_AND_VISION.md), [Data Model](DATA_MODEL.md), [Business Architecture](BUSINESS_ARCHITECTURE.md), and [Decisions Log](user-profile/DECISIONS_LOG.md).*
+_This document is the single source of truth for the Financial Planner tech stack. All technology choices trace back to the [Problem Statement & Vision](PROBLEM_STATEMENT_AND_VISION.md), [Data Model](DATA_MODEL.md), [Business Architecture](BUSINESS_ARCHITECTURE.md), and [Decisions Log](user-profile/DECISIONS_LOG.md)._

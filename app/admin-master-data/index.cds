@@ -1,0 +1,10 @@
+using from './annotations/issuers';
+using from './annotations/rewards-programs';
+using from './annotations/purchase-categories';
+using from './annotations/earning-categories';
+using from './annotations/application-rules';
+using from './annotations/budget-allocations';
+using from './annotations/recurrent-expenses';
+using from './annotations/csv-formats';
+using from './annotations/system-config';
+using from './annotations/lookups';

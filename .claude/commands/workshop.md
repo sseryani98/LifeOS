@@ -22,18 +22,21 @@ You are running a functional spec workshop for the Financial Planner project. Fo
 ## Execute Workshop (6 Phases)
 
 ### Phase 1: Pre-draft (Internal Only)
+
 - Build a draft spec internally following the template in §4.
 - Pre-populate all sections you can from existing docs (BA descriptions, DM entities, decisions, tech stack patterns).
 - Mark gaps that need Sandro's input with `[WORKSHOP]` placeholders.
 - **DO NOT dump the full pre-draft on Sandro.** This is preparation for the interview, not the deliverable.
 
 ### Phase 2: Draft Review (Conversational)
+
 - **Start by confirming scope:** List the FRICEW objects covered by this spec, one line each with ID + name. Ask: "This is what we're covering — does the scope look right?"
 - After scope confirmation, walk through the spec **topic by topic** in a conversational interview style.
 - Present what you already know from existing docs and ask if it's accurate, then move to the gaps.
 - **One question at a time.** Never present a wall of questions or a full document dump.
 
 ### Phase 3: Gap Interview
+
 - Walk through each `[WORKSHOP]` placeholder **one question at a time**.
 - Use the type-specific workshop questions from §5.2.
 - For **every** spec, ask: "Does this feature generate any alerts?" (OI-06 resolution).
@@ -43,17 +46,20 @@ You are running a functional spec workshop for the Financial Planner project. Fo
 - **Keep going until you are confident you have no more questions.** Do not stop early. After clearing all `[WORKSHOP]` placeholders, think critically: are there edge cases, interactions, or ambiguities you haven't asked about? If yes, ask. Only move to Phase 4 when you can honestly say "I have no more questions."
 
 ### Phase 4: Business Rules Extraction
+
 - Propose numbered business rules (BR-xx) based on the conversation.
 - Present rules in **batches by topic** (e.g., "Here are the rules for SimpleFIN sync — do these look right?"). Sandro prefers reviewing related rules together, not one at a time.
 - Every rule must be testable and unambiguous.
 
 ### Phase 5: Functional Unit Tests
+
 - Draft FUT scenarios (FUT-xxx) based on business rules and edge cases.
 - Each FUT has: Covers (FRICEW IDs), Preconditions, Steps, Expected Result.
 - Cover happy path + key error/edge paths.
 - Present to Sandro for validation.
 
 ### Phase 6: Spec Production
+
 - **Before writing the spec file**, offer UX/QoL suggestions. Ask: "Before I write this up, I have some UX suggestions that could improve the experience — want to hear them?" Present as a numbered list with short descriptions. Sandro will pick what he likes.
 - Summarize any DM-001 amendments needed and get explicit confirmation.
 - Write the final spec to `design/specs/SPEC-{nn}-{NAME}.md` (see §9 for file naming).

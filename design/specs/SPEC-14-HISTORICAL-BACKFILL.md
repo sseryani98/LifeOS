@@ -12,8 +12,8 @@
 
 ## 1. Change History
 
-| Date | Author | Description |
-|------|--------|-------------|
+| Date       | Author          | Description                                                       |
+| ---------- | --------------- | ----------------------------------------------------------------- |
 | 2026-02-16 | Sandro & Claude | Initial creation — workshop complete. D-107 through D-113 logged. |
 
 ---
@@ -32,31 +32,31 @@ Key decisions: D-13 (historical backfill to 2023 via CSV), D-107 (scripted conve
 
 ## 3. Data Model References
 
-| Entity | Role | DM-001 Ref | Amendment? |
-|--------|------|------------|------------|
-| Transaction | Target for all loaded transactions | §5.1 | — |
-| Card Instance | Transaction attribution target | §4.4 | — |
-| Supplementary Card | Amex Cobalt supp card matching | §4.5 | — |
-| CSV Format Config | Issuer-specific parsing rules | §3.6 | — (SPEC-01 amendments apply) |
-| Import Log | One entry per file processed | SPEC-01 | Add `skipped_count` (integer) |
-| Vendor | Created/matched during categorization | §4.8 | — |
-| Merchant Pattern | Used by ENH-001 for vendor matching | §4.9 | — |
-| Vendor Category Stats | Updated by categorization assignments | §4.15 | — |
-| Purchase Type | Assigned during categorization | §3.3 | — |
-| Earning Category | Assigned during categorization | §3.4 | — |
-| System Config | SimpleFIN connection date for cutoff | SPEC-01 | Add `SIMPLEFIN_CONNECTION_DATE` parameter |
+| Entity                | Role                                  | DM-001 Ref | Amendment?                                |
+| --------------------- | ------------------------------------- | ---------- | ----------------------------------------- |
+| Transaction           | Target for all loaded transactions    | §5.1       | —                                         |
+| Card Instance         | Transaction attribution target        | §4.4       | —                                         |
+| Supplementary Card    | Amex Cobalt supp card matching        | §4.5       | —                                         |
+| CSV Format Config     | Issuer-specific parsing rules         | §3.6       | — (SPEC-01 amendments apply)              |
+| Import Log            | One entry per file processed          | SPEC-01    | Add `skipped_count` (integer)             |
+| Vendor                | Created/matched during categorization | §4.8       | —                                         |
+| Merchant Pattern      | Used by ENH-001 for vendor matching   | §4.9       | —                                         |
+| Vendor Category Stats | Updated by categorization assignments | §4.15      | —                                         |
+| Purchase Type         | Assigned during categorization        | §3.3       | —                                         |
+| Earning Category      | Assigned during categorization        | §3.4       | —                                         |
+| System Config         | SimpleFIN connection date for cutoff  | SPEC-01    | Add `SIMPLEFIN_CONNECTION_DATE` parameter |
 
 ### Import Log Amendment
 
-| New Attribute | Type | Required | Notes |
-|---------------|------|----------|-------|
-| skipped_count | integer | yes | Count of rows skipped (payments, refunds, post-cutoff, pending) |
+| New Attribute | Type    | Required | Notes                                                           |
+| ------------- | ------- | -------- | --------------------------------------------------------------- |
+| skipped_count | integer | yes      | Count of rows skipped (payments, refunds, post-cutoff, pending) |
 
 ### System Config Addition
 
-| Key | Default | Description |
-|-----|---------|-------------|
-| SIMPLEFIN_CONNECTION_DATE | null | Date SimpleFIN was first connected (YYYY-MM-DD). Used as cutoff for historical CSV backfill (TD, Amex, CIBC). |
+| Key                       | Default | Description                                                                                                   |
+| ------------------------- | ------- | ------------------------------------------------------------------------------------------------------------- |
+| SIMPLEFIN_CONNECTION_DATE | null    | Date SimpleFIN was first connected (YYYY-MM-DD). Used as cutoff for historical CSV backfill (TD, Amex, CIBC). |
 
 ---
 
@@ -68,23 +68,23 @@ Key decisions: D-13 (historical backfill to 2023 via CSV), D-107 (scripted conve
 
 **Pre-requisites:**
 
-| # | Requirement | Validation |
-|---|-------------|------------|
-| 1 | CNV-002 complete — all reference data seeded | Issuers, Purchase Types, Earning Categories, CSV Format Configs exist |
-| 2 | CNV-003 complete — Sandro's card portfolio seeded | Card Instances for all 4 issuers exist with correct `cardholder_name` |
-| 3 | ENH-001 built — categorization engine operational | Vendor matching and category assignment functions callable |
-| 4 | Full-history CSV exports downloaded from all 4 issuers | Files present in designated directory |
-| 5 | `SIMPLEFIN_CONNECTION_DATE` recorded in System Config | Set before running (or null if SimpleFIN not yet connected) |
+| #   | Requirement                                            | Validation                                                            |
+| --- | ------------------------------------------------------ | --------------------------------------------------------------------- |
+| 1   | CNV-002 complete — all reference data seeded           | Issuers, Purchase Types, Earning Categories, CSV Format Configs exist |
+| 2   | CNV-003 complete — Sandro's card portfolio seeded      | Card Instances for all 4 issuers exist with correct `cardholder_name` |
+| 3   | ENH-001 built — categorization engine operational      | Vendor matching and category assignment functions callable            |
+| 4   | Full-history CSV exports downloaded from all 4 issuers | Files present in designated directory                                 |
+| 5   | `SIMPLEFIN_CONNECTION_DATE` recorded in System Config  | Set before running (or null if SimpleFIN not yet connected)           |
 
 **File Inventory:**
 
-| Issuer | File Pattern | Cards | Est. Files | Est. Rows |
-|--------|-------------|-------|------------|-----------|
-| TD | Monthly per-card (`accountactivity-{month}.csv`) | 3 (Aeroplan, FCT #1, FCT #2) | ~90 | ~300–500 |
-| Amex | All-transactions per card | 3 (Cobalt, Gold, Bonvoy) | 3 | ~500 |
-| CIBC | All-transactions per card | 2 (Aventura, Aeroplan) | 2 | ~300 |
-| Scotiabank | All-transactions | 1 (Amex Gold) | 1 | ~80 |
-| **Total** | | **9 cards** | **~96** | **~1,200–1,400** |
+| Issuer     | File Pattern                                     | Cards                        | Est. Files | Est. Rows        |
+| ---------- | ------------------------------------------------ | ---------------------------- | ---------- | ---------------- |
+| TD         | Monthly per-card (`accountactivity-{month}.csv`) | 3 (Aeroplan, FCT #1, FCT #2) | ~90        | ~300–500         |
+| Amex       | All-transactions per card                        | 3 (Cobalt, Gold, Bonvoy)     | 3          | ~500             |
+| CIBC       | All-transactions per card                        | 2 (Aventura, Aeroplan)       | 2          | ~300             |
+| Scotiabank | All-transactions                                 | 1 (Amex Gold)                | 1          | ~80              |
+| **Total**  |                                                  | **9 cards**                  | **~96**    | **~1,200–1,400** |
 
 **Processing Flow:**
 
@@ -116,68 +116,68 @@ For each card:
 
 Reuses INT-002 data mapping (SPEC-01 §4.2) with these fixed values:
 
-| Field | Value | Notes |
-|-------|-------|-------|
-| `source` | `csv` | All historical transactions |
-| `external_id` | `null` | CSV transactions have no external ID |
-| `is_excluded` | `false` | Default |
+| Field                   | Value         | Notes                                          |
+| ----------------------- | ------------- | ---------------------------------------------- |
+| `source`                | `csv`         | All historical transactions                    |
+| `external_id`           | `null`        | CSV transactions have no external ID           |
+| `is_excluded`           | `false`       | Default                                        |
 | `categorization_status` | `categorized` | All transactions categorized during conversion |
 
 **Categorization Strategy (D-110):**
 
 Three-tier approach, executed per card batch:
 
-| Tier | Actor | Input | Output |
-|------|-------|-------|--------|
-| 1 | ENH-001 | Raw merchant description | Vendor match → Purchase Type + Earning Category |
-| 2 | Claude | Unmatched descriptions | Proposed vendor name, Purchase Type, Earning Category |
-| 3 | Sandro | Claude's proposals | Approve, correct, or assign manually |
+| Tier | Actor   | Input                    | Output                                                |
+| ---- | ------- | ------------------------ | ----------------------------------------------------- |
+| 1    | ENH-001 | Raw merchant description | Vendor match → Purchase Type + Earning Category       |
+| 2    | Claude  | Unmatched descriptions   | Proposed vendor name, Purchase Type, Earning Category |
+| 3    | Sandro  | Claude's proposals       | Approve, correct, or assign manually                  |
 
 Tier 2 and 3 corrections feed back into ENH-001 as learned patterns (Merchant Pattern + Vendor Category Stats), bootstrapping the categorization engine for ongoing use.
 
 **Reconciliation Report (per card):**
 
-| Check | Detail |
-|-------|--------|
-| Row count | Imported + skipped = total CSV rows (minus headers/skip rows) |
-| Skipped breakdown | Payments: N, Refunds: N, Post-cutoff: N, Pending: N |
-| Date range | Earliest and latest `posted_at` match expected range |
-| Field completeness | Zero nulls in: vendor, purchase_type, earning_category |
-| Amount total | Sum of imported amounts (for spot-check) |
+| Check              | Detail                                                        |
+| ------------------ | ------------------------------------------------------------- |
+| Row count          | Imported + skipped = total CSV rows (minus headers/skip rows) |
+| Skipped breakdown  | Payments: N, Refunds: N, Post-cutoff: N, Pending: N           |
+| Date range         | Earliest and latest `posted_at` match expected range          |
+| Field completeness | Zero nulls in: vendor, purchase_type, earning_category        |
+| Amount total       | Sum of imported amounts (for spot-check)                      |
 
 ---
 
 ## 5. Business Rules
 
-| Rule | Description |
-|------|-------------|
-| BR-01 | Purchases only — skip payments and refunds. Scotia: Type="Debit" + status="posted". TD/CIBC: debit column populated. Amex: positive amounts only. |
-| BR-02 | Date cutoff for TD, Amex, CIBC: import only transactions where `posted_at` < `SIMPLEFIN_CONNECTION_DATE`. |
-| BR-03 | No date cutoff for Scotiabank (not on SimpleFIN). Import full date range. |
-| BR-04 | Each CSV file maps to exactly one Card Instance. Card assigned before processing. |
+| Rule  | Description                                                                                                                                                                     |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| BR-01 | Purchases only — skip payments and refunds. Scotia: Type="Debit" + status="posted". TD/CIBC: debit column populated. Amex: positive amounts only.                               |
+| BR-02 | Date cutoff for TD, Amex, CIBC: import only transactions where `posted_at` < `SIMPLEFIN_CONNECTION_DATE`.                                                                       |
+| BR-03 | No date cutoff for Scotiabank (not on SimpleFIN). Import full date range.                                                                                                       |
+| BR-04 | Each CSV file maps to exactly one Card Instance. Card assigned before processing.                                                                                               |
 | BR-05 | Amex Cobalt only: supplementary card attribution via Cardmember column → `Card Instance.cardholder_name` (D-91, D-113). All other cards: single cardholder, no matching needed. |
-| BR-06 | Execution dependency: CNV-002 and CNV-003 must complete before CNV-001. Script validates pre-requisites before starting. |
-| BR-07 | Halt on parse errors. Script stops on any unparseable row, logs file name and line number, waits for investigation before continuing. |
-| BR-08 | Categorization is mandatory. No transaction saved without Purchase Type + Earning Category. Three-tier: ENH-001 → Claude → Sandro (D-110). |
-| BR-09 | New vendors auto-created following ENH-009 normalization rules. Existing vendors matched, no duplicates. |
-| BR-10 | One Import Log entry per file: source filename, card, imported count, skipped count, total amount, date range. |
-| BR-11 | Reconciliation checks run after each card's batch: row counts, date range, field completeness, amount total. |
-| BR-12 | Sandro downloads full-history CSVs from all 4 issuers before SimpleFIN goes live. Pre-requisite action item. |
-| BR-13 | All-or-nothing per file. If processing halts mid-file, no transactions from that file are committed. Fix and reprocess the entire file. |
+| BR-06 | Execution dependency: CNV-002 and CNV-003 must complete before CNV-001. Script validates pre-requisites before starting.                                                        |
+| BR-07 | Halt on parse errors. Script stops on any unparseable row, logs file name and line number, waits for investigation before continuing.                                           |
+| BR-08 | Categorization is mandatory. No transaction saved without Purchase Type + Earning Category. Three-tier: ENH-001 → Claude → Sandro (D-110).                                      |
+| BR-09 | New vendors auto-created following ENH-009 normalization rules. Existing vendors matched, no duplicates.                                                                        |
+| BR-10 | One Import Log entry per file: source filename, card, imported count, skipped count, total amount, date range.                                                                  |
+| BR-11 | Reconciliation checks run after each card's batch: row counts, date range, field completeness, amount total.                                                                    |
+| BR-12 | Sandro downloads full-history CSVs from all 4 issuers before SimpleFIN goes live. Pre-requisite action item.                                                                    |
+| BR-13 | All-or-nothing per file. If processing halts mid-file, no transactions from that file are committed. Fix and reprocess the entire file.                                         |
 
 ---
 
 ## 6. Error Handling
 
-| Condition | Response | Resolution |
-|-----------|----------|------------|
-| CSV row unparseable (bad date, missing amount) | Script halts, logs file name + line number + raw row | Investigate, fix source data or skip row manually |
-| Unknown Cardmember on Amex Cobalt | Script halts, shows unmatched name | Add `cardholder_name` to Card Instance or Supplementary Card, retry |
-| Card Instance not found for file | Script halts before processing | Verify CNV-003 loaded correctly |
-| CSV Format Config missing for issuer | Script halts before processing | Verify CNV-002 loaded correctly |
-| ENH-001 not available | Script halts before processing | Verify ENH-001 is built and operational |
-| Vendor name collision (same normalized name, different merchants) | Flag for manual resolution during categorization review | Sandro disambiguates |
-| `SIMPLEFIN_CONNECTION_DATE` not set (null) | Warning — all transactions imported (no cutoff applied) | Set the date if SimpleFIN is already connected |
+| Condition                                                         | Response                                                | Resolution                                                          |
+| ----------------------------------------------------------------- | ------------------------------------------------------- | ------------------------------------------------------------------- |
+| CSV row unparseable (bad date, missing amount)                    | Script halts, logs file name + line number + raw row    | Investigate, fix source data or skip row manually                   |
+| Unknown Cardmember on Amex Cobalt                                 | Script halts, shows unmatched name                      | Add `cardholder_name` to Card Instance or Supplementary Card, retry |
+| Card Instance not found for file                                  | Script halts before processing                          | Verify CNV-003 loaded correctly                                     |
+| CSV Format Config missing for issuer                              | Script halts before processing                          | Verify CNV-002 loaded correctly                                     |
+| ENH-001 not available                                             | Script halts before processing                          | Verify ENH-001 is built and operational                             |
+| Vendor name collision (same normalized name, different merchants) | Flag for manual resolution during categorization review | Sandro disambiguates                                                |
+| `SIMPLEFIN_CONNECTION_DATE` not set (null)                        | Warning — all transactions imported (no cutoff applied) | Set the date if SimpleFIN is already connected                      |
 
 ---
 
@@ -541,13 +541,13 @@ None. All questions resolved during workshop.
 
 ## 9. Cross-Spec Notes
 
-| Target Spec | Note |
-|-------------|------|
-| SPEC-01 (Ingestion Pipeline) | Amendment: add multi-file upload to FRM-003 with same-card restriction (D-108). |
-| SPEC-01 (Ingestion Pipeline) | Amendment: add `skipped_count` to Import Log entity. |
-| SPEC-01 (Ingestion Pipeline) | Amendment: add `SIMPLEFIN_CONNECTION_DATE` to System Config seed values. |
+| Target Spec                      | Note                                                                                        |
+| -------------------------------- | ------------------------------------------------------------------------------------------- |
+| SPEC-01 (Ingestion Pipeline)     | Amendment: add multi-file upload to FRM-003 with same-card restriction (D-108).             |
+| SPEC-01 (Ingestion Pipeline)     | Amendment: add `skipped_count` to Import Log entity.                                        |
+| SPEC-01 (Ingestion Pipeline)     | Amendment: add `SIMPLEFIN_CONNECTION_DATE` to System Config seed values.                    |
 | SPEC-02 (Transaction Processing) | ENH-001 patterns bootstrapped by CNV-001 categorization — strong day-one matching expected. |
 
 ---
 
-*This spec traces to [Business Architecture](../BUSINESS_ARCHITECTURE.md) object CNV-001 and [Data Model](../DATA_MODEL.md) entities listed in §3. New decisions D-107–D-113 logged in [Decisions Log](../user-profile/DECISIONS_LOG.md).*
+_This spec traces to [Business Architecture](../BUSINESS_ARCHITECTURE.md) object CNV-001 and [Data Model](../DATA_MODEL.md) entities listed in §3. New decisions D-107–D-113 logged in [Decisions Log](../user-profile/DECISIONS_LOG.md)._

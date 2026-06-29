@@ -9,10 +9,10 @@
 
 ## 1. Change History
 
-| Date | Author | Description |
-|------|--------|-------------|
+| Date       | Author          | Description                                                      |
+| ---------- | --------------- | ---------------------------------------------------------------- |
 | 2026-02-21 | Sandro & Claude | Initial creation — Step 14 complete. D-308 through D-313 logged. |
-| 2026-02-21 | Sandro | Approved. Status Draft → Approved. |
+| 2026-02-21 | Sandro          | Approved. Status Draft → Approved.                               |
 
 ---
 
@@ -20,18 +20,21 @@
 
 Custom visual identity layered on top of `sap_horizon` (Horizon Light). Targeted overrides only — no theme package, no build tooling.
 
-| Aspect | Decision |
-|--------|----------|
-| **Base Theme** | SAP Horizon Light (`sap_horizon`) — unchanged (D-56) |
-| **Brand Color** | Warm Charcoal `#3D3A38` — replaces Horizon blue (D-308) |
-| **ShellBar** | Dark charcoal background, white text (D-309) |
-| **Border Radius** | 0 on all containers and interactive controls (D-310) |
-| **Card Treatment** | Horizon shadow retained, sharp corners (D-311) |
-| **Semantic Colors** | Horizon defaults — no override |
-| **Link Color** | Horizon blue — no override |
-| **Override Method** | Single CSS file after Horizon, CSS custom properties (D-312) |
-| **Total Overrides** | 28 custom properties + ~2 targeted selectors (D-313) |
-| **Amends** | D-60 (was "no custom accent" → now defined custom palette) |
+| Aspect              | Decision                                                        |
+| ------------------- | --------------------------------------------------------------- |
+| **Base Theme**      | SAP Horizon Light (`sap_horizon`) — unchanged (D-56)            |
+| **Brand Identity**  | "Obsidian & Amber" — warm gold accent on dark shell (D-314)     |
+| **Shell Color**     | Obsidian `#2A2725` — deep warm black (D-314)                    |
+| **Accent Color**    | Amber `#C8973E` — warm gold for interactive elements (D-314)    |
+| **Border Radius**   | 0 on all containers and interactive controls (D-310)            |
+| **Card Treatment**  | Horizon shadow retained, sharp corners (D-311)                  |
+| **Semantic Colors** | Horizon defaults — no override                                  |
+| **Link Color**      | Deep Gold `#8B6B1F` — replaces Horizon blue for WCAG AA (D-314) |
+| **Page Background** | Warm Stone `#F0EDEA` — reduces white void (D-314)               |
+| **Side Nav**        | Soft Ash `#E8E5E2` — tinted for three-column depth (D-314)      |
+| **Override Method** | Single CSS file after Horizon, CSS custom properties (D-312)    |
+| **Total Overrides** | 30 custom properties + ~5 targeted selectors (D-314)            |
+| **Amends**          | D-60, D-308, D-309, D-313 (replaced by D-314 palette)           |
 
 ---
 
@@ -39,52 +42,55 @@ Custom visual identity layered on top of `sap_horizon` (Horizon Light). Targeted
 
 ### 3.1 Design Intent
 
-Replace Horizon's corporate SAP blue with a warm charcoal/slate palette. The brand color recedes — neutral, understated, premium — letting semantic colors (green, red, orange, blue, grey) carry all the meaning. Data speaks; chrome stays quiet.
+"Obsidian & Amber" — a warm, premium palette inspired by financial instruments and achievement. The deep obsidian shell anchors the app while amber accents connote finance, value, and reward. Zero SAP blue in any brand or interactive element. Semantic colors (green, red, orange, blue, grey) remain unchanged and carry all functional meaning.
 
-This amends D-60 ("standard Horizon semantic colors only, no custom accent") — the semantic colors remain unchanged, but a custom brand accent is now defined.
+This amends D-60 ("standard Horizon semantic colors only, no custom accent") and replaces the earlier Warm Charcoal palette (D-308/D-309) with a fully differentiated brand identity.
 
 ### 3.2 Brand Palette
 
-| Role | Name | Hex | Usage |
-|------|------|-----|-------|
-| **Primary** | Warm Charcoal | `#3D3A38` | ShellBar background, emphasized buttons, nav active indicator, selection highlight, focus outline |
-| **Primary Hover** | Dark Charcoal | `#2E2B29` | Hover states on primary buttons and interactive elements |
-| **Primary Active** | Deep Charcoal | `#252220` | Pressed/active state |
-| **Selected Background** | Warm Mist | `#EDECEB` | Selected table rows, active list items, subtle highlight backgrounds |
-| **Shell Hover** | Ash | `#4A4745` | Hover on ShellBar elements (lighter than charcoal on dark surface) |
+| Role                    | Name       | Hex       | Usage                                                                                     |
+| ----------------------- | ---------- | --------- | ----------------------------------------------------------------------------------------- |
+| **Shell/Primary**       | Obsidian   | `#2A2725` | ShellBar background, active list press, deep anchor color                                 |
+| **Accent**              | Amber      | `#C8973E` | Emphasized buttons, nav active indicator, selection highlight, focus outline, brand color |
+| **Accent Hover**        | Dark Amber | `#A67C2E` | Hover states on emphasized buttons and interactive elements                               |
+| **Accent Active**       | Burnt Gold | `#8E6A24` | Pressed/active state on emphasized elements                                               |
+| **Link Text**           | Deep Gold  | `#8B6B1F` | Text links — replaces Horizon blue, WCAG AA compliant                                     |
+| **Page Background**     | Warm Stone | `#F0EDEA` | Page/body background — reduces white void                                                 |
+| **Surface**             | Parchment  | `#FAFAF8` | Card/content group backgrounds — subtle lift against Warm Stone                           |
+| **Side Nav**            | Soft Ash   | `#E8E5E2` | Side navigation panel — three-column depth effect                                         |
+| **Selected Background** | Gold Mist  | `#F5EDD8` | Selected table rows, hover backgrounds, active list items                                 |
+| **Shell Hover**         | Warm Smoke | `#3D3A37` | Hover on ShellBar elements (lighter than obsidian on dark surface)                        |
 
-All five values share the same warm undertone (slightly reddish-brown grey, not cool/blue grey). Contrast ratios: Primary against white = ~10.2:1 (WCAG AAA). Primary Hover against white = ~12.5:1.
-
-Page background, body text, and all other surface colors remain Horizon defaults.
+All values share a warm undertone (amber-brown family, not cool/blue). Contrast ratios: Obsidian against white = ~13.5:1 (WCAG AAA). Amber against white = ~3.8:1 (WCAG AA for large text). Deep Gold against white = ~5.6:1 (WCAG AA).
 
 ### 3.3 Semantic Colors — Unchanged
 
-The five semantic states defined in DS-001 §6 remain at Horizon defaults. No overrides. The warm charcoal brand intentionally avoids collision with any semantic state.
+The five semantic states defined in DS-001 §6 remain at Horizon defaults. No overrides. The amber brand intentionally avoids collision with any semantic state.
 
-| State | Color | Usage (from DS-001 §6) |
-|-------|-------|------------------------|
-| Positive / Success | Green | Active, met bonus, on-track budget, successful sync |
-| Critical / Error | Red | Missed bonus, over budget, sync error |
-| Warning | Orange | To Cancel, near budget limit, uncategorized |
-| Information | Blue | Focus state, in-progress bonus, user-corrected |
-| Neutral | Grey | Closed, pending, never synced |
+| State              | Color  | Usage (from DS-001 §6)                              |
+| ------------------ | ------ | --------------------------------------------------- |
+| Positive / Success | Green  | Active, met bonus, on-track budget, successful sync |
+| Critical / Error   | Red    | Missed bonus, over budget, sync error               |
+| Warning            | Orange | To Cancel, near budget limit, uncategorized         |
+| Information        | Blue   | Focus state, in-progress bonus, user-corrected      |
+| Neutral            | Grey   | Closed, pending, never synced                       |
 
-### 3.4 Link Color — Horizon Blue Retained
+### 3.4 Link Color — Deep Gold
 
-Text links keep Horizon's default blue (`#0064D9`). Blue is universally understood as "clickable" and aligns with the Information semantic state. Overriding link color to charcoal would reduce scannability with no UX benefit.
+Text links use Deep Gold (`#8B6B1F`) instead of Horizon blue. This eliminates the last SAP-blue fingerprint from interactive elements. Deep Gold against white = ~5.6:1, meeting WCAG AA. Links remain visually distinct from body text (`#1D2D3E`) through both color difference and underline convention.
 
 ### 3.5 Domain Chart Colors — Reference
 
 Issuer chart colors defined in SPEC-19 §4.1.13 (D-220). Applied programmatically to chart data series as constants — not part of CSS theme overrides.
 
-| Issuer | Hex | Color Name |
-|--------|-----|------------|
-| TD | `#00A650` | Green |
-| Amex | `#006FCF` | Blue |
-| CIBC | `#C41F3E` | Red |
-| Scotia | `#FFB819` | Gold |
-| BMO | `#009B8D` | Teal |
-| RBC | `#7B2D8E` | Purple |
+| Issuer    | Hex               | Color Name               |
+| --------- | ----------------- | ------------------------ |
+| TD        | `#00A650`         | Green                    |
+| Amex      | `#006FCF`         | Blue                     |
+| CIBC      | `#C41F3E`         | Red                      |
+| Scotia    | `#FFB819`         | Gold                     |
+| BMO       | `#009B8D`         | Teal                     |
+| RBC       | `#7B2D8E`         | Purple                   |
 | Aggregate | `sapNeutralColor` | Grey (dashed line style) |
 
 Non-mapped issuers fall back to VizFrame auto-assigned qualitative palette.
@@ -93,11 +99,11 @@ Non-mapped issuers fall back to VizFrame auto-assigned qualitative palette.
 
 CPP coloring in RPT-004 (Trophy Case) defined in SPEC-21 BR-06. Uses standard Horizon semantic states, not custom colors:
 
-| Condition | State | Color |
-|-----------|-------|-------|
-| CPP ≥ 2× program valuation | Positive | Green |
-| CPP ≥ 1× program valuation | Information | Blue |
-| CPP < 1× program valuation | Warning | Orange |
+| Condition                  | State       | Color  |
+| -------------------------- | ----------- | ------ |
+| CPP ≥ 2× program valuation | Positive    | Green  |
+| CPP ≥ 1× program valuation | Information | Blue   |
+| CPP < 1× program valuation | Warning     | Orange |
 
 ---
 
@@ -109,25 +115,25 @@ All container and interactive control border radii set to `0`. Sharp edges throu
 
 ### 4.2 Components Set to 0
 
-| Component Category | SAPUI5 Controls |
-|--------------------|-----------------|
-| **Buttons** | `sap.m.Button`, `sap.m.SegmentedButton`, `sap.m.ToggleButton` |
-| **Inputs** | `sap.m.Input`, `sap.m.TextArea`, `sap.m.SearchField`, `sap.m.DatePicker`, `sap.m.ComboBox`, `sap.m.MultiComboBox`, `sap.m.Select`, `sap.m.StepInput` |
-| **Cards** | `sap.f.Card`, `sap.m.GenericTile`, `sap.ui.integration.widgets.Card` |
-| **Containers** | `sap.m.Panel`, `sap.m.Dialog`, `sap.m.Popover`, `sap.m.MessageStrip`, `sap.m.MessageBox` |
-| **Toolbar** | `sap.m.OverflowToolbar`, `sap.m.Toolbar` |
-| **Tabs** | `sap.m.IconTabBar` (tab headers) |
-| **Checkboxes** | `sap.m.CheckBox` (square is the natural sharp-edge shape) |
+| Component Category | SAPUI5 Controls                                                                                                                                      |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Buttons**        | `sap.m.Button`, `sap.m.SegmentedButton`, `sap.m.ToggleButton`                                                                                        |
+| **Inputs**         | `sap.m.Input`, `sap.m.TextArea`, `sap.m.SearchField`, `sap.m.DatePicker`, `sap.m.ComboBox`, `sap.m.MultiComboBox`, `sap.m.Select`, `sap.m.StepInput` |
+| **Cards**          | `sap.f.Card`, `sap.m.GenericTile`, `sap.ui.integration.widgets.Card`                                                                                 |
+| **Containers**     | `sap.m.Panel`, `sap.m.Dialog`, `sap.m.Popover`, `sap.m.MessageStrip`, `sap.m.MessageBox`                                                             |
+| **Toolbar**        | `sap.m.OverflowToolbar`, `sap.m.Toolbar`                                                                                                             |
+| **Tabs**           | `sap.m.IconTabBar` (tab headers)                                                                                                                     |
+| **Checkboxes**     | `sap.m.CheckBox` (square is the natural sharp-edge shape)                                                                                            |
 
 ### 4.3 Exceptions — Keep Rounded
 
-| Component | Reason |
-|-----------|--------|
-| `sap.m.RadioButton` | Circle is the universal radio affordance — square radio buttons break the checkbox/radio distinction |
-| Avatars / User icons | Circular by convention |
-| `sap.m.Switch` track | Pill shape is the toggle affordance |
-| `sap.m.ProgressIndicator` track | Slight rounding for visual clarity |
-| `sap.m.BusyIndicator` | Animated — no border radius applicable |
+| Component                       | Reason                                                                                               |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `sap.m.RadioButton`             | Circle is the universal radio affordance — square radio buttons break the checkbox/radio distinction |
+| Avatars / User icons            | Circular by convention                                                                               |
+| `sap.m.Switch` track            | Pill shape is the toggle affordance                                                                  |
+| `sap.m.ProgressIndicator` track | Slight rounding for visual clarity                                                                   |
+| `sap.m.BusyIndicator`           | Animated — no border radius applicable                                                               |
 
 ### 4.4 Implementation
 
@@ -151,86 +157,89 @@ The exceptions in §4.3 don't need explicit overrides — they use their own CSS
 
 ### 5.1 ShellBar
 
-| Property | Horizon Default | Override |
-|----------|----------------|----------|
-| Background | White (`#FFFFFF`) | Warm Charcoal (`#3D3A38`) |
-| Text / app title | Dark (`#1D2D3E`) | White (`#FFFFFF`) |
-| Icons | Dark | White |
-| Bottom separator | 1px border | Subtle `box-shadow: 0 1px 4px rgba(0,0,0,0.15)` — soft drop shadow anchors the dark bar against the white content below |
+| Property         | Horizon Default   | Override                                                                                                               |
+| ---------------- | ----------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Background       | White (`#FFFFFF`) | Obsidian (`#2A2725`)                                                                                                   |
+| Text / app title | Dark (`#1D2D3E`)  | White (`#FFFFFF`)                                                                                                      |
+| Icons            | Dark              | White                                                                                                                  |
+| Hover            | Light grey        | Warm Smoke (`#3D3A37`)                                                                                                 |
+| Bottom separator | 1px border        | Subtle `box-shadow: 0 1px 4px rgba(0,0,0,0.15)` — soft drop shadow anchors the dark bar against the warm stone content |
 
 ### 5.2 Emphasized Buttons
 
-| Property | Horizon Default | Override |
-|----------|----------------|----------|
-| Background | SAP Blue (`#0070F2`) | Warm Charcoal (`#3D3A38`) |
-| Text | White | White (unchanged) |
-| Border | None | None (unchanged) |
-| Hover background | Darker blue | Dark Charcoal (`#2E2B29`) |
-| Active background | Darkest blue | Deep Charcoal (`#252220`) |
-| Focus outline | Blue | Charcoal (`#3D3A38`) |
+| Property          | Horizon Default      | Override               |
+| ----------------- | -------------------- | ---------------------- |
+| Background        | SAP Blue (`#0070F2`) | Amber (`#C8973E`)      |
+| Text              | White                | White (unchanged)      |
+| Border            | None                 | Amber (`#C8973E`)      |
+| Hover background  | Darker blue          | Dark Amber (`#A67C2E`) |
+| Active background | Darkest blue         | Burnt Gold (`#8E6A24`) |
+| Focus outline     | Blue                 | Amber (`#C8973E`)      |
 
 ### 5.3 Default Buttons (non-emphasized)
 
-| Property | Horizon Default | Override |
-|----------|----------------|----------|
-| Background | Transparent | Transparent (unchanged) |
-| Text | Blue (`#0064D9`) | Warm Charcoal (`#3D3A38`) |
-| Border | 1px blue | 1px Warm Charcoal (`#3D3A38`) |
-| Hover background | Light blue tint | Warm Mist (`#EDECEB`) |
+| Property         | Horizon Default  | Override                 |
+| ---------------- | ---------------- | ------------------------ |
+| Background       | Transparent      | Transparent (unchanged)  |
+| Text             | Blue (`#0064D9`) | Obsidian (`#2A2725`)     |
+| Border           | 1px blue         | 1px Obsidian (`#2A2725`) |
+| Hover background | Light blue tint  | Gold Mist (`#F5EDD8`)    |
+| Hover border     | Darker blue      | Dark Amber (`#A67C2E`)   |
 
-Ghost/transparent buttons follow the same pattern — charcoal text, no border, Warm Mist hover.
+Ghost/transparent buttons follow the same pattern — obsidian text, no border, Gold Mist hover.
 
 ### 5.4 Cards
 
-| Property | Horizon Default | Override |
-|----------|----------------|----------|
-| Box shadow | Subtle elevation | Keep (Horizon default) |
-| Border | None | None (unchanged) |
-| Background | White | White (unchanged) |
-| Border radius | Rounded | 0 (per §4) |
+| Property      | Horizon Default  | Override               |
+| ------------- | ---------------- | ---------------------- |
+| Box shadow    | Subtle elevation | Keep (Horizon default) |
+| Border        | None             | None (unchanged)       |
+| Background    | White            | Parchment (`#FAFAF8`)  |
+| Border radius | Rounded          | 0 (per §4)             |
 
-Cards get sharp corners from §4 but retain their Horizon shadow. No other card-level overrides.
+Cards get sharp corners from §4 but retain their Horizon shadow. Parchment surface provides subtle lift against Warm Stone page background.
 
 ### 5.5 Side Navigation
 
-| Property | Horizon Default | Override |
-|----------|----------------|----------|
-| Background | White | White (unchanged) |
-| Active item indicator | Blue left border | Warm Charcoal left border |
-| Active item text | Blue | Warm Charcoal (`#3D3A38`) |
-| Active item icon | Blue | Warm Charcoal |
-| Hover background | Light blue tint | Warm Mist (`#EDECEB`) |
-| Group headers | Grey text | Grey text (unchanged) |
-| Divider between groups | Light grey | Light grey (unchanged) |
-| Collapsed mode — active icon | Blue | Warm Charcoal |
+| Property                     | Horizon Default  | Override                      |
+| ---------------------------- | ---------------- | ----------------------------- |
+| Background                   | White            | Soft Ash (`#E8E5E2`)          |
+| Active item indicator        | Blue left border | Amber left border (`#C8973E`) |
+| Active item background       | Blue tint        | Gold Mist (`#F5EDD8`)         |
+| Hover background             | Light blue tint  | Gold Mist (`#F5EDD8`)         |
+| Group headers                | Grey text        | Grey text (unchanged)         |
+| Divider between groups       | Light grey       | Light grey (unchanged)        |
+| Collapsed mode — active icon | Blue             | Amber                         |
+
+The tinted side nav background creates a three-column depth effect: dark shell > warm sidebar > light content.
 
 ### 5.6 Input Fields
 
-| Property | Horizon Default | Override |
-|----------|----------------|----------|
-| Border | 1px bottom border (blue on focus) | 1px bottom border — Charcoal on focus |
-| Focus outline | Blue | Warm Charcoal |
-| Value help icon | Blue | Horizon default (keep — functional affordance) |
+| Property        | Horizon Default                   | Override                                       |
+| --------------- | --------------------------------- | ---------------------------------------------- |
+| Border          | 1px bottom border (blue on focus) | 1px bottom border — Amber on focus             |
+| Focus outline   | Blue                              | Amber (`#C8973E`)                              |
+| Value help icon | Blue                              | Horizon default (keep — functional affordance) |
 
 Applies to: `Input`, `TextArea`, `SearchField`, `DatePicker`, `ComboBox`, `Select`, `StepInput`.
 
 ### 5.7 Tables
 
-| Property | Horizon Default | Override |
-|----------|----------------|----------|
-| Row density | Compact (~32px) | Compact (unchanged, per D-56) |
-| Row hover | Light blue tint | Warm Mist (`#EDECEB`) |
-| Selected row | Blue tint | Warm Mist (`#EDECEB`) |
-| Header background | Light grey | Light grey (unchanged) |
-| Column borders | None (Horizon) | None (unchanged) |
+| Property          | Horizon Default | Override                      |
+| ----------------- | --------------- | ----------------------------- |
+| Row density       | Compact (~32px) | Compact (unchanged, per D-56) |
+| Row hover         | Light blue tint | Gold Mist (`#F5EDD8`)         |
+| Selected row      | Blue tint       | Gold Mist (`#F5EDD8`)         |
+| Header background | Light grey      | Light grey (unchanged)        |
+| Column borders    | None (Horizon)  | None (unchanged)              |
 
 ### 5.8 Dialogs & Popovers
 
-| Property | Horizon Default | Override |
-|----------|----------------|----------|
-| Overlay backdrop | `rgba(0,0,0,0.6)` | Unchanged |
-| Box shadow | Elevation shadow | Keep — dialogs need visual separation from page content |
-| Border radius | Rounded | 0 (per §4) |
+| Property         | Horizon Default   | Override                                                |
+| ---------------- | ----------------- | ------------------------------------------------------- |
+| Overlay backdrop | `rgba(0,0,0,0.6)` | Unchanged                                               |
+| Box shadow       | Elevation shadow  | Keep — dialogs need visual separation from page content |
+| Border radius    | Rounded           | 0 (per §4)                                              |
 
 Dialogs retain their box-shadow (unlike the flat page content) because they float above the page and need depth to communicate modality.
 
@@ -263,14 +272,15 @@ The app has a single shell entry point (`index.html`) wrapping all pages via sid
 
 ```html
 <!-- SAPUI5 bootstrap — loads sap_horizon from CDN -->
-<script id="sap-ui-bootstrap"
-  src="https://ui5.sap.com/1.120/resources/sap-ui-core.js"
+<script
+  id="sap-ui-bootstrap"
+  src="https://ui5.sap.com/1.136.16/resources/sap-ui-core.js"
   data-sap-ui-theme="sap_horizon"
-  ...>
-</script>
+  ...
+></script>
 
 <!-- Theme overrides — loaded after Horizon, wins by cascade order -->
-<link rel="stylesheet" href="shared/css/theme-overrides.css">
+<link rel="stylesheet" href="shared/css/theme-overrides.css" />
 ```
 
 One `<link>`, one file, applied to all apps. No per-app references needed.
@@ -279,10 +289,10 @@ One `<link>`, one file, applied to all apps. No per-app references needed.
 
 The CSS file contains two layers:
 
-| Layer | Mechanism | Purpose |
-|-------|-----------|---------|
-| **1. Custom properties** | `:root { --sapBrandColor: #3D3A38; ... }` | Colors, border radii — covers ~90% of overrides. All components referencing these properties update automatically. |
-| **2. Targeted selectors** | `.sapMBtnEmphasized { ... }` | Component-specific tweaks where custom properties alone don't achieve the desired result (e.g., ShellBar dark mode, specific hover treatments). |
+| Layer                     | Mechanism                                 | Purpose                                                                                                                                         |
+| ------------------------- | ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| **1. Custom properties**  | `:root { --sapBrandColor: #3D3A38; ... }` | Colors, border radii — covers ~90% of overrides. All components referencing these properties update automatically.                              |
+| **2. Targeted selectors** | `.sapMBtnEmphasized { ... }`              | Component-specific tweaks where custom properties alone don't achieve the desired result (e.g., ShellBar dark mode, specific hover treatments). |
 
 Layer 1 always comes first. Layer 2 is the escape hatch — used sparingly and only when needed.
 
@@ -294,12 +304,12 @@ Layer 1 always comes first. Layer 2 is the escape hatch — used sparingly and o
 
 ### 6.6 What We Do NOT Use
 
-| Tool | Why Not |
-|------|---------|
-| SAP Theme Designer | Cloud-hosted, generates `.theming` packages. Overkill for targeted overrides. Adds build dependency. |
-| `@sap-theming/` npm packages | Build-time theme compilation. Unnecessary when CSS custom properties cover our needs. |
-| Less/Sass compilation | Horizon uses CSS custom properties natively. No preprocessor step needed. |
-| `sap.ui.getCore().applyTheme()` with custom theme ID | Requires a registered theme package. We're augmenting Horizon, not replacing it. |
+| Tool                                                 | Why Not                                                                                              |
+| ---------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| SAP Theme Designer                                   | Cloud-hosted, generates `.theming` packages. Overkill for targeted overrides. Adds build dependency. |
+| `@sap-theming/` npm packages                         | Build-time theme compilation. Unnecessary when CSS custom properties cover our needs.                |
+| Less/Sass compilation                                | Horizon uses CSS custom properties natively. No preprocessor step needed.                            |
+| `sap.ui.getCore().applyTheme()` with custom theme ID | Requires a registered theme package. We're augmenting Horizon, not replacing it.                     |
 
 ### 6.7 Maintenance
 
@@ -317,121 +327,140 @@ All values set via `:root { }` block. Grouped by category.
 
 #### Brand & Selection
 
-| CSS Custom Property | Horizon Default | Override | Notes |
-|---------------------|----------------|----------|-------|
-| `--sapBrandColor` | `#0070F2` | `#3D3A38` | Primary brand — cascades to many derived properties |
-| `--sapHighlightColor` | `#0064D9` | `#3D3A38` | Selection and highlight |
-| `--sapActiveColor` | `#0064D9` | `#2E2B29` | Pressed/active states |
-| `--sapSelectedColor` | `#0064D9` | `#3D3A38` | Selected items |
-| `--sapContent_FocusColor` | `#0064D9` | `#3D3A38` | Focus outlines on all interactive elements |
+| CSS Custom Property       | Horizon Default | Override  | Notes                                              |
+| ------------------------- | --------------- | --------- | -------------------------------------------------- |
+| `--sapBrandColor`         | `#0070F2`       | `#C8973E` | Amber accent — cascades to many derived properties |
+| `--sapHighlightColor`     | `#0064D9`       | `#C8973E` | Selection and highlight                            |
+| `--sapActiveColor`        | `#0064D9`       | `#8E6A24` | Pressed/active states (Burnt Gold)                 |
+| `--sapSelectedColor`      | `#0064D9`       | `#C8973E` | Selected items                                     |
+| `--sapContent_FocusColor` | `#0064D9`       | `#C8973E` | Focus outlines on all interactive elements         |
+
+#### Links
+
+| CSS Custom Property | Horizon Default | Override  | Notes                                    |
+| ------------------- | --------------- | --------- | ---------------------------------------- |
+| `--sapLinkColor`    | `#0064D9`       | `#8B6B1F` | Deep Gold — replaces Horizon blue (§3.4) |
+
+#### Page Background & Surfaces
+
+| CSS Custom Property            | Horizon Default | Override  | Notes                                      |
+| ------------------------------ | --------------- | --------- | ------------------------------------------ |
+| `--sapBackgroundColor`         | `#FAFAFA`       | `#F0EDEA` | Warm Stone — reduces white void            |
+| `--sapGroup_ContentBackground` | `#FFFFFF`       | `#FAFAF8` | Parchment — subtle lift against Warm Stone |
 
 #### Shell
 
-| CSS Custom Property | Horizon Default | Override | Notes |
-|---------------------|----------------|----------|-------|
-| `--sapShellColor` | `#FFFFFF` | `#3D3A38` | ShellBar background |
-| `--sapShell_TextColor` | `#1D2D3E` | `#FFFFFF` | ShellBar text and app title |
-| `--sapShell_InteractiveTextColor` | `#0064D9` | `#FFFFFF` | ShellBar interactive elements |
-| `--sapShell_Hover_Background` | `#EBECEE` | `#4A4745` | Hover on shell elements |
+| CSS Custom Property               | Horizon Default | Override  | Notes                         |
+| --------------------------------- | --------------- | --------- | ----------------------------- |
+| `--sapShellColor`                 | `#FFFFFF`       | `#2A2725` | Obsidian shell background     |
+| `--sapShell_TextColor`            | `#1D2D3E`       | `#FFFFFF` | ShellBar text and app title   |
+| `--sapShell_InteractiveTextColor` | `#0064D9`       | `#FFFFFF` | ShellBar interactive elements |
+| `--sapShell_Hover_Background`     | `#EBECEE`       | `#3D3A37` | Warm Smoke hover              |
 
 #### Buttons — Emphasized
 
-| CSS Custom Property | Horizon Default | Override | Notes |
-|---------------------|----------------|----------|-------|
-| `--sapButton_Emphasized_Background` | `#0070F2` | `#3D3A38` | |
-| `--sapButton_Emphasized_BorderColor` | `#0070F2` | `#3D3A38` | |
-| `--sapButton_Emphasized_TextColor` | `#FFFFFF` | `#FFFFFF` | Unchanged |
-| `--sapButton_Emphasized_Hover_Background` | `#0064D9` | `#2E2B29` | |
-| `--sapButton_Emphasized_Hover_BorderColor` | `#0064D9` | `#2E2B29` | |
-| `--sapButton_Emphasized_Active_Background` | `#0058B8` | `#252220` | |
-| `--sapButton_Emphasized_Active_BorderColor` | `#0058B8` | `#252220` | |
+| CSS Custom Property                         | Horizon Default | Override  | Notes      |
+| ------------------------------------------- | --------------- | --------- | ---------- |
+| `--sapButton_Emphasized_Background`         | `#0070F2`       | `#C8973E` | Amber      |
+| `--sapButton_Emphasized_BorderColor`        | `#0070F2`       | `#C8973E` | Amber      |
+| `--sapButton_Emphasized_TextColor`          | `#FFFFFF`       | `#FFFFFF` | Unchanged  |
+| `--sapButton_Emphasized_Hover_Background`   | `#0064D9`       | `#A67C2E` | Dark Amber |
+| `--sapButton_Emphasized_Hover_BorderColor`  | `#0064D9`       | `#A67C2E` | Dark Amber |
+| `--sapButton_Emphasized_Active_Background`  | `#0058B8`       | `#8E6A24` | Burnt Gold |
+| `--sapButton_Emphasized_Active_BorderColor` | `#0058B8`       | `#8E6A24` | Burnt Gold |
 
 #### Buttons — Default
 
-| CSS Custom Property | Horizon Default | Override | Notes |
-|---------------------|----------------|----------|-------|
-| `--sapButton_TextColor` | `#0064D9` | `#3D3A38` | |
-| `--sapButton_BorderColor` | `#0064D9` | `#3D3A38` | |
-| `--sapButton_Hover_Background` | `#EBF5FE` | `#EDECEB` | Warm Mist |
-| `--sapButton_Hover_BorderColor` | `#0064D9` | `#2E2B29` | |
+| CSS Custom Property             | Horizon Default | Override  | Notes      |
+| ------------------------------- | --------------- | --------- | ---------- |
+| `--sapButton_TextColor`         | `#0064D9`       | `#2A2725` | Obsidian   |
+| `--sapButton_BorderColor`       | `#0064D9`       | `#2A2725` | Obsidian   |
+| `--sapButton_Hover_Background`  | `#EBF5FE`       | `#F5EDD8` | Gold Mist  |
+| `--sapButton_Hover_BorderColor` | `#0064D9`       | `#A67C2E` | Dark Amber |
 
 #### Input Fields
 
-| CSS Custom Property | Horizon Default | Override | Notes |
-|---------------------|----------------|----------|-------|
-| `--sapField_Focus_BorderColor` | `#0064D9` | `#3D3A38` | Focus state |
-| `--sapField_Hover_BorderColor` | `#0064D9` | `#3D3A38` | Hover state |
-| `--sapField_Active_BorderColor` | `#0064D9` | `#2E2B29` | Active state |
+| CSS Custom Property             | Horizon Default | Override  | Notes             |
+| ------------------------------- | --------------- | --------- | ----------------- |
+| `--sapField_Focus_BorderColor`  | `#0064D9`       | `#C8973E` | Amber focus state |
+| `--sapField_Hover_BorderColor`  | `#0064D9`       | `#C8973E` | Amber hover state |
+| `--sapField_Active_BorderColor` | `#0064D9`       | `#A67C2E` | Dark Amber active |
 
 #### Lists & Tables
 
-| CSS Custom Property | Horizon Default | Override | Notes |
-|---------------------|----------------|----------|-------|
-| `--sapList_Hover_Background` | `#EBF5FE` | `#EDECEB` | Row hover |
-| `--sapList_SelectionBackgroundColor` | `#EBF5FE` | `#EDECEB` | Selected row |
-| `--sapList_Active_Background` | `#0064D9` | `#3D3A38` | Active/pressed row |
-| `--sapList_Active_TextColor` | `#FFFFFF` | `#FFFFFF` | Unchanged |
+| CSS Custom Property                  | Horizon Default | Override  | Notes              |
+| ------------------------------------ | --------------- | --------- | ------------------ |
+| `--sapList_Hover_Background`         | `#EBF5FE`       | `#F5EDD8` | Gold Mist hover    |
+| `--sapList_SelectionBackgroundColor` | `#EBF5FE`       | `#F5EDD8` | Gold Mist selected |
+| `--sapList_Active_Background`        | `#0064D9`       | `#2A2725` | Obsidian pressed   |
+| `--sapList_Active_TextColor`         | `#FFFFFF`       | `#FFFFFF` | Unchanged          |
 
 #### Border Radius
 
-| CSS Custom Property | Horizon Default | Override | Notes |
-|---------------------|----------------|----------|-------|
-| `--sapButton_BorderCornerRadius` | `0.5rem` | `0` | |
-| `--sapField_BorderCornerRadius` | `0.5rem` | `0` | |
-| `--sapElement_BorderCornerRadius` | `0.5rem` | `0` | Generic elements |
-| `--sapPopover_BorderCornerRadius` | `0.75rem` | `0` | Dialogs, popovers |
-| `--sapTile_BorderCornerRadius` | `1rem` | `0` | Cards, tiles |
+| CSS Custom Property               | Horizon Default | Override | Notes             |
+| --------------------------------- | --------------- | -------- | ----------------- |
+| `--sapButton_BorderCornerRadius`  | `0.5rem`        | `0`      |                   |
+| `--sapField_BorderCornerRadius`   | `0.5rem`        | `0`      |                   |
+| `--sapElement_BorderCornerRadius` | `0.5rem`        | `0`      | Generic elements  |
+| `--sapPopover_BorderCornerRadius` | `0.75rem`       | `0`      | Dialogs, popovers |
+| `--sapTile_BorderCornerRadius`    | `1rem`          | `0`      | Cards, tiles      |
 
 #### Not Overridden (kept at Horizon defaults)
 
-| CSS Custom Property | Horizon Default | Why Kept |
-|---------------------|----------------|----------|
-| `--sapLinkColor` | `#0064D9` | Links keep blue — universal clickable affordance (§3.4) |
-| `--sapPositiveColor` | `#256F3A` | Semantic — no override |
-| `--sapCriticalColor` | `#E76500` | Semantic — no override |
-| `--sapNegativeColor` | `#AA0808` | Semantic — no override |
-| `--sapInformativeColor` | `#0064D9` | Semantic — no override |
-| `--sapNeutralColor` | `#788FA6` | Semantic — no override |
-| `--sapBackgroundColor` | `#FAFAFA` | Page background stays Horizon |
-| `--sapTextColor` | `#1D2D3E` | Body text stays Horizon |
-| `--sapFontFamily` | `'72', ...` | Typography stays Horizon |
+| CSS Custom Property     | Horizon Default        | Why Kept                                      |
+| ----------------------- | ---------------------- | --------------------------------------------- |
+| `--sapPositiveColor`    | `#256F3A`              | Semantic — no override                        |
+| `--sapCriticalColor`    | `#E76500`              | Semantic — no override                        |
+| `--sapNegativeColor`    | `#AA0808`              | Semantic — no override                        |
+| `--sapInformativeColor` | `#0064D9`              | Semantic — no override                        |
+| `--sapNeutralColor`     | `#788FA6`              | Semantic — no override                        |
+| `--sapTextColor`        | `#1D2D3E`              | Body text stays Horizon                       |
+| `--sapFontFamily`       | `'DM Sans', '72', ...` | Custom brand font — warm geometric sans-serif |
 
 ### 7.2 Layer 2 — Targeted Selectors
 
-Needed only where custom properties don't fully achieve the desired result. Determined during build based on actual DOM inspection. Known candidates:
+Verified against running DOM in SAPUI5 1.136.16. Each selector has a comment in the CSS file noting the component and version.
 
-| Selector | Override | Reason |
-|----------|----------|--------|
-| `.sapMShellBarCont` (or equivalent) | `background-color`, `color` | ShellBar dark treatment may need explicit class override if `--sapShellColor` doesn't cascade to all internal elements |
-| `.sapTntSideNavigation .sapTntNavLI.sapTntNavLISelected` (or equivalent) | `border-left-color`, `color` | Active nav indicator — may need class-level override if not fully driven by `--sapHighlightColor` |
-
-Exact selectors will be verified against the running DOM during Sprint W1-S1 scaffold setup. Each Layer 2 selector gets a comment in the CSS file noting the component, SAPUI5 version, and what it targets.
+| Selector                                    | Override                    | Reason                                                                                      |
+| ------------------------------------------- | --------------------------- | ------------------------------------------------------------------------------------------- |
+| `.sapUiBody .sapMText, ...` (12 selectors)  | `font-family`               | Horizon bakes `"72"` directly into compiled CSS instead of referencing `--sapFontFamily`    |
+| `.sapMIBar.sapMTB.sapMOTB.sapTntToolHeader` | `background-color`, `color` | ToolHeader doesn't apply `--sapShellColor` in 1.136.16 — four-class selector beats CDN      |
+| `.sapTntToolHeader .sapMTitle`              | `color`                     | Title control defaults to `--sapTextColor` (dark) — must inherit shell white                |
+| `.sapTntToolPageMain`                       | `background-color`          | Horizon hardcodes cool grey `#F5F6F7` — override to `--sapBackgroundColor` (Warm Stone)     |
+| `.sapUxAPObjectPageWrapper`                 | `background-color`          | ObjectPage scroll area also hardcodes cool grey — override to match Warm Stone              |
+| `.sapTntToolPageAsideContent`               | `background-color`          | Side nav aside panel — Soft Ash (`#E8E5E2`) for three-column depth effect                   |
+| `.sapTntNLI.sapTntNLISelected`              | `background` (composite)    | Horizon bakes blue gradient indicator + blue tint background. Override to amber + Gold Mist |
+| `.sapTntNLI.sapTntNLISelected a`            | `background-color`          | Inner anchor also gets hardcoded blue tint — override to Gold Mist                          |
 
 ### 7.3 Note on Horizon Defaults
 
-Horizon default values listed above are approximate based on `sap_horizon` 1.120.x. Exact values will be verified against the CDN-loaded theme during build. The override values are final — Horizon defaults are documented here for reference, not as contractual values.
+Horizon default values listed above are based on `sap_horizon` 1.136.16 and verified against the CDN-loaded theme. The override values are final — Horizon defaults are documented here for reference, not as contractual values.
 
 ---
 
 ## 8. Spec Amendments
 
-| Document | Amendment | Decision |
-|----------|-----------|----------|
-| DS-001 §6 (D-60) | "Standard Horizon semantic colors only, no custom accent" replaced with defined custom palette. Semantic colors remain unchanged. | D-308 |
+| Document            | Amendment                                                                                                                    | Decision |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------- | -------- |
+| DS-001 §6 (D-60)    | "Standard Horizon semantic colors only, no custom accent" replaced with Obsidian & Amber palette. Semantic colors unchanged. | D-314    |
+| TH-001 §3.2 (D-308) | Warm Charcoal palette replaced by Obsidian & Amber 10-value palette.                                                         | D-314    |
+| TH-001 §5.1 (D-309) | ShellBar color changed from `#3D3A38` to `#2A2725` (Obsidian).                                                               | D-314    |
+| TH-001 §3.4         | Link color changed from Horizon blue to Deep Gold (`#8B6B1F`).                                                               | D-314    |
 
 ---
 
 ## 9. Decisions Reference
 
-| ID | Title | Summary |
-|----|-------|---------|
-| D-308 | Brand palette — Warm Charcoal | `#3D3A38` as primary brand color. Four-value palette (primary, hover, active, selected background). Amends D-60. |
-| D-309 | Dark ShellBar | Charcoal background (`#3D3A38`) with white text/icons. Subtle drop shadow for separation. |
-| D-310 | Zero border radius | All containers and interactive controls set to `0`. Exceptions: radio buttons, avatars, switch tracks, progress indicators. |
-| D-311 | Component overrides | Charcoal emphasized buttons, charcoal side nav active state, charcoal input focus, Warm Mist hover/selection backgrounds. Card shadow retained (Horizon default). Dialogs keep shadow for modality. |
-| D-312 | Override strategy | Single CSS file (`app/shared/css/theme-overrides.css`) loaded after Horizon via `index.html`. Two layers: CSS custom properties first, targeted selectors as fallback. No theme build tooling. |
-| D-313 | Color mapping table | 28 CSS custom properties overridden, 8 explicitly kept at Horizon defaults. Layer 2 targeted selectors kept to minimum, verified during build. |
+| ID    | Title                             | Summary                                                                                                                                                                                                                                                           |
+| ----- | --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| D-308 | ~~Brand palette — Warm Charcoal~~ | Superseded by D-314. Was: `#3D3A38` as primary brand color.                                                                                                                                                                                                       |
+| D-309 | ~~Dark ShellBar~~                 | Superseded by D-314. Was: Charcoal background (`#3D3A38`).                                                                                                                                                                                                        |
+| D-310 | Zero border radius                | All containers and interactive controls set to `0`. Exceptions: radio buttons, avatars, switch tracks, progress indicators.                                                                                                                                       |
+| D-311 | ~~Component overrides~~           | Superseded by D-314. Was: Charcoal emphasized buttons, Warm Mist hover/selection.                                                                                                                                                                                 |
+| D-312 | Override strategy                 | Single CSS file (`app/shared/css/theme-overrides.css`) loaded after Horizon via `index.html`. Two layers: CSS custom properties first, targeted selectors as fallback. No theme build tooling.                                                                    |
+| D-313 | ~~Color mapping table~~           | Superseded by D-314. Was: 28 custom properties, 8 kept at defaults.                                                                                                                                                                                               |
+| D-314 | Obsidian & Amber identity         | Full brand rebrand. Obsidian (`#2A2725`) shell, Amber (`#C8973E`) accent, Deep Gold (`#8B6B1F`) links, Warm Stone (`#F0EDEA`) page background, Soft Ash (`#E8E5E2`) side nav. 30 custom properties + 6 targeted selectors. Supersedes D-308, D-309, D-311, D-313. |
 
 ---
 
-*This document is the single source of truth for the Financial Planner's custom theme. It layers on top of [Design System](DESIGN_SYSTEM.md) (D-56 through D-62), references issuer colors from [SPEC-19](specs/SPEC-19-CHURNBOARD.md) §4.1.13 (D-220) and CPP coloring from [SPEC-21](specs/SPEC-21-TROPHY-CASE.md) BR-06. All decisions logged in [Decisions Log](user-profile/DECISIONS_LOG.md).*
+_This document is the single source of truth for the Financial Planner's custom theme. It layers on top of [Design System](DESIGN_SYSTEM.md) (D-56 through D-62), references issuer colors from [SPEC-19](specs/SPEC-19-CHURNBOARD.md) §4.1.13 (D-220) and CPP coloring from [SPEC-21](specs/SPEC-21-TROPHY-CASE.md) BR-06. All decisions logged in [Decisions Log](user-profile/DECISIONS_LOG.md)._

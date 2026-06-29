@@ -1,0 +1,11 @@
+{
+  "build": {
+    "target": "gen"
+  },
+  "features": {
+    "assert_integrity": "db"
+  },
+  "hana": {
+    "deploy-format": "hdbtable"
+  }
+}

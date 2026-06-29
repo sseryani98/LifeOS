@@ -12,10 +12,10 @@
 
 ## 1. Change History
 
-| Date | Author | Description |
-|------|--------|-------------|
+| Date       | Author          | Description                                                       |
+| ---------- | --------------- | ----------------------------------------------------------------- |
 | 2026-02-17 | Sandro & Claude | Initial creation — workshop complete. D-142 through D-147 logged. |
-| 2026-02-18 | Sandro | Approved. |
+| 2026-02-18 | Sandro          | Approved.                                                         |
 
 ---
 
@@ -31,18 +31,18 @@ Key decisions: D-04 (CC fees as budget + churning cost), D-23 (realized vs unrea
 
 ## 3. Data Model References
 
-| Entity | Role | DM-001 Ref | Amendment? |
-|--------|------|------------|------------|
-| Card Instance | Hub — profitability computed per card | §4.4 | — |
-| Market Card | fee_structure, fee_amount for breakeven | §4.1 | — |
-| Offer | fyf flag for FYF year detection | §4.2 | — |
-| Offer Tranche | Bonus terms (consumed via ENH-003) | §4.3 | — |
-| Earning Multiplier | Per-card per-category earn rates | §4.5 | — |
-| Card Perk | dollar_value_realized for realized perks line | §4.7 | — |
-| Transaction | Fee identification (Annual Fee subtype) + spend totals | §5.1 | — |
-| Points Adjustment | Signup bonus + referral bonus attribution | §5.3 | — |
-| Rewards Program | cpp_valuation for points-to-dollar conversion | §3.2 | — |
-| Purchase Type | Annual Fee subtype identification | §3.3 | — |
+| Entity             | Role                                                   | DM-001 Ref | Amendment? |
+| ------------------ | ------------------------------------------------------ | ---------- | ---------- |
+| Card Instance      | Hub — profitability computed per card                  | §4.4       | —          |
+| Market Card        | fee_structure, fee_amount for breakeven                | §4.1       | —          |
+| Offer              | fyf flag for FYF year detection                        | §4.2       | —          |
+| Offer Tranche      | Bonus terms (consumed via ENH-003)                     | §4.3       | —          |
+| Earning Multiplier | Per-card per-category earn rates                       | §4.5       | —          |
+| Card Perk          | dollar_value_realized for realized perks line          | §4.7       | —          |
+| Transaction        | Fee identification (Annual Fee subtype) + spend totals | §5.1       | —          |
+| Points Adjustment  | Signup bonus + referral bonus attribution              | §5.3       | —          |
+| Rewards Program    | cpp_valuation for points-to-dollar conversion          | §3.2       | —          |
+| Purchase Type      | Annual Fee subtype identification                      | §3.3       | —          |
 
 ### DM-001 Amendments
 
@@ -66,71 +66,71 @@ Updated to:
 
 **Outputs:**
 
-| Field | Type | Notes |
-|-------|------|-------|
-| `cardInstanceId` | UUID | |
-| `cardName` | string | Market Card name |
-| `lifecycleState` | enum | Current card status |
-| `activationDate` | date | Card Instance activation_date |
-| `currentCardYear` | integer | Which card year the card is in (1, 2, 3…) |
-| `scope` | enum | `all_time` · `card_year` |
-| `cardYearStart` | date | Start of the requested card year (null for all-time) |
-| `cardYearEnd` | date | End of the requested card year (null for all-time) |
-| `profitability` | object | Five-line breakdown (see below) |
-| `breakeven` | object | Breakeven monitor (see below) |
-| `effectiveEarnRate` | decimal | Blended points per dollar across all spend |
-| `totalSpend` | decimal | Total card spend in scope |
-| `cardYears` | array | Summary per card year (for all-time scope only) |
+| Field               | Type    | Notes                                                |
+| ------------------- | ------- | ---------------------------------------------------- |
+| `cardInstanceId`    | UUID    |                                                      |
+| `cardName`          | string  | Market Card name                                     |
+| `lifecycleState`    | enum    | Current card status                                  |
+| `activationDate`    | date    | Card Instance activation_date                        |
+| `currentCardYear`   | integer | Which card year the card is in (1, 2, 3…)            |
+| `scope`             | enum    | `all_time` · `card_year`                             |
+| `cardYearStart`     | date    | Start of the requested card year (null for all-time) |
+| `cardYearEnd`       | date    | End of the requested card year (null for all-time)   |
+| `profitability`     | object  | Five-line breakdown (see below)                      |
+| `breakeven`         | object  | Breakeven monitor (see below)                        |
+| `effectiveEarnRate` | decimal | Blended points per dollar across all spend           |
+| `totalSpend`        | decimal | Total card spend in scope                            |
+| `cardYears`         | array   | Summary per card year (for all-time scope only)      |
 
 **Profitability breakdown:**
 
-| Field | Type | Notes |
-|-------|------|-------|
-| `spendBasedPoints` | integer | Points earned from spending (ENH-006 per-card) minus signup/referral |
-| `spendBasedValue` | decimal | spendBasedPoints × CPP / 100 |
-| `signupBonusPoints` | integer | Points Adjustments where adjustment_type = signup_bonus AND card_instance_id matches |
-| `signupBonusValue` | decimal | signupBonusPoints × CPP / 100 |
-| `referralBonusPoints` | integer | Points Adjustments where adjustment_type = referral AND card_instance_id matches |
-| `referralBonusValue` | decimal | referralBonusPoints × CPP / 100 |
-| `realizedPerks` | decimal | Sum of Card Perk.dollar_value_realized for this card |
-| `feesPaid` | decimal | Sum of fee transactions (Annual Fee subtype) on this card |
-| `netValue` | decimal | spendBasedValue + signupBonusValue + referralBonusValue + realizedPerks − feesPaid |
+| Field                 | Type    | Notes                                                                                |
+| --------------------- | ------- | ------------------------------------------------------------------------------------ |
+| `spendBasedPoints`    | integer | Points earned from spending (ENH-006 per-card) minus signup/referral                 |
+| `spendBasedValue`     | decimal | spendBasedPoints × CPP / 100                                                         |
+| `signupBonusPoints`   | integer | Points Adjustments where adjustment_type = signup_bonus AND card_instance_id matches |
+| `signupBonusValue`    | decimal | signupBonusPoints × CPP / 100                                                        |
+| `referralBonusPoints` | integer | Points Adjustments where adjustment_type = referral AND card_instance_id matches     |
+| `referralBonusValue`  | decimal | referralBonusPoints × CPP / 100                                                      |
+| `realizedPerks`       | decimal | Sum of Card Perk.dollar_value_realized for this card                                 |
+| `feesPaid`            | decimal | Sum of fee transactions (Annual Fee subtype) on this card                            |
+| `netValue`            | decimal | spendBasedValue + signupBonusValue + referralBonusValue + realizedPerks − feesPaid   |
 
 **Breakeven monitor:**
 
-| Field | Type | Notes |
-|-------|------|-------|
-| `applicable` | boolean | False for closed cards, no-fee cards |
-| `feeTarget` | decimal | Expected fee for current period |
-| `feePeriod` | enum | `monthly` · `annual` |
-| `periodStart` | date | Current fee period start |
-| `periodEnd` | date | Current fee period end |
-| `earnedValue` | decimal | Total value earned in current period (all five revenue lines) |
+| Field          | Type    | Notes                                                                    |
+| -------------- | ------- | ------------------------------------------------------------------------ |
+| `applicable`   | boolean | False for closed cards, no-fee cards                                     |
+| `feeTarget`    | decimal | Expected fee for current period                                          |
+| `feePeriod`    | enum    | `monthly` · `annual`                                                     |
+| `periodStart`  | date    | Current fee period start                                                 |
+| `periodEnd`    | date    | Current fee period end                                                   |
+| `earnedValue`  | decimal | Total value earned in current period (all five revenue lines)            |
 | `pointsNeeded` | integer | Points still needed to break even: (feeTarget − earnedValue) / CPP × 100 |
-| `progress` | decimal | earnedValue / feeTarget × 100 (capped at 100) |
-| `isMet` | boolean | earnedValue ≥ feeTarget |
-| `isFyf` | boolean | True when in FYF year 1 |
+| `progress`     | decimal | earnedValue / feeTarget × 100 (capped at 100)                            |
+| `isMet`        | boolean | earnedValue ≥ feeTarget                                                  |
+| `isFyf`        | boolean | True when in FYF year 1                                                  |
 
 **Per-card-year summary (within all-time response):**
 
-| Field | Type | Notes |
-|-------|------|-------|
-| `cardYear` | integer | 1, 2, 3… |
-| `yearStart` | date | |
-| `yearEnd` | date | |
-| `netValue` | decimal | Profitability for this card year |
-| `totalSpend` | decimal | Spend in this card year |
-| `feesPaid` | decimal | |
-| `isFyf` | boolean | |
+| Field        | Type    | Notes                            |
+| ------------ | ------- | -------------------------------- |
+| `cardYear`   | integer | 1, 2, 3…                         |
+| `yearStart`  | date    |                                  |
+| `yearEnd`    | date    |                                  |
+| `netValue`   | decimal | Profitability for this card year |
+| `totalSpend` | decimal | Spend in this card year          |
+| `feesPaid`   | decimal |                                  |
+| `isFyf`      | boolean |                                  |
 
 **Consumers:**
 
-| Consumer | Usage |
-|----------|-------|
+| Consumer                 | Usage                                                                           |
+| ------------------------ | ------------------------------------------------------------------------------- |
 | RPT-005 (Card Analytics) | Primary consumer — full profitability breakdown + breakeven + card year history |
-| FRM-004 (My Cards) | Summary net value per card on card list |
-| RPT-001 (Churnboard) | Portfolio-level profitability summary |
-| WFL-002 (Card Lifecycle) | Renewal decision support — current year profitability vs fee |
+| FRM-004 (My Cards)       | Summary net value per card on card list                                         |
+| RPT-001 (Churnboard)     | Portfolio-level profitability summary                                           |
+| WFL-002 (Card Lifecycle) | Renewal decision support — current year profitability vs fee                    |
 
 #### Profitability Formula
 
@@ -179,20 +179,20 @@ The breakeven monitor answers: "Is this card earning more than its cost in the c
 
 **Fee target source:**
 
-| Scenario | Fee Target |
-|----------|-----------|
-| Current period (fee not yet posted) | Market Card.fee_amount |
-| Historical period | Actual fee transaction amount |
-| FYF year 1 (Offer.fyf = true AND within card year 1) | $0 — breakeven auto-met |
-| No-fee card (fee_amount = 0) | N/A — breakeven not applicable |
-| Closed card | N/A — breakeven not applicable |
+| Scenario                                             | Fee Target                     |
+| ---------------------------------------------------- | ------------------------------ |
+| Current period (fee not yet posted)                  | Market Card.fee_amount         |
+| Historical period                                    | Actual fee transaction amount  |
+| FYF year 1 (Offer.fyf = true AND within card year 1) | $0 — breakeven auto-met        |
+| No-fee card (fee_amount = 0)                         | N/A — breakeven not applicable |
+| Closed card                                          | N/A — breakeven not applicable |
 
 **Fee period:**
 
-| fee_structure | Period Definition |
-|---------------|-------------------|
-| `annual` | Current card year (activation anniversary to next anniversary) |
-| `monthly` | Current billing month based on statement_close_day (D-124). Day N of month to Day N-1 of next month. |
+| fee_structure | Period Definition                                                                                    |
+| ------------- | ---------------------------------------------------------------------------------------------------- |
+| `annual`      | Current card year (activation anniversary to next anniversary)                                       |
+| `monthly`     | Current billing month based on statement_close_day (D-124). Day N of month to Day N-1 of next month. |
 
 **Points needed:** `max(0, (feeTarget − earnedValue)) / CPP × 100`
 
@@ -230,10 +230,10 @@ ENH-006 provides total points per card. ENH-005 subtracts non-spend Points Adjus
 
 Two prominent ObjectNumber tiles at the top of the page:
 
-| KPI | Value | Color |
-|-----|-------|-------|
+| KPI                | Value                                  | Color                                      |
+| ------------------ | -------------------------------------- | ------------------------------------------ |
 | **This Card Year** | ENH-005 netValue for current card year | Semantic: green (positive), red (negative) |
-| **Lifetime** | ENH-005 netValue for all-time | Semantic: green (positive), red (negative) |
+| **Lifetime**       | ENH-005 netValue for all-time          | Semantic: green (positive), red (negative) |
 
 For closed cards, "This Card Year" shows the final card year's value. Label changes to "Final Card Year".
 
@@ -245,34 +245,34 @@ The page is a scrolling object page (per Design System, D-62) with the following
 
 Five-line table showing the ENH-005 profitability breakdown for the selected scope (current card year by default, toggle to all-time):
 
-| Line | Value | Format |
-|------|-------|--------|
+| Line               | Value            | Format                      |
+| ------------------ | ---------------- | --------------------------- |
 | Spend-based points | X points ($Y.YY) | Points count + dollar value |
-| Signup bonus | X points ($Y.YY) | |
-| Referral bonuses | X points ($Y.YY) | |
-| Realized perks | $Y.YY | Dollar only |
-| Fees paid | −$Y.YY | Red, negative |
-| **Net value** | **$Y.YY** | Bold, semantic color |
+| Signup bonus       | X points ($Y.YY) |                             |
+| Referral bonuses   | X points ($Y.YY) |                             |
+| Realized perks     | $Y.YY            | Dollar only                 |
+| Fees paid          | −$Y.YY           | Red, negative               |
+| **Net value**      | **$Y.YY**        | Bold, semantic color        |
 
 **Section 2 — Breakeven Monitor**
 
-| Element | Details |
-|---------|---------|
-| Progress bar | Visual progress toward breakeven (0–100%) |
-| Points needed | "650 MR points ($13.00) remaining" |
-| Fee target | "Monthly fee: $12.99" or "Annual fee: $139.00" |
-| Period | "Mar 5 – Apr 4, 2026" (monthly) or "Mar 15, 2025 – Mar 14, 2026" (annual) |
-| Status | ObjectStatus: "Breakeven Met" (green) / "X points to go" (orange) / "First Year Free" (blue) |
+| Element       | Details                                                                                      |
+| ------------- | -------------------------------------------------------------------------------------------- |
+| Progress bar  | Visual progress toward breakeven (0–100%)                                                    |
+| Points needed | "650 MR points ($13.00) remaining"                                                           |
+| Fee target    | "Monthly fee: $12.99" or "Annual fee: $139.00"                                               |
+| Period        | "Mar 5 – Apr 4, 2026" (monthly) or "Mar 15, 2025 – Mar 14, 2026" (annual)                    |
+| Status        | ObjectStatus: "Breakeven Met" (green) / "X points to go" (orange) / "First Year Free" (blue) |
 
 Hidden when: closed card, no-fee card. Shows "First Year Free — no fee to offset" for FYF year 1.
 
 **Section 3 — Effective Earn Rate**
 
-| Element | Details |
-|---------|---------|
-| Headline number | "2.6×" — blended earn rate |
-| Context | "Across $X,XXX total spend" |
-| Comparison | "vs. base rate of 1.0×" (the card's "Everything Else" multiplier) |
+| Element         | Details                                                           |
+| --------------- | ----------------------------------------------------------------- |
+| Headline number | "2.6×" — blended earn rate                                        |
+| Context         | "Across $X,XXX total spend"                                       |
+| Comparison      | "vs. base rate of 1.0×" (the card's "Everything Else" multiplier) |
 
 **Section 4 — Bonus Progress**
 
@@ -284,12 +284,12 @@ Hidden when: no active tranches. This section mirrors FRM-004's bonus progress d
 
 Table showing this card's earning multipliers sorted by earn value (multiplier × CPP):
 
-| Category | Multiplier | Earn Rate | Best Card? |
-|----------|-----------|-----------|------------|
-| Groceries | 5× | $0.10/$ | Yes |
-| Dining | 3× | $0.06/$ | No (TD Aeroplan: $0.08/$) |
-| Streaming | 2× | $0.04/$ | Yes |
-| Everything Else | 1× | $0.02/$ | No |
+| Category        | Multiplier | Earn Rate | Best Card?                |
+| --------------- | ---------- | --------- | ------------------------- |
+| Groceries       | 5×         | $0.10/$   | Yes                       |
+| Dining          | 3×         | $0.06/$   | No (TD Aeroplan: $0.08/$) |
+| Streaming       | 2×         | $0.04/$   | Yes                       |
+| Everything Else | 1×         | $0.02/$   | No                        |
 
 "Earn Rate" = multiplier × CPP / 100. "Best Card?" indicator from ENH-002 recommendation data — shows the card that currently wins if this card doesn't.
 
@@ -316,10 +316,10 @@ VizFrame donut chart: spend by Earning Category on this card.
 
 Table comparing profitability across card years (D-143):
 
-| Card Year | Period | Spend | Points | Value | Perks | Fees | Net | FYF? |
-|-----------|--------|-------|--------|-------|-------|------|-----|------|
-| Year 1 | Mar 2024 – Mar 2025 | $12,000 | 28,000 | $560 | $100 | $0 | +$660 | Yes |
-| Year 2 | Mar 2025 – Mar 2026 | $8,000 | 16,000 | $320 | $75 | $139 | +$256 | No |
+| Card Year | Period              | Spend   | Points | Value | Perks | Fees | Net   | FYF? |
+| --------- | ------------------- | ------- | ------ | ----- | ----- | ---- | ----- | ---- |
+| Year 1    | Mar 2024 – Mar 2025 | $12,000 | 28,000 | $560  | $100  | $0   | +$660 | Yes  |
+| Year 2    | Mar 2025 – Mar 2026 | $8,000  | 16,000 | $320  | $75   | $139 | +$256 | No   |
 
 For the current (incomplete) card year, the period shows "to date" and values reflect partial year.
 
@@ -329,64 +329,64 @@ For the current (incomplete) card year, the period shows "to date" and values re
 
 ### ENH-005 — Card Profitability Calculator
 
-| Rule | Description |
-|------|-------------|
-| BR-01 | Profitability formula: Net Value = Spend-Based Value + Signup Bonus Value + Referral Bonus Value + Realized Perks − Fees Paid. Computed at runtime, not stored (D-142). |
-| BR-02 | All points valued at current CPP (Rewards Program.cpp_valuation). Not historical CPP at time of earning. |
-| BR-03 | Redemptions excluded from card-level profitability. They are per-program events (D-142). |
-| BR-04 | Spend-based points = ENH-006 per-card total (D-130) minus Points Adjustments (all types) for this card. |
-| BR-05 | Signup bonus points = Points Adjustments where adjustment_type = signup_bonus AND card_instance_id = this card. Includes auto-created adjustments from ENH-003 (D-126). |
-| BR-06 | Referral bonus points = Points Adjustments where adjustment_type = referral AND card_instance_id = this card (D-26). |
-| BR-07 | Realized perks = sum of Card Perk.dollar_value_realized for this card's Card Perk records. |
+| Rule  | Description                                                                                                                                                                           |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| BR-01 | Profitability formula: Net Value = Spend-Based Value + Signup Bonus Value + Referral Bonus Value + Realized Perks − Fees Paid. Computed at runtime, not stored (D-142).               |
+| BR-02 | All points valued at current CPP (Rewards Program.cpp_valuation). Not historical CPP at time of earning.                                                                              |
+| BR-03 | Redemptions excluded from card-level profitability. They are per-program events (D-142).                                                                                              |
+| BR-04 | Spend-based points = ENH-006 per-card total (D-130) minus Points Adjustments (all types) for this card.                                                                               |
+| BR-05 | Signup bonus points = Points Adjustments where adjustment_type = signup_bonus AND card_instance_id = this card. Includes auto-created adjustments from ENH-003 (D-126).               |
+| BR-06 | Referral bonus points = Points Adjustments where adjustment_type = referral AND card_instance_id = this card (D-26).                                                                  |
+| BR-07 | Realized perks = sum of Card Perk.dollar_value_realized for this card's Card Perk records.                                                                                            |
 | BR-08 | Fees = sum of absolute Transaction.amount where Purchase Type = "Annual Fee" (subtype of "Credit Card Fees") AND card_instance_id = this card. FX Fee and Interest subtypes excluded. |
-| BR-09 | Card year = anniversary-based 365-day period from activation_date (D-143). Year N starts at activation_date + ((N-1) × 365). |
-| BR-10 | All-time profitability = sum across all card years. |
-| BR-11 | For closed cards, final card year ends at closed_date. |
-| BR-12 | Breakeven fee target: Market Card.fee_amount for current period; actual fee transactions for historical periods (D-145). |
-| BR-13 | Breakeven period: matches fee_structure — monthly periods for monthly fees, card-year periods for annual fees (D-145). |
-| BR-14 | FYF year 1 (Offer.fyf = true AND within card year 1): breakeven target = $0, auto-met (D-145). |
-| BR-15 | Breakeven not applicable for closed cards and no-fee cards (fee_amount = 0). |
-| BR-16 | Monthly fee breakeven period: statement_close_day to next statement_close_day (D-124). |
-| BR-17 | Effective earn rate = spend-based points / total charge spend. Excludes signup, referral, refunds (D-129). |
-| BR-18 | Cards without activation_date cannot have profitability computed. Return empty result. |
-| BR-19 | Points Adjustment date determines which card year a bonus falls into. |
+| BR-09 | Card year = anniversary-based 365-day period from activation_date (D-143). Year N starts at activation_date + ((N-1) × 365).                                                          |
+| BR-10 | All-time profitability = sum across all card years.                                                                                                                                   |
+| BR-11 | For closed cards, final card year ends at closed_date.                                                                                                                                |
+| BR-12 | Breakeven fee target: Market Card.fee_amount for current period; actual fee transactions for historical periods (D-145).                                                              |
+| BR-13 | Breakeven period: matches fee_structure — monthly periods for monthly fees, card-year periods for annual fees (D-145).                                                                |
+| BR-14 | FYF year 1 (Offer.fyf = true AND within card year 1): breakeven target = $0, auto-met (D-145).                                                                                        |
+| BR-15 | Breakeven not applicable for closed cards and no-fee cards (fee_amount = 0).                                                                                                          |
+| BR-16 | Monthly fee breakeven period: statement_close_day to next statement_close_day (D-124).                                                                                                |
+| BR-17 | Effective earn rate = spend-based points / total charge spend. Excludes signup, referral, refunds (D-129).                                                                            |
+| BR-18 | Cards without activation_date cannot have profitability computed. Return empty result.                                                                                                |
+| BR-19 | Points Adjustment date determines which card year a bonus falls into.                                                                                                                 |
 
 ### RPT-005 — Card Analytics
 
-| Rule | Description |
-|------|-------------|
-| BR-20 | Card selector includes all lifecycle states: Focus, Active, To Cancel, Closed (D-144). Grouped with active on top, closed below. |
-| BR-21 | Primary navigation from FRM-004. Dropdown on RPT-005 for card switching (D-144). |
-| BR-22 | Two headline KPIs: current card year net value and lifetime net value (D-147). Semantic color: green (≥ 0), red (< 0). |
-| BR-23 | For closed cards, headline label changes from "This Card Year" to "Final Card Year". |
-| BR-24 | Breakeven monitor section hidden for closed cards and no-fee cards (BR-15). |
-| BR-25 | "What to Use This Card On" shows current active earning multipliers only (D-40 time-bound). |
+| Rule  | Description                                                                                                                                 |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| BR-20 | Card selector includes all lifecycle states: Focus, Active, To Cancel, Closed (D-144). Grouped with active on top, closed below.            |
+| BR-21 | Primary navigation from FRM-004. Dropdown on RPT-005 for card switching (D-144).                                                            |
+| BR-22 | Two headline KPIs: current card year net value and lifetime net value (D-147). Semantic color: green (≥ 0), red (< 0).                      |
+| BR-23 | For closed cards, headline label changes from "This Card Year" to "Final Card Year".                                                        |
+| BR-24 | Breakeven monitor section hidden for closed cards and no-fee cards (BR-15).                                                                 |
+| BR-25 | "What to Use This Card On" shows current active earning multipliers only (D-40 time-bound).                                                 |
 | BR-26 | "Best Card?" indicator in Section 5 sourced from ENH-002 recommendation output. Shows the winning card name when this card is not the best. |
-| BR-27 | Spend Trend default range: last 12 months. Card year boundaries shown as vertical reference lines. |
-| BR-28 | Category Spend Breakdown defaults to current card year scope with toggle to all-time. |
-| BR-29 | Year-over-Year table shows all completed card years plus current (partial) year. |
+| BR-27 | Spend Trend default range: last 12 months. Card year boundaries shown as vertical reference lines.                                          |
+| BR-28 | Category Spend Breakdown defaults to current card year scope with toggle to all-time.                                                       |
+| BR-29 | Year-over-Year table shows all completed card years plus current (partial) year.                                                            |
 
 ---
 
 ## 6. Error Handling
 
-| Condition | Response | i18n Key Pattern |
-|-----------|----------|------------------|
-| Card has no activation_date | Profitability section shows "Activation date required for profitability analysis" | `churning.profitability.noActivationDate` |
-| Card has no Rewards Program (Market Card.rewards_program_id is null) | Points-based lines show 0. Perks and fees still computed. | — |
-| No transactions on card | All values = 0. Dashboard shows empty state: "No transactions yet" | `churning.profitability.noTransactions` |
-| No fee transactions found (annual fee card) | feesPaid = 0 for that period. Breakeven shows full fee target as remaining. | — |
-| ENH-006 per-card breakdown unavailable | Spend-based points = 0. Log warning. | — |
-| ENH-002 recommendation data unavailable | "Best Card?" column hidden in Section 5 | — |
-| ENH-003 tranche data unavailable | Bonus Progress section hidden | — |
-| Card year extends beyond today (current year) | Show "to date" label. All values are partial/in-progress. | — |
+| Condition                                                            | Response                                                                          | i18n Key Pattern                          |
+| -------------------------------------------------------------------- | --------------------------------------------------------------------------------- | ----------------------------------------- |
+| Card has no activation_date                                          | Profitability section shows "Activation date required for profitability analysis" | `churning.profitability.noActivationDate` |
+| Card has no Rewards Program (Market Card.rewards_program_id is null) | Points-based lines show 0. Perks and fees still computed.                         | —                                         |
+| No transactions on card                                              | All values = 0. Dashboard shows empty state: "No transactions yet"                | `churning.profitability.noTransactions`   |
+| No fee transactions found (annual fee card)                          | feesPaid = 0 for that period. Breakeven shows full fee target as remaining.       | —                                         |
+| ENH-006 per-card breakdown unavailable                               | Spend-based points = 0. Log warning.                                              | —                                         |
+| ENH-002 recommendation data unavailable                              | "Best Card?" column hidden in Section 5                                           | —                                         |
+| ENH-003 tranche data unavailable                                     | Bonus Progress section hidden                                                     | —                                         |
+| Card year extends beyond today (current year)                        | Show "to date" label. All values are partial/in-progress.                         | —                                         |
 
 ---
 
 ## 7. Open Items
 
-| OI | Resolution |
-|----|------------|
+| OI    | Resolution                                                                                                                   |
+| ----- | ---------------------------------------------------------------------------------------------------------------------------- |
 | OI-06 | No new Alert Types from this spec. Existing alert types (af_renewal, bonus_met) support renewal decision context indirectly. |
 
 ---
@@ -415,7 +415,7 @@ For the current (incomplete) card year, the period shows "to date" and values re
 
 - Spend-based points: 15,000 − 20,000 − 5,000 = −10,000 → 0 (floor at 0, or compute as negative? See BR-04)
 
-*Correction: ENH-006 total includes spend + adjustments. Spend-based = 15,000 total from ENH-006, adjustments total = 25,000. But ENH-006's per-card breakdown tracks actual points from transactions × multipliers, NOT Points Adjustments. So spend-based = 15,000.*
+_Correction: ENH-006 total includes spend + adjustments. Spend-based = 15,000 total from ENH-006, adjustments total = 25,000. But ENH-006's per-card breakdown tracks actual points from transactions × multipliers, NOT Points Adjustments. So spend-based = 15,000._
 
 - spendBasedPoints = 15,000, spendBasedValue = $300.00
 - signupBonusPoints = 20,000, signupBonusValue = $400.00
@@ -745,15 +745,15 @@ For the current (incomplete) card year, the period shows "to date" and values re
 
 ## 9. Cross-Spec Notes
 
-| Target Spec | Note |
-|-------------|------|
-| SPEC-04 (Bonus & Points) | ENH-005 consumes ENH-006's per-card points breakdown (D-130) as a revenue input. ENH-003 auto-creates signup_bonus Points Adjustments (D-126) which feed the signup bonus line. |
-| SPEC-07 (Card Recommendation) | "What to Use This Card On" (Section 5) consumes ENH-002 recommendation output. ENH-005 and ENH-002 share multiplier and CPP data but have no direct dependency. |
+| Target Spec                     | Note                                                                                                                                                                                                                                                         |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| SPEC-04 (Bonus & Points)        | ENH-005 consumes ENH-006's per-card points breakdown (D-130) as a revenue input. ENH-003 auto-creates signup_bonus Points Adjustments (D-126) which feed the signup bonus line.                                                                              |
+| SPEC-07 (Card Recommendation)   | "What to Use This Card On" (Section 5) consumes ENH-002 recommendation output. ENH-005 and ENH-002 share multiplier and CPP data but have no direct dependency.                                                                                              |
 | SPEC-06 (Reference Data & Seed) | Purchase Type "Credit Card Fees" → "Annual Fee" subtype used for fee identification. Market Card fee_amount and fee_structure used for breakeven target. Offer.fyf for FYF detection. **DM-001 §8 amendment:** Card Profitability formula updated per D-142. |
-| SPEC-10 (My Cards) | RPT-005 primary navigation entry point from FRM-004 card detail. ENH-005 summary net value displayed on FRM-004 card list. |
-| SPEC-15 (Churnboard) | RPT-001 consumes ENH-005 for portfolio-level profitability aggregation. |
-| SPEC-11 (Card Lifecycle) | WFL-002 uses ENH-005 current-year profitability for renewal decision support. |
+| SPEC-10 (My Cards)              | RPT-005 primary navigation entry point from FRM-004 card detail. ENH-005 summary net value displayed on FRM-004 card list.                                                                                                                                   |
+| SPEC-15 (Churnboard)            | RPT-001 consumes ENH-005 for portfolio-level profitability aggregation.                                                                                                                                                                                      |
+| SPEC-11 (Card Lifecycle)        | WFL-002 uses ENH-005 current-year profitability for renewal decision support.                                                                                                                                                                                |
 
 ---
 
-*This spec traces to [Business Architecture](../BUSINESS_ARCHITECTURE.md) objects ENH-005, RPT-005 and [Data Model](../DATA_MODEL.md) entities listed in §3. New decisions D-142–D-147 logged in [Decisions Log](../user-profile/DECISIONS_LOG.md).*
+_This spec traces to [Business Architecture](../BUSINESS_ARCHITECTURE.md) objects ENH-005, RPT-005 and [Data Model](../DATA_MODEL.md) entities listed in §3. New decisions D-142–D-147 logged in [Decisions Log](../user-profile/DECISIONS_LOG.md)._

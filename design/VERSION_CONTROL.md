@@ -9,24 +9,24 @@
 
 ## 1. Change History
 
-| Date | Author | Description |
-|------|--------|-------------|
+| Date       | Author          | Description                                                    |
+| ---------- | --------------- | -------------------------------------------------------------- |
 | 2026-02-16 | Sandro & Claude | Initial creation — Step 11 complete. D-81 through D-86 logged. |
-| 2026-02-20 | Claude | Status → Approved. Step 12 complete — all 21 specs approved. |
+| 2026-02-20 | Claude          | Status → Approved. Step 12 complete — all 21 specs approved.   |
 
 ---
 
 ## 2. Summary
 
-| Area | Standard |
-|------|----------|
-| **Repository** | Local Git. Single repo. No remote for V1. |
-| **Branching** | Sprint branches off `main`. One branch per sprint (10 total). |
-| **Branch naming** | `sprint/W{wave}-S{sprint}` — e.g., `sprint/W1-S1` |
-| **Commits** | Conventional Commits — `type(scope): description`. FRICEW IDs in body. |
-| **Co-authorship** | `Co-Authored-By: Claude Code <noreply@anthropic.com>` on all agent commits |
+| Area               | Standard                                                                         |
+| ------------------ | -------------------------------------------------------------------------------- |
+| **Repository**     | Local Git. Single repo. No remote for V1.                                        |
+| **Branching**      | Sprint branches off `main`. One branch per sprint (10 total).                    |
+| **Branch naming**  | `sprint/W{wave}-S{sprint}` — e.g., `sprint/W1-S1`                                |
+| **Commits**        | Conventional Commits — `type(scope): description`. FRICEW IDs in body.           |
+| **Co-authorship**  | `Co-Authored-By: Claude Code <noreply@anthropic.com>` on all agent commits       |
 | **Merge strategy** | Merge commit (`--no-ff`) at sprint checkpoint. Sprint boundary visible in graph. |
-| **Tagging** | Per-sprint annotated tags — `v{wave}.{sprint}`. `v1.0.0` at go-live. |
+| **Tagging**        | Per-sprint annotated tags — `v{wave}.{sprint}`. `v1.0.0` at go-live.             |
 
 ---
 
@@ -72,15 +72,15 @@ Desktop.ini
 
 ### 3.2 What Stays Tracked
 
-| Path | Why |
-|------|-----|
-| `package-lock.json` | Deterministic dependency installs |
-| `db/seed/*.csv` | Seed data for CNV-002 — design artifact, not generated |
-| `project/sprints/*.md` | Permanent sprint reports |
-| `project/SPRINT_BOARD.md` | Sprint tracking |
-| `project/DEFECT_LOG.md` | Defect tracking |
-| `design/` | All design deliverables |
-| `CLAUDE.md` | Project context |
+| Path                      | Why                                                    |
+| ------------------------- | ------------------------------------------------------ |
+| `package-lock.json`       | Deterministic dependency installs                      |
+| `db/seed/*.csv`           | Seed data for CNV-002 — design artifact, not generated |
+| `project/sprints/*.md`    | Permanent sprint reports                               |
+| `project/SPRINT_BOARD.md` | Sprint tracking                                        |
+| `project/DEFECT_LOG.md`   | Defect tracking                                        |
+| `design/`                 | All design deliverables                                |
+| `CLAUDE.md`               | Project context                                        |
 
 ---
 
@@ -92,10 +92,10 @@ Desktop.ini
 
 Two branch types:
 
-| Branch | Lifespan | Purpose |
-|--------|----------|---------|
-| `main` | Permanent | Stable. Only moves forward at sprint checkpoints after multi-persona review. |
-| `sprint/W{n}-S{n}` | 1 week | Working branch for the active sprint. All agents commit here. Merged to `main` at sprint end. |
+| Branch             | Lifespan  | Purpose                                                                                       |
+| ------------------ | --------- | --------------------------------------------------------------------------------------------- |
+| `main`             | Permanent | Stable. Only moves forward at sprint checkpoints after multi-persona review.                  |
+| `sprint/W{n}-S{n}` | 1 week    | Working branch for the active sprint. All agents commit here. Merged to `main` at sprint end. |
 
 ### 4.2 Sprint Branch Lifecycle
 
@@ -112,12 +112,12 @@ Two branch types:
 
 ### 4.3 Rules
 
-| Rule | Details |
-|------|---------|
-| `main` is always stable | Never commit directly to `main` during a sprint |
-| One active sprint branch at a time | No parallel sprints — solo developer |
-| Merge only at checkpoint | Sprint branch merges to `main` after the sprint checkpoint meeting passes |
-| Delete after merge | Sprint branches are short-lived — delete after successful merge |
+| Rule                               | Details                                                                   |
+| ---------------------------------- | ------------------------------------------------------------------------- |
+| `main` is always stable            | Never commit directly to `main` during a sprint                           |
+| One active sprint branch at a time | No parallel sprints — solo developer                                      |
+| Merge only at checkpoint           | Sprint branch merges to `main` after the sprint checkpoint meeting passes |
+| Delete after merge                 | Sprint branches are short-lived — delete after successful merge           |
 
 ---
 
@@ -125,8 +125,8 @@ Two branch types:
 
 **Decision D-83.**
 
-| Pattern | Example | Notes |
-|---------|---------|-------|
+| Pattern                    | Example        | Notes                                                                   |
+| -------------------------- | -------------- | ----------------------------------------------------------------------- |
 | `sprint/W{wave}-S{sprint}` | `sprint/W1-S1` | Matches sprint IDs in [PROJECT_MANAGEMENT.md](PROJECT_MANAGEMENT.md) §3 |
 
 The `sprint/` prefix groups working branches visually in `git branch --list`. Wave-Sprint IDs are the same identifiers used in the sprint board, sprint reports, and defect log — zero translation.
@@ -170,33 +170,33 @@ Co-Authored-By: Claude Code <noreply@anthropic.com>
 
 ### 6.2 Types
 
-| Type | When |
-|------|------|
-| `feat` | New functionality (FRICEW object delivery) |
-| `fix` | Bug fix |
-| `refactor` | Code restructuring, no behavior change |
-| `test` | Adding or updating tests |
-| `docs` | Design docs, CLAUDE.md, decisions log |
-| `chore` | Config, dependencies, .gitignore, ESLint |
-| `seed` | Reference data seeding (CNV-002, CNV-003) |
+| Type       | When                                       |
+| ---------- | ------------------------------------------ |
+| `feat`     | New functionality (FRICEW object delivery) |
+| `fix`      | Bug fix                                    |
+| `refactor` | Code restructuring, no behavior change     |
+| `test`     | Adding or updating tests                   |
+| `docs`     | Design docs, CLAUDE.md, decisions log      |
+| `chore`    | Config, dependencies, .gitignore, ESLint   |
+| `seed`     | Reference data seeding (CNV-002, CNV-003)  |
 
 ### 6.3 Scopes
 
-| Scope | Maps To |
-|-------|---------|
-| `transaction` | `srv/modules/transaction/`, TransactionService |
-| `categorization` | `srv/modules/categorization/`, ENH-001 |
-| `churning` | `srv/modules/churning/`, ENH-003/005/006 |
-| `budget` | `srv/modules/budget/`, ENH-007 |
-| `eligibility` | `srv/modules/eligibility/`, ENH-004 |
-| `recommendation` | `srv/modules/recommendation/`, ENH-002 |
-| `integration` | `srv/modules/integration/`, INT-001/002/003 |
-| `admin` | AdminService, FRM-009/010 |
-| `shared` | `srv/modules/shared/`, `app/shared/` |
-| `db` | CDS models, seed data |
-| `ui` | Frontend apps (when scope spans multiple apps) |
-| `docs` | Design documents |
-| `config` | Project config files |
+| Scope            | Maps To                                        |
+| ---------------- | ---------------------------------------------- |
+| `transaction`    | `srv/modules/transaction/`, TransactionService |
+| `categorization` | `srv/modules/categorization/`, ENH-001         |
+| `churning`       | `srv/modules/churning/`, ENH-003/005/006       |
+| `budget`         | `srv/modules/budget/`, ENH-007                 |
+| `eligibility`    | `srv/modules/eligibility/`, ENH-004            |
+| `recommendation` | `srv/modules/recommendation/`, ENH-002         |
+| `integration`    | `srv/modules/integration/`, INT-001/002/003    |
+| `admin`          | AdminService, FRM-009/010                      |
+| `shared`         | `srv/modules/shared/`, `app/shared/`           |
+| `db`             | CDS models, seed data                          |
+| `ui`             | Frontend apps (when scope spans multiple apps) |
+| `docs`           | Design documents                               |
+| `config`         | Project config files                           |
 
 ### 6.4 Examples
 
@@ -235,10 +235,10 @@ Covers ENH-001, ENH-009. Resolves OI-01 (categorization taxonomy).
 
 ### 6.5 Co-Author Attribution
 
-| Who Commits | Co-Author Trailer? |
-|-------------|-------------------|
+| Who Commits       | Co-Author Trailer?                                          |
+| ----------------- | ----------------------------------------------------------- |
 | Claude Code agent | Yes — `Co-Authored-By: Claude Code <noreply@anthropic.com>` |
-| Sandro manually | No |
+| Sandro manually   | No                                                          |
 
 ---
 
@@ -267,11 +267,11 @@ Delivers: {FRICEW IDs completed this sprint}
 
 ### 7.3 Why Merge Commits
 
-| Alternative | Why Not |
-|-------------|---------|
-| Squash | Loses individual commit granularity. 10-20+ commits per sprint across multiple agents would collapse into one. |
-| Rebase | Linear history but sprint boundaries become invisible. The merge node is the sprint boundary marker. |
-| Fast-forward | Same as rebase — no merge node, no visible sprint boundary. |
+| Alternative  | Why Not                                                                                                        |
+| ------------ | -------------------------------------------------------------------------------------------------------------- |
+| Squash       | Loses individual commit granularity. 10-20+ commits per sprint across multiple agents would collapse into one. |
+| Rebase       | Linear history but sprint boundaries become invisible. The merge node is the sprint boundary marker.           |
+| Fast-forward | Same as rebase — no merge node, no visible sprint boundary.                                                    |
 
 ---
 
@@ -281,26 +281,26 @@ Delivers: {FRICEW IDs completed this sprint}
 
 ### 8.1 Tag Scheme
 
-| Event | Tag Format | Example |
-|-------|-----------|---------|
-| Sprint completion | `v{wave}.{sprint}` | `v1.1`, `v1.2`, `v2.1` |
-| Go-live (all 43 objects) | `v1.0.0` | Final release after Wave 4 |
+| Event                    | Tag Format         | Example                    |
+| ------------------------ | ------------------ | -------------------------- |
+| Sprint completion        | `v{wave}.{sprint}` | `v1.1`, `v1.2`, `v2.1`     |
+| Go-live (all 43 objects) | `v1.0.0`           | Final release after Wave 4 |
 
 ### 8.2 Tag Schedule
 
-| Tag | Sprint | Milestone |
-|-----|--------|-----------|
-| `v1.1` | W1-S1 | Foundation & seed data |
-| `v1.2` | W1-S2 | Ingestion pipeline |
-| `v1.3` | W1-S3 | Transaction processing |
-| `v1.4` | W1-S4 | Computation engines |
-| `v1.5` | W1-S5 | Cards, dashboards & workflows |
-| `v2.1` | W2-S1 | Churning depth |
-| `v2.2` | W2-S2 | Goals & reports |
-| `v3.1` | W3-S1 | Analytics & financial picture |
-| `v3.2` | W3-S2 | Remaining reports |
-| `v4.1` | W4-S1 | Market intelligence |
-| `v1.0.0` | — | Go-live: all 43 FRICEW objects delivered |
+| Tag      | Sprint | Milestone                                |
+| -------- | ------ | ---------------------------------------- |
+| `v1.1`   | W1-S1  | Foundation & seed data                   |
+| `v1.2`   | W1-S2  | Ingestion pipeline                       |
+| `v1.3`   | W1-S3  | Transaction processing                   |
+| `v1.4`   | W1-S4  | Computation engines                      |
+| `v1.5`   | W1-S5  | Cards, dashboards & workflows            |
+| `v2.1`   | W2-S1  | Churning depth                           |
+| `v2.2`   | W2-S2  | Goals & reports                          |
+| `v3.1`   | W3-S1  | Analytics & financial picture            |
+| `v3.2`   | W3-S2  | Remaining reports                        |
+| `v4.1`   | W4-S1  | Market intelligence                      |
+| `v1.0.0` | —      | Go-live: all 43 FRICEW objects delivered |
 
 ### 8.3 Creating Tags
 
@@ -356,15 +356,15 @@ Complete flow for one sprint:
 
 Decisions made during version control strategy (Step 11):
 
-| ID | Title | Summary |
-|----|-------|---------|
-| D-81 | Repository Setup | .gitignore for CAP + Node + TypeScript stack. Ignores gen/, @cds-models/, .env, logs/, coverage/, test-reports/, .vscode/. |
-| D-82 | Branching Strategy | Sprint branches off `main`. One branch per sprint. `main` only moves at checkpoint. |
-| D-83 | Branch Naming | `sprint/W{wave}-S{sprint}` — matches sprint IDs from PROJECT_MANAGEMENT.md. |
-| D-84 | Commit Conventions | Conventional Commits — `type(scope): description`. FRICEW IDs in body. Co-Authored-By on agent commits. |
-| D-85 | Merge Strategy | Merge commits (`--no-ff`). Sprint boundary visible as merge node. Individual commits preserved. |
-| D-86 | Tagging & Releases | Per-sprint annotated tags — `v{wave}.{sprint}`. `v1.0.0` at go-live. |
+| ID   | Title              | Summary                                                                                                                    |
+| ---- | ------------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| D-81 | Repository Setup   | .gitignore for CAP + Node + TypeScript stack. Ignores gen/, @cds-models/, .env, logs/, coverage/, test-reports/, .vscode/. |
+| D-82 | Branching Strategy | Sprint branches off `main`. One branch per sprint. `main` only moves at checkpoint.                                        |
+| D-83 | Branch Naming      | `sprint/W{wave}-S{sprint}` — matches sprint IDs from PROJECT_MANAGEMENT.md.                                                |
+| D-84 | Commit Conventions | Conventional Commits — `type(scope): description`. FRICEW IDs in body. Co-Authored-By on agent commits.                    |
+| D-85 | Merge Strategy     | Merge commits (`--no-ff`). Sprint boundary visible as merge node. Individual commits preserved.                            |
+| D-86 | Tagging & Releases | Per-sprint annotated tags — `v{wave}.{sprint}`. `v1.0.0` at go-live.                                                       |
 
 ---
 
-*This document is the single source of truth for the Financial Planner version control strategy. References [PROJECT_MANAGEMENT.md](PROJECT_MANAGEMENT.md) (sprint plan, checkpoint meeting), [TECH_STACK.md](TECH_STACK.md) (project structure), and [Decisions Log](user-profile/DECISIONS_LOG.md).*
+_This document is the single source of truth for the Financial Planner version control strategy. References [PROJECT_MANAGEMENT.md](PROJECT_MANAGEMENT.md) (sprint plan, checkpoint meeting), [TECH_STACK.md](TECH_STACK.md) (project structure), and [Decisions Log](user-profile/DECISIONS_LOG.md)._

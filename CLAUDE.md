@@ -7,6 +7,7 @@ Personal financial management system for a Canadian credit card churner. TypeScr
 ## Current Sprint
 
 <!-- Updated each sprint -->
+
 **Sprint:** W1-S1 — Foundation & Seed Data
 **Branch:** sprint/W1-S1
 **Goal:** Reference data seeded, config tables editable via SM30-style CRUD
@@ -15,7 +16,7 @@ Personal financial management system for a Canadian credit card churner. TypeScr
 ## Architecture
 
 - **Backend:** CAP with @cap-js/postgres — 4 CDS services (Transaction, Churning, Budget, Admin)
-- **Frontend:** SAPUI5 — Fiori Elements for CRUD (8 apps), Freestyle for dashboards/wizards (14 apps)
+- **Frontend:** SAPUI5 1.136.16 — Fiori Elements for CRUD (8 apps), Freestyle for dashboards/wizards (14 apps)
 - **API:** OData V4 auto-generated from CDS
 - **Theme:** sap_horizon + custom overrides in `app/shared/css/theme-overrides.css`
 - **Background jobs:** node-cron inside CAP process via `cds.spawn()`
@@ -43,10 +44,10 @@ srv/
     i18n.properties          CDS field labels (PascalCase keys)
     messages.properties      Runtime messages (camelCase.dots keys)
   modules/
-    shared/                  BaseFacade, BaseService, Logger, MessagingUtility, constants
-    {domain}/                Per-domain: {Domain}Facade.ts, {Domain}Service.ts, {Domain}Validator.ts
+    shared/                  baseFacade, baseService, logger, messagingUtility, constants
+    {domain}/                Per-domain: {domain}Facade.ts, {domain}Service.ts, {domain}DataService.ts, {domain}Validator.ts
     integration/             SimpleFIN, CSV, Scheduling services
-  util/                      EncryptionUtility, DateTimeUtility, CurrencyUtility
+  util/                      encryptionUtility, dateTimeUtility, currencyUtility
 app/
   shared/                    BaseController.js, controls/, util/formatter.js, css/theme-overrides.css
   {app-name}/                One folder per UI app (23 total)
@@ -73,6 +74,9 @@ project/
 - **FKs:** CAP auto-generated (`cardInstance_ID`)
 - **Namespace:** `com.financialplanner`
 - **Schema:** One `schema.cds` per domain folder under `db/`
+- **Code lists for dropdowns:** When a field has a known/finite set of values that need dropdown UX, use a `CodeList` entity (`@cds.autoexpose entity Xxx : CodeList { key code : String(n); }`) with an Association — NOT a `String enum` (enums don't produce dropdowns in Fiori Elements V4). Annotate with `@Common: { Text, TextArrangement: #TextOnly, ValueListWithFixedValues }`. Reference the FK (`xxx_code`) in UI annotations. Hide raw codes via `@UI.Hidden` on the code list's `code` field. Name such fields `xxxType` not `xxxName`
+- **Association ValueHelp:** Two parts required: (1) The **target entity's `ID` field** must have `@Common: { Text: name, TextArrangement: #TextOnly }` — this makes ValueHelp dropdowns display names instead of UUIDs (same pattern as CodeList `code` fields). (2) The **consuming association** must have `@Common: { Text: assoc.name, TextArrangement: #TextOnly, ValueList: { ... } }`. Annotate the association, not the FK — CAP auto-generates FKs, they can't be annotated. Use `ValueListWithFixedValues` (dropdown) if <25 rows. ValueList `DisplayOnly` columns must match the target entity's ListReport.
+- **Annotations over code:** Use CAP built-in annotations before writing custom handler code — only write handlers for business rules with no annotation equivalent. Key annotations: `@assert.unique`, `@assert.range`, `@assert.format`, `@readonly`, `@mandatory`, `@assert: (case when … then …)` for cross-field validation, `@flow.status` + `@from`/`@to` for state machines
 
 ### TypeScript (srv/ and db/ only)
 
@@ -82,16 +86,22 @@ project/
 - Custom types in `{domain}/types.ts`
 - No `any` — ever
 
-### Handler Pattern — Always 3 Files
+### Handler Pattern — Always 4 Files
 
-| Layer | File | Does | Calls |
-|-------|------|------|-------|
-| Facade | `{Domain}Facade.ts` | Handler registration + `wrapHandler` | Service |
-| Service | `{Domain}Service.ts` | Business logic, CDS reads/writes | Validator, other Services |
-| Validator | `{Domain}Validator.ts` | Input validation, `req.error()` accumulation | Nothing |
+| Layer       | File                     | Does                                         | Calls                  |
+| ----------- | ------------------------ | -------------------------------------------- | ---------------------- |
+| Facade      | `{Domain}Facade.ts`      | Handler registration + `wrapHandler`         | Service                |
+| Service     | `{Domain}Service.ts`     | Business logic, orchestration                | Validator, DataService |
+| DataService | `{Domain}DataService.ts` | All CDS SELECT/INSERT/UPDATE/DELETE queries  | Nothing                |
+| Validator   | `{Domain}Validator.ts`   | Input validation, `req.error()` accumulation | Nothing                |
 
-- Facades: NO `if`/`for`/`while`, NO `try`/`catch` — enforced by ESLint
-- All handlers wrapped with `wrapHandler` from `BaseFacade`
+- Facades: NO `if`/`for`/`while`, NO `try`/`catch`, NO CQL, NO data access — enforced by ESLint
+- `wrapHandler` takes a **function reference** and returns a wrapped function:
+  `this.wrapHandler(this._handleXxx, 'event', 'Entity', 'error.i18n.key')`
+- Each handler is a private `_handle{Action}{Entity}` method — a one-liner delegating to the service
+- Services: NO direct CQL queries — all DB access goes through DataService
+- DataService: pure data access, no business logic, no `req.error()`/`req.reject()`
+- CQL statements (`SELECT`, `UPDATE`, `INSERT`, `DELETE`) are directly awaitable — never use `cds.run()`
 - Private methods: `_` prefix, placed at bottom of class
 
 ### Error Handling
@@ -110,11 +120,11 @@ project/
 
 ### i18n — Three Tiers
 
-| Tier | File | Key Format |
-|------|------|------------|
-| CDS labels | `srv/_i18n/i18n.properties` | `PascalCase` |
-| Runtime messages | `srv/_i18n/messages.properties` | `camelCase.dots` |
-| UI5 app messages | `app/{name}/webapp/i18n/i18n.properties` | `camelCase` |
+| Tier             | File                                     | Key Format       |
+| ---------------- | ---------------------------------------- | ---------------- |
+| CDS labels       | `srv/_i18n/i18n.properties`              | `PascalCase`     |
+| Runtime messages | `srv/_i18n/messages.properties`          | `camelCase.dots` |
+| UI5 app messages | `app/{name}/webapp/i18n/i18n.properties` | `camelCase`      |
 
 ### SAPUI5 (app/ — JavaScript, not TypeScript)
 
@@ -122,6 +132,14 @@ project/
 - All controllers extend `BaseController.js`
 - Extensions: `{ViewType}Ext.js` (ListReportExt, ObjectPageExt)
 - Annotations: entity-based files in `app/{name}/annotations/`
+- **Annotation UX rules (Fiori Elements):**
+  - Combine related fields into one column via `@Common: { Text, TextArrangement: #TextLast }` (e.g., shortName + name → "AMEX (American Express)")
+  - Every `LineItem` entry must have `![@HTML5.CssDefaults]: {width: 'X%'}` — widths must total 100%
+  - Every ListReport entity must have `SelectionFields` — filter order matches column order, hidden column = hidden filter
+  - `SelectionFields`, `LineItem`, and `FieldGroup` must all reference the **FK** (`issuer_ID`), never the nav path (`issuer.name`) — `@Common.Text` handles display. Using nav paths in `LineItem` creates duplicate entries in the Settings column picker. Adapt Filters and Settings columns must show the same fields.
+  - Technical fields (`ID`, `createdAt`, `createdBy`, `modifiedAt`, `modifiedBy`) must always be `@UI.Hidden`
+  - Every entity must have `PresentationVariant` with `SortOrder` ascending on the first LineItem column and `Visualizations: ['@UI.LineItem']`
+- **Model over byId:** Control UI state (visibility, selectedKey, enabled) via JSON model + XML binding, not imperative `byId().setVisible()`. `byId` is acceptable only for structural DOM operations (`addContent`, `removeAllContent`, accessing routers).
 - Hungarian notation: `sName`, `oModel`, `aItems`, `bIsValid`, `iCount`, `fnCallback`
 - Event handlers: `on` prefix (`onPressSubmit`, `onSelectCard`)
 - Max 10 `sap.ui.define` dependencies
@@ -138,7 +156,7 @@ project/
 - **TDD:** Red-Green-Refactor for Validators, Services, Utilities, ENH engines
 - **Framework:** Jest + ts-jest (backend), QUnit + OPA5 (frontend)
 - **Unit tests:** No DB, mocked CDS. Validators fully tested (pure). Services tested with CDS mocked + real Validator.
-- **Integration tests:** `cds.test()` + SQLite. One file per CDS service.
+- **Integration tests:** `cds.test()` + SQLite. One file per CDS service. Never test CAP CRUD/draft machinery ("can read X", "can create via draft") or `@readonly` enforcement. DO test annotation-based constraints (`@assert.unique`, `@mandatory`, `@assert.range`, cross-field `@assert`) as behavioral contract documentation, plus any custom handler logic.
 - **Test data:** Hybrid factories + named constants (UPPER_SNAKE_CASE) in `test/data/`. Semantic names. No real card numbers.
 - **Coverage targets:** Validators/Utilities 100%/100%, Services 90%/85%, Overall 85%/80%
 - **Facades excluded** from unit testing (zero logic by design)
@@ -156,29 +174,39 @@ project/
 
 Look up details here — do not duplicate:
 
-| Topic | Document |
-|-------|----------|
-| Entity definitions | [DATA_MODEL.md](design/DATA_MODEL.md) |
-| Functional specs | [design/specs/SPEC-{nn}-*.md](design/specs/) |
-| Business rules | Spec §5 (Business Rules) per FRICEW object |
-| Wave plan & FRICEW catalog | [BUSINESS_ARCHITECTURE.md](design/BUSINESS_ARCHITECTURE.md) |
-| Sprint plan & personas | [PROJECT_MANAGEMENT.md](design/PROJECT_MANAGEMENT.md) |
-| Full coding standards | [TECHNICAL_STANDARDS.md](design/TECHNICAL_STANDARDS.md) |
-| Test strategy details | [TEST_STRATEGY.md](design/TEST_STRATEGY.md) |
-| Design system | [DESIGN_SYSTEM.md](design/DESIGN_SYSTEM.md) |
-| Theme overrides | [THEME.md](design/THEME.md) |
-| Navigation & IA | [INFORMATION_ARCHITECTURE.md](design/INFORMATION_ARCHITECTURE.md) |
-| Cross-sprint contracts | [BUILD_PLAN.md](design/BUILD_PLAN.md) §2 |
-| All decisions | [DECISIONS_LOG.md](design/user-profile/DECISIONS_LOG.md) |
+| Topic                      | Document                                                          |
+| -------------------------- | ----------------------------------------------------------------- |
+| Entity definitions         | [DATA_MODEL.md](design/DATA_MODEL.md)                             |
+| Functional specs           | [design/specs/SPEC-{nn}-\*.md](design/specs/)                     |
+| Business rules             | Spec §5 (Business Rules) per FRICEW object                        |
+| Wave plan & FRICEW catalog | [BUSINESS_ARCHITECTURE.md](design/BUSINESS_ARCHITECTURE.md)       |
+| Sprint plan & personas     | [PROJECT_MANAGEMENT.md](design/PROJECT_MANAGEMENT.md)             |
+| Full coding standards      | [TECHNICAL_STANDARDS.md](design/TECHNICAL_STANDARDS.md)           |
+| Test strategy details      | [TEST_STRATEGY.md](design/TEST_STRATEGY.md)                       |
+| Design system              | [DESIGN_SYSTEM.md](design/DESIGN_SYSTEM.md)                       |
+| Theme overrides            | [THEME.md](design/THEME.md)                                       |
+| Navigation & IA            | [INFORMATION_ARCHITECTURE.md](design/INFORMATION_ARCHITECTURE.md) |
+| Cross-sprint contracts     | [BUILD_PLAN.md](design/BUILD_PLAN.md) §2                          |
+| All decisions              | [DECISIONS_LOG.md](design/user-profile/DECISIONS_LOG.md)          |
+
+## Frontend Validation
+
+- **Playwright MCP** is configured in `.mcp.json` — use it to validate all frontend work
+- After UI changes: navigate, screenshot, and verify rendering via Playwright before marking done
+- Use `browser_evaluate` to inspect DOM, CSS variables, computed styles
+- Use `browser_snapshot` + `browser_click` for interaction testing
+- Local dev server: `npx cds serve all --in-memory` at `http://localhost:4004`
+- Shell app: `http://localhost:4004/index.html`
 
 ## Do NOT
 
 - Add features beyond what the functional spec defines
 - Skip TDD — write failing tests before implementation
-- Hardcode user-facing strings — always i18n keys
+- Hardcode user-facing strings — always i18n keys. In CDS annotations use `'{i18n>Key}'` syntax for all TypeName, TypeNamePlural, Label, and Facet Label values
 - Put logic in Facades — they are pure wiring
 - Use `any` type in TypeScript
 - Log decrypted sensitive data
 - Use `!important` in CSS overrides
 - Duplicate information already in design docs — reference it
+- Use FRICEW IDs (FRM-xxx, RPT-xxx, etc.) in source code — use semantic names; FRICEW IDs belong in design docs and commit bodies only
 - Commit `.env`, `logs/`, `node_modules/`, `gen/`
