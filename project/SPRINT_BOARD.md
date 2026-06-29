@@ -9,7 +9,6 @@
 
 | Story | Type | Description | Status |
 | --- | --- | --- | --- |
-| ENH-008 | Enhancement | Deduplication engine: evaluate() returns new/duplicate/reconciliation | Backlog |
 | INT-001 | Integration | SimpleFIN Bridge sync: dedup, scheduling, encrypted access URL | Backlog |
 | FRM-010 | Form | Connection Manager: health dashboard with manual sync trigger | Backlog |
 | INT-002 | Integration | CSV parsing engine: per-issuer CSVFormatConfig (Scotia/TD/CIBC/Amex) | Backlog |
@@ -21,7 +20,9 @@ _None_
 
 ### Done
 
-_None_
+| Story | Type | Description | Status |
+| --- | --- | --- | --- |
+| ENH-008 | Enhancement | Deduplication engine: evaluate() returns new/duplicate/potential_duplicate per SPEC-01 §4.3 | Done |
 
 ---
 
