@@ -1,5 +1,6 @@
 # Defect Log
 
-| ID  | Sprint | Severity | Description | Status | Resolution |
-| --- | ------ | -------- | ----------- | ------ | ---------- |
-| \_  | \_     | \_       | \_          | \_     | \_         |
+| ID | Sprint | Severity | Description | Status | Resolution |
+| --- | --- | --- | --- | --- | --- |
+| D-001 | W1-S2 | High | Coverage harness never ran: `coveragePathIgnorePatterns` used glob strings but Jest treats them as regex (`**/...` → "Invalid regular expression"), `coverageThreshold` globs pointed at non-matching paths (`**/Validator.ts`, `./srv/util/**/*.ts`), and `generateTestReport.ts` read the wrong jest JSON shape (`testResults`/`testFilePath` vs `assertionResults`/`name`) — so `npm test` (jest --coverage) crashed before reporting. Root cause: W1-S1 config authored but never exercised with coverage. | Closed | Fixed in `e691978`: valid regex patterns, repointed threshold globs (`**/*Validator.ts` + per-file utility gates), corrected report shape; added utility + logger unit tests to clear the 80% branch gate. |
+| D-002 | W1-S2 | Medium | `tsc` and `cds build` failed with `TS2688: Cannot find type definition file for 'sap__cds'` — the `@cap-js/cds-types` postinstall (which creates the `node_modules/@types/sap__cds` junction) had not run in the resumed session. Recurs on a fresh `npm ci` if postinstall is skipped. | Closed | Restored junction by running `@cap-js/cds-types/scripts/postinstall.js` with `INIT_CWD` set. Mitigation: ensure `npm install`/postinstall runs after clone; consider documenting in setup. |
