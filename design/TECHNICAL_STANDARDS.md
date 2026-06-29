@@ -9,11 +9,11 @@
 
 ## 1. Change History
 
-| Date | Author | Description |
-|------|--------|-------------|
+| Date       | Author          | Description                                                                   |
+| ---------- | --------------- | ----------------------------------------------------------------------------- |
 | 2026-02-16 | Sandro & Claude | Initial creation — Step 9 complete. D-63 through D-73 logged. OI-07 resolved. |
-| 2026-02-20 | Sandro & Claude | Added §13 — Test-Driven Development workflow (D-230). |
-| 2026-02-20 | Claude | Status → Approved. Step 12 complete — all 21 specs approved. |
+| 2026-02-20 | Sandro & Claude | Added §13 — Test-Driven Development workflow (D-230).                         |
+| 2026-02-20 | Claude          | Status → Approved. Step 12 complete — all 21 specs approved.                  |
 
 ---
 
@@ -21,19 +21,19 @@
 
 This document formalizes coding conventions and patterns so all build personas follow consistent rules from Sprint 1. Turns the high-level Enbridge conventions ([TECH_STACK.md](TECH_STACK.md) §7) into enforceable standards.
 
-| Area | Key Standard |
-|------|-------------|
-| **CDS** | PascalCase entities, camelCase fields, CAP auto-generated FKs, modular schema files by domain |
-| **TypeScript** | `strict: true`, all sub-flags, `ES2022` target, `Node16` module |
-| **Handler pattern** | Facade → Service → Validator, always 3 files, `wrapHandler` on every handler |
-| **Error handling** | `req.error()` for validation (accumulate), `req.reject()` for fatal. Always i18n keys. |
-| **Logging** | Structured JSON, dual output (console + file), dedicated `error.log`, correlation IDs |
-| **i18n** | Three tiers: CDS labels (PascalCase), runtime messages (camelCase.dots), UI5 (camelCase) |
-| **Encryption** | AES-256-GCM, env var key, per-field IV, `EncryptionUtility.ts` |
-| **ESLint** | Enbridge-adapted rules, custom architectural rules, Hungarian notation in UI5 |
-| **SAPUI5** | XML views, BaseController, entity-based annotations, `{ViewType}Ext` extensions, Hungarian notation |
-| **Code review** | Per-persona checklists for sprint checkpoint meetings |
-| **Development workflow** | Test-driven development — Red-Green-Refactor for all Validators, Services, Utilities |
+| Area                     | Key Standard                                                                                        |
+| ------------------------ | --------------------------------------------------------------------------------------------------- |
+| **CDS**                  | PascalCase entities, camelCase fields, CAP auto-generated FKs, modular schema files by domain       |
+| **TypeScript**           | `strict: true`, all sub-flags, `ES2022` target, `Node16` module                                     |
+| **Handler pattern**      | Facade → Service → Validator, always 3 files, `wrapHandler` on every handler                        |
+| **Error handling**       | `req.error()` for validation (accumulate), `req.reject()` for fatal. Always i18n keys.              |
+| **Logging**              | Structured JSON, dual output (console + file), dedicated `error.log`, correlation IDs               |
+| **i18n**                 | Three tiers: CDS labels (PascalCase), runtime messages (camelCase.dots), UI5 (camelCase)            |
+| **Encryption**           | AES-256-GCM, env var key, per-field IV, `EncryptionUtility.ts`                                      |
+| **ESLint**               | Enbridge-adapted rules, custom architectural rules, Hungarian notation in UI5                       |
+| **SAPUI5**               | XML views, BaseController, entity-based annotations, `{ViewType}Ext` extensions, Hungarian notation |
+| **Code review**          | Per-persona checklists for sprint checkpoint meetings                                               |
+| **Development workflow** | Test-driven development — Red-Green-Refactor for all Validators, Services, Utilities                |
 
 ---
 
@@ -43,39 +43,39 @@ This document formalizes coding conventions and patterns so all build personas f
 
 ### 3.1 Naming
 
-| Convention | Standard | Example |
-|---|---|---|
-| Namespace | `com.financialplanner` | `namespace com.financialplanner;` |
-| Entity names | PascalCase, singular | `Transaction`, `CardInstance`, `EarningMultiplier` |
-| Field names | camelCase | `lifecycleState`, `activationDate` |
-| Foreign key fields | CAP auto-generated | `cardInstance_ID` (underscore + capital `ID`) |
-| Association names | camelCase, no suffix | `cardInstance`, `issuer`, `rewardsProgram` |
-| Enum types | PascalCase type, camelCase values | `type LifecycleState : String enum { focus; active; toCancel; closed; }` |
-| Config table projections | `VH` suffix for value-help | `PurchaseTypeVH` in service definitions |
+| Convention               | Standard                          | Example                                                                  |
+| ------------------------ | --------------------------------- | ------------------------------------------------------------------------ |
+| Namespace                | `com.financialplanner`            | `namespace com.financialplanner;`                                        |
+| Entity names             | PascalCase, singular              | `Transaction`, `CardInstance`, `EarningMultiplier`                       |
+| Field names              | camelCase                         | `lifecycleState`, `activationDate`                                       |
+| Foreign key fields       | CAP auto-generated                | `cardInstance_ID` (underscore + capital `ID`)                            |
+| Association names        | camelCase, no suffix              | `cardInstance`, `issuer`, `rewardsProgram`                               |
+| Enum types               | PascalCase type, camelCase values | `type LifecycleState : String enum { focus; active; toCancel; closed; }` |
+| Config table projections | `VH` suffix for value-help        | `PurchaseTypeVH` in service definitions                                  |
 
 ### 3.2 Associations & Compositions
 
-| Type | Use When | Example |
-|---|---|---|
+| Type            | Use When                              | Example                                                                    |
+| --------------- | ------------------------------------- | -------------------------------------------------------------------------- |
 | **Composition** | True parent-child with cascade delete | `Offer` composes `OfferTranche`; `Transaction` composes `TransactionSplit` |
-| **Association** | All other references (no cascade) | `Transaction` → `CardInstance`, `Alert` → `CardInstance` |
+| **Association** | All other references (no cascade)     | `Transaction` → `CardInstance`, `Alert` → `CardInstance`                   |
 
 ### 3.3 Modular Schema Structure
 
 One `schema.cds` per domain folder under `db/`:
 
-| Folder | Entities | Count |
-|---|---|---|
-| `db/common/` | Enum imports, shared aspects | — |
-| `db/reference/schema.cds` | All 16 reference data entities | 16 |
-| `db/cards/schema.cds` | MarketCard, Offer, OfferTranche, CardInstance, EarningMultiplier, SoftPerkDefinition, CardPerk | 7 |
-| `db/transactions/schema.cds` | Transaction, TransactionSplit, Vendor, MerchantPattern, VendorCategoryStats | 5 |
-| `db/points/schema.cds` | PointsAdjustment, Redemption | 2 |
-| `db/budget/schema.cds` | BudgetAllocation, RecurrentExpense, Goal, IncomeEntry | 4 |
-| `db/financial/schema.cds` | FinancialAccount, FinancialSnapshot | 2 |
-| `db/integration/schema.cds` | ProviderConnection, ProviderAccount | 2 |
-| `db/alerts/schema.cds` | Alert | 1 |
-| `db/enums.cds` | All enum type definitions | — |
+| Folder                       | Entities                                                                                       | Count |
+| ---------------------------- | ---------------------------------------------------------------------------------------------- | ----- |
+| `db/common/`                 | Enum imports, shared aspects                                                                   | —     |
+| `db/reference/schema.cds`    | All 16 reference data entities                                                                 | 16    |
+| `db/cards/schema.cds`        | MarketCard, Offer, OfferTranche, CardInstance, EarningMultiplier, SoftPerkDefinition, CardPerk | 7     |
+| `db/transactions/schema.cds` | Transaction, TransactionSplit, Vendor, MerchantPattern, VendorCategoryStats                    | 5     |
+| `db/points/schema.cds`       | PointsAdjustment, Redemption                                                                   | 2     |
+| `db/budget/schema.cds`       | BudgetAllocation, RecurrentExpense, Goal, IncomeEntry                                          | 4     |
+| `db/financial/schema.cds`    | FinancialAccount, FinancialSnapshot                                                            | 2     |
+| `db/integration/schema.cds`  | ProviderConnection, ProviderAccount                                                            | 2     |
+| `db/alerts/schema.cds`       | Alert                                                                                          | 1     |
+| `db/enums.cds`               | All enum type definitions                                                                      | —     |
 
 ### 3.4 Annotation Files
 
@@ -108,19 +108,19 @@ Each file contains UI, micro-frontend, and side-effect annotations for that enti
 
 ### 4.1 tsconfig.json
 
-| Setting | Value | Notes |
-|---|---|---|
-| `strict` | `true` | Enables all strict sub-flags |
-| `noUnusedLocals` | `true` | Dead variable detection |
-| `noUnusedParameters` | `true` | Dead parameter detection |
-| `noImplicitReturns` | `true` | Every code path must return |
-| `noFallthroughCasesInSwitch` | `true` | Prevents switch fallthrough |
-| `esModuleInterop` | `true` | Clean CommonJS interop |
-| `resolveJsonModule` | `true` | Import JSON files |
-| `skipLibCheck` | `true` | Faster builds |
-| `target` | `ES2022` | Node.js 20 native support |
-| `module` | `Node16` | CAP 8 recommended |
-| `outDir` | `./gen` | CAP default output |
+| Setting                      | Value    | Notes                        |
+| ---------------------------- | -------- | ---------------------------- |
+| `strict`                     | `true`   | Enables all strict sub-flags |
+| `noUnusedLocals`             | `true`   | Dead variable detection      |
+| `noUnusedParameters`         | `true`   | Dead parameter detection     |
+| `noImplicitReturns`          | `true`   | Every code path must return  |
+| `noFallthroughCasesInSwitch` | `true`   | Prevents switch fallthrough  |
+| `esModuleInterop`            | `true`   | Clean CommonJS interop       |
+| `resolveJsonModule`          | `true`   | Import JSON files            |
+| `skipLibCheck`               | `true`   | Faster builds                |
+| `target`                     | `ES2022` | Node.js 20 native support    |
+| `module`                     | `Node16` | CAP 8 recommended            |
+| `outDir`                     | `./gen`  | CAP default output           |
 
 Scope: `srv/` and `db/` TypeScript files. `app/` is SAPUI5 JavaScript (not TypeScript).
 
@@ -131,7 +131,7 @@ Scope: `srv/` and `db/` TypeScript files. `app/` is SAPUI5 JavaScript (not TypeS
 **Entity imports** from generated types:
 
 ```typescript
-import { Transaction, CardInstance } from '#cds-models/com/financialplanner';
+import { Transaction, CardInstance } from "#cds-models/com/financialplanner";
 ```
 
 **Handler registration** — pass entity references, not strings, for typed `req.data`:
@@ -161,11 +161,11 @@ srv/modules/budget/types.ts    →  BudgetStatus, DiscretionaryBreakdown
 
 Every module has exactly three files. No exceptions.
 
-| Layer | File | Responsibility | Calls |
-|---|---|---|---|
-| **Facade** | `{Domain}Facade.ts` | Handler registration, `wrapHandler` wrapping | Service |
-| **Service** | `{Domain}Service.ts` | Business logic, orchestration, CDS reads/writes | Validator, other Services |
-| **Validator** | `{Domain}Validator.ts` | Input validation only. `req.error()` accumulation. No DB calls. | Nothing |
+| Layer         | File                   | Responsibility                                                  | Calls                     |
+| ------------- | ---------------------- | --------------------------------------------------------------- | ------------------------- |
+| **Facade**    | `{Domain}Facade.ts`    | Handler registration, `wrapHandler` wrapping                    | Service                   |
+| **Service**   | `{Domain}Service.ts`   | Business logic, orchestration, CDS reads/writes                 | Validator, other Services |
+| **Validator** | `{Domain}Validator.ts` | Input validation only. `req.error()` accumulation. No DB calls. | Nothing                   |
 
 ### 5.2 wrapHandler Contract
 
@@ -183,14 +183,14 @@ wrapHandler(req, handlerName, async () => {
 
 ### 5.3 Layer Rules
 
-| Rule | Enforced By |
-|---|---|
-| Facades contain no `if`/`for`/`while` | ESLint: `no-logic-in-facade` |
-| Facades contain no `try`/`catch` | ESLint: `no-try-catch-in-facade` |
-| All Facades extend `BaseFacade` | ESLint: `require-facade-extends-base` |
-| All Services extend `BaseService` | ESLint: `require-service-extends-base` |
-| All handlers use `wrapHandler` | ESLint: `require-wrap-handler` |
-| Private methods (`_` prefix) at bottom of class | ESLint: `private-methods-at-bottom` |
+| Rule                                            | Enforced By                            |
+| ----------------------------------------------- | -------------------------------------- |
+| Facades contain no `if`/`for`/`while`           | ESLint: `no-logic-in-facade`           |
+| Facades contain no `try`/`catch`                | ESLint: `no-try-catch-in-facade`       |
+| All Facades extend `BaseFacade`                 | ESLint: `require-facade-extends-base`  |
+| All Services extend `BaseService`               | ESLint: `require-service-extends-base` |
+| All handlers use `wrapHandler`                  | ESLint: `require-wrap-handler`         |
+| Private methods (`_` prefix) at bottom of class | ESLint: `private-methods-at-bottom`    |
 
 ---
 
@@ -200,20 +200,20 @@ wrapHandler(req, handlerName, async () => {
 
 ### 6.1 Two Patterns
 
-| Method | Purpose | Behavior | Who Calls It |
-|---|---|---|---|
-| `req.error()` | Validation failure | Accumulates. All errors returned together. | Validator |
-| `req.reject()` | Fatal / unrecoverable | Stops execution immediately. | Service or Facade |
+| Method         | Purpose               | Behavior                                   | Who Calls It      |
+| -------------- | --------------------- | ------------------------------------------ | ----------------- |
+| `req.error()`  | Validation failure    | Accumulates. All errors returned together. | Validator         |
+| `req.reject()` | Fatal / unrecoverable | Stops execution immediately.               | Service or Facade |
 
 ### 6.2 HTTP Status Codes
 
-| Scenario | Status | Method |
-|---|---|---|
-| Field validation failed | `400` | `req.error()` |
-| Entity not found | `404` | `req.reject()` |
-| Business logic conflict (duplicate, invalid state) | `409` | `req.reject()` |
-| External service failure (SimpleFIN, CSV parse) | `502` | `req.reject()` |
-| Unexpected server error (wrapHandler catch) | `500` | `req.reject()` |
+| Scenario                                           | Status | Method         |
+| -------------------------------------------------- | ------ | -------------- |
+| Field validation failed                            | `400`  | `req.error()`  |
+| Entity not found                                   | `404`  | `req.reject()` |
+| Business logic conflict (duplicate, invalid state) | `409`  | `req.reject()` |
+| External service failure (SimpleFIN, CSV parse)    | `502`  | `req.reject()` |
+| Unexpected server error (wrapHandler catch)        | `500`  | `req.reject()` |
 
 ### 6.3 Message Format
 
@@ -221,10 +221,15 @@ Always i18n keys via `MessagingUtility`. Never hardcoded strings.
 
 ```typescript
 // Validator — accumulates, with field target
-req.error({ code: 'VALIDATION', message: texts.getText('validation.amount.required'), target: 'amount', status: 400 });
+req.error({
+  code: "VALIDATION",
+  message: texts.getText("validation.amount.required"),
+  target: "amount",
+  status: 400,
+});
 
 // Service — fatal
-req.reject(404, texts.getText('entity.notFound', ['Transaction', id]));
+req.reject(404, texts.getText("entity.notFound", ["Transaction", id]));
 ```
 
 The `target` field links errors to form fields — Fiori Elements highlights the field in red.
@@ -239,20 +244,20 @@ The `target` field links errors to form fields — Fiori Elements highlights the
 
 TypeScript adaptation of Enbridge's Logger in `srv/modules/shared/Logger.ts`. Uses `cds.log()` internally.
 
-| Property | Value |
-|---|---|
-| Namespace | Module name only (e.g., `TransactionFacade`) |
+| Property       | Value                                                                  |
+| -------------- | ---------------------------------------------------------------------- |
+| Namespace      | Module name only (e.g., `TransactionFacade`)                           |
 | Correlation ID | From `req.id`. For `cds.spawn()` background jobs, generate a new UUID. |
-| Output | Console + file (dual) |
+| Output         | Console + file (dual)                                                  |
 
 ### 7.2 Log Levels
 
-| Level | When | Examples |
-|---|---|---|
-| `ERROR` | Something failed that needs attention | wrapHandler catch, SimpleFIN failure, CSV parse failure, encryption failure |
-| `WARN` | Unexpected but handled | Duplicate skipped, broken connection detected, low categorization confidence |
-| `INFO` | Normal operations worth tracking | Handler ENTRY/EXIT, sync completed, import completed, lifecycle state change |
-| `DEBUG` | Detailed internals for troubleshooting | Categorization scoring, bonus calculation steps, pattern match attempts |
+| Level   | When                                   | Examples                                                                     |
+| ------- | -------------------------------------- | ---------------------------------------------------------------------------- |
+| `ERROR` | Something failed that needs attention  | wrapHandler catch, SimpleFIN failure, CSV parse failure, encryption failure  |
+| `WARN`  | Unexpected but handled                 | Duplicate skipped, broken connection detected, low categorization confidence |
+| `INFO`  | Normal operations worth tracking       | Handler ENTRY/EXIT, sync completed, import completed, lifecycle state change |
+| `DEBUG` | Detailed internals for troubleshooting | Categorization scoring, bonus calculation steps, pattern match attempts      |
 
 Default level: `INFO`. Toggle to `DEBUG` via `cds.env.log.levels` — no code change.
 
@@ -270,31 +275,31 @@ Default level: `INFO`. Toggle to `DEBUG` via `cds.env.log.levels` — no code ch
 
 ### 7.4 Log Types
 
-| Type | Used For |
-|---|---|
-| `ENTRY` | wrapHandler start |
-| `EXIT` | wrapHandler end |
-| `EXTERNAL_CALL` | Before/after SimpleFIN API, CSV parse |
-| `STATE_CHANGE` | Card lifecycle transition, alert status change |
-| `BATCH_RESULT` | Sync/import summary (counts) |
-| `ERROR` | Caught exceptions |
+| Type            | Used For                                       |
+| --------------- | ---------------------------------------------- |
+| `ENTRY`         | wrapHandler start                              |
+| `EXIT`          | wrapHandler end                                |
+| `EXTERNAL_CALL` | Before/after SimpleFIN API, CSV parse          |
+| `STATE_CHANGE`  | Card lifecycle transition, alert status change |
+| `BATCH_RESULT`  | Sync/import summary (counts)                   |
+| `ERROR`         | Caught exceptions                              |
 
 ### 7.5 File Output
 
-| File | Contents |
-|---|---|
-| `logs/app.log` | All log entries at or above the configured level |
-| `logs/error.log` | ERROR entries only — dedicated safety net |
+| File             | Contents                                         |
+| ---------------- | ------------------------------------------------ |
+| `logs/app.log`   | All log entries at or above the configured level |
+| `logs/error.log` | ERROR entries only — dedicated safety net        |
 
 Rotation: daily or at 10MB threshold.
 
 ### 7.6 Sensitive Data Rules
 
-| Never Log | Why |
-|---|---|
-| Decrypted card numbers, CVV, expiry | OI-07 sensitive data |
-| SimpleFIN access URL (decrypted) | Credential |
-| Full `req.data` at INFO level | May contain sensitive fields |
+| Never Log                           | Why                          |
+| ----------------------------------- | ---------------------------- |
+| Decrypted card numbers, CVV, expiry | OI-07 sensitive data         |
+| SimpleFIN access URL (decrypted)    | Credential                   |
+| Full `req.data` at INFO level       | May contain sensitive fields |
 
 At DEBUG level, `req.data` may be logged but with sensitive fields redacted. Logger class provides a `_redact()` utility that strips known sensitive field names (`cardNumberEnc`, `cvvEnc`, `expiryDateEnc`, `accessUrlEnc`) before output.
 
@@ -306,11 +311,11 @@ At DEBUG level, `req.data` may be logged but with sensitive fields redacted. Log
 
 ### 8.1 Three Tiers
 
-| Tier | File | Key Format | Purpose |
-|---|---|---|---|
-| CDS field labels | `srv/_i18n/i18n.properties` | PascalCase | Column headers, form labels, filter labels |
-| Runtime messages | `srv/_i18n/messages.properties` | `camelCase.dots` | Errors, toasts, validation, user-facing runtime text |
-| UI5 app messages | `app/{name}/webapp/i18n/i18n.properties` | camelCase | Page titles, buttons, wizard steps, card titles, empty states |
+| Tier             | File                                     | Key Format       | Purpose                                                       |
+| ---------------- | ---------------------------------------- | ---------------- | ------------------------------------------------------------- |
+| CDS field labels | `srv/_i18n/i18n.properties`              | PascalCase       | Column headers, form labels, filter labels                    |
+| Runtime messages | `srv/_i18n/messages.properties`          | `camelCase.dots` | Errors, toasts, validation, user-facing runtime text          |
+| UI5 app messages | `app/{name}/webapp/i18n/i18n.properties` | camelCase        | Page titles, buttons, wizard steps, card titles, empty states |
 
 ### 8.2 Examples
 
@@ -369,11 +374,11 @@ AES-256-GCM (authenticated encryption — confidentiality + tamper detection). N
 
 ### 9.3 Key Management
 
-| Aspect | Standard |
-|---|---|
-| Storage | `.env` file (gitignored) as `ENCRYPTION_KEY` |
-| Key format | 256-bit random, hex-encoded |
-| Startup check | App refuses to start if `ENCRYPTION_KEY` is missing (logs ERROR) |
+| Aspect          | Standard                                                         |
+| --------------- | ---------------------------------------------------------------- |
+| Storage         | `.env` file (gitignored) as `ENCRYPTION_KEY`                     |
+| Key format      | 256-bit random, hex-encoded                                      |
+| Startup check   | App refuses to start if `ENCRYPTION_KEY` is missing (logs ERROR) |
 | First-run setup | `npm run generate-key` creates a random key and writes to `.env` |
 
 ### 9.4 Storage Format
@@ -404,91 +409,91 @@ No raw `crypto` calls outside this utility. All `_enc` field access goes through
 
 ### 10.2 Severity Philosophy
 
-| Category | Severity |
-|---|---|
-| Architectural rules (wrapHandler, no-logic-in-facade, extends-base) | `error` |
-| Type safety (no-explicit-any, no-console, eqeqeq) | `error` |
-| Style (import order, private-methods-at-bottom, prefer-const) | `error` |
-| Complexity (max-depth, max-params, complexity) | `warn` |
+| Category                                                            | Severity |
+| ------------------------------------------------------------------- | -------- |
+| Architectural rules (wrapHandler, no-logic-in-facade, extends-base) | `error`  |
+| Type safety (no-explicit-any, no-console, eqeqeq)                   | `error`  |
+| Style (import order, private-methods-at-bottom, prefer-const)       | `error`  |
+| Complexity (max-depth, max-params, complexity)                      | `warn`   |
 
 ### 10.3 Rules
 
 **Type Safety & Best Practices:**
 
-| Rule | Severity | Notes |
-|---|---|---|
-| `no-explicit-any` | `error` | |
-| `no-non-null-assertion` | `error` | |
-| `eqeqeq` | `error` | Always `===` |
-| `prefer-const` | `error` | |
-| `no-var` | `error` | |
-| `no-console` | `error` | Use Logger |
-| `no-magic-numbers` | `error` | Ignores: -1, 0, 1, 2, 100, 200, 400, 404, 409, 500, 502 |
-| `prefer-template` | `error` | Template literals over concatenation |
-| `no-throw-literal` | `error` | |
-| `no-restricted-syntax` | `error` | Disallows `.bind()`, `.call()`, `.apply()` — use arrow functions |
+| Rule                    | Severity | Notes                                                            |
+| ----------------------- | -------- | ---------------------------------------------------------------- |
+| `no-explicit-any`       | `error`  |                                                                  |
+| `no-non-null-assertion` | `error`  |                                                                  |
+| `eqeqeq`                | `error`  | Always `===`                                                     |
+| `prefer-const`          | `error`  |                                                                  |
+| `no-var`                | `error`  |                                                                  |
+| `no-console`            | `error`  | Use Logger                                                       |
+| `no-magic-numbers`      | `error`  | Ignores: -1, 0, 1, 2, 100, 200, 400, 404, 409, 500, 502          |
+| `prefer-template`       | `error`  | Template literals over concatenation                             |
+| `no-throw-literal`      | `error`  |                                                                  |
+| `no-restricted-syntax`  | `error`  | Disallows `.bind()`, `.call()`, `.apply()` — use arrow functions |
 
 **Complexity:**
 
-| Rule | Severity | Threshold |
-|---|---|---|
-| `max-depth` | `warn` | 4 |
-| `max-params` | `warn` | 5 |
-| `complexity` | `warn` | 10 |
+| Rule         | Severity | Threshold |
+| ------------ | -------- | --------- |
+| `max-depth`  | `warn`   | 4         |
+| `max-params` | `warn`   | 5         |
+| `complexity` | `warn`   | 10        |
 
 **Naming:**
 
-| Rule | Severity | Notes |
-|---|---|---|
-| `@typescript-eslint/naming-convention` | `error` | PascalCase classes, camelCase methods, `_` prefix for private |
-| `camelcase` | `error` | General camelCase enforcement |
-| `id-length` | `warn` | Min 2, exceptions: `i`, `j`, `k`, `n`, `x`, `y`, `_` |
+| Rule                                   | Severity | Notes                                                         |
+| -------------------------------------- | -------- | ------------------------------------------------------------- |
+| `@typescript-eslint/naming-convention` | `error`  | PascalCase classes, camelCase methods, `_` prefix for private |
+| `camelcase`                            | `error`  | General camelCase enforcement                                 |
+| `id-length`                            | `warn`   | Min 2, exceptions: `i`, `j`, `k`, `n`, `x`, `y`, `_`          |
 
 **Import Ordering:**
 
-| Rule | Severity | Order |
-|---|---|---|
-| `import/order` | `error` | builtin → external → internal (`#cds-models`) → relative |
-| `import/first` | `error` | |
-| `import/no-duplicates` | `error` | |
-| `import/newline-after-import` | `error` | |
+| Rule                          | Severity | Order                                                    |
+| ----------------------------- | -------- | -------------------------------------------------------- |
+| `import/order`                | `error`  | builtin → external → internal (`#cds-models`) → relative |
+| `import/first`                | `error`  |                                                          |
+| `import/no-duplicates`        | `error`  |                                                          |
+| `import/newline-after-import` | `error`  |                                                          |
 
 **Custom Architectural Rules (adapted from Enbridge):**
 
-| Rule | Severity | Enforces |
-|---|---|---|
-| `no-logic-in-facade` | `error` | No `if`/`for`/`while` in Facade classes |
-| `require-wrap-handler` | `error` | All handler registrations use `wrapHandler` |
-| `no-try-catch-in-facade` | `error` | No try/catch in Facades |
-| `require-facade-extends-base` | `error` | All Facades extend `BaseFacade` |
-| `require-service-extends-base` | `error` | All Services extend `BaseService` |
-| `private-methods-at-bottom` | `error` | `_` prefixed methods at end of class |
+| Rule                           | Severity | Enforces                                    |
+| ------------------------------ | -------- | ------------------------------------------- |
+| `no-logic-in-facade`           | `error`  | No `if`/`for`/`while` in Facade classes     |
+| `require-wrap-handler`         | `error`  | All handler registrations use `wrapHandler` |
+| `no-try-catch-in-facade`       | `error`  | No try/catch in Facades                     |
+| `require-facade-extends-base`  | `error`  | All Facades extend `BaseFacade`             |
+| `require-service-extends-base` | `error`  | All Services extend `BaseService`           |
+| `private-methods-at-bottom`    | `error`  | `_` prefixed methods at end of class        |
 
 **JSDoc (TypeScript backend):**
 
-| Rule | Severity | Notes |
-|---|---|---|
-| `jsdoc/require-jsdoc` | `error` | All methods (public and private) |
-| `jsdoc/require-param-description` | `error` | |
-| `jsdoc/require-returns-description` | `off` | |
-| `jsdoc/require-param-type` | `off` | TypeScript handles types |
-| `jsdoc/require-returns-type` | `off` | TypeScript handles types |
+| Rule                                | Severity | Notes                            |
+| ----------------------------------- | -------- | -------------------------------- |
+| `jsdoc/require-jsdoc`               | `error`  | All methods (public and private) |
+| `jsdoc/require-param-description`   | `error`  |                                  |
+| `jsdoc/require-returns-description` | `off`    |                                  |
+| `jsdoc/require-param-type`          | `off`    | TypeScript handles types         |
+| `jsdoc/require-returns-type`        | `off`    | TypeScript handles types         |
 
 ### 10.4 UI5-Specific Rules
 
 Applied to `app/**/webapp/**/*.js` files:
 
-| Rule | Severity | Notes |
-|---|---|---|
-| `hungarian-notation` | `warn` | `sName`, `oModel`, `aItems`, `bIsValid`, `iCount`, `fnCallback` |
-| `event-handler-naming` | `error` | `on` prefix: `onPressSubmit`, `onSelectCard` |
-| `controller-file-naming` | `error` | Extensions: `*Ext.controller.js` |
-| `max-lines-per-function` | `warn` | 50 lines (excludes `sap.ui.define` callbacks) |
-| `max-params` | `warn` | 4 (excludes `sap.ui.define` callbacks) |
-| `max-dependencies` | `warn` | 10 imports per `sap.ui.define` call |
-| `complexity` | `warn` | 10 |
-| `max-depth` | `warn` | 4 |
-| `no-console` | `warn` | Allows `console.warn` and `console.error` |
+| Rule                     | Severity | Notes                                                           |
+| ------------------------ | -------- | --------------------------------------------------------------- |
+| `hungarian-notation`     | `warn`   | `sName`, `oModel`, `aItems`, `bIsValid`, `iCount`, `fnCallback` |
+| `event-handler-naming`   | `error`  | `on` prefix: `onPressSubmit`, `onSelectCard`                    |
+| `controller-file-naming` | `error`  | Extensions: `*Ext.controller.js`                                |
+| `max-lines-per-function` | `warn`   | 50 lines (excludes `sap.ui.define` callbacks)                   |
+| `max-params`             | `warn`   | 4 (excludes `sap.ui.define` callbacks)                          |
+| `max-dependencies`       | `warn`   | 10 imports per `sap.ui.define` call                             |
+| `complexity`             | `warn`   | 10                                                              |
+| `max-depth`              | `warn`   | 4                                                               |
+| `no-console`             | `warn`   | Allows `console.warn` and `console.error`                       |
 
 ### 10.5 Global Ignores
 
@@ -509,36 +514,36 @@ Applied to `app/**/webapp/**/*.js` files:
 
 ### 11.1 Fiori Elements Apps (8 apps)
 
-| Convention | Standard |
-|---|---|
-| Customization | Extensions in `app/{name}/webapp/ext/` only |
-| Extension naming | `{ViewType}Ext` — `ListReportExt.js`, `ObjectPageExt.js`, `FilterBarExt.js` |
-| Annotations | Entity-based files in `app/{name}/annotations/` — e.g., `Transaction.cds`, `Vendor.cds` |
-| `manifest.json` | Standard Fiori Elements config. No custom Component.js logic. |
+| Convention       | Standard                                                                                |
+| ---------------- | --------------------------------------------------------------------------------------- |
+| Customization    | Extensions in `app/{name}/webapp/ext/` only                                             |
+| Extension naming | `{ViewType}Ext` — `ListReportExt.js`, `ObjectPageExt.js`, `FilterBarExt.js`             |
+| Annotations      | Entity-based files in `app/{name}/annotations/` — e.g., `Transaction.cds`, `Vendor.cds` |
+| `manifest.json`  | Standard Fiori Elements config. No custom Component.js logic.                           |
 
 ### 11.2 Freestyle Apps (14 apps — 12 dashboards + 2 wizards)
 
-| Convention | Standard |
-|---|---|
-| Base controller | All extend `BaseController.js` in `app/shared/` |
-| Controller naming | `{PageName}.controller.js` |
-| View naming | `{PageName}.view.xml` — XML views only |
-| Fragment naming | `{FragmentName}.fragment.xml` |
-| Model access | Named models: `this.getView().getModel("data")`. OData stays as default. |
-| Formatter | `formatter.js` per app for display logic. No inline formatting in XML views. |
-| Event handlers | `on` prefix: `onPressSubmit`, `onSelectCard`, `onChangeMonth` |
-| Hungarian notation | Enforced: `sName`, `oModel`, `aItems`, `bIsValid`, `iCount`, `fnCallback` |
-| Private methods | `_` prefix: `_loadChartData`, `_buildFilterArray` |
+| Convention         | Standard                                                                     |
+| ------------------ | ---------------------------------------------------------------------------- |
+| Base controller    | All extend `BaseController.js` in `app/shared/`                              |
+| Controller naming  | `{PageName}.controller.js`                                                   |
+| View naming        | `{PageName}.view.xml` — XML views only                                       |
+| Fragment naming    | `{FragmentName}.fragment.xml`                                                |
+| Model access       | Named models: `this.getView().getModel("data")`. OData stays as default.     |
+| Formatter          | `formatter.js` per app for display logic. No inline formatting in XML views. |
+| Event handlers     | `on` prefix: `onPressSubmit`, `onSelectCard`, `onChangeMonth`                |
+| Hungarian notation | Enforced: `sName`, `oModel`, `aItems`, `bIsValid`, `iCount`, `fnCallback`    |
+| Private methods    | `_` prefix: `_loadChartData`, `_buildFilterArray`                            |
 
 ### 11.3 Custom Controls
 
-| Convention | Standard |
-|---|---|
-| Location | `app/shared/controls/` |
-| Pattern | Extends `sap.ui.core.Control`. Wraps chart library instance. |
-| Naming | `VizFrameCard.js`, `ApexChartCard.js` |
+| Convention   | Standard                                                                        |
+| ------------ | ------------------------------------------------------------------------------- |
+| Location     | `app/shared/controls/`                                                          |
+| Pattern      | Extends `sap.ui.core.Control`. Wraps chart library instance.                    |
+| Naming       | `VizFrameCard.js`, `ApexChartCard.js`                                           |
 | Data binding | Accepts JSON model path, renders internally. Parent sets data; control renders. |
-| Lifecycle | `onAfterRendering` initializes chart. `exit` destroys chart instance. |
+| Lifecycle    | `onAfterRendering` initializes chart. `exit` destroys chart instance.           |
 
 ### 11.4 Shared Resources
 
@@ -623,15 +628,15 @@ All backend implementation follows the Red-Green-Refactor cycle:
 
 ### 13.1 Scope
 
-| Layer | TDD? | Notes |
-|-------|------|-------|
-| **Validators** | Yes | Pure functions — ideal TDD targets. Write test per business rule, then implement. |
-| **Services** | Yes | Mock CDS + use real Validator. One test per method, then implement. |
-| **Utilities** | Yes | Pure functions. Write test, then implement. |
-| **ENH engines** | Yes | Core computation logic. Test expected outputs per scenario, then implement. |
-| **Facades** | No | Zero logic by design (ESLint-enforced). Covered by integration tests after unit TDD is complete. |
-| **Integration tests** | No | Written after unit-level TDD for a module is complete, since they require the full CDS stack via `cds.test()`. |
-| **Frontend** | No | Learning exercise (D-80). Tests written alongside or after implementation. |
+| Layer                 | TDD? | Notes                                                                                                          |
+| --------------------- | ---- | -------------------------------------------------------------------------------------------------------------- |
+| **Validators**        | Yes  | Pure functions — ideal TDD targets. Write test per business rule, then implement.                              |
+| **Services**          | Yes  | Mock CDS + use real Validator. One test per method, then implement.                                            |
+| **Utilities**         | Yes  | Pure functions. Write test, then implement.                                                                    |
+| **ENH engines**       | Yes  | Core computation logic. Test expected outputs per scenario, then implement.                                    |
+| **Facades**           | No   | Zero logic by design (ESLint-enforced). Covered by integration tests after unit TDD is complete.               |
+| **Integration tests** | No   | Written after unit-level TDD for a module is complete, since they require the full CDS stack via `cds.test()`. |
+| **Frontend**          | No   | Learning exercise (D-80). Tests written alongside or after implementation.                                     |
 
 ### 13.2 Workflow Per Module
 
@@ -658,21 +663,21 @@ For each FRICEW object being built:
 
 Decisions made during technical standards definition (Step 9):
 
-| ID | Title | Summary |
-|----|-------|---------|
-| D-63 | CDS Naming & Modeling Conventions | PascalCase entities, camelCase fields, CAP auto-generated FKs, modular schema by domain, entity-based annotations in folder |
-| D-64 | TypeScript Strict Mode | `strict: true`, ES2022 target, Node16 module, all strict sub-flags enabled |
-| D-65 | CDS Entity Type Patterns | Follow CAP standard — `#cds-models/` imports, entity references in handlers, `types.ts` per module |
-| D-66 | Three-Layer Handler Pattern | Facade → Service → Validator, always 3 files, `wrapHandler` on every handler |
-| D-67 | Error Handling Patterns | `req.error()` for validation, `req.reject()` for fatal, always i18n keys, field targets on validation errors |
-| D-68 | Logging Standards | Structured JSON, dual output (console + file), dedicated `error.log`, correlation IDs, sensitive data redaction |
-| D-69 | i18n Three-Tier Convention | CDS labels (PascalCase), runtime messages (camelCase.dots), UI5 (camelCase) |
-| D-70 | Encryption — OI-07 | AES-256-GCM, env var key in `.env`, per-field IV, `EncryptionUtility.ts` |
-| D-71 | ESLint Configuration | Enbridge-adapted, custom architectural rules, errors for most rules, warn for complexity, JSDoc descriptions required, Hungarian in UI5 |
-| D-72 | SAPUI5 Conventions | XML views, BaseController, entity-based annotations, `{ViewType}Ext` extensions, Hungarian notation, max 10 deps |
-| D-73 | Code Review Checklists | Per-persona checklists for 6 review roles at sprint checkpoint meetings |
-| D-230 | Test-Driven Development | Red-Green-Refactor for Validators, Services, Utilities, ENH engines. Integration and frontend tests written after. |
+| ID    | Title                             | Summary                                                                                                                                 |
+| ----- | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| D-63  | CDS Naming & Modeling Conventions | PascalCase entities, camelCase fields, CAP auto-generated FKs, modular schema by domain, entity-based annotations in folder             |
+| D-64  | TypeScript Strict Mode            | `strict: true`, ES2022 target, Node16 module, all strict sub-flags enabled                                                              |
+| D-65  | CDS Entity Type Patterns          | Follow CAP standard — `#cds-models/` imports, entity references in handlers, `types.ts` per module                                      |
+| D-66  | Three-Layer Handler Pattern       | Facade → Service → Validator, always 3 files, `wrapHandler` on every handler                                                            |
+| D-67  | Error Handling Patterns           | `req.error()` for validation, `req.reject()` for fatal, always i18n keys, field targets on validation errors                            |
+| D-68  | Logging Standards                 | Structured JSON, dual output (console + file), dedicated `error.log`, correlation IDs, sensitive data redaction                         |
+| D-69  | i18n Three-Tier Convention        | CDS labels (PascalCase), runtime messages (camelCase.dots), UI5 (camelCase)                                                             |
+| D-70  | Encryption — OI-07                | AES-256-GCM, env var key in `.env`, per-field IV, `EncryptionUtility.ts`                                                                |
+| D-71  | ESLint Configuration              | Enbridge-adapted, custom architectural rules, errors for most rules, warn for complexity, JSDoc descriptions required, Hungarian in UI5 |
+| D-72  | SAPUI5 Conventions                | XML views, BaseController, entity-based annotations, `{ViewType}Ext` extensions, Hungarian notation, max 10 deps                        |
+| D-73  | Code Review Checklists            | Per-persona checklists for 6 review roles at sprint checkpoint meetings                                                                 |
+| D-230 | Test-Driven Development           | Red-Green-Refactor for Validators, Services, Utilities, ENH engines. Integration and frontend tests written after.                      |
 
 ---
 
-*This document is the single source of truth for coding conventions and patterns. All build personas reference these standards. Traces back to [Tech Stack](TECH_STACK.md) (Enbridge conventions), [Design System](DESIGN_SYSTEM.md) (UI patterns), [Data Model](DATA_MODEL.md) (entity definitions), and [Decisions Log](user-profile/DECISIONS_LOG.md).*
+_This document is the single source of truth for coding conventions and patterns. All build personas reference these standards. Traces back to [Tech Stack](TECH_STACK.md) (Enbridge conventions), [Design System](DESIGN_SYSTEM.md) (UI patterns), [Data Model](DATA_MODEL.md) (entity definitions), and [Decisions Log](user-profile/DECISIONS_LOG.md)._

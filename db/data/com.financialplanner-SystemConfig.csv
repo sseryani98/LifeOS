@@ -1,0 +1,19 @@
+ID,key,value,description
+a1b2c3d4-0012-4000-8000-000000000001,SIMPLEFIN_SYNC_TIME,20:00,Daily sync time (HH:MM 24h)
+a1b2c3d4-0012-4000-8000-000000000002,SIMPLEFIN_LOOKBACK_DAYS,7,Days to look back on each sync
+a1b2c3d4-0012-4000-8000-000000000003,SIMPLEFIN_RETRY_ATTEMPTS,3,HTTP retry count on failure
+a1b2c3d4-0012-4000-8000-000000000004,SIMPLEFIN_STALE_DAYS,3,Days without sync before stale alert
+a1b2c3d4-0012-4000-8000-000000000005,BUDGET_WARNING_THRESHOLD_PCT,80,Percent of budget at which category warning alert fires
+a1b2c3d4-0012-4000-8000-000000000006,GOAL_DEADLINE_ALERT_DAYS,30,Days before target date to fire goal deadline approaching alert
+a1b2c3d4-0012-4000-8000-000000000007,GOAL_SPENDING_WARNING_PCT,80,Percent of target amount at which goal spending warning fires
+a1b2c3d4-0012-4000-8000-000000000008,FINANCIAL_PICTURE_STALE_DAYS,45,Days after which account snapshot data is considered stale
+a1b2c3d4-0012-4000-8000-000000000009,SCRAPER_ENABLED,true,Enable or disable weekly scheduled scraping
+a1b2c3d4-0012-4000-8000-00000000000a,SCRAPER_DAY_OF_WEEK,0,Day of week for scheduled scrape (0=Sunday)
+a1b2c3d4-0012-4000-8000-00000000000b,SCRAPER_DELAY_MS,1500,Milliseconds delay between page fetches
+a1b2c3d4-0012-4000-8000-00000000000c,SCRAPER_RETRY_ATTEMPTS,3,HTTP retry count per card page
+a1b2c3d4-0012-4000-8000-00000000000d,AF_ALERT_DAYS,30,Days before AF date to create af_approaching alert
+a1b2c3d4-0012-4000-8000-00000000000e,CANCEL_REMINDER_DAYS,2,Days before tentative cancel date to create cancel_reminder alert
+a1b2c3d4-0012-4000-8000-00000000000f,ELIGIBILITY_ALERT_DAYS,30,Days before eligibility window opens to fire alert
+a1b2c3d4-0012-4000-8000-000000000010,LAST_REVIEW_DATE,,Datetime of last completed weekly review session
+a1b2c3d4-0012-4000-8000-000000000011,REVIEW_REMINDER_DAYS,7,Days threshold for review overdue alert
+a1b2c3d4-0012-4000-8000-000000000012,CSV_IMPORT_REMINDER_DAYS,7,Days threshold for Scotia CSV import overdue flag

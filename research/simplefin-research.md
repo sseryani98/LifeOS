@@ -14,14 +14,14 @@ All six target institutions are supported by SimpleFIN Bridge via MX, but connec
 
 **Scotiabank is the critical risk.** It has no data-access agreement with any aggregator and relies entirely on screen scraping. More problematically, **Scotiabank uses app-based-only 2FA**, which means every automated connection attempt may trigger a manual approval on the user's phone. A Quicken Simplifi user reported needing to "manually confirm with my bank's 2FA every single time" for Scotiabank — a pattern incompatible with automated daily syncing. Scotiabank also historically rejected aggregation explicitly (Globe and Mail reporting). This bank is your most likely point of failure at launch, and you should plan a CSV-import fallback.
 
-| Bank | Connection type | Credit cards | 2FA risk | Re-auth frequency | Reliability |
-|------|----------------|-------------|----------|-------------------|-------------|
-| **CIBC** | Direct API (MX partnership, Aug 2022) | ✅ Confirmed | Low | Very infrequent | **High** |
-| **Amex Canada** | Direct API/OAuth2 (MX partnership, Nov 2024) | ✅ Confirmed | Low | Very infrequent | **High** |
-| **TD Bank** | Screen scraping | ✅ Expected | Medium | Weeks–months | Moderate |
-| **RBC** | Screen scraping | ✅ Expected | Medium | Weeks–months | Moderate |
-| **BMO** | Screen scraping | ✅ Expected | Medium | Weeks–months | Moderate |
-| **Scotiabank** | Screen scraping | ✅ Expected | **High** (app-only) | **Very frequent** | **Low** |
+| Bank            | Connection type                              | Credit cards | 2FA risk            | Re-auth frequency | Reliability |
+| --------------- | -------------------------------------------- | ------------ | ------------------- | ----------------- | ----------- |
+| **CIBC**        | Direct API (MX partnership, Aug 2022)        | ✅ Confirmed | Low                 | Very infrequent   | **High**    |
+| **Amex Canada** | Direct API/OAuth2 (MX partnership, Nov 2024) | ✅ Confirmed | Low                 | Very infrequent   | **High**    |
+| **TD Bank**     | Screen scraping                              | ✅ Expected  | Medium              | Weeks–months      | Moderate    |
+| **RBC**         | Screen scraping                              | ✅ Expected  | Medium              | Weeks–months      | Moderate    |
+| **BMO**         | Screen scraping                              | ✅ Expected  | Medium              | Weeks–months      | Moderate    |
+| **Scotiabank**  | Screen scraping                              | ✅ Expected  | **High** (app-only) | **Very frequent** | **Low**     |
 
 Beyond your six targets, SimpleFIN/MX also covers Desjardins, National Bank of Canada, Tangerine, Simplii Financial, MBNA, Canadian Tire Bank, EQ Bank, Manulife Bank, Meridian Credit Union, ATB Financial, Rogers Bank, Wealthsimple Cash, PC Financial, and dozens of others — though reliability varies per institution.
 

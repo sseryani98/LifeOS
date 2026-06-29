@@ -12,11 +12,11 @@
 
 ## 1. Change History
 
-| Date | Author | Description |
-|------|--------|-------------|
-| 2026-02-20 | Sandro & Claude | Initial creation — workshop complete. D-188 through D-208 logged. |
-| 2026-02-20 | Sandro | Approved. |
-| 2026-02-20 | Claude | SPEC-21 amendment: Remove FRM-004 Section 4 (Redemptions). Sections 5–8 renumber to 4–7 (D-280). |
+| Date       | Author          | Description                                                                                      |
+| ---------- | --------------- | ------------------------------------------------------------------------------------------------ |
+| 2026-02-20 | Sandro & Claude | Initial creation — workshop complete. D-188 through D-208 logged.                                |
+| 2026-02-20 | Sandro          | Approved.                                                                                        |
+| 2026-02-20 | Claude          | SPEC-21 amendment: Remove FRM-004 Section 4 (Redemptions). Sections 5–8 renumber to 4–7 (D-280). |
 
 ---
 
@@ -32,19 +32,19 @@ Key decisions: D-03 (register first), D-21 (soft perk tracking), D-24 (multi-tra
 
 ## 3. Data Model References
 
-| Entity | Role | DM-001 Ref | Amendment? |
-|--------|------|------------|------------|
-| Card Instance | Central entity — lifecycle state, card details, encrypted fields | §4.4 | `cvv_enc` → `cvv_front_enc` + `cvv_back_enc` |
-| Market Card | Card product reference for onboarding | §4.1 | — |
-| Offer | Signup offer terms, linked to Card Instance | §4.2 | Add `fee_amount` |
-| Offer Tranche | MSR thresholds per offer | §4.3 | — |
-| Earning Multiplier | Per-category earn rates | §4.5 | Add optional `card_instance_id` |
-| Soft Perk Definition | Card perks | §4.6 | Add optional `card_instance_id` |
-| Card Perk | Instance-level perk utilization tracking | §4.7 | — |
-| Provider Account | SimpleFIN account → card mapping | §4.13 | — |
-| Alert | AF approaching, cancel reminder | §6.1 | — |
-| Alert Type | New seed values | §3.11 | Add `af_approaching`, `cancel_reminder` (total: 13) |
-| System Config | Alert timing parameters | §3.17 | Add `AF_ALERT_DAYS`, `CANCEL_REMINDER_DAYS` |
+| Entity               | Role                                                             | DM-001 Ref | Amendment?                                          |
+| -------------------- | ---------------------------------------------------------------- | ---------- | --------------------------------------------------- |
+| Card Instance        | Central entity — lifecycle state, card details, encrypted fields | §4.4       | `cvv_enc` → `cvv_front_enc` + `cvv_back_enc`        |
+| Market Card          | Card product reference for onboarding                            | §4.1       | —                                                   |
+| Offer                | Signup offer terms, linked to Card Instance                      | §4.2       | Add `fee_amount`                                    |
+| Offer Tranche        | MSR thresholds per offer                                         | §4.3       | —                                                   |
+| Earning Multiplier   | Per-category earn rates                                          | §4.5       | Add optional `card_instance_id`                     |
+| Soft Perk Definition | Card perks                                                       | §4.6       | Add optional `card_instance_id`                     |
+| Card Perk            | Instance-level perk utilization tracking                         | §4.7       | —                                                   |
+| Provider Account     | SimpleFIN account → card mapping                                 | §4.13      | —                                                   |
+| Alert                | AF approaching, cancel reminder                                  | §6.1       | —                                                   |
+| Alert Type           | New seed values                                                  | §3.11      | Add `af_approaching`, `cancel_reminder` (total: 13) |
+| System Config        | Alert timing parameters                                          | §3.17      | Add `AF_ALERT_DAYS`, `CANCEL_REMINDER_DAYS`         |
 
 ### DM-001 Amendments
 
@@ -52,35 +52,35 @@ Key decisions: D-03 (register first), D-21 (soft perk tracking), D-24 (multi-tra
 
 Remove `cvv_enc`. Add:
 
-| New Attribute | Type | Required | Notes |
-|---------------|------|----------|-------|
-| `cvv_front_enc` | String (encrypted) | no | Front CVV (Amex 4-digit CID) |
-| `cvv_back_enc` | String (encrypted) | no | Back CVV (3-digit) |
+| New Attribute   | Type               | Required | Notes                        |
+| --------------- | ------------------ | -------- | ---------------------------- |
+| `cvv_front_enc` | String (encrypted) | no       | Front CVV (Amex 4-digit CID) |
+| `cvv_back_enc`  | String (encrypted) | no       | Back CVV (3-digit)           |
 
 **2. Offer — fee_amount (D-191)**
 
-| New Attribute | Type | Required | Notes |
-|---------------|------|----------|-------|
-| `fee_amount` | Decimal(15,2) | no | Defaults from Market Card's `fee_amount` during onboarding. Overridable per offer. |
+| New Attribute | Type          | Required | Notes                                                                              |
+| ------------- | ------------- | -------- | ---------------------------------------------------------------------------------- |
+| `fee_amount`  | Decimal(15,2) | no       | Defaults from Market Card's `fee_amount` during onboarding. Overridable per offer. |
 
 **3. Earning Multiplier — instance override (D-192)**
 
-| New Attribute | Type | Required | Notes |
-|---------------|------|----------|-------|
-| `card_instance_id` | UUID (FK → Card Instance) | no | If set, this is an instance-level override. Takes precedence over market card defaults. |
+| New Attribute      | Type                      | Required | Notes                                                                                   |
+| ------------------ | ------------------------- | -------- | --------------------------------------------------------------------------------------- |
+| `card_instance_id` | UUID (FK → Card Instance) | no       | If set, this is an instance-level override. Takes precedence over market card defaults. |
 
 **4. Soft Perk Definition — instance override (D-192)**
 
-| New Attribute | Type | Required | Notes |
-|---------------|------|----------|-------|
-| `card_instance_id` | UUID (FK → Card Instance) | no | Same pattern as Earning Multiplier. Instance override takes precedence over market card defaults. |
+| New Attribute      | Type                      | Required | Notes                                                                                             |
+| ------------------ | ------------------------- | -------- | ------------------------------------------------------------------------------------------------- |
+| `card_instance_id` | UUID (FK → Card Instance) | no       | Same pattern as Earning Multiplier. Instance override takes precedence over market card defaults. |
 
 **5. System Config — new parameters**
 
-| Key | Default | Description |
-|-----|---------|-------------|
-| `AF_ALERT_DAYS` | `30` | Days before AF date to create `af_approaching` alert |
-| `CANCEL_REMINDER_DAYS` | `2` | Days before tentative cancel date to create `cancel_reminder` alert |
+| Key                    | Default | Description                                                         |
+| ---------------------- | ------- | ------------------------------------------------------------------- |
+| `AF_ALERT_DAYS`        | `30`    | Days before AF date to create `af_approaching` alert                |
+| `CANCEL_REMINDER_DAYS` | `2`     | Days before tentative cancel date to create `cancel_reminder` alert |
 
 ---
 
@@ -129,26 +129,26 @@ Remove `cvv_enc`. Add:
 
 **Transitions:**
 
-| # | From | To | Trigger | Guard | Side Effects |
-|---|------|----|---------|-------|--------------|
-| 1 | Focus | Active | Auto — all offer tranches met (ENH-003) | ENH-003 reports all tranches `met` | — |
-| 2 | Focus | Active | Auto — all MSR windows expired | ENH-003 reports all tranches `missed` | — |
-| 3 | Focus | Active | Immediate — no offer on card | Card created without offer via FRM-006 | — |
-| 4 | Focus | To Cancel | Manual | `tentative_cancel_date` required | Create `cancel_reminder` alert |
-| 5 | Focus | Closed | Manual | `closed_date` required | Dismiss all alerts, unlink Provider Account, cascade close supp cards |
-| 6 | Active | To Cancel | Manual | `tentative_cancel_date` required | Create `cancel_reminder` alert |
-| 7 | Active | Closed | Manual | `closed_date` required | Dismiss all alerts, unlink Provider Account, cascade close supp cards |
-| 8 | To Cancel | Active | Manual (reversal) | — | Clear `tentative_cancel_date`, dismiss `cancel_reminder` alert |
-| 9 | To Cancel | Closed | Manual | `closed_date` required | Clear `tentative_cancel_date`, dismiss all alerts, unlink Provider Account, cascade close supp cards |
+| #   | From      | To        | Trigger                                 | Guard                                  | Side Effects                                                                                         |
+| --- | --------- | --------- | --------------------------------------- | -------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| 1   | Focus     | Active    | Auto — all offer tranches met (ENH-003) | ENH-003 reports all tranches `met`     | —                                                                                                    |
+| 2   | Focus     | Active    | Auto — all MSR windows expired          | ENH-003 reports all tranches `missed`  | —                                                                                                    |
+| 3   | Focus     | Active    | Immediate — no offer on card            | Card created without offer via FRM-006 | —                                                                                                    |
+| 4   | Focus     | To Cancel | Manual                                  | `tentative_cancel_date` required       | Create `cancel_reminder` alert                                                                       |
+| 5   | Focus     | Closed    | Manual                                  | `closed_date` required                 | Dismiss all alerts, unlink Provider Account, cascade close supp cards                                |
+| 6   | Active    | To Cancel | Manual                                  | `tentative_cancel_date` required       | Create `cancel_reminder` alert                                                                       |
+| 7   | Active    | Closed    | Manual                                  | `closed_date` required                 | Dismiss all alerts, unlink Provider Account, cascade close supp cards                                |
+| 8   | To Cancel | Active    | Manual (reversal)                       | —                                      | Clear `tentative_cancel_date`, dismiss `cancel_reminder` alert                                       |
+| 9   | To Cancel | Closed    | Manual                                  | `closed_date` required                 | Clear `tentative_cancel_date`, dismiss all alerts, unlink Provider Account, cascade close supp cards |
 
 **Lifecycle State Colors (D-60):**
 
-| State | Semantic | Color |
-|-------|----------|-------|
-| Focus | Information | Blue |
-| Active | Success | Green |
-| To Cancel | Warning | Orange |
-| Closed | None | Grey |
+| State     | Semantic    | Color  |
+| --------- | ----------- | ------ |
+| Focus     | Information | Blue   |
+| Active    | Success     | Green  |
+| To Cancel | Warning     | Orange |
+| Closed    | None        | Grey   |
 
 **Supplementary Card Lifecycle (D-193):**
 
@@ -161,39 +161,39 @@ Remove `cvv_enc`. Add:
 
 **Wizard Steps:**
 
-| Step | Name | Required | Description |
-|------|------|----------|-------------|
-| 1 | Select Market Card | Yes | Searchable value help against existing Market Cards. No inline creation — use FRM-005 first. |
-| 2 | Define Offer Terms | No | Defaults from market card's current active offer (latest by `offer_start_date` where `offer_end_date` is null or future). Skippable if no bonus. |
-| 3 | Enter Card Details | Yes | Card instance attributes. `activation_date` is required. |
-| 4 | SimpleFIN Link | No | Connect a Provider Account (FRM-010 flow from SPEC-01). |
-| 5 | Supplementary Cards | No | Add supp cards. Reuses FRM-006 with Market Card locked and `parent_card_instance_id` set. |
+| Step | Name                | Required | Description                                                                                                                                      |
+| ---- | ------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1    | Select Market Card  | Yes      | Searchable value help against existing Market Cards. No inline creation — use FRM-005 first.                                                     |
+| 2    | Define Offer Terms  | No       | Defaults from market card's current active offer (latest by `offer_start_date` where `offer_end_date` is null or future). Skippable if no bonus. |
+| 3    | Enter Card Details  | Yes      | Card instance attributes. `activation_date` is required.                                                                                         |
+| 4    | SimpleFIN Link      | No       | Connect a Provider Account (FRM-010 flow from SPEC-01).                                                                                          |
+| 5    | Supplementary Cards | No       | Add supp cards. Reuses FRM-006 with Market Card locked and `parent_card_instance_id` set.                                                        |
 
 **Step 2 — Offer Terms Fields:**
 
-| Field | Source | Editable | Notes |
-|-------|--------|----------|-------|
-| Offer name | Defaulted from active offer | Yes | |
-| FYF | Defaulted from active offer | Yes | Boolean |
-| fee_amount | Defaulted from Market Card's `fee_amount` | Yes | Overridable per offer (D-191) |
-| Source | — | Yes | Free text |
-| Notes | — | Yes | Free text |
-| Tranches (table) | Defaulted from active offer's tranches | Yes | Add/remove/edit rows |
+| Field            | Source                                    | Editable | Notes                         |
+| ---------------- | ----------------------------------------- | -------- | ----------------------------- |
+| Offer name       | Defaulted from active offer               | Yes      |                               |
+| FYF              | Defaulted from active offer               | Yes      | Boolean                       |
+| fee_amount       | Defaulted from Market Card's `fee_amount` | Yes      | Overridable per offer (D-191) |
+| Source           | —                                         | Yes      | Free text                     |
+| Notes            | —                                         | Yes      | Free text                     |
+| Tranches (table) | Defaulted from active offer's tranches    | Yes      | Add/remove/edit rows          |
 
 **Tranche Row Fields:** `tranche_number`, `msr_amount`, `msr_window_type`, `msr_window_months`, `bonus_amount`, `unlock_month`
 
 **Step 3 — Card Details Fields:**
 
-| Field | Type | Required | Notes |
-|-------|------|----------|-------|
-| activation_date | Date | Yes | |
-| credit_limit | Decimal | No | |
-| card_number_enc | String (encrypted) | No | |
-| cvv_front_enc | String (encrypted) | No | Amex 4-digit CID |
-| cvv_back_enc | String (encrypted) | No | 3-digit CVV |
-| expiry_date_enc | String (encrypted) | No | |
-| cardholder_name | String | No | |
-| statement_close_day | Integer (1–31) | No | Required for monthly_recurring tranches (SPEC-04) |
+| Field               | Type               | Required | Notes                                             |
+| ------------------- | ------------------ | -------- | ------------------------------------------------- |
+| activation_date     | Date               | Yes      |                                                   |
+| credit_limit        | Decimal            | No       |                                                   |
+| card_number_enc     | String (encrypted) | No       |                                                   |
+| cvv_front_enc       | String (encrypted) | No       | Amex 4-digit CID                                  |
+| cvv_back_enc        | String (encrypted) | No       | 3-digit CVV                                       |
+| expiry_date_enc     | String (encrypted) | No       |                                                   |
+| cardholder_name     | String             | No       |                                                   |
+| statement_close_day | Integer (1–31)     | No       | Required for monthly_recurring tranches (SPEC-04) |
 
 **Estimated First Year Value (D-199):**
 
@@ -228,21 +228,21 @@ Both open FRM-006 with Market Card pre-filled/locked and `parent_card_instance_i
 
 **List Page:**
 
-| Column | Source | Visible by Default | Filterable |
-|--------|--------|--------------------|------------|
-| Card Name | Market Card → `name` | Yes | Yes |
-| Issuer | Market Card → Issuer → `name` | Yes | Yes |
-| Lifecycle State | Card Instance → `lifecycle_state` (ObjectStatus, D-60 colors) | Yes | Yes |
-| Activation Date | Card Instance → `activation_date` | Yes | Yes |
-| Annual Fee | Offer → `fee_amount` | Yes | Yes |
-| Credit Limit | Card Instance → `credit_limit` | Yes | Yes |
-| Rewards Program | Market Card → Rewards Program → `name` | Yes | Yes |
-| Next AF Date | Computed: `activation_date + N×12 months` | Yes | Yes |
-| Estimated Value Gain | Computed: lifetime points earned + perks realized − fees paid | Yes | Yes |
-| Bonus Progress | ENH-003: e.g., "2/3 tranches met" or "Complete" | Yes | Yes |
-| Card Network | Market Card → Card Network → `name` | Yes | Yes |
-| Total Points Earned | Computed from transactions + adjustments | Yes | Yes |
-| Tentative Cancel Date | Card Instance → `tentative_cancel_date` | No (p13n) | Yes |
+| Column                | Source                                                        | Visible by Default | Filterable |
+| --------------------- | ------------------------------------------------------------- | ------------------ | ---------- |
+| Card Name             | Market Card → `name`                                          | Yes                | Yes        |
+| Issuer                | Market Card → Issuer → `name`                                 | Yes                | Yes        |
+| Lifecycle State       | Card Instance → `lifecycle_state` (ObjectStatus, D-60 colors) | Yes                | Yes        |
+| Activation Date       | Card Instance → `activation_date`                             | Yes                | Yes        |
+| Annual Fee            | Offer → `fee_amount`                                          | Yes                | Yes        |
+| Credit Limit          | Card Instance → `credit_limit`                                | Yes                | Yes        |
+| Rewards Program       | Market Card → Rewards Program → `name`                        | Yes                | Yes        |
+| Next AF Date          | Computed: `activation_date + N×12 months`                     | Yes                | Yes        |
+| Estimated Value Gain  | Computed: lifetime points earned + perks realized − fees paid | Yes                | Yes        |
+| Bonus Progress        | ENH-003: e.g., "2/3 tranches met" or "Complete"               | Yes                | Yes        |
+| Card Network          | Market Card → Card Network → `name`                           | Yes                | Yes        |
+| Total Points Earned   | Computed from transactions + adjustments                      | Yes                | Yes        |
+| Tentative Cancel Date | Card Instance → `tentative_cancel_date`                       | No (p13n)          | Yes        |
 
 **List Behavior:**
 
@@ -255,10 +255,10 @@ Both open FRM-006 with Market Card pre-filled/locked and `parent_card_instance_i
 
 **Inline Actions (from list):**
 
-| Action | Visible When |
-|--------|-------------|
-| Mark To Cancel | Focus or Active |
-| Close Card | Focus, Active, or To Cancel |
+| Action         | Visible When                |
+| -------------- | --------------------------- |
+| Mark To Cancel | Focus or Active             |
+| Close Card     | Focus, Active, or To Cancel |
 
 **Object Page (scrolling, per D-62):**
 
@@ -266,44 +266,44 @@ Both open FRM-006 with Market Card pre-filled/locked and `parent_card_instance_i
 
 **Sections:**
 
-| # | Section | Content |
-|---|---------|---------|
-| 1 | Overview | Card details (credit limit, statement close day, cardholder name, FYF status), offer summary with tranche table, encrypted fields (card number, CVV1, CVV2, expiry — reveal on click) |
-| 2 | Bonus Progress | Tranche table from ENH-003 (SPEC-04), MSR progress bars, deadlines |
-| 3 | Earning & Perks | Earning multipliers table + soft perks with utilization tracking. Overridable per instance (D-192). |
-| 4 | Fee History | Computed timeline from activation_date + fee data. Year 1: $0 if FYF, else fee_amount. Subsequent years: fee_amount. Not linked to transactions. (D-201) |
-| 5 | Supplementary Cards | Child Card Instances table. "Add Supplementary Card" action. Points/fees roll up to parent totals. (D-202) |
-| 6 | Lifecycle Timeline | Visual timeline of state transitions with dates (D-204) |
-| 7 | Analytics | Monthly spend trend, earning category breakdown, points earned over time, bonus progress timeline. Includes supp card data (D-202). |
+| #   | Section             | Content                                                                                                                                                                               |
+| --- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Overview            | Card details (credit limit, statement close day, cardholder name, FYF status), offer summary with tranche table, encrypted fields (card number, CVV1, CVV2, expiry — reveal on click) |
+| 2   | Bonus Progress      | Tranche table from ENH-003 (SPEC-04), MSR progress bars, deadlines                                                                                                                    |
+| 3   | Earning & Perks     | Earning multipliers table + soft perks with utilization tracking. Overridable per instance (D-192).                                                                                   |
+| 4   | Fee History         | Computed timeline from activation_date + fee data. Year 1: $0 if FYF, else fee_amount. Subsequent years: fee_amount. Not linked to transactions. (D-201)                              |
+| 5   | Supplementary Cards | Child Card Instances table. "Add Supplementary Card" action. Points/fees roll up to parent totals. (D-202)                                                                            |
+| 6   | Lifecycle Timeline  | Visual timeline of state transitions with dates (D-204)                                                                                                                               |
+| 7   | Analytics           | Monthly spend trend, earning category breakdown, points earned over time, bonus progress timeline. Includes supp card data (D-202).                                                   |
 
 **Object Page Actions:**
 
-| Action | Visible When | Effect |
-|--------|-------------|--------|
-| Mark To Cancel | Focus or Active | Prompts for `tentative_cancel_date`, transitions state |
-| Close Card | Focus, Active, or To Cancel | Prompts for `closed_date`, transitions to Closed |
-| Reactivate | To Cancel | Reverses to Active, clears `tentative_cancel_date` |
-| Add Supplementary Card | Not Closed | Opens FRM-006 with Market Card locked, parent set |
-| Edit Card Details | Not Closed | Inline edit of mutable fields |
-| Link SimpleFIN Account | Not Closed & unlinked | Opens FRM-010 flow |
-| Unlink SimpleFIN Account | Not Closed & linked | Removes Provider Account mapping |
-| Delete Card | Any state | Deletes card if zero transactions (BR-30–BR-32) |
+| Action                   | Visible When                | Effect                                                 |
+| ------------------------ | --------------------------- | ------------------------------------------------------ |
+| Mark To Cancel           | Focus or Active             | Prompts for `tentative_cancel_date`, transitions state |
+| Close Card               | Focus, Active, or To Cancel | Prompts for `closed_date`, transitions to Closed       |
+| Reactivate               | To Cancel                   | Reverses to Active, clears `tentative_cancel_date`     |
+| Add Supplementary Card   | Not Closed                  | Opens FRM-006 with Market Card locked, parent set      |
+| Edit Card Details        | Not Closed                  | Inline edit of mutable fields                          |
+| Link SimpleFIN Account   | Not Closed & unlinked       | Opens FRM-010 flow                                     |
+| Unlink SimpleFIN Account | Not Closed & linked         | Removes Provider Account mapping                       |
+| Delete Card              | Any state                   | Deletes card if zero transactions (BR-30–BR-32)        |
 
 **Mutable Fields (D-205):**
 
-| Field | Editable | Notes |
-|-------|----------|-------|
-| Market Card | No | Fundamental identity — delete and re-create |
-| Offer / Tranches | Yes | User might correct terms |
-| Activation Date | Yes | Correction |
-| Credit Limit | Yes | Limit increases |
-| Statement Close Day | Yes | Could change |
-| Cardholder Name | Yes | Rare |
-| Card Number (enc) | Yes | Card renewal |
-| CVV1 / CVV2 (enc) | Yes | Card renewal |
-| Expiry (enc) | Yes | Card renewal |
-| Lifecycle State | No | Changed via actions only |
-| Parent Card Instance | No | Structural — set at creation |
+| Field                | Editable | Notes                                       |
+| -------------------- | -------- | ------------------------------------------- |
+| Market Card          | No       | Fundamental identity — delete and re-create |
+| Offer / Tranches     | Yes      | User might correct terms                    |
+| Activation Date      | Yes      | Correction                                  |
+| Credit Limit         | Yes      | Limit increases                             |
+| Statement Close Day  | Yes      | Could change                                |
+| Cardholder Name      | Yes      | Rare                                        |
+| Card Number (enc)    | Yes      | Card renewal                                |
+| CVV1 / CVV2 (enc)    | Yes      | Card renewal                                |
+| Expiry (enc)         | Yes      | Card renewal                                |
+| Lifecycle State      | No       | Changed via actions only                    |
+| Parent Card Instance | No       | Structural — set at creation                |
 
 **Onboarding Completion Summary (D-204):**
 
@@ -330,96 +330,96 @@ No separate WFL-004 implementation. Traceability preserved — WFL-004 maps to F
 
 ### WFL-002 — Card Lifecycle
 
-| Rule | Description |
-|------|-------------|
-| BR-01 | `lifecycle_state` enum: `Focus`, `Active`, `To Cancel`, `Closed`. |
+| Rule  | Description                                                                                                                                                                  |
+| ----- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| BR-01 | `lifecycle_state` enum: `Focus`, `Active`, `To Cancel`, `Closed`.                                                                                                            |
 | BR-02 | Valid transitions: Focus→Active, Focus→To Cancel, Focus→Closed, Active→To Cancel, Active→Closed, To Cancel→Active, To Cancel→Closed. Any other transition SHALL be rejected. |
-| BR-03 | Closed is terminal — no outbound transitions allowed. |
-| BR-04 | Focus→Active auto-triggers when all offer tranches are met (ENH-003 trigger, SPEC-04). |
-| BR-05 | Focus→Active auto-triggers when all MSR windows have expired (bonus_missed). |
-| BR-06 | Card Instance with no offer SHALL start at Active, not Focus. |
-| BR-07 | Active→To Cancel and Focus→To Cancel require `tentative_cancel_date`. |
-| BR-08 | To Cancel→Active SHALL clear `tentative_cancel_date` and dismiss the `cancel_reminder` alert. |
-| BR-09 | Any transition to Closed SHALL set `closed_date`, dismiss all open alerts for the card, and unlink the Provider Account (if linked). |
-| BR-10 | Closing a parent card SHALL cascade Closed to all supplementary cards, applying BR-09 side effects to each. |
+| BR-03 | Closed is terminal — no outbound transitions allowed.                                                                                                                        |
+| BR-04 | Focus→Active auto-triggers when all offer tranches are met (ENH-003 trigger, SPEC-04).                                                                                       |
+| BR-05 | Focus→Active auto-triggers when all MSR windows have expired (bonus_missed).                                                                                                 |
+| BR-06 | Card Instance with no offer SHALL start at Active, not Focus.                                                                                                                |
+| BR-07 | Active→To Cancel and Focus→To Cancel require `tentative_cancel_date`.                                                                                                        |
+| BR-08 | To Cancel→Active SHALL clear `tentative_cancel_date` and dismiss the `cancel_reminder` alert.                                                                                |
+| BR-09 | Any transition to Closed SHALL set `closed_date`, dismiss all open alerts for the card, and unlink the Provider Account (if linked).                                         |
+| BR-10 | Closing a parent card SHALL cascade Closed to all supplementary cards, applying BR-09 side effects to each.                                                                  |
 
 ### FRM-006 — Card Onboarding
 
-| Rule | Description |
-|------|-------------|
-| BR-11 | Market Card selection is required. Value help against existing Market Cards only — no inline creation. |
-| BR-12 | Offer step is optional — skippable if no bonus. |
-| BR-13 | Offer terms SHALL default from Market Card's current active offer (latest by `offer_start_date` where `offer_end_date` is null or future). |
-| BR-14 | Offer `fee_amount` SHALL default from Market Card's `fee_amount`, overridable by user. |
-| BR-15 | `activation_date` is required. |
-| BR-16 | Wizard save SHALL be atomic: Card Instance + Offer + Offer Tranches created in a single transaction. |
+| Rule  | Description                                                                                                                                                             |
+| ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| BR-11 | Market Card selection is required. Value help against existing Market Cards only — no inline creation.                                                                  |
+| BR-12 | Offer step is optional — skippable if no bonus.                                                                                                                         |
+| BR-13 | Offer terms SHALL default from Market Card's current active offer (latest by `offer_start_date` where `offer_end_date` is null or future).                              |
+| BR-14 | Offer `fee_amount` SHALL default from Market Card's `fee_amount`, overridable by user.                                                                                  |
+| BR-15 | `activation_date` is required.                                                                                                                                          |
+| BR-16 | Wizard save SHALL be atomic: Card Instance + Offer + Offer Tranches created in a single transaction.                                                                    |
 | BR-17 | Estimated First Year Value = SUM(tranche `bonus_amount`) + SUM(soft perk `dollar_value`) − first year fee (0 if FYF, else offer `fee_amount`). Live-updating in wizard. |
-| BR-18 | Supplementary card creation SHALL reuse FRM-006 with Market Card pre-filled/locked and `parent_card_instance_id` auto-set. |
-| BR-19 | Multiple Card Instances for the same Market Card are allowed (re-churning). |
+| BR-18 | Supplementary card creation SHALL reuse FRM-006 with Market Card pre-filled/locked and `parent_card_instance_id` auto-set.                                              |
+| BR-19 | Multiple Card Instances for the same Market Card are allowed (re-churning).                                                                                             |
 
 ### FRM-004 — My Cards
 
-| Rule | Description |
-|------|-------------|
-| BR-20 | List page SHALL show only primary cards (`parent_card_instance_id` is null). |
-| BR-21 | Default variant SHALL filter `lifecycle_state` to exclude Closed. Closed remains selectable. |
-| BR-22 | Every list column SHALL have a corresponding filter. |
-| BR-23 | Default sort: `activation_date` descending. |
-| BR-24 | Supplementary cards SHALL be displayed only in the parent's Supplementary Cards section, not in the list. |
+| Rule  | Description                                                                                                                               |
+| ----- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| BR-20 | List page SHALL show only primary cards (`parent_card_instance_id` is null).                                                              |
+| BR-21 | Default variant SHALL filter `lifecycle_state` to exclude Closed. Closed remains selectable.                                              |
+| BR-22 | Every list column SHALL have a corresponding filter.                                                                                      |
+| BR-23 | Default sort: `activation_date` descending.                                                                                               |
+| BR-24 | Supplementary cards SHALL be displayed only in the parent's Supplementary Cards section, not in the list.                                 |
 | BR-25 | Supplementary card points and fees SHALL roll up into the parent card's analytics and totals (Estimated Value Gain, Total Points Earned). |
-| BR-26 | Market Card is immutable after creation. All other fields are mutable via Edit or lifecycle actions. |
-| BR-27 | Encrypted fields (card number, CVV1, CVV2, expiry) SHALL be editable post-creation. |
-| BR-28 | Fee History SHALL be a computed timeline from `activation_date` + fee data, not linked to transactions. |
-| BR-29 | Estimated Value Gain = lifetime total points earned + perks realized − total fees paid. |
+| BR-26 | Market Card is immutable after creation. All other fields are mutable via Edit or lifecycle actions.                                      |
+| BR-27 | Encrypted fields (card number, CVV1, CVV2, expiry) SHALL be editable post-creation.                                                       |
+| BR-28 | Fee History SHALL be a computed timeline from `activation_date` + fee data, not linked to transactions.                                   |
+| BR-29 | Estimated Value Gain = lifetime total points earned + perks realized − total fees paid.                                                   |
 
 ### Delete
 
-| Rule | Description |
-|------|-------------|
-| BR-30 | Card Instance deletion SHALL be allowed only if zero transactions are assigned. |
+| Rule  | Description                                                                                                                                                                       |
+| ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| BR-30 | Card Instance deletion SHALL be allowed only if zero transactions are assigned.                                                                                                   |
 | BR-31 | Delete SHALL cascade to: Offer, Tranches, instance-level Earning Multiplier/Soft Perk Definition overrides, Card Perks, Alerts. Provider Account SHALL be unlinked (not deleted). |
-| BR-32 | Parent delete SHALL be blocked if any supplementary card has transactions. |
+| BR-32 | Parent delete SHALL be blocked if any supplementary card has transactions.                                                                                                        |
 
 ### Alerts
 
-| Rule | Description |
-|------|-------------|
-| BR-33 | `af_approaching` alert SHALL be created `AF_ALERT_DAYS` (default 30) days before the next AF date. |
-| BR-34 | Next AF date = `activation_date` + N×12 months, where N is the smallest positive integer placing the date in the future. |
+| Rule  | Description                                                                                                                                                        |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| BR-33 | `af_approaching` alert SHALL be created `AF_ALERT_DAYS` (default 30) days before the next AF date.                                                                 |
+| BR-34 | Next AF date = `activation_date` + N×12 months, where N is the smallest positive integer placing the date in the future.                                           |
 | BR-35 | `cancel_reminder` alert SHALL be created `CANCEL_REMINDER_DAYS` (default 2) days before `tentative_cancel_date`. Alert persists until card leaves To Cancel state. |
 
 ### Overrides
 
-| Rule | Description |
-|------|-------------|
-| BR-36 | Earning Multiplier and Soft Perk Definition support instance-level overrides via optional `card_instance_id`. |
-| BR-37 | Instance-level overrides SHALL take precedence over Market Card defaults when displaying or computing for a card instance. |
+| Rule  | Description                                                                                                                        |
+| ----- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| BR-36 | Earning Multiplier and Soft Perk Definition support instance-level overrides via optional `card_instance_id`.                      |
+| BR-37 | Instance-level overrides SHALL take precedence over Market Card defaults when displaying or computing for a card instance.         |
 | BR-38 | No auto-copy on onboarding. Instance overrides are created only when the user explicitly edits a value on the FRM-004 object page. |
 
 ---
 
 ## 6. Error Handling
 
-| Condition | Response | i18n Key Pattern |
-|-----------|----------|------------------|
-| Invalid state transition attempted | Reject with current state and attempted target | `card.lifecycle.invalidTransition` |
-| `tentative_cancel_date` missing on To Cancel transition | Validation error | `card.lifecycle.cancelDateRequired` |
-| `closed_date` missing on Close transition | Validation error | `card.lifecycle.closeDateRequired` |
-| Market Card not selected in wizard | Validation error | `card.onboarding.marketCardRequired` |
-| `activation_date` missing in wizard | Validation error | `card.onboarding.activationDateRequired` |
-| Delete attempted with assigned transactions | Reject with transaction count | `card.delete.hasTransactions` |
-| Parent delete attempted with supp card transactions | Reject listing which supp cards have transactions | `card.delete.suppCardHasTransactions` |
-| Cascade close fails on supp card | Transaction rolled back, parent remains in original state | `card.lifecycle.cascadeCloseFailed` |
-| Provider Account unlink fails on close | Log warning, proceed with close (non-blocking) | `card.lifecycle.unlinkWarning` |
+| Condition                                               | Response                                                  | i18n Key Pattern                         |
+| ------------------------------------------------------- | --------------------------------------------------------- | ---------------------------------------- |
+| Invalid state transition attempted                      | Reject with current state and attempted target            | `card.lifecycle.invalidTransition`       |
+| `tentative_cancel_date` missing on To Cancel transition | Validation error                                          | `card.lifecycle.cancelDateRequired`      |
+| `closed_date` missing on Close transition               | Validation error                                          | `card.lifecycle.closeDateRequired`       |
+| Market Card not selected in wizard                      | Validation error                                          | `card.onboarding.marketCardRequired`     |
+| `activation_date` missing in wizard                     | Validation error                                          | `card.onboarding.activationDateRequired` |
+| Delete attempted with assigned transactions             | Reject with transaction count                             | `card.delete.hasTransactions`            |
+| Parent delete attempted with supp card transactions     | Reject listing which supp cards have transactions         | `card.delete.suppCardHasTransactions`    |
+| Cascade close fails on supp card                        | Transaction rolled back, parent remains in original state | `card.lifecycle.cascadeCloseFailed`      |
+| Provider Account unlink fails on close                  | Log warning, proceed with close (non-blocking)            | `card.lifecycle.unlinkWarning`           |
 
 ---
 
 ## 7. Open Items
 
-| OI | Resolution |
-|----|------------|
+| OI    | Resolution                                                                                                                                              |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | OI-04 | Resolved. Card status transition rules fully defined — 4 states, 7 transitions (9 including auto-triggers), guards, and side effects specified in §4.1. |
-| OI-06 | Two alert types defined: `af_approaching`, `cancel_reminder`. Added to Alert Type seed (total now 13 across all specs). |
+| OI-06 | Two alert types defined: `af_approaching`, `cancel_reminder`. Added to Alert Type seed (total now 13 across all specs).                                 |
 
 ---
 
@@ -692,16 +692,16 @@ No separate WFL-004 implementation. Traceability preserved — WFL-004 maps to F
 
 ## 9. Cross-Spec Notes
 
-| Target Spec | Note |
-|-------------|------|
-| SPEC-01 (Ingestion Pipeline) | FRM-010 SimpleFIN link reused in FRM-006 step 4. Provider Account `card_instance_id` mapping triggers unmatched transaction resolution (SPEC-01, BR-07). Provider Account unlinked on card close. |
-| SPEC-02 (Transaction Processing) | Card reassignment dropdown on FRM-001 filters by lifecycle state — exclude Closed (SPEC-02 cross-spec note). Transaction count checked on card delete (BR-30). |
-| SPEC-04 (Bonus & Points) | ENH-003 provides Focus→Active auto-trigger (all tranches met) and Focus→Active on bonus_missed. `statement_close_day` on Card Instance used by ENH-003. Bonus Progress section on FRM-004 cross-refs ENH-003 output. |
-| SPEC-06 (Reference Data & Seed) | Alert Type seed values: add `af_approaching`, `cancel_reminder` (total 13). System Config: add `AF_ALERT_DAYS`, `CANCEL_REMINDER_DAYS`. |
-| SPEC-05 (Budget Pipeline) | No direct dependency. Cards with transactions feed into budget via Transaction → Purchase Type. |
-| FRM-005 (Market Cards) | FRM-006 step 1 reads from Market Card catalog managed by FRM-005. No inline creation from wizard. |
-| Business Architecture | WFL-004 status changed to "Absorbed by FRM-006" (D-188). |
+| Target Spec                      | Note                                                                                                                                                                                                                 |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| SPEC-01 (Ingestion Pipeline)     | FRM-010 SimpleFIN link reused in FRM-006 step 4. Provider Account `card_instance_id` mapping triggers unmatched transaction resolution (SPEC-01, BR-07). Provider Account unlinked on card close.                    |
+| SPEC-02 (Transaction Processing) | Card reassignment dropdown on FRM-001 filters by lifecycle state — exclude Closed (SPEC-02 cross-spec note). Transaction count checked on card delete (BR-30).                                                       |
+| SPEC-04 (Bonus & Points)         | ENH-003 provides Focus→Active auto-trigger (all tranches met) and Focus→Active on bonus_missed. `statement_close_day` on Card Instance used by ENH-003. Bonus Progress section on FRM-004 cross-refs ENH-003 output. |
+| SPEC-06 (Reference Data & Seed)  | Alert Type seed values: add `af_approaching`, `cancel_reminder` (total 13). System Config: add `AF_ALERT_DAYS`, `CANCEL_REMINDER_DAYS`.                                                                              |
+| SPEC-05 (Budget Pipeline)        | No direct dependency. Cards with transactions feed into budget via Transaction → Purchase Type.                                                                                                                      |
+| FRM-005 (Market Cards)           | FRM-006 step 1 reads from Market Card catalog managed by FRM-005. No inline creation from wizard.                                                                                                                    |
+| Business Architecture            | WFL-004 status changed to "Absorbed by FRM-006" (D-188).                                                                                                                                                             |
 
 ---
 
-*This spec is the single source of truth for FRM-004, FRM-006, WFL-002, and WFL-004. Card Instance entity definition is in [DATA_MODEL.md](../DATA_MODEL.md). Design decisions are in [DECISIONS_LOG.md](../user-profile/DECISIONS_LOG.md).*
+_This spec is the single source of truth for FRM-004, FRM-006, WFL-002, and WFL-004. Card Instance entity definition is in [DATA_MODEL.md](../DATA_MODEL.md). Design decisions are in [DECISIONS_LOG.md](../user-profile/DECISIONS_LOG.md)._

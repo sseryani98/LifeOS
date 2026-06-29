@@ -12,8 +12,8 @@
 
 ## 1. Change History
 
-| Date | Author | Description |
-|------|--------|-------------|
+| Date       | Author          | Description                                                       |
+| ---------- | --------------- | ----------------------------------------------------------------- |
 | 2026-02-17 | Sandro & Claude | Initial creation — workshop complete. D-136 through D-141 logged. |
 
 ---
@@ -30,15 +30,15 @@ Key decisions: D-06 (recommendation logic), D-40 (time-bound multipliers), D-136
 
 ## 3. Data Model References
 
-| Entity | Role | DM-001 Ref | Amendment? |
-|--------|------|------------|------------|
-| Market Card | Card product — links to issuer, program, multipliers | §4.1 | — |
-| Earning Multiplier | Per-card per-category multiplier with time-bounding | §4.5 | — |
-| Card Instance | User's card — lifecycle state, activation date, offer link | §4.4 | — |
-| Earning Category | Multiplier buckets cards earn against | §3.4 | — |
-| Rewards Program | CPP valuation for dollar normalization | §3.2 | — |
-| Offer Tranche | MSR thresholds and bonus amounts for override calc | §4.3 | — |
-| Offer | Links card instance to offer terms | §4.2 | — |
+| Entity             | Role                                                       | DM-001 Ref | Amendment? |
+| ------------------ | ---------------------------------------------------------- | ---------- | ---------- |
+| Market Card        | Card product — links to issuer, program, multipliers       | §4.1       | —          |
+| Earning Multiplier | Per-card per-category multiplier with time-bounding        | §4.5       | —          |
+| Card Instance      | User's card — lifecycle state, activation date, offer link | §4.4       | —          |
+| Earning Category   | Multiplier buckets cards earn against                      | §3.4       | —          |
+| Rewards Program    | CPP valuation for dollar normalization                     | §3.2       | —          |
+| Offer Tranche      | MSR thresholds and bonus amounts for override calc         | §4.3       | —          |
+| Offer              | Links card instance to offer terms                         | §4.2       | —          |
 
 ### DM-001 Amendments
 
@@ -111,11 +111,11 @@ Card A: Amex Cobalt, Dining = 5× MR at 2.0 CPP → 10.0¢/$, no active MSR.
 
 Card B: TD Aeroplan, Dining = 1.5× at 1.8 CPP → 2.7¢/$. In-progress MSR: $500 remaining, 25,000 pts bonus.
 
-| Component | Card A | Card B |
-|-----------|--------|--------|
-| Base earn rate | 10.0¢/$ | 2.7¢/$ |
-| Bonus value/dollar | — | (25,000 × 1.8 / 100) / 500 = 90.0¢/$ |
-| Total effective | 10.0¢/$ | 92.7¢/$ |
+| Component          | Card A  | Card B                               |
+| ------------------ | ------- | ------------------------------------ |
+| Base earn rate     | 10.0¢/$ | 2.7¢/$                               |
+| Bonus value/dollar | —       | (25,000 × 1.8 / 100) / 500 = 90.0¢/$ |
+| Total effective    | 10.0¢/$ | 92.7¢/$                              |
 
 **Result:** Card B recommended with bonus override flag. Every dollar spent on Card B toward its MSR is worth 92.7¢ in total value.
 
@@ -125,11 +125,11 @@ Card A: Cobalt, Groceries = 5× MR at 2.0 CPP → 10.0¢/$.
 
 Card B: CIBC Aventura, Groceries = 1× at 1.5 CPP → 1.5¢/$. In-progress MSR: $3,000 remaining, 5,000 pts bonus.
 
-| Component | Card A | Card B |
-|-----------|--------|--------|
-| Base earn rate | 10.0¢/$ | 1.5¢/$ |
-| Bonus value/dollar | — | (5,000 × 1.5 / 100) / 3,000 = 2.5¢/$ |
-| Total effective | 10.0¢/$ | 4.0¢/$ |
+| Component          | Card A  | Card B                               |
+| ------------------ | ------- | ------------------------------------ |
+| Base earn rate     | 10.0¢/$ | 1.5¢/$                               |
+| Bonus value/dollar | —       | (5,000 × 1.5 / 100) / 3,000 = 2.5¢/$ |
+| Total effective    | 10.0¢/$ | 4.0¢/$                               |
 
 **Result:** Card A remains recommended. The bonus override is insufficient (4.0¢/$ < 10.0¢/$).
 
@@ -150,46 +150,46 @@ ENH-002 exposes two query modes:
 - **Input:** `earning_category_id`
 - **Output:**
 
-| Field | Type | Notes |
-|-------|------|-------|
-| `earning_category_id` | UUID | |
-| `earning_category_name` | string | |
-| `recommendations` | array | Ranked list of eligible cards |
+| Field                   | Type   | Notes                         |
+| ----------------------- | ------ | ----------------------------- |
+| `earning_category_id`   | UUID   |                               |
+| `earning_category_name` | string |                               |
+| `recommendations`       | array  | Ranked list of eligible cards |
 
 Per card in `recommendations`:
 
-| Field | Type | Notes |
-|-------|------|-------|
-| `card_instance_id` | UUID | |
-| `card_name` | string | Market Card name |
-| `rewards_program_name` | string | |
-| `multiplier` | decimal | Raw multiplier |
-| `cpp_valuation` | decimal | Program's CPP |
-| `effective_earn_rate` | decimal | ¢/$ |
-| `is_recommended` | boolean | True for top card |
-| `has_bonus_override` | boolean | True if override is active |
-| `remaining_msr` | decimal | Null if no active MSR |
-| `msr_days_remaining` | integer | Null if no active MSR |
-| `bonus_value_per_dollar` | decimal | Null if no active MSR |
+| Field                    | Type    | Notes                      |
+| ------------------------ | ------- | -------------------------- |
+| `card_instance_id`       | UUID    |                            |
+| `card_name`              | string  | Market Card name           |
+| `rewards_program_name`   | string  |                            |
+| `multiplier`             | decimal | Raw multiplier             |
+| `cpp_valuation`          | decimal | Program's CPP              |
+| `effective_earn_rate`    | decimal | ¢/$                        |
+| `is_recommended`         | boolean | True for top card          |
+| `has_bonus_override`     | boolean | True if override is active |
+| `remaining_msr`          | decimal | Null if no active MSR      |
+| `msr_days_remaining`     | integer | Null if no active MSR      |
+| `bonus_value_per_dollar` | decimal | Null if no active MSR      |
 
 **Full-matrix mode:**
 
 - **Input:** None
 - **Output:** Array of single-category results for all earning categories, plus:
 
-| Field | Type | Notes |
-|-------|------|-------|
-| `wallet_summary` | array | Optimal card distribution — card name + count of categories won |
-| `top_yields` | array | Top 5 highest earn rate combinations (category × card), base rates only |
+| Field            | Type  | Notes                                                                   |
+| ---------------- | ----- | ----------------------------------------------------------------------- |
+| `wallet_summary` | array | Optimal card distribution — card name + count of categories won         |
+| `top_yields`     | array | Top 5 highest earn rate combinations (category × card), base rates only |
 
 **Consumers:**
 
-| Consumer | Query Mode | Usage |
-|----------|-----------|-------|
-| RPT-006 (Card Recommendation Matrix) | Full matrix | Primary visualization |
-| FRM-002 (Transaction Entry) | Single category | Card recommendation during manual entry |
-| RPT-001 (Churnboard) | Full matrix | Card recommendation section |
-| FRM-009 (Earning Category object page) | Single category | Yield table on Earning Category detail |
+| Consumer                               | Query Mode      | Usage                                   |
+| -------------------------------------- | --------------- | --------------------------------------- |
+| RPT-006 (Card Recommendation Matrix)   | Full matrix     | Primary visualization                   |
+| FRM-002 (Transaction Entry)            | Single category | Card recommendation during manual entry |
+| RPT-001 (Churnboard)                   | Full matrix     | Card recommendation section             |
+| FRM-009 (Earning Category object page) | Single category | Yield table on Earning Category detail  |
 
 ### 4.2 RPT-006 — Card Recommendation Matrix [Report]
 
@@ -235,51 +235,51 @@ Per card in `recommendations`:
 
 ### ENH-002 — Card Recommendation Engine
 
-| Rule | Description |
-|------|-------------|
-| BR-01 | Eligible cards: `lifecycle_state` in (`Focus`, `Active`, `To Cancel`) AND `activation_date IS NOT NULL`. `Closed` cards excluded (D-137). |
-| BR-02 | Effective earn rate = `multiplier × cpp_valuation / 100` (cents per dollar). Normalizes across programs (D-136). |
-| BR-03 | If no Earning Multiplier exists for a card × category, fall back to "Everything Else" multiplier. If that's also missing, earn rate = 0. |
-| BR-04 | Multiplier selected by current date within `[effective_from, effective_to]` range (D-40). Recommendations always reflect current rates. |
-| BR-05 | Default recommendation: card with the highest effective earn rate for the given category. |
+| Rule  | Description                                                                                                                                                                             |
+| ----- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| BR-01 | Eligible cards: `lifecycle_state` in (`Focus`, `Active`, `To Cancel`) AND `activation_date IS NOT NULL`. `Closed` cards excluded (D-137).                                               |
+| BR-02 | Effective earn rate = `multiplier × cpp_valuation / 100` (cents per dollar). Normalizes across programs (D-136).                                                                        |
+| BR-03 | If no Earning Multiplier exists for a card × category, fall back to "Everything Else" multiplier. If that's also missing, earn rate = 0.                                                |
+| BR-04 | Multiplier selected by current date within `[effective_from, effective_to]` range (D-40). Recommendations always reflect current rates.                                                 |
+| BR-05 | Default recommendation: card with the highest effective earn rate for the given category.                                                                                               |
 | BR-06 | Bonus override: `bonus_value_per_dollar = (bonus_amount × cpp_valuation / 100) / remaining_msr`. Override when `bonus_value_per_dollar + card_earn_rate > best_card_earn_rate` (D-136). |
-| BR-07 | Multiple in-progress tranches: use the nearest achievable tranche (lowest `remaining_msr`) for override calculation (D-138). |
-| BR-08 | Monthly recurring tranches: use current in-progress period's remaining MSR and that period's `bonus_amount` for override calculation. |
-| BR-09 | Tie-breaking (equal effective earn rate): in-progress MSR > `Focus` > `Active` > `To Cancel` > alphabetical by card name (D-139). |
-| BR-10 | Two query modes: single-category (ranked card list) and full-matrix (all categories × all cards, wallet summary, top 5 yields). |
-| BR-11 | Wallet summary: count of categories each eligible card is the optimal choice for. Includes bonus override wins. |
-| BR-12 | Top 5 Yields: ranked by effective earn rate (base rates only, no bonus override), across all category × card combinations. |
+| BR-07 | Multiple in-progress tranches: use the nearest achievable tranche (lowest `remaining_msr`) for override calculation (D-138).                                                            |
+| BR-08 | Monthly recurring tranches: use current in-progress period's remaining MSR and that period's `bonus_amount` for override calculation.                                                   |
+| BR-09 | Tie-breaking (equal effective earn rate): in-progress MSR > `Focus` > `Active` > `To Cancel` > alphabetical by card name (D-139).                                                       |
+| BR-10 | Two query modes: single-category (ranked card list) and full-matrix (all categories × all cards, wallet summary, top 5 yields).                                                         |
+| BR-11 | Wallet summary: count of categories each eligible card is the optimal choice for. Includes bonus override wins.                                                                         |
+| BR-12 | Top 5 Yields: ranked by effective earn rate (base rates only, no bonus override), across all category × card combinations.                                                              |
 
 ### RPT-006 — Card Recommendation Matrix
 
-| Rule | Description |
-|------|-------------|
+| Rule  | Description                                                                                                                                |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------ |
 | BR-13 | Matrix orientation: earning categories as rows (sorted by `sort_order`), cards as columns (sorted by issuer name, then card name) (D-140). |
-| BR-14 | Column headers: card name, rewards program, CPP valuation. |
-| BR-15 | Each cell shows: multiplier and effective earn rate. Bonus override cells add inline MSR context (remaining amount, days left). |
-| BR-16 | Heat map gradient: cell background intensity proportional to effective earn rate across the matrix (D-140). |
-| BR-17 | Best card per category row highlighted with distinct visual indicator (green/bold). |
-| BR-18 | Bonus override cells use a separate visual treatment (distinct icon/color) to indicate the recommendation is temporary. |
-| BR-19 | "Everything Else" category included as a row — shows base rate comparison across all cards. |
-| BR-20 | Max Yield column shows best earn rate per category. Available via personalization, shown by default (D-140). |
-| BR-21 | "Your Wallet" summary card above matrix shows optimal card distribution with category counts (D-140). |
-| BR-22 | Top 5 Yields section shows 5 highest earn rate combinations, base rates only (D-140). |
-| BR-23 | Sticky column headers — card names visible while scrolling (D-140). |
-| BR-24 | Cell click popover shows full calculation breakdown (D-140). |
-| BR-25 | No period selector — always reflects current state. |
+| BR-14 | Column headers: card name, rewards program, CPP valuation.                                                                                 |
+| BR-15 | Each cell shows: multiplier and effective earn rate. Bonus override cells add inline MSR context (remaining amount, days left).            |
+| BR-16 | Heat map gradient: cell background intensity proportional to effective earn rate across the matrix (D-140).                                |
+| BR-17 | Best card per category row highlighted with distinct visual indicator (green/bold).                                                        |
+| BR-18 | Bonus override cells use a separate visual treatment (distinct icon/color) to indicate the recommendation is temporary.                    |
+| BR-19 | "Everything Else" category included as a row — shows base rate comparison across all cards.                                                |
+| BR-20 | Max Yield column shows best earn rate per category. Available via personalization, shown by default (D-140).                               |
+| BR-21 | "Your Wallet" summary card above matrix shows optimal card distribution with category counts (D-140).                                      |
+| BR-22 | Top 5 Yields section shows 5 highest earn rate combinations, base rates only (D-140).                                                      |
+| BR-23 | Sticky column headers — card names visible while scrolling (D-140).                                                                        |
+| BR-24 | Cell click popover shows full calculation breakdown (D-140).                                                                               |
+| BR-25 | No period selector — always reflects current state.                                                                                        |
 
 ---
 
 ## 6. Error Handling
 
-| Condition | Response | i18n Key Pattern |
-|-----------|----------|------------------|
-| Card has no `activation_date` | Excluded from eligible cards; not an error | — |
-| No "Everything Else" multiplier for a card | Earn rate = 0 for unmatched categories; log WARN | `churning.recommendation.noBaseMultiplier` |
-| CPP valuation is 0 or null on Rewards Program | Effective earn rate = 0 for all cards in that program; log WARN | `churning.recommendation.noCppValuation` |
-| ENH-003 data unavailable for bonus override check | Skip bonus override for that card; use base rate only; log WARN | `churning.recommendation.bonusDataUnavailable` |
-| No eligible cards | Empty result set; RPT-006 shows empty state with `noDataText` | `churning.recommendation.noEligibleCards` |
-| Earning Multiplier has overlapping date ranges for same card × category | Use the most recent `effective_from`; log WARN | `churning.recommendation.overlappingMultiplier` |
+| Condition                                                               | Response                                                        | i18n Key Pattern                                |
+| ----------------------------------------------------------------------- | --------------------------------------------------------------- | ----------------------------------------------- |
+| Card has no `activation_date`                                           | Excluded from eligible cards; not an error                      | —                                               |
+| No "Everything Else" multiplier for a card                              | Earn rate = 0 for unmatched categories; log WARN                | `churning.recommendation.noBaseMultiplier`      |
+| CPP valuation is 0 or null on Rewards Program                           | Effective earn rate = 0 for all cards in that program; log WARN | `churning.recommendation.noCppValuation`        |
+| ENH-003 data unavailable for bonus override check                       | Skip bonus override for that card; use base rate only; log WARN | `churning.recommendation.bonusDataUnavailable`  |
+| No eligible cards                                                       | Empty result set; RPT-006 shows empty state with `noDataText`   | `churning.recommendation.noEligibleCards`       |
+| Earning Multiplier has overlapping date ranges for same card × category | Use the most recent `effective_from`; log WARN                  | `churning.recommendation.overlappingMultiplier` |
 
 ---
 
@@ -611,15 +611,15 @@ None. All design questions resolved during workshop.
 
 ## 9. Cross-Spec Notes
 
-| Target Spec | Note |
-|-------------|------|
-| SPEC-04 (Bonus & Points) | ENH-002 consumes ENH-003's per-tranche progress data (`remaining_msr`, `status`, `days_remaining`) for bonus override calculation. |
-| SPEC-06 (Reference Data & Seed) | Amendment: Earning Category promoted from inline-edit to object page in FRM-009 (D-141). Object page includes a yield table powered by ENH-002's single-category query mode. Base rates only. Every Market Card should have an "Everything Else" Earning Multiplier row. |
-| SPEC-02 (Transaction Processing) | Earning Category assigned on transactions determines which multiplier applies for ENH-002's earn rate comparison. |
-| SPEC-17 (Transaction Entry) | FRM-002 consumes ENH-002 single-category mode to display card recommendation during manual transaction entry. |
-| SPEC-19 (Churnboard) | RPT-001 has a "card recommendation by category" section consuming ENH-002's full-matrix output. |
-| SPEC-08 (Card Profitability) | ENH-005 is independent from ENH-002 but both share multiplier and CPP data. No direct dependency. |
+| Target Spec                      | Note                                                                                                                                                                                                                                                                     |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| SPEC-04 (Bonus & Points)         | ENH-002 consumes ENH-003's per-tranche progress data (`remaining_msr`, `status`, `days_remaining`) for bonus override calculation.                                                                                                                                       |
+| SPEC-06 (Reference Data & Seed)  | Amendment: Earning Category promoted from inline-edit to object page in FRM-009 (D-141). Object page includes a yield table powered by ENH-002's single-category query mode. Base rates only. Every Market Card should have an "Everything Else" Earning Multiplier row. |
+| SPEC-02 (Transaction Processing) | Earning Category assigned on transactions determines which multiplier applies for ENH-002's earn rate comparison.                                                                                                                                                        |
+| SPEC-17 (Transaction Entry)      | FRM-002 consumes ENH-002 single-category mode to display card recommendation during manual transaction entry.                                                                                                                                                            |
+| SPEC-19 (Churnboard)             | RPT-001 has a "card recommendation by category" section consuming ENH-002's full-matrix output.                                                                                                                                                                          |
+| SPEC-08 (Card Profitability)     | ENH-005 is independent from ENH-002 but both share multiplier and CPP data. No direct dependency.                                                                                                                                                                        |
 
 ---
 
-*This spec traces to [Business Architecture](../BUSINESS_ARCHITECTURE.md) objects ENH-002, RPT-006 and [Data Model](../DATA_MODEL.md) entities listed in §3. New decisions D-136–D-141 logged in [Decisions Log](../user-profile/DECISIONS_LOG.md).*
+_This spec traces to [Business Architecture](../BUSINESS_ARCHITECTURE.md) objects ENH-002, RPT-006 and [Data Model](../DATA_MODEL.md) entities listed in §3. New decisions D-136–D-141 logged in [Decisions Log](../user-profile/DECISIONS_LOG.md)._
