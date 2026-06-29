@@ -8,10 +8,10 @@ Personal financial management system for a Canadian credit card churner. TypeScr
 
 <!-- Updated each sprint -->
 
-**Sprint:** W1-S1 — Foundation & Seed Data
-**Branch:** sprint/W1-S1
-**Goal:** Reference data seeded, config tables editable via SM30-style CRUD
-**Stories:** CNV-002, CNV-003, FRM-009
+**Sprint:** W1-S2 — Ingestion Pipeline
+**Branch:** sprint/W1-S2
+**Goal:** Transactions flow from SimpleFIN and CSV into the system. Connection health visible.
+**Stories:** ENH-008, INT-001, INT-002, FRM-003, FRM-010
 
 ## Architecture
 
