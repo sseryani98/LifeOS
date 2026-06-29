@@ -1,15 +1,5 @@
 namespace com.financialplanner;
 
-type CardType                  : String enum {
-  credit;
-  charge
-}
-
-type CardSegment               : String enum {
-  personal;
-  business
-}
-
 type FeeStructure              : String enum {
   annual;
   monthly

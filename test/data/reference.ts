@@ -48,35 +48,35 @@ export const RBC_ISSUER = {
 export const AEROPLAN_PROGRAM = {
   ID: "a1b2c3d4-0002-4000-8000-000000000001",
   name: "Aeroplan",
-  currencyName: "points",
+  currencyType_code: "points",
   cppValuation: 2.0,
 } as const;
 
 export const AMEX_MR_PROGRAM = {
   ID: "a1b2c3d4-0002-4000-8000-000000000002",
   name: "Amex Membership Rewards",
-  currencyName: "MR points",
+  currencyType_code: "mrPoints",
   cppValuation: 2.0,
 } as const;
 
 export const BONVOY_PROGRAM = {
   ID: "a1b2c3d4-0002-4000-8000-000000000003",
   name: "Marriott Bonvoy",
-  currencyName: "points",
+  currencyType_code: "points",
   cppValuation: 0.6,
 } as const;
 
 export const SCENE_PLUS_PROGRAM = {
   ID: "a1b2c3d4-0002-4000-8000-000000000004",
   name: "Scene+",
-  currencyName: "points",
+  currencyType_code: "points",
   cppValuation: 1.0,
 } as const;
 
 export const CASH_BACK_PROGRAM = {
   ID: "a1b2c3d4-0002-4000-8000-00000000000e",
   name: "Cash Back",
-  currencyName: "dollars",
+  currencyType_code: "dollars",
   cppValuation: 1.0,
 } as const;
 
@@ -84,99 +84,86 @@ export const CASH_BACK_PROGRAM = {
 export const VISA_NETWORK = {
   ID: "a1b2c3d4-0003-4000-8000-000000000001",
   name: "Visa",
-  sortOrder: 1,
 } as const;
 
 export const MASTERCARD_NETWORK = {
   ID: "a1b2c3d4-0003-4000-8000-000000000002",
   name: "Mastercard",
-  sortOrder: 2,
 } as const;
 
 export const AMEX_NETWORK = {
   ID: "a1b2c3d4-0003-4000-8000-000000000003",
   name: "Amex",
-  sortOrder: 3,
 } as const;
 
-// ─── Purchase Types (subset for tests) ──────────────────────────────────────
-export const GROCERIES_PURCHASE_TYPE = {
+// ─── Purchase Categories (subset for tests) ────────────────────────────────
+export const GROCERIES_CATEGORY = {
   ID: "a1b2c3d4-000d-4000-8000-000000000001",
   name: "Groceries",
-  parent_ID: null,
-  sortOrder: 1,
   excludesFromBudget: false,
 } as const;
 
-export const DINING_PURCHASE_TYPE = {
+export const DINING_CATEGORY = {
   ID: "a1b2c3d4-000d-4000-8000-000000000002",
   name: "Dining",
-  parent_ID: null,
-  sortOrder: 2,
   excludesFromBudget: false,
 } as const;
 
-export const TRANSPORTATION_PURCHASE_TYPE = {
+export const TRANSPORTATION_CATEGORY = {
   ID: "a1b2c3d4-000d-4000-8000-000000000003",
   name: "Transportation",
-  parent_ID: null,
-  sortOrder: 3,
   excludesFromBudget: false,
 } as const;
 
-export const CREDIT_CARD_FEES_PURCHASE_TYPE = {
+export const CREDIT_CARD_FEES_CATEGORY = {
   ID: "a1b2c3d4-000d-4000-8000-00000000000b",
   name: "Credit Card Fees",
-  parent_ID: null,
-  sortOrder: 11,
   excludesFromBudget: false,
 } as const;
 
-export const REIMBURSABLE_PURCHASE_TYPE = {
+export const REIMBURSABLE_CATEGORY = {
   ID: "a1b2c3d4-000d-4000-8000-00000000000c",
   name: "Reimbursable",
-  parent_ID: null,
-  sortOrder: 12,
   excludesFromBudget: true,
 } as const;
 
-export const RESTAURANTS_SUBTYPE = {
+// ─── Purchase Types (subtypes, subset for tests) ───────────────────────────
+export const RESTAURANTS_PURCHASE_TYPE = {
   ID: "a1b2c3d4-000d-4000-8000-100000000001",
   name: "Restaurants",
-  parent_ID: "a1b2c3d4-000d-4000-8000-000000000002",
-  sortOrder: 1,
-  excludesFromBudget: false,
+  category_ID: DINING_CATEGORY.ID,
+} as const;
+
+export const FAST_FOOD_PURCHASE_TYPE = {
+  ID: "a1b2c3d4-000d-4000-8000-100000000002",
+  name: "Fast Food",
+  category_ID: DINING_CATEGORY.ID,
 } as const;
 
 // ─── Earning Categories (subset for tests) ──────────────────────────────────
 export const GROCERIES_EARNING_CATEGORY = {
   ID: "a1b2c3d4-000c-4000-8000-000000000001",
   name: "Groceries",
-  sortOrder: 1,
 } as const;
 
 export const DINING_EARNING_CATEGORY = {
   ID: "a1b2c3d4-000c-4000-8000-000000000002",
   name: "Dining",
-  sortOrder: 2,
 } as const;
 
 export const GAS_EARNING_CATEGORY = {
   ID: "a1b2c3d4-000c-4000-8000-000000000003",
   name: "Gas",
-  sortOrder: 3,
 } as const;
 
 export const TRAVEL_EARNING_CATEGORY = {
   ID: "a1b2c3d4-000c-4000-8000-000000000005",
   name: "Travel",
-  sortOrder: 5,
 } as const;
 
 export const EVERYTHING_ELSE_EARNING_CATEGORY = {
   ID: "a1b2c3d4-000c-4000-8000-00000000000e",
   name: "Everything Else",
-  sortOrder: 14,
 } as const;
 
 // ─── Alert Types (full set — used across many specs) ────────────────────────
@@ -233,17 +220,14 @@ export const ALERT_TYPE_REVIEW_OVERDUE = {
 export const INFO_SEVERITY = {
   ID: "a1b2c3d4-0004-4000-8000-000000000001",
   name: "info",
-  sortOrder: 1,
 } as const;
 export const WARNING_SEVERITY = {
   ID: "a1b2c3d4-0004-4000-8000-000000000002",
   name: "warning",
-  sortOrder: 2,
 } as const;
 export const CRITICAL_SEVERITY = {
   ID: "a1b2c3d4-0004-4000-8000-000000000003",
   name: "critical",
-  sortOrder: 3,
 } as const;
 
 // ─── System Config Keys ─────────────────────────────────────────────────────
@@ -315,21 +299,21 @@ export const AEROPLAN_PREMIUM_TIER = {
 // ─── Perk Types ─────────────────────────────────────────────────────────────
 export const LOUNGE_PASS_PERK = {
   ID: "a1b2c3d4-0008-4000-8000-000000000001",
-  name: "lounge_pass",
+  name: "Lounge Pass",
 } as const;
 export const TRAVEL_CREDIT_PERK = {
   ID: "a1b2c3d4-0008-4000-8000-000000000002",
-  name: "travel_credit",
+  name: "Travel Credit",
 } as const;
 
 // ─── Adjustment Types ───────────────────────────────────────────────────────
 export const SIGNUP_BONUS_ADJUSTMENT = {
   ID: "a1b2c3d4-0009-4000-8000-000000000001",
-  name: "signup_bonus",
+  name: "Sign-up Bonus",
 } as const;
 export const REFERRAL_ADJUSTMENT = {
   ID: "a1b2c3d4-0009-4000-8000-000000000002",
-  name: "referral",
+  name: "Referral",
 } as const;
 
 // ─── Pattern Sources ────────────────────────────────────────────────────────
@@ -364,4 +348,26 @@ export const FLIGHT_REDEMPTION = {
 export const HOTEL_REDEMPTION = {
   ID: "a1b2c3d4-000a-4000-8000-000000000002",
   name: "Hotel",
+} as const;
+
+// ─── Financial Account Types ───────────────────────────────────────────────
+export const RRSP_ACCOUNT_TYPE = {
+  ID: "a1b2c3d4-000b-4000-8000-000000000001",
+  name: "RRSP",
+  isAsset: true,
+} as const;
+export const CAR_LOAN_ACCOUNT_TYPE = {
+  ID: "a1b2c3d4-000b-4000-8000-000000000009",
+  name: "Car Loan",
+  isAsset: false,
+} as const;
+
+// ─── Income Source Types ───────────────────────────────────────────────────
+export const SALARY_INCOME_TYPE = {
+  ID: "a1b2c3d4-0007-4000-8000-000000000001",
+  name: "Salary",
+} as const;
+export const BONUS_INCOME_TYPE = {
+  ID: "a1b2c3d4-0007-4000-8000-000000000002",
+  name: "Bonus",
 } as const;

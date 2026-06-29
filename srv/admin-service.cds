@@ -9,35 +9,51 @@ using from '../db/budget/schema';
 service AdminService @(path: '/service/adminSvcs') {
   @odata.draft.enabled
   entity Issuers                    as projection on fp.Issuer;
+
   @odata.draft.enabled
   entity RewardsPrograms            as projection on fp.RewardsProgram;
+
   @odata.draft.enabled
+  entity PurchaseCategories         as projection on fp.PurchaseCategory;
+
   entity PurchaseTypes              as projection on fp.PurchaseType;
+
   @odata.draft.enabled
   entity EarningCategories          as projection on fp.EarningCategory;
+
   @odata.draft.enabled
   entity IssuerApplicationRules     as projection on fp.IssuerApplicationRule;
+
   @odata.draft.enabled
   entity CsvFormatConfigs           as projection on fp.CsvFormatConfig;
+
   @odata.draft.enabled
   entity FinancialAccountTypes      as projection on fp.FinancialAccountType;
+
   @odata.draft.enabled
   entity IncomeSourceTypes          as projection on fp.IncomeSourceType;
+
   @odata.draft.enabled
   entity PerkTypes                  as projection on fp.PerkType;
+
   @odata.draft.enabled
   entity AdjustmentTypes            as projection on fp.AdjustmentType;
+
   entity AlertTypes @readonly       as projection on fp.AlertType;
   entity AlertSeverities @readonly  as projection on fp.AlertSeverity;
   entity CardNetworks @readonly     as projection on fp.CardNetwork;
   entity PatternSources @readonly   as projection on fp.PatternSource;
   entity ConfidenceLevels @readonly as projection on fp.ConfidenceLevel;
+
   @odata.draft.enabled
   entity ProgramTiers               as projection on fp.ProgramTier;
+
   @odata.draft.enabled
   entity SystemConfigs              as projection on fp.SystemConfig;
+
   @odata.draft.enabled
   entity RedemptionTypes            as projection on fp.RedemptionType;
+
   @odata.draft.enabled
   entity ScrapeMappings             as projection on fp.ScrapeMapping;
 
@@ -53,6 +69,7 @@ service AdminService @(path: '/service/adminSvcs') {
   // Budget entities
   @odata.draft.enabled
   entity BudgetAllocations          as projection on fp.BudgetAllocation;
+
   @odata.draft.enabled
   entity RecurrentExpenses          as projection on fp.RecurrentExpense;
 }

@@ -2,6 +2,7 @@
     controllerName="com.financialplanner.shell.controller.App"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
+    xmlns:core="sap.ui.core"
     xmlns:tnt="sap.tnt"
     displayBlock="true"
 >
@@ -12,10 +13,22 @@
         <!-- Header -->
         <tnt:header>
             <tnt:ToolHeader>
+                <Button
+                    id="navBackBtn"
+                    icon="sap-icon://nav-back"
+                    type="Transparent"
+                    press=".onNavBack"
+                    visible="{shellView>/backVisible}"
+                    tooltip="{i18n>navBack}"
+                />
+                <core:Icon
+                    src="sap-icon://lead"
+                    class="sapUiSmallMarginBegin"
+                />
                 <Title
                     text="{i18n>appTitle}"
                     level="H4"
-                    class="sapUiSmallMarginBegin"
+                    class="sapUiTinyMarginBegin"
                 />
                 <ToolbarSpacer />
             </tnt:ToolHeader>
@@ -25,6 +38,7 @@
         <tnt:sideContent>
             <tnt:SideNavigation
                 id="sideNav"
+                selectedKey="{shellView>/selectedKey}"
                 itemSelect=".onNavItemSelect"
             >
                 <tnt:NavigationList>
@@ -182,8 +196,8 @@
                             visible="true"
                         />
                         <tnt:NavigationListItem
-                            text="{i18n>navPurchaseTypes}"
-                            key="MD_PURCHASE_TYPES"
+                            text="{i18n>navPurchaseCategories}"
+                            key="MD_PURCHASE_CATEGORIES"
                             visible="true"
                         />
                         <tnt:NavigationListItem
@@ -217,6 +231,36 @@
                             visible="true"
                         />
                         <tnt:NavigationListItem
+                            text="{i18n>navFinancialAccountTypes}"
+                            key="MD_FINANCIAL_ACCOUNT_TYPES"
+                            visible="true"
+                        />
+                        <tnt:NavigationListItem
+                            text="{i18n>navIncomeSourceTypes}"
+                            key="MD_INCOME_SOURCE_TYPES"
+                            visible="true"
+                        />
+                        <tnt:NavigationListItem
+                            text="{i18n>navPerkTypes}"
+                            key="MD_PERK_TYPES"
+                            visible="true"
+                        />
+                        <tnt:NavigationListItem
+                            text="{i18n>navAdjustmentTypes}"
+                            key="MD_ADJUSTMENT_TYPES"
+                            visible="true"
+                        />
+                        <tnt:NavigationListItem
+                            text="{i18n>navRedemptionTypes}"
+                            key="MD_REDEMPTION_TYPES"
+                            visible="true"
+                        />
+                        <tnt:NavigationListItem
+                            text="{i18n>navScrapeMappings}"
+                            key="MD_SCRAPE_MAPPINGS"
+                            visible="true"
+                        />
+                        <tnt:NavigationListItem
                             text="{i18n>navSimplefinConnections}"
                             key="SIMPLEFIN_CONNECTIONS"
                             visible="false"
@@ -233,15 +277,15 @@
 
         <!-- Content Area -->
         <tnt:mainContents>
+            <mvc:XMLView
+                viewName="com.financialplanner.shell.view.Welcome"
+                visible="{shellView>/welcomeVisible}"
+            />
             <Page
                 id="appContent"
                 showHeader="false"
-            >
-                <Text
-                    text="{i18n>welcomeText}"
-                    class="sapUiMediumMargin"
-                />
-            </Page>
+                visible="{= !${shellView>/welcomeVisible}}"
+            />
         </tnt:mainContents>
     </tnt:ToolPage>
 </mvc:View>

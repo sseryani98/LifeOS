@@ -5,7 +5,7 @@ annotate svc.CsvFormatConfigs with @UI: {
   HeaderInfo             : {
     TypeName      : '{i18n>CsvFormatConfig}',
     TypeNamePlural: '{i18n>CsvFormatConfigs}',
-    Title         : {Value: configName}
+    Title         : {Value: '{i18n>CsvFormatConfig}'}
   },
   PresentationVariant    : {
     SortOrder     : [{
@@ -24,7 +24,7 @@ annotate svc.CsvFormatConfigs with @UI: {
   ],
   LineItem               : [
     {
-      Value                : issuer.name,
+      Value                : issuer_ID,
       Label                : '{i18n>CsvFormatConfig.issuer}',
       ![@HTML5.CssDefaults]: {width: '20%'}
     },
@@ -91,55 +91,6 @@ annotate svc.CsvFormatConfigs with @UI: {
   ]
 };
 
-// ─── System Config ─────────────────────────────────────────────────────────
-annotate svc.SystemConfigs with @UI: {
-  HeaderInfo         : {
-    TypeName      : '{i18n>SystemConfig}',
-    TypeNamePlural: '{i18n>SystemConfigs}',
-    Title         : {Value: ![key]}
-  },
-  PresentationVariant: {
-    SortOrder     : [{
-      Property  : ![key],
-      Descending: false
-    }],
-    Visualizations: ['@UI.LineItem']
-  },
-  SelectionFields    : [
-    ![key],
-    value,
-    description
-  ],
-  LineItem           : [
-    {
-      Value                : ![key],
-      Label                : '{i18n>SystemConfig.key}',
-      ![@HTML5.CssDefaults]: {width: '25%'}
-    },
-    {
-      Value                : value,
-      ![@HTML5.CssDefaults]: {width: '35%'}
-    },
-    {
-      Value                : description,
-      ![@HTML5.CssDefaults]: {width: '40%'}
-    }
-  ],
-  FieldGroup #General: {Data: [
-    {
-      Value: ![key],
-      Label: '{i18n>SystemConfig.key}'
-    },
-    {Value: value},
-    {Value: description}
-  ]},
-  Facets             : [{
-    $Type : 'UI.ReferenceFacet',
-    Label : '{i18n>FacetGeneral}',
-    Target: '@UI.FieldGroup#General'
-  }]
-};
-
 // ─── Field Labels & Hidden Fields ──────────────────────────────────────────
 
 annotate svc.CsvFormatConfigs with {
@@ -148,7 +99,26 @@ annotate svc.CsvFormatConfigs with {
   createdBy         @UI.Hidden;
   modifiedAt        @UI.Hidden;
   modifiedBy        @UI.Hidden;
-  issuer            @title: '{i18n>CsvFormatConfig.issuer}';
+  issuer            @title : '{i18n>CsvFormatConfig.issuer}'
+                    @Common: {
+    Text           : issuer.name,
+    TextArrangement: #TextOnly,
+    ValueListWithFixedValues,
+    ValueList      : {
+      CollectionPath: 'Issuers',
+      Parameters    : [
+        {
+          $Type            : 'Common.ValueListParameterInOut',
+          LocalDataProperty: issuer_ID,
+          ValueListProperty: 'ID'
+        },
+        {
+          $Type            : 'Common.ValueListParameterDisplayOnly',
+          ValueListProperty: 'shortName'
+        }
+      ]
+    }
+  };
   configName        @title: '{i18n>CsvFormatConfig.configName}';
   dateColumn        @title: '{i18n>CsvFormatConfig.dateColumn}';
   dateFormat        @title: '{i18n>CsvFormatConfig.dateFormat}';
@@ -162,15 +132,4 @@ annotate svc.CsvFormatConfigs with {
   cardmemberColumn  @title: '{i18n>CsvFormatConfig.cardmemberColumn}';
   headerRowsSkip    @title: '{i18n>CsvFormatConfig.headerRowsSkip}';
   delimiter         @title: '{i18n>CsvFormatConfig.delimiter}';
-};
-
-annotate svc.SystemConfigs with {
-  ID          @UI.Hidden;
-  createdAt   @UI.Hidden;
-  createdBy   @UI.Hidden;
-  modifiedAt  @UI.Hidden;
-  modifiedBy  @UI.Hidden;
-  ![key]      @title: '{i18n>SystemConfig.key}';
-  value       @title: '{i18n>SystemConfig.value}';
-  description @title: '{i18n>SystemConfig.description}';
 };
