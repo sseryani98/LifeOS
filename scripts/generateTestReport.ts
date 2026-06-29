@@ -13,8 +13,8 @@ interface TestResult {
   numPendingTests: number;
   startTime: number;
   testResults: Array<{
-    testFilePath: string;
-    testResults: Array<{
+    name: string;
+    assertionResults: Array<{
       ancestorTitles: string[];
       title: string;
       status: string;
@@ -86,13 +86,13 @@ function generateReport(): void {
     location: string;
   }> = [];
   for (const suite of testResults.testResults) {
-    for (const test of suite.testResults) {
+    for (const test of suite.assertionResults) {
       if (test.status === "failed") {
         failures.push({
-          suite: suite.testFilePath,
+          suite: suite.name,
           title: [...test.ancestorTitles, test.title].join(" > "),
           message: test.failureMessages.join("\n"),
-          location: suite.testFilePath,
+          location: suite.name,
         });
       }
     }
