@@ -1,5 +1,5 @@
 {
-  "_version": "1.49.0",
+  "_version": "2.0.0",
   "sap.app": {
     "id": "com.financialplanner.adminmasterdata",
     "type": "application",
@@ -31,7 +31,6 @@
         "dataSource": "AdminService",
         "preload": true,
         "settings": {
-          "synchronizationMode": "None",
           "operationMode": "Server",
           "autoExpandSelect": true
         }
@@ -43,10 +42,19 @@
         }
       }
     },
+    "extends": {
+      "extensions": {
+        "sap.ui.controllerExtensions": {
+          "sap.fe.templates.ObjectPage.ObjectPageController": {
+            "controllerName": "com.financialplanner.adminmasterdata.ext.controller.ObjectPageExt"
+          }
+        }
+      }
+    },
     "routing": {
       "routes": [
         {
-          "pattern": ":?query:",
+          "pattern": "Issuers:?query:",
           "name": "IssuersList",
           "target": "IssuersList"
         },
@@ -66,14 +74,14 @@
           "target": "RewardsProgramsDetail"
         },
         {
-          "pattern": "PurchaseTypes:?query:",
-          "name": "PurchaseTypesList",
-          "target": "PurchaseTypesList"
+          "pattern": "PurchaseCategories:?query:",
+          "name": "PurchaseCategoriesList",
+          "target": "PurchaseCategoriesList"
         },
         {
-          "pattern": "PurchaseTypes({key}):?query:",
-          "name": "PurchaseTypesDetail",
-          "target": "PurchaseTypesDetail"
+          "pattern": "PurchaseCategories({key}):?query:",
+          "name": "PurchaseCategoriesDetail",
+          "target": "PurchaseCategoriesDetail"
         },
         {
           "pattern": "EarningCategories:?query:",
@@ -134,6 +142,66 @@
           "pattern": "RecurrentExpenses({key}):?query:",
           "name": "RecurrentExpensesDetail",
           "target": "RecurrentExpensesDetail"
+        },
+        {
+          "pattern": "FinancialAccountTypes:?query:",
+          "name": "FinancialAccountTypesList",
+          "target": "FinancialAccountTypesList"
+        },
+        {
+          "pattern": "FinancialAccountTypes({key}):?query:",
+          "name": "FinancialAccountTypesDetail",
+          "target": "FinancialAccountTypesDetail"
+        },
+        {
+          "pattern": "IncomeSourceTypes:?query:",
+          "name": "IncomeSourceTypesList",
+          "target": "IncomeSourceTypesList"
+        },
+        {
+          "pattern": "IncomeSourceTypes({key}):?query:",
+          "name": "IncomeSourceTypesDetail",
+          "target": "IncomeSourceTypesDetail"
+        },
+        {
+          "pattern": "PerkTypes:?query:",
+          "name": "PerkTypesList",
+          "target": "PerkTypesList"
+        },
+        {
+          "pattern": "PerkTypes({key}):?query:",
+          "name": "PerkTypesDetail",
+          "target": "PerkTypesDetail"
+        },
+        {
+          "pattern": "AdjustmentTypes:?query:",
+          "name": "AdjustmentTypesList",
+          "target": "AdjustmentTypesList"
+        },
+        {
+          "pattern": "AdjustmentTypes({key}):?query:",
+          "name": "AdjustmentTypesDetail",
+          "target": "AdjustmentTypesDetail"
+        },
+        {
+          "pattern": "RedemptionTypes:?query:",
+          "name": "RedemptionTypesList",
+          "target": "RedemptionTypesList"
+        },
+        {
+          "pattern": "RedemptionTypes({key}):?query:",
+          "name": "RedemptionTypesDetail",
+          "target": "RedemptionTypesDetail"
+        },
+        {
+          "pattern": "ScrapeMappings:?query:",
+          "name": "ScrapeMappingsList",
+          "target": "ScrapeMappingsList"
+        },
+        {
+          "pattern": "ScrapeMappings({key}):?query:",
+          "name": "ScrapeMappingsDetail",
+          "target": "ScrapeMappingsDetail"
         }
       ],
       "targets": {
@@ -197,32 +265,32 @@
             }
           }
         },
-        "PurchaseTypesList": {
+        "PurchaseCategoriesList": {
           "type": "Component",
-          "id": "PurchaseTypesList",
+          "id": "PurchaseCategoriesList",
           "name": "sap.fe.templates.ListReport",
           "options": {
             "settings": {
-              "contextPath": "/PurchaseTypes",
+              "contextPath": "/PurchaseCategories",
               "variantManagement": "None",
               "initialLoad": "Enabled",
               "navigation": {
-                "PurchaseTypes": {
+                "PurchaseCategories": {
                   "detail": {
-                    "route": "PurchaseTypesDetail"
+                    "route": "PurchaseCategoriesDetail"
                   }
                 }
               }
             }
           }
         },
-        "PurchaseTypesDetail": {
+        "PurchaseCategoriesDetail": {
           "type": "Component",
-          "id": "PurchaseTypesDetail",
+          "id": "PurchaseCategoriesDetail",
           "name": "sap.fe.templates.ObjectPage",
           "options": {
             "settings": {
-              "contextPath": "/PurchaseTypes",
+              "contextPath": "/PurchaseCategories",
               "editableHeaderContent": true
             }
           }
@@ -403,6 +471,186 @@
           "options": {
             "settings": {
               "contextPath": "/RecurrentExpenses",
+              "editableHeaderContent": true
+            }
+          }
+        },
+        "FinancialAccountTypesList": {
+          "type": "Component",
+          "id": "FinancialAccountTypesList",
+          "name": "sap.fe.templates.ListReport",
+          "options": {
+            "settings": {
+              "contextPath": "/FinancialAccountTypes",
+              "variantManagement": "None",
+              "initialLoad": "Enabled",
+              "navigation": {
+                "FinancialAccountTypes": {
+                  "detail": {
+                    "route": "FinancialAccountTypesDetail"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "FinancialAccountTypesDetail": {
+          "type": "Component",
+          "id": "FinancialAccountTypesDetail",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "contextPath": "/FinancialAccountTypes",
+              "editableHeaderContent": true
+            }
+          }
+        },
+        "IncomeSourceTypesList": {
+          "type": "Component",
+          "id": "IncomeSourceTypesList",
+          "name": "sap.fe.templates.ListReport",
+          "options": {
+            "settings": {
+              "contextPath": "/IncomeSourceTypes",
+              "variantManagement": "None",
+              "initialLoad": "Enabled",
+              "navigation": {
+                "IncomeSourceTypes": {
+                  "detail": {
+                    "route": "IncomeSourceTypesDetail"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "IncomeSourceTypesDetail": {
+          "type": "Component",
+          "id": "IncomeSourceTypesDetail",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "contextPath": "/IncomeSourceTypes",
+              "editableHeaderContent": true
+            }
+          }
+        },
+        "PerkTypesList": {
+          "type": "Component",
+          "id": "PerkTypesList",
+          "name": "sap.fe.templates.ListReport",
+          "options": {
+            "settings": {
+              "contextPath": "/PerkTypes",
+              "variantManagement": "None",
+              "initialLoad": "Enabled",
+              "navigation": {
+                "PerkTypes": {
+                  "detail": {
+                    "route": "PerkTypesDetail"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "PerkTypesDetail": {
+          "type": "Component",
+          "id": "PerkTypesDetail",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "contextPath": "/PerkTypes",
+              "editableHeaderContent": true
+            }
+          }
+        },
+        "AdjustmentTypesList": {
+          "type": "Component",
+          "id": "AdjustmentTypesList",
+          "name": "sap.fe.templates.ListReport",
+          "options": {
+            "settings": {
+              "contextPath": "/AdjustmentTypes",
+              "variantManagement": "None",
+              "initialLoad": "Enabled",
+              "navigation": {
+                "AdjustmentTypes": {
+                  "detail": {
+                    "route": "AdjustmentTypesDetail"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "AdjustmentTypesDetail": {
+          "type": "Component",
+          "id": "AdjustmentTypesDetail",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "contextPath": "/AdjustmentTypes",
+              "editableHeaderContent": true
+            }
+          }
+        },
+        "RedemptionTypesList": {
+          "type": "Component",
+          "id": "RedemptionTypesList",
+          "name": "sap.fe.templates.ListReport",
+          "options": {
+            "settings": {
+              "contextPath": "/RedemptionTypes",
+              "variantManagement": "None",
+              "initialLoad": "Enabled",
+              "navigation": {
+                "RedemptionTypes": {
+                  "detail": {
+                    "route": "RedemptionTypesDetail"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "RedemptionTypesDetail": {
+          "type": "Component",
+          "id": "RedemptionTypesDetail",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "contextPath": "/RedemptionTypes",
+              "editableHeaderContent": true
+            }
+          }
+        },
+        "ScrapeMappingsList": {
+          "type": "Component",
+          "id": "ScrapeMappingsList",
+          "name": "sap.fe.templates.ListReport",
+          "options": {
+            "settings": {
+              "contextPath": "/ScrapeMappings",
+              "variantManagement": "None",
+              "initialLoad": "Enabled",
+              "navigation": {
+                "ScrapeMappings": {
+                  "detail": {
+                    "route": "ScrapeMappingsDetail"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ScrapeMappingsDetail": {
+          "type": "Component",
+          "id": "ScrapeMappingsDetail",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "contextPath": "/ScrapeMappings",
               "editableHeaderContent": true
             }
           }

@@ -5,8 +5,6 @@ using {
   managed
 } from '@sap/cds/common';
 using {
-  com.financialplanner.CardType,
-  com.financialplanner.CardSegment,
   com.financialplanner.FeeStructure,
   com.financialplanner.MsrWindowType,
   com.financialplanner.LifecycleState,
@@ -18,7 +16,9 @@ using {
   com.financialplanner.CardNetwork,
   com.financialplanner.ProgramTier,
   com.financialplanner.EarningCategory,
-  com.financialplanner.PerkType
+  com.financialplanner.PerkType,
+  com.financialplanner.CardType,
+  com.financialplanner.CardSegment
 } from '../reference/schema';
 
 @assert.unique: {name: [name]}
@@ -28,8 +28,8 @@ entity MarketCard : cuid, managed {
   rewardsProgram   : Association to RewardsProgram               @Common.Label: '{i18n>MarketCard.rewardsProgram}';
   cardNetwork      : Association to CardNetwork not null         @mandatory  @Common.Label: '{i18n>MarketCard.cardNetwork}';
   programTier      : Association to ProgramTier                  @Common.Label: '{i18n>MarketCard.programTier}';
-  cardType         : CardType not null                           @mandatory  @Common.Label: '{i18n>MarketCard.cardType}';
-  cardSegment      : CardSegment not null                        @mandatory  @Common.Label: '{i18n>MarketCard.cardSegment}';
+  cardType         : Association to CardType                     @mandatory  @Common.Label: '{i18n>MarketCard.cardType}';
+  cardSegment      : Association to CardSegment                  @mandatory  @Common.Label: '{i18n>MarketCard.cardSegment}';
   feeStructure     : FeeStructure not null                       @mandatory  @Common.Label: '{i18n>MarketCard.feeStructure}';
   feeAmount        : Decimal(15, 2) not null                     @mandatory  @Common.Label: '{i18n>MarketCard.feeAmount}';
   status           : MarketCardStatus not null default 'active'  @mandatory  @Common.Label: '{i18n>MarketCard.status}';

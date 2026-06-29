@@ -1,4 +1,4 @@
-ID,issuer_ID,rewardsProgram_ID,ruleType,parameterCount,parameterDays,appliesToCardType,appliesToSegment,referenceDate,description
+ID,issuer_ID,rewardsProgram_ID,ruleType,parameterCount,parameterDays,appliesToCardType_code,appliesToCardSegment_code,referenceDate,description
 a1b2c3d4-0010-4000-8000-000000000001,a1b2c3d4-0001-4000-8000-000000000002,,MAX_CONCURRENT,4,,credit,,,"Max 4 Amex credit cards held at once (charge cards exempt)"
 a1b2c3d4-0010-4000-8000-000000000002,a1b2c3d4-0001-4000-8000-000000000002,,APPS_IN_WINDOW,2,90,credit,,,"Max 2 Amex credit card approvals per 90 days"
 a1b2c3d4-0010-4000-8000-000000000003,a1b2c3d4-0001-4000-8000-000000000002,,ONCE_PER_LIFETIME,,,,,,Welcome bonus once per lifetime per Amex product

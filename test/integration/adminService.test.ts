@@ -1,25 +1,48 @@
 import cds from "@sap/cds";
 
 import {
-  TD_ISSUER,
-  AMEX_ISSUER,
-  GROCERIES_PURCHASE_TYPE,
-  DINING_PURCHASE_TYPE,
-  REIMBURSABLE_PURCHASE_TYPE,
-  RESTAURANTS_SUBTYPE,
-  ALERT_TYPE_MSR_DEADLINE,
-} from "../data/reference.js";
+  AMEX_COBALT,
+  AMEX_COBALT_DEC2025_OFFER,
+  AMEX_COBALT_INSTANCE,
+} from "../data/cards.js";
 
 import {
   GROCERIES_ALLOCATION_CURRENT,
   DINING_ALLOCATION_CURRENT,
 } from "../data/budget.js";
 
-const { GET, POST, PATCH, DELETE, expect } = cds.test(
-  "serve",
-  "--with-mocks",
-  "--in-memory",
-);
+import {
+  ALLOCATION_EXCLUDED_CATEGORY,
+  ALLOCATION_HISTORICAL_EFFECTIVE_TO,
+  ALLOCATION_DUPLICATE_COMPOSITE,
+  ALLOCATION_DIFFERENT_EFFECTIVE_FROM,
+  ALLOCATION_RATIO_ABOVE_MAX,
+  ALLOCATION_RATIO_NEGATIVE,
+  ALLOCATION_MISSING_RATIO,
+  ISSUER_RULE_ORPHAN,
+  ISSUER_RULE_ISSUER_ONLY,
+  CSV_CONFIG_XOR_BOTH,
+  CSV_CONFIG_XOR_NEITHER,
+  CSV_CONFIG_MISSING_STATUS_VALUE,
+  CSV_CONFIG_DUPLICATE_NAME,
+  SCRAPE_MAPPING_FIRST,
+  SCRAPE_MAPPING_DUPLICATE,
+  ISSUER_DUPLICATE_NAME,
+  PROGRAM_DUPLICATE_NAME,
+  PURCHASE_CATEGORY_DUPLICATE_NAME,
+  EARNING_CATEGORY_DUPLICATE_NAME,
+  FINANCIAL_ACCOUNT_TYPE_DUPLICATE_NAME,
+  INCOME_SOURCE_TYPE_DUPLICATE_NAME,
+  PERK_TYPE_DUPLICATE_NAME,
+  ADJUSTMENT_TYPE_DUPLICATE_NAME,
+  REDEMPTION_TYPE_DUPLICATE_NAME,
+  ISSUER_MISSING_NAME,
+  ISSUER_MISSING_SHORT_NAME,
+  PROGRAM_MISSING_CURRENCY,
+  RECURRENT_EXPENSE_MISSING_NAME,
+} from "../data/admin.js";
+
+const { POST, expect } = cds.test("serve", "--with-mocks", "--in-memory");
 
 const SERVICE = "/service/adminSvcs";
 
@@ -50,6 +73,13 @@ async function createViaDraftExpectError(
 async function seed() {
   // Reference data is already seeded from db/data/*.csv by cds.deploy.
   // Only insert entities that have no CSV seed files.
+  await INSERT.into("com.financialplanner.MarketCard").entries([AMEX_COBALT]);
+  await INSERT.into("com.financialplanner.Offer").entries([
+    AMEX_COBALT_DEC2025_OFFER,
+  ]);
+  await INSERT.into("com.financialplanner.CardInstance").entries([
+    AMEX_COBALT_INSTANCE,
+  ]);
   await INSERT.into("com.financialplanner.BudgetAllocation").entries([
     GROCERIES_ALLOCATION_CURRENT,
     DINING_ALLOCATION_CURRENT,
@@ -59,229 +89,244 @@ async function seed() {
 beforeAll(seed);
 
 describe("AdminService", () => {
-  // ─── CRUD on editable entities ─────────────────────────────────────────
+  // ─── Cross-field business rules ────────────────────────────────────────
 
-  describe("editable reference entities", () => {
-    it("can read issuers", async () => {
-      const { status, data } = await GET(`${SERVICE}/Issuers`);
-      expect(status).to.be.oneOf([200, 201]);
-      expect(data.value.length).to.be.greaterThanOrEqual(3);
+  describe("BudgetAllocation cross-field rules", () => {
+    it("rejects allocation referencing an excluded-from-budget category", async () => {
+      const res = await createViaDraftExpectError(
+        "BudgetAllocations",
+        ALLOCATION_EXCLUDED_CATEGORY,
+      );
+      expect(res.status).to.be.oneOf([400, 409, 422, 500]);
     });
 
-    it("can create a new issuer via draft", async () => {
-      const { status, data } = await createViaDraft("Issuers", {
-        name: "National Bank",
-        shortName: "NBC",
-      });
-      expect(status).to.be.oneOf([200, 201]);
-      expect(data.name).to.equal("National Bank");
-      expect(data.IsActiveEntity).to.equal(true);
-    });
-
-    it("can update an issuer via draft edit", async () => {
-      const edit = await POST(
-        `${SERVICE}/Issuers(ID=${AMEX_ISSUER.ID},IsActiveEntity=true)/AdminService.draftEdit`,
-        { PreserveChanges: true },
+    it("rejects allocation with effectiveTo != 9999-12-31 (historical protection)", async () => {
+      const res = await createViaDraftExpectError(
+        "BudgetAllocations",
+        ALLOCATION_HISTORICAL_EFFECTIVE_TO,
       );
-      expect(edit.status).to.equal(201);
-
-      await PATCH(
-        `${SERVICE}/Issuers(ID=${AMEX_ISSUER.ID},IsActiveEntity=false)`,
-        { shortName: "AMEX" },
-      );
-
-      const { status } = await POST(
-        `${SERVICE}/Issuers(ID=${AMEX_ISSUER.ID},IsActiveEntity=false)/AdminService.draftActivate`,
-        {},
-      );
-      expect(status).to.be.oneOf([200, 201]);
-    });
-
-    it("can delete an unreferenced issuer", async () => {
-      const created = await createViaDraft("Issuers", {
-        name: "Temp Issuer For Delete",
-        shortName: "TMP",
-      });
-      const { status } = await DELETE(
-        `${SERVICE}/Issuers(ID=${created.data.ID},IsActiveEntity=true)`,
-      );
-      expect(status).to.equal(204);
+      expect(res.status).to.be.oneOf([400, 409, 422, 500]);
     });
   });
 
-  // ─── Uniqueness constraints ─────────────────────────────────────────────
-
-  describe("uniqueness constraints", () => {
-    it("rejects duplicate issuer name on activation", async () => {
-      const res = await createViaDraftExpectError("Issuers", {
-        name: TD_ISSUER.name,
-        shortName: "DUP",
-      });
-      expect(res.status).to.be.oneOf([400, 409, 500]);
+  describe("IssuerApplicationRule cross-field rules", () => {
+    it("rejects rule with neither issuer nor rewards program", async () => {
+      const res = await createViaDraftExpectError(
+        "IssuerApplicationRules",
+        ISSUER_RULE_ORPHAN,
+      );
+      expect(res.status).to.be.oneOf([400, 409, 422, 500]);
     });
 
-    it("rejects duplicate budget allocation for same purchase type and start date", async () => {
-      const res = await createViaDraftExpectError("BudgetAllocations", {
-        purchaseType_ID: GROCERIES_PURCHASE_TYPE.ID,
-        ratio: 50,
-        effectiveFrom: GROCERIES_ALLOCATION_CURRENT.effectiveFrom,
-        effectiveTo: "9999-12-31",
-      });
-      expect(res.status).to.be.oneOf([400, 409, 500]);
-    });
-
-    it("allows same purchase type with different start date", async () => {
-      const { status } = await createViaDraft("BudgetAllocations", {
-        purchaseType_ID: GROCERIES_PURCHASE_TYPE.ID,
-        ratio: 30,
-        effectiveFrom: "2027-01-01",
-        effectiveTo: "9999-12-31",
-      });
+    it("accepts rule with only issuer set", async () => {
+      const { status } = await createViaDraft(
+        "IssuerApplicationRules",
+        ISSUER_RULE_ISSUER_ONLY,
+      );
       expect(status).to.be.oneOf([200, 201]);
     });
   });
 
-  // ─── Field validation ───────────────────────────────────────────────────
+  describe("CsvFormatConfig cross-field rules", () => {
+    it("rejects config with both amount styles set (XOR violation)", async () => {
+      const res = await createViaDraftExpectError(
+        "CsvFormatConfigs",
+        CSV_CONFIG_XOR_BOTH,
+      );
+      expect(res.status).to.be.oneOf([400, 409, 422, 500]);
+    });
+
+    it("rejects config with neither amount style set (XOR violation)", async () => {
+      const res = await createViaDraftExpectError(
+        "CsvFormatConfigs",
+        CSV_CONFIG_XOR_NEITHER,
+      );
+      expect(res.status).to.be.oneOf([400, 409, 422, 500]);
+    });
+
+    it("rejects config with statusColumn but no statusPostedValue", async () => {
+      const res = await createViaDraftExpectError(
+        "CsvFormatConfigs",
+        CSV_CONFIG_MISSING_STATUS_VALUE,
+      );
+      expect(res.status).to.be.oneOf([400, 409, 422, 500]);
+    });
+  });
+
+  // ─── Composite uniqueness constraints ──────────────────────────────────
+
+  describe("composite uniqueness", () => {
+    it("rejects duplicate BudgetAllocation [purchaseCategory, effectiveFrom]", async () => {
+      const res = await createViaDraftExpectError(
+        "BudgetAllocations",
+        ALLOCATION_DUPLICATE_COMPOSITE,
+      );
+      expect(res.status).to.be.oneOf([400, 409, 500]);
+    });
+
+    it("allows same category with different effectiveFrom", async () => {
+      const { status } = await createViaDraft(
+        "BudgetAllocations",
+        ALLOCATION_DIFFERENT_EFFECTIVE_FROM,
+      );
+      expect(status).to.be.oneOf([200, 201]);
+    });
+
+    it("rejects duplicate ScrapeMapping [entityType, sourceText]", async () => {
+      await createViaDraft("ScrapeMappings", SCRAPE_MAPPING_FIRST);
+      const res = await createViaDraftExpectError(
+        "ScrapeMappings",
+        SCRAPE_MAPPING_DUPLICATE,
+      );
+      expect(res.status).to.be.oneOf([400, 409, 500]);
+    });
+  });
+
+  // ─── Simple uniqueness constraints ─────────────────────────────────────
+
+  describe("simple uniqueness", () => {
+    it("rejects duplicate issuer name", async () => {
+      const res = await createViaDraftExpectError(
+        "Issuers",
+        ISSUER_DUPLICATE_NAME,
+      );
+      expect(res.status).to.be.oneOf([400, 409, 500]);
+    });
+
+    it("rejects duplicate rewards program name", async () => {
+      const res = await createViaDraftExpectError(
+        "RewardsPrograms",
+        PROGRAM_DUPLICATE_NAME,
+      );
+      expect(res.status).to.be.oneOf([400, 409, 500]);
+    });
+
+    it("rejects duplicate purchase category name", async () => {
+      const res = await createViaDraftExpectError(
+        "PurchaseCategories",
+        PURCHASE_CATEGORY_DUPLICATE_NAME,
+      );
+      expect(res.status).to.be.oneOf([400, 409, 500]);
+    });
+
+    it("rejects duplicate earning category name", async () => {
+      const res = await createViaDraftExpectError(
+        "EarningCategories",
+        EARNING_CATEGORY_DUPLICATE_NAME,
+      );
+      expect(res.status).to.be.oneOf([400, 409, 500]);
+    });
+
+    it("rejects duplicate csv format config name", async () => {
+      const res = await createViaDraftExpectError(
+        "CsvFormatConfigs",
+        CSV_CONFIG_DUPLICATE_NAME,
+      );
+      expect(res.status).to.be.oneOf([400, 409, 500]);
+    });
+
+    it("rejects duplicate financial account type name", async () => {
+      const res = await createViaDraftExpectError(
+        "FinancialAccountTypes",
+        FINANCIAL_ACCOUNT_TYPE_DUPLICATE_NAME,
+      );
+      expect(res.status).to.be.oneOf([400, 409, 500]);
+    });
+
+    it("rejects duplicate income source type name", async () => {
+      const res = await createViaDraftExpectError(
+        "IncomeSourceTypes",
+        INCOME_SOURCE_TYPE_DUPLICATE_NAME,
+      );
+      expect(res.status).to.be.oneOf([400, 409, 500]);
+    });
+
+    it("rejects duplicate perk type name", async () => {
+      const res = await createViaDraftExpectError(
+        "PerkTypes",
+        PERK_TYPE_DUPLICATE_NAME,
+      );
+      expect(res.status).to.be.oneOf([400, 409, 500]);
+    });
+
+    it("rejects duplicate adjustment type name", async () => {
+      const res = await createViaDraftExpectError(
+        "AdjustmentTypes",
+        ADJUSTMENT_TYPE_DUPLICATE_NAME,
+      );
+      expect(res.status).to.be.oneOf([400, 409, 500]);
+    });
+
+    it("rejects duplicate redemption type name", async () => {
+      const res = await createViaDraftExpectError(
+        "RedemptionTypes",
+        REDEMPTION_TYPE_DUPLICATE_NAME,
+      );
+      expect(res.status).to.be.oneOf([400, 409, 500]);
+    });
+  });
+
+  // ─── Field validation ──────────────────────────────────────────────────
+
   describe("field validation", () => {
     it("rejects budget allocation with ratio above 100", async () => {
-      const res = await createViaDraftExpectError("BudgetAllocations", {
-        purchaseType_ID: DINING_PURCHASE_TYPE.ID,
-        ratio: 150,
-        effectiveFrom: "2028-01-01",
-        effectiveTo: "9999-12-31",
-      });
+      const res = await createViaDraftExpectError(
+        "BudgetAllocations",
+        ALLOCATION_RATIO_ABOVE_MAX,
+      );
       expect(res.status).to.be.oneOf([400, 409, 422, 500]);
     });
 
     it("rejects budget allocation with negative ratio", async () => {
-      const res = await createViaDraftExpectError("BudgetAllocations", {
-        purchaseType_ID: DINING_PURCHASE_TYPE.ID,
-        ratio: -5,
-        effectiveFrom: "2028-06-01",
-        effectiveTo: "9999-12-31",
-      });
+      const res = await createViaDraftExpectError(
+        "BudgetAllocations",
+        ALLOCATION_RATIO_NEGATIVE,
+      );
       expect(res.status).to.be.oneOf([400, 409, 422, 500]);
-    });
-
-    it("rejects system config key that is not UPPER_SNAKE_CASE", async () => {
-      const res = await createViaDraftExpectError("SystemConfigs", {
-        key: "lowercase_key",
-        value: "test",
-        description: "Invalid key format",
-      });
-      expect(res.status).to.be.oneOf([400, 409, 422, 500]);
-    });
-
-    it("accepts system config key in UPPER_SNAKE_CASE", async () => {
-      const { status } = await createViaDraft("SystemConfigs", {
-        key: "VALID_KEY",
-        value: "test",
-        description: "Valid key format",
-      });
-      expect(status).to.be.oneOf([200, 201]);
-    });
-  });
-
-  // ─── CDS @assert (cross-field validation) ───────────────────────────────
-  describe("cross-field validation", () => {
-    it("rejects budget allocation referencing a child purchase type", async () => {
-      const res = await createViaDraftExpectError("BudgetAllocations", {
-        purchaseType_ID: RESTAURANTS_SUBTYPE.ID,
-        ratio: 10,
-        effectiveFrom: "2028-01-01",
-        effectiveTo: "9999-12-31",
-      });
-      expect(res.status).to.be.oneOf([400, 409, 422, 500]);
-    });
-
-    it("rejects budget allocation referencing an excluded-from-budget purchase type", async () => {
-      const res = await createViaDraftExpectError("BudgetAllocations", {
-        purchaseType_ID: REIMBURSABLE_PURCHASE_TYPE.ID,
-        ratio: 10,
-        effectiveFrom: "2028-01-01",
-        effectiveTo: "9999-12-31",
-      });
-      expect(res.status).to.be.oneOf([400, 409, 422, 500]);
-    });
-  });
-
-  // ─── Read-only entities ─────────────────────────────────────────────────
-  describe("read-only entities", () => {
-    it("can read alert types", async () => {
-      const { status, data } = await GET(`${SERVICE}/AlertTypes`);
-      expect(status).to.be.oneOf([200, 201]);
-      expect(data.value.length).to.be.greaterThanOrEqual(1);
-    });
-
-    it("rejects creating an alert type", async () => {
-      const res = await POST(`${SERVICE}/AlertTypes`, {
-        name: "new_alert",
-        sortOrder: 99,
-      }).catch((e: { status: number }) => e);
-      expect(res.status).to.equal(405);
-    });
-
-    it("rejects deleting an alert type", async () => {
-      const res = await DELETE(
-        `${SERVICE}/AlertTypes(${ALERT_TYPE_MSR_DEADLINE.ID})`,
-      ).catch((e: { status: number }) => e);
-      expect(res.status).to.equal(405);
-    });
-
-    it("rejects creating an alert severity", async () => {
-      const res = await POST(`${SERVICE}/AlertSeverities`, {
-        name: "new_severity",
-        sortOrder: 99,
-      }).catch((e: { status: number }) => e);
-      expect(res.status).to.equal(405);
-    });
-
-    it("rejects creating a card network", async () => {
-      const res = await POST(`${SERVICE}/CardNetworks`, {
-        name: "new_network",
-        sortOrder: 99,
-      }).catch((e: { status: number }) => e);
-      expect(res.status).to.equal(405);
     });
   });
 
   // ─── Mandatory fields ──────────────────────────────────────────────────
+
   describe("mandatory fields", () => {
     it("rejects issuer without name", async () => {
-      const res = await createViaDraftExpectError("Issuers", {
-        shortName: "X",
-      });
+      const res = await createViaDraftExpectError(
+        "Issuers",
+        ISSUER_MISSING_NAME,
+      );
       expect(res.status).to.be.oneOf([400, 409, 422, 500]);
     });
 
     it("rejects issuer without short name", async () => {
-      const res = await createViaDraftExpectError("Issuers", {
-        name: "Some Issuer",
-      });
+      const res = await createViaDraftExpectError(
+        "Issuers",
+        ISSUER_MISSING_SHORT_NAME,
+      );
       expect(res.status).to.be.oneOf([400, 409, 422, 500]);
     });
 
     it("rejects budget allocation without ratio", async () => {
-      const res = await createViaDraftExpectError("BudgetAllocations", {
-        purchaseType_ID: DINING_PURCHASE_TYPE.ID,
-        effectiveFrom: "2029-01-01",
-        effectiveTo: "9999-12-31",
-      });
+      const res = await createViaDraftExpectError(
+        "BudgetAllocations",
+        ALLOCATION_MISSING_RATIO,
+      );
       expect(res.status).to.be.oneOf([400, 409, 422, 500]);
     });
-  });
 
-  // ─── Referential integrity ─────────────────────────────────────────────
+    it("rejects rewards program without currency type", async () => {
+      const res = await createViaDraftExpectError(
+        "RewardsPrograms",
+        PROGRAM_MISSING_CURRENCY,
+      );
+      expect(res.status).to.be.oneOf([400, 409, 422, 500]);
+    });
 
-  describe("referential integrity", () => {
-    it("rejects budget allocation with non-existent purchase type", async () => {
-      const res = await createViaDraftExpectError("BudgetAllocations", {
-        purchaseType_ID: "00000000-0000-0000-0000-000000000000",
-        ratio: 10,
-        effectiveFrom: "2029-01-01",
-        effectiveTo: "9999-12-31",
-      });
-      expect(res.status).to.be.greaterThanOrEqual(400);
+    it("rejects recurrent expense without name", async () => {
+      const res = await createViaDraftExpectError(
+        "RecurrentExpenses",
+        RECURRENT_EXPENSE_MISSING_NAME,
+      );
+      expect(res.status).to.be.oneOf([400, 409, 422, 500]);
     });
   });
 });

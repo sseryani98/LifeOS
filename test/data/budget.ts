@@ -8,9 +8,9 @@
  */
 
 import {
-  GROCERIES_PURCHASE_TYPE,
-  DINING_PURCHASE_TYPE,
-  TRANSPORTATION_PURCHASE_TYPE,
+  GROCERIES_CATEGORY,
+  DINING_CATEGORY,
+  TRANSPORTATION_CATEGORY,
 } from "./reference.js";
 
 import { AMEX_COBALT_INSTANCE } from "./cards.js";
@@ -18,7 +18,7 @@ import { AMEX_COBALT_INSTANCE } from "./cards.js";
 // ─── Budget Allocations ────────────────────────────────────────────────────────
 export const GROCERIES_ALLOCATION_CURRENT = {
   ID: "a1b2c3d4-0030-4000-8000-000000000001",
-  purchaseType_ID: GROCERIES_PURCHASE_TYPE.ID,
+  purchaseCategory_ID: GROCERIES_CATEGORY.ID,
   ratio: 35,
   effectiveFrom: "2026-01-01",
   effectiveTo: "9999-12-31",
@@ -26,7 +26,7 @@ export const GROCERIES_ALLOCATION_CURRENT = {
 
 export const DINING_ALLOCATION_CURRENT = {
   ID: "a1b2c3d4-0030-4000-8000-000000000002",
-  purchaseType_ID: DINING_PURCHASE_TYPE.ID,
+  purchaseCategory_ID: DINING_CATEGORY.ID,
   ratio: 25,
   effectiveFrom: "2026-01-01",
   effectiveTo: "9999-12-31",
@@ -34,7 +34,7 @@ export const DINING_ALLOCATION_CURRENT = {
 
 export const TRANSPORTATION_ALLOCATION_CURRENT = {
   ID: "a1b2c3d4-0030-4000-8000-000000000003",
-  purchaseType_ID: TRANSPORTATION_PURCHASE_TYPE.ID,
+  purchaseCategory_ID: TRANSPORTATION_CATEGORY.ID,
   ratio: 15,
   effectiveFrom: "2026-01-01",
   effectiveTo: "9999-12-31",
@@ -43,7 +43,7 @@ export const TRANSPORTATION_ALLOCATION_CURRENT = {
 // Historical (closed) allocation — for time-bounding tests
 export const GROCERIES_ALLOCATION_HISTORICAL = {
   ID: "a1b2c3d4-0030-4000-8000-000000000099",
-  purchaseType_ID: GROCERIES_PURCHASE_TYPE.ID,
+  purchaseCategory_ID: GROCERIES_CATEGORY.ID,
   ratio: 40,
   effectiveFrom: "2025-01-01",
   effectiveTo: "2025-12-31",
@@ -65,7 +65,7 @@ export const CAR_LOAN_EXPENSE = {
   ID: "a1b2c3d4-0031-4000-8000-000000000002",
   name: "Car Loan Payment",
   amount: 450.0,
-  purchaseType_ID: TRANSPORTATION_PURCHASE_TYPE.ID,
+  purchaseType_ID: null,
   cardInstance_ID: null,
   effectiveFrom: "2025-06-01",
   effectiveTo: "9999-12-31",

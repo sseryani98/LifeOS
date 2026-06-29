@@ -74,6 +74,8 @@ project/
 - **FKs:** CAP auto-generated (`cardInstance_ID`)
 - **Namespace:** `com.financialplanner`
 - **Schema:** One `schema.cds` per domain folder under `db/`
+- **Code lists for dropdowns:** When a field has a known/finite set of values that need dropdown UX, use a `CodeList` entity (`@cds.autoexpose entity Xxx : CodeList { key code : String(n); }`) with an Association — NOT a `String enum` (enums don't produce dropdowns in Fiori Elements V4). Annotate with `@Common: { Text, TextArrangement: #TextOnly, ValueListWithFixedValues }`. Reference the FK (`xxx_code`) in UI annotations. Hide raw codes via `@UI.Hidden` on the code list's `code` field. Name such fields `xxxType` not `xxxName`
+- **Association ValueHelp:** Two parts required: (1) The **target entity's `ID` field** must have `@Common: { Text: name, TextArrangement: #TextOnly }` — this makes ValueHelp dropdowns display names instead of UUIDs (same pattern as CodeList `code` fields). (2) The **consuming association** must have `@Common: { Text: assoc.name, TextArrangement: #TextOnly, ValueList: { ... } }`. Annotate the association, not the FK — CAP auto-generates FKs, they can't be annotated. Use `ValueListWithFixedValues` (dropdown) if <25 rows. ValueList `DisplayOnly` columns must match the target entity's ListReport.
 - **Annotations over code:** Use CAP built-in annotations before writing custom handler code — only write handlers for business rules with no annotation equivalent. Key annotations: `@assert.unique`, `@assert.range`, `@assert.format`, `@readonly`, `@mandatory`, `@assert: (case when … then …)` for cross-field validation, `@flow.status` + `@from`/`@to` for state machines
 
 ### TypeScript (srv/ and db/ only)
@@ -134,8 +136,10 @@ project/
   - Combine related fields into one column via `@Common: { Text, TextArrangement: #TextLast }` (e.g., shortName + name → "AMEX (American Express)")
   - Every `LineItem` entry must have `![@HTML5.CssDefaults]: {width: 'X%'}` — widths must total 100%
   - Every ListReport entity must have `SelectionFields` — filter order matches column order, hidden column = hidden filter
+  - `SelectionFields`, `LineItem`, and `FieldGroup` must all reference the **FK** (`issuer_ID`), never the nav path (`issuer.name`) — `@Common.Text` handles display. Using nav paths in `LineItem` creates duplicate entries in the Settings column picker. Adapt Filters and Settings columns must show the same fields.
   - Technical fields (`ID`, `createdAt`, `createdBy`, `modifiedAt`, `modifiedBy`) must always be `@UI.Hidden`
   - Every entity must have `PresentationVariant` with `SortOrder` ascending on the first LineItem column and `Visualizations: ['@UI.LineItem']`
+- **Model over byId:** Control UI state (visibility, selectedKey, enabled) via JSON model + XML binding, not imperative `byId().setVisible()`. `byId` is acceptable only for structural DOM operations (`addContent`, `removeAllContent`, accessing routers).
 - Hungarian notation: `sName`, `oModel`, `aItems`, `bIsValid`, `iCount`, `fnCallback`
 - Event handlers: `on` prefix (`onPressSubmit`, `onSelectCard`)
 - Max 10 `sap.ui.define` dependencies
@@ -152,7 +156,7 @@ project/
 - **TDD:** Red-Green-Refactor for Validators, Services, Utilities, ENH engines
 - **Framework:** Jest + ts-jest (backend), QUnit + OPA5 (frontend)
 - **Unit tests:** No DB, mocked CDS. Validators fully tested (pure). Services tested with CDS mocked + real Validator.
-- **Integration tests:** `cds.test()` + SQLite. One file per CDS service.
+- **Integration tests:** `cds.test()` + SQLite. One file per CDS service. Never test CAP CRUD/draft machinery ("can read X", "can create via draft") or `@readonly` enforcement. DO test annotation-based constraints (`@assert.unique`, `@mandatory`, `@assert.range`, cross-field `@assert`) as behavioral contract documentation, plus any custom handler logic.
 - **Test data:** Hybrid factories + named constants (UPPER_SNAKE_CASE) in `test/data/`. Semantic names. No real card numbers.
 - **Coverage targets:** Validators/Utilities 100%/100%, Services 90%/85%, Overall 85%/80%
 - **Facades excluded** from unit testing (zero logic by design)

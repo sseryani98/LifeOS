@@ -10,6 +10,9 @@ gen/
 # Secrets
 .env
 
+# Personal seed data (card portfolio, financial details)
+db/seed/
+
 # Runtime logs
 logs/
 

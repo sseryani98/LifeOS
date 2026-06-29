@@ -128,10 +128,27 @@
   color: var(--sapShell_TextColor);
 }
 
-/* ToolHeader title — Title control defaults to --sapTextColor (dark),
-   must inherit shell text color on the dark header bar.  (SAPUI5 1.136.16) */
-.sapTntToolHeader .sapMTitle {
+/* ToolHeader title & icon — Title and Icon controls default to --sapTextColor
+   (dark), must inherit shell text color on the dark header bar.  (SAPUI5 1.136.16) */
+.sapTntToolHeader .sapMTitle,
+.sapTntToolHeader > .sapUiIcon {
   color: var(--sapShell_TextColor);
+}
+
+/* ToolHeader buttons — Transparent buttons inherit dark icon/text color
+   which has no contrast on the dark shell header. Four-class prefix needed
+   to beat CDN specificity on .sapMBtnTransparent selectors.  (SAPUI5 1.136.16) */
+.sapMIBar.sapMTB.sapMOTB.sapTntToolHeader .sapMBtnInner {
+  color: var(--sapShell_TextColor);
+}
+
+.sapMIBar.sapMTB.sapMOTB.sapTntToolHeader .sapMBtnIcon {
+  color: var(--sapShell_TextColor);
+}
+
+.sapMIBar.sapMTB.sapMOTB.sapTntToolHeader .sapMBtnInner:hover {
+  background-color: var(--sapShell_Hover_Background);
+  border-color: var(--sapShell_Hover_Background);
 }
 
 /* ToolPage main content area — Horizon 1.136.16 hardcodes a cool grey (#F5F6F7)

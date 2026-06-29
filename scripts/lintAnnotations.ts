@@ -297,6 +297,12 @@ function checkTechnicalFieldsHidden(
 ): Violation[] {
   const violations: Violation[] = [];
 
+  // CodeList entities (key `code`, no `ID`/managed fields) have no technical
+  // fields to hide. They are identified by an annotated `code` element —
+  // ID-bearing entities annotate `ID`, never `code`.
+  const isCodeList = /\bcode\s+@UI\.Hidden/.test(block.content);
+  if (isCodeList) return violations;
+
   for (const field of TECHNICAL_FIELDS) {
     const hiddenPattern = new RegExp(`\\b${field}\\b[^;]*@UI\\.Hidden`, "s");
     if (!hiddenPattern.test(block.content)) {

@@ -1,0 +1,12 @@
+<mvc:View
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+>
+    <VBox
+        class="sapUiMediumMargin"
+        alignItems="Center"
+        justifyContent="Center"
+    >
+        <Text text="{i18n>welcomeText}" />
+    </VBox>
+</mvc:View>

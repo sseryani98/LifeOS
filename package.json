@@ -13,7 +13,8 @@
     "test": "jest --json --outputFile=coverage/test-results.json --coverage",
     "posttest": "tsx scripts/generateTestReport.ts",
     "generate-key": "tsx scripts/generateKey.ts",
-    "lint": "eslint srv/ app/ scripts/ && npm run lint:i18n && npm run lint:annotations && npm run lint:filenames",
+    "lint": "eslint srv/ app/ scripts/ && npm run lint:ui5 && npm run lint:i18n && npm run lint:annotations && npm run lint:filenames",
+    "lint:ui5": "cd app/admin-master-data && ui5lint",
     "lint:i18n": "tsx scripts/lintI18n.ts",
     "lint:annotations": "tsx scripts/lintAnnotations.ts",
     "lint:filenames": "tsx scripts/lintFilenames.ts"
@@ -40,6 +41,7 @@
     "@types/papaparse": "^5",
     "@typescript-eslint/eslint-plugin": "^8",
     "@typescript-eslint/parser": "^8",
+    "@ui5/linter": "^1.20.18",
     "eslint": "^9",
     "eslint-plugin-import": "^2",
     "eslint-plugin-jsdoc": "^50",
@@ -61,7 +63,11 @@
           "user": "postgres",
           "password": "",
           "database": "financial_planner"
-        }
+        },
+        "data": [
+          "db/data",
+          "db/seed"
+        ]
       }
     },
     "i18n": {

@@ -2,16 +2,30 @@ namespace com.financialplanner;
 
 using {
   cuid,
-  managed
+  managed,
+  sap.common.CodeList
 } from '@sap/cds/common';
 using {
   com.financialplanner.AmountSign,
   com.financialplanner.RuleType,
   com.financialplanner.ReferenceDate,
-  com.financialplanner.CardType,
-  com.financialplanner.CardSegment,
   com.financialplanner.ScrapeMappingEntityType
 } from '../enums';
+
+@cds.autoexpose
+entity RewardsCurrencyType : CodeList {
+  key code : String(20);
+}
+
+@cds.autoexpose
+entity CardType : CodeList {
+  key code : String(20);
+}
+
+@cds.autoexpose
+entity CardSegment : CodeList {
+  key code : String(20);
+}
 
 @assert.unique: {name: [name]}
 entity Issuer : cuid, managed {
@@ -21,40 +35,45 @@ entity Issuer : cuid, managed {
 
 @assert.unique: {name: [name]}
 entity RewardsProgram : cuid, managed {
-  name         : String(100) not null    @mandatory  @Common.Label: '{i18n>RewardsProgram.name}';
-  currencyName : String(50) not null     @mandatory  @Common.Label: '{i18n>RewardsProgram.currencyName}';
-  cppValuation : Decimal(5, 2) not null  @mandatory  @Common.Label: '{i18n>RewardsProgram.cppValuation}';
+  name         : String(100) not null                @mandatory  @Common.Label: '{i18n>RewardsProgram.name}';
+  currencyType : Association to RewardsCurrencyType  @mandatory  @Common.Label: '{i18n>RewardsProgram.currencyType}';
+  cppValuation : Decimal(5, 2) not null              @mandatory  @Common.Label: '{i18n>RewardsProgram.cppValuation}';
+}
+
+@assert.unique: {name: [name]}
+entity PurchaseCategory : cuid, managed {
+  name               : String(100) not null            @mandatory  @Common.Label: '{i18n>PurchaseCategory.name}';
+  excludesFromBudget : Boolean not null default false  @mandatory  @Common.Label: '{i18n>PurchaseCategory.excludesFromBudget}';
+  purchaseTypes      : Composition of many PurchaseType
+                         on purchaseTypes.category = $self;
 }
 
 @assert.unique: {name: [name]}
 entity PurchaseType : cuid, managed {
-  name               : String(100) not null            @mandatory  @Common.Label: '{i18n>PurchaseType.name}';
-  parent             : Association to PurchaseType     @Common.Label: '{i18n>PurchaseType.parent}';
-  sortOrder          : Integer not null                @mandatory  @Common.Label: '{i18n>PurchaseType.sortOrder}';
-  excludesFromBudget : Boolean not null default false  @mandatory  @Common.Label: '{i18n>PurchaseType.excludesFromBudget}';
+  name     : String(100) not null                      @mandatory  @Common.Label: '{i18n>PurchaseType.name}';
+  category : Association to PurchaseCategory not null  @mandatory  @Common.Label: '{i18n>PurchaseType.category}';
 }
 
 @assert.unique: {name: [name]}
 entity EarningCategory : cuid, managed {
-  name      : String(100) not null  @mandatory  @Common.Label: '{i18n>EarningCategory.name}';
-  sortOrder : Integer not null      @mandatory  @Common.Label: '{i18n>EarningCategory.sortOrder}';
+  name : String(100) not null  @mandatory  @Common.Label: '{i18n>EarningCategory.name}';
 }
 
 entity IssuerApplicationRule : cuid, managed {
-  issuer            : Association to Issuer         @Common.Label: '{i18n>IssuerApplicationRule.issuer}'
-                                                    @assert      : (case
-                                                                      when issuer             is null
-                                                                           and rewardsProgram is null
-                                                                           then 'admin.issuerRule.missingIssuerOrProgram'
-                                                                    end);
-  rewardsProgram    : Association to RewardsProgram @Common.Label: '{i18n>IssuerApplicationRule.rewardsProgram}';
-  ruleType          : RuleType not null             @mandatory  @Common.Label: '{i18n>IssuerApplicationRule.ruleType}';
-  parameterCount    : Integer                       @Common.Label: '{i18n>IssuerApplicationRule.parameterCount}';
-  parameterDays     : Integer                       @Common.Label: '{i18n>IssuerApplicationRule.parameterDays}';
-  appliesToCardType : CardType                      @Common.Label: '{i18n>IssuerApplicationRule.appliesToCardType}';
-  appliesToSegment  : CardSegment                   @Common.Label: '{i18n>IssuerApplicationRule.appliesToSegment}';
-  referenceDate     : ReferenceDate                 @Common.Label: '{i18n>IssuerApplicationRule.referenceDate}';
-  description       : String(500) not null          @mandatory  @Common.Label: '{i18n>IssuerApplicationRule.description}';
+  issuer               : Association to Issuer         @Common.Label: '{i18n>IssuerApplicationRule.issuer}'
+                                                       @assert      : (case
+                                                                         when issuer             is null
+                                                                              and rewardsProgram is null
+                                                                              then 'admin.issuerRule.missingIssuerOrProgram'
+                                                                       end);
+  rewardsProgram       : Association to RewardsProgram @Common.Label: '{i18n>IssuerApplicationRule.rewardsProgram}';
+  ruleType             : RuleType not null             @mandatory  @Common.Label: '{i18n>IssuerApplicationRule.ruleType}';
+  parameterCount       : Integer                       @Common.Label: '{i18n>IssuerApplicationRule.parameterCount}';
+  parameterDays        : Integer                       @Common.Label: '{i18n>IssuerApplicationRule.parameterDays}';
+  appliesToCardType    : Association to CardType       @Common.Label: '{i18n>IssuerApplicationRule.appliesToCardType}';
+  appliesToCardSegment : Association to CardSegment    @Common.Label: '{i18n>IssuerApplicationRule.appliesToCardSegment}';
+  referenceDate        : ReferenceDate                 @Common.Label: '{i18n>IssuerApplicationRule.referenceDate}';
+  description          : String(500) not null          @mandatory  @Common.Label: '{i18n>IssuerApplicationRule.description}';
 }
 
 @assert.unique: {configName: [configName]}
@@ -102,57 +121,48 @@ entity CsvFormatConfig : cuid, managed {
 
 @assert.unique: {name: [name]}
 entity FinancialAccountType : cuid, managed {
-  name      : String(100) not null  @mandatory  @Common.Label: '{i18n>FinancialAccountType.name}';
-  sortOrder : Integer not null      @mandatory  @Common.Label: '{i18n>FinancialAccountType.sortOrder}';
-  isAsset   : Boolean not null      @mandatory  @Common.Label: '{i18n>FinancialAccountType.isAsset}';
+  name    : String(100) not null  @mandatory  @Common.Label: '{i18n>FinancialAccountType.name}';
+  isAsset : Boolean not null      @mandatory  @Common.Label: '{i18n>FinancialAccountType.isAsset}';
 }
 
 @assert.unique: {name: [name]}
 entity IncomeSourceType : cuid, managed {
-  name      : String(100) not null  @mandatory  @Common.Label: '{i18n>IncomeSourceType.name}';
-  sortOrder : Integer not null      @mandatory  @Common.Label: '{i18n>IncomeSourceType.sortOrder}';
+  name : String(100) not null  @mandatory  @Common.Label: '{i18n>IncomeSourceType.name}';
 }
 
 @assert.unique: {name: [name]}
 entity PerkType : cuid, managed {
-  name      : String(100) not null  @mandatory  @Common.Label: '{i18n>PerkType.name}';
-  sortOrder : Integer not null      @mandatory  @Common.Label: '{i18n>PerkType.sortOrder}';
+  name : String(100) not null  @mandatory  @Common.Label: '{i18n>PerkType.name}';
 }
 
 @assert.unique: {name: [name]}
 entity AdjustmentType : cuid, managed {
-  name      : String(100) not null  @mandatory  @Common.Label: '{i18n>AdjustmentType.name}';
-  sortOrder : Integer not null      @mandatory  @Common.Label: '{i18n>AdjustmentType.sortOrder}';
+  name : String(100) not null  @mandatory  @Common.Label: '{i18n>AdjustmentType.name}';
 }
 
 @assert.unique: {name: [name]}
 entity AlertType : cuid, managed {
-  name      : String(100) not null  @mandatory  @Common.Label: '{i18n>AlertType.name}';
-  sortOrder : Integer not null      @mandatory  @Common.Label: '{i18n>AlertType.sortOrder}';
+  name : String(100) not null  @mandatory  @Common.Label: '{i18n>AlertType.name}';
 }
 
 @assert.unique: {name: [name]}
 entity AlertSeverity : cuid, managed {
-  name      : String(100) not null  @mandatory  @Common.Label: '{i18n>AlertSeverity.name}';
-  sortOrder : Integer not null      @mandatory  @Common.Label: '{i18n>AlertSeverity.sortOrder}';
+  name : String(100) not null  @mandatory  @Common.Label: '{i18n>AlertSeverity.name}';
 }
 
 @assert.unique: {name: [name]}
 entity CardNetwork : cuid, managed {
-  name      : String(100) not null  @mandatory  @Common.Label: '{i18n>CardNetwork.name}';
-  sortOrder : Integer not null      @mandatory  @Common.Label: '{i18n>CardNetwork.sortOrder}';
+  name : String(100) not null  @mandatory  @Common.Label: '{i18n>CardNetwork.name}';
 }
 
 @assert.unique: {name: [name]}
 entity PatternSource : cuid, managed {
-  name      : String(100) not null  @mandatory  @Common.Label: '{i18n>PatternSource.name}';
-  sortOrder : Integer not null      @mandatory  @Common.Label: '{i18n>PatternSource.sortOrder}';
+  name : String(100) not null  @mandatory  @Common.Label: '{i18n>PatternSource.name}';
 }
 
 @assert.unique: {name: [name]}
 entity ConfidenceLevel : cuid, managed {
-  name      : String(100) not null  @mandatory  @Common.Label: '{i18n>ConfidenceLevel.name}';
-  sortOrder : Integer not null      @mandatory  @Common.Label: '{i18n>ConfidenceLevel.sortOrder}';
+  name : String(100) not null  @mandatory  @Common.Label: '{i18n>ConfidenceLevel.name}';
 }
 
 @assert.unique: {programName: [
@@ -162,7 +172,6 @@ entity ConfidenceLevel : cuid, managed {
 entity ProgramTier : cuid, managed {
   rewardsProgram : Association to RewardsProgram not null  @mandatory  @Common.Label: '{i18n>ProgramTier.rewardsProgram}';
   name           : String(100) not null                    @mandatory  @Common.Label: '{i18n>ProgramTier.name}';
-  sortOrder      : Integer not null                        @mandatory  @Common.Label: '{i18n>ProgramTier.sortOrder}';
 }
 
 @assert.unique: {configKey: [key]}
@@ -175,8 +184,7 @@ entity SystemConfig : cuid, managed {
 
 @assert.unique: {name: [name]}
 entity RedemptionType : cuid, managed {
-  name      : String(100) not null  @mandatory  @Common.Label: '{i18n>RedemptionType.name}';
-  sortOrder : Integer not null      @mandatory  @Common.Label: '{i18n>RedemptionType.sortOrder}';
+  name : String(100) not null  @mandatory  @Common.Label: '{i18n>RedemptionType.name}';
 }
 
 @assert.unique: {mapping: [
