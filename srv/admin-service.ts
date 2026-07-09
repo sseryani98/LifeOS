@@ -1,11 +1,11 @@
 import cds from "@sap/cds";
 
-import { DeduplicationDataService } from "./modules/integration/deduplicationDataService.js";
-import { DeduplicationService } from "./modules/integration/deduplicationService.js";
-import { SchedulingService } from "./modules/integration/schedulingService.js";
-import { SimpleFINDataService } from "./modules/integration/simpleFinDataService.js";
-import { SimpleFINFacade } from "./modules/integration/simpleFinFacade.js";
-import { SimpleFINService } from "./modules/integration/simpleFinService.js";
+import { DeduplicationDataService } from "./modules/ingestion/deduplicationDataService.js";
+import { DeduplicationService } from "./modules/ingestion/deduplicationService.js";
+import { SchedulingService } from "./modules/ingestion/schedulingService.js";
+import { SimpleFINDataService } from "./modules/ingestion/simpleFinDataService.js";
+import { SimpleFINFacade } from "./modules/ingestion/simpleFinFacade.js";
+import { SimpleFINService } from "./modules/ingestion/simpleFinService.js";
 
 /** AdminService — Reference data CRUD, system config, integrations, alerts. */
 export default class AdminService extends cds.ApplicationService {

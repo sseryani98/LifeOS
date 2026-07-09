@@ -46,7 +46,7 @@ srv/
   modules/
     shared/                  baseFacade, baseService, logger, messagingUtility, constants
     {domain}/                Per-domain: {domain}Facade.ts, {domain}Service.ts, {domain}DataService.ts, {domain}Validator.ts (+ {domain}Mapper.ts when translating shapes)
-    integration/             SimpleFIN, CSV, Scheduling services
+    ingestion/               SimpleFIN, CSV, Scheduling, Dedup services (the ingestion domain)
   util/                      encryptionUtility, dateTimeUtility, currencyUtility
 app/
   shared/                    BaseController.ts, controls/, util/formatter.ts, css/theme-overrides.css (transpiled UI5 lib, served at /shared)
@@ -55,10 +55,14 @@ app/
     webapp/                  manifest.json, Component.ts, i18n/, ext/ or views/
     annotations/             Entity-based CDS annotation files (Fiori Elements apps only)
 test/
-  unit/{domain}/             Per-module unit tests
-  integration/               Per-CDS-service integration tests
+  shared/{data,support}/     Cross-cutting fixtures + builders (used across modules or test types)
+  unit/{module}/             Per-module unit area, each split into:
+    data/                    Fixtures + factories used only by this module's unit tests
+    support/                 Mocks/harness builders (buildXxxMocks) — functions, never fixtures
+    tests/                   The *.test.ts specs
+  integration/{module}/      Same data/support/tests split, per CDS service / domain
   integration/scenarios/     FUT multi-step scenario tests
-  data/                      Test data factories, named constants, seeds.ts
+                             ({module}: ingestion=CSV/SimpleFIN/Scheduling/Dedup, shared=utilities, admin, …)
 project/
   SPRINT_BOARD.md            Current sprint status
   DEFECT_LOG.md              Running defect log
@@ -82,7 +86,7 @@ project/
 > `app/` is TypeScript too — see **SAPUI5** for its (different) tooling. These rules are backend-specific.
 
 - `strict: true` (all sub-flags). No `any`, ever. Entity imports from `#cds-models/com/financialplanner`. Handler registration passes entity references, not strings
-- **Exported types → `{domain}/types.ts`**, never atop a class. File-private and anonymous inline shapes are exempt. `lint:domain-types`
+- **Named types → `{domain}/types.ts`.** A file that declares a class holds NO named `interface`/`type` beside it — exported or file-private, it moves to the domain's `types.ts`. In non-class modules, file-private types may stay local; exported types still belong in `types.ts`. Anonymous inline shapes are always exempt. `lint:domain-types`
 - **Constants → grouped `as const` objects**, imported by namespace (`ALERTS.TYPE.STALE_DATA`), never a wall of loose `const`s. Placement: cross-module/generic → `shared/constants.ts`; domain-scoped → `{domain}/constants.ts`; private to one file → local `as const` at top. Derived single-use values (a `join()` path) may stay loose. `lint:grouped-constants` fires at ≥3 loose literals. Frontend variant — any SCREAMING_SNAKE object/array-literal map lives in the app's `constants.ts`, never beside a formatter/controller; scalar one-offs and camelCase subjects (`formatter`, `navConfig`) stay put. `lint:frontend-constants`
 - **Identifier length ≥3 letters** (only `i` and `id` exempt; object keys exempt — CAP's `ID`, external payload keys). `id-length`
 - **Method names = verb + object** (`_fetchAccounts` not `_fetch`). Exempt: framework lifecycle names (`init`, `onInit`, `render`) and interface methods named for the class itself (`DedupService.evaluate`)
@@ -160,8 +164,10 @@ Authored in TypeScript, transpiled to classic `sap.ui.define` AMD at serve/build
 - **Framework:** Jest + ts-jest (backend), QUnit + OPA5 (frontend)
 - **Unit tests:** No DB, mocked CDS. Validators fully tested (pure). Services tested with CDS mocked + real Validator
 - **Integration tests:** `cds.test()` + SQLite, one file per CDS service. Never test CAP CRUD/draft machinery or `@readonly` enforcement. DO test annotation-based constraints (`@assert.unique`, `@mandatory`, `@assert.range`, cross-field `@assert`) as contract documentation, plus custom handler logic
-- **Test data:** hybrid factories + named constants (UPPER_SNAKE_CASE) in `test/data/`. Semantic names, no real card numbers
-- **Readable test files** (`lint:test-data`; `test/data/` + `test/support/` exempt): a `*.test.ts` is imports + arrange-act-assert, nothing else. Every payload and UUID is a named constant from `test/data/` (never inline, never re-declared when a canonical constant exists); builders (`buildXxxMocks`, `seedXxx`, HTTP stubs) live in `test/support/`. Assertions may hold inline expected values
+- **Test tree — `{test-type}/{module}/{data,support,tests}`** (`lint:test-structure`): every test file lives in one of three role folders under its module — `data/` (fixtures + factories), `support/` (mocks/harness/seed *builders* — functions only), `tests/` (the `*.test.ts` specs). Modules mirror `srv/modules/` (the ingestion domain is named **`ingestion`**, not `integration`, to avoid colliding with the integration test type). Cross-cutting fixtures/builders shared across modules *or* across the unit↔integration boundary live in top-level **`test/shared/{data,support}`**. **Data never lives in `support/`** — an exported object/array fixture in a `support/` file is a violation; move it to the sibling `data/` folder
+- **Test data:** hybrid factories + named constants (UPPER_SNAKE_CASE) in a `data/` folder. Semantic names, no real card numbers
+- **Readable test files** (`lint:test-data`; `data/` + `support/` folders exempt): a `*.test.ts` is imports + arrange-act-assert, nothing else. Every payload and UUID is a named constant from a `data/` folder (never inline, never re-declared when a canonical constant exists); builders (`buildXxxMocks`, `seedXxx`, HTTP stubs) live in `support/`. Assertions may hold inline expected values
+- **No CQL in specs** (`lint:test-cql`): a `*.test.ts` never issues DB access directly — every `SELECT`/`INSERT`/`UPDATE`/`DELETE`/`UPSERT` (and `cds.run`/`cds.ql`) lives in a named `support/` helper (`seedXxx`, `readXxxById`, `mapXxxToYyy`) the spec calls. Query/seed helpers return typed row shapes so the AAA body stays free of inline CQL and row-type annotations
 - **One-line JSDoc per test** (`lint:test-data`): every `it`/`test` gets a `/** … */` one-liner stating the **why** (the rule it protects, what breaks) — not a paraphrase of the title
 - **Coverage targets:** Validators/Utilities 100%/100%, Services 90%/85%, Overall 85%/80%. Facades excluded (zero logic by design)
 

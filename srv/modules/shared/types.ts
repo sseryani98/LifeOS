@@ -17,3 +17,12 @@ export interface HttpClient {
 
 /** Async delay, injectable so retry backoff is instant under test. */
 export type SleepFn = (ms: number) => Promise<void>;
+
+/** Valid log entry types for structured logging. */
+export type LogType =
+  | "ENTRY"
+  | "EXIT"
+  | "EXTERNAL_CALL"
+  | "STATE_CHANGE"
+  | "BATCH_RESULT"
+  | "ERROR";
