@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "es2022",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "skipLibCheck": true,
+    "noImplicitReturns": true,
+    "paths": {
+      "com/financialplanner/shell/*": ["./*"],
+      "com/financialplanner/shared/*": ["../shared/*"]
+    },
+    "types": ["@sapui5/types"]
+  },
+  "include": ["**/*.ts"],
+  "exclude": ["node_modules"]
+}

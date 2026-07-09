@@ -1,6 +1,5 @@
 using AdminService as svc from '../../../srv/admin-service';
 
-// ─── Recurrent Expense ─────────────────────────────────────────────────────
 annotate svc.RecurrentExpenses with @UI: {
   HeaderInfo         : {
     TypeName      : '{i18n>RecurrentExpense}',
@@ -71,8 +70,6 @@ annotate svc.RecurrentExpenses with @UI: {
     Target: '@UI.FieldGroup#General'
   }]
 };
-
-// ─── Field Labels & Hidden Fields ──────────────────────────────────────────
 
 annotate svc.RecurrentExpenses with {
   ID            @UI.Hidden;

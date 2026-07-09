@@ -19,6 +19,9 @@ export class MessagingUtility {
   /**
    * Retrieves a localized message by key, with optional parameter substitution.
    * Parameters replace {0}, {1}, etc. placeholders in the message template.
+   * @param key Message key in camelCase.dots format.
+   * @param params Ordered values substituted into {0}, {1}, ... placeholders.
+   * @returns The resolved message, or the key itself when no matching entry exists.
    */
   static getText(key: string, params?: string[]): string {
     const messages = MessagingUtility._loadMessages();
@@ -39,6 +42,7 @@ export class MessagingUtility {
   /**
    * Loads and caches messages from the properties file.
    * Parses key=value pairs, ignoring comments and blank lines.
+   * @returns The cached key-to-message map (empty if the file is absent).
    */
   private static _loadMessages(): Map<string, string> {
     if (MessagingUtility.messages) {

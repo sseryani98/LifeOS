@@ -208,9 +208,9 @@ shared/ BaseFacade, BaseService, Logger, MessagingUtility, constants
 integration/ SimpleFIN, CSV, Scheduling services
 util/ EncryptionUtility, DateTimeUtility, CurrencyUtility
 app/
-shared/ BaseController.js, controls/, util/formatter.js, css/theme-overrides.css
+shared/ BaseController.ts, controls/, util/formatter.ts, css/theme-overrides.css
 {app-name}/ One folder per UI app (23 total)
-webapp/ manifest.json, Component.js, i18n/, ext/ or views/
+webapp/ manifest.json, Component.ts, i18n/, ext/ or views/
 annotations/ Entity-based CDS annotation files (Fiori Elements apps only)
 test/
 unit/{domain}/ Per-module unit tests
@@ -233,7 +233,7 @@ sprints/ Sprint checkpoint reports
 - **Namespace:** `com.financialplanner`
 - **Schema:** One `schema.cds` per domain folder under `db/`
 
-### TypeScript (srv/ and db/ only)
+### TypeScript (backend — srv/ and db/)
 - `strict: true` with all sub-flags
 - Entity imports: `import { Transaction } from '#cds-models/com/financialplanner'`
 - Handler registration: pass entity references, not strings
@@ -270,14 +270,15 @@ sprints/ Sprint checkpoint reports
 | Runtime messages | `srv/_i18n/messages.properties` | `camelCase.dots` |
 | UI5 app messages | `app/{name}/webapp/i18n/i18n.properties` | `camelCase` |
 
-### SAPUI5 (app/ — JavaScript, not TypeScript)
-- XML views only — no JS views
-- All controllers extend `BaseController.js`
-- Extensions: `{ViewType}Ext.js` (ListReportExt, ObjectPageExt)
+### SAPUI5 (app/ — TypeScript, transpiled to AMD)
+- Authored in TypeScript, transpiled to `sap.ui.define` AMD at serve/build time (`ui5-tooling-transpile` + `cds-plugin-ui5`)
+- XML views only — no JS/TS views
+- All controllers extend `BaseController.ts`
+- Extensions: `{ViewType}Ext.controller.ts` (ListReportExt, ObjectPageExt)
 - Annotations: entity-based files in `app/{name}/annotations/`
-- Hungarian notation: `sName`, `oModel`, `aItems`, `bIsValid`, `iCount`, `fnCallback`
+- `@namespace` JSDoc mandatory on every UI5 class; ES `import`/`export default class`, not `sap.ui.define`
+- No Hungarian notation — plain descriptive names (the type is in the signature)
 - Event handlers: `on` prefix (`onPressSubmit`, `onSelectCard`)
-- Max 10 `sap.ui.define` dependencies
 
 ### Encryption
 - AES-256-GCM via `EncryptionUtility.ts` — `encrypt(plaintext)` / `decrypt(stored)`
@@ -450,11 +451,11 @@ Create the following:
 - `srv/_i18n/messages.properties` — header comment + common messages (entity.notFound, validation.required)
 
 **8. App shared resources:**
-- `app/shared/BaseController.js` — extends sap.ui.core.mvc.Controller, provides getRouter, getModel, setModel helpers
+- `app/shared/BaseController.ts` — extends sap.ui.core.mvc.Controller, provides getRouter, getModel, setModel helpers
 - `app/shared/css/theme-overrides.css` — full CSS from THEME.md §7 (all 28 custom properties in :root block + Layer 2 selectors placeholder)
-- `app/shared/util/formatter.js` — stubs for formatCurrency, formatDate, formatStatus
-- `app/shared/controls/VizFrameCard.js` — stub extending sap.ui.core.Control
-- `app/shared/controls/ApexChartCard.js` — stub extending sap.ui.core.Control
+- `app/shared/util/formatter.ts` — stubs for formatCurrency, formatDate, formatStatus
+- `app/shared/controls/VizFrameCard.ts` — stub extending sap.ui.core.Control
+- `app/shared/controls/ApexChartCard.ts` — stub extending sap.ui.core.Control
 
 **9. Shell entry point:**
 - `app/index.html` — SAPUI5 bootstrap loading sap_horizon from CDN, theme-overrides.css link after bootstrap, shell container for side navigation + content area. Reference DESIGN_SYSTEM.md §4 for nav structure and INFORMATION_ARCHITECTURE.md §2 for the 23 nav entries (5 groups). Nav items hidden until built per wave-gating (D-307) — only show items relevant to W1-S1 initially.

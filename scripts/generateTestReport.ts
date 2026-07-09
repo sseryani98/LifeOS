@@ -37,7 +37,7 @@ interface CoverageSummary {
 /**
  * Generates a markdown test report from Jest JSON output and coverage summary.
  * Implements rolling retention of max 5 report files.
- * See TEST_STRATEGY.md §12 for format specification.
+ * See TEST_STRATEGY.md for format specification.
  */
 function generateReport(): void {
   const now = new Date();

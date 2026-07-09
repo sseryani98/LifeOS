@@ -359,16 +359,16 @@ Coverage report runs on every `npm test` execution. Not a separate step.
 
 **Decision D-80.**
 
-Frontend testing is included as a **learning exercise** — no enforced coverage thresholds. Enough scope to learn QUnit and OPA5 patterns for both Fiori Elements and freestyle SAPUI5 apps.
+Frontend testing is included as a **learning exercise** — no enforced coverage thresholds. Enough scope to learn QUnit and OPA5 patterns for both Fiori Elements and freestyle SAPUI5 apps. Test files are authored in **TypeScript** (like all of `app/` since D-315) and transpiled by `ui5-tooling-transpile`.
 
 ### 9.1 QUnit — Controller Logic and Shared Resources
 
 | Target                                 | What to Test                                              |
 | -------------------------------------- | --------------------------------------------------------- |
-| `app/shared/util/formatter.js`         | Currency formatting, date formatting, status text mapping |
-| `app/shared/BaseController.js`         | Helper methods (model access, navigation)                 |
-| `app/shared/controls/VizFrameCard.js`  | Property binding, config generation                       |
-| `app/shared/controls/ApexChartCard.js` | Property binding, config generation                       |
+| `app/shared/util/formatter.ts`         | Currency formatting, date formatting, status text mapping |
+| `app/shared/BaseController.ts`         | Helper methods (model access, navigation)                 |
+| `app/shared/controls/VizFrameCard.ts`  | Property binding, config generation                       |
+| `app/shared/controls/ApexChartCard.ts` | Property binding, config generation                       |
 | 1-2 freestyle controllers              | Event handlers that transform data before OData calls     |
 
 ### 9.2 OPA5 — Journey Tests
@@ -387,24 +387,24 @@ app/
 ├── shared/
 │   └── test/
 │       └── unit/
-│           ├── formatter.test.js
-│           ├── BaseController.test.js
-│           ├── VizFrameCard.test.js
-│           └── ApexChartCard.test.js
+│           ├── formatter.test.ts
+│           ├── BaseController.test.ts
+│           ├── VizFrameCard.test.ts
+│           └── ApexChartCard.test.ts
 ├── transactions/
 │   └── webapp/
 │       └── test/
 │           ├── unit/
-│           │   └── ListReportExt.test.js
+│           │   └── ListReportExt.test.ts
 │           └── integration/
-│               └── TransactionJourney.js
+│               └── TransactionJourney.ts
 └── csv-import/
     └── webapp/
         └── test/
             ├── unit/
-            │   └── CsvImportController.test.js
+            │   └── CsvImportController.test.ts
             └── integration/
-                └── CsvImportJourney.js
+                └── CsvImportJourney.ts
 ```
 
 ### 9.4 Coverage

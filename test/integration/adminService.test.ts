@@ -1,15 +1,9 @@
 import cds from "@sap/cds";
 
 import {
-  AMEX_COBALT,
-  AMEX_COBALT_DEC2025_OFFER,
-  AMEX_COBALT_INSTANCE,
-} from "../data/cards.js";
-
-import {
-  GROCERIES_ALLOCATION_CURRENT,
-  DINING_ALLOCATION_CURRENT,
-} from "../data/budget.js";
+  buildDraftHelpers,
+  seedAdmin,
+} from "../support/integration/adminService.js";
 
 import {
   ALLOCATION_EXCLUDED_CATEGORY,
@@ -44,80 +38,42 @@ import {
 
 const { POST, expect } = cds.test("serve", "--with-mocks", "--in-memory");
 
-const SERVICE = "/service/adminSvcs";
+const { createViaDraft, createViaDraftExpectError } = buildDraftHelpers(POST);
 
-/** Creates a draft, applies data, and activates it. Returns the active entity. */
-async function createViaDraft(entity: string, data: Record<string, unknown>) {
-  const draft = await POST(`${SERVICE}/${entity}`, data);
-  const id = draft.data.ID;
-  const activated = await POST(
-    `${SERVICE}/${entity}(ID=${id},IsActiveEntity=false)/AdminService.draftActivate`,
-    {},
-  );
-  return activated;
-}
-
-/** Creates a draft, applies data, and attempts activation. Returns the error or activated entity. */
-async function createViaDraftExpectError(
-  entity: string,
-  data: Record<string, unknown>,
-) {
-  const draft = await POST(`${SERVICE}/${entity}`, data);
-  const id = draft.data.ID;
-  return POST(
-    `${SERVICE}/${entity}(ID=${id},IsActiveEntity=false)/AdminService.draftActivate`,
-    {},
-  ).catch((error: { status: number }) => error);
-}
-
-async function seed() {
-  // Reference data is already seeded from db/data/*.csv by cds.deploy.
-  // Only insert entities that have no CSV seed files.
-  await INSERT.into("com.financialplanner.MarketCard").entries([AMEX_COBALT]);
-  await INSERT.into("com.financialplanner.Offer").entries([
-    AMEX_COBALT_DEC2025_OFFER,
-  ]);
-  await INSERT.into("com.financialplanner.CardInstance").entries([
-    AMEX_COBALT_INSTANCE,
-  ]);
-  await INSERT.into("com.financialplanner.BudgetAllocation").entries([
-    GROCERIES_ALLOCATION_CURRENT,
-    DINING_ALLOCATION_CURRENT,
-  ]);
-}
-
-beforeAll(seed);
+beforeAll(seedAdmin);
 
 describe("AdminService", () => {
-  // ─── Cross-field business rules ────────────────────────────────────────
-
   describe("BudgetAllocation cross-field rules", () => {
+    /** A category flagged excludesFromBudget is money that gets reimbursed, so budgeting a share of it would double-count non-spending. */
     it("rejects allocation referencing an excluded-from-budget category", async () => {
       const res = await createViaDraftExpectError(
         "BudgetAllocations",
         ALLOCATION_EXCLUDED_CATEGORY,
       );
-      expect(res.status).to.be.oneOf([400, 409, 422, 500]);
+      expect(res.status).to.be.oneOf([400, 409, 422]);
     });
 
+    /** Only the open-ended row (effectiveTo 9999-12-31) is current; writing a closed one would retroactively rewrite an already-settled past budget period. */
     it("rejects allocation with effectiveTo != 9999-12-31 (historical protection)", async () => {
       const res = await createViaDraftExpectError(
         "BudgetAllocations",
         ALLOCATION_HISTORICAL_EFFECTIVE_TO,
       );
-      expect(res.status).to.be.oneOf([400, 409, 422, 500]);
+      expect(res.status).to.be.oneOf([400, 409, 422]);
     });
   });
 
   describe("IssuerApplicationRule cross-field rules", () => {
+    /** An application rule must be anchored to an issuer or a program; scoped to neither, it has no target to enforce against (cross-field @assert). */
     it("rejects rule with neither issuer nor rewards program", async () => {
       const res = await createViaDraftExpectError(
         "IssuerApplicationRules",
         ISSUER_RULE_ORPHAN,
       );
-      expect(res.status).to.be.oneOf([400, 409, 422, 500]);
+      expect(res.status).to.be.oneOf([400, 409, 422]);
     });
 
+    /** Anchoring to just the issuer is already a complete scope; guards the cross-field rule against over-rejecting the valid one-sided case. */
     it("accepts rule with only issuer set", async () => {
       const { status } = await createViaDraft(
         "IssuerApplicationRules",
@@ -128,34 +84,36 @@ describe("AdminService", () => {
   });
 
   describe("CsvFormatConfig cross-field rules", () => {
+    /** A single signed amount column and separate debit/credit columns are mutually exclusive CSV layouts; setting both leaves parsing ambiguous about the sign. */
     it("rejects config with both amount styles set (XOR violation)", async () => {
       const res = await createViaDraftExpectError(
         "CsvFormatConfigs",
         CSV_CONFIG_XOR_BOTH,
       );
-      expect(res.status).to.be.oneOf([400, 409, 422, 500]);
+      expect(res.status).to.be.oneOf([400, 409, 422]);
     });
 
+    /** With neither an amount column nor debit/credit columns, a parsed row carries no monetary value to import. */
     it("rejects config with neither amount style set (XOR violation)", async () => {
       const res = await createViaDraftExpectError(
         "CsvFormatConfigs",
         CSV_CONFIG_XOR_NEITHER,
       );
-      expect(res.status).to.be.oneOf([400, 409, 422, 500]);
+      expect(res.status).to.be.oneOf([400, 409, 422]);
     });
 
+    /** A status column is unusable without the value that marks a row posted, so the parser couldn't tell posted transactions from pending ones. */
     it("rejects config with statusColumn but no statusPostedValue", async () => {
       const res = await createViaDraftExpectError(
         "CsvFormatConfigs",
         CSV_CONFIG_MISSING_STATUS_VALUE,
       );
-      expect(res.status).to.be.oneOf([400, 409, 422, 500]);
+      expect(res.status).to.be.oneOf([400, 409, 422]);
     });
   });
 
-  // ─── Composite uniqueness constraints ──────────────────────────────────
-
   describe("composite uniqueness", () => {
+    /** Two allocations for one category starting the same day would give a single budget period two conflicting shares (composite @assert.unique). */
     it("rejects duplicate BudgetAllocation [purchaseCategory, effectiveFrom]", async () => {
       const res = await createViaDraftExpectError(
         "BudgetAllocations",
@@ -164,6 +122,7 @@ describe("AdminService", () => {
       expect(res.status).to.be.oneOf([400, 409, 500]);
     });
 
+    /** The same category may recur across different start dates as period versioning; confirms uniqueness is scoped to the pair, not the category alone. */
     it("allows same category with different effectiveFrom", async () => {
       const { status } = await createViaDraft(
         "BudgetAllocations",
@@ -172,6 +131,7 @@ describe("AdminService", () => {
       expect(status).to.be.oneOf([200, 201]);
     });
 
+    /** One scraped source string per entity type must resolve to a single target; a duplicate would make the mapping lookup non-deterministic (composite @assert.unique). */
     it("rejects duplicate ScrapeMapping [entityType, sourceText]", async () => {
       await createViaDraft("ScrapeMappings", SCRAPE_MAPPING_FIRST);
       const res = await createViaDraftExpectError(
@@ -182,9 +142,8 @@ describe("AdminService", () => {
     });
   });
 
-  // ─── Simple uniqueness constraints ─────────────────────────────────────
-
   describe("simple uniqueness", () => {
+    /** Two issuers sharing a name would make card-to-issuer resolution by name ambiguous (@assert.unique). */
     it("rejects duplicate issuer name", async () => {
       const res = await createViaDraftExpectError(
         "Issuers",
@@ -193,6 +152,7 @@ describe("AdminService", () => {
       expect(res.status).to.be.oneOf([400, 409, 500]);
     });
 
+    /** Two rewards programs with one name would make card and points references to a program ambiguous. */
     it("rejects duplicate rewards program name", async () => {
       const res = await createViaDraftExpectError(
         "RewardsPrograms",
@@ -201,6 +161,7 @@ describe("AdminService", () => {
       expect(res.status).to.be.oneOf([400, 409, 500]);
     });
 
+    /** Duplicate category names would let transaction categorization and budget allocation target the wrong category. */
     it("rejects duplicate purchase category name", async () => {
       const res = await createViaDraftExpectError(
         "PurchaseCategories",
@@ -209,6 +170,7 @@ describe("AdminService", () => {
       expect(res.status).to.be.oneOf([400, 409, 500]);
     });
 
+    /** Duplicate earning-category names would make earn-rate rules ambiguous about which category a purchase earns under. */
     it("rejects duplicate earning category name", async () => {
       const res = await createViaDraftExpectError(
         "EarningCategories",
@@ -217,6 +179,7 @@ describe("AdminService", () => {
       expect(res.status).to.be.oneOf([400, 409, 500]);
     });
 
+    /** The config name is how a user picks an import format; duplicates would make that selection ambiguous. */
     it("rejects duplicate csv format config name", async () => {
       const res = await createViaDraftExpectError(
         "CsvFormatConfigs",
@@ -225,6 +188,7 @@ describe("AdminService", () => {
       expect(res.status).to.be.oneOf([400, 409, 500]);
     });
 
+    /** Two account types with one name would make account classification (asset vs liability) ambiguous. */
     it("rejects duplicate financial account type name", async () => {
       const res = await createViaDraftExpectError(
         "FinancialAccountTypes",
@@ -233,6 +197,7 @@ describe("AdminService", () => {
       expect(res.status).to.be.oneOf([400, 409, 500]);
     });
 
+    /** Duplicate income-source-type names would make income classification ambiguous. */
     it("rejects duplicate income source type name", async () => {
       const res = await createViaDraftExpectError(
         "IncomeSourceTypes",
@@ -241,6 +206,7 @@ describe("AdminService", () => {
       expect(res.status).to.be.oneOf([400, 409, 500]);
     });
 
+    /** Two perk types sharing a name would make card-perk references ambiguous. */
     it("rejects duplicate perk type name", async () => {
       const res = await createViaDraftExpectError(
         "PerkTypes",
@@ -249,6 +215,7 @@ describe("AdminService", () => {
       expect(res.status).to.be.oneOf([400, 409, 500]);
     });
 
+    /** Duplicate adjustment-type names would make points-adjustment references ambiguous. */
     it("rejects duplicate adjustment type name", async () => {
       const res = await createViaDraftExpectError(
         "AdjustmentTypes",
@@ -257,6 +224,7 @@ describe("AdminService", () => {
       expect(res.status).to.be.oneOf([400, 409, 500]);
     });
 
+    /** Duplicate redemption-type names would make redemption references ambiguous. */
     it("rejects duplicate redemption type name", async () => {
       const res = await createViaDraftExpectError(
         "RedemptionTypes",
@@ -266,67 +234,70 @@ describe("AdminService", () => {
     });
   });
 
-  // ─── Field validation ──────────────────────────────────────────────────
-
   describe("field validation", () => {
+    /** A budget ratio is a percentage of spend; above 100 would allocate more than the whole to one category (@assert.range). */
     it("rejects budget allocation with ratio above 100", async () => {
       const res = await createViaDraftExpectError(
         "BudgetAllocations",
         ALLOCATION_RATIO_ABOVE_MAX,
       );
-      expect(res.status).to.be.oneOf([400, 409, 422, 500]);
+      expect(res.status).to.be.oneOf([400, 409, 422]);
     });
 
+    /** A negative budget share is meaningless — a category can't claim less than zero of spend (@assert.range lower bound). */
     it("rejects budget allocation with negative ratio", async () => {
       const res = await createViaDraftExpectError(
         "BudgetAllocations",
         ALLOCATION_RATIO_NEGATIVE,
       );
-      expect(res.status).to.be.oneOf([400, 409, 422, 500]);
+      expect(res.status).to.be.oneOf([400, 409, 422]);
     });
   });
 
-  // ─── Mandatory fields ──────────────────────────────────────────────────
-
   describe("mandatory fields", () => {
+    /** The name is the issuer's human-facing identifier that cards and rules reference; without it the record can't be identified (@mandatory). */
     it("rejects issuer without name", async () => {
       const res = await createViaDraftExpectError(
         "Issuers",
         ISSUER_MISSING_NAME,
       );
-      expect(res.status).to.be.oneOf([400, 409, 422, 500]);
+      expect(res.status).to.be.oneOf([400, 409, 422]);
     });
 
+    /** The short name drives compact display such as the combined issuer column, so it can't be left empty (@mandatory). */
     it("rejects issuer without short name", async () => {
       const res = await createViaDraftExpectError(
         "Issuers",
         ISSUER_MISSING_SHORT_NAME,
       );
-      expect(res.status).to.be.oneOf([400, 409, 422, 500]);
+      expect(res.status).to.be.oneOf([400, 409, 422]);
     });
 
+    /** Without a ratio there is no share to budget, leaving the allocation meaningless (@mandatory). */
     it("rejects budget allocation without ratio", async () => {
       const res = await createViaDraftExpectError(
         "BudgetAllocations",
         ALLOCATION_MISSING_RATIO,
       );
-      expect(res.status).to.be.oneOf([400, 409, 422, 500]);
+      expect(res.status).to.be.oneOf([400, 409, 422]);
     });
 
+    /** The currency type defines what unit a program earns (points/miles/cash), without which its earnings can't be valued (@mandatory). */
     it("rejects rewards program without currency type", async () => {
       const res = await createViaDraftExpectError(
         "RewardsPrograms",
         PROGRAM_MISSING_CURRENCY,
       );
-      expect(res.status).to.be.oneOf([400, 409, 422, 500]);
+      expect(res.status).to.be.oneOf([400, 409, 422]);
     });
 
+    /** The name identifies a recurring expense to the user; an unnamed one can't be recognized or managed (@mandatory). */
     it("rejects recurrent expense without name", async () => {
       const res = await createViaDraftExpectError(
         "RecurrentExpenses",
         RECURRENT_EXPENSE_MISSING_NAME,
       );
-      expect(res.status).to.be.oneOf([400, 409, 422, 500]);
+      expect(res.status).to.be.oneOf([400, 409, 422]);
     });
   });
 });

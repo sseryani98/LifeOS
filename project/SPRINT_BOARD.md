@@ -9,8 +9,6 @@
 
 | Story | Type | Description | Status |
 | --- | --- | --- | --- |
-| INT-001 | Integration | SimpleFIN Bridge sync: dedup, scheduling, encrypted access URL | Backlog |
-| FRM-010 | Form | Connection Manager: health dashboard with manual sync trigger | Backlog |
 | INT-002 | Integration | CSV parsing engine: per-issuer CSVFormatConfig (Scotia/TD/CIBC/Amex) | Backlog |
 | FRM-003 | Form | CSV Import Wizard: 3-step freestyle wizard with review tabs | Backlog |
 
@@ -23,6 +21,8 @@ _None_
 | Story | Type | Description | Status |
 | --- | --- | --- | --- |
 | ENH-008 | Enhancement | Deduplication engine: evaluate() returns new/duplicate/potential_duplicate per SPEC-01 §4.3 | Done |
+| INT-001 | Integration | SimpleFIN Bridge sync: 4-layer engine, ENH-008 dedup, node-cron scheduling, encrypted access URL, retry/backoff, connection_error/stale_data/unmapped_account alerts, null-card backfill | Done |
+| FRM-010 | Form | Connection Manager: freestyle health page — status ObjectStatus colours, manual Sync Now, Add Connection (claim setup token), Re-authenticate, account→card mapping | Done |
 
 ---
 

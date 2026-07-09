@@ -3,6 +3,6 @@
 // Usage: buildCardInstance({ lifecycleState: 'Focus' })
 //
 // Factories are added as domain entities are implemented.
-// See TEST_STRATEGY.md §7.1 for the factory pattern.
+// See TEST_STRATEGY.md for the factory pattern.
 
 export {};

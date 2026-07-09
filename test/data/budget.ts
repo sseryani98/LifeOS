@@ -4,7 +4,7 @@
  * IDs use series a1b2c3d4-0030 for BudgetAllocation,
  *   a1b2c3d4-0031 for RecurrentExpense.
  *
- * See TEST_STRATEGY.md §6.5 for naming pattern, §7.2 for canonical test world.
+ * See TEST_STRATEGY.md for naming pattern and canonical test world.
  */
 
 import {

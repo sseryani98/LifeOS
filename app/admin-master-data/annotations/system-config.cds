@@ -1,6 +1,5 @@
 using AdminService as svc from '../../../srv/admin-service';
 
-// ─── System Config ─────────────────────────────────────────────────────────
 annotate svc.SystemConfigs with
 @Capabilities.InsertRestrictions.Insertable: false
 @Capabilities.DeleteRestrictions.Deletable : false;
@@ -52,8 +51,6 @@ annotate svc.SystemConfigs with @UI: {
     Target: '@UI.FieldGroup#General'
   }]
 };
-
-// ─── Field Labels & Hidden Fields ──────────────────────────────────────────
 
 annotate svc.SystemConfigs with {
   ID          @UI.Hidden;

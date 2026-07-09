@@ -1,10 +1,8 @@
-/**
- * AdminService — Reference data CRUD, system config, integrations, alerts.
- * Path: /service/adminSvcs
- */
 using {com.financialplanner as fp} from '../db/reference/schema';
 using from '../db/cards/schema';
 using from '../db/budget/schema';
+using from '../db/integration/schema';
+using from '../db/alerts/schema';
 
 service AdminService @(path: '/service/adminSvcs') {
   @odata.draft.enabled
@@ -57,7 +55,6 @@ service AdminService @(path: '/service/adminSvcs') {
   @odata.draft.enabled
   entity ScrapeMappings             as projection on fp.ScrapeMapping;
 
-  // Card entities
   entity MarketCards                as projection on fp.MarketCard;
   entity Offers                     as projection on fp.Offer;
   entity OfferTranches              as projection on fp.OfferTranche;
@@ -66,10 +63,20 @@ service AdminService @(path: '/service/adminSvcs') {
   entity SoftPerkDefinitions        as projection on fp.SoftPerkDefinition;
   entity CardPerks                  as projection on fp.CardPerk;
 
-  // Budget entities
   @odata.draft.enabled
   entity BudgetAllocations          as projection on fp.BudgetAllocation;
 
   @odata.draft.enabled
   entity RecurrentExpenses          as projection on fp.RecurrentExpense;
+
+  // Connection entities: "Sync Now" runs an immediate sync for one connection.
+  entity ProviderConnections        as projection on fp.ProviderConnection
+    actions {
+      action syncNow() returns String;
+    };
+
+  entity ProviderAccounts           as projection on fp.ProviderAccount;
+  entity Alerts                     as projection on fp.Alert;
+
+  action claimSetupToken(setupToken: String, displayName: String) returns String;
 }

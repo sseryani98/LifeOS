@@ -1,6 +1,5 @@
 using AdminService as svc from '../../../srv/admin-service';
 
-// ─── Issuer ────────────────────────────────────────────────────────────────
 annotate svc.Issuers with @UI: {
   HeaderInfo         : {
     TypeName      : '{i18n>Issuer}',
@@ -27,8 +26,6 @@ annotate svc.Issuers with @UI: {
     Target: '@UI.FieldGroup#General'
   }]
 };
-
-// ─── Field Labels & Hidden Fields ──────────────────────────────────────────
 
 annotate svc.Issuers with {
   ID         @UI.Hidden

@@ -1,7 +1,5 @@
-/**
- * TransactionService — Transaction ingestion, categorization, and listing.
- * Path: /service/transactionSvcs
- */
+using {com.financialplanner as fp} from '../db/transactions/schema';
+
 service TransactionService @(path: '/service/transactionSvcs') {
-  // Entities exposed in W1-S2+
+  entity Transactions as projection on fp.Transaction;
 }

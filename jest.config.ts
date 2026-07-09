@@ -24,6 +24,10 @@ const config: Config = {
       lines: 100,
       branches: 100,
     },
+    "./srv/modules/**/*Service.ts": {
+      lines: 90,
+      branches: 85,
+    },
     "./srv/modules/shared/encryptionUtility.ts": {
       lines: 100,
       branches: 100,
