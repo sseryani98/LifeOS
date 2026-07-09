@@ -444,7 +444,7 @@ Create the following:
 - srv/modules/budget/
 - srv/modules/eligibility/
 - srv/modules/recommendation/
-- srv/modules/integration/
+- srv/modules/ingestion/
 
 **7. i18n files:**
 - `srv/_i18n/i18n.properties` — header comment only
@@ -977,7 +977,7 @@ Define transaction entities in `db/transactions/schema.cds` per DATA_MODEL.md §
 Transaction has fields: externalId, source, amount, transactionDate, postDate, rawDescription, normalizedDescription, categorizationStatus, etc.
 
 **Backend:**
-Create `srv/modules/integration/DeduplicationService.ts`:
+Create `srv/modules/ingestion/DeduplicationService.ts`:
 - `evaluate(transaction)` → returns `new` / `duplicate` / `reconciliation`
 - Matching logic per SPEC-01 §4.3: externalId exact match, then fuzzy match on (date + amount + description + cardInstance)
 - Reconciliation = SimpleFIN match for a previously CSV-imported transaction
@@ -1020,7 +1020,7 @@ Implement INT-001 (SimpleFIN Sync) and FRM-010 (Connection Manager) per SPEC-01 
 Read SPEC-01 §4.1 (INT-001) and §4.5 (FRM-010) for full details.
 
 **Backend — INT-001:**
-Create `srv/modules/integration/SimpleFINService.ts`:
+Create `srv/modules/ingestion/SimpleFINService.ts`:
 - `syncTransactions(connectionId)` — calls SimpleFIN Bridge API via axios
 - Parses response, normalizes descriptions, maps accounts to CardInstances
 - Calls DeduplicationService.evaluate() for each transaction
@@ -1031,9 +1031,9 @@ Create `srv/modules/integration/SimpleFINService.ts`:
 Define integration entities in `db/integration/schema.cds` per DATA_MODEL.md §7:
 - ProviderConnection, ProviderAccount
 
-Create `srv/modules/integration/SimpleFINFacade.ts` and `SimpleFINValidator.ts`.
+Create `srv/modules/ingestion/SimpleFINFacade.ts` and `SimpleFINValidator.ts`.
 
-Add scheduling via node-cron in `srv/modules/integration/SchedulingService.ts`:
+Add scheduling via node-cron in `srv/modules/ingestion/SchedulingService.ts`:
 - Poll interval from SystemConfig `SIMPLEFIN_POLL_INTERVAL_HOURS`
 - Uses `cds.spawn()` for background execution
 
@@ -1086,7 +1086,7 @@ Implement INT-002 (CSV Parsing) and FRM-003 (CSV Import Wizard) per SPEC-01 §4.
 Read SPEC-01 §4.2 (INT-002) and §4.4 (FRM-003) for full details. Reference `design/actual-csvs/` for real CSV samples from all 4 issuers.
 
 **Backend — INT-002:**
-Create `srv/modules/integration/CSVImportService.ts`:
+Create `srv/modules/ingestion/CSVImportService.ts`:
 - `parseFile(fileContent, cardInstanceId)` — uses papaparse
 - Reads CSVFormatConfig for the card's issuer to determine: column mapping, date format, amount sign handling, header rows to skip
 - Returns parsed rows with normalized fields
@@ -1293,7 +1293,7 @@ CNV-001 uses INT-002 (CSV parsing, built in W1-S2) to load historical transactio
 Define ImportLog in `db/integration/schema.cds` (if not already):
 - fileName, importDate, cardInstance_ID, recordsTotal, recordsNew, recordsDuplicate, recordsFailed, status
 
-Create backfill orchestration in `srv/modules/integration/BackfillService.ts`:
+Create backfill orchestration in `srv/modules/ingestion/BackfillService.ts`:
 - Batch processing with progress tracking
 - Handles ~1,200-1,400 total transactions across 4 issuers
 - After backfill: MerchantPatterns bootstrapped from user corrections during review
@@ -2476,7 +2476,7 @@ Define scraping entities (if not already in `db/integration/schema.cds`):
 - ScrapeRun, ScrapeQueueItem, ScrapeMapping (per DATA_MODEL.md amendments from SPEC-13)
 
 **Backend — INT-003:**
-Create `srv/modules/integration/ScraperService.ts`:
+Create `srv/modules/ingestion/ScraperService.ts`:
 - `scrape(sourceUrl)` — uses axios + cheerio to fetch and parse offer pages
 - ScrapeMapping configuration: CSS selectors for each source site per SPEC-13
 - Creates ScrapeQueueItem records for each parsed offer (status: pending_review)

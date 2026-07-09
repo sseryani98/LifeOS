@@ -43,19 +43,19 @@ interface Violation {
 }
 
 /**
- * Classifies a `const` initializer as a fresh scalar/array literal — the kind
- * that should be grouped. Object literals are already the grouped form; calls
- * and `new` are computed/derived (e.g. `join(process.cwd(), …)`) and legitimately
- * stay loose; bare identifier aliases are not literals.
+ * Classifies a `const` initializer as a fresh scalar/array/regex literal — the
+ * kind that should be grouped. Object literals are already the grouped form;
+ * calls and `new` are computed/derived (e.g. `join(process.cwd(), …)`) and
+ * legitimately stay loose; bare identifier aliases are not literals.
  * @param initializer Source text of the initializer, right of the `=`.
- * @returns True when the initializer is a groupable scalar or array literal.
+ * @returns True when the initializer is a groupable scalar, array, or regex.
  */
 function isGroupableLiteral(initializer: string): boolean {
   const head = initializer.trimStart();
   if (head.startsWith("{")) return false;
   if (head.startsWith("new ")) return false;
   if (/^[A-Za-z_$][\w$.]*\s*\(/.test(head)) return false;
-  return /^(?:["'`[]|-?\d|true\b|false\b)/.test(head);
+  return /^(?:["'`[/]|-?\d|true\b|false\b)/.test(head);
 }
 
 /**

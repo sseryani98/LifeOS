@@ -9,7 +9,6 @@
 
 | Story | Type | Description | Status |
 | --- | --- | --- | --- |
-| INT-002 | Integration | CSV parsing engine: per-issuer CSVFormatConfig (Scotia/TD/CIBC/Amex) | Backlog |
 | FRM-003 | Form | CSV Import Wizard: 3-step freestyle wizard with review tabs | Backlog |
 
 ### In Progress
@@ -20,6 +19,7 @@ _None_
 
 | Story | Type | Description | Status |
 | --- | --- | --- | --- |
+| INT-002 | Integration | CSV parsing engine: 4-layer engine + field parser + mapper, per-issuer format config resolution (Scotia/TD/CIBC/Amex), single & split debit/credit amounts, header-name & index columns, status filter, supp-card attribution, ENH-008 dedup classification, parseCsvImport action. Fixed TD/CIBC seed off-by-one (D-003). | Done |
 | ENH-008 | Enhancement | Deduplication engine: evaluate() returns new/duplicate/potential_duplicate per SPEC-01 §4.3 | Done |
 | INT-001 | Integration | SimpleFIN Bridge sync: 4-layer engine, ENH-008 dedup, node-cron scheduling, encrypted access URL, retry/backoff, connection_error/stale_data/unmapped_account alerts, null-card backfill | Done |
 | FRM-010 | Form | Connection Manager: freestyle health page — status ObjectStatus colours, manual Sync Now, Add Connection (claim setup token), Re-authenticate, account→card mapping | Done |

@@ -22,13 +22,18 @@ const SKIP_SEGMENTS = new Set([
 const TYPES_FILE = "types.ts";
 
 /**
- * Matches a top-level EXPORTED type declaration — `export interface Foo` or
- * `export type Foo = …`. Requiring a name after the keyword (`[A-Za-z_$]`) means
- * re-export blocks (`export type { X } from …`) and `export type *` are ignored.
- * Non-exported (module-private) types are deliberately NOT matched: they are one
- * file's implementation detail, not a shared contract, so they may stay local.
+ * Matches a top-level type declaration — `interface Foo`/`type Foo = …`, with or
+ * without an `export` prefix. Group 1 is the `export ` prefix (present or not),
+ * group 2 the name. Requiring a name char after the keyword means re-export blocks
+ * (`export type { X } from …`) and `export type *` stay unmatched.
  */
-const EXPORTED_TYPE_DECL = /^export\s+(?:interface|type)\s+([A-Za-z_$][\w$]*)/;
+const TYPE_DECL = /^(export\s+)?(?:interface|type)\s+([A-Za-z_$][\w$]*)/;
+
+/**
+ * A file that declares a class may hold NO named type beside it — the shape
+ * belongs in types.ts, exported or not. Non-class modules keep the laxer rule.
+ */
+const CLASS_DECL = /^(?:export\s+)?(?:abstract\s+)?class\s/m;
 
 interface TypeDeclaration {
   name: string;
@@ -61,19 +66,21 @@ function collectFiles(dir: string): string[] {
 }
 
 /**
- * Scans one file for exported type declarations that belong in a types.ts.
- * Files named types.ts are the designated home and are skipped.
+ * Scans one file for type declarations that belong in a types.ts. Files named
+ * types.ts are the designated home and are skipped. Exported types are flagged
+ * anywhere; private types are flagged only when the file declares a class.
  * @param filePath Absolute path of the file to scan.
  * @returns A violation listing the misplaced declarations, or null when clean.
  */
 function scanFile(filePath: string): Violation | null {
   if (basename(filePath) === TYPES_FILE) return null;
+  const source = readFileSync(filePath, "utf8");
+  const fileHasClass = CLASS_DECL.test(source);
   const declarations: TypeDeclaration[] = [];
-  const lines = readFileSync(filePath, "utf8").split(/\r?\n/);
-  lines.forEach((text, index) => {
-    const match = EXPORTED_TYPE_DECL.exec(text);
-    if (match) {
-      declarations.push({ name: match[1], line: index + 1 });
+  source.split(/\r?\n/).forEach((text, index) => {
+    const match = TYPE_DECL.exec(text);
+    if (match && (Boolean(match[1]) || fileHasClass)) {
+      declarations.push({ name: match[2], line: index + 1 });
     }
   });
   if (declarations.length === 0) return null;
@@ -81,9 +88,9 @@ function scanFile(filePath: string): Violation | null {
 }
 
 /**
- * Scans backend TypeScript for exported `interface`/`type` declarations living
- * outside a types.ts and exits non-zero when any are found. Keeps a domain's
- * shared type contracts in one place instead of scattered atop service classes.
+ * Scans backend TypeScript for `interface`/`type` declarations living outside a
+ * types.ts and exits non-zero when any are found. Keeps a domain's type contracts
+ * in one place instead of scattered atop the service and data-service classes.
  */
 function main(): void {
   const files = SOURCE_DIRS.flatMap(collectFiles);
@@ -92,11 +99,11 @@ function main(): void {
     .filter((violation): violation is Violation => violation !== null);
 
   console.log(
-    `Scanning ${files.length} backend file(s) for misplaced exported types...`,
+    `Scanning ${files.length} backend file(s) for misplaced types...`,
   );
 
   if (violations.length === 0) {
-    console.log("All exported domain types live in a types.ts.");
+    console.log("All domain types live in a types.ts.");
     process.exit(0);
   }
 
@@ -108,10 +115,10 @@ function main(): void {
     console.log(`${violation.filePath}  —  ${names}`);
   }
   console.log(
-    `\nFound exported type declaration(s) outside a types.ts. Move each ` +
-      `\`export interface\`/\`export type\` into the domain's types.ts ` +
-      `(e.g. srv/modules/integration/types.ts). Non-exported, file-private ` +
-      `types may stay local.`,
+    `\nFound type declaration(s) outside a types.ts. Move each into the domain's ` +
+      `types.ts (e.g. srv/modules/ingestion/types.ts). Exported types always ` +
+      `belong there; a file that declares a class may keep no named type beside ` +
+      `it either. Private types in non-class modules may stay local.`,
   );
   process.exit(1);
 }

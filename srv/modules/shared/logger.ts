@@ -4,14 +4,7 @@ import { join } from "path";
 
 import cds from "@sap/cds";
 
-/** Valid log entry types for structured logging. */
-type LogType =
-  | "ENTRY"
-  | "EXIT"
-  | "EXTERNAL_CALL"
-  | "STATE_CHANGE"
-  | "BATCH_RESULT"
-  | "ERROR";
+import type { LogType } from "./types.js";
 
 /** Fields that must be redacted before DEBUG-level logging. */
 const SENSITIVE_FIELDS = [
