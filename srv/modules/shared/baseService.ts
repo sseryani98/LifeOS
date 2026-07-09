@@ -7,7 +7,10 @@ import { Logger } from "./logger.js";
 export class BaseService {
   protected readonly logger: Logger;
 
-  /** Creates a new Service instance with a named logger. */
+  /**
+   * Creates a new Service instance with a named logger.
+   * @param moduleName - Namespace used to tag this service's log entries
+   */
   constructor(moduleName: string) {
     this.logger = new Logger(moduleName);
   }

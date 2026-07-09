@@ -4,7 +4,7 @@
  * IDs match the CSV seed files in db/data/ for consistency
  * between unit tests (no DB) and integration tests (cds.test + SQLite).
  *
- * See TEST_STRATEGY.md §6.5 for naming pattern, §7.2 for canonical test world.
+ * See TEST_STRATEGY.md for naming pattern and canonical test world.
  */
 
 // ─── Issuers ────────────────────────────────────────────────────────────────

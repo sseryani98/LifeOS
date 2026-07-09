@@ -209,21 +209,21 @@ financial-planner/
 │       └── CurrencyUtility.ts
 ├── app/
 │   ├── shared/                              ← Shared across freestyle apps
-│   │   ├── BaseController.js
+│   │   ├── BaseController.ts
 │   │   ├── controls/
-│   │   │   ├── VizFrameCard.js
-│   │   │   └── ApexChartCard.js
+│   │   │   ├── VizFrameCard.ts
+│   │   │   └── ApexChartCard.ts
 │   │   └── util/
-│   │       └── formatter.js                 ← Shared formatters (currency, date, status)
+│   │       └── formatter.ts                 ← Shared formatters (currency, date, status)
 │   ├── transactions/                        ← FRM-001 (Fiori Elements List Report)
 │   │   ├── webapp/
 │   │   │   ├── manifest.json
-│   │   │   ├── Component.js
+│   │   │   ├── Component.ts
 │   │   │   ├── i18n/
 │   │   │   │   └── i18n.properties          ← UI5 messages (camelCase)
 │   │   │   └── ext/
-│   │   │       ├── ListReportExt.js
-│   │   │       └── ObjectPageExt.js
+│   │   │       ├── ListReportExt.controller.ts
+│   │   │       └── ObjectPageExt.controller.ts
 │   │   └── annotations/
 │   │       ├── Transaction.cds              ← Entity-based annotations
 │   │       └── Vendor.cds

@@ -18,6 +18,7 @@ describe("EncryptionUtility", () => {
     }
   });
 
+  /** Card data is stored encrypted at rest; if the AES-256-GCM round-trip weren't lossless the stored ciphertext would be unrecoverable, and the ciphertext must never expose the plaintext. */
   it("round-trips plaintext through encrypt then decrypt", () => {
     process.env["ENCRYPTION_KEY"] = VALID_KEY;
     const util = new EncryptionUtility();
@@ -29,6 +30,7 @@ describe("EncryptionUtility", () => {
     expect(util.decrypt(cipher)).toBe(PLAINTEXT);
   });
 
+  /** Failing loudly at construction stops the app from silently running without encryption and writing sensitive fields in the clear. */
   it("throws when ENCRYPTION_KEY is not set", () => {
     delete process.env["ENCRYPTION_KEY"];
     expect(() => new EncryptionUtility()).toThrow(
@@ -36,11 +38,13 @@ describe("EncryptionUtility", () => {
     );
   });
 
+  /** AES-256 requires exactly a 32-byte key; rejecting a mis-sized key up front prevents cryptic runtime cipher failures deep in a request. */
   it("throws when ENCRYPTION_KEY is the wrong length", () => {
     process.env["ENCRYPTION_KEY"] = SHORT_KEY;
     expect(() => new EncryptionUtility()).toThrow(/32 bytes/);
   });
 
+  /** decrypt splits on the iv:tag:data structure; a payload missing those parts must be rejected rather than feeding garbage to the GCM cipher. */
   it("throws on a malformed encrypted string", () => {
     process.env["ENCRYPTION_KEY"] = VALID_KEY;
     const util = new EncryptionUtility();

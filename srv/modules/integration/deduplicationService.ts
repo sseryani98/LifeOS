@@ -4,27 +4,30 @@ import type { DeduplicationDataService } from "./deduplicationDataService.js";
 import type { DedupResult, IncomingTransaction } from "./types.js";
 
 /**
- * ENH-008 — Transaction deduplication engine.
+ * Transaction deduplication engine.
  *
- * Implements the two-tier strategy from SPEC-01 §4.3 (D-88):
- *  - SimpleFIN transactions (external id present): exact match on
- *    (externalId, card) → silent `duplicate` (BR-09).
- *  - Other sources (CSV/manual, no external id): natural-key match on
- *    (rawDescription, postedAt, amount, card) → `potential_duplicate` for review.
- *  - No match → `new`.
- *
- * Consumed by INT-001 (SimpleFIN sync) and INT-002 (CSV import).
+ * Two tiers because only SimpleFIN rows carry a stable external id: those
+ * dedupe exactly and silently, while CSV/manual rows have no such key — a
+ * natural-key match there is only ever flagged `potential_duplicate` for
+ * human review, never dropped.
  */
 export class DeduplicationService extends BaseService {
   private readonly dataService: DeduplicationDataService;
 
-  /** Creates the engine with an injected data-access layer. */
+  /**
+   * Creates the engine with an injected data-access layer.
+   * @param dataService Data-access layer used to look up existing transactions.
+   */
   constructor(dataService: DeduplicationDataService) {
     super("integration.deduplication");
     this.dataService = dataService;
   }
 
-  /** Classifies an incoming transaction as new, duplicate, or potential duplicate. */
+  /**
+   * Classifies an incoming transaction as new, duplicate, or potential duplicate.
+   * @param incoming Transaction to classify against already-persisted rows.
+   * @returns The dedup outcome, including the matched transaction id when applicable.
+   */
   async evaluate(incoming: IncomingTransaction): Promise<DedupResult> {
     if (incoming.externalId) {
       const match = await this.dataService.findByExternalId(

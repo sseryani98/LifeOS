@@ -178,7 +178,7 @@ function checkColumnWidths(
     const widthMatches = [...lineItemContent.matchAll(/width\s*:\s*'(\d+)%'/g)];
     if (widthMatches.length > 0) {
       const totalWidth = widthMatches.reduce(
-        (sum, wm) => sum + parseInt(wm[1], 10),
+        (sum, widthMatch) => sum + parseInt(widthMatch[1], 10),
         0,
       );
       if (totalWidth !== 100) {
@@ -261,17 +261,17 @@ function checkSelectionFields(
         );
         let sfEnd = sfStart;
         let sfDepth = 0;
-        for (let si = sfStart; si < block.content.length; si++) {
-          if (block.content[si] === "[") sfDepth++;
-          if (block.content[si] === "]") sfDepth--;
+        for (let sfIndex = sfStart; sfIndex < block.content.length; sfIndex++) {
+          if (block.content[sfIndex] === "[") sfDepth++;
+          if (block.content[sfIndex] === "]") sfDepth--;
           if (sfDepth === 0) {
-            sfEnd = si;
+            sfEnd = sfIndex;
             break;
           }
         }
         const sfContent = block.content.slice(sfStart + 1, sfEnd).trim();
         const selectionFieldCount = sfContent
-          ? sfContent.split(",").filter(sf => sf.trim()).length
+          ? sfContent.split(",").filter(field => field.trim()).length
           : 0;
         if (selectionFieldCount !== lineItemCount) {
           violations.push({

@@ -1,13 +1,8 @@
 /**
- * Named test data constants for card entities.
- * UPPER_SNAKE_CASE naming convention.
- * Deterministic UUIDs for reproducible tests.
- * IDs use series a1b2c3d4-002X for card domain entities:
- *   0020 = MarketCard, 0021 = Offer, 0022 = OfferTranche,
- *   0023 = CardInstance, 0024 = EarningMultiplier,
- *   0025 = SoftPerkDefinition, 0026 = CardPerk
- *
- * See TEST_STRATEGY.md §6.5 for naming pattern, §7.2 for canonical test world.
+ * Named card-domain test constants (UPPER_SNAKE_CASE, deterministic UUIDs).
+ * ID series a1b2c3d4-002X: 0020 MarketCard, 0021 Offer, 0022 OfferTranche,
+ * 0023 CardInstance, 0024 EarningMultiplier, 0025 SoftPerkDefinition,
+ * 0026 CardPerk. See TEST_STRATEGY.md for the canonical test world.
  */
 
 import {

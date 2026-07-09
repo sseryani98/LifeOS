@@ -5,7 +5,7 @@
  * These represent invalid, edge-case, and valid payloads used to test
  * cross-field rules, validation constraints, and uniqueness enforcement.
  *
- * See TEST_STRATEGY.md §6.5 for naming pattern, §7.2 for canonical test world.
+ * See TEST_STRATEGY.md for naming pattern and canonical test world.
  */
 
 import {

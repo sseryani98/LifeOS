@@ -1,6 +1,5 @@
 using AdminService as svc from '../../../srv/admin-service';
 
-// ─── Rewards Program ───────────────────────────────────────────────────────
 annotate svc.RewardsPrograms with @UI: {
   HeaderInfo         : {
     TypeName      : '{i18n>RewardsProgram}',
@@ -45,7 +44,6 @@ annotate svc.RewardsPrograms with @UI: {
   }]
 };
 
-// ─── Program Tier (composition child of Rewards Program) ───────────────────
 annotate svc.ProgramTiers with @UI: {
   HeaderInfo         : {
     TypeName      : '{i18n>ProgramTier}',
@@ -65,7 +63,6 @@ annotate svc.ProgramTiers with @UI: {
   }]
 };
 
-// ─── Card Network (read-only) ──────────────────────────────────────────────
 annotate svc.CardNetworks with @UI: {
   HeaderInfo         : {
     TypeName      : '{i18n>CardNetwork}',
@@ -85,8 +82,6 @@ annotate svc.CardNetworks with @UI: {
     ![@HTML5.CssDefaults]: {width: '100%'}
   }]
 };
-
-// ─── Field Labels & Hidden Fields ──────────────────────────────────────────
 
 annotate svc.RewardsPrograms with {
   ID           @UI.Hidden
@@ -127,7 +122,6 @@ annotate svc.CardNetworks with {
   name       @title: '{i18n>CardNetwork.name}';
 };
 
-// ─── Code Lists ───────────────────────────────────────────────────────────
 annotate svc.RewardsCurrencyType with {
   code @UI.Hidden
        @Common: {

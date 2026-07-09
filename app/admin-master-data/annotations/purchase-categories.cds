@@ -1,6 +1,5 @@
 using AdminService as svc from '../../../srv/admin-service';
 
-// ─── Purchase Category ────────────────────────────────────────────────────
 annotate svc.PurchaseCategories with @UI: {
   HeaderInfo         : {
     TypeName      : '{i18n>PurchaseCategory}',
@@ -46,7 +45,6 @@ annotate svc.PurchaseCategories with @UI: {
   ]
 };
 
-// ─── Purchase Type (composition child) ────────────────────────────────────
 annotate svc.PurchaseTypes with @UI: {
   HeaderInfo         : {
     TypeName      : '{i18n>PurchaseType}',
@@ -65,8 +63,6 @@ annotate svc.PurchaseTypes with @UI: {
     ![@HTML5.CssDefaults]: {width: '100%'}
   }]
 };
-
-// ─── Field Labels & Hidden Fields ──────────────────────────────────────────
 
 annotate svc.PurchaseCategories with {
   ID                 @UI.Hidden
