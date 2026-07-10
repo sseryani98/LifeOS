@@ -2,14 +2,24 @@ import {
   AMAZON_CONTAINS_PATTERN,
   AMAZON_VENDOR_ID,
   APPLE_GENERIC_PATTERN,
+  BOOK_LONG_PATTERN,
+  BOOK_SHORT_PATTERN,
+  COFFEE_HIGH_PATTERN,
+  COFFEE_LOW_PATTERN,
+  COFFEE_UNKNOWN_CONF_PATTERN,
   GENERIC_STATION_CONTAINS_PATTERN,
+  GYM_BUSY_PATTERN,
+  GYM_QUIET_PATTERN,
   ICLOUD_AMOUNT_PATTERN,
   NETFLIX_EXACT_PATTERN,
   NETFLIX_VENDOR_ID,
   SHELL_STARTS_WITH_PATTERN,
   SHOPPING_PT,
+  SPA_FIRST_PATTERN,
+  SPA_SECOND_PATTERN,
   STREAMING_EC,
   SUBSCRIPTIONS_PT,
+  UNKNOWN_MATCHTYPE_PATTERN,
   YOUTUBE_AMOUNT_PATTERN,
   YOUTUBE_VENDOR_ID,
 } from "../data/patterns.js";
@@ -103,6 +113,76 @@ describe("CategorizationContext", () => {
 
     expect(result.alternatives).toHaveLength(1);
     expect(result.alternatives[0].purchaseType_ID).toBe(SUBSCRIPTIONS_PT);
+  });
+
+  /** At equal tier and amount specificity, higher confidence must win so a firmer pattern outranks a weaker same-text one. */
+  it("breaks a tier tie by confidence level", () => {
+    const context = buildCategorizationContext([
+      COFFEE_LOW_PATTERN,
+      COFFEE_HIGH_PATTERN,
+    ]);
+
+    const result = context.categorize("COFFEE SHOP DOWNTOWN", -6.5);
+
+    expect(result.vendorName).toBe("Coffee High");
+  });
+
+  /** At equal confidence, the longer pattern must win — a more specific substring beats a broad one. */
+  it("breaks a confidence tie by longer pattern", () => {
+    const context = buildCategorizationContext([
+      BOOK_SHORT_PATTERN,
+      BOOK_LONG_PATTERN,
+    ]);
+
+    const result = context.categorize("THE BOOKSTORE DOWNTOWN", -30);
+
+    expect(result.vendorName).toBe("Book Long");
+  });
+
+  /** With every earlier key equal, the higher vendor transaction count must win — the final tie-breaker. */
+  it("breaks a full tie by vendor transaction count", () => {
+    const context = buildCategorizationContext([
+      GYM_QUIET_PATTERN,
+      GYM_BUSY_PATTERN,
+    ]);
+
+    const result = context.categorize("GYM WORLD MEMBERSHIP", -49.99);
+
+    expect(result.vendorName).toBe("Gym Busy");
+  });
+
+  /** An unrecognised confidence name must rank last so a known-confidence pattern still wins the tie — bad reference data can't hijack the match. */
+  it("ranks an unknown confidence name last", () => {
+    const context = buildCategorizationContext([
+      COFFEE_UNKNOWN_CONF_PATTERN,
+      COFFEE_HIGH_PATTERN,
+    ]);
+
+    const result = context.categorize("COFFEE SHOP DOWNTOWN", -6.5);
+
+    expect(result.vendorName).toBe("Coffee High");
+  });
+
+  /** When every tie-break key is equal (uncounted vendors), the match stays deterministic on the first candidate rather than throwing. */
+  it("resolves a full tie deterministically", () => {
+    const context = buildCategorizationContext([
+      SPA_FIRST_PATTERN,
+      SPA_SECOND_PATTERN,
+    ]);
+
+    const result = context.categorize("SPA DELUXE RETREAT", -80);
+
+    expect(result.vendorName).toBe("Spa First");
+  });
+
+  /** An unrecognised match type must never match — the matcher only honours exact/starts_with/contains, guarding against bad seed data. */
+  it("ignores a pattern with an unknown match type", () => {
+    const context = buildCategorizationContext([UNKNOWN_MATCHTYPE_PATTERN]);
+
+    const result = context.categorize("REGEXVENDOR", -10);
+
+    expect(result.vendor_ID).toBeNull();
+    expect(result.status).toBe("uncategorized");
   });
 
   /** hasVendorMatch gates learning: a vendor that already matches the description must report true so no duplicate pattern is created. */
