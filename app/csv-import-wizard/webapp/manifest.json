@@ -1,0 +1,80 @@
+{
+  "_version": "2.0.0",
+  "sap.app": {
+    "id": "com.financialplanner.csvimportwizard",
+    "type": "application",
+    "title": "{{appTitle}}",
+    "description": "{{appDescription}}",
+    "applicationVersion": {
+      "version": "1.0.0"
+    },
+    "dataSources": {
+      "TransactionService": {
+        "uri": "/service/transactionSvcs/",
+        "type": "OData",
+        "settings": {
+          "odataVersion": "4.0"
+        }
+      }
+    }
+  },
+  "sap.ui5": {
+    "dependencies": {
+      "minUI5Version": "1.136.16",
+      "libs": {
+        "sap.m": {},
+        "sap.ui.core": {}
+      }
+    },
+    "rootView": {
+      "viewName": "com.financialplanner.csvimportwizard.view.App",
+      "type": "XML",
+      "async": true,
+      "id": "idRootApp"
+    },
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "com.financialplanner.csvimportwizard.i18n.i18n"
+        }
+      },
+      "": {
+        "dataSource": "TransactionService",
+        "preload": true,
+        "settings": {
+          "operationMode": "Server",
+          "autoExpandSelect": true,
+          "groupId": "$auto",
+          "updateGroupId": "$auto"
+        }
+      }
+    },
+    "routing": {
+      "config": {
+        "routerClass": "sap.m.routing.Router",
+        "type": "View",
+        "viewType": "XML",
+        "path": "com.financialplanner.csvimportwizard.view",
+        "controlId": "idRootApp",
+        "controlAggregation": "pages",
+        "async": true
+      },
+      "routes": [
+        {
+          "pattern": ":?query:",
+          "name": "CsvImportWizard",
+          "target": "CsvImportWizard"
+        }
+      ],
+      "targets": {
+        "CsvImportWizard": {
+          "type": "View",
+          "name": "CsvImportWizard",
+          "id": "idCsvImportWizardView",
+          "level": 1
+        }
+      }
+    }
+  }
+}

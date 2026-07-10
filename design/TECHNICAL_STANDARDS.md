@@ -73,7 +73,7 @@ One `schema.cds` per domain folder under `db/`:
 | `db/points/schema.cds`       | PointsAdjustment, Redemption                                                                   | 2     |
 | `db/budget/schema.cds`       | BudgetAllocation, RecurrentExpense, Goal, IncomeEntry                                          | 4     |
 | `db/financial/schema.cds`    | FinancialAccount, FinancialSnapshot                                                            | 2     |
-| `db/integration/schema.cds`  | ProviderConnection, ProviderAccount                                                            | 2     |
+| `db/ingestion/schema.cds`    | ProviderConnection, ProviderAccount, ImportLog                                                 | 3     |
 | `db/alerts/schema.cds`       | Alert                                                                                          | 1     |
 | `db/enums.cds`               | All enum type definitions                                                                      | —     |
 

@@ -2,7 +2,7 @@
  * A single side-navigation entry: which component to load, the inner route to
  * navigate to, and the URL hash fragment that deep-links to it.
  */
-export interface NavEntry {
+interface NavEntry {
   component: string;
   route: string;
   hash: string;
@@ -89,6 +89,11 @@ const navConfig: Record<string, NavEntry> = {
     component: "com.financialplanner.connectionmanager",
     route: "ConnectionManager",
     hash: "SimpleFINConnections",
+  },
+  CSV_IMPORT: {
+    component: "com.financialplanner.csvimportwizard",
+    route: "CsvImportWizard",
+    hash: "CsvImport",
   },
 };
 

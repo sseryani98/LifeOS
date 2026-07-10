@@ -12,6 +12,8 @@ export const ENTITIES = {
   SYSTEM_CONFIG: "com.financialplanner.SystemConfig",
   CARD_INSTANCE: "com.financialplanner.CardInstance",
   CSV_FORMAT_CONFIG: "com.financialplanner.CsvFormatConfig",
+  IMPORT_LOG: "com.financialplanner.ImportLog",
+  VENDOR: "com.financialplanner.Vendor",
 } as const;
 
 /** AlertType / AlertSeverity display names (seeded reference data). */
@@ -90,4 +92,12 @@ export const CSV = {
   },
   /** Ingestion source written to every CSV-imported transaction. */
   SOURCE: "csv",
+} as const;
+
+/** categorizationStatus values written on save, mirroring enums.cds. */
+export const CATEGORIZATION = {
+  /** User assigned a vendor and/or categories in the wizard. */
+  USER_CORRECTED: "user_corrected",
+  /** Row cleared without categories — imported uncategorized. */
+  UNCATEGORIZED: "uncategorized",
 } as const;

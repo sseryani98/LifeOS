@@ -1,7 +1,7 @@
 using {com.financialplanner as fp} from '../db/reference/schema';
 using from '../db/cards/schema';
 using from '../db/budget/schema';
-using from '../db/integration/schema';
+using from '../db/ingestion/schema';
 using from '../db/alerts/schema';
 
 service AdminService @(path: '/service/adminSvcs') {

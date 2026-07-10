@@ -4,11 +4,11 @@ import { basename, join, relative } from "path";
 const ROOT_DIR = process.cwd();
 
 /**
- * Backend TypeScript is the only surface the domain-types convention governs.
- * The `{domain}/types.ts` rule (CLAUDE.md) lives under srv/; app/ (UI5) and
- * scripts/ have their own idioms and no equivalent shared-contract convention.
+ * Both TypeScript surfaces the types-in-a-types.ts convention governs: srv/
+ * ({domain}/types.ts) and app/ (each UI5 app's model/types.ts). scripts/ is
+ * tooling with its own idioms and no equivalent shared-contract convention.
  */
-const SOURCE_DIRS = [join(ROOT_DIR, "srv")];
+const SOURCE_DIRS = [join(ROOT_DIR, "srv"), join(ROOT_DIR, "app")];
 
 const SKIP_SEGMENTS = new Set([
   "node_modules",
@@ -33,7 +33,7 @@ const TYPE_DECL = /^(export\s+)?(?:interface|type)\s+([A-Za-z_$][\w$]*)/;
  * A file that declares a class may hold NO named type beside it — the shape
  * belongs in types.ts, exported or not. Non-class modules keep the laxer rule.
  */
-const CLASS_DECL = /^(?:export\s+)?(?:abstract\s+)?class\s/m;
+const CLASS_DECL = /^(?:export\s+)?(?:default\s+)?(?:abstract\s+)?class\s/m;
 
 interface TypeDeclaration {
   name: string;
@@ -99,7 +99,7 @@ function main(): void {
     .filter((violation): violation is Violation => violation !== null);
 
   console.log(
-    `Scanning ${files.length} backend file(s) for misplaced types...`,
+    `Scanning ${files.length} TypeScript file(s) for misplaced types...`,
   );
 
   if (violations.length === 0) {
@@ -116,9 +116,9 @@ function main(): void {
   }
   console.log(
     `\nFound type declaration(s) outside a types.ts. Move each into the domain's ` +
-      `types.ts (e.g. srv/modules/ingestion/types.ts). Exported types always ` +
-      `belong there; a file that declares a class may keep no named type beside ` +
-      `it either. Private types in non-class modules may stay local.`,
+      `types.ts (srv/modules/ingestion/types.ts, or a UI5 app's model/types.ts). ` +
+      `Exported types always belong there; a file that declares a class may keep ` +
+      `no named type beside it either. Private types in non-class modules may stay local.`,
   );
   process.exit(1);
 }

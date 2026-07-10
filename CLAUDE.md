@@ -34,7 +34,7 @@ db/                          CDS entity models (9 domain folders)
   points/schema.cds          2 points entities
   budget/schema.cds          4 budget entities
   financial/schema.cds       2 financial entities
-  integration/schema.cds     2 integration entities
+  ingestion/schema.cds       3 ingestion entities
   alerts/schema.cds          1 alert entity
   seed/                      CSV seed data (CNV-002, CNV-003)
 srv/
