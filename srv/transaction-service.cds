@@ -71,6 +71,17 @@ service TransactionService @(path: '/service/transactionSvcs') {
     topVendorName    : String;
   }
 
+  type SplitResult {
+    transactionId : UUID;
+    mySharePct    : Decimal(5, 4);
+    myShareAmount : Decimal(15, 2);
+    isRecurring   : Boolean;
+  }
+
+  type BulkCategorizeResult {
+    updatedCount : Integer;
+  }
+
   action parseCsvImport(cardInstance_ID: UUID,
                         fileName: String,
                         fileContent: LargeString) returns CsvParseResult;
@@ -79,4 +90,20 @@ service TransactionService @(path: '/service/transactionSvcs') {
                        fileName: String,
                        skippedCount: Integer,
                        rows: many CsvSaveRow)     returns CsvImportSummary;
+
+  action splitTransaction(transactionId: UUID,
+                          mySharePct: Decimal(5, 4),
+                          myShareAmount: Decimal(15, 2),
+                          splitDescription: String,
+                          isRecurring: Boolean)   returns SplitResult;
+
+  action bulkCategorize(transactionIds: many UUID,
+                        vendor_ID: UUID,
+                        purchaseType_ID: UUID,
+                        earningCategory_ID: UUID) returns BulkCategorizeResult;
+
+  action correctCategorization(transactionId: UUID,
+                               vendor_ID: UUID,
+                               purchaseType_ID: UUID,
+                               earningCategory_ID: UUID);
 }

@@ -19,4 +19,14 @@ export class CurrencyUtility {
       currency: CURRENCY.CODE,
     }).format(amount);
   }
+
+  /**
+   * Rounds a monetary value to whole cents, clearing binary-float drift (e.g.
+   * 110 × 0.2 → 22.00) so stored amounts reconcile exactly.
+   * @param amount Monetary value in dollars.
+   * @returns The amount rounded to two decimal places.
+   */
+  static roundToCents(amount: number): number {
+    return Math.round(amount * 100) / 100;
+  }
 }
