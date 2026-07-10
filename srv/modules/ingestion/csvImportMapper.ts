@@ -1,3 +1,5 @@
+import type { CategorizationResult } from "../categorization/types.js";
+
 import { CSV } from "./constants.js";
 import type {
   CsvClassifiedRow,
@@ -30,17 +32,19 @@ export class CsvImportMapper {
   }
 
   /**
-   * Maps parsed fields plus a dedup verdict to a review row (New or Potential
-   * Duplicates tab).
+   * Maps parsed fields plus a dedup verdict and the categorization suggestion to
+   * a review row (New or Potential Duplicates tab).
    * @param rowNumber 1-based source line number, for user reference.
    * @param fields Scalar fields parsed from the CSV row.
    * @param dedup Deduplication outcome for this row.
+   * @param suggestion Categorization pre-fill for this row.
    * @returns The classified row for the review tabs.
    */
   static toClassifiedRow(
     rowNumber: number,
     fields: ParsedCsvFields,
     dedup: DedupResult,
+    suggestion: CategorizationResult,
   ): CsvClassifiedRow {
     return {
       rowNumber,
@@ -51,6 +55,11 @@ export class CsvImportMapper {
       cardholderName: fields.cardholderName,
       dedupOutcome: dedup.outcome,
       matchedTransactionId: dedup.matchedTransactionId ?? null,
+      suggestedVendor_ID: suggestion.vendor_ID,
+      suggestedVendorName: suggestion.vendorName,
+      suggestedPurchaseType_ID: suggestion.purchaseType_ID,
+      suggestedEarningCategory_ID: suggestion.earningCategory_ID,
+      suggestionConfidence: suggestion.confidence,
     };
   }
 

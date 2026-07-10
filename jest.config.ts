@@ -5,6 +5,9 @@ const config: Config = {
   testEnvironment: "node",
   roots: ["<rootDir>/test"],
   testMatch: ["**/*.test.ts"],
+  // cds.test spins up an in-memory server per integration suite; cold starts
+  // exceed Jest's 5s default when several bootstrap in parallel under coverage.
+  testTimeout: 30000,
   moduleNameMapper: {
     "^(\\.{1,2}/.*)\\.js$": "$1",
   },

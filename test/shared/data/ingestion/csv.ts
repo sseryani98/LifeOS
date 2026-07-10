@@ -2,6 +2,7 @@
 // Config records mirror the corrected seed; CSV samples are trimmed from the
 // real exports in design/actual-csvs/. Builders live in a support/ folder.
 
+import type { CategorizationResult } from "../../../../srv/modules/categorization/types.js";
 import type {
   AttributionCard,
   CsvFormatConfigRecord,
@@ -220,6 +221,17 @@ export const DEDUP_NEW: DedupResult = { outcome: "new" };
 export const DEDUP_POTENTIAL: DedupResult = {
   outcome: "potential_duplicate",
   matchedTransactionId: MATCHED_TX_ID,
+};
+
+/** Categorization pre-fill when nothing matched — the wizard shows empty value helps. */
+export const SUGGESTION_NONE: CategorizationResult = {
+  vendor_ID: null,
+  vendorName: null,
+  purchaseType_ID: null,
+  earningCategory_ID: null,
+  confidence: null,
+  alternatives: [],
+  status: "uncategorized",
 };
 
 // ─── Action-request payloads (parse entry point) ────────────────────────────

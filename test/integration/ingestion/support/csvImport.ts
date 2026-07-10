@@ -2,6 +2,8 @@
 // in-memory DB, plus a seeded CIBC card so the seeded format config resolves.
 // Kept out of the test file so the body reads as arrange-act-assert.
 
+import { CategorizationDataService } from "../../../../srv/modules/categorization/categorizationDataService.js";
+import { CategorizationService } from "../../../../srv/modules/categorization/categorizationService.js";
 import { CsvImportDataService } from "../../../../srv/modules/ingestion/csvImportDataService.js";
 import { CsvImportService } from "../../../../srv/modules/ingestion/csvImportService.js";
 import { DeduplicationDataService } from "../../../../srv/modules/ingestion/deduplicationDataService.js";
@@ -24,6 +26,7 @@ export function buildCsvImportService(): CsvImportService {
   return new CsvImportService(
     new CsvImportDataService(),
     new DeduplicationService(new DeduplicationDataService()),
+    new CategorizationService(new CategorizationDataService()),
   );
 }
 

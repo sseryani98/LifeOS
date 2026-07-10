@@ -12,6 +12,8 @@ using {com.financialplanner.ImportLog} from '../db/ingestion/schema';
 
 service TransactionService @(path: '/service/transactionSvcs') {
   entity Transactions            as projection on fp.Transaction;
+  entity TransactionSplits       as projection on fp.TransactionSplit;
+  entity MerchantPatterns        as projection on fp.MerchantPattern;
   entity Vendors                 as projection on Vendor;
   entity PurchaseTypes           as projection on PurchaseType;
   entity EarningCategories       as projection on EarningCategory;
@@ -20,14 +22,19 @@ service TransactionService @(path: '/service/transactionSvcs') {
   entity ImportLogs @readonly    as projection on ImportLog;
 
   type CsvClassifiedRow {
-    rowNumber            : Integer;
-    postedAt             : Date;
-    amount               : Decimal(15, 2);
-    rawDescription       : String;
-    cardInstance_ID      : UUID;
-    cardholderName       : String;
-    dedupOutcome         : String;
-    matchedTransactionId : UUID;
+    rowNumber                   : Integer;
+    postedAt                    : Date;
+    amount                      : Decimal(15, 2);
+    rawDescription              : String;
+    cardInstance_ID             : UUID;
+    cardholderName              : String;
+    dedupOutcome                : String;
+    matchedTransactionId        : UUID;
+    suggestedVendor_ID          : UUID;
+    suggestedVendorName         : String;
+    suggestedPurchaseType_ID    : UUID;
+    suggestedEarningCategory_ID : UUID;
+    suggestionConfidence        : String;
   }
 
   type CsvExcludedRow {

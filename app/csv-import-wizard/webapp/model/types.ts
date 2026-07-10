@@ -14,6 +14,11 @@ export interface ClassifiedRow {
   cardholderName: string | null;
   dedupOutcome: string;
   matchedTransactionId: string | null;
+  suggestedVendor_ID: string | null;
+  suggestedVendorName: string | null;
+  suggestedPurchaseType_ID: string | null;
+  suggestedEarningCategory_ID: string | null;
+  suggestionConfidence: string | null;
 }
 
 /** An excluded (parse-error) row as returned by the parseCsvImport action. */

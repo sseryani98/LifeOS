@@ -3,6 +3,7 @@ import cds from "@sap/cds";
 
 import { BaseService } from "../shared/baseService.js";
 import { MessagingUtility } from "../shared/messagingUtility.js";
+import type { CategorizationService } from "../categorization/categorizationService.js";
 
 import { CSV } from "./constants.js";
 import { CsvFieldParser } from "./csvFieldParser.js";
@@ -27,21 +28,25 @@ import type {
  * through dedup — classifying rows as new, potential duplicate, or excluded.
  */
 export class CsvImportService extends BaseService {
+  private readonly categorizationService: CategorizationService;
   private readonly dataService: CsvImportDataService;
   private readonly dedupService: DeduplicationService;
 
   /**
-   * Creates the engine with injected data + dedup collaborators.
+   * Creates the engine with injected data, dedup, and categorization collaborators.
    * @param dataService Data-access layer for config resolution and attribution cards.
    * @param dedupService Engine that classifies rows as new or potential duplicate.
+   * @param categorizationService Engine that pre-fills vendor + category suggestions.
    */
   constructor(
     dataService: CsvImportDataService,
     dedupService: DeduplicationService,
+    categorizationService: CategorizationService,
   ) {
     super("integration.csv");
     this.dataService = dataService;
     this.dedupService = dedupService;
+    this.categorizationService = categorizationService;
   }
 
   /**
@@ -94,18 +99,20 @@ export class CsvImportService extends BaseService {
     const attributionCards = await this.dataService.getAttributionCards(
       cardInstanceId,
     );
+    const categorization = await this.categorizationService.buildContext();
     const rows = Papa.parse<string[]>(request.fileContent as string, {
       header: false,
       skipEmptyLines: false,
     }).data;
     const headerMap = this._buildHeaderMap(rows, config);
-    const buckets = await this._processRows(
+    const parseContext: ParseContext = {
       config,
-      rows,
       headerMap,
-      attributionCards,
-      cardInstanceId,
-    );
+      attribution: this._buildAttributionMap(attributionCards),
+      selectedId: cardInstanceId,
+      categorization,
+    };
+    const buckets = await this._processRows(rows, parseContext);
     return {
       configResolved: true,
       configName: config.configName,
@@ -159,26 +166,15 @@ export class CsvImportService extends BaseService {
   /**
    * Processes every data row (after the skipped header/preamble) into the new,
    * potential-duplicate, or excluded buckets, discarding status-filtered rows.
-   * @param config Active format config.
    * @param rows All parsed rows of the file.
-   * @param headerMap Header name → index map.
-   * @param attributionCards Cards eligible for cardmember attribution.
-   * @param selectedId The selected card instance id.
+   * @param context Per-file parse context (config, maps, categorization).
    * @returns The accumulated row buckets and skipped count.
    */
   private async _processRows(
-    config: CsvFormatConfigRecord,
     rows: string[][],
-    headerMap: Map<string, number>,
-    attributionCards: AttributionCard[],
-    selectedId: string,
+    context: ParseContext,
   ): Promise<RowBuckets> {
-    const context: ParseContext = {
-      config,
-      headerMap,
-      attribution: this._buildAttributionMap(attributionCards),
-      selectedId,
-    };
+    const { config, headerMap } = context;
     const buckets: RowBuckets = {
       newRows: [],
       potentialDuplicates: [],
@@ -220,7 +216,16 @@ export class CsvImportService extends BaseService {
     const dedup = await this.dedupService.evaluate(
       CsvImportMapper.toCandidate(fields),
     );
-    const row = CsvImportMapper.toClassifiedRow(rowNumber, fields, dedup);
+    const suggestion = context.categorization.categorize(
+      fields.rawDescription,
+      fields.amount,
+    );
+    const row = CsvImportMapper.toClassifiedRow(
+      rowNumber,
+      fields,
+      dedup,
+      suggestion,
+    );
     const bucket =
       dedup.outcome === "potential_duplicate"
         ? buckets.potentialDuplicates

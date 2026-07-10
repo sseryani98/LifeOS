@@ -1,3 +1,4 @@
+import type { CategorizationContext } from "../categorization/categorizationContextService.js";
 import type { EncryptionFactory, HttpClient, SleepFn } from "../shared/types.js";
 
 /** Deduplication outcomes for the two-tier strategy. */
@@ -186,11 +187,20 @@ export interface ParsedCsvFields {
   cardholderName: string | null;
 }
 
-/** A successfully parsed + deduped CSV row (New or Potential Duplicates tab). */
+/**
+ * A successfully parsed + deduped CSV row (New or Potential Duplicates tab).
+ * The `suggested*` fields carry the categorization pre-fill so the wizard can
+ * pre-populate the categorization value helps for the user to accept or change.
+ */
 export interface CsvClassifiedRow extends ParsedCsvFields {
   rowNumber: number;
   dedupOutcome: DedupOutcome;
   matchedTransactionId: string | null;
+  suggestedVendor_ID: string | null;
+  suggestedVendorName: string | null;
+  suggestedPurchaseType_ID: string | null;
+  suggestedEarningCategory_ID: string | null;
+  suggestionConfidence: string | null;
 }
 
 /** A CSV row that failed to parse — surfaced on the Excluded tab. */
@@ -290,4 +300,5 @@ export interface ParseContext {
   headerMap: Map<string, number>;
   attribution: Map<string, string>;
   selectedId: string;
+  categorization: CategorizationContext;
 }
