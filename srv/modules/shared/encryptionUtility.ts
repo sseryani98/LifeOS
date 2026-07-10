@@ -1,22 +1,14 @@
 import { createCipheriv, createDecipheriv, randomBytes } from "crypto";
 
-/** Encryption algorithm — AES-256-GCM (authenticated encryption). */
-const ALGORITHM = "aes-256-gcm";
-
-/** IV length in bytes for AES-GCM. */
-const IV_LENGTH = 12;
-
-/** Authentication tag length in bytes. */
-const AUTH_TAG_LENGTH = 16;
-
-/** Required key length in bytes (256 bits). */
-const KEY_LENGTH = 32;
-
-/** Separator between IV, auth tag, and ciphertext in stored format. */
-const SEPARATOR = ":";
-
-/** Number of parts in the encrypted string format (iv:authTag:ciphertext). */
-const ENCRYPTED_PARTS = 3;
+/** AES-256-GCM storage-format spec — {iv}:{authTag}:{ciphertext}, hex-encoded. */
+const ENCRYPTION = {
+  ALGORITHM: "aes-256-gcm",
+  IV_LENGTH: 12,
+  AUTH_TAG_LENGTH: 16,
+  KEY_LENGTH: 32,
+  SEPARATOR: ":",
+  ENCRYPTED_PARTS: 3,
+} as const;
 
 /**
  * AES-256-GCM encryption utility for sensitive fields.
@@ -33,9 +25,9 @@ export class EncryptionUtility {
       throw new Error("ENCRYPTION_KEY environment variable is not set");
     }
     this.key = Buffer.from(keyHex, "hex");
-    if (this.key.length !== KEY_LENGTH) {
+    if (this.key.length !== ENCRYPTION.KEY_LENGTH) {
       throw new Error(
-        `ENCRYPTION_KEY must be ${KEY_LENGTH} bytes (${KEY_LENGTH * 2} hex characters)`,
+        `ENCRYPTION_KEY must be ${ENCRYPTION.KEY_LENGTH} bytes (${ENCRYPTION.KEY_LENGTH * 2} hex characters)`,
       );
     }
   }
@@ -43,11 +35,13 @@ export class EncryptionUtility {
   /**
    * Encrypts plaintext using AES-256-GCM.
    * Returns format: {iv}:{authTag}:{ciphertext} (hex-encoded).
+   * @param plaintext The sensitive value to encrypt.
+   * @returns The hex-encoded iv:authTag:ciphertext storage string.
    */
   encrypt(plaintext: string): string {
-    const iv = randomBytes(IV_LENGTH);
-    const cipher = createCipheriv(ALGORITHM, this.key, iv, {
-      authTagLength: AUTH_TAG_LENGTH,
+    const initVector = randomBytes(ENCRYPTION.IV_LENGTH);
+    const cipher = createCipheriv(ENCRYPTION.ALGORITHM, this.key, initVector, {
+      authTagLength: ENCRYPTION.AUTH_TAG_LENGTH,
     });
     const encrypted = Buffer.concat([
       cipher.update(plaintext, "utf-8"),
@@ -55,28 +49,30 @@ export class EncryptionUtility {
     ]);
     const authTag = cipher.getAuthTag();
     return [
-      iv.toString("hex"),
+      initVector.toString("hex"),
       authTag.toString("hex"),
       encrypted.toString("hex"),
-    ].join(SEPARATOR);
+    ].join(ENCRYPTION.SEPARATOR);
   }
 
   /**
    * Decrypts a stored encrypted string back to plaintext.
    * Expects format: {iv}:{authTag}:{ciphertext} (hex-encoded).
+   * @param stored The hex-encoded iv:authTag:ciphertext string produced by encrypt.
+   * @returns The recovered plaintext value.
    */
   decrypt(stored: string): string {
-    const parts = stored.split(SEPARATOR);
-    if (parts.length !== ENCRYPTED_PARTS) {
+    const parts = stored.split(ENCRYPTION.SEPARATOR);
+    if (parts.length !== ENCRYPTION.ENCRYPTED_PARTS) {
       throw new Error(
         "Invalid encrypted format — expected iv:authTag:ciphertext",
       );
     }
-    const iv = Buffer.from(parts[0], "hex");
+    const initVector = Buffer.from(parts[0], "hex");
     const authTag = Buffer.from(parts[1], "hex");
     const ciphertext = Buffer.from(parts[2], "hex");
-    const decipher = createDecipheriv(ALGORITHM, this.key, iv, {
-      authTagLength: AUTH_TAG_LENGTH,
+    const decipher = createDecipheriv(ENCRYPTION.ALGORITHM, this.key, initVector, {
+      authTagLength: ENCRYPTION.AUTH_TAG_LENGTH,
     });
     decipher.setAuthTag(authTag);
     const decrypted = Buffer.concat([

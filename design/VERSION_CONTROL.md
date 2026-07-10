@@ -190,7 +190,7 @@ Co-Authored-By: Claude Code <noreply@anthropic.com>
 | `budget`         | `srv/modules/budget/`, ENH-007                 |
 | `eligibility`    | `srv/modules/eligibility/`, ENH-004            |
 | `recommendation` | `srv/modules/recommendation/`, ENH-002         |
-| `integration`    | `srv/modules/integration/`, INT-001/002/003    |
+| `integration`    | `srv/modules/ingestion/`, INT-001/002/003    |
 | `admin`          | AdminService, FRM-009/010                      |
 | `shared`         | `srv/modules/shared/`, `app/shared/`           |
 | `db`             | CDS models, seed data                          |

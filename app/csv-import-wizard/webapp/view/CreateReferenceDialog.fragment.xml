@@ -1,0 +1,44 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+>
+    <Dialog
+        id="idCreateReferenceDialog"
+        title="{ui>/createDialogTitle}"
+        contentWidth="24rem"
+    >
+        <content>
+            <VBox
+                id="idCreateReferenceVBox"
+                class="sapUiContentPadding"
+            >
+                <Label
+                    id="idCreateReferenceLabel"
+                    text="{i18n>referenceName}"
+                    required="true"
+                    labelFor="idCreateReferenceInput"
+                />
+                <Input
+                    id="idCreateReferenceInput"
+                    value="{ui>/newRefName}"
+                    placeholder="{i18n>referenceNamePlaceholder}"
+                />
+            </VBox>
+        </content>
+        <beginButton>
+            <Button
+                id="idConfirmCreateButton"
+                text="{i18n>create}"
+                type="Emphasized"
+                press=".onButtonConfirmCreatePress"
+            />
+        </beginButton>
+        <endButton>
+            <Button
+                id="idCancelCreateButton"
+                text="{i18n>cancel}"
+                press=".onButtonCancelCreatePress"
+            />
+        </endButton>
+    </Dialog>
+</core:FragmentDefinition>

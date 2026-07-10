@@ -237,7 +237,7 @@ The only exception: when the test is specifically _about_ a field value (e.g., t
 Factories keep data DRY. Named constants keep tests readable.
 
 ```typescript
-// test/data/factories.ts — builds the objects
+// test/shared/data/factories.ts — builds the objects
 export function buildCardInstance(
   overrides?: Partial<CardInstance>,
 ): CardInstance {
@@ -250,7 +250,7 @@ export function buildCardInstance(
   };
 }
 
-// test/data/cards.ts — named constants for tests
+// test/shared/data/cards.ts — named constants for tests
 export const AMEX_COBALT_FOCUS_CARD = buildCardInstance({
   lifecycleState: "Focus",
   activationDate: "2026-01-15",
@@ -272,7 +272,7 @@ export const CLOSED_AMEX_GOLD = buildCardInstance({
 
 ### 7.2 Canonical Test World
 
-A pre-built dataset for integration and scenario tests in `test/data/integration/seeds.ts`:
+A pre-built dataset for integration and scenario tests in `test/shared/data/` (module-grouped seed sets):
 
 | Seed Set           | Contents                                                                                                |
 | ------------------ | ------------------------------------------------------------------------------------------------------- |
@@ -295,16 +295,17 @@ A pre-built dataset for integration and scenario tests in `test/data/integration
 
 ### 7.4 File Structure
 
+Fixtures live in a `data/` folder — either the cross-cutting `test/shared/data/` (used by many modules or across the unit↔integration boundary) or a module-local `{test-type}/{module}/data/` (used only there). See §11 for the full tree and the `data/support/tests` contract.
+
 ```
-test/data/
+test/shared/data/
 ├── factories.ts              ← Factory functions (buildCardInstance, buildTransaction, ...)
 ├── cards.ts                  ← AMEX_COBALT_FOCUS_CARD, TD_AEROPLAN_ACTIVE_CARD, ...
-├── offers.ts                 ← COBALT_THREE_TRANCHE_OFFER, TD_SIMPLE_OFFER, ...
-├── transactions.ts           ← COBALT_PARTIAL_SPEND_TRANSACTIONS, MIXED_VENDOR_BATCH, ...
-├── vendors.ts                ← AMAZON_VENDOR, LOBLAWS_VENDOR, ...
 ├── reference.ts              ← ISSUERS, EARNING_CATEGORIES, PURCHASE_TYPES, ...
-└── integration/
-    └── seeds.ts              ← Full DB seed sets (combines the above for cds.test)
+├── budget.ts                 ← GROCERIES_ALLOCATION_CURRENT, NETFLIX_EXPENSE, ...
+└── ingestion/                ← module-grouped fixtures shared across unit + integration
+    ├── csv.ts                ← SCOTIA_CONFIG, CIBC_CSV, VALID_PARSE_REQUEST, ...
+    └── simplefin.ts          ← CONNECTION_ACTIVE, RESPONSE_TWO_NEW, VALID_CLAIM, ...
 ```
 
 ---
@@ -359,16 +360,16 @@ Coverage report runs on every `npm test` execution. Not a separate step.
 
 **Decision D-80.**
 
-Frontend testing is included as a **learning exercise** — no enforced coverage thresholds. Enough scope to learn QUnit and OPA5 patterns for both Fiori Elements and freestyle SAPUI5 apps.
+Frontend testing is included as a **learning exercise** — no enforced coverage thresholds. Enough scope to learn QUnit and OPA5 patterns for both Fiori Elements and freestyle SAPUI5 apps. Test files are authored in **TypeScript** (like all of `app/` since D-315) and transpiled by `ui5-tooling-transpile`.
 
 ### 9.1 QUnit — Controller Logic and Shared Resources
 
 | Target                                 | What to Test                                              |
 | -------------------------------------- | --------------------------------------------------------- |
-| `app/shared/util/formatter.js`         | Currency formatting, date formatting, status text mapping |
-| `app/shared/BaseController.js`         | Helper methods (model access, navigation)                 |
-| `app/shared/controls/VizFrameCard.js`  | Property binding, config generation                       |
-| `app/shared/controls/ApexChartCard.js` | Property binding, config generation                       |
+| `app/shared/util/formatter.ts`         | Currency formatting, date formatting, status text mapping |
+| `app/shared/BaseController.ts`         | Helper methods (model access, navigation)                 |
+| `app/shared/controls/VizFrameCard.ts`  | Property binding, config generation                       |
+| `app/shared/controls/ApexChartCard.ts` | Property binding, config generation                       |
 | 1-2 freestyle controllers              | Event handlers that transform data before OData calls     |
 
 ### 9.2 OPA5 — Journey Tests
@@ -387,24 +388,24 @@ app/
 ├── shared/
 │   └── test/
 │       └── unit/
-│           ├── formatter.test.js
-│           ├── BaseController.test.js
-│           ├── VizFrameCard.test.js
-│           └── ApexChartCard.test.js
+│           ├── formatter.test.ts
+│           ├── BaseController.test.ts
+│           ├── VizFrameCard.test.ts
+│           └── ApexChartCard.test.ts
 ├── transactions/
 │   └── webapp/
 │       └── test/
 │           ├── unit/
-│           │   └── ListReportExt.test.js
+│           │   └── ListReportExt.test.ts
 │           └── integration/
-│               └── TransactionJourney.js
+│               └── TransactionJourney.ts
 └── csv-import/
     └── webapp/
         └── test/
             ├── unit/
-            │   └── CsvImportController.test.js
+            │   └── CsvImportController.test.ts
             └── integration/
-                └── CsvImportJourney.js
+                └── CsvImportJourney.ts
 ```
 
 ### 9.4 Coverage
@@ -454,55 +455,76 @@ Test scope grows with each wave. Earlier waves carry heavier test weight because
 
 ## 11. Test File Structure
 
-Complete test directory layout:
+**The contract (`lint:test-structure`).** Every backend test file lives under `test/{unit|integration}/{module}/{data|support|tests}/`, plus one cross-cutting `test/shared/{data,support}/`:
+
+| Role folder | Holds | Rule |
+| --- | --- | --- |
+| `data/` | Fixtures + factories — named constants (UPPER_SNAKE_CASE) and builder functions returning plain objects | Data lives here, nowhere else |
+| `support/` | Mocks, service/harness wiring, `seedXxx`, HTTP stubs — **functions only** | An exported object/array fixture here is a lint violation → move to sibling `data/` |
+| `tests/` | The `*.test.ts` specs (imports + arrange-act-assert) | A spec outside a `tests/`/`scenarios/` folder is a violation |
+
+- **`{module}`** mirrors `srv/modules/`. The data-ingestion domain lives in `srv/modules/ingestion` (CSV, SimpleFIN, Scheduling, Dedup) and keeps that `ingestion` name in the test tree — renamed from `integration` so it never collides with the _integration_ test type.
+- **`test/shared/{data,support}`** is for fixtures/builders shared across modules **or** across the unit↔integration boundary (e.g. `cards.ts`, `reference.ts`). A fixture used by only one module+test-type stays in that module's local `data/`.
+
+Current layout:
 
 ```
 test/
+├── shared/                              ← cross-cutting fixtures + builders
+│   ├── data/
+│   │   ├── factories.ts
+│   │   ├── cards.ts
+│   │   ├── reference.ts
+│   │   ├── budget.ts
+│   │   └── ingestion/                   ← module-grouped, shared across test types
+│   │       ├── csv.ts
+│   │       └── simplefin.ts
+│   └── support/
 ├── unit/
-│   ├── transaction/
-│   │   ├── TransactionService.test.ts
-│   │   └── TransactionValidator.test.ts
-│   ├── categorization/
-│   │   ├── CategorizationService.test.ts
-│   │   └── CategorizationValidator.test.ts
-│   ├── churning/
-│   │   ├── ChurningService.test.ts
-│   │   └── ChurningValidator.test.ts
-│   ├── budget/
-│   │   ├── BudgetService.test.ts
-│   │   └── BudgetValidator.test.ts
-│   ├── eligibility/
-│   │   ├── EligibilityService.test.ts
-│   │   └── EligibilityValidator.test.ts
-│   ├── recommendation/
-│   │   ├── RecommendationService.test.ts
-│   │   └── RecommendationValidator.test.ts
-│   ├── integration/
-│   │   └── SimpleFINIntegrationService.test.ts
-│   └── util/
-│       ├── EncryptionUtility.test.ts
-│       ├── DateTimeUtility.test.ts
-│       ├── CurrencyUtility.test.ts
-│       └── MessagingUtility.test.ts
-├── integration/
-│   ├── TransactionService.test.ts
-│   ├── ChurningService.test.ts
-│   ├── BudgetService.test.ts
-│   ├── AdminService.test.ts
-│   └── scenarios/
-│       ├── weekly-review.test.ts
-│       ├── card-onboarding.test.ts
-│       ├── csv-import.test.ts
-│       └── card-lifecycle.test.ts
-└── data/
-    ├── factories.ts
-    ├── cards.ts
-    ├── offers.ts
-    ├── transactions.ts
-    ├── vendors.ts
-    ├── reference.ts
-    └── integration/
-        └── seeds.ts
+│   ├── ingestion/
+│   │   ├── data/
+│   │   │   └── transactions.ts          ← used only by unit dedup specs
+│   │   ├── support/
+│   │   │   ├── csvImportMocks.ts
+│   │   │   ├── deduplicationMocks.ts
+│   │   │   ├── schedulingMocks.ts
+│   │   │   └── simplefinMocks.ts
+│   │   └── tests/
+│   │       ├── csvFieldParser.test.ts
+│   │       ├── csvImportMapper.test.ts
+│   │       ├── csvImportService.test.ts
+│   │       ├── csvImportValidator.test.ts
+│   │       ├── deduplicationService.test.ts
+│   │       ├── deduplicationValidator.test.ts
+│   │       ├── schedulingService.test.ts
+│   │       ├── simpleFinService.test.ts
+│   │       └── simpleFinValidator.test.ts
+│   └── shared/
+│       ├── data/
+│       ├── support/
+│       └── tests/                       ← utility specs
+│           ├── currencyUtility.test.ts
+│           ├── dateTimeUtility.test.ts
+│           ├── encryptionUtility.test.ts
+│           └── logger.test.ts
+└── integration/
+    ├── ingestion/
+    │   ├── data/
+    │   │   └── csvImport.ts             ← RBC_CARD_INSTANCE, CIBC_DUP_TRANSACTION
+    │   ├── support/
+    │   │   ├── csvImport.ts             ← buildCsvImportService, seedCsvImport
+    │   │   └── simplefinSync.ts
+    │   └── tests/
+    │       ├── csvImport.test.ts
+    │       └── simpleFinSync.test.ts
+    ├── admin/
+    │   ├── data/
+    │   │   └── admin.ts
+    │   ├── support/
+    │   │   └── adminService.ts
+    │   └── tests/
+    │       └── adminService.test.ts
+    └── scenarios/                        ← FUT multi-step specs
 ```
 
 Frontend tests live within their respective `app/` folders (see §9.3).

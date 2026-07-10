@@ -1,6 +1,5 @@
 using AdminService as svc from '../../../srv/admin-service';
 
-// ─── Issuer Application Rule ───────────────────────────────────────────────
 annotate svc.IssuerApplicationRules with @UI: {
   HeaderInfo            : {
     TypeName      : '{i18n>IssuerApplicationRule}',
@@ -99,8 +98,6 @@ annotate svc.IssuerApplicationRules with @UI: {
     }
   ]
 };
-
-// ─── Field Labels & Hidden Fields ──────────────────────────────────────────
 
 annotate svc.IssuerApplicationRules with {
   ID                   @UI.Hidden;

@@ -13,8 +13,8 @@ interface TestResult {
   numPendingTests: number;
   startTime: number;
   testResults: Array<{
-    testFilePath: string;
-    testResults: Array<{
+    name: string;
+    assertionResults: Array<{
       ancestorTitles: string[];
       title: string;
       status: string;
@@ -37,7 +37,7 @@ interface CoverageSummary {
 /**
  * Generates a markdown test report from Jest JSON output and coverage summary.
  * Implements rolling retention of max 5 report files.
- * See TEST_STRATEGY.md §12 for format specification.
+ * See TEST_STRATEGY.md for format specification.
  */
 function generateReport(): void {
   const now = new Date();
@@ -86,13 +86,13 @@ function generateReport(): void {
     location: string;
   }> = [];
   for (const suite of testResults.testResults) {
-    for (const test of suite.testResults) {
+    for (const test of suite.assertionResults) {
       if (test.status === "failed") {
         failures.push({
-          suite: suite.testFilePath,
+          suite: suite.name,
           title: [...test.ancestorTitles, test.title].join(" > "),
           message: test.failureMessages.join("\n"),
-          location: suite.testFilePath,
+          location: suite.name,
         });
       }
     }

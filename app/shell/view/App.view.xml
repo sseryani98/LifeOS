@@ -6,18 +6,14 @@
     xmlns:tnt="sap.tnt"
     displayBlock="true"
 >
-    <tnt:ToolPage
-        id="toolPage"
-        sideExpanded="true"
-    >
-        <!-- Header -->
+    <tnt:ToolPage id="idToolPage">
         <tnt:header>
             <tnt:ToolHeader>
                 <Button
-                    id="navBackBtn"
+                    id="idNavBackButton"
                     icon="sap-icon://nav-back"
                     type="Transparent"
-                    press=".onNavBack"
+                    press=".onButtonNavBackPress"
                     visible="{shellView>/backVisible}"
                     tooltip="{i18n>navBack}"
                 />
@@ -34,20 +30,17 @@
             </tnt:ToolHeader>
         </tnt:header>
 
-        <!-- Side Navigation — items hidden until built; visible flags toggled per sprint -->
         <tnt:sideContent>
             <tnt:SideNavigation
-                id="sideNav"
+                id="idSideNavigation"
                 selectedKey="{shellView>/selectedKey}"
-                itemSelect=".onNavItemSelect"
+                itemSelect=".onSideNavigationItemSelect"
             >
                 <tnt:NavigationList>
-                    <!-- Group: Transactions -->
                     <tnt:NavigationListItem
                         text="{i18n>navTransactions}"
                         icon="sap-icon://payment-approval"
                         expanded="false"
-                        visible="false"
                     >
                         <tnt:NavigationListItem
                             text="{i18n>navWeeklyReview}"
@@ -62,11 +55,9 @@
                         <tnt:NavigationListItem
                             text="{i18n>navCsvImport}"
                             key="CSV_IMPORT"
-                            visible="false"
                         />
                     </tnt:NavigationListItem>
 
-                    <!-- Group: Churning — Cards -->
                     <tnt:NavigationListItem
                         text="{i18n>navChurningCards}"
                         icon="sap-icon://credit-card"
@@ -85,7 +76,6 @@
                         />
                     </tnt:NavigationListItem>
 
-                    <!-- Group: Churning — Analytics -->
                     <tnt:NavigationListItem
                         text="{i18n>navChurningAnalytics}"
                         icon="sap-icon://business-objects-experience"
@@ -129,7 +119,6 @@
                         />
                     </tnt:NavigationListItem>
 
-                    <!-- Group: Finances -->
                     <tnt:NavigationListItem
                         text="{i18n>navFinances}"
                         icon="sap-icon://wallet"
@@ -178,92 +167,73 @@
                         />
                     </tnt:NavigationListItem>
 
-                    <!-- Group: Admin — Master Data entities (per-entity nav, D-92) -->
                     <tnt:NavigationListItem
                         text="{i18n>navAdmin}"
                         icon="sap-icon://action-settings"
-                        expanded="true"
-                        visible="true"
                     >
                         <tnt:NavigationListItem
                             text="{i18n>navIssuers}"
                             key="MD_ISSUERS"
-                            visible="true"
                         />
                         <tnt:NavigationListItem
                             text="{i18n>navRewardsPrograms}"
                             key="MD_REWARDS_PROGRAMS"
-                            visible="true"
                         />
                         <tnt:NavigationListItem
                             text="{i18n>navPurchaseCategories}"
                             key="MD_PURCHASE_CATEGORIES"
-                            visible="true"
                         />
                         <tnt:NavigationListItem
                             text="{i18n>navEarningCategories}"
                             key="MD_EARNING_CATEGORIES"
-                            visible="true"
                         />
                         <tnt:NavigationListItem
                             text="{i18n>navApplicationRules}"
                             key="MD_APP_RULES"
-                            visible="true"
                         />
                         <tnt:NavigationListItem
                             text="{i18n>navCsvFormats}"
                             key="MD_CSV_CONFIGS"
-                            visible="true"
                         />
                         <tnt:NavigationListItem
                             text="{i18n>navSystemConfig}"
                             key="MD_SYSTEM_CONFIGS"
-                            visible="true"
                         />
                         <tnt:NavigationListItem
                             text="{i18n>navBudgetAllocations}"
                             key="MD_BUDGET_ALLOCATIONS"
-                            visible="true"
                         />
                         <tnt:NavigationListItem
                             text="{i18n>navRecurrentExpenses}"
                             key="MD_RECURRENT_EXPENSES"
-                            visible="true"
                         />
                         <tnt:NavigationListItem
                             text="{i18n>navFinancialAccountTypes}"
                             key="MD_FINANCIAL_ACCOUNT_TYPES"
-                            visible="true"
                         />
                         <tnt:NavigationListItem
                             text="{i18n>navIncomeSourceTypes}"
                             key="MD_INCOME_SOURCE_TYPES"
-                            visible="true"
                         />
                         <tnt:NavigationListItem
                             text="{i18n>navPerkTypes}"
                             key="MD_PERK_TYPES"
-                            visible="true"
                         />
                         <tnt:NavigationListItem
                             text="{i18n>navAdjustmentTypes}"
                             key="MD_ADJUSTMENT_TYPES"
-                            visible="true"
                         />
                         <tnt:NavigationListItem
                             text="{i18n>navRedemptionTypes}"
                             key="MD_REDEMPTION_TYPES"
-                            visible="true"
                         />
                         <tnt:NavigationListItem
                             text="{i18n>navScrapeMappings}"
                             key="MD_SCRAPE_MAPPINGS"
-                            visible="true"
                         />
                         <tnt:NavigationListItem
                             text="{i18n>navSimplefinConnections}"
                             key="SIMPLEFIN_CONNECTIONS"
-                            visible="false"
                         />
                         <tnt:NavigationListItem
                             text="{i18n>navScraperApprovals}"
@@ -275,14 +245,13 @@
             </tnt:SideNavigation>
         </tnt:sideContent>
 
-        <!-- Content Area -->
         <tnt:mainContents>
             <mvc:XMLView
                 viewName="com.financialplanner.shell.view.Welcome"
                 visible="{shellView>/welcomeVisible}"
             />
             <Page
-                id="appContent"
+                id="idAppContentPage"
                 showHeader="false"
                 visible="{= !${shellView>/welcomeVisible}}"
             />

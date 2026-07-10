@@ -1,0 +1,13 @@
+{
+  "name": "com.financialplanner.shared",
+  "version": "1.0.0",
+  "private": true,
+  "devDependencies": {
+    "ui5-tooling-transpile": "^3.11.3"
+  },
+  "ui5": {
+    "dependencies": [
+      "ui5-tooling-transpile"
+    ]
+  }
+}

@@ -10,21 +10,33 @@ const config: Config = {
   },
   coverageDirectory: "coverage/",
   coveragePathIgnorePatterns: [
-    "**/node_modules/**",
-    "**/@cds-models/**",
-    "**/gen/**",
-    "**/*Facade.ts",
+    "/node_modules/",
+    "/@cds-models/",
+    "/gen/",
+    "Facade\\.ts$",
   ],
   coverageThreshold: {
     global: {
       lines: 85,
       branches: 80,
     },
-    "./srv/modules/**/Validator.ts": {
+    "./srv/modules/**/*Validator.ts": {
       lines: 100,
       branches: 100,
     },
-    "./srv/util/**/*.ts": {
+    "./srv/modules/**/*Service.ts": {
+      lines: 90,
+      branches: 85,
+    },
+    "./srv/modules/shared/encryptionUtility.ts": {
+      lines: 100,
+      branches: 100,
+    },
+    "./srv/modules/shared/dateTimeUtility.ts": {
+      lines: 100,
+      branches: 100,
+    },
+    "./srv/modules/shared/currencyUtility.ts": {
       lines: 100,
       branches: 100,
     },

@@ -1,6 +1,5 @@
 using AdminService as svc from '../../../srv/admin-service';
 
-// ─── CSV Format Config ─────────────────────────────────────────────────────
 annotate svc.CsvFormatConfigs with @UI: {
   HeaderInfo             : {
     TypeName      : '{i18n>CsvFormatConfig}',
@@ -90,8 +89,6 @@ annotate svc.CsvFormatConfigs with @UI: {
     }
   ]
 };
-
-// ─── Field Labels & Hidden Fields ──────────────────────────────────────────
 
 annotate svc.CsvFormatConfigs with {
   ID                @UI.Hidden;

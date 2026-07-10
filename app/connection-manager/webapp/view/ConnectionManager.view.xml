@@ -1,0 +1,115 @@
+<mvc:View
+    controllerName="com.financialplanner.connectionmanager.controller.ConnectionManager"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:macros="sap.fe.macros"
+    xmlns:mtable="sap.fe.macros.table"
+    displayBlock="true"
+>
+    <Page
+        id="idConnectionManagerPage"
+        title="{i18n>pageTitle}"
+        class="sapUiContentPadding"
+    >
+        <content>
+            <macros:Table
+                id="idConnectionsTable"
+                contextPath="/ProviderConnections"
+                metaPath="@com.sap.vocabularies.UI.v1.LineItem"
+                selectionMode="Single"
+                selectionChange=".onTableConnectionSelectionChange"
+                header="{i18n>connectionsTitle}"
+            >
+                <macros:actions>
+                    <mtable:Action
+                        key="addConnection"
+                        text="{i18n>addConnection}"
+                        press=".onActionAddConnectionPress"
+                    />
+                    <mtable:Action
+                        key="syncNow"
+                        text="{i18n>syncNow}"
+                        press=".onActionSyncNowPress"
+                        requiresSelection="true"
+                    />
+                    <mtable:Action
+                        key="reauthenticate"
+                        text="{i18n>reauthenticate}"
+                        press=".onActionReauthenticatePress"
+                        requiresSelection="true"
+                    />
+                </macros:actions>
+                <macros:columns>
+                    <mtable:Column
+                        key="statusColumn"
+                        header="{i18n>colStatus}"
+                        width="12rem"
+                    >
+                        <ObjectStatus
+                            core:require="{ formatter: 'com/financialplanner/connectionmanager/model/formatter' }"
+                            text="{ path: 'lastSyncStatus', formatter: 'formatter.formatStatusText' }"
+                            state="{ path: 'lastSyncStatus', formatter: 'formatter.formatStatusState' }"
+                            icon="{ path: 'lastSyncStatus', formatter: 'formatter.formatStatusIcon' }"
+                        />
+                    </mtable:Column>
+                    <mtable:Column
+                        key="activeColumn"
+                        header="{i18n>colActive}"
+                        width="6rem"
+                        horizontalAlign="Center"
+                    >
+                        <Switch
+                            state="{isActive}"
+                            change=".onSwitchActiveChange"
+                        />
+                    </mtable:Column>
+                </macros:columns>
+            </macros:Table>
+
+            <macros:Table
+                id="idAccountsTable"
+                contextPath="/ProviderConnections/accounts"
+                metaPath="@com.sap.vocabularies.UI.v1.LineItem"
+                selectionMode="None"
+                header="{i18n>accountsTitle}"
+                visible="{ui>/hasSelection}"
+            >
+                <macros:columns>
+                    <mtable:Column
+                        key="cardColumn"
+                        header="{i18n>colCardInstance}"
+                        width="22rem"
+                    >
+                        <ComboBox
+                            selectedKey="{cardInstance_ID}"
+                            placeholder="{i18n>selectCardPlaceholder}"
+                            change=".onCardInstancesComboBoxMappingChange"
+                            items="{
+                                path: '/CardInstances',
+                                parameters: { $expand: 'marketCard' },
+                                templateShareable: false
+                            }"
+                        >
+                            <core:Item
+                                key="{ID}"
+                                text="{marketCard/name}"
+                            />
+                        </ComboBox>
+                    </mtable:Column>
+                    <mtable:Column
+                        key="accountActiveColumn"
+                        header="{i18n>colAccountActive}"
+                        width="6rem"
+                        horizontalAlign="Center"
+                    >
+                        <Switch
+                            state="{isActive}"
+                            change=".onSwitchActiveChange"
+                        />
+                    </mtable:Column>
+                </macros:columns>
+            </macros:Table>
+        </content>
+    </Page>
+</mvc:View>
