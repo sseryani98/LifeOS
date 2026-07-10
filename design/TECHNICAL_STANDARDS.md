@@ -30,8 +30,8 @@ This document formalizes coding conventions and patterns so all build personas f
 | **Logging**              | Structured JSON, dual output (console + file), dedicated `error.log`, correlation IDs               |
 | **i18n**                 | Three tiers: CDS labels (PascalCase), runtime messages (camelCase.dots), UI5 (camelCase)            |
 | **Encryption**           | AES-256-GCM, env var key, per-field IV, `EncryptionUtility.ts`                                      |
-| **ESLint**               | Enbridge-adapted rules, custom architectural rules, Hungarian notation in UI5                       |
-| **SAPUI5**               | XML views, BaseController, entity-based annotations, `{ViewType}Ext` extensions, Hungarian notation |
+| **ESLint**               | Enbridge-adapted, custom architectural rules; UI5 shares the backend tsRules                        |
+| **SAPUI5**               | XML views, BaseController, entity-based annotations, `{ViewType}Ext` extensions, ES modules (TS)    |
 | **Code review**          | Per-persona checklists for sprint checkpoint meetings                                               |
 | **Development workflow** | Test-driven development — Red-Green-Refactor for all Validators, Services, Utilities                |
 
@@ -73,7 +73,7 @@ One `schema.cds` per domain folder under `db/`:
 | `db/points/schema.cds`       | PointsAdjustment, Redemption                                                                   | 2     |
 | `db/budget/schema.cds`       | BudgetAllocation, RecurrentExpense, Goal, IncomeEntry                                          | 4     |
 | `db/financial/schema.cds`    | FinancialAccount, FinancialSnapshot                                                            | 2     |
-| `db/integration/schema.cds`  | ProviderConnection, ProviderAccount                                                            | 2     |
+| `db/ingestion/schema.cds`    | ProviderConnection, ProviderAccount, ImportLog                                                 | 3     |
 | `db/alerts/schema.cds`       | Alert                                                                                          | 1     |
 | `db/enums.cds`               | All enum type definitions                                                                      | —     |
 
@@ -122,7 +122,7 @@ Each file contains UI, micro-frontend, and side-effect annotations for that enti
 | `module`                     | `Node16` | CAP 8 recommended            |
 | `outDir`                     | `./gen`  | CAP default output           |
 
-Scope: `srv/` and `db/` TypeScript files. `app/` is SAPUI5 JavaScript (not TypeScript).
+Scope: `srv/` and `db/` TypeScript files. **`app/` is now TypeScript too** (D-315, superseding this line) — but with its own per-app `tsconfig.json` + `ui5.yaml` transpile setup (`ui5-tooling-transpile` + `cds-plugin-ui5`), not this root config. See D-315 and §11 for the frontend TypeScript conventions.
 
 ### 4.2 CDS Entity Type Patterns
 
@@ -479,15 +479,15 @@ No raw `crypto` calls outside this utility. All `_enc` field access goes through
 | `jsdoc/require-param-type`          | `off`    | TypeScript handles types         |
 | `jsdoc/require-returns-type`        | `off`    | TypeScript handles types         |
 
-### 10.4 UI5-Specific Rules
+### 10.4 UI5 Frontend Rules
 
-Applied to `app/**/webapp/**/*.js` files:
+Applied to `app/**/*.ts` (D-315). The frontend **shares the backend `tsRules` verbatim** — including `id-length` (min 3), the `jsdoc/*` set, and `no-explicit-any` — diverging only in two spots: browser globals (`window`, `document`, `Intl` as `readonly`) and `jsdoc/require-jsdoc` `checkConstructors: false` (UI5's generated control constructors are boilerplate). The custom UI5 rules below are **pre-migration and no longer active** — Hungarian notation is dropped and modules use ES `import`/`export`, not `sap.ui.define`:
 
 | Rule                     | Severity | Notes                                                           |
 | ------------------------ | -------- | --------------------------------------------------------------- |
 | `hungarian-notation`     | `warn`   | `sName`, `oModel`, `aItems`, `bIsValid`, `iCount`, `fnCallback` |
 | `event-handler-naming`   | `error`  | `on` prefix: `onPressSubmit`, `onSelectCard`                    |
-| `controller-file-naming` | `error`  | Extensions: `*Ext.controller.js`                                |
+| `controller-file-naming` | `error`  | Extensions: `*Ext.controller.ts`                                |
 | `max-lines-per-function` | `warn`   | 50 lines (excludes `sap.ui.define` callbacks)                   |
 | `max-params`             | `warn`   | 4 (excludes `sap.ui.define` callbacks)                          |
 | `max-dependencies`       | `warn`   | 10 imports per `sap.ui.define` call                             |
@@ -510,29 +510,29 @@ Applied to `app/**/webapp/**/*.js` files:
 
 ## 11. SAPUI5 Conventions
 
-**Decision D-72.**
+**Decision D-72** — but **substantially superseded by D-315 (Frontend TypeScript Migration).** `app/` is now TypeScript: all filenames below are `.ts` not `.js` (`BaseController.ts`, `{PageName}.controller.ts`, `{ViewType}Ext.controller.ts`, `VizFrameCard.ts`); modules use ES `import`/`export default class` not `sap.ui.define`; **every UI5 class needs a `@namespace` JSDoc** tag (else the transpiler emits a native class UI5 can't instantiate); and **Hungarian notation is dropped** (the type is in the signature). See D-315 for the toolchain (`ui5-tooling-transpile` + `cds-plugin-ui5`). The structural conventions (XML views only, BaseController, entity-based annotations, `{ViewType}Ext` extensions, `on`-prefix handlers, `_`-prefix privates) still hold.
 
 ### 11.1 Fiori Elements Apps (8 apps)
 
 | Convention       | Standard                                                                                |
 | ---------------- | --------------------------------------------------------------------------------------- |
 | Customization    | Extensions in `app/{name}/webapp/ext/` only                                             |
-| Extension naming | `{ViewType}Ext` — `ListReportExt.js`, `ObjectPageExt.js`, `FilterBarExt.js`             |
+| Extension naming | `{ViewType}Ext.controller.ts` — `ListReportExt`, `ObjectPageExt`, `FilterBarExt`        |
 | Annotations      | Entity-based files in `app/{name}/annotations/` — e.g., `Transaction.cds`, `Vendor.cds` |
-| `manifest.json`  | Standard Fiori Elements config. No custom Component.js logic.                           |
+| `manifest.json`  | Standard Fiori Elements config. No custom Component.ts logic.                           |
 
 ### 11.2 Freestyle Apps (14 apps — 12 dashboards + 2 wizards)
 
 | Convention         | Standard                                                                     |
 | ------------------ | ---------------------------------------------------------------------------- |
-| Base controller    | All extend `BaseController.js` in `app/shared/`                              |
-| Controller naming  | `{PageName}.controller.js`                                                   |
+| Base controller    | All extend `BaseController.ts` in `app/shared/`                              |
+| Controller naming  | `{PageName}.controller.ts`                                                   |
 | View naming        | `{PageName}.view.xml` — XML views only                                       |
 | Fragment naming    | `{FragmentName}.fragment.xml`                                                |
 | Model access       | Named models: `this.getView().getModel("data")`. OData stays as default.     |
-| Formatter          | `formatter.js` per app for display logic. No inline formatting in XML views. |
+| Formatter          | `formatter.ts` per app for display logic. No inline formatting in XML views. |
 | Event handlers     | `on` prefix: `onPressSubmit`, `onSelectCard`, `onChangeMonth`                |
-| Hungarian notation | Enforced: `sName`, `oModel`, `aItems`, `bIsValid`, `iCount`, `fnCallback`    |
+| Identifier naming  | No Hungarian notation (D-315). Min 3-letter identifiers (`id-length`).       |
 | Private methods    | `_` prefix: `_loadChartData`, `_buildFilterArray`                            |
 
 ### 11.3 Custom Controls
@@ -541,7 +541,7 @@ Applied to `app/**/webapp/**/*.js` files:
 | ------------ | ------------------------------------------------------------------------------- |
 | Location     | `app/shared/controls/`                                                          |
 | Pattern      | Extends `sap.ui.core.Control`. Wraps chart library instance.                    |
-| Naming       | `VizFrameCard.js`, `ApexChartCard.js`                                           |
+| Naming       | `VizFrameCard.ts`, `ApexChartCard.ts`                                           |
 | Data binding | Accepts JSON model path, renders internally. Parent sets data; control renders. |
 | Lifecycle    | `onAfterRendering` initializes chart. `exit` destroys chart instance.           |
 
@@ -549,12 +549,12 @@ Applied to `app/**/webapp/**/*.js` files:
 
 ```
 app/shared/
-├── BaseController.js
+├── BaseController.ts
 ├── controls/
-│   ├── VizFrameCard.js
-│   └── ApexChartCard.js
+│   ├── VizFrameCard.ts
+│   └── ApexChartCard.ts
 └── util/
-    └── formatter.js          ← shared formatters (currency, date, status)
+    └── formatter.ts          ← shared formatters (currency, date, status)
 ```
 
 ---
@@ -575,13 +575,14 @@ Per-persona checklists for the sprint checkpoint meeting. Review personas valida
 
 ### 12.2 Frontend Developer
 
-- [ ] Hungarian notation in all SAPUI5 controllers
+- [ ] `@namespace` JSDoc tag on every UI5 class (else the transpiler emits an uninstantiable native class)
+- [ ] ES `import` / `export default class` syntax — not `sap.ui.define`
+- [ ] No Hungarian notation — plain descriptive names
 - [ ] Event handlers use `on` prefix
-- [ ] XML views only — no JS views
+- [ ] XML views only — no JS/TS views
 - [ ] Annotation files are entity-based in `annotations/` folder
-- [ ] Extensions follow `{ViewType}Ext` naming
-- [ ] `sap.ui.define` dependencies under 10
-- [ ] Formatters in `formatter.js`, not inline in XML
+- [ ] Extensions follow `{ViewType}Ext` naming (`{ViewType}Ext.controller.ts`)
+- [ ] Formatters in `formatter.ts`, not inline in XML
 
 ### 12.3 Security Reviewer
 

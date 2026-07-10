@@ -1,5 +1,5 @@
 ID,issuer_ID,configName,dateColumn,dateFormat,amountColumn,amountSign,debitColumn,creditColumn,descriptionColumn,statusColumn,statusPostedValue,cardmemberColumn,headerRowsSkip,delimiter
 a1b2c3d4-0011-4000-8000-000000000001,a1b2c3d4-0001-4000-8000-000000000004,Scotiabank CSV Export,Date,YYYY-MM-DD,Amount,POSITIVE_IS_DEBIT,,,Description,Status,posted,,1,","
-a1b2c3d4-0011-4000-8000-000000000002,a1b2c3d4-0001-4000-8000-000000000001,TD CSV Export,0,MM/DD/YYYY,,,1,2,0,,,,0,","
-a1b2c3d4-0011-4000-8000-000000000003,a1b2c3d4-0001-4000-8000-000000000003,CIBC CSV Export,0,YYYY-MM-DD,,,1,2,1,,,,0,","
+a1b2c3d4-0011-4000-8000-000000000002,a1b2c3d4-0001-4000-8000-000000000001,TD CSV Export,0,MM/DD/YYYY,,,2,3,1,,,,0,","
+a1b2c3d4-0011-4000-8000-000000000003,a1b2c3d4-0001-4000-8000-000000000003,CIBC CSV Export,0,YYYY-MM-DD,,,2,3,1,,,,0,","
 a1b2c3d4-0011-4000-8000-000000000004,a1b2c3d4-0001-4000-8000-000000000002,Amex CSV Export,Date,"DD MMM. YYYY",Amount,POSITIVE_IS_DEBIT,,,Description,,,Cardmember,12,","

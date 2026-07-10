@@ -1,6 +1,5 @@
 using AdminService as svc from '../../../srv/admin-service';
 
-// ─── Budget Allocation ─────────────────────────────────────────────────────
 annotate svc.BudgetAllocations with @UI: {
   HeaderInfo         : {
     TypeName      : '{i18n>BudgetAllocation}',
@@ -55,8 +54,6 @@ annotate svc.BudgetAllocations with @UI: {
     Target: '@UI.FieldGroup#General'
   }]
 };
-
-// ─── Field Labels & Hidden Fields ──────────────────────────────────────────
 
 annotate svc.BudgetAllocations with {
   ID               @UI.Hidden;

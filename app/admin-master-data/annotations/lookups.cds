@@ -1,6 +1,5 @@
 using AdminService as svc from '../../../srv/admin-service';
 
-// ─── Financial Account Type ────────────────────────────────────────────────
 annotate svc.FinancialAccountTypes with @UI: {
   HeaderInfo         : {
     TypeName      : '{i18n>FinancialAccountType}',
@@ -39,7 +38,6 @@ annotate svc.FinancialAccountTypes with @UI: {
   }]
 };
 
-// ─── Income Source Type ────────────────────────────────────────────────────
 annotate svc.IncomeSourceTypes with @UI: {
   HeaderInfo         : {
     TypeName      : '{i18n>IncomeSourceType}',
@@ -66,7 +64,6 @@ annotate svc.IncomeSourceTypes with @UI: {
   }]
 };
 
-// ─── Perk Type ─────────────────────────────────────────────────────────────
 annotate svc.PerkTypes with @UI: {
   HeaderInfo         : {
     TypeName      : '{i18n>PerkType}',
@@ -93,7 +90,6 @@ annotate svc.PerkTypes with @UI: {
   }]
 };
 
-// ─── Adjustment Type ───────────────────────────────────────────────────────
 annotate svc.AdjustmentTypes with @UI: {
   HeaderInfo         : {
     TypeName      : '{i18n>AdjustmentType}',
@@ -120,7 +116,6 @@ annotate svc.AdjustmentTypes with @UI: {
   }]
 };
 
-// ─── Redemption Type ───────────────────────────────────────────────────────
 annotate svc.RedemptionTypes with @UI: {
   HeaderInfo         : {
     TypeName      : '{i18n>RedemptionType}',
@@ -147,7 +142,6 @@ annotate svc.RedemptionTypes with @UI: {
   }]
 };
 
-// ─── Alert Type (read-only) ────────────────────────────────────────────────
 annotate svc.AlertTypes with @UI: {
   HeaderInfo         : {
     TypeName      : '{i18n>AlertType}',
@@ -168,7 +162,6 @@ annotate svc.AlertTypes with @UI: {
   }]
 };
 
-// ─── Alert Severity (read-only) ────────────────────────────────────────────
 annotate svc.AlertSeverities with @UI: {
   HeaderInfo         : {
     TypeName      : '{i18n>AlertSeverity}',
@@ -189,7 +182,6 @@ annotate svc.AlertSeverities with @UI: {
   }]
 };
 
-// ─── Pattern Source (read-only) ────────────────────────────────────────────
 annotate svc.PatternSources with @UI: {
   HeaderInfo         : {
     TypeName      : '{i18n>PatternSource}',
@@ -210,7 +202,6 @@ annotate svc.PatternSources with @UI: {
   }]
 };
 
-// ─── Confidence Level (read-only) ──────────────────────────────────────────
 annotate svc.ConfidenceLevels with @UI: {
   HeaderInfo         : {
     TypeName      : '{i18n>ConfidenceLevel}',
@@ -231,7 +222,6 @@ annotate svc.ConfidenceLevels with @UI: {
   }]
 };
 
-// ─── Scrape Mapping ────────────────────────────────────────────────────────
 annotate svc.ScrapeMappings with @UI: {
   HeaderInfo         : {
     TypeName      : '{i18n>ScrapeMapping}',
@@ -275,8 +265,6 @@ annotate svc.ScrapeMappings with @UI: {
     Target: '@UI.FieldGroup#General'
   }]
 };
-
-// ─── Field Labels & Hidden Fields ──────────────────────────────────────────
 
 annotate svc.FinancialAccountTypes with {
   ID         @UI.Hidden;

@@ -1,60 +1,49 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Financial Planner</title>
 
-    <!-- DM Sans — custom brand font loaded before SAPUI5 bootstrap -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap"
-      rel="stylesheet"
-    />
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Financial Planner</title>
 
-    <!-- SAPUI5 Bootstrap — loads sap_horizon from CDN -->
-    <script
-      id="sap-ui-bootstrap"
-      src="https://ui5.sap.com/1.136.16/resources/sap-ui-core.js"
-      data-sap-ui-theme="sap_horizon"
-      data-sap-ui-compatVersion="edge"
-      data-sap-ui-async="true"
-      data-sap-ui-resourceroots='{
+  <!-- DM Sans — custom brand font loaded before SAPUI5 bootstrap -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap"
+    rel="stylesheet" />
+
+  <script id="sap-ui-bootstrap" src="https://ui5.sap.com/1.136.16/resources/sap-ui-core.js"
+    data-sap-ui-theme="sap_horizon" data-sap-ui-compatVersion="edge" data-sap-ui-async="true" data-sap-ui-resourceroots='{
       "com.financialplanner.shell": "./shell/",
       "com.financialplanner.shared": "./shared/",
-      "com.financialplanner.adminmasterdata": "./admin-master-data/webapp/"
-    }'
-      data-sap-ui-xx-cssVariables="true"
-      data-sap-ui-libs="sap.m, sap.tnt, sap.f, sap.ui.layout, sap.uxap"
-      data-sap-ui-oninit="module:sap/ui/core/ComponentSupport"
-    ></script>
+      "com.financialplanner.adminmasterdata": "./admin-master-data/webapp/",
+      "com.financialplanner.connectionmanager": "./connection-manager/webapp/",
+      "com.financialplanner.csvimportwizard": "./csv-import-wizard/webapp/"
+    }' data-sap-ui-xx-cssVariables="true" data-sap-ui-libs="sap.m, sap.tnt, sap.f, sap.ui.layout, sap.uxap"
+    data-sap-ui-oninit="module:sap/ui/core/ComponentSupport"></script>
 
-    <style>
-      html,
-      body {
-        height: 100%;
-        margin: 0;
-        padding: 0;
-      }
+  <style>
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
 
-      body {
-        overflow: hidden;
-      }
+    body {
+      overflow: hidden;
+    }
 
-      #content {
-        height: 100%;
-      }
-    </style>
-  </head>
+    #content {
+      height: 100%;
+    }
+  </style>
+</head>
 
-  <body class="sapUiBody sapUiSizeCompact" id="content">
-    <div
-      data-sap-ui-component
-      data-name="com.financialplanner.shell"
-      data-id="shellContainer"
-      data-settings='{ "id": "shell" }'
-      style="height: 100%"
-    ></div>
-  </body>
+<body class="sapUiBody sapUiSizeCompact" id="content">
+  <div data-sap-ui-component data-name="com.financialplanner.shell" data-id="shellContainer"
+    data-settings='{ "id": "shell" }' style="height: 100%"></div>
+</body>
+
 </html>

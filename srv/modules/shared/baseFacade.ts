@@ -1,19 +1,22 @@
 import cds from "@sap/cds";
 
+import { TIME } from "./constants.js";
 import { Logger } from "./logger.js";
-
-const MS_PER_SECOND = 1000;
 
 /**
  * Base class for all Facade modules.
  * Facades register CDS event handlers and delegate to Service classes.
- * No business logic allowed — enforced by ESLint rules.
+ * No business logic allowed.
  */
 export class BaseFacade {
   protected readonly logger: Logger;
   protected readonly srv: cds.ApplicationService;
 
-  /** Creates a new Facade instance tied to a CDS service. */
+  /**
+   * Creates a new Facade instance tied to a CDS service.
+   * @param srv - The CDS application service this facade registers handlers on
+   * @param moduleName - Namespace used to tag this facade's log entries
+   */
   constructor(srv: cds.ApplicationService, moduleName: string) {
     this.srv = srv;
     this.logger = new Logger(moduleName);
@@ -32,6 +35,7 @@ export class BaseFacade {
    * @param event - Event name for logging context (e.g., 'before-CREATE')
    * @param entity - Entity name for logging context
    * @param errorKey - i18n key for error messages
+   * @returns The wrapped handler that logs entry/exit and rejects on failure
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   wrapHandler<T extends (...args: any[]) => any>(
@@ -54,7 +58,7 @@ export class BaseFacade {
       try {
         const result = await handler(...args);
         this.logger.info("EXIT", `${event} ${entity}`, {
-          duration_s: (Date.now() - startTime) / MS_PER_SECOND,
+          duration_s: (Date.now() - startTime) / TIME.MS_PER_SECOND,
         });
         return result;
       } catch (error: unknown) {
@@ -64,7 +68,7 @@ export class BaseFacade {
           event,
           entity,
           error: errorMessage,
-          duration_s: (Date.now() - startTime) / MS_PER_SECOND,
+          duration_s: (Date.now() - startTime) / TIME.MS_PER_SECOND,
         });
         throw req.reject(500, errorKey);
       }

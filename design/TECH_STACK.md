@@ -153,7 +153,7 @@ financial-planner/
 │   ├── points/schema.cds                    ← PointsAdjustment, Redemption
 │   ├── budget/schema.cds                    ← BudgetAllocation, RecurrentExpense, Goal, IncomeEntry
 │   ├── financial/schema.cds                 ← FinancialAccount, FinancialSnapshot
-│   ├── integration/schema.cds               ← ProviderConnection, ProviderAccount
+│   ├── ingestion/schema.cds                 ← ProviderConnection, ProviderAccount, ImportLog
 │   ├── alerts/schema.cds                    ← Alert
 │   └── seed/                                ← CSV seed data for CNV-002
 ├── srv/
@@ -209,21 +209,21 @@ financial-planner/
 │       └── CurrencyUtility.ts
 ├── app/
 │   ├── shared/                              ← Shared across freestyle apps
-│   │   ├── BaseController.js
+│   │   ├── BaseController.ts
 │   │   ├── controls/
-│   │   │   ├── VizFrameCard.js
-│   │   │   └── ApexChartCard.js
+│   │   │   ├── VizFrameCard.ts
+│   │   │   └── ApexChartCard.ts
 │   │   └── util/
-│   │       └── formatter.js                 ← Shared formatters (currency, date, status)
+│   │       └── formatter.ts                 ← Shared formatters (currency, date, status)
 │   ├── transactions/                        ← FRM-001 (Fiori Elements List Report)
 │   │   ├── webapp/
 │   │   │   ├── manifest.json
-│   │   │   ├── Component.js
+│   │   │   ├── Component.ts
 │   │   │   ├── i18n/
 │   │   │   │   └── i18n.properties          ← UI5 messages (camelCase)
 │   │   │   └── ext/
-│   │   │       ├── ListReportExt.js
-│   │   │       └── ObjectPageExt.js
+│   │   │       ├── ListReportExt.controller.ts
+│   │   │       └── ObjectPageExt.controller.ts
 │   │   └── annotations/
 │   │       ├── Transaction.cds              ← Entity-based annotations
 │   │       └── Vendor.cds
@@ -338,7 +338,7 @@ Docker deferred to future cloud deployment.
 | 1   | **Backend Developer**         | `db/`, `srv/`                | CDS models, service definitions, TypeScript handlers, Facade → Service → Validator pattern, ENH engines, utilities, i18n (CDS labels + runtime messages).  |
 | 2   | **Frontend Developer**        | `app/`                       | Fiori Elements apps (annotations, manifest.json, extensions) AND freestyle SAPUI5 (views, controllers, VizFrame/ApexCharts dashboards, wizards). UI5 i18n. |
 | 3   | **Project Manager**           | Sprint board, sprint reports | Tracks progress against 43 FRICEW objects across 4 waves. Manages backlog, sprint planning, sprint reviews. Flags scope creep and dependency blockers.     |
-| 4   | **Integration Specialist**    | `srv/modules/integration/`   | SimpleFIN API client (INT-001), CSV parsing (INT-002), web scraping (INT-003), dedup (ENH-008), scheduling, external system error handling.                |
+| 4   | **Integration Specialist**    | `srv/modules/ingestion/`   | SimpleFIN API client (INT-001), CSV parsing (INT-002), web scraping (INT-003), dedup (ENH-008), scheduling, external system error handling.                |
 | 5   | **Test Captain**              | `test/`                      | Unit tests for services, OData integration tests, test data setup, edge case coverage from functional specs, test strategy enforcement.                    |
 | 6   | **Documentation Guardian**    | `design/`, `CLAUDE.md`       | Single source of truth enforcement. No duplication, no conflicting information. Updates change history on evolving documents. Validates cross-references.  |
 | 7   | **Security Reviewer**         | Cross-cutting                | Encryption implementation (OI-07), credential handling, code audits for vulnerabilities, no sensitive data in logs/OData responses, OWASP basics.          |

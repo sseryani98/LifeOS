@@ -1,0 +1,80 @@
+{
+  "_version": "2.0.0",
+  "sap.app": {
+    "id": "com.financialplanner.connectionmanager",
+    "type": "application",
+    "title": "{{appTitle}}",
+    "description": "{{appDescription}}",
+    "applicationVersion": {
+      "version": "1.0.0"
+    },
+    "dataSources": {
+      "AdminService": {
+        "uri": "/service/adminSvcs/",
+        "type": "OData",
+        "settings": {
+          "odataVersion": "4.0"
+        }
+      }
+    }
+  },
+  "sap.ui5": {
+    "dependencies": {
+      "minUI5Version": "1.136.16",
+      "libs": {
+        "sap.m": {},
+        "sap.ui.core": {},
+        "sap.fe.core": {},
+        "sap.fe.macros": {}
+      }
+    },
+    "rootView": {
+      "viewName": "sap.fe.core.rootView.NavContainer",
+      "type": "XML",
+      "async": true,
+      "id": "appRootView"
+    },
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "com.financialplanner.connectionmanager.i18n.i18n"
+        }
+      },
+      "": {
+        "dataSource": "AdminService",
+        "preload": true,
+        "settings": {
+          "operationMode": "Server",
+          "autoExpandSelect": true,
+          "groupId": "$auto",
+          "updateGroupId": "$auto",
+          "earlyRequests": true
+        }
+      }
+    },
+    "routing": {
+      "routes": [
+        {
+          "pattern": ":?query:",
+          "name": "ConnectionManager",
+          "target": "ConnectionManager"
+        }
+      ],
+      "targets": {
+        "ConnectionManager": {
+          "type": "Component",
+          "id": "ConnectionManager",
+          "name": "sap.fe.core.fpm",
+          "options": {
+            "settings": {
+              "viewName": "com.financialplanner.connectionmanager.view.ConnectionManager",
+              "contextPath": "/ProviderConnections",
+              "navigation": {}
+            }
+          }
+        }
+      }
+    }
+  }
+}

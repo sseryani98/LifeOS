@@ -1,6 +1,5 @@
 using AdminService as svc from '../../../srv/admin-service';
 
-// ─── Earning Category ──────────────────────────────────────────────────────
 annotate svc.EarningCategories with @UI: {
   HeaderInfo         : {
     TypeName      : '{i18n>EarningCategory}',
@@ -26,8 +25,6 @@ annotate svc.EarningCategories with @UI: {
     Target: '@UI.FieldGroup#General'
   }]
 };
-
-// ─── Field Labels & Hidden Fields ──────────────────────────────────────────
 
 annotate svc.EarningCategories with {
   ID         @UI.Hidden;

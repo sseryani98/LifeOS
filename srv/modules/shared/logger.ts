@@ -4,14 +4,7 @@ import { join } from "path";
 
 import cds from "@sap/cds";
 
-/** Valid log entry types for structured logging. */
-type LogType =
-  | "ENTRY"
-  | "EXIT"
-  | "EXTERNAL_CALL"
-  | "STATE_CHANGE"
-  | "BATCH_RESULT"
-  | "ERROR";
+import type { LogType } from "./types.js";
 
 /** Fields that must be redacted before DEBUG-level logging. */
 const SENSITIVE_FIELDS = [
@@ -41,7 +34,10 @@ export class Logger {
   private readonly cdsLogger: ReturnType<typeof cds.log>;
   private correlationId: string;
 
-  /** Creates a logger for the given module namespace. */
+  /**
+   * Creates a logger for the given module namespace.
+   * @param moduleName - Namespace tagged on every entry and passed to cds.log
+   */
   constructor(moduleName: string) {
     this.moduleName = moduleName;
     this.cdsLogger = cds.log(moduleName);
@@ -49,26 +45,44 @@ export class Logger {
     this._ensureLogDir();
   }
 
-  /** Sets the correlation ID from a CDS request. */
+  /**
+   * Sets the correlation ID from a CDS request.
+   * @param requestId - Request-scoped ID that ties log entries to one request
+   */
   setCorrelationId(requestId: string): void {
     this.correlationId = requestId;
   }
 
-  /** Logs an INFO-level structured entry. */
+  /**
+   * Logs an INFO-level structured entry.
+   * @param type - Category of the log event
+   * @param message - Human-readable description of the event
+   * @param data - Optional structured context to attach to the entry
+   */
   info(type: LogType, message: string, data?: Record<string, unknown>): void {
     const entry = this._createEntry("INFO", type, message, data);
     this.cdsLogger.info(JSON.stringify(entry));
     this._writeToFile(APP_LOG, entry);
   }
 
-  /** Logs a WARN-level structured entry. */
+  /**
+   * Logs a WARN-level structured entry.
+   * @param type - Category of the log event
+   * @param message - Human-readable description of the event
+   * @param data - Optional structured context to attach to the entry
+   */
   warn(type: LogType, message: string, data?: Record<string, unknown>): void {
     const entry = this._createEntry("WARN", type, message, data);
     this.cdsLogger.warn(JSON.stringify(entry));
     this._writeToFile(APP_LOG, entry);
   }
 
-  /** Logs an ERROR-level structured entry to both app.log and error.log. */
+  /**
+   * Logs an ERROR-level structured entry to both app.log and error.log.
+   * @param type - Category of the log event
+   * @param message - Human-readable description of the event
+   * @param data - Optional structured context to attach to the entry
+   */
   error(type: LogType, message: string, data?: Record<string, unknown>): void {
     const entry = this._createEntry("ERROR", type, message, data);
     this.cdsLogger.error(JSON.stringify(entry));
@@ -76,7 +90,12 @@ export class Logger {
     this._writeToFile(ERROR_LOG, entry);
   }
 
-  /** Logs a DEBUG-level structured entry. Data is redacted before output. */
+  /**
+   * Logs a DEBUG-level structured entry. Data is redacted before output.
+   * @param type - Category of the log event
+   * @param message - Human-readable description of the event
+   * @param data - Optional structured context, redacted before it is written
+   */
   debug(type: LogType, message: string, data?: Record<string, unknown>): void {
     const redactedData = data ? this._redact(data) : undefined;
     const entry = this._createEntry("DEBUG", type, message, redactedData);
@@ -86,6 +105,11 @@ export class Logger {
 
   /**
    * Creates a structured log entry object.
+   * @param level - Severity label (INFO, WARN, ERROR, DEBUG)
+   * @param type - Category of the log event
+   * @param message - Human-readable description of the event
+   * @param data - Optional structured context to attach to the entry
+   * @returns The assembled log entry with timestamp and correlation metadata
    */
   private _createEntry(
     level: string,
@@ -110,6 +134,8 @@ export class Logger {
   /**
    * Redacts sensitive fields from data before logging.
    * Replaces values of sensitive keys with '[REDACTED]'.
+   * @param data - Structured context that may contain sensitive keys
+   * @returns A deep copy with sensitive values replaced by '[REDACTED]'
    */
   private _redact(data: Record<string, unknown>): Record<string, unknown> {
     const redacted: Record<string, unknown> = {};
@@ -132,7 +158,11 @@ export class Logger {
     }
   }
 
-  /** Appends a JSON log entry to a file. */
+  /**
+   * Appends a JSON log entry to a file.
+   * @param filePath - Absolute path of the log file to append to
+   * @param entry - The structured log entry to serialize and write
+   */
   private _writeToFile(filePath: string, entry: Record<string, unknown>): void {
     try {
       appendFileSync(filePath, `${JSON.stringify(entry)}\n`, "utf-8");
