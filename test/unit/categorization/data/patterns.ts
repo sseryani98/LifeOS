@@ -102,6 +102,117 @@ export const GENERIC_STATION_CONTAINS_PATTERN: MerchantPatternRecord = {
   amount: null,
 };
 
+// ─── Tie-break patterns (chain: confidence → pattern length → vendor count) ───
+/** High-confidence "COFFEE" contains pattern — beats the low one on confidence. */
+export const COFFEE_HIGH_PATTERN: MerchantPatternRecord = {
+  ID: "beefaaaa-0000-0000-0000-000000000008",
+  vendor_ID: "beef0001-0000-0000-0000-000000000009",
+  vendorName: "Coffee High",
+  pattern: "COFFEE",
+  matchType: "contains",
+  confidenceName: "high",
+  amount: null,
+};
+
+/** Low-confidence "COFFEE" contains pattern — loses the confidence tie-break. */
+export const COFFEE_LOW_PATTERN: MerchantPatternRecord = {
+  ID: "beefaaaa-0000-0000-0000-000000000009",
+  vendor_ID: "beef0001-0000-0000-0000-00000000000a",
+  vendorName: "Coffee Low",
+  pattern: "COFFEE",
+  matchType: "contains",
+  confidenceName: "low",
+  amount: null,
+};
+
+/** Short "BOOK" contains pattern — loses the length tie-break to the longer one. */
+export const BOOK_SHORT_PATTERN: MerchantPatternRecord = {
+  ID: "beefaaaa-0000-0000-0000-00000000000b",
+  vendor_ID: "beef0001-0000-0000-0000-00000000000b",
+  vendorName: "Book Short",
+  pattern: "BOOK",
+  matchType: "contains",
+  confidenceName: "medium",
+  amount: null,
+};
+
+/** Long "BOOKSTORE" contains pattern — wins on longer pattern at equal confidence. */
+export const BOOK_LONG_PATTERN: MerchantPatternRecord = {
+  ID: "beefaaaa-0000-0000-0000-00000000000c",
+  vendor_ID: "beef0001-0000-0000-0000-00000000000c",
+  vendorName: "Book Long",
+  pattern: "BOOKSTORE",
+  matchType: "contains",
+  confidenceName: "medium",
+  amount: null,
+};
+
+/** "GYM" contains pattern on a high-count vendor — wins the final count tie-break. */
+export const GYM_BUSY_PATTERN: MerchantPatternRecord = {
+  ID: "beefaaaa-0000-0000-0000-00000000000d",
+  vendor_ID: "beef0001-0000-0000-0000-00000000000d",
+  vendorName: "Gym Busy",
+  pattern: "GYM",
+  matchType: "contains",
+  confidenceName: "medium",
+  amount: null,
+};
+
+/** "GYM" contains pattern on a low-count vendor — loses only on vendor count. */
+export const GYM_QUIET_PATTERN: MerchantPatternRecord = {
+  ID: "beefaaaa-0000-0000-0000-00000000000e",
+  vendor_ID: "beef0001-0000-0000-0000-00000000000e",
+  vendorName: "Gym Quiet",
+  pattern: "GYM",
+  matchType: "contains",
+  confidenceName: "medium",
+  amount: null,
+};
+
+/** "COFFEE" pattern with an unrecognised confidence name — ranks last on confidence. */
+export const COFFEE_UNKNOWN_CONF_PATTERN: MerchantPatternRecord = {
+  ID: "beefaaaa-0000-0000-0000-000000000010",
+  vendor_ID: "beef0001-0000-0000-0000-000000000011",
+  vendorName: "Coffee Unknown",
+  pattern: "COFFEE",
+  matchType: "contains",
+  confidenceName: "unverified",
+  amount: null,
+};
+
+/** "SPA" pattern on a vendor absent from the counts map — used for a full-tie test. */
+export const SPA_FIRST_PATTERN: MerchantPatternRecord = {
+  ID: "beefaaaa-0000-0000-0000-000000000012",
+  vendor_ID: "beef0001-0000-0000-0000-000000000012",
+  vendorName: "Spa First",
+  pattern: "SPA",
+  matchType: "contains",
+  confidenceName: "medium",
+  amount: null,
+};
+
+/** Second "SPA" pattern, also on an uncounted vendor — ties the first entirely. */
+export const SPA_SECOND_PATTERN: MerchantPatternRecord = {
+  ID: "beefaaaa-0000-0000-0000-000000000013",
+  vendor_ID: "beef0001-0000-0000-0000-000000000013",
+  vendorName: "Spa Second",
+  pattern: "SPA",
+  matchType: "contains",
+  confidenceName: "medium",
+  amount: null,
+};
+
+/** Pattern with an unrecognised match type — never matches (defensive fall-through). */
+export const UNKNOWN_MATCHTYPE_PATTERN: MerchantPatternRecord = {
+  ID: "beefaaaa-0000-0000-0000-00000000000f",
+  vendor_ID: "beef0001-0000-0000-0000-00000000000f",
+  vendorName: "Unknown",
+  pattern: "REGEXVENDOR",
+  matchType: "regex",
+  confidenceName: "high",
+  amount: null,
+};
+
 // ─── Category stats (ranked by usage count desc) ──────────────────────────────
 export const NETFLIX_COMBOS: CategoryCombo[] = [
   { purchaseType_ID: SUBSCRIPTIONS_PT, earningCategory_ID: STREAMING_EC, usageCount: 12 },
@@ -128,6 +239,8 @@ export const VENDOR_COUNTS = new Map<string, number>([
   [NETFLIX_VENDOR_ID, 12],
   [AMAZON_VENDOR_ID, 10],
   [YOUTUBE_VENDOR_ID, 4],
+  ["beef0001-0000-0000-0000-00000000000d", 30],
+  ["beef0001-0000-0000-0000-00000000000e", 2],
 ]);
 
 // ─── Learned-pattern params (mapper inputs) ───────────────────────────────────
