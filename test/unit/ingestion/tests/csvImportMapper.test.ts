@@ -6,6 +6,7 @@ import {
   DEDUP_POTENTIAL,
   MATCHED_TX_ID,
   PARSED_FIELDS_NEW,
+  SUGGESTION_NONE,
 } from "../../../shared/data/ingestion/csv.js";
 
 describe("CsvImportMapper", () => {
@@ -28,13 +29,19 @@ describe("CsvImportMapper", () => {
   describe("toClassifiedRow", () => {
     /** A new row must carry outcome "new" and a null match id so the wizard files it under the New tab. */
     it("carries the new outcome with no match id", () => {
-      const row = CsvImportMapper.toClassifiedRow(3, PARSED_FIELDS_NEW, DEDUP_NEW);
+      const row = CsvImportMapper.toClassifiedRow(
+        3,
+        PARSED_FIELDS_NEW,
+        DEDUP_NEW,
+        SUGGESTION_NONE,
+      );
 
       expect(row).toMatchObject({
         rowNumber: 3,
         dedupOutcome: "new",
         matchedTransactionId: null,
         amount: -27.67,
+        suggestedVendor_ID: null,
       });
     });
 
@@ -44,6 +51,7 @@ describe("CsvImportMapper", () => {
         5,
         PARSED_FIELDS_NEW,
         DEDUP_POTENTIAL,
+        SUGGESTION_NONE,
       );
 
       expect(row.dedupOutcome).toBe("potential_duplicate");

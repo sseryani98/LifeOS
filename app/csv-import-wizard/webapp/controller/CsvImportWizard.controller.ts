@@ -34,8 +34,7 @@ import type {
 /**
  * CSV Import Wizard controller. Drives the three-step flow: upload + card
  * selection, tabbed review (New / Potential Duplicates / Excluded) with batch
- * categorization, and confirm + save. All backend calls go through
- * CsvImportWizardService; UI state lives in the "ui" JSON model.
+ * categorization, and confirm + save. 
  *
  * @namespace com.financialplanner.csvimportwizard.controller
  */
@@ -405,6 +404,11 @@ export default class CsvImportWizard extends BaseController {
       cardholderName: null,
       dedupOutcome: DEDUP_OUTCOME.NEW,
       matchedTransactionId: null,
+      suggestedVendor_ID: null,
+      suggestedVendorName: null,
+      suggestedPurchaseType_ID: null,
+      suggestedEarningCategory_ID: null,
+      suggestionConfidence: null,
     });
     const remaining = (state.getProperty("/excludedRows") as ExcludedEditRow[]).filter(
       row => row.rowNumber !== excluded.rowNumber,
@@ -504,16 +508,17 @@ export default class CsvImportWizard extends BaseController {
   }
 
   /**
-   * Maps a classified row to a New-tab row with empty categorization.
+   * Maps a classified row to a New-tab row, pre-filling the categorization value
+   * helps from the engine's suggestion for the user to accept or change.
    * @param row the classified row from the parse result
    * @returns the New-tab row
    */
   private _toNewRow(row: ClassifiedRow): NewRow {
     return {
       ...row,
-      vendor_ID: null,
-      purchaseType_ID: null,
-      earningCategory_ID: null,
+      vendor_ID: row.suggestedVendor_ID,
+      purchaseType_ID: row.suggestedPurchaseType_ID,
+      earningCategory_ID: row.suggestedEarningCategory_ID,
       cleared: false,
     };
   }
