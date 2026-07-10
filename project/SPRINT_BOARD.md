@@ -1,33 +1,44 @@
 # Sprint Board
 
-## Current Sprint: W1-S2 — Ingestion Pipeline
+## Current Sprint: W1-S3 — Transaction Processing
 
-**Branch:** sprint/W1-S2
-**Goal:** Transactions flow from SimpleFIN and CSV into the system. Connection health visible.
+**Branch:** sprint/W1-S3
+**Goal:** Transactions categorized, splits supported, historical data backfilled.
+**Sync point:** #4 — Categorization engine trained
 
 ### Backlog
 
-_None_
+| Story | Type | Description | Status |
+| --- | --- | --- | --- |
+| ENH-009 | Enhancement | Split logic: TransactionSplit with mySharePct/myShareAmount. Budget uses myShareAmount, churning uses parent Transaction.amount. splitTransaction action + validation (enter %/$ not both, sum, recurring suggestion). | Backlog |
+| FRM-001 | Form | Transaction List: Fiori Elements List Report + Object Page — inline edit (vendor/PT/EC/notes), Split dialog, Apply Categories bulk, Re-categorize action, splits section, filters. | Backlog |
+| CNV-001 | Conversion | Historical backfill: BackfillService orchestration (parse via INT-002 → ENH-008 dedup → ENH-001 categorize → ImportLog), purchases-only + date-cutoff filters, halt-on-parse-error, supp-card attribution. Scenario test. | Backlog |
 
 ### In Progress
 
-_None_
+| Story | Type | Description | Status |
+| --- | --- | --- | --- |
+| ENH-001 | Enhancement | Categorization engine: three-pass matching pipeline (exact → starts-with → contains, fuse.js fuzzy fallback) returning vendor + dual taxonomy; user correction auto-creates MerchantPattern (learning). MerchantPattern entity + VendorCategoryStats CDS view. Wires deferred FRM-003 fuzzy pre-fill. | In Progress |
 
 ### Done
 
-| Story | Type | Description | Status |
-| --- | --- | --- | --- |
-| FRM-003 | Form | CSV Import Wizard: 3-step freestyle `sap.m.Wizard` (TypeScript) on TransactionService. Step 1 drag-drop + picker (multi-file, same-card), non-closed card selector, blocks when no format config resolves. Step 2 tabbed review (New / Potential Duplicates / Excluded) with badge counts, per-row edit + categorization value helps, Clear/propagate/Clear-Matching/Undo, multi-select apply, running totals + progress, side-by-side duplicate skip/import, Excluded field-edit → move to New. Step 3 confirm + save → post-import summary. Backend: new `saveCsvImport` action (4-file handler + mapper, TDD), Import Log entity, Vendor entity + Transaction vendor/purchaseType/earningCategory FKs. Registered in shell nav. Playwright-verified end-to-end. | Done |
-
-**FRM-003 scope decisions (Sandro):** (1) Added the Vendor entity + Transaction categorization FKs now (aligning the CDS with the documented data model) so categorization persists — rather than deferring the New-tab category columns. (2) Included multi-file same-card upload. (3) Deferred to a later story: ENH-001 fuzzy auto-suggestion pre-fill and the earning-yield computation — the category columns are manual value helps (with on-the-fly Vendor/Earning-Category creation) and the Earning Yield column shows a placeholder until ENH-001 lands.
-| INT-002 | Integration | CSV parsing engine: 4-layer engine + field parser + mapper, per-issuer format config resolution (Scotia/TD/CIBC/Amex), single & split debit/credit amounts, header-name & index columns, status filter, supp-card attribution, ENH-008 dedup classification, parseCsvImport action. Fixed TD/CIBC seed off-by-one (D-003). | Done |
-| ENH-008 | Enhancement | Deduplication engine: evaluate() returns new/duplicate/potential_duplicate per SPEC-01 §4.3 | Done |
-| INT-001 | Integration | SimpleFIN Bridge sync: 4-layer engine, ENH-008 dedup, node-cron scheduling, encrypted access URL, retry/backoff, connection_error/stale_data/unmapped_account alerts, null-card backfill | Done |
-| FRM-010 | Form | Connection Manager: freestyle health page — status ObjectStatus colours, manual Sync Now, Add Connection (claim setup token), Re-authenticate, account→card mapping | Done |
+_None yet_
 
 ---
 
-## Previous Sprint: W1-S1 — Foundation & Seed Data (merged 0a9804f, tagged v1.1)
+## Previous Sprint: W1-S2 — Ingestion Pipeline (merged 9bbe826, tagged v1.2)
+
+| Story | Type | Description | Status |
+| --- | --- | --- | --- |
+| INT-001 | Integration | SimpleFIN Bridge sync: 4-layer engine, ENH-008 dedup, node-cron scheduling, encrypted access URL, retry/backoff, connection_error/stale_data/unmapped_account alerts, null-card backfill | Done |
+| INT-002 | Integration | CSV parsing engine: 4-layer engine + field parser + mapper, per-issuer format config resolution (Scotia/TD/CIBC/Amex), dedup classification, parseCsvImport action | Done |
+| ENH-008 | Enhancement | Deduplication engine: evaluate() returns new/duplicate/potential_duplicate per SPEC-01 §4.3 | Done |
+| FRM-003 | Form | CSV Import Wizard: 3-step freestyle wizard, tabbed review, saveCsvImport action, Import Log + Vendor entity + Transaction categorization FKs | Done |
+| FRM-010 | Form | Connection Manager: freestyle health page, manual Sync Now, Add Connection, Re-authenticate, account→card mapping | Done |
+
+---
+
+## W1-S1 — Foundation & Seed Data (merged 0a9804f, tagged v1.1)
 
 | Story | Type | Description | Status |
 | --- | --- | --- | --- |
