@@ -8,11 +8,15 @@ import { CsvImportSaveService } from "./modules/ingestion/csvImportSaveService.j
 import { CsvImportService } from "./modules/ingestion/csvImportService.js";
 import { DeduplicationDataService } from "./modules/ingestion/deduplicationDataService.js";
 import { DeduplicationService } from "./modules/ingestion/deduplicationService.js";
+import { TransactionDataService } from "./modules/transaction/transactionDataService.js";
+import { TransactionFacade } from "./modules/transaction/transactionFacade.js";
+import { TransactionService as TransactionEngine } from "./modules/transaction/transactionService.js";
 
-/** TransactionService — Transaction ingestion, categorization, and listing. */
+/** TransactionService — Transaction ingestion, categorization, splitting, listing. */
 export default class TransactionService extends cds.ApplicationService {
   /**
-   * Wires the CSV import parse/save actions with categorization pre-fill.
+   * Wires the CSV import parse/save actions and the split / categorization
+   * actions, sharing one categorization engine for pre-fill and learning.
    * @returns Resolves once handlers are registered and base init completes.
    */
   async init(): Promise<void> {
@@ -30,6 +34,13 @@ export default class TransactionService extends cds.ApplicationService {
       this,
       csvImportService,
       csvImportSaveService,
+    ).registerHandlers();
+    new TransactionFacade(
+      this,
+      new TransactionEngine(
+        new TransactionDataService(),
+        categorizationService,
+      ),
     ).registerHandlers();
     return super.init();
   }

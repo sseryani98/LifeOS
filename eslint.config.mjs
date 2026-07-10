@@ -22,7 +22,7 @@ const idLength = [
 // appears — a lint failure here means "rename to start with a verb", not "add noise".
 const VERB_PREFIXES = [
   "get", "set", "is", "has", "can", "should", "will", "did",
-  "on", "handle", "wrap",
+  "on", "handle", "wrap", "round",
   "init", "exit", "destroy", "render",
   "create", "read", "update", "delete", "remove", "add", "insert",
   "save", "load", "reload", "fetch", "find", "list", "count", "exists",

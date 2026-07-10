@@ -10,4 +10,10 @@ describe("CurrencyUtility", () => {
   it("formats zero", () => {
     expect(CurrencyUtility.formatCAD(0)).toBe("$0.00");
   });
+
+  /** Split shares multiply a percentage by an amount; rounding to cents must clear binary-float drift so stored money reconciles exactly. */
+  it("rounds a percentage product to whole cents", () => {
+    expect(CurrencyUtility.roundToCents(110 * 0.2)).toBe(22);
+    expect(CurrencyUtility.roundToCents(85 * 0.3333)).toBe(28.33);
+  });
 });
