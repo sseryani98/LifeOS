@@ -13,7 +13,7 @@
     "test": "jest --json --outputFile=coverage/test-results.json --coverage",
     "posttest": "tsx scripts/generateTestReport.ts",
     "generate-key": "tsx scripts/generateKey.ts",
-    "lint": "eslint srv/ app/ scripts/ && npm run lint:ui5 && npm run lint:i18n && npm run lint:annotations && npm run lint:filenames && npm run lint:tracking-ids && npm run lint:default-attrs && npm run lint:test-data && npm run lint:test-structure && npm run lint:test-cql && npm run lint:grouped-constants && npm run lint:frontend-constants && npm run lint:domain-types && npm run lint:comment-length && npm run lint:mapper-methods && npm run lint:messaging && npm run lint:frontend-data-access && npm run lint:control-ids && npm run lint:event-handlers",
+    "lint": "eslint srv/ app/ scripts/ && npm run lint:ui5 && npm run lint:i18n && npm run lint:annotations && npm run lint:filenames && npm run lint:tracking-ids && npm run lint:default-attrs && npm run lint:test-data && npm run lint:test-structure && npm run lint:test-cql && npm run lint:grouped-constants && npm run lint:frontend-constants && npm run lint:domain-types && npm run lint:comment-length && npm run lint:mapper-methods && npm run lint:messaging && npm run lint:frontend-data-access && npm run lint:control-ids && npm run lint:event-handlers && npm run lint:handler-event-types",
     "lint:ui5": "cd app/admin-master-data && ui5lint",
     "lint:i18n": "tsx scripts/lintI18n.ts",
     "lint:annotations": "tsx scripts/lintAnnotations.ts",
@@ -31,7 +31,8 @@
     "lint:messaging": "tsx scripts/lintMessaging.ts",
     "lint:frontend-data-access": "tsx scripts/lintFrontendDataAccess.ts",
     "lint:control-ids": "tsx scripts/lintControlIds.ts",
-    "lint:event-handlers": "tsx scripts/lintEventHandlers.ts"
+    "lint:event-handlers": "tsx scripts/lintEventHandlers.ts",
+    "lint:handler-event-types": "tsx scripts/lintHandlerEventTypes.ts"
   },
   "dependencies": {
     "@cap-js/postgres": "^2",
@@ -73,6 +74,8 @@
   },
   "ui5": {
     "ui5linter": {
+      "idNamingPattern": "",
+      "eventNamingPattern": "",
       "usage": {
         "WrongNamespaceLinter": false
       },

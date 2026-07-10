@@ -4,11 +4,11 @@ import { join, relative } from "path";
 const ROOT_DIR = process.cwd();
 
 /**
- * Backend TypeScript is the only surface the constants-grouping convention
- * governs. UI5 (app/) is JavaScript with its own idioms; scripts/ and test/
- * are tooling/fixtures where loose top-level constants are expected.
+ * Both product TypeScript surfaces the constants-grouping convention governs:
+ * srv/ and app/ (UI5, now strict TS). scripts/ and test/ are tooling/fixtures
+ * where loose top-level constants are expected.
  */
-const SOURCE_DIRS = [join(ROOT_DIR, "srv")];
+const SOURCE_DIRS = [join(ROOT_DIR, "srv"), join(ROOT_DIR, "app")];
 
 const SKIP_SEGMENTS = new Set([
   "node_modules",
@@ -31,6 +31,13 @@ const GROUP_THRESHOLD = 3;
  * initializer so its kind can be classified.
  */
 const CONST_DECL = /^(?:export\s+)?const\s+([A-Z][A-Z0-9_]*)\b\s*(?::[^=]+)?=\s*(.+)$/;
+
+/**
+ * A class declaration anywhere in the file — used with the model/ path check to
+ * exempt a UI5 app's `model/{App}Service.ts`, whose loose OData action-path
+ * constants (`"/parseCsvImport(...)"`) are the documented carve-out.
+ */
+const CLASS_DECL = /^(?:export\s+)?(?:default\s+)?(?:abstract\s+)?class\s/m;
 
 interface LooseConst {
   name: string;
@@ -86,8 +93,12 @@ function collectFiles(dir: string): string[] {
  * @returns A single violation when the file is over threshold, else null.
  */
 function scanFile(filePath: string): Violation | null {
+  const source = readFileSync(filePath, "utf8");
+  const isModelClass =
+    /[/\\]model[/\\]/.test(filePath) && CLASS_DECL.test(source);
+  if (isModelClass) return null;
   const loose: LooseConst[] = [];
-  const lines = readFileSync(filePath, "utf8").split(/\r?\n/);
+  const lines = source.split(/\r?\n/);
   lines.forEach((text, index) => {
     const match = CONST_DECL.exec(text);
     if (match && isGroupableLiteral(match[2])) {
@@ -110,7 +121,7 @@ function main(): void {
     .filter((violation): violation is Violation => violation !== null);
 
   console.log(
-    `Scanning ${files.length} backend file(s) for ungrouped constants...`,
+    `Scanning ${files.length} TypeScript file(s) for ungrouped constants...`,
   );
 
   if (violations.length === 0) {

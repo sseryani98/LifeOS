@@ -219,6 +219,63 @@ export interface CsvValidationError {
   messageKey: string;
 }
 
+/**
+ * One reviewed row the wizard sends to saveCsvImport — a cleared New row or an
+ * overridden potential duplicate. Categorization ids are null when the user
+ * imported the row uncategorized.
+ */
+export interface CsvSaveRow {
+  postedAt: string;
+  amount: number;
+  rawDescription: string;
+  cardInstance_ID?: string | null;
+  vendor_ID?: string | null;
+  purchaseType_ID?: string | null;
+  earningCategory_ID?: string | null;
+}
+
+/** Inputs for a CSV save request (wizard step 3 → persist). */
+export interface CsvSaveRequest {
+  cardInstance_ID?: string | null;
+  fileName?: string | null;
+  skippedCount?: number | null;
+  rows?: CsvSaveRow[] | null;
+}
+
+/** A Transaction insert row assembled from a reviewed CSV row. */
+export interface TransactionInsert {
+  ID: string;
+  cardInstance_ID: string | null;
+  source: string;
+  amount: number;
+  postedAt: string;
+  rawDescription: string;
+  vendor_ID: string | null;
+  purchaseType_ID: string | null;
+  earningCategory_ID: string | null;
+  categorizationStatus: string;
+  isExcluded: boolean;
+}
+
+/** An ImportLog insert row recording one CSV import run. */
+export interface ImportLogInsert {
+  ID: string;
+  cardInstance_ID: string;
+  fileName: string;
+  importDate: string;
+  transactionCount: number;
+  totalAmount: number;
+  skippedCount: number;
+}
+
+/** Post-import summary returned to the wizard: counts, total, and top vendor. */
+export interface CsvImportSummary {
+  importLogId: string;
+  transactionCount: number;
+  totalAmount: number;
+  topVendorName: string | null;
+}
+
 /** Buckets accumulated while classifying the rows of one CSV file. */
 export interface RowBuckets {
   newRows: CsvClassifiedRow[];

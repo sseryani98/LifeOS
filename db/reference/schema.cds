@@ -59,6 +59,12 @@ entity EarningCategory : cuid, managed {
   name : String(100) not null  @mandatory  @Common.Label: '{i18n>EarningCategory.name}';
 }
 
+@assert.unique: {name: [name]}
+entity Vendor : cuid, managed {
+  name  : String(200) not null  @mandatory  @Common.Label: '{i18n>Vendor.name}';
+  notes : String(1000)          @Common.Label: '{i18n>Vendor.notes}';
+}
+
 entity IssuerApplicationRule : cuid, managed {
   issuer               : Association to Issuer         @Common.Label: '{i18n>IssuerApplicationRule.issuer}'
                                                        @assert      : (case

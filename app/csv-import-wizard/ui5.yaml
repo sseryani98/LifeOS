@@ -1,0 +1,18 @@
+specVersion: "4.0"
+metadata:
+  name: com.financialplanner.csvimportwizard
+type: application
+customConfiguration:
+  cds-plugin-ui5:
+    # Pin the mount to the resourceRoot path index.html already maps this
+    # namespace to, so the transpiled output is served where the shell expects
+    # it and index.html needs no change.
+    mountPath: /csv-import-wizard/webapp
+builder:
+  customTasks:
+    - name: ui5-tooling-transpile-task
+      afterTask: replaceVersion
+server:
+  customMiddleware:
+    - name: ui5-tooling-transpile-middleware
+      afterMiddleware: compression

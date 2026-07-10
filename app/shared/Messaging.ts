@@ -4,9 +4,6 @@ import { getText as resolveText } from "com/financialplanner/shared/util/i18n";
 import type Controller from "sap/ui/core/mvc/Controller";
 import type View from "sap/ui/core/mvc/View";
 
-/** The value type of the MessageBox.Action enum (not exported from the module). */
-type MessageBoxAction = (typeof MessageBox.Action)[keyof typeof MessageBox.Action];
-
 /**
  * Messaging — shared user-messaging helper for all controller types.
  */
@@ -36,7 +33,7 @@ export default class Messaging {
   public showConfirm(key: string): Promise<boolean> {
     return new Promise(resolve => {
       MessageBox.confirm(this._resolveText(key), {
-        onClose: (action: MessageBoxAction) =>
+        onClose: (action: (typeof MessageBox.Action)[keyof typeof MessageBox.Action]) =>
           resolve(action === MessageBox.Action.OK),
       });
     });

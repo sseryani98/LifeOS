@@ -1,5 +1,10 @@
 import { ENTITIES } from "./constants.js";
-import type { AttributionCard, CsvFormatConfigRecord } from "./types.js";
+import type {
+  AttributionCard,
+  CsvFormatConfigRecord,
+  ImportLogInsert,
+  TransactionInsert,
+} from "./types.js";
 
 /**
  * Data-access layer for the CSV import engine: resolves the issuer format
@@ -50,5 +55,34 @@ export class CsvImportDataService {
       .columns("ID", "cardholderName")
       .where({ parentCardInstance_ID: cardInstanceId })) as AttributionCard[];
     return [selected, ...supplementary];
+  }
+
+  /**
+   * Persists the reviewed rows as transactions in one insert.
+   * @param rows Transaction insert rows.
+   */
+  async insertTransactions(rows: TransactionInsert[]): Promise<void> {
+    await INSERT.into(ENTITIES.TRANSACTION).entries(rows);
+  }
+
+  /**
+   * Records one import-log row for the run.
+   * @param row Import-log insert row.
+   */
+  async insertImportLog(row: ImportLogInsert): Promise<void> {
+    await INSERT.into(ENTITIES.IMPORT_LOG).entries(row);
+  }
+
+  /**
+   * Resolves a vendor's display name for the post-import summary.
+   * @param vendorId Vendor id to resolve.
+   * @returns The vendor name, or null when the vendor is unknown.
+   */
+  async getVendorName(vendorId: string): Promise<string | null> {
+    const row = (await SELECT.one
+      .from(ENTITIES.VENDOR)
+      .columns("name")
+      .where({ ID: vendorId })) as { name: string } | undefined;
+    return row?.name ?? null;
   }
 }

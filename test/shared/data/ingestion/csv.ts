@@ -6,6 +6,8 @@ import type {
   AttributionCard,
   CsvFormatConfigRecord,
   CsvParseRequest,
+  CsvSaveRequest,
+  CsvSaveRow,
   DedupResult,
   ParsedCsvFields,
 } from "../../../../srv/modules/ingestion/types.js";
@@ -235,3 +237,159 @@ export const PARSE_ACTION_DATA_EMPTY = {
   fileName: "",
   fileContent: "",
 };
+
+// ─── Save requests + rows (step 3 → persist) ────────────────────────────────
+
+/** Vendor ids referenced by categorized save rows. */
+export const VENDOR_AMAZON_ID = "d1d1d1d1-0000-4000-8000-00000000000a";
+export const VENDOR_CINEPLEX_ID = "d1d1d1d1-0000-4000-8000-00000000000b";
+
+/** Purchase-type + earning-category ids referenced by categorized save rows. */
+export const PURCHASE_TYPE_ID = "d2d2d2d2-0000-4000-8000-000000000001";
+export const EARNING_CATEGORY_ID = "d3d3d3d3-0000-4000-8000-000000000001";
+
+/** A fully categorized row — saves as user_corrected. */
+export const SAVE_ROW_CATEGORIZED: CsvSaveRow = {
+  postedAt: "2026-02-12",
+  amount: -27.67,
+  rawDescription: "cineplex #7115 qp",
+  cardInstance_ID: CSV_CARD_ID,
+  vendor_ID: VENDOR_CINEPLEX_ID,
+  purchaseType_ID: PURCHASE_TYPE_ID,
+  earningCategory_ID: EARNING_CATEGORY_ID,
+};
+
+/** An uncategorized row — cleared with no vendor/categories. */
+export const SAVE_ROW_UNCATEGORIZED: CsvSaveRow = {
+  postedAt: "2026-02-15",
+  amount: -28.8,
+  rawDescription: "interest charges-purchase",
+  cardInstance_ID: CSV_CARD_ID,
+  vendor_ID: null,
+  purchaseType_ID: null,
+  earningCategory_ID: null,
+};
+
+/** A second Amazon row so a top-vendor tally has a clear winner. */
+export const SAVE_ROW_AMAZON: CsvSaveRow = {
+  postedAt: "2026-02-10",
+  amount: -19.99,
+  rawDescription: "AMZN MKTP US",
+  cardInstance_ID: CSV_CARD_ID,
+  vendor_ID: VENDOR_AMAZON_ID,
+  purchaseType_ID: PURCHASE_TYPE_ID,
+  earningCategory_ID: EARNING_CATEGORY_ID,
+};
+
+/** A valid multi-row save request for the selected card. */
+export const VALID_SAVE_REQUEST: CsvSaveRequest = {
+  cardInstance_ID: CSV_CARD_ID,
+  fileName: "scotia.csv",
+  skippedCount: 1,
+  rows: [SAVE_ROW_CATEGORIZED, SAVE_ROW_UNCATEGORIZED],
+};
+
+/** A save request whose row list is empty — nothing to persist. */
+export const SAVE_REQUEST_NO_ROWS: CsvSaveRequest = {
+  cardInstance_ID: CSV_CARD_ID,
+  fileName: "scotia.csv",
+  skippedCount: 0,
+  rows: [],
+};
+
+/** A save request missing the target card. */
+export const SAVE_REQUEST_MISSING_CARD: CsvSaveRequest = {
+  cardInstance_ID: null,
+  fileName: "scotia.csv",
+  skippedCount: 0,
+  rows: [SAVE_ROW_CATEGORIZED],
+};
+
+/** A save request missing the file name. */
+export const SAVE_REQUEST_MISSING_FILE: CsvSaveRequest = {
+  cardInstance_ID: CSV_CARD_ID,
+  fileName: "",
+  skippedCount: 0,
+  rows: [SAVE_ROW_CATEGORIZED],
+};
+
+/** A save request with a row carrying a non-numeric amount and no date. */
+export const SAVE_REQUEST_BAD_ROW: CsvSaveRequest = {
+  cardInstance_ID: CSV_CARD_ID,
+  fileName: "scotia.csv",
+  skippedCount: 0,
+  rows: [
+    {
+      postedAt: "",
+      amount: Number.NaN,
+      rawDescription: "",
+      cardInstance_ID: null,
+      vendor_ID: null,
+      purchaseType_ID: null,
+      earningCategory_ID: null,
+    },
+  ],
+};
+
+/** The `data` block of a valid saveCsvImport action request. */
+export const SAVE_ACTION_DATA = {
+  cardInstance_ID: CSV_CARD_ID,
+  fileName: "scotia.csv",
+  skippedCount: 1,
+  rows: [SAVE_ROW_AMAZON, SAVE_ROW_CATEGORIZED, SAVE_ROW_UNCATEGORIZED],
+};
+
+/** The `data` block of an invalid (no rows) saveCsvImport action request. */
+export const SAVE_ACTION_DATA_EMPTY = {
+  cardInstance_ID: CSV_CARD_ID,
+  fileName: "scotia.csv",
+  skippedCount: 0,
+  rows: [],
+};
+
+/** A save request where Amazon is the clear most-frequent vendor (top-vendor tally). */
+export const SAVE_REQUEST_TOP_AMAZON: CsvSaveRequest = {
+  cardInstance_ID: CSV_CARD_ID,
+  fileName: "scotia.csv",
+  skippedCount: 2,
+  rows: [SAVE_ROW_AMAZON, { ...SAVE_ROW_AMAZON }, SAVE_ROW_UNCATEGORIZED],
+};
+
+/** A save request whose single row carries no vendor — no top vendor to name. */
+export const SAVE_REQUEST_ALL_UNCATEGORIZED: CsvSaveRequest = {
+  cardInstance_ID: CSV_CARD_ID,
+  fileName: "scotia.csv",
+  skippedCount: 0,
+  rows: [
+    {
+      postedAt: "2026-02-15",
+      amount: -5,
+      rawDescription: "x",
+      cardInstance_ID: CSV_CARD_ID,
+      vendor_ID: null,
+      purchaseType_ID: null,
+      earningCategory_ID: null,
+    },
+  ],
+};
+
+/** A save request whose every field (request + row) is invalid — error accumulation. */
+export const SAVE_REQUEST_ALL_INVALID: CsvSaveRequest = {
+  cardInstance_ID: null,
+  fileName: null,
+  skippedCount: 0,
+  rows: [
+    {
+      postedAt: "",
+      amount: Number.NaN,
+      rawDescription: "",
+      cardInstance_ID: null,
+      vendor_ID: null,
+      purchaseType_ID: null,
+      earningCategory_ID: null,
+    },
+  ],
+};
+
+/** Generated Transaction id the save mapper stamps onto an insert row. */
+export const SAVE_TX_ID = "aaaaaaaa-0000-4000-8000-000000000001";

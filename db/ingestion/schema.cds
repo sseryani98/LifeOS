@@ -33,3 +33,14 @@ entity ProviderAccount : cuid, managed {
     accountName        : String(200)                                 @Common.Label: '{i18n>ProviderAccount.accountName}';
     isActive           : Boolean not null default true               @mandatory  @Common.Label: '{i18n>ProviderAccount.isActive}';
 }
+
+// One row per CSV import run: the imported file, its target card, and the
+// persisted totals shown in the wizard's import history.
+entity ImportLog : cuid, managed {
+    cardInstance     : Association to CardInstance not null  @mandatory  @Common.Label: '{i18n>ImportLog.cardInstance}';
+    fileName         : String(500) not null                  @mandatory  @Common.Label: '{i18n>ImportLog.fileName}';
+    importDate       : Timestamp not null                    @mandatory  @Common.Label: '{i18n>ImportLog.importDate}';
+    transactionCount : Integer not null                      @mandatory  @Common.Label: '{i18n>ImportLog.transactionCount}';
+    totalAmount      : Decimal(15, 2) not null               @mandatory  @Common.Label: '{i18n>ImportLog.totalAmount}';
+    skippedCount     : Integer not null default 0            @mandatory  @Common.Label: '{i18n>ImportLog.skippedCount}';
+}

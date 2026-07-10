@@ -3,6 +3,18 @@
  */
 const formatter = {
   /**
+   * Formats a signed amount to two decimals for review tables and totals.
+   * @param value the raw amount
+   * @returns the amount fixed to two decimals, or "" when absent
+   */
+  formatAmount(value: number | string | null | undefined): string {
+    if (value === null || value === undefined || value === "") {
+      return "";
+    }
+    return Number(value).toFixed(2);
+  },
+
+  /**
    * Formats a numeric amount as Canadian dollars.
    * @param amount the amount to format
    * @returns formatted currency string (e.g. "$1,234.56"), or "" when empty

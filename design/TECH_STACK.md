@@ -153,7 +153,7 @@ financial-planner/
 │   ├── points/schema.cds                    ← PointsAdjustment, Redemption
 │   ├── budget/schema.cds                    ← BudgetAllocation, RecurrentExpense, Goal, IncomeEntry
 │   ├── financial/schema.cds                 ← FinancialAccount, FinancialSnapshot
-│   ├── integration/schema.cds               ← ProviderConnection, ProviderAccount
+│   ├── ingestion/schema.cds                 ← ProviderConnection, ProviderAccount, ImportLog
 │   ├── alerts/schema.cds                    ← Alert
 │   └── seed/                                ← CSV seed data for CNV-002
 ├── srv/

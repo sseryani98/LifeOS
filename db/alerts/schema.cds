@@ -14,7 +14,7 @@ using {
     com.financialplanner.OfferTranche,
     com.financialplanner.CardPerk
 } from '../cards/schema';
-using {com.financialplanner.ProviderConnection} from '../integration/schema';
+using {com.financialplanner.ProviderConnection} from '../ingestion/schema';
 
 
 entity Alert : cuid, managed {
