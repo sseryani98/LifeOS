@@ -1,6 +1,6 @@
 ---
 name: workshop
-description: Run a functional spec workshop for a Financial Planner FRICEW spec group — scout the design docs via subagents, interview Sandro one question at a time, extract business rules and functional unit tests, then write SPEC-nn. Use whenever Sandro wants to spec, design, or workshop a feature; says "let's spec out X", "workshop the goals module", "run a workshop on INT-001", "I want to design the budget pipeline"; names a spec by number, name, or FRICEW ID; or asks to amend, re-open, or extend an existing spec in Financial Planner/design/specs/. Also use when a build is blocked because a spec is missing, thin, or ambiguous and the fix is a design conversation rather than code.
+description: Run a functional spec workshop for a Financial Planner FRICEW spec group — scout the design docs via subagents, interview Sandro one question at a time, extract business rules and functional unit tests, then hand a workshop record to the spec-writer agent that writes SPEC-nn. Use whenever Sandro wants to spec, design, or workshop a feature; says "let's spec out X", "workshop the goals module", "run a workshop on INT-001", "I want to design the budget pipeline"; names a spec by number, name, or FRICEW ID; or asks to amend, re-open, or extend an existing spec in Financial Planner/design/specs/. Also use when a build is blocked because a spec is missing, thin, or ambiguous and the fix is a design conversation rather than code.
 ---
 
 A spec workshop is an **interview**, not a document review. Sandro holds the domain knowledge; the
@@ -89,22 +89,32 @@ Draft FUT-xxx scenarios from the rules and edge cases. Each has: Covers (FRICEW 
 Preconditions, Steps, Expected Result. Cover the happy path plus the key error and edge paths.
 Present for validation.
 
-## Phase 6: Spec Production
+## Phase 6: Spec Production (delegated to spec-writer)
 
-1. **Before writing**, offer UX/QoL suggestions: "I have some UX suggestions before I write this
+The interview is done; the writing happens in an isolated **spec-writer** agent so producing the
+document never competes for context with the conversation you just held.
+
+1. **Before handing off**, offer UX/QoL suggestions: "I have some UX suggestions before I write this
    up — want to hear them?" Numbered list, short descriptions. He'll pick.
 2. Summarize any DM-001 amendments (new attributes, relationship changes) and get explicit
    confirmation.
-3. Write `Financial Planner/design/specs/SPEC-{nn}-{NAME}.md` per §9.
-4. Log new decisions in `user-profile/DECISIONS_LOG.md` — Decision ID, Context, Options, Decision,
-   Rationale.
-5. Note any OI-xx resolved in the spec's Open Items section.
-6. Validate against the §6 Definition of Done.
-7. Ask for explicit approval. On approval, flip status Draft → Approved and update `MEMORY.md`.
+3. Assemble the **workshop record** — the handoff artifact. It contains: the resolved spec
+   number, name, and FRICEW IDs; the confirmed scope; the approved BR-xx; the FUT-xxx (Covers,
+   Preconditions, Steps, Expected Result); the decisions taken (context, options, ruling,
+   rationale); the confirmed DM-001 amendments; the UX picks; and any cross-spec notes. It must be
+   complete — the writer cannot ask Sandro anything.
+4. Invoke the **spec-writer** agent with that record. It reads the §4 template / §6 DoD / §9 naming
+   itself, writes `Financial Planner/design/specs/SPEC-{nn}-{NAME}.md`, logs decisions in
+   `user-profile/DECISIONS_LOG.md`, records resolved OIs, and returns its Definition-of-Done check
+   — all at status **Draft**.
+5. If spec-writer returns a **gap** instead of a file, the interview left a hole. Ask Sandro that
+   one question, add his answer to the record, and re-invoke. Do not fill the hole yourself.
+6. Review the returned DoD check against §6. Show Sandro the spec path and the one-line summary and
+   ask for explicit approval. On approval, flip status Draft → Approved and update `MEMORY.md`.
 
-**The spec must be lean.** Follow the template exactly — no extra sections, no filler, no restating
-BA/DM/Decisions. Tables over paragraphs. Rules as terse numbered assertions. FUTs as concrete
-steps. If a sentence doesn't help a build persona implement or a review persona validate, cut it.
+**The spec must be lean** — the writer enforces this, and it is still the bar: template exactly, no
+filler, no restating BA/DM/Decisions, tables over paragraphs, every sentence earning its place by
+helping a build persona implement or a review persona validate.
 
 ## Rules
 
