@@ -33,6 +33,17 @@ export interface BulkCategorizeResult {
   updatedCount: number;
 }
 
+/** A re-categorize request over a multi-selection of transactions. */
+export interface ReCategorizeCommand {
+  transactionIds: string[];
+}
+
+/** Outcome of a re-categorize action — rows re-matched vs rows skipped. */
+export interface ReCategorizeResult {
+  recategorizedCount: number;
+  skippedCount: number;
+}
+
 /** A single-transaction categorization correction (learning trigger). */
 export interface CorrectionCommand {
   transactionId: string;
