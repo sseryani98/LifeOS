@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Financial Planner — Project Tracker</title>
+<style>
+  :root{
+    --charcoal:#3D3A38; --charcoal2:#2E2B29; --ink:#1c1a19; --paper:#f4f2ef; --card:#ffffff;
+    --line:#e2ddd6; --muted:#8a827a; --text:#26221f; --accent:#b8703a; --accent2:#7a6a58;
+    --g:#3f7d54; --gb:#e2efe6; --b:#3a6ea5; --bb:#e2ecf6; --a:#b8863a; --ab:#f6eede;
+    --o:#c1622e; --ob:#f7e6da; --r:#b23a3a; --rb:#f6e0e0; --n:#6b625a; --nb:#ece7e1;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--text);font:14px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  .mono{font-family:"SF Mono",ui-monospace,"Cascadia Code",Menlo,Consolas,monospace;font-size:12.5px}
+  .sm{font-size:12px}
+  header{background:var(--charcoal);color:#f4f2ef;padding:14px 24px;display:flex;align-items:center;gap:20px;border-bottom:3px solid var(--accent)}
+  header .brand{font-weight:700;letter-spacing:.3px}
+  header .sub{color:#c9c1b8;font-size:12.5px}
+  header .spacer{flex:1}
+  header select{background:var(--charcoal2);color:#f4f2ef;border:1px solid #55504c;padding:6px 10px;font-size:13px}
+  header .gen{color:#a89f95;font-size:12px}
+  .wrap{display:flex;min-height:calc(100vh - 55px)}
+  nav{width:190px;background:#ece7e1;border-right:1px solid var(--line);padding:14px 0;flex-shrink:0}
+  nav a{display:block;padding:9px 22px;color:var(--text);text-decoration:none;font-weight:500;border-left:3px solid transparent;cursor:pointer}
+  nav a:hover{background:#e2ddd6}
+  nav a.active{border-left-color:var(--accent);background:#fff;color:var(--accent)}
+  main{flex:1;padding:24px 28px;max-width:1180px}
+  h3{margin:0 0 12px;font-size:15px}
+  .card{background:var(--card);border:1px solid var(--line);padding:18px 20px;margin-bottom:20px}
+  .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+  .stat{background:var(--card);border:1px solid var(--line);padding:14px 16px}
+  .stat-l{color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.6px}
+  .stat-v{font-size:26px;font-weight:700;margin-top:4px}
+  .stat-v.sm{font-size:15px;font-weight:600;line-height:1.3}
+  .stat-sub{font-size:14px;color:var(--muted);font-weight:400;margin-left:4px}
+  table{width:100%;border-collapse:collapse}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-size:11.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:600}
+  table.kv th{width:190px;text-transform:none;font-size:13px;color:var(--n)}
+  .muted{color:var(--muted)}
+  .nowrap{white-space:nowrap}
+  .pill{display:inline-block;padding:2px 9px;font-size:11.5px;font-weight:600;border:1px solid}
+  .pill.g{background:var(--gb);color:var(--g);border-color:#bcd9c6}
+  .pill.b{background:var(--bb);color:var(--b);border-color:#c3d6e8}
+  .pill.a{background:var(--ab);color:var(--a);border-color:#e8d6b3}
+  .pill.o{background:var(--ob);color:var(--o);border-color:#eccbb0}
+  .pill.r{background:var(--rb);color:var(--r);border-color:#e6bcbc}
+  .pill.n{background:var(--nb);color:var(--n);border-color:#d8d0c8}
+  .count{display:inline-block;background:var(--nb);color:var(--n);font-size:12px;padding:1px 8px;font-weight:600;margin-left:4px}
+  .lanes{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .lane-h{font-weight:700;font-size:13px;padding:6px 0;border-bottom:2px solid var(--charcoal);margin-bottom:10px}
+  .ticket{background:#faf8f5;border:1px solid var(--line);border-left:3px solid var(--accent2);padding:10px 12px;margin-bottom:10px}
+  .ticket.empty{border-left-color:var(--line);color:var(--muted);text-align:center}
+  .t-id{font-weight:700;color:var(--charcoal)}
+  .t-type{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin:2px 0 6px}
+  .t-desc{font-size:12.5px;color:var(--text)}
+  .timeline{display:flex;flex-wrap:wrap;gap:6px}
+  .tl-item{display:flex;align-items:center;gap:7px;padding:6px 11px;border:1px solid var(--line);font-size:12px}
+  .tl-item.done{background:var(--gb);border-color:#bcd9c6}
+  .tl-item.todo{background:#fff}
+  .tl-n{font-weight:700;color:var(--charcoal);font-family:ui-monospace,monospace}
+  .tl-name{color:var(--text)}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+  .chip{background:var(--nb);border:1px solid #d8d0c8;padding:3px 9px;font-size:11.5px}
+  .phase{margin-bottom:18px}
+  .phase-h{font-weight:700;background:var(--charcoal);color:#f4f2ef;padding:6px 12px;display:inline-block;margin-bottom:8px;font-size:13px}
+  footer{padding:16px 28px;color:var(--muted);font-size:12px;border-top:1px solid var(--line)}
+</style></head>
+<body>
+<header>
+  <div>
+    <div class="brand">Life OS · Project Tracker</div>
+    <div class="sub">Read-only PMO view · generated from project markdown</div>
+  </div>
+  <div class="spacer"></div>
+  <label class="gen">Project&nbsp;
+    <select onchange="return false" title="Only Financial Planner qualifies today (has design/ + project/)">
+      <option selected>Financial Planner</option>
+    </select>
+  </label>
+  <div class="gen">Generated 2026-07-16 02:33</div>
+</header>
+<div class="wrap">
+  <nav id="nav">
+    <a data-sec="overview" class="active" onclick="showSec('overview',this)">Overview</a><a data-sec="board" class="" onclick="showSec('board',this)">Sprint Board</a><a data-sec="stories" class="" onclick="showSec('stories',this)">User Stories</a><a data-sec="decisions" class="" onclick="showSec('decisions',this)">Decisions</a><a data-sec="defects" class="" onclick="showSec('defects',this)">Defects</a><a data-sec="changelog" class="" onclick="showSec('changelog',this)">Change Log</a><a data-sec="tooling" class="" onclick="showSec('tooling',this)">Tooling</a><a data-sec="method" class="" onclick="showSec('method',this)">Methodology</a>
+  </nav>
+  <main>
+    <section id="sec-overview" style="display:block">
+<div class="grid4">
+  <div class="stat"><div class="stat-l">Phase</div><div class="stat-v">Build</div></div>
+  <div class="stat"><div class="stat-l">Current stage</div><div class="stat-v sm">W1-S3 — Transaction Processing</div></div>
+  <div class="stat"><div class="stat-l">Stories done</div><div class="stat-v">8<span class="stat-sub">/ 10</span></div></div>
+  <div class="stat"><div class="stat-l">Open defects</div><div class="stat-v">0<span class="stat-sub">/ 3</span></div></div>
+</div>
+
+<div class="card">
+  <h3>Where the project is</h3>
+  <table class="kv">
+    <tr><th>Phase</th><td><span class="pill n">Build</span> &nbsp; Design complete — building</td></tr>
+    <tr><th>Current sprint / substage</th><td>W1-S3 — Transaction Processing</td></tr>
+    <tr><th>In flight now</th><td>Idle — next up: FRM-001</td></tr>
+    <tr><th>Next step</th><td>FRM-001 · Transaction List: Fiori Elements List Report + Object Page — inline edit (vendor/PT/EC/not</td></tr>
+    <tr><th>Branch</th><td class="mono">sprint/W1-S3</td></tr>
+    <tr><th>Sprint goal</th><td>Transactions categorized, splits supported, historical data backfilled.</td></tr>
+    <tr><th>Sync point</th><td>#4 — Categorization engine trained</td></tr>
+  </table>
+</div>
+
+<div class="card">
+  <h3>Design phase timeline</h3>
+  <div class="timeline">
+    <div class="tl-item done"><span class="tl-n">0</span><span class="tl-name">Problem Statement + Vision</span></div><div class="tl-item done"><span class="tl-n">1</span><span class="tl-name">Domain Validation</span></div><div class="tl-item done"><span class="tl-n">2</span><span class="tl-name">Aggregator Spike</span></div><div class="tl-item done"><span class="tl-n">3</span><span class="tl-name">Business Architecture</span></div><div class="tl-item done"><span class="tl-n">4</span><span class="tl-name">Prioritization &amp; Phasing</span></div><div class="tl-item done"><span class="tl-n">5</span><span class="tl-name">Data Model Design</span></div><div class="tl-item done"><span class="tl-n">6</span><span class="tl-name">Tech Stack Decision</span></div><div class="tl-item done"><span class="tl-n">7</span><span class="tl-name">Design Workshop Setup</span></div><div class="tl-item done"><span class="tl-n">8</span><span class="tl-name">Design System</span></div><div class="tl-item done"><span class="tl-n">9</span><span class="tl-name">Technical Standards</span></div><div class="tl-item done"><span class="tl-n">10</span><span class="tl-name">Test Strategy</span></div><div class="tl-item done"><span class="tl-n">11</span><span class="tl-name">Version Control Strategy</span></div><div class="tl-item done"><span class="tl-n">12</span><span class="tl-name">Functional Specs</span></div><div class="tl-item done"><span class="tl-n">13</span><span class="tl-name">Information Architecture</span></div><div class="tl-item done"><span class="tl-n">14</span><span class="tl-name">Theme Build</span></div><div class="tl-item done"><span class="tl-n">15</span><span class="tl-name">Build Plan</span></div>
+  </div>
+</div></section><section id="sec-board" style="display:none">
+<div class="card">
+  <h3>W1-S3 — Transaction Processing</h3>
+  <p class="muted">Transactions categorized, splits supported, historical data backfilled.</p>
+  <div class="lanes">
+    
+      <div class="lane">
+        <div class="lane-h">Backlog <span class="count">2</span></div>
+        <div class="ticket"><div class="t-id mono">FRM-001</div><div class="t-type">Form</div><div class="t-desc">Transaction List: Fiori Elements List Report + Object Page — inline edit (vendor/PT/EC/notes), Split dialog, Apply Categories bulk, Re-categorize action, splits…</div></div><div class="ticket"><div class="t-id mono">CNV-001</div><div class="t-type">Conversion</div><div class="t-desc">Historical backfill: BackfillService orchestration (parse via INT-002 → ENH-008 dedup → ENH-001 categorize → ImportLog), purchases-only + date-cutoff filters, h…</div></div>
+      </div>
+      <div class="lane">
+        <div class="lane-h">In Progress <span class="count">0</span></div>
+        <div class="ticket empty">—</div>
+      </div>
+      <div class="lane">
+        <div class="lane-h">Done <span class="count">2</span></div>
+        <div class="ticket"><div class="t-id mono">ENH-001</div><div class="t-type">Enhancement</div><div class="t-desc">Categorization engine: three-pass matching pipeline (exact → starts-with → contains) returning vendor + dual taxonomy; user correction auto-creates MerchantPatt…</div></div><div class="ticket"><div class="t-id mono">ENH-009</div><div class="t-type">Enhancement</div><div class="t-desc">Split logic: TransactionSplit with mySharePct/myShareAmount (either/or, share ≤ total, reimbursed = 0). splitTransaction / bulkCategorize / correctCategorizatio…</div></div>
+      </div>
+  </div>
+</div>
+<div class="card">
+  <h3>Sprint history</h3>
+  <table><thead><tr><th>Sprint</th><th>Stories</th></tr></thead><tbody>
+  <tr><td>Previous Sprint: W1-S2 — Ingestion Pipeline (merged 9bbe826, tagged v1.2)</td><td>5</td></tr><tr><td>W1-S1 — Foundation &amp; Seed Data (merged 0a9804f, tagged v1.1)</td><td>3</td></tr>
+  </tbody></table>
+</div></section><section id="sec-stories" style="display:none">
+<div class="card">
+  <h3>User story list <span class="count">10</span></h3>
+  <table><thead><tr><th>ID</th><th>Type</th><th>Description</th><th>Status</th><th>Sprint</th></tr></thead><tbody>
+  <tr><td class="mono">FRM-001</td><td>Form</td><td>Transaction List: Fiori Elements List Report + Object Page — inline edit (vendor/PT/EC/notes), Split dialog, Apply Categories bulk, Re-categorize action, splits section, filters.</td><td><span class="pill a">Backlog</span></td><td>W1-S3</td></tr><tr><td class="mono">CNV-001</td><td>Conversion</td><td>Historical backfill: BackfillService orchestration (parse via INT-002 → ENH-008 dedup → ENH-001 categorize → ImportLog), purchases-only + date-cutoff filters, halt-on-parse-error, supp-card attribution. Scenario test.</td><td><span class="pill a">Backlog</span></td><td>W1-S3</td></tr><tr><td class="mono">INT-001</td><td>Integration</td><td>SimpleFIN Bridge sync: 4-layer engine, ENH-008 dedup, node-cron scheduling, encrypted access URL, retry/backoff, connection_error/stale_data/unmapped_account alerts, null-card backfill</td><td><span class="pill g">Done</span></td><td>Previous Sprint: W1-S2</td></tr><tr><td class="mono">INT-002</td><td>Integration</td><td>CSV parsing engine: 4-layer engine + field parser + mapper, per-issuer format config resolution (Scotia/TD/CIBC/Amex), dedup classification, parseCsvImport action</td><td><span class="pill g">Done</span></td><td>Previous Sprint: W1-S2</td></tr><tr><td class="mono">ENH-008</td><td>Enhancement</td><td>Deduplication engine: evaluate() returns new/duplicate/potential_duplicate per SPEC-01 §4.3</td><td><span class="pill g">Done</span></td><td>Previous Sprint: W1-S2</td></tr><tr><td class="mono">FRM-003</td><td>Form</td><td>CSV Import Wizard: 3-step freestyle wizard, tabbed review, saveCsvImport action, Import Log + Vendor entity + Transaction categorization FKs</td><td><span class="pill g">Done</span></td><td>Previous Sprint: W1-S2</td></tr><tr><td class="mono">FRM-010</td><td>Form</td><td>Connection Manager: freestyle health page, manual Sync Now, Add Connection, Re-authenticate, account→card mapping</td><td><span class="pill g">Done</span></td><td>Previous Sprint: W1-S2</td></tr><tr><td class="mono">CNV-002</td><td>Conversion</td><td>Seed reference lookup tables from design specs</td><td><span class="pill g">Done</span></td><td>W1-S1</td></tr><tr><td class="mono">CNV-003</td><td>Conversion</td><td>Seed Sandro's card portfolio and historical data</td><td><span class="pill g">Done</span></td><td>W1-S1</td></tr><tr><td class="mono">FRM-009</td><td>Form</td><td>Master Data Maintenance: SM30-style CRUD for all config tables</td><td><span class="pill g">Done</span></td><td>W1-S1</td></tr>
+  </tbody></table>
+</div></section><section id="sec-decisions" style="display:none">
+<div class="card">
+  <h3>Decisions</h3>
+  <table><thead><tr><th>Sprint</th><th>Decision</th></tr></thead><tbody><tr><td>W1-S2</td><td>db/integration → db/ingestion rename. The ingestion domain is named ingestion (not integration) to avoid colliding with the integration test-type folder. Test tree, module folders, and docs updated to match.</td></tr><tr><td>W1-S2</td><td>formatAmount extracted to a shared helper to remove duplication across the CSV and SimpleFIN paths.</td></tr><tr><td>W1-S2</td><td>Vendor entity brought forward (see FRM-003 decision 1) so categorization can persist during import ahead of the ENH-001 categorization engine in W1-S3.</td></tr></tbody></table>
+</div></section><section id="sec-defects" style="display:none">
+<div class="card">
+  <h3>Defect log <span class="count">0 open</span></h3>
+  <table><thead><tr><th>ID</th><th>Sprint</th><th>Severity</th><th>Description</th><th>Status</th></tr></thead><tbody>
+  <tr><td class="mono">D-001</td><td>W1-S2</td><td><span class="pill o">High</span></td><td>Coverage harness never ran: coveragePathIgnorePatterns used glob strings but Jest treats them as regex (/... → &quot;Invalid regular expression&quot;), coverageThreshold globs pointed at non-matching paths (/Validator.ts, ./srv/util//.ts), …</td><td><span class="pill g">Closed</span></td></tr><tr><td class="mono">D-003</td><td>W1-S2</td><td><span class="pill o">High</span></td><td>Seed CsvFormatConfig for TD and CIBC had off-by-one column indices vs the actual bank exports (design/actual-csvs/): both are headerless with layout 0=date, 1=description, 2=debit, 3=credit, but the seed set descriptionColumn/debitColumn/cr…</td><td><span class="pill g">Closed</span></td></tr><tr><td class="mono">D-002</td><td>W1-S2</td><td><span class="pill a">Medium</span></td><td>tsc and cds build failed with TS2688: Cannot find type definition file for 'sap__cds' — the @cap-js/cds-types postinstall (which creates the node_modules/@types/sap__cds junction) had not run in the resumed session. Recurs on a fresh npm ci…</td><td><span class="pill g">Closed</span></td></tr>
+  </tbody></table>
+</div></section><section id="sec-changelog" style="display:none">
+<div class="card">
+  <h3>Change log <span class="muted">(most recent across design docs)</span></h3>
+  <table><thead><tr><th>Date</th><th>Doc</th><th>Change</th></tr></thead><tbody>
+  <tr><td class="mono nowrap">2026-07-15</td><td class="mono">VERSION_CONTROL</td><td>Life OS restructure — §2/§3 repo root, gitignore, lockfile.</td></tr><tr><td class="mono nowrap">2026-07-15</td><td class="mono">TEST_STRATEGY</td><td>Life OS restructure — §12.1 test report script now shared from Standards.</td></tr><tr><td class="mono nowrap">2026-07-15</td><td class="mono">TECH_STACK</td><td>Restructure — project is now an npm workspace package in the Life OS monorepo. §7: shared ESLint config, tsconfig.base.json, and lint + test-report scripts moved to Standards (Technical + Linting)/; shared devDeps and th…</td></tr><tr><td class="mono nowrap">2026-07-15</td><td class="mono">TECHNICAL_STANDARDS</td><td>Life OS restructure — §4.1 and §10 now point at the shared Standards configs.</td></tr><tr><td class="mono nowrap">2026-02-21</td><td class="mono">THEME</td><td>Approved. Status Draft → Approved.</td></tr><tr><td class="mono nowrap">2026-02-21</td><td class="mono">THEME</td><td>Initial creation — Step 14 complete. D-308 through D-313 logged.</td></tr><tr><td class="mono nowrap">2026-02-21</td><td class="mono">INFORMATION_ARCHITECTURE</td><td>Approved.</td></tr><tr><td class="mono nowrap">2026-02-21</td><td class="mono">INFORMATION_ARCHITECTURE</td><td>Initial creation — Step 13 complete. D-288 through D-307 logged.</td></tr><tr><td class="mono nowrap">2026-02-21</td><td class="mono">DESIGN_SYSTEM</td><td>§6 (D-60) amended by TH-001. Custom brand palette (Warm Charcoal #3D3A38) replaces &quot;no custom accent.&quot; Semantic colors unchanged. See THEME.md for full override spec.</td></tr><tr><td class="mono nowrap">2026-02-21</td><td class="mono">DESIGN_PHASE_TIMELINE</td><td>Step 15 (Build Plan) complete. BUILD_PLAN.md approved — 32 prompts across 10 sprints covering all 43 FRICEW objects. Cross-sprint integration contracts, build-phase CLAUDE.md, scaffold prompt, sprint checklists, prompt p…</td></tr><tr><td class="mono nowrap">2026-02-21</td><td class="mono">DESIGN_PHASE_TIMELINE</td><td>Step 14 (Theme Build) drafted. Warm Charcoal brand palette, dark ShellBar, 0 border radius, 28 CSS custom property overrides, single-file override strategy. Amends D-60. D-308 through D-313 logged.</td></tr><tr><td class="mono nowrap">2026-02-21</td><td class="mono">DESIGN_PHASE_TIMELINE</td><td>Step 13 (Information Architecture) drafted. Revised side nav (23 entries, 3 changes from DS-001), 7 user journeys traced, 30+ cross-page links defined, landing page set (WFL-001), discoverability audit complete (1 side-n…</td></tr><tr><td class="mono nowrap">2026-02-21</td><td class="mono">BUILD_PLAN</td><td>Approved. All 7 sections complete — cross-sprint contracts, CLAUDE.md update, scaffold prompt, sprint checklists, prompt playbook (32 prompts), quick reference.</td></tr><tr><td class="mono nowrap">2026-02-21</td><td class="mono">BUILD_PLAN</td><td>Initial creation — Step 15 in progress.</td></tr><tr><td class="mono nowrap">2026-02-20</td><td class="mono">VERSION_CONTROL</td><td>Status → Approved. Step 12 complete — all 21 specs approved.</td></tr><tr><td class="mono nowrap">2026-02-20</td><td class="mono">TEST_STRATEGY</td><td>Status → Approved. Step 12 complete — all 21 specs approved.</td></tr>
+  </tbody></table>
+</div></section><section id="sec-tooling" style="display:none">
+<div class="grid4">
+  <div class="stat"><div class="stat-l">Agents</div><div class="stat-v">9</div></div>
+  <div class="stat"><div class="stat-l">Skills</div><div class="stat-v">6</div></div>
+  <div class="stat"><div class="stat-l">Workflows</div><div class="stat-v">3</div></div>
+  <div class="stat"><div class="stat-l">Linters</div><div class="stat-v">20</div></div>
+</div>
+
+<div class="card">
+  <h3>Custom agents</h3>
+  <table><thead><tr><th>Name</th><th>Model</th><th>Purpose</th></tr></thead><tbody>
+  <tr><td class="mono">build-briefer</td><td><span class="pill n">sonnet</span></td><td>Read-only story resolver for the build workflow. Turns a FRICEW ID into a structured brief by extracting from the design docs. Cannot write, cannot run commands, cannot decide anything the docs do not already say.</td></tr><tr><td class="mono">functional-tester</td><td><span class="pill n">sonnet</span></td><td>Runs a story's Functional Unit Tests (SPEC-nn §8) against the built UI in a real browser and reports a pass/fail matrix. Read-only against the tree — it verifies, it never fixes.</td></tr><tr><td class="mono">gate-runner</td><td><span class="pill n">haiku</span></td><td>Runs the build gate (tsc, lint, test, cds build) and reports raw results. Classifies each failure so the workflow can route repair to the right model tier. Never fixes anything.</td></tr><tr><td class="mono">implementer</td><td><span class="pill n">opus</span></td><td>Builds the source for a story until the gate is green, working against tests it may not edit. Also marks the sprint board at handoff. Never commits.</td></tr><tr><td class="mono">quality-reviewer</td><td><span class="pill n">opus</span></td><td>Read-only code reviewer for the code-quality workflow. Finds judgment defects and argues about them, but cannot modify the tree. Use for any review stage that must not apply its own findings.</td></tr><tr><td class="mono">smoke-tester</td><td><span class="pill n">sonnet</span></td><td>Drives a built UI in a real browser and reports what it observed. Read-only against the tree — it validates, it never fixes.</td></tr><tr><td class="mono">spec-writer</td><td><span class="pill n">opus</span></td><td>Turns a completed workshop record into a lean SPEC-nn file — following the DESIGN_WORKSHOP template exactly, logging decisions, validating the Definition of Done. Writes in an isolated context so the interview never competes with document production. Does not interview; if the record has a hole, it returns a gap rather than inventing.</td></tr><tr><td class="mono">test-author</td><td><span class="pill n">opus</span></td><td>Writes the failing tests for a story from its business rules and FUTs, and later raises coverage to threshold. Owns the test tree and writes nothing outside it.</td></tr><tr><td class="mono">ux-tester</td><td><span class="pill n">sonnet</span></td><td>Reviews a story's built pages against the Design System, Theme, and Information Architecture in a real browser — contrast, theme adherence, wording, and page-to-page consistency. Read-only against the tree; it reports, it never fixes.</td></tr>
+  </tbody></table>
+</div>
+
+<div class="card">
+  <h3>Custom skills</h3>
+  <table><thead><tr><th>Name</th><th>Purpose</th></tr></thead><tbody>
+  <tr><td class="mono">/cap-annotation-hunter</td><td>Audit a CAP srv/ folder for imperative JS/TS that a CDS annotation could have replaced — missed @mandatory/@assert./@restrict/@readonly/@cds.on.insert/@flow, plus handlers that duplicate an annotation</td></tr><tr><td class="mono">/commit-diff</td><td>Write and make a git commit whose message matches this repo's real history — Conventional Commits with a why-first body, FRICEW IDs, and the Co-Authored-By trailer. A Haiku subagent drafts the message</td></tr><tr><td class="mono">/human-review-loop</td><td>Process Sandro's end-of-build-cycle code review. For each finding — diagnose why the tooling failed to catch it, prescribe one durable prevention (ESLint rule, lint script, hook, memory, CLAUDE.md), t</td></tr><tr><td class="mono">/pm-update</td><td>Audit the PMO tracking artifacts for consistency and reconcile drift. Use whenever Sandro wants to check that the sprint board, defect log, and sprint checkpoints agree with each other, with git histo</td></tr><tr><td class="mono">/refresh-docs</td><td>Sweep the design docs, CLAUDE.md files, and specs for staleness and contradiction, then fix them in one pass and show the diff. Use whenever Sandro wants the documentation brought back in sync — after</td></tr><tr><td class="mono">/workshop</td><td>Run a functional spec workshop for a Financial Planner FRICEW spec group — scout the design docs via subagents, interview Sandro one question at a time, extract business rules and functional unit test</td></tr>
+  </tbody></table>
+</div>
+
+<div class="card">
+  <h3>Commands &amp; workflows</h3>
+  <table><thead><tr><th>Command</th><th>Purpose</th></tr></thead><tbody>
+  <tr><td class="mono">/build</td><td>Build one story end-to-end — brief, TDD red, implement, gate, coverage, smoke. Stops before the commit.</td></tr><tr><td class="mono">/code-quality</td><td>Isolated-agent code quality review — lint gate, parallel reviewers, reviewer-vs-adversary debate, consensus table</td></tr><tr><td class="mono">/test-quality</td><td>Isolated-agent test quality review — lint+coverage gate, per-module reviewers, reviewer-vs-adversary debate, auto-implements consensus</td></tr>
+  </tbody></table>
+  <table style="margin-top:12px"><thead><tr><th>Workflow (.js)</th><th>Purpose</th></tr></thead><tbody>
+  <tr><td class="mono">build</td><td>Build one story end-to-end with isolated agents: brief, TDD red, implement, gate, coverage, smoke, handoff</td></tr><tr><td class="mono">code-quality</td><td>Isolated-agent code quality review: lint gate, parallel reviewers, reviewer-vs-adversary debate, consensus report</td></tr><tr><td class="mono">test-quality</td><td>Isolated-agent test quality review: gate, per-module reviewers, one reviewer-vs-adversary debate per module, auto-implement consensus</td></tr>
+  </tbody></table>
+</div>
+
+<div class="card">
+  <h3>ESLint &amp; lint suite</h3>
+  <p>Shared flat config: <span class="pill g">present</span> &nbsp;·&nbsp; 22 <span class="muted">lint:* scripts wired in Financial Planner</span> &nbsp;·&nbsp; 20 <span class="muted">custom architectural linters</span></p>
+  <div class="chips">
+    <span class="chip mono">lintAnnotations</span><span class="chip mono">lintCommentLength</span><span class="chip mono">lintControlIds</span><span class="chip mono">lintDocClaims</span><span class="chip mono">lintDomainTypes</span><span class="chip mono">lintEventHandlers</span><span class="chip mono">lintFacades</span><span class="chip mono">lintFilenames</span><span class="chip mono">lintFrontendConstants</span><span class="chip mono">lintFrontendDataAccess</span><span class="chip mono">lintGroupedConstants</span><span class="chip mono">lintHandlerEventTypes</span><span class="chip mono">lintI18n</span><span class="chip mono">lintMapperMethods</span><span class="chip mono">lintMessaging</span><span class="chip mono">lintNoDefaultAttributes</span><span class="chip mono">lintNoTrackingIds</span><span class="chip mono">lintTestCqlAccess</span><span class="chip mono">lintTestData</span><span class="chip mono">lintTestStructure</span>
+  </div>
+</div></section><section id="sec-method" style="display:none">
+<div class="card">
+  <h3>Build methodology <span class="muted">(Plan → Design → Build)</span></h3>
+  <p class="muted">Every stage maps to a skill, workflow, or agent. <span class="pill g">Have</span> exists · <span class="pill a">Extend</span> needs a change · <span class="pill o">New</span> to author. Full detail in <span class="mono">Standards (Documents)/METHODOLOGY_BLUEPRINT.md</span>.</p>
+  
+    <div class="phase">
+      <div class="phase-h">Plan</div>
+      <table><thead><tr><th>Stage</th><th>Artifact</th><th>Tooling</th><th>Status</th></tr></thead><tbody>
+      <tr><td>Ideate</td><td>Problem Statement &amp; Vision</td><td class="mono sm">/generate-problem-statement-vision</td><td><span class="pill o">New</span></td></tr><tr><td>Scope</td><td>Business Architecture</td><td class="mono sm">/generate-business-architecture</td><td><span class="pill o">New</span></td></tr><tr><td>Research</td><td>Research pack</td><td class="mono sm">/gather-research</td><td><span class="pill o">New</span></td></tr><tr><td>Scaffold</td><td>Module skeleton</td><td class="mono sm">/scaffold-module</td><td><span class="pill o">New</span></td></tr>
+      </tbody></table>
+    </div>
+    <div class="phase">
+      <div class="phase-h">Design</div>
+      <table><thead><tr><th>Stage</th><th>Artifact</th><th>Tooling</th><th>Status</th></tr></thead><tbody>
+      <tr><td>Workshops</td><td>Lean Specs</td><td class="mono sm">design-workshop workflow (/workshop + spec-writer)</td><td><span class="pill a">Extend</span></td></tr><tr><td>Information Arch.</td><td>Information Architecture</td><td class="mono sm">/generate-information-architecture</td><td><span class="pill o">New</span></td></tr><tr><td>Design System</td><td>Design System</td><td class="mono sm">/generate-design-system</td><td><span class="pill o">New</span></td></tr><tr><td>Theme</td><td>Theme</td><td class="mono sm">/generate-theme</td><td><span class="pill o">New</span></td></tr><tr><td>Data Model</td><td>Data Model</td><td class="mono sm">/generate-data-model</td><td><span class="pill o">New</span></td></tr><tr><td>Tech Stack</td><td>Tech Stack</td><td class="mono sm">/generate-tech-stack</td><td><span class="pill o">New</span></td></tr><tr><td>Test Strategy</td><td>Test Strategy</td><td class="mono sm">/generate-test-strategy</td><td><span class="pill o">New</span></td></tr><tr><td>Project Planning</td><td>Build Plan + Project Mgmt</td><td class="mono sm">/generate-build-plan</td><td><span class="pill o">New</span></td></tr>
+      </tbody></table>
+    </div>
+    <div class="phase">
+      <div class="phase-h">Build</div>
+      <table><thead><tr><th>Stage</th><th>Artifact</th><th>Tooling</th><th>Status</th></tr></thead><tbody>
+      <tr><td>Sprint Build</td><td>Green, reviewed story</td><td class="mono sm">/build → build.js</td><td><span class="pill g">Have</span></td></tr><tr><td>Code Quality</td><td>Consensus findings applied</td><td class="mono sm">/code-quality</td><td><span class="pill g">Have</span></td></tr><tr><td>Test Quality</td><td>Test gaps implemented</td><td class="mono sm">/test-quality</td><td><span class="pill g">Have</span></td></tr><tr><td>Functional Test</td><td>Pass/fail matrix</td><td class="mono sm">functional-tester agent</td><td><span class="pill o">New</span></td></tr><tr><td>UX Test</td><td>UX/theme report</td><td class="mono sm">ux-tester agent</td><td><span class="pill o">New</span></td></tr><tr><td>Human Review</td><td>Feedback → prevention</td><td class="mono sm">/human-review-loop</td><td><span class="pill g">Have</span></td></tr><tr><td>Documentation</td><td>Fresh tech docs</td><td class="mono sm">/refresh-docs</td><td><span class="pill o">New</span></td></tr><tr><td>PM Update</td><td>Board / defect update</td><td class="mono sm">/pm-update</td><td><span class="pill o">New</span></td></tr><tr><td>Commit</td><td>Conventional commit</td><td class="mono sm">/commit-diff</td><td><span class="pill g">Have</span></td></tr>
+      </tbody></table>
+    </div>
+</div></section>
+  </main>
+</div>
+<footer>Life OS Project Tracker v1 · source: Financial Planner/project + design + .claude · re-run <span class="mono">node "Project Tracker/dashboard/generate.mjs"</span> to refresh.</footer>
+<script>
+function showSec(id, el){
+  document.querySelectorAll('main section').forEach(s=>s.style.display='none');
+  document.getElementById('sec-'+id).style.display='block';
+  document.querySelectorAll('#nav a').forEach(a=>a.classList.remove('active'));
+  el.classList.add('active');
+  window.scrollTo(0,0);
+}
+</script>
+</body></html>

@@ -97,7 +97,7 @@ BUILD  (per sprint, per story)
 ## 5. Stage → tooling map
 
 Legend for **Status**: **Have** = exists and fits; **Extend** = exists but needs a change
-for reuse across modules; **New** = must be authored.
+for reuse across modules; **New** = must be authored; **Built** = authored this session.
 
 ### 5.1 Plan
 
@@ -125,7 +125,7 @@ Notes:
 
 | Stage             | Artifact                    | Tooling (proposed)                   | Status  | Context-isolated agents            |
 | ----------------- | --------------------------- | ------------------------------------ | ------- | ---------------------------------- |
-| Workshops         | `specs/SPEC-nn` (Lean Spec) | `design-workshop` **workflow**       | Extend  | `/workshop` scout(s) → **spec-writer** agent |
+| Workshops         | `specs/SPEC-nn` (Lean Spec) | `/workshop` (interview) → `spec-writer` | **Built** | `/workshop` scout(s) + interview → **spec-writer** agent |
 | Information Arch.  | `INFORMATION_ARCHITECTURE`  | `/generate-information-architecture` | New     | ia-scout, writer                   |
 | Design System      | `DESIGN_SYSTEM`             | `/generate-design-system`            | New     | writer                             |
 | Theme             | `THEME`                     | `/generate-theme`                    | New     | writer                             |
@@ -158,11 +158,11 @@ Notes:
 | Sprint Build    | Green, reviewed story             | `/build` → `build.js` workflow   | Have    | build-briefer → test-author → implementer → gate-runner → test-author → smoke-tester |
 | Code Quality    | Consensus findings, applied       | `/code-quality` workflow         | Have    | gate-runner → quality-reviewer ×N → adversary ×N |
 | Test Quality    | Consensus test gaps, implemented  | `/test-quality` workflow         | Have    | gate-runner → quality-reviewer ×N → adversary → test-author → gate-runner |
-| Functional Test | Pass/fail over all functional cases | `functional-tester` agent      | New (extends smoke-tester) | functional-tester             |
-| UX Test         | Holistic UX/theme/consistency report | `ux-tester` agent             | New     | ux-tester                                        |
+| Functional Test | Pass/fail over story's FUTs        | `functional-tester` agent      | **Built** | functional-tester             |
+| UX Test         | Holistic UX/theme/consistency report | `ux-tester` agent             | **Built** | ux-tester                                      |
 | Human Review    | Feedback → durable prevention     | `/human-review-loop` skill       | Have    | —                                                |
-| Documentation   | Fresh, consistent tech docs       | `/refresh-docs` skill            | New     | doc-scout, writer                                |
-| PM Update       | Board / defect log / checkpoint   | `/pm-update` skill (or agent)    | New     | pm-updater                                       |
+| Documentation   | Fresh, consistent tech docs       | `/refresh-docs` skill            | **Built** | doc-scout(s), writer                           |
+| PM Update       | Consistency audit + reconcile     | `/pm-update` skill               | **Built** | state-scout                                     |
 | Commit          | Conventional commit               | `/commit-diff` skill (Haiku)     | Have    | Haiku drafter                                    |
 
 Notes:
@@ -188,16 +188,25 @@ Notes:
 
 Grouped by effort. Full specs for each become their own `SKILL.md` / agent file when built.
 
-**Build phase (highest leverage — closes the loop on work you do every sprint):**
+**Build phase — BUILT this session (all four Build-phase gaps closed):**
 
-- `functional-tester` agent — systematic FUT runner in Playwright.
-- `ux-tester` agent — holistic UX/theme/consistency reviewer.
-- `/refresh-docs` skill — staleness + inconsistency sweep, then rewrite.
-- `/pm-update` skill — board / defect / checkpoint write-back.
+- `functional-tester` agent — runs the story's FUTs (parsed from SPEC-nn §8), classifying
+  UI-exercisable vs. backend-only, returns a pass/fail matrix. Read-only.
+- `ux-tester` agent — reviews the story's pages against Design System + Theme + IA across
+  four lenses (theme, contrast, wording, page-to-page). Read-only.
+- `/refresh-docs` skill — scout-detected staleness sweep, auto-fixes facts in one pass, runs
+  `lint:doc-claims`, shows the diff. Trues up facts, never rewrites meaning.
+- `/pm-update` skill — **reframed** from write-back to a consistency auditor: cross-checks
+  board / defect log / checkpoints against each other, git, and the FRICEW catalogue, then
+  reconciles mechanical drift and flags judgment calls. (The implementer still owns the
+  per-story board handoff in `build.js`.)
 
 **Design phase (mostly port-and-adapt from the planner's existing docs):**
 
-- `design-workshop` workflow — wraps existing `/workshop` + new `spec-writer` agent.
+- ~~`design-workshop` workflow — wraps existing `/workshop` + new `spec-writer` agent.~~
+  **BUILT this session:** `/workshop` now runs the interview (Phases 0–5) and hands a *workshop
+  record* to the new isolated `spec-writer` agent for Phase 6 spec production. Kept as
+  skill→agent rather than a headless `.js` workflow because the interview needs a live human.
 - `/generate-tech-stack`, `/generate-test-strategy` — copy-forward from planner.
 - `/generate-data-model`, `/generate-information-architecture`,
   `/generate-design-system`, `/generate-theme`, `/generate-build-plan`.
