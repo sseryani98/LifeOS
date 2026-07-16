@@ -1,0 +1,121 @@
+{
+  "name": "financial-planner",
+  "version": "0.0.1",
+  "description": "Personal financial management system for a Canadian credit card churner",
+  "private": true,
+  "type": "module",
+  "imports": {
+    "#cds-models/*": "./@cds-models/*/index.js"
+  },
+  "scripts": {
+    "start": "cds-serve",
+    "build": "cds build",
+    "test": "jest --json --outputFile=coverage/test-results.json --coverage",
+    "posttest": "tsx \"../Standards (Technical + Linting)/scripts/generateTestReport.ts\"",
+    "generate-key": "tsx scripts/generateKey.ts",
+    "lint": "eslint srv/ app/ scripts/ && npm run lint:ui5 && npm run lint:i18n && npm run lint:annotations && npm run lint:filenames && npm run lint:tracking-ids && npm run lint:default-attrs && npm run lint:test-data && npm run lint:test-structure && npm run lint:test-cql && npm run lint:grouped-constants && npm run lint:frontend-constants && npm run lint:domain-types && npm run lint:comment-length && npm run lint:mapper-methods && npm run lint:messaging && npm run lint:frontend-data-access && npm run lint:control-ids && npm run lint:event-handlers && npm run lint:handler-event-types && npm run lint:facades && npm run lint:doc-claims",
+    "lint:ui5": "cd app/admin-master-data && ui5lint",
+    "lint:i18n": "tsx \"../Standards (Technical + Linting)/scripts/lintI18n.ts\"",
+    "lint:annotations": "tsx \"../Standards (Technical + Linting)/scripts/lintAnnotations.ts\"",
+    "lint:filenames": "tsx \"../Standards (Technical + Linting)/scripts/lintFilenames.ts\"",
+    "lint:tracking-ids": "tsx \"../Standards (Technical + Linting)/scripts/lintNoTrackingIds.ts\"",
+    "lint:default-attrs": "tsx \"../Standards (Technical + Linting)/scripts/lintNoDefaultAttributes.ts\"",
+    "lint:test-data": "tsx \"../Standards (Technical + Linting)/scripts/lintTestData.ts\"",
+    "lint:test-structure": "tsx \"../Standards (Technical + Linting)/scripts/lintTestStructure.ts\"",
+    "lint:test-cql": "tsx \"../Standards (Technical + Linting)/scripts/lintTestCqlAccess.ts\"",
+    "lint:grouped-constants": "tsx \"../Standards (Technical + Linting)/scripts/lintGroupedConstants.ts\"",
+    "lint:frontend-constants": "tsx \"../Standards (Technical + Linting)/scripts/lintFrontendConstants.ts\"",
+    "lint:domain-types": "tsx \"../Standards (Technical + Linting)/scripts/lintDomainTypes.ts\"",
+    "lint:comment-length": "tsx \"../Standards (Technical + Linting)/scripts/lintCommentLength.ts\"",
+    "lint:mapper-methods": "tsx \"../Standards (Technical + Linting)/scripts/lintMapperMethods.ts\"",
+    "lint:messaging": "tsx \"../Standards (Technical + Linting)/scripts/lintMessaging.ts\"",
+    "lint:frontend-data-access": "tsx \"../Standards (Technical + Linting)/scripts/lintFrontendDataAccess.ts\"",
+    "lint:control-ids": "tsx \"../Standards (Technical + Linting)/scripts/lintControlIds.ts\"",
+    "lint:event-handlers": "tsx \"../Standards (Technical + Linting)/scripts/lintEventHandlers.ts\"",
+    "lint:handler-event-types": "tsx \"../Standards (Technical + Linting)/scripts/lintHandlerEventTypes.ts\"",
+    "lint:facades": "tsx \"../Standards (Technical + Linting)/scripts/lintFacades.ts\"",
+    "lint:doc-claims": "tsx \"../Standards (Technical + Linting)/scripts/lintDocClaims.ts\""
+  },
+  "dependencies": {
+    "@cap-js/postgres": "^2",
+    "@sap/cds": "^9",
+    "axios": "^1",
+    "cheerio": "^1",
+    "fuse.js": "^7",
+    "node-cron": "^3",
+    "papaparse": "^5"
+  },
+  "devDependencies": {
+    "@cap-js/cds-test": "^0.4.1",
+    "@cap-js/cds-typer": ">=0.1",
+    "@cap-js/cds-types": "^0.15",
+    "@cap-js/sqlite": "^2.2.0",
+    "@sap/eslint-plugin-cds": "^3",
+    "@sapui5/types": "^1.136.16",
+    "@types/cheerio": "^0.22",
+    "@types/node-cron": "^3",
+    "@types/papaparse": "^5",
+    "@ui5/cli": "^4.0.57",
+    "@ui5/linter": "^1.20.18",
+    "@ui5/ts-interface-generator": "^0.11.1",
+    "cds-plugin-ui5": "^0.17.4",
+    "ui5-tooling-transpile": "^3.11.3"
+  },
+  "ui5": {
+    "ui5linter": {
+      "idNamingPattern": "",
+      "eventNamingPattern": "",
+      "usage": {
+        "WrongNamespaceLinter": false
+      },
+      "xmlClassExceptions": [
+        "com.financialplanner.connectionmanager.view.ConnectionManager"
+      ]
+    }
+  },
+  "cds": {
+    "requires": {
+      "db": {
+        "kind": "postgres",
+        "impl": "@cap-js/postgres",
+        "credentials": {
+          "host": "localhost",
+          "port": 5432,
+          "user": "postgres",
+          "password": "",
+          "database": "financial_planner"
+        },
+        "data": [
+          "db/data",
+          "db/seed"
+        ]
+      }
+    },
+    "i18n": {
+      "folders": [
+        "srv/_i18n"
+      ]
+    },
+    "log": {
+      "levels": {
+        "app": "info"
+      }
+    },
+    "[development]": {
+      "requires": {
+        "db": {
+          "kind": "sqlite",
+          "impl": "@cap-js/sqlite",
+          "credentials": {
+            "url": ":memory:",
+            "host": null,
+            "port": null,
+            "user": null,
+            "password": null,
+            "database": null
+          }
+        }
+      }
+    }
+  }
+}

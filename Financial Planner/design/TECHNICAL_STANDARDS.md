@@ -14,6 +14,7 @@
 | 2026-02-16 | Sandro & Claude | Initial creation — Step 9 complete. D-63 through D-73 logged. OI-07 resolved. |
 | 2026-02-20 | Sandro & Claude | Added §13 — Test-Driven Development workflow (D-230).                         |
 | 2026-02-20 | Claude          | Status → Approved. Step 12 complete — all 21 specs approved.                  |
+| 2026-07-15 | Sandro & Claude | Life OS restructure — §4.1 and §10 now point at the shared Standards configs. |
 
 ---
 
@@ -121,6 +122,8 @@ Each file contains UI, micro-frontend, and side-effect annotations for that enti
 | `target`                     | `ES2022` | Node.js 20 native support    |
 | `module`                     | `Node16` | CAP 8 recommended            |
 | `outDir`                     | `./gen`  | CAP default output           |
+
+Every setting above except `outDir` lives in `Standards (Technical + Linting)/tsconfig.base.json`, shared across the Life OS monorepo. This project's `tsconfig.json` extends it and adds what is project-local: `outDir`, `rootDir`, `types`, the `@sap/cds` / `#cds-models` paths, and the include/exclude globs.
 
 Scope: `srv/` and `db/` TypeScript files. **`app/` is now TypeScript too** (D-315, superseding this line) — but with its own per-app `tsconfig.json` + `ui5.yaml` transpile setup (`ui5-tooling-transpile` + `cds-plugin-ui5`), not this root config. See D-315 and §11 for the frontend TypeScript conventions.
 
@@ -402,6 +405,8 @@ No raw `crypto` calls outside this utility. All `_enc` field access goes through
 ## 10. ESLint Configuration
 
 **Decision D-71.**
+
+The rules below live in `Standards (Technical + Linting)/eslint.config.mjs`, shared across the Life OS monorepo. This project's own `eslint.config.mjs` is a re-export of it — flat-config `files` globs resolve relative to the config ESLint loads, so loading from here roots `srv/**`, `app/**`, and `test/**` at this project. `npm run lint` runs from this project; the lint scripts it chains live in `Standards (Technical + Linting)/scripts/`.
 
 ### 10.1 Base Preset
 

@@ -44,12 +44,14 @@ const SKIP_SEGMENTS = new Set([
 
 /**
  * Banned design-tracking ID patterns: FRICEW object IDs (FRM/RPT/INT/CNV/ENH/
- * WKF plus the project's FUT/REP variants), business-rule IDs (BR-nn), and
+ * WFL plus the project's FUT/REP variants), business-rule IDs (BR-nn), and
  * spec/decision IDs (SPEC-nn, D-nn). Word-boundary anchored so embedded
  * substrings (e.g. "POINT-1", "PRINT-2") never match.
+ * Workflow IDs are WFL, not WKF — the latter matched nothing and left every
+ * WFL-nn free to reach source code.
  */
 const TRACKING_ID =
-  /\b(?:FRM|RPT|INT|CNV|ENH|WKF|REP|FUT|BR|SPEC)-\d+\b|\bD-\d+\b/;
+  /\b(?:FRM|RPT|INT|CNV|ENH|WFL|REP|FUT|BR|SPEC)-\d+\b|\bD-\d+\b/;
 
 /**
  * The section mark (U+00A7), banned because it only appears in design-doc

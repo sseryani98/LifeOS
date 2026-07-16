@@ -1,0 +1,20 @@
+{
+  "extends": "../Standards (Technical + Linting)/tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./gen",
+    "rootDir": ".",
+    "types": ["jest", "node", "sap__cds"],
+    // npm workspaces may hoist cds-types to the repo root, so the local path is
+    // tried first and the hoisted one second. Both are listed because which one
+    // exists depends on dedupe outcomes, not on anything we control.
+    "paths": {
+      "@sap/cds": [
+        "./node_modules/@cap-js/cds-types",
+        "../node_modules/@cap-js/cds-types"
+      ],
+      "#cds-models/*": ["./@cds-models/*"]
+    }
+  },
+  "include": ["srv/**/*.ts", "db/**/*.ts", "scripts/**/*.ts", "test/**/*.ts"],
+  "exclude": ["node_modules", "gen", "@cds-models"]
+}
