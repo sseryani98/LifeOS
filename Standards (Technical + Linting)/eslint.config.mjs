@@ -1,3 +1,5 @@
+import { join } from "path";
+
 import tsPlugin from "@typescript-eslint/eslint-plugin";
 import tsParser from "@typescript-eslint/parser";
 import jsdocPlugin from "eslint-plugin-jsdoc";
@@ -195,14 +197,17 @@ const tsPlugins = {
 };
 
 // Type-aware parsing, required by rules that read the checker (no-deprecated).
-// projectService auto-resolves the owning tsconfig per file — the root project
-// for srv/db/scripts, the per-app project for each app/*. Spread into the
-// backend and frontend blocks so both get type info.
+// projectService auto-resolves the owning tsconfig per file — the module project
+// for srv/db, the per-app project for each app/*. Spread into the backend and
+// frontend blocks so both get type info.
+// The root must be the workspace, not this folder: projectService resolves each
+// file's tsconfig by walking up, so a root that is not an ancestor of the modules
+// would leave every module file without a project.
 const typeAwareParserOptions = {
   ecmaVersion: 2022,
   sourceType: "module",
   projectService: true,
-  tsconfigRootDir: import.meta.dirname,
+  tsconfigRootDir: join(import.meta.dirname, ".."),
 };
 
 export default [
@@ -238,16 +243,10 @@ export default [
         { case: "camelCase", ignore: ["^.*-service\\.ts$"] },
       ],
 
-      // --- Custom Architectural Rules (backend-only) ---
-      // Documented as comments until built as real plugin rules. These are
-      // facade/service patterns — they have no frontend equivalent.
-      //
-      // 'no-logic-in-facade': 'error'      — No if/for/while in Facade classes
-      // 'require-wrap-handler': 'error'    — All handlers use wrapHandler
-      // 'no-try-catch-in-facade': 'error'  — No try/catch in Facades
-      // 'require-facade-extends-base'      — All Facades extend BaseFacade
-      // 'require-service-extends-base'     — All Services extend BaseService
-      // 'private-methods-at-bottom'        — _ prefixed methods at end of class
+      // Architectural rules live in scripts/lint*.ts, not here — authoring an ESLint
+      // plugin rule costs ~5x a scanner script and there is no plugin scaffold.
+      // Facade logic/CQL is enforced by `npm run lint:facades`. Rules parked here as
+      // comments were unenforced for months while reading as enforced; don't re-add any.
     },
   },
 

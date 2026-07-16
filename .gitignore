@@ -1,45 +1,24 @@
 # Node
 node_modules/
 
-# CAP generated
-gen/
-@cds-models/
-.cds-services.json
-*.sqlite
-
-# Secrets
-.env
-
-# Personal seed data (card portfolio, financial details)
-db/seed/
-
-# Runtime logs
-logs/
-
-# Test artifacts
-coverage/
-project/test-reports/
-
 # TypeScript build cache
 *.tsbuildinfo
 
-# CAP local env overrides
-default-env.json
-
-# IDE
-.vscode/
-
-# Claude Code (keep .claude/commands/ tracked)
+# Claude Code (keep .claude/commands/ and .claude/skills/ tracked)
 .claude/settings.json
 .claude/settings.local.json
 .claude/*.md
+
+# MCP server config (local dev convenience — Playwright browser choice is per-machine)
+.mcp.json
+.playwright-mcp/
+
+# IDE — settings.json is tracked: it carries the folder view (hiding the workspace
+# plumbing npm pins to the root), which every clone should get, not just this machine.
+.vscode/*
+!.vscode/settings.json
 
 # OS
 Thumbs.db
 Desktop.ini
 .DS_Store
-financial_planner
-financial_planner-shm
-financial_planner-wal
-.mcp.json
-.playwright-mcp/

@@ -15,6 +15,7 @@
 | 2026-02-16 | Sandro & Claude | Added §12 — Markdown test report generation (rolling 5 files).                                        |
 | 2026-02-20 | Sandro & Claude | Added TDD workflow reference in §2 Summary (D-230). Primary definition in TECHNICAL_STANDARDS.md §13. |
 | 2026-02-20 | Claude          | Status → Approved. Step 12 complete — all 21 specs approved.                                          |
+| 2026-07-15 | Sandro & Claude | Life OS restructure — §12.1 test report script now shared from Standards.                             |
 
 ---
 
@@ -125,7 +126,7 @@ const result = service["_computeTrancheWindow"](startDate, months);
 Test files get ESLint overrides to allow this pattern:
 
 ```typescript
-// eslint.config.mjs — test file overrides
+// Standards (Technical + Linting)/eslint.config.mjs — test file overrides
 {
   files: ['test/**/*.test.ts'],
   rules: {
@@ -535,14 +536,14 @@ Frontend tests live within their respective `app/` folders (see §9.3).
 
 ### 12.1 Report Generation
 
-Every `npm test` execution generates a markdown report in `project/test-reports/`. The report is produced by a post-test script (`scripts/generate-test-report.ts`) that reads Jest's JSON output and coverage summary.
+Every `npm test` execution generates a markdown report in `project/test-reports/`. The report is produced by a post-test script (`generateTestReport.ts`) that reads Jest's JSON output and coverage summary. The script is shared across the Life OS monorepo and lives in `Standards (Technical + Linting)/scripts/` — `npm test` still runs from this project.
 
 **npm scripts:**
 
 ```json
 {
   "test": "jest --json --outputFile=coverage/test-results.json --coverage",
-  "posttest": "ts-node scripts/generate-test-report.ts"
+  "posttest": "tsx \"../Standards (Technical + Linting)/scripts/generateTestReport.ts\""
 }
 ```
 

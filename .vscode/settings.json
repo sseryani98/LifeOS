@@ -1,0 +1,16 @@
+{
+  "files.exclude": {
+    "**/node_modules": true,
+    "package.json": true,
+    "package-lock.json": true,
+    ".prettierrc.json": true,
+    ".mcp.json": true,
+    ".gitignore": true
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/@cds-models": true,
+    "**/gen": true,
+    "**/coverage": true
+  }
+}

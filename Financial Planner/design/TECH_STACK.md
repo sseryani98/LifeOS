@@ -16,6 +16,7 @@
 | 2026-02-16 | Sandro & Claude | Expanded test/ folder structure: unit tests per module, integration tests per CDS service, scenario tests, test data factories + canonical test world (D-74 through D-78). Cross-reference to TEST_STRATEGY.md.                                                         |
 | 2026-02-20 | Claude          | SPEC-21 amendment: `app/trophy-case/` changed from Freestyle to Fiori Elements ALP + Object Page (D-279).                                                                                                                                                               |
 | 2026-02-20 | Claude          | Status → Approved. Step 12 complete — all 21 specs approved.                                                                                                                                                                                                            |
+| 2026-07-15 | Sandro & Claude | Restructure — project is now an npm workspace package in the Life OS monorepo. §7: shared ESLint config, tsconfig.base.json, and lint + test-report scripts moved to Standards (Technical + Linting)/; shared devDeps and the only lockfile at the workspace root.      |
 
 ---
 
@@ -127,14 +128,31 @@ Wave 4's market intelligence (INT-003, WFL-003, CNV-004) folds into ChurningServ
 
 Follows Sandro's Enbridge CAP conventions, adapted for TypeScript and local deployment.
 
+The project is one npm workspace package inside the **Life OS** monorepo — a single git repo, no submodules. Shared tooling (the ESLint rules, the base `tsconfig`, the lint and test-report scripts) sits beside it under `Standards (Technical + Linting)/`; the workspace root holds the single lockfile, the hoisted `node_modules/`, and the shared devDependencies. `npm install` runs at the root — `npm run lint` and `npm test` still run from this project.
+
 ```
-financial-planner/
-├── package.json
-├── tsconfig.json
+Life OS/
+├── package.json                             ← Workspace root — shared devDeps (eslint, typescript, tsx, jest)
+├── package-lock.json                        ← The only lockfile
+├── node_modules/                            ← Hoisted dependencies
+├── .prettierrc.json                         ← Shared formatting
+├── .mcp.json                                ← Playwright MCP (gitignored)
+├── Standards (Technical + Linting)/
+│   ├── eslint.config.mjs                    ← The shared ESLint rules (§10 of TECHNICAL_STANDARDS.md)
+│   ├── tsconfig.base.json                   ← Shared compilerOptions (§4.1 of TECHNICAL_STANDARDS.md)
+│   └── scripts/                             ← Shared lint scripts + generateTestReport.ts
+└── Financial Planner/                       ← This project — tree below
+```
+
+```
+Financial Planner/
+├── package.json                             ← CAP/UI5/domain deps + npm scripts (shared devDeps live at the root)
+├── tsconfig.json                            ← Extends Standards (Technical + Linting)/tsconfig.base.json
 ├── .cdsrc.json
 ├── .env                                     ← ENCRYPTION_KEY (gitignored)
 ├── .gitignore
-├── eslint.config.mjs
+├── eslint.config.mjs                        ← Re-exports the shared config from Standards
+├── scripts/generateKey.ts                   ← ENCRYPTION_KEY generator — the only script left here
 ├── CLAUDE.md
 ├── design/                                  ← Design documents
 ├── project/                                 ← Sprint tracking (see PROJECT_MANAGEMENT.md)

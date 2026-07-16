@@ -13,6 +13,7 @@
 | ---------- | --------------- | -------------------------------------------------------------- |
 | 2026-02-16 | Sandro & Claude | Initial creation — Step 11 complete. D-81 through D-86 logged. |
 | 2026-02-20 | Claude          | Status → Approved. Step 12 complete — all 21 specs approved.   |
+| 2026-07-15 | Sandro & Claude | Life OS restructure — §2/§3 repo root, gitignore, lockfile.    |
 
 ---
 
@@ -20,7 +21,7 @@
 
 | Area               | Standard                                                                         |
 | ------------------ | -------------------------------------------------------------------------------- |
-| **Repository**     | Local Git. Single repo. No remote for V1.                                        |
+| **Repository**     | Local Git. Single repo, rooted at the Life OS monorepo. No submodules.           |
 | **Branching**      | Sprint branches off `main`. One branch per sprint (10 total).                    |
 | **Branch naming**  | `sprint/W{wave}-S{sprint}` — e.g., `sprint/W1-S1`                                |
 | **Commits**        | Conventional Commits — `type(scope): description`. FRICEW IDs in body.           |
@@ -33,6 +34,8 @@
 ## 3. Repository Setup
 
 **Decision D-81.**
+
+One git repo, rooted at the Life OS monorepo — this project is a tracked folder inside it, not a submodule. The `.gitignore` below is this project's; the workspace root carries its own for root-level plumbing (`node_modules/`, `.mcp.json`, `.vscode/`).
 
 ### 3.1 .gitignore
 
@@ -74,7 +77,7 @@ Desktop.ini
 
 | Path                      | Why                                                    |
 | ------------------------- | ------------------------------------------------------ |
-| `package-lock.json`       | Deterministic dependency installs                      |
+| `../package-lock.json`    | Deterministic installs — one lockfile, workspace-wide  |
 | `db/seed/*.csv`           | Seed data for CNV-002 — design artifact, not generated |
 | `project/sprints/*.md`    | Permanent sprint reports                               |
 | `project/SPRINT_BOARD.md` | Sprint tracking                                        |
