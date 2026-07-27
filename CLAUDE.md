@@ -18,7 +18,7 @@ test strategy are decided once here and inherited by every module.
 | Wellness              | —                    | Planned — habits, journalling                    |
 
 The list is open-ended. Two modules exist, and the second is a scaffold rather than a
-build — so the conventions below are proven on one module and merely *survived contact*
+build — so the conventions below are proven on one module and merely _survived contact_
 with a second. Where Project Tracker has already falsified something, it is corrected in
 place below rather than carved out in the module.
 
@@ -74,7 +74,7 @@ Validator/Mapper handler pattern, i18n tiers, SAPUI5 rules, test rules — but t
 still written in the planner's vocabulary (`com.financialplanner`, card encryption,
 churning domain). Read that file before writing code in any module — including Project
 Tracker, which references it rather than restating it. They stay there until a second
-module *in build* separates the standard from the example; see §Still Undecided.
+module _in build_ separates the standard from the example; see §Still Undecided.
 
 Rationale and worked examples sit under `Financial Planner/design/` —
 TECHNICAL_STANDARDS.md, TEST_STRATEGY.md, TECH_STACK.md, VERSION_CONTROL.md are the
@@ -101,7 +101,7 @@ is the tail wagging the dog. Scaffolding Project Tracker found exactly this in
 `lintNoTrackingIds.ts` (it scanned a `scripts/` folder only the planner has).
 
 ESLint needs one extra hop. Flat-config `files` globs resolve against the config file
-ESLint *loads*, not the one that authored the array — so a module's `eslint.config.mjs`
+ESLint _loads_, not the one that authored the array — so a module's `eslint.config.mjs`
 re-exports the shared config to root `srv/**` and `app/**` at the module.
 
 ## Adding a Module
@@ -189,14 +189,18 @@ Do not invent an answer to these — ask.
 - **Where the shared standards live.** They are still inside
   `Financial Planner/CLAUDE.md`, written in the planner's vocabulary, and Project Tracker
   now references them from outside. That is the arrangement the §Standards section already
-  describes as temporary. A second module in *build* — not just scaffolded — is what should
+  describes as temporary. A second module in _build_ — not just scaffolded — is what should
   trigger the move to `Standards (Documents)/`.
 
 ## Conventions
 
 - **Memory** at `.claude/projects/c--Projects-Life-OS/memory/` is Life-OS-wide — the
   standards it records apply to every module, not just the planner.
-- **Playwright MCP** (`.mcp.json`, root) validates frontend work in every module.
+- **Playwright MCP** (`.mcp.json`, root) validates frontend work in every module. **That file is
+  gitignored** (`.gitignore:13`), so it is machine-local, not a repo artifact — a fresh clone has no
+  MCP servers registered. Any server the repo depends on therefore ships as a **tracked installer
+  script** under `Standards (Technical + Linting)/scripts/` rather than as a committed config; see
+  Project Tracker D-32 (the `INT-006` hook) and D-44 (the `INT-001` verb server).
 - **Commits** are Conventional Commits. Scope by module when a change is module-local.
 
 ## Do NOT
