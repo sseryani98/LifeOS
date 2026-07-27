@@ -1,0 +1,19 @@
+# CAP generated
+gen/
+@cds-models/
+.cds-services.json
+*.sqlite
+
+# Test artifacts
+coverage/
+
+# TypeScript build cache
+*.tsbuildinfo
+
+# CAP local env overrides
+default-env.json
+
+# Local Postgres artifacts (database name, per package.json cds.requires.db)
+project_tracker
+project_tracker-shm
+project_tracker-wal

@@ -1,7 +1,7 @@
 {
-  "name": "financial-planner",
+  "name": "project-tracker",
   "version": "0.0.1",
-  "description": "Personal financial management system for a Canadian credit card churner",
+  "description": "Project state of record for Life OS — the store the agent fleet writes into",
   "private": true,
   "type": "module",
   "imports": {
@@ -10,11 +10,7 @@
   "scripts": {
     "start": "cds-serve",
     "build": "cds build",
-    "test": "jest --json --outputFile=coverage/test-results.json --coverage",
-    "posttest": "tsx \"../Standards (Technical + Linting)/scripts/generateTestReport.ts\"",
-    "generate-key": "tsx scripts/generateKey.ts",
-    "lint": "eslint srv/ app/ scripts/ --no-error-on-unmatched-pattern && npm run lint:ui5 && npm run lint:i18n && npm run lint:annotations && npm run lint:filenames && npm run lint:tracking-ids && npm run lint:default-attrs && npm run lint:test-data && npm run lint:test-structure && npm run lint:test-cql && npm run lint:grouped-constants && npm run lint:frontend-constants && npm run lint:domain-types && npm run lint:comment-length && npm run lint:mapper-methods && npm run lint:messaging && npm run lint:frontend-data-access && npm run lint:frontend-controller-shape && npm run lint:control-ids && npm run lint:event-handlers && npm run lint:handler-event-types && npm run lint:facades && npm run lint:doc-claims",
-    "lint:ui5": "cd app/admin-master-data && ui5lint",
+    "lint": "eslint srv/ app/ --no-error-on-unmatched-pattern && npm run lint:i18n && npm run lint:annotations && npm run lint:filenames && npm run lint:tracking-ids && npm run lint:default-attrs && npm run lint:test-data && npm run lint:test-structure && npm run lint:test-cql && npm run lint:grouped-constants && npm run lint:frontend-constants && npm run lint:domain-types && npm run lint:comment-length && npm run lint:mapper-methods && npm run lint:messaging && npm run lint:frontend-data-access && npm run lint:frontend-controller-shape && npm run lint:control-ids && npm run lint:event-handlers && npm run lint:handler-event-types && npm run lint:facades && npm run lint:doc-claims",
     "lint:i18n": "tsx \"../Standards (Technical + Linting)/scripts/lintI18n.ts\"",
     "lint:annotations": "tsx \"../Standards (Technical + Linting)/scripts/lintAnnotations.ts\"",
     "lint:filenames": "tsx \"../Standards (Technical + Linting)/scripts/lintFilenames.ts\"",
@@ -39,12 +35,7 @@
   },
   "dependencies": {
     "@cap-js/postgres": "^2",
-    "@sap/cds": "9.8.4",
-    "axios": "^1",
-    "cheerio": "^1",
-    "fuse.js": "^7",
-    "node-cron": "^3",
-    "papaparse": "^5"
+    "@sap/cds": "9.8.4"
   },
   "devDependencies": {
     "@cap-js/cds-test": "^0.4.1",
@@ -53,26 +44,9 @@
     "@cap-js/sqlite": "^2.2.0",
     "@sap/eslint-plugin-cds": "^3",
     "@sapui5/types": "^1.136.16",
-    "@types/cheerio": "^0.22",
-    "@types/node-cron": "^3",
-    "@types/papaparse": "^5",
     "@ui5/cli": "^4.0.57",
-    "@ui5/linter": "^1.20.18",
-    "@ui5/ts-interface-generator": "^0.11.1",
     "cds-plugin-ui5": "^0.17.4",
     "ui5-tooling-transpile": "^3.11.3"
-  },
-  "ui5": {
-    "ui5linter": {
-      "idNamingPattern": "",
-      "eventNamingPattern": "",
-      "usage": {
-        "WrongNamespaceLinter": false
-      },
-      "xmlClassExceptions": [
-        "com.financialplanner.connectionmanager.view.ConnectionManager"
-      ]
-    }
   },
   "cds": {
     "requires": {
@@ -84,12 +58,8 @@
           "port": 5432,
           "user": "postgres",
           "password": "",
-          "database": "financial_planner"
-        },
-        "data": [
-          "db/data",
-          "db/seed"
-        ]
+          "database": "project_tracker"
+        }
       }
     },
     "i18n": {

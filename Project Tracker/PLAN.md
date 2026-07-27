@@ -1,7 +1,7 @@
 # Project Tracker — Plan
 
-**Status:** Plan phase — Ideate, Scope and Research complete, Scaffold next
-**Last updated:** 2026-07-26
+**Status:** Plan phase — Ideate, Scope, Research and Scaffold complete; Workshops next
+**Last updated:** 2026-07-27
 **Purpose:** The continuity document. Anyone (or any fresh chat) picking up Project Tracker
 starts here. Read this, then `design/PROBLEM_STATEMENT_AND_VISION.md` (PSV-001),
 `design/BUSINESS_ARCHITECTURE.md` (BA-001) and `design/DECISIONS_LOG.md` for the full
@@ -63,8 +63,8 @@ wording**: a bare `cds.connect.to()` throws, so the mechanism needs a constructi
 | 1   | Ideate             | `/generate-problem-statement-vision`    | Authored     | **Done** — 2026-07-26             |
 | 2   | Scope              | `/generate-business-architecture`       | Authored     | **Done** — 2026-07-26             |
 | 3   | Research           | `/gather-research`                      | Authored     | **Done** — 2026-07-26             |
-| 4   | Scaffold           | `/scaffold-module`                      | Not authored | **Next** — skill not yet authored |
-| 5   | Workshops          | `/workshop` → `spec-writer`             | Exists       | Not started                       |
+| 4   | Scaffold           | `/scaffold-module` → `scaffold-writer`  | Authored     | **Done** — 2026-07-27             |
+| 5   | Workshops          | `/workshop` → `spec-writer`             | Exists       | **Next**                          |
 | 6   | Information Arch.  | `/generate-information-architecture`    | Not authored | Not started — runs in full (D-21) |
 | 7   | Design System      | `/generate-design-system`               | Not authored | Not started — runs in full (D-21) |
 | 8   | Theme              | `/generate-theme`                       | Not authored | Not started — runs in full (D-21) |
@@ -82,32 +82,24 @@ Reports and two Forms, which is a real UI rather than a thin shell.
 
 ### Immediate next action
 
-Run **Scaffold**, which needs `/scaffold-module` authored first (D-14 — skills are written as
-their stage arrives). Scaffold creates the module folder, the workspace entry, the ESLint
-re-export, the tsconfig and the module `CLAUDE.md`, and per D-03 updates the root `CLAUDE.md`
-§Undecided — which D-29 and D-30 now close on all three counts (one backend or two, shared
-database or isolated, one shell or many).
+Run **Workshops** (`/workshop`) over the slice-1 objects, starting with `INT-001` — the widest
+fan-out object in BA-001, which every wave-1 and wave-3 object sits on. Its four implementation
+caveats from RSH-001 are spec input, and D-33 now settles how its TypeScript facade loads.
 
-**Two things to settle at or before Scaffold:**
+**Still open:** OI-04 (what calculated health computes — the `ENH-003` workshop), OI-05
+(methodology genericity — Data Model). **OI-03 is closed by D-35.** Research risks: R2 is closed
+by D-33 and R3/R8 dissolved with D-29; **R1, R4, R7 and R9 remain unexecuted** — see
+`research/README.md` §5. **R9 is the one with a deadline**: it must be settled before
+`RPT-001`…`RPT-004` are built.
 
-1. **Set up the git remote.** D-31 makes it the durability destination, and the repo has none
-   today — so the code and design docs have no off-machine copy either. This is Sandro's to
-   create; nothing has been pushed.
-2. **R2 — how a TypeScript service implementation loads outside `cds watch`.** The
-   highest-priority residual from Research, and a Tech Stack decision `INT-001` depends on.
-   Financial Planner's own tests carry the comment "cds.test cannot load the TypeScript service
-   impl", and Project Tracker will be TypeScript.
+### Carried forward from Scaffold
 
-**Still open:** OI-03 (three stages with no invocation point — settle at Scaffold), OI-04 (what
-calculated health computes — the `ENH-003` workshop), OI-05 (methodology genericity — Data
-Model). Five research risks remain unexecuted; see `research/README.md` §5.
-
-### Two things worth doing before or during Scaffold
-
-1. **Three slash commands** for `functional-tester`, `ux-tester`, and the `/human-review-loop`
-   trigger. Until these exist, the project view can name a next stage that cannot be run.
-2. ~~Decide what replaces git for project state~~ — **settled by D-31** (see §7). What remains
-   is the mechanical act of creating the git remote.
+1. **Push to the git remote.** The remote is now configured
+   (`https://github.com/sseryani98/LifeOS.git`) but **nothing has been pushed** — so the repo
+   still has no off-machine copy, and D-31's durability destination is not yet real.
+2. **The `@sap/cds` pin is now load-bearing** (D-34). Both modules and the root are held at
+   `9.8.4`; raising it is its own change, run with the suite green either side. 9.9.x breaks
+   every `cds.test` suite.
 3. **Note the rewiring stage exists** (§6). Ten files carry references to the retired state
    files, and `/pm-update` largely dissolves. It is catalogued as `INT-002` … `INT-006`, so it
    is estimated in the Build Plan rather than discovered during cutover.
@@ -312,6 +304,42 @@ Settle before or during Scaffold.
 ---
 
 ## 8. Session log
+
+### 2026-07-27 — Scaffold complete: module wired, root §Undecided emptied, R2 and OI-03 closed
+
+- Authored `/scaffold-module` + the `scaffold-writer` agent (D-14 — skills as their stage
+  arrives), then ran the stage. Created `Project Tracker/` with `package.json`,
+  `eslint.config.mjs`, `tsconfig.json`, `CLAUDE.md` and an empty `db/ srv/ app/ test/` skeleton.
+  **No FRICEW object was built** — structure only.
+- **Root `CLAUDE.md` §Undecided is empty.** All three items closed: namespace (D-03),
+  cross-module data (D-29), shell (D-30). The section became **Cross-Module Rulings**, and R9's
+  unexecuted cross-origin problem is written into it rather than left in the research pack where
+  a future module would not look. One new item opened: where the shared standards live, which a
+  second module _in build_ should trigger.
+- **R2 is settled by execution, not by reasoning (D-33).** `CDS_TYPESCRIPT=true` plus a `tsx`
+  loader — both required, independent levers. Node 22.19's native type stripping is **not**
+  sufficient: the shared `tsconfig.base.json` sets `module: Node16`, so source imports a sibling
+  as `./types.js` and strip-only mode cannot resolve that to `./types.ts`. Financial Planner
+  writes `.js` specifiers in every relative import, so this is the repo idiom. `tsx` alone fails
+  differently and more quietly — the service starts, then rejects every call with "no handler",
+  because the resolver never offered the file. `INT-001` and `INT-004` are unblocked.
+- **Scaffolding broke Financial Planner and the verification caught it (D-34).** Adding the
+  second workspace package made npm hoist one CAP runtime for the whole repo and pull 9.9.3 via
+  `@cap-js/cds-test`'s `>=8.8` peer range — **68 tests across 6 suites failed** mid-sprint, because
+  9.9.x `await`s `cds.plugins` in `bin/serve.js` and Jest's CJS VM rejects the dynamic import.
+  `@sap/cds` is now pinned to `9.8.4` at the root and in both modules; FP is back to 286/286.
+  npm `overrides` was tried first and is silently ignored when it conflicts with a direct
+  dependency. Also hit: `@cap-js/cds-types`' `postinstall` symlink for `@types/sap__cds` does not
+  survive an incremental install, which fails every module's `tsc`.
+- **OI-03 closed (D-35).** Authored `/functional-test` and `/ux-test`; gave `/human-review-loop`
+  a chain position and the rule that an agent may never close the stage on its own behalf. All
+  nine Sprint Build stages now have an invocation point — which the project view depends on,
+  since a next action naming an unrunnable stage is the P4 defect the module exists to remove.
+- **The second module falsified three shared claims, all fixed at the root (D-36).** The `lint:*`
+  block is not copy-verbatim safe (`lint:ui5` names a planner app folder); `lintNoTrackingIds.ts`
+  crashed on a `scripts/` folder only the planner has; and `eslint` exits 2 on an empty source
+  tree. The root's linter count read 20 and is 21.
+- **Git remote configured** — `https://github.com/sseryani98/LifeOS.git`. Nothing pushed yet.
 
 ### 2026-07-26 — Research complete: pack written, OI-01 and OI-02 closed, BA-001 → v1.1
 
