@@ -29,7 +29,7 @@ const VERB_PREFIXES = [
   "create", "read", "update", "delete", "remove", "add", "insert",
   "save", "load", "reload", "fetch", "find", "list", "count", "exists",
   "build", "make", "compute", "calculate", "derive", "resolve", "ensure",
-  "apply", "map", "parse", "format", "serialize", "deserialize", "normalize",
+  "apply", "map", "parse", "decode", "format", "serialize", "deserialize", "normalize",
   "sanitize", "redact", "encrypt", "decrypt", "hash",
   "validate", "verify", "assert", "check",
   "open", "close", "show", "hide", "toggle", "refresh", "reset", "clear",
