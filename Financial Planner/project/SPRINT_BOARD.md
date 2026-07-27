@@ -10,7 +10,6 @@
 
 | Story | Type | Description | Status |
 | --- | --- | --- | --- |
-| FRM-001 | Form | Transaction List: Fiori Elements List Report + Object Page — inline edit (vendor/PT/EC/notes), Split dialog, Apply Categories bulk, Re-categorize action, splits section, filters. | Backlog |
 | CNV-001 | Conversion | Historical backfill: BackfillService orchestration (parse via INT-002 → ENH-008 dedup → ENH-001 categorize → ImportLog), purchases-only + date-cutoff filters, halt-on-parse-error, supp-card attribution. Scenario test. | Backlog |
 
 ### In Progress
@@ -23,6 +22,7 @@ _None_
 | --- | --- | --- | --- |
 | ENH-001 | Enhancement | Categorization engine: three-pass matching pipeline (exact → starts-with → contains) returning vendor + dual taxonomy; user correction auto-creates MerchantPattern (learning). MerchantPattern entity + VendorCategoryStats CDS view. Wires FRM-003 pre-fill. | Done |
 | ENH-009 | Enhancement | Split logic: TransactionSplit with mySharePct/myShareAmount (either/or, share ≤ total, reimbursed = 0). splitTransaction / bulkCategorize / correctCategorization actions on TransactionService; bulk learning dedupes per description. 4-file transaction module + Mapper, unit + SQLite integration tests. | Done |
+| FRM-001 | Form | Transaction List: Fiori Elements List Report + Object Page — inline edit (vendor/PT/EC/notes), Split dialog, Apply Categories bulk, Re-categorize action, splits section, filters. | Done |
 
 ---
 
