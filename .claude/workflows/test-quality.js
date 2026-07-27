@@ -222,6 +222,24 @@ const diffFocus =
     ? `\n## This is a post-build review\n\nThe build changed these files:\n\n${changedFiles.join('\n')}\n\n**Judge the tests that cover this changeset.** A gap unrelated to what moved is real but is not what this run is for, and reporting it buries the gaps that are. Ask: does the changed behavior have a test that would fail if the change were wrong?\n\nThese tests were likely written by the build workflow's \`test-author\` from the spec's business rules. **Nothing else re-checks its judgment — you are the only thing that does.** It wrote tests the implementer then made pass; if it aimed at the wrong behavior, every phase after it agreed.\n`
     : ''
 
+// The full suite runs all ~266 tests + whole-project coverage. For a single-module or diff run,
+// that is 200+ wasted seconds — the reviewers only read their own module's rows. Scope jest to the
+// lenses under review, and clear the config threshold so unrun modules don't emit phantom
+// "coverage not met" failures (the gate agent flags real shortfalls from the table, not the exit
+// code). `all` runs every module, so scope is empty and it falls back to plain `npm test`.
+const ALL_MODULES = ['admin', 'categorization', 'ingestion', 'shared', 'transaction']
+
+const jestCommandFor = names => {
+  const modules = [...new Set(names)].filter(name => ALL_MODULES.includes(name))
+  const isFull = ALL_MODULES.every(module => modules.includes(module)) || !modules.length
+  // jest 29: --testPathPattern is singular. --coverageThreshold="{}" clears the config gate so unrun
+  // modules do not emit phantom "threshold not met" failures.
+  return isFull ? 'npm test' : `npx jest --coverage --coverageThreshold="{}" --testPathPattern="(${modules.join('|')})"`
+}
+
+const gateTestCommand = jestCommandFor(lenses.map(lens => lens.name))
+const gateIsScoped = gateTestCommand !== 'npm test'
+
 // ---------------------------------------------------------------- Phase 1: Gate
 
 phase('Gate')
@@ -234,14 +252,20 @@ const gateResult = await agent(
 \`\`\`
 cd "${moduleDir}" && npx tsc --noEmit
 cd "${moduleDir}" && npm run lint
-cd "${moduleDir}" && npm test
+cd "${moduleDir}" && ${gateTestCommand}
 \`\`\`
 
 Run all three even if an early one fails — one failure must not mask the others.
 
+**\`tsc --noEmit\` is the ONLY authority on type errors.** ${gateIsScoped ? 'The test command below runs a scoped subset through ts-jest, whose per-file diagnostics can disagree with a full compile (it may flag a method as missing that exists, or miss a real error). Take every \`mechanical\`/type failure from `tsc`, never from the jest output — a TS line printed by jest is noise unless \`tsc\` also reports it.' : 'Report type errors from its output.'}
+
 \`npm run lint\` is ESLint plus 21 \`lint:*\` scripts chained with \`&&\`, so it halts at the first failing linter. Expected. Report what you got.
 
-\`npm test\` has \`--coverage\` baked in and a \`posttest\` generator that writes markdown under \`project/test-reports/\`. If the console table is truncated, read the newest report there.
+${
+  gateIsScoped
+    ? `The test command is **scoped to the modules under review** (\`${gateTestCommand}\`) — it runs only their tests, not the full ~266, and clears the coverage threshold so unrun modules do not raise phantom failures. The coverage table it prints therefore covers the target modules and whatever they exercise; that is the scope you are reviewing, so it is complete for this run. Report a \`coverage\` failure only by reading a target file's numbers against the targets below — jest will not exit non-zero on coverage here.`
+    : '\`npm test\` has \`--coverage\` baked in and a \`posttest\` generator that writes markdown under \`project/test-reports/\`. If the console table is truncated, read the newest report there.'
+}
 
 ## The coverage table is the payload
 
@@ -371,7 +395,7 @@ This is a spec-to-test mapping job, and you are the only agent doing it.
 
 ## Method
 
-1. Read the functional specs: \`${moduleDir}/design/specs/SPEC-*.md\`. **§5 of each spec holds the business rules**; the specs also enumerate functional unit tests (FUTs). Those are the contract.
+1. Read the functional specs — **but only for the modules under review this run: ${lenses.map(lens => lens.name).join(', ')}.** Glob \`${moduleDir}/design/specs/SPEC-*.md\` and read the ones whose subject is a module in that list; skip the rest. Reading every spec on a single-module run is wasted effort — the gaps you would find in an unreviewed module are not this run's job and will bury the ones that are. Open another module's spec only if a rule you are tracing for an in-scope module explicitly reaches into it. **§5 of each spec holds the business rules**; the specs also enumerate functional unit tests (FUTs). Those are the contract.
 2. Map each rule and FUT to the test that protects it. Grep the test tree for the **behavior**, not the ID.
 3. Report the ones with **no test**, ranked by what breaks if the rule silently stops holding.
 
@@ -725,6 +749,10 @@ ${standards}
 
 Prefer extending over creating: a new constant beside the existing ones beats a new file; a new \`it\` in the right \`describe\` beats a new spec. **Reuse the canonical constant when one exists** — re-declaring it is itself a \`lint:test-data\` violation.
 
+## Batch your verification — do not run the suite between findings
+
+Write **all** the tests first, then run the suite **once** at the end to confirm they compile, pass, and lint clean. **Do not re-run after each finding** — a full run per finding is the single most expensive habit here, and it buys nothing a final run does not. Reserve a re-run for a specific test your one check flagged. A dedicated **Verify phase runs the whole gate again after you**, independently — so you do not need to prove green exhaustively; you need to write correct tests and sanity-check them once. For a sourceBug, confirm the test fails for the reason you claim, then stop — it is *meant* to stay red.
+
 Report each item as \`implemented\`, \`deferred\`, or \`sourceBug\`. **Deferred is respectable.** Do not invent a passing test to close a row — a test that cannot fail is worse than the gap it replaced, and it will outlive both of us in the suite.`
 
 log(`Implementing ${consensus.length} consensus items across ${buckets.size} bucket(s): ${[...buckets.keys()].join(', ')}.`)
@@ -750,15 +778,23 @@ log(`${wrote.length} written · ${deferred.length} deferred · ${authorSourceBug
 
 phase('Verify')
 
+// Verify only what changed. A module author touches one tree, so its writes can only break its own
+// tests — scope the confirm run to the buckets that were written. The shared bucket is the
+// exception: it edits cross-module fixtures, so any shared write forces a full run.
+const writtenBuckets = [...buckets.keys()]
+const verifyTestCommand = writtenBuckets.includes('shared') ? 'npm test' : jestCommandFor(writtenBuckets)
+
 const verifyPrompt = `Run the checks for \`${moduleDir}\` after new tests were just written into it.
 
 \`\`\`
 cd "${moduleDir}" && npx tsc --noEmit
 cd "${moduleDir}" && npm run lint
-cd "${moduleDir}" && npm test
+cd "${moduleDir}" && ${verifyTestCommand}
 \`\`\`
 
 Run all three even if an early one fails. Report the coverage table verbatim in \`coverageTable\` as before. No hashing on this run.
+
+**\`tsc --noEmit\` is the only authority on type errors** — ${verifyTestCommand === 'npm test' ? 'report them from its output.' : "the scoped ts-jest run's per-file type diagnostics can disagree with a full compile, so take type/`mechanical` failures from `tsc`, not from jest's printed TS lines."} A pre-existing \`tsc\` error in a file no author touched is not this run's doing — check it against the baseline below before calling it a new failure.
 
 Classify each failure: \`mechanical\` (a lint/ESLint/tsc rule — the message says the fix), \`logic\` (a failing Jest assertion), \`coverage\` (threshold not met). Put the **raw output** in \`detail\`. Do not diagnose and do not suggest fixes — the agent reading this needs the real text.`
 
@@ -806,12 +842,36 @@ ${standards}`,
 
 const sourceBugs = [...authorSourceBugs.map(item => `${item.id} — ${item.what}`), ...(repair?.sourceBugs ?? [])]
 
+// A null gate is UNVERIFIED, not "failed" — the gate can die (session limit, crash), and the smoke
+// test hit exactly that. Reporting passed:false there hid that nothing had checked the tree. And a
+// run that plants a sourceBug test is SUPPOSED to end red: separate that expected red from a real
+// repair failure, or every good run that catches a bug reads as broken.
+const verdictOf = () => {
+  if (!finalGate) return 'unverified'
+  if (finalGate.passed) return 'clean'
+  // mechanical/coverage failures are never expected: the author's tests must lint-clean and must not
+  // drop coverage. Only a `logic` failure can be a planted sourceBug left deliberately red.
+  const failures = finalGate.failures ?? []
+  const allLogic = failures.length > 0 && failures.every(failure => failure.kind === 'logic')
+  return sourceBugs.length && allLogic ? 'red-known' : 'red-unexpected'
+}
+
+const status = verdictOf()
+
 return {
   ...report,
   consensus: consensus.map(item => ({ ...item.finding, adversary: item.adversary })),
   implemented,
   buckets: [...buckets.keys()],
   sourceBugs,
-  verification: { passed: finalGate?.passed ?? false, failures: finalGate?.failures ?? [], repaired: repair?.fixes ?? [], unfixed: repair?.unfixed ?? [], coverage: finalGate?.overall ?? null },
+  verification: {
+    status, // clean | red-known (only sourceBugs remain) | red-unexpected | unverified (gate never ran)
+    passed: status === 'clean',
+    ranRepair: repair !== null,
+    failures: finalGate?.failures ?? [],
+    repaired: repair?.fixes ?? [],
+    unfixed: repair?.unfixed ?? [],
+    coverage: finalGate?.overall ?? null,
+  },
   counts: { ...report.counts, written: wrote.length, deferred: deferred.length, sourceBugs: sourceBugs.length },
 }

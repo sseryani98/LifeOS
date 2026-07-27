@@ -79,14 +79,27 @@ scales with modules, not findings** — one adversary per module rules on all of
 findings at once. Before invoking, tell Sandro in one line what he is about to spend: `lenses + 2
 reviewers, then 1–3 debate agents per module, then 1 author per module + up to 3 verify agents`.
 
-| Target | Roughly |
-| --- | --- |
-| single module | ~7 Opus + 2 Haiku |
-| diff mode | ~10–16, scaling with modules touched |
-| `all` | **~28 Opus + 2 Haiku** |
+Agent count is not the ceiling — **tokens and wall-clock are.** The Opus author phase dominates both.
+The single-module baseline below was measured; the "tuned" column is the target after three
+optimizations now in the workflow (scoped gate/verify jest runs, a batched author self-check, a
+spec-scoped functional reviewer) and should be re-measured on the next full run:
 
-**For `all`, ask for confirmation first** and quote the number. For diff mode and single modules,
-report the shape and proceed — that is the common case and it is cheap.
+| Target | Agents | Tokens (baseline → tuned) | Wall time (baseline → tuned) |
+| --- | --- | --- | --- |
+| single module | ~7 Opus + 2 Haiku | ~500k → **~400k** | ~30 min → **~18 min** |
+| `all` | ~28 Opus + 2 Haiku | **~2M+** (no scope savings — every module in play) | hours |
+
+The gate/verify scoping only helps when fewer than all modules are under review, so `all` sees none
+of it — another reason to run modules one at a time rather than `all` in a single shot.
+
+A single module measured at ~500k tokens and ~33 minutes, and the verify gate hit the session limit
+mid-run. **`all` will not complete in one invocation on a 5× plan** — it will exhaust the session
+partway and hand back a half-written tree. Prefer running one module at a time, or diff mode, which
+scopes to what changed. **For `all`, say this plainly and ask first.** For diff mode and single
+modules, report the shape and proceed.
+
+A run that plants a sourceBug ends with a **red suite by design** — the failing test documents a real
+bug for you to fix. That is a successful run (`verification.status: red-known`), not a broken one.
 
 ## 3. Invoke
 
@@ -130,9 +143,20 @@ Then report, in one line each:
 - **`sourceBugs`** — a new test caught a real bug in `srv/`. **Lead with this if it is non-empty.**
   It is the most valuable thing the run can produce and it is a bug report, not a footnote. Nothing
   was fixed — by design; the authors and the verifier are both forbidden from editing `srv/`.
-- **`verification.passed`** — did `tsc`, `lint` and `test` end green? **Lead with this if it is
-  false.** A red tree outranks every finding in the tables. Show `verification.repaired` (what the
-  verifier fixed, usually lint) and `verification.unfixed`.
+- **`verification.status`** — the tree's state after the run. Four values, and they mean different
+  things — do not collapse them to pass/fail:
+  - `clean` — `tsc`, `lint`, `test` all green. Say so in one line.
+  - `red-known` — red, but the only failures are the sourceBug tests, left failing on purpose to
+    document a real bug. **This is a successful run, not a broken one.** Report it as such, and point
+    at `sourceBugs`.
+  - `red-unexpected` — red for a reason that is not a sourceBug: a lint failure the verifier could
+    not fix, a coverage drop, an assertion that should not fail. **Lead with this** — it outranks
+    every finding in the tables. Show `verification.unfixed`.
+  - `unverified` — the gate never completed (crash, session limit). **Nothing checked the tree.**
+    Say plainly that the writes are unconfirmed and offer to re-run `npm test && npm run lint`
+    yourself. Do not imply green. `verification.ranRepair` tells you whether repair got as far as
+    running before the confirm gate died.
+  Show `verification.repaired` (what the verifier fixed, usually lint) whenever it is non-empty.
 - Any **`deferred`** item — an author declined to write it. Name it and why; he may disagree.
 - `counts.dropped` — findings the reviewer conceded after challenge. Name them briefly.
 - `counts.folded` — gaps the adversary spotted as the same finding said twice.
