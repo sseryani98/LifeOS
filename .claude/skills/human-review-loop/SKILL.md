@@ -1,13 +1,32 @@
 ---
 name: human-review-loop
-description: Process Sandro's end-of-build-cycle code review. For each finding — diagnose why the tooling failed to catch it, prescribe one durable prevention (ESLint rule, lint script, hook, memory, CLAUDE.md), then fix the instance and sweep the codebase for the rest. Use when Sandro gives feedback on an uncommitted changeset, critiques agent-written code, or asks "why did lint not catch this", "why didn't eslint catch this", "prevent this from happening again", "add this to memory/claude.md", "can we lint this".
+description: Process Sandro's end-of-build-cycle code review. For each finding — diagnose why the tooling failed to catch it, prescribe one durable prevention (ESLint rule, lint script, hook, memory, CLAUDE.md), then fix the instance and sweep the codebase for the rest. Use when Sandro gives feedback on an uncommitted changeset, critiques agent-written code, or asks "why did lint not catch this", "why didn't eslint catch this", "prevent this from happening again", "add this to memory/claude.md", "can we lint this". Also the Human Review stage of the Sprint Build chain — invoke it as `/human-review-loop` after `/functional-test` and `/ux-test`, once Sandro has read the diff and has findings.
 ---
+
+## When this fires
+
+Two entry points, and they are the same conversation from different directions.
+
+1. **Ad hoc** — Sandro points at something wrong in an uncommitted changeset, in any of the wordings
+   above. This is the common case and needs no ceremony.
+2. **Sprint Build stage 6 — Human Review.** The chain is: `/build` → `/code-quality` →
+   `/test-quality` → `/functional-test` → `/ux-test` (UI stories only) → **Human Review** →
+   `/refresh-docs` → `/pm-update` → `/commit-diff`. Every prior stage is agent-run and stops without
+   committing; this one is **manual and Sandro's**, because it is the only stage whose input is a
+   human having read the diff.
+
+**The stage is not skippable and it is not automatable.** If Sandro has read the diff and has no
+findings, that is a complete Human Review — say so and move to `/refresh-docs`. What is not allowed
+is an agent declaring the stage complete on its own behalf. Nothing downstream can tell the
+difference between "reviewed, nothing found" and "never reviewed", which is exactly why the stage
+has to be recorded rather than inferred.
 
 Sandro reviews a finished changeset and points at what's wrong. Per finding, in this order —
 **diagnose → prescribe → prove → fix → sweep**. The order is load-bearing: the mechanism gets
 built while the violation is still on disk, which is the only reason Red is possible.
 
-Paths are relative to `Life OS/`. The unit is `Financial Planner/`.
+Paths are relative to `Life OS/`. The unit is **the module the changeset touches** — resolve it
+rather than assuming; there is more than one module now. `{Module}/` below means that module.
 
 ## Search Map
 
@@ -15,12 +34,12 @@ Grep these before diagnosing. Where a rule *isn't* is the diagnosis.
 
 | Layer | Path | Binds? |
 |---|---|---|
-| Terse pre-coding rules | `Financial Planner/CLAUDE.md` | No — prose |
+| Terse pre-coding rules | `{Module}/CLAUDE.md`, plus the shared standards in `Financial Planner/CLAUDE.md` | No — prose |
 | Rationale + examples | `Financial Planner/design/TECHNICAL_STANDARDS.md` | No — prose |
 | Why + provenance | `~/.claude/projects/c--Projects-Life-OS/memory/*.md` | No — prose |
-| ESLint | `Financial Planner/eslint.config.mjs` — **5 `files:` blocks, each with its own `rules:`** | Yes |
-| Custom linters | `Financial Planner/scripts/lint*.ts` (18) | Yes |
-| The chain | `package.json` `lint` — `&&`-joined, **first failure hides the rest** | Yes |
+| ESLint | `Standards (Technical + Linting)/eslint.config.mjs` — the shared rules; `{Module}/eslint.config.mjs` only re-exports them | Yes |
+| Custom linters | `Standards (Technical + Linting)/scripts/lint*.ts` (21, shared by every module) | Yes |
+| The chain | `{Module}/package.json` `lint` — `&&`-joined, **first failure hides the rest** | Yes |
 | Agent process | `.claude/settings.json` — **zero hooks today** | Yes |
 | Commit gate | `Financial Planner/.git/hooks/pre-commit` — lint only, untracked | Yes |
 

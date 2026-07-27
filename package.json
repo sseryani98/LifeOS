@@ -5,7 +5,8 @@
   "private": true,
   "type": "module",
   "workspaces": [
-    "Financial Planner"
+    "Financial Planner",
+    "Project Tracker"
   ],
   "scripts": {
     "lint": "npm run lint:standards && npm run lint --workspaces --if-present",
@@ -13,6 +14,7 @@
     "test": "npm run test --workspaces --if-present"
   },
   "devDependencies": {
+    "@sap/cds": "9.8.4",
     "@types/jest": "^29",
     "@types/node": "^20",
     "@typescript-eslint/eslint-plugin": "^8",

@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync } from "fs";
+import { existsSync, readdirSync, readFileSync } from "fs";
 import { join, relative } from "path";
 
 const ROOT_DIR = process.cwd();
@@ -68,9 +68,12 @@ interface Violation {
 }
 
 /**
- * Recursively collects scannable source file paths under a directory.
+ * Recursively collects scannable source file paths under a directory. A missing
+ * root is skipped rather than fatal: SOURCE_DIRS is the union of trees any module
+ * might have, and no module has all of them — a scaffolded one has almost none.
  */
 function collectFiles(dir: string): string[] {
+  if (!existsSync(dir)) return [];
   const found: string[] = [];
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
     if (SKIP_SEGMENTS.has(entry.name)) continue;
