@@ -47,25 +47,36 @@ export class TransactionDataService {
   }
 
   /**
-   * Inserts a new split for a transaction.
-   * @param id Generated split id.
+   * Inserts a new split for a transaction — the ID is filled by the cuid aspect.
    * @param transactionId The parent transaction.
    * @param values The computed split values.
    * @returns Resolves once the insert completes.
    */
   async insertSplit(
-    id: string,
     transactionId: string,
     values: SplitPersistValues,
   ): Promise<void> {
     await INSERT.into(ENTITIES.TRANSACTION_SPLIT).entries({
-      ID: id,
       transaction_ID: transactionId,
       mySharePct: values.mySharePct,
       myShareAmount: values.myShareAmount,
       splitDescription: values.splitDescription,
       isRecurring: values.isRecurring,
     });
+  }
+
+  /**
+   * Loads a transaction's currently-stored vendor — the baseline a draft save
+   * compares against to tell whether the vendor actually changed.
+   * @param transactionId The transaction being saved.
+   * @returns The stored vendor id, or null when unset or the row is absent.
+   */
+  async loadStoredVendor(transactionId: string): Promise<string | null> {
+    const row = (await SELECT.one
+      .from(ENTITIES.TRANSACTION)
+      .columns("vendor_ID")
+      .where({ ID: transactionId })) as { vendor_ID: string | null } | undefined;
+    return row?.vendor_ID ?? null;
   }
 
   /**

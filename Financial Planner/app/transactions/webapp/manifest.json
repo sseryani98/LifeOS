@@ -1,0 +1,114 @@
+{
+  "_version": "2.0.0",
+  "sap.app": {
+    "id": "com.financialplanner.transactions",
+    "type": "application",
+    "title": "{{appTitle}}",
+    "description": "{{appDescription}}",
+    "applicationVersion": {
+      "version": "1.0.0"
+    },
+    "dataSources": {
+      "TransactionService": {
+        "uri": "/service/transactionSvcs/",
+        "type": "OData",
+        "settings": {
+          "odataVersion": "4.0"
+        }
+      }
+    }
+  },
+  "sap.ui5": {
+    "dependencies": {
+      "minUI5Version": "1.136.16",
+      "libs": {
+        "sap.m": {},
+        "sap.fe.templates": {}
+      }
+    },
+    "models": {
+      "": {
+        "dataSource": "TransactionService",
+        "preload": true,
+        "settings": {
+          "operationMode": "Server",
+          "autoExpandSelect": true,
+          "earlyRequests": true
+        }
+      },
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "com.financialplanner.transactions.i18n.i18n"
+        }
+      }
+    },
+    "routing": {
+      "routes": [
+        {
+          "pattern": ":?query:",
+          "name": "TransactionsList",
+          "target": "TransactionsList"
+        },
+        {
+          "pattern": "Transactions({key}):?query:",
+          "name": "TransactionsObjectPage",
+          "target": "TransactionsObjectPage"
+        }
+      ],
+      "targets": {
+        "TransactionsList": {
+          "type": "Component",
+          "id": "TransactionsList",
+          "name": "sap.fe.templates.ListReport",
+          "options": {
+            "settings": {
+              "contextPath": "/Transactions",
+              "variantManagement": "Page",
+              "initialLoad": "Enabled",
+              "controlConfiguration": {
+                "@com.sap.vocabularies.UI.v1.LineItem": {
+                  "actions": {
+                    "ReCategorize": {
+                      "press": "com.financialplanner.transactions.ext.TransactionsListActions.onReCategorize",
+                      "text": "{i18n>reCategorize}",
+                      "requiresSelection": true
+                    },
+                    "ApplyCategories": {
+                      "press": "com.financialplanner.transactions.ext.TransactionsListActions.onApplyCategories",
+                      "text": "{i18n>applyCategories}",
+                      "requiresSelection": true
+                    },
+                    "Split": {
+                      "press": "com.financialplanner.transactions.ext.TransactionsListActions.onSplit",
+                      "text": "{i18n>split}",
+                      "requiresSelection": true
+                    }
+                  }
+                }
+              },
+              "navigation": {
+                "Transactions": {
+                  "detail": {
+                    "route": "TransactionsObjectPage"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "TransactionsObjectPage": {
+          "type": "Component",
+          "id": "TransactionsObjectPage",
+          "name": "sap.fe.templates.ObjectPage",
+          "options": {
+            "settings": {
+              "contextPath": "/Transactions",
+              "editableHeaderContent": false
+            }
+          }
+        }
+      }
+    }
+  }
+}

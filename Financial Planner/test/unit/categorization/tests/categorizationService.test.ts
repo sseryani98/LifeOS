@@ -11,6 +11,15 @@ import {
   NETFLIX_EXACT_PATTERN,
   NETFLIX_VENDOR_ID,
 } from "../data/patterns.js";
+import {
+  RECAT_AUTO_ID,
+  RECAT_AUTO_ROW,
+  RECAT_UNCATEGORIZED_ID,
+  RECAT_UNCATEGORIZED_ROW,
+  RECAT_UNMATCHED_ROW,
+  RECAT_USER_CORRECTED_ID,
+  RECAT_USER_CORRECTED_ROW,
+} from "../data/recategorization.js";
 import { buildCategorizationMocks } from "../support/categorizationMocks.js";
 
 describe("CategorizationService", () => {
@@ -106,5 +115,92 @@ describe("CategorizationService", () => {
 
     expect(mocks.updateTransactionCategorization).not.toHaveBeenCalled();
     expect(mocks.insertMerchantPattern).not.toHaveBeenCalled();
+  });
+
+  describe("applyAssignmentLearning", () => {
+    /** A direct object-page vendor assignment must learn a pattern without re-writing the row (the save already persisted it). */
+    it("learns a pattern from a direct vendor assignment", async () => {
+      const mocks = buildCategorizationMocks();
+      mocks.loadTransactionForCorrection.mockResolvedValue(PADEL_TRANSACTION);
+
+      await mocks.service.applyAssignmentLearning(
+        PADEL_TRANSACTION.ID,
+        PADEL_HAUS_VENDOR_ID,
+      );
+
+      expect(mocks.insertMerchantPattern).toHaveBeenCalledWith(
+        expect.objectContaining({ vendor_ID: PADEL_HAUS_VENDOR_ID }),
+      );
+    });
+
+    /** A missing transaction must be a no-op — never learn against a row that does not exist. */
+    it("is a no-op when the transaction does not exist", async () => {
+      const mocks = buildCategorizationMocks();
+      mocks.loadTransactionForCorrection.mockResolvedValue(null);
+
+      await mocks.service.applyAssignmentLearning(PADEL_TRANSACTION.ID, PADEL_HAUS_VENDOR_ID);
+
+      expect(mocks.insertMerchantPattern).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("applyReCategorization", () => {
+    /** Re-run must apply the fresh match as `auto` to uncategorized and auto rows so a new pattern back-fills the selection. */
+    it("applies auto categorization to uncategorized and auto rows", async () => {
+      const mocks = buildCategorizationMocks();
+      mocks.loadTransactionsForRecategorization.mockResolvedValue([
+        RECAT_UNCATEGORIZED_ROW,
+        RECAT_AUTO_ROW,
+      ]);
+      mocks.loadActivePatterns.mockResolvedValue([NETFLIX_EXACT_PATTERN]);
+
+      const outcome = await mocks.service.applyReCategorization([
+        RECAT_UNCATEGORIZED_ID,
+        RECAT_AUTO_ID,
+      ]);
+
+      expect(outcome.recategorizedCount).toBe(2);
+      expect(mocks.updateTransactionCategorization).toHaveBeenCalledWith(
+        RECAT_UNCATEGORIZED_ID,
+        expect.objectContaining({
+          vendor_ID: NETFLIX_VENDOR_ID,
+          categorizationStatus: "auto",
+        }),
+      );
+    });
+
+    /** A user-corrected row must be skipped — a re-run never overrides the user's own decision. */
+    it("skips user_corrected rows without writing", async () => {
+      const mocks = buildCategorizationMocks();
+      mocks.loadTransactionsForRecategorization.mockResolvedValue([
+        RECAT_USER_CORRECTED_ROW,
+      ]);
+      mocks.loadActivePatterns.mockResolvedValue([NETFLIX_EXACT_PATTERN]);
+
+      const outcome = await mocks.service.applyReCategorization([
+        RECAT_USER_CORRECTED_ID,
+      ]);
+
+      expect(outcome.recategorizedCount).toBe(0);
+      expect(outcome.skippedCount).toBe(1);
+      expect(mocks.updateTransactionCategorization).not.toHaveBeenCalled();
+    });
+
+    /** A row no pattern matches must be left uncategorized and counted as skipped, not written. */
+    it("leaves unmatched rows uncategorized", async () => {
+      const mocks = buildCategorizationMocks();
+      mocks.loadTransactionsForRecategorization.mockResolvedValue([
+        RECAT_UNMATCHED_ROW,
+      ]);
+      mocks.loadActivePatterns.mockResolvedValue([NETFLIX_EXACT_PATTERN]);
+
+      const outcome = await mocks.service.applyReCategorization([
+        RECAT_UNMATCHED_ROW.ID,
+      ]);
+
+      expect(outcome.recategorizedCount).toBe(0);
+      expect(outcome.skippedCount).toBe(1);
+      expect(mocks.updateTransactionCategorization).not.toHaveBeenCalled();
+    });
   });
 });

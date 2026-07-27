@@ -40,9 +40,3 @@ export const APPLE_TO_ICLOUD_CORRECTION: CorrectionRequest = {
   purchaseType_ID: RECURRING_BILLS_PT,
   earningCategory_ID: null,
 };
-
-/** Invalid — missing both the transaction id and the vendor. */
-export const EMPTY_CORRECTION: CorrectionRequest = {
-  transactionId: "",
-  vendor_ID: "",
-};

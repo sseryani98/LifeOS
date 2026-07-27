@@ -1,0 +1,53 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:form="sap.ui.layout.form"
+>
+    <Dialog
+        id="idSplitDialog"
+        title="{i18n>splitDialogTitle}"
+    >
+        <content>
+            <form:SimpleForm editable="true">
+                <Label text="{i18n>splitMySharePct}" />
+                <Input
+                    id="idSplitPctInput"
+                    value="{splitModel>/mySharePct}"
+                    type="Number"
+                    description="{i18n>splitPctUnit}"
+                />
+                <Label text="{i18n>splitMyShareAmount}" />
+                <Input
+                    id="idSplitAmountInput"
+                    value="{splitModel>/myShareAmount}"
+                    type="Number"
+                />
+                <Label text="{i18n>splitDescription}" />
+                <Input
+                    id="idSplitDescriptionInput"
+                    value="{splitModel>/splitDescription}"
+                />
+                <Label text="{i18n>splitRecurring}" />
+                <Switch
+                    id="idSplitRecurringSwitch"
+                    state="{splitModel>/isRecurring}"
+                />
+            </form:SimpleForm>
+        </content>
+        <beginButton>
+            <Button
+                id="idSplitConfirmButton"
+                text="{i18n>save}"
+                type="Emphasized"
+                press=".onButtonSplitConfirmPress"
+            />
+        </beginButton>
+        <endButton>
+            <Button
+                id="idSplitCancelButton"
+                text="{i18n>cancel}"
+                press=".onButtonSplitCancelPress"
+            />
+        </endButton>
+    </Dialog>
+</core:FragmentDefinition>

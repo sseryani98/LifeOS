@@ -48,16 +48,10 @@ export interface CategorizationResult {
 
 /** Inputs to a user categorization correction (learning trigger). */
 export interface CorrectionRequest {
-  transactionId?: string | null;
-  vendor_ID?: string | null;
-  purchaseType_ID?: string | null;
-  earningCategory_ID?: string | null;
-}
-
-/** A single validation failure produced by CategorizationValidator. */
-export interface CategorizationValidationError {
-  field: string;
-  messageKey: string;
+  transactionId: string;
+  vendor_ID: string;
+  purchaseType_ID: string | null;
+  earningCategory_ID: string | null;
 }
 
 /** The transaction fields the correction flow reads before learning. */
@@ -69,7 +63,6 @@ export interface TransactionCategorizationRow {
 
 /** Inputs for assembling a learned MerchantPattern from a correction. */
 export interface LearnedPatternParams {
-  id: string;
   vendorId: string;
   pattern: string;
   /** The transaction's signed amount, used when discriminating by amount. */
@@ -82,7 +75,6 @@ export interface LearnedPatternParams {
 
 /** A MerchantPattern insert row assembled during learning. */
 export interface MerchantPatternInsert {
-  ID: string;
   vendor_ID: string;
   pattern: string;
   matchType: string;
@@ -92,10 +84,28 @@ export interface MerchantPatternInsert {
   isActive: boolean;
 }
 
-/** The categorization fields written to a transaction on correction. */
+/**
+ * The categorization fields written to a transaction — user_corrected on a
+ * correction, auto on a re-categorize match.
+ */
 export interface TransactionCategorizationPatch {
   vendor_ID: string;
   purchaseType_ID: string | null;
   earningCategory_ID: string | null;
   categorizationStatus: string;
+}
+
+/** The transaction fields the re-categorize batch reads before re-matching. */
+export interface TransactionRecategorizationRow {
+  ID: string;
+  rawDescription: string;
+  amount: number;
+  /** Current categorizationStatus — user_corrected rows are skipped. */
+  categorizationStatus: string;
+}
+
+/** Outcome of a re-categorize batch: rows re-matched vs rows left untouched. */
+export interface ReCategorizeOutcome {
+  recategorizedCount: number;
+  skippedCount: number;
 }

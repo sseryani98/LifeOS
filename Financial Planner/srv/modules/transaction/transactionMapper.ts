@@ -1,6 +1,7 @@
 import type {
   BulkCategorizeCommand,
   CorrectionCommand,
+  ReCategorizeCommand,
   SplitCommand,
 } from "./types.js";
 
@@ -36,6 +37,19 @@ export class TransactionMapper {
       vendor_ID: (data?.vendor_ID ?? null) as string | null,
       purchaseType_ID: (data?.purchaseType_ID ?? null) as string | null,
       earningCategory_ID: (data?.earningCategory_ID ?? null) as string | null,
+    };
+  }
+
+  /**
+   * Maps the raw reCategorize payload to a typed re-categorize command.
+   * @param data The action request's data block.
+   * @returns The typed re-categorize command.
+   */
+  static toReCategorizeCommand(
+    data: Record<string, unknown> | undefined,
+  ): ReCategorizeCommand {
+    return {
+      transactionIds: (data?.transactionIds ?? []) as string[],
     };
   }
 

@@ -8,7 +8,11 @@ interface NavEntry {
   hash: string;
 }
 
-/** Map of nav keys → their component, route, and URL hash. */
+/**
+ * Nav keys → component, route, and URL hash. Each key must match the `key=`
+ * attribute of a NavigationListItem in App.view.xml — `_navigateToKey` silently
+ * no-ops on a key with no entry here.
+ */
 const navConfig: Record<string, NavEntry> = {
   MD_ISSUERS: {
     component: "com.financialplanner.adminmasterdata",
@@ -94,6 +98,11 @@ const navConfig: Record<string, NavEntry> = {
     component: "com.financialplanner.csvimportwizard",
     route: "CsvImportWizard",
     hash: "CsvImport",
+  },
+  TRANSACTION_LIST: {
+    component: "com.financialplanner.transactions",
+    route: "TransactionsList",
+    hash: "Transactions",
   },
 };
 

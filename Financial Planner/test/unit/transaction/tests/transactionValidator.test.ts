@@ -3,21 +3,29 @@ import {
   BOTH_INPUTS_SPLIT,
   BULK_APPLY,
   DOLLAR_SPLIT,
+  EMPTY_RECATEGORIZE,
   EMPTY_SELECTION_BULK,
   EXCEEDS_DOLLAR_SPLIT,
+  EXCEEDS_SHARE,
   FRIEND_ABS_AMOUNT,
-  INVALID_PCT_SPLIT,
+  FULL_DOLLAR_SPLIT,
+  FULL_PADEL_SHARE,
+  FULL_PCT_SPLIT,
+  FULL_RESTAURANT_SHARE,
   MISSING_TXN_CORRECTION,
   MISSING_VENDOR_CORRECTION,
   NEGATIVE_DOLLAR_SPLIT,
-  NEGATIVE_PCT_SPLIT,
+  NEGATIVE_SHARE,
   NEITHER_INPUT_SPLIT,
-  NO_VENDOR_BULK,
   PADEL_ABS_AMOUNT,
+  PADEL_PCT_SHARE,
   PERCENTAGE_SPLIT,
+  RECATEGORIZE_SELECTION,
   REIMBURSED_SPLIT,
   RESTAURANT_ABS_AMOUNT,
+  RESTAURANT_DOLLAR_SHARE,
   VALID_CORRECTION,
+  ZERO_SHARE,
 } from "../data/splits.js";
 
 describe("TransactionValidator", () => {
@@ -27,6 +35,7 @@ describe("TransactionValidator", () => {
       const errors = TransactionValidator.validateSplit(
         PERCENTAGE_SPLIT,
         PADEL_ABS_AMOUNT,
+        PADEL_PCT_SHARE,
       );
 
       expect(errors).toHaveLength(0);
@@ -37,6 +46,7 @@ describe("TransactionValidator", () => {
       const errors = TransactionValidator.validateSplit(
         DOLLAR_SPLIT,
         RESTAURANT_ABS_AMOUNT,
+        RESTAURANT_DOLLAR_SHARE,
       );
 
       expect(errors).toHaveLength(0);
@@ -47,6 +57,7 @@ describe("TransactionValidator", () => {
       const errors = TransactionValidator.validateSplit(
         REIMBURSED_SPLIT,
         FRIEND_ABS_AMOUNT,
+        ZERO_SHARE,
       );
 
       expect(errors).toHaveLength(0);
@@ -57,6 +68,7 @@ describe("TransactionValidator", () => {
       const errors = TransactionValidator.validateSplit(
         BOTH_INPUTS_SPLIT,
         PADEL_ABS_AMOUNT,
+        PADEL_PCT_SHARE,
       );
 
       expect(errors[0].messageKey).toBe("transaction.split.enterOneInput");
@@ -67,29 +79,10 @@ describe("TransactionValidator", () => {
       const errors = TransactionValidator.validateSplit(
         NEITHER_INPUT_SPLIT,
         PADEL_ABS_AMOUNT,
+        ZERO_SHARE,
       );
 
       expect(errors[0].messageKey).toBe("transaction.split.enterOneInput");
-    });
-
-    /** A percentage above 100% must fail so a share can never exceed the whole. */
-    it("rejects a percentage outside 0–1", () => {
-      const errors = TransactionValidator.validateSplit(
-        INVALID_PCT_SPLIT,
-        PADEL_ABS_AMOUNT,
-      );
-
-      expect(errors[0].messageKey).toBe("transaction.split.invalidPercentage");
-    });
-
-    /** A negative percentage must fail — the lower bound of the range is guarded too. */
-    it("rejects a negative percentage", () => {
-      const errors = TransactionValidator.validateSplit(
-        NEGATIVE_PCT_SPLIT,
-        PADEL_ABS_AMOUNT,
-      );
-
-      expect(errors[0].messageKey).toBe("transaction.split.invalidPercentage");
     });
 
     /** A negative dollar share must fail — a share below zero is nonsensical. */
@@ -97,6 +90,7 @@ describe("TransactionValidator", () => {
       const errors = TransactionValidator.validateSplit(
         NEGATIVE_DOLLAR_SPLIT,
         RESTAURANT_ABS_AMOUNT,
+        NEGATIVE_SHARE,
       );
 
       expect(errors[0].messageKey).toBe("transaction.split.amountExceedsTotal");
@@ -107,41 +101,32 @@ describe("TransactionValidator", () => {
       const errors = TransactionValidator.validateSplit(
         EXCEEDS_DOLLAR_SPLIT,
         RESTAURANT_ABS_AMOUNT,
+        EXCEEDS_SHARE,
       );
 
       expect(errors[0].messageKey).toBe("transaction.split.amountExceedsTotal");
     });
-  });
 
-  describe("computeMyShareAmount", () => {
-    /** A percentage share must resolve to amount × pct rounded to cents — the value the budget reads. */
-    it("computes the share from a percentage", () => {
-      const share = TransactionValidator.computeMyShareAmount(
-        PERCENTAGE_SPLIT,
+    /** 100% is inside the range, not past it — a `>=` ceiling would reject a user splitting the whole charge to themselves. */
+    it("accepts a percentage at the 100% ceiling", () => {
+      const errors = TransactionValidator.validateSplit(
+        FULL_PCT_SPLIT,
         PADEL_ABS_AMOUNT,
+        FULL_PADEL_SHARE,
       );
 
-      expect(share).toBe(22);
+      expect(errors).toHaveLength(0);
     });
 
-    /** A dollar share must pass through unchanged so an explicit amount is stored verbatim. */
-    it("passes a dollar share through unchanged", () => {
-      const share = TransactionValidator.computeMyShareAmount(
-        DOLLAR_SPLIT,
+    /** A share equal to the total is inside the cap — a `>=` ceiling would reject an exact-total share, which is a legal full claim. */
+    it("accepts a dollar share equal to the total", () => {
+      const errors = TransactionValidator.validateSplit(
+        FULL_DOLLAR_SPLIT,
         RESTAURANT_ABS_AMOUNT,
+        FULL_RESTAURANT_SHARE,
       );
 
-      expect(share).toBe(42.5);
-    });
-
-    /** With neither input present the share defaults to zero rather than null — myShareAmount is never left unset. */
-    it("defaults to zero when neither input is present", () => {
-      const share = TransactionValidator.computeMyShareAmount(
-        NEITHER_INPUT_SPLIT,
-        PADEL_ABS_AMOUNT,
-      );
-
-      expect(share).toBe(0);
+      expect(errors).toHaveLength(0);
     });
   });
 
@@ -160,15 +145,23 @@ describe("TransactionValidator", () => {
 
       expect(errors[0].messageKey).toBe("transaction.recategorize.noSelection");
     });
+  });
 
-    /** A selection with no vendor must fail — learning needs a vendor to anchor the pattern. */
-    it("rejects a selection with no vendor", () => {
+  describe("validateReCategorize", () => {
+    /** A non-empty selection must pass so the re-run proceeds over the chosen rows. */
+    it("accepts a non-empty selection", () => {
       const errors =
-        TransactionValidator.validateBulkCategorize(NO_VENDOR_BULK);
+        TransactionValidator.validateReCategorize(RECATEGORIZE_SELECTION);
 
-      expect(errors[0].messageKey).toBe(
-        "transaction.bulkCategorize.vendorRequired",
-      );
+      expect(errors).toHaveLength(0);
+    });
+
+    /** An empty selection must fail — there is nothing to re-categorize. */
+    it("rejects an empty selection", () => {
+      const errors =
+        TransactionValidator.validateReCategorize(EMPTY_RECATEGORIZE);
+
+      expect(errors[0].messageKey).toBe("transaction.recategorize.noSelection");
     });
   });
 

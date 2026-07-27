@@ -21,10 +21,16 @@ export function buildTransactionMocks(): TransactionMocks {
     findSplitByTransaction: jest.fn(async () => null),
     insertSplit: jest.fn(async () => undefined),
     updateSplit: jest.fn(async () => undefined),
+    loadStoredVendor: jest.fn(async () => null),
   } as unknown as jest.Mocked<TransactionDataService>;
 
   const categorization = {
-    correctCategorization: jest.fn(async () => undefined),
+    correctCategorization: jest.fn(async () => true),
+    applyAssignmentLearning: jest.fn(async () => undefined),
+    applyReCategorization: jest.fn(async () => ({
+      recategorizedCount: 0,
+      skippedCount: 0,
+    })),
   } as unknown as jest.Mocked<CategorizationService>;
 
   const service = new TransactionService(data, categorization);
@@ -34,4 +40,12 @@ export function buildTransactionMocks(): TransactionMocks {
 /** Wraps an action payload as a request with a spy error() collaborator. */
 export function requestOf(data: unknown): { data: unknown; error: jest.Mock } {
   return { data, error: jest.fn() };
+}
+
+/** Wraps an UPDATE patch as a request with a keyed params entry (the row id). */
+export function requestWithKey(
+  data: Record<string, unknown>,
+  id: string,
+): { data: Record<string, unknown>; params: unknown[]; error: jest.Mock } {
+  return { data, params: [{ ID: id }], error: jest.fn() };
 }

@@ -1,0 +1,63 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:form="sap.ui.layout.form"
+>
+    <Dialog
+        id="idApplyCategoriesDialog"
+        title="{i18n>applyDialogTitle}"
+    >
+        <content>
+            <form:SimpleForm editable="true">
+                <Label text="{i18n>applyVendor}" />
+                <ComboBox
+                    id="idApplyVendorComboBox"
+                    selectedKey="{applyModel>/vendor_ID}"
+                    items="{path: '/Vendors', sorter: {path: 'name'}}"
+                >
+                    <core:Item
+                        key="{ID}"
+                        text="{name}"
+                    />
+                </ComboBox>
+                <Label text="{i18n>applyPurchaseType}" />
+                <ComboBox
+                    id="idApplyPurchaseTypeComboBox"
+                    selectedKey="{applyModel>/purchaseType_ID}"
+                    items="{path: '/PurchaseTypes', sorter: {path: 'name'}}"
+                >
+                    <core:Item
+                        key="{ID}"
+                        text="{name}"
+                    />
+                </ComboBox>
+                <Label text="{i18n>applyEarningCategory}" />
+                <ComboBox
+                    id="idApplyEarningCategoryComboBox"
+                    selectedKey="{applyModel>/earningCategory_ID}"
+                    items="{path: '/EarningCategories', sorter: {path: 'name'}}"
+                >
+                    <core:Item
+                        key="{ID}"
+                        text="{name}"
+                    />
+                </ComboBox>
+            </form:SimpleForm>
+        </content>
+        <beginButton>
+            <Button
+                id="idApplyConfirmButton"
+                text="{i18n>apply}"
+                type="Emphasized"
+                press=".onButtonApplyConfirmPress"
+            />
+        </beginButton>
+        <endButton>
+            <Button
+                id="idApplyCancelButton"
+                text="{i18n>cancel}"
+                press=".onButtonApplyCancelPress"
+            />
+        </endButton>
+    </Dialog>
+</core:FragmentDefinition>

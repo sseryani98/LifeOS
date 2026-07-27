@@ -9,8 +9,8 @@ import type {
 } from "./types.js";
 
 /**
- * Matching engine for the categorization engine: the matched pattern +
- * ranked category combos into a result, and correction inputs into the learned
+ * Mapping for the categorization engine: matched pattern +
+ * ranked combos into a result, and correction inputs into the learned
  * MerchantPattern and transaction patch.
  */
 export class CategorizationMapper {
@@ -69,6 +69,23 @@ export class CategorizationMapper {
   }
 
   /**
+   * Builds the transaction categorization fields written when the re-categorize
+   * batch re-matches a row — same taxonomy as a fresh match, status `auto`.
+   * @param result The re-run categorization result (a matched vendor).
+   * @returns The transaction categorization patch.
+   */
+  static toAutoCategorizationPatch(
+    result: CategorizationResult,
+  ): TransactionCategorizationPatch {
+    return {
+      vendor_ID: result.vendor_ID as string,
+      purchaseType_ID: result.purchaseType_ID,
+      earningCategory_ID: result.earningCategory_ID,
+      categorizationStatus: CATEGORIZATION_STATUS.AUTO,
+    };
+  }
+
+  /**
    * Builds a learned MerchantPattern from a correction. A correction over a
    * description that already matched a different vendor becomes an amount-
    * discriminated `contains` pattern; a from-scratch correction becomes an
@@ -80,7 +97,6 @@ export class CategorizationMapper {
     params: LearnedPatternParams,
   ): MerchantPatternInsert {
     return {
-      ID: params.id,
       vendor_ID: params.vendorId,
       pattern: params.pattern,
       matchType: params.isDiscriminator

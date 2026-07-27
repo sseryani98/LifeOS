@@ -246,11 +246,9 @@ export const VENDOR_COUNTS = new Map<string, number>([
 // ─── Learned-pattern params (mapper inputs) ───────────────────────────────────
 export const LEARNED_SOURCE_ID = "source-learned";
 export const MEDIUM_CONFIDENCE_ID = "confidence-medium";
-export const LEARNED_PATTERN_ID = "pattern-1";
 
 /** Params for a from-scratch correction — expects an exact, amount-agnostic pattern. */
 export const SCRATCH_LEARNED_PARAMS: LearnedPatternParams = {
-  id: LEARNED_PATTERN_ID,
   vendorId: AMAZON_VENDOR_ID,
   pattern: "PADEL HAUS TORONTO",
   amount: -110,
@@ -261,7 +259,6 @@ export const SCRATCH_LEARNED_PARAMS: LearnedPatternParams = {
 
 /** Params for a discriminating correction — expects a contains, amount-specific pattern. */
 export const DISCRIMINATOR_LEARNED_PARAMS: LearnedPatternParams = {
-  id: LEARNED_PATTERN_ID,
   vendorId: AMAZON_VENDOR_ID,
   pattern: "APPLE.COM/BILL",
   amount: -3.99,

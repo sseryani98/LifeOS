@@ -10,8 +10,30 @@ using {
 } from '../db/cards/schema';
 using {com.financialplanner.ImportLog} from '../db/ingestion/schema';
 
+// CSV ingestion (parse/save actions, ImportLogs, Csv* types) lives here with the
+// transaction actions as a design decision.
 service TransactionService @(path: '/service/transactionSvcs') {
-  entity Transactions            as projection on fp.Transaction;
+  @odata.draft.enabled
+  entity Transactions            as
+    projection on fp.Transaction {
+      *,
+      // Status → ObjectStatus colour: auto = Positive (green), user_corrected =
+      // Information (blue), uncategorized = Critical (orange).
+      case
+        categorizationStatus
+        when 'auto'
+             then 3
+        when 'user_corrected'
+             then 5
+        else 2
+      end as statusCriticality : Integer,
+      case
+        when split.myShareAmount is not null
+             then true
+        else false
+      end as hasSplit          : Boolean
+    };
+
   entity TransactionSplits       as projection on fp.TransactionSplit;
   entity MerchantPatterns        as projection on fp.MerchantPattern;
   entity Vendors                 as projection on Vendor;
@@ -82,6 +104,11 @@ service TransactionService @(path: '/service/transactionSvcs') {
     updatedCount : Integer;
   }
 
+  type ReCategorizeResult {
+    recategorizedCount : Integer;
+    skippedCount       : Integer;
+  }
+
   action parseCsvImport(cardInstance_ID: UUID,
                         fileName: String,
                         fileContent: LargeString) returns CsvParseResult;
@@ -92,18 +119,23 @@ service TransactionService @(path: '/service/transactionSvcs') {
                        rows: many CsvSaveRow)     returns CsvImportSummary;
 
   action splitTransaction(transactionId: UUID,
-                          mySharePct: Decimal(5, 4),
+                          mySharePct: Decimal(5, 4) @assert.range: [
+    0,
+    1
+  ],
                           myShareAmount: Decimal(15, 2),
                           splitDescription: String,
                           isRecurring: Boolean)   returns SplitResult;
 
   action bulkCategorize(transactionIds: many UUID,
-                        vendor_ID: UUID,
+                        vendor_ID: UUID @mandatory,
                         purchaseType_ID: UUID,
                         earningCategory_ID: UUID) returns BulkCategorizeResult;
 
-  action correctCategorization(transactionId: UUID,
-                               vendor_ID: UUID,
+  action correctCategorization(transactionId: UUID @mandatory,
+                               vendor_ID: UUID     @mandatory,
                                purchaseType_ID: UUID,
                                earningCategory_ID: UUID);
+
+  action reCategorize(transactionIds: many UUID)  returns ReCategorizeResult;
 }

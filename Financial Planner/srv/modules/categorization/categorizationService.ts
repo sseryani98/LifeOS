@@ -1,15 +1,14 @@
-import cds from "@sap/cds";
-
 import { BaseService } from "../shared/baseService.js";
 
 import { CategorizationContext } from "./categorizationContextService.js";
 import { CategorizationMapper } from "./categorizationMapper.js";
-import { CONFIDENCE, PATTERN_SOURCE } from "./constants.js";
+import { CATEGORIZATION_STATUS, CONFIDENCE, PATTERN_SOURCE } from "./constants.js";
 import type { CategorizationDataService } from "./categorizationDataService.js";
 import type {
   CategorizationInput,
   CategorizationResult,
   CorrectionRequest,
+  ReCategorizeOutcome,
   TransactionCategorizationRow,
 } from "./types.js";
 
@@ -59,25 +58,85 @@ export class CategorizationService extends BaseService {
    * vendor + taxonomy, then auto-creates a MerchantPattern so future identical
    * descriptions categorize automatically.
    * @param request Correction inputs (transaction + assignments).
-   * @returns Resolves once the correction and any learning complete.
+   * @returns True when the correction wrote a row, false when the row was absent.
    */
-  async correctCategorization(request: CorrectionRequest): Promise<void> {
+  async correctCategorization(request: CorrectionRequest): Promise<boolean> {
     const transaction = await this.dataService.loadTransactionForCorrection(
-      request.transactionId as string,
+      request.transactionId,
     );
     if (!transaction) {
-      return;
+      return false;
     }
     const patch = CategorizationMapper.toCategorizationPatch(
-      request.vendor_ID as string,
-      request.purchaseType_ID ?? null,
-      request.earningCategory_ID ?? null,
+      request.vendor_ID,
+      request.purchaseType_ID,
+      request.earningCategory_ID,
     );
     await this.dataService.updateTransactionCategorization(
       transaction.ID,
       patch,
     );
-    await this._applyLearning(transaction, request.vendor_ID as string);
+    await this._applyLearning(transaction, request.vendor_ID);
+    return true;
+  }
+
+  /**
+   * Learns from a direct vendor assignment (an object-page/inline save) without
+   * re-writing the transaction — the save itself persists the vendor. Mirrors a
+   * correction's learning: creates a pattern unless the vendor already matches.
+   * @param transactionId The transaction the vendor was assigned to.
+   * @param vendorId The assigned vendor id.
+   * @returns Resolves once any pattern is learned; a no-op for a missing row.
+   */
+  async applyAssignmentLearning(
+    transactionId: string,
+    vendorId: string,
+  ): Promise<void> {
+    const transaction =
+      await this.dataService.loadTransactionForCorrection(transactionId);
+    if (!transaction) {
+      return;
+    }
+    await this._applyLearning(transaction, vendorId);
+  }
+
+  /**
+   * Re-runs matching over a selection, applying the fresh match as an `auto`
+   * categorization. user_corrected rows are left untouched (the user's decision
+   * wins); rows that no longer match keep whatever categorization they already
+   * had. No learning fires — a re-run is not a user correction.
+   * @param transactionIds The selected transaction ids.
+   * @returns Counts of rows re-categorized and rows skipped.
+   */
+  async applyReCategorization(
+    transactionIds: string[],
+  ): Promise<ReCategorizeOutcome> {
+    const rows =
+      await this.dataService.loadTransactionsForRecategorization(transactionIds);
+    const context = await this.buildContext();
+    let recategorizedCount = 0;
+    let skippedCount = 0;
+    for (const row of rows) {
+      if (row.categorizationStatus === CATEGORIZATION_STATUS.USER_CORRECTED) {
+        skippedCount += 1;
+        continue;
+      }
+      const result = context.categorize(row.rawDescription, row.amount);
+      if (result.vendor_ID === null) {
+        skippedCount += 1;
+        continue;
+      }
+      await this.dataService.updateTransactionCategorization(
+        row.ID,
+        CategorizationMapper.toAutoCategorizationPatch(result),
+      );
+      recategorizedCount += 1;
+    }
+    this.logger.info("STATE_CHANGE", "Re-categorization applied", {
+      recategorizedCount,
+      skippedCount,
+    });
+    return { recategorizedCount, skippedCount };
   }
 
   /**
@@ -104,7 +163,6 @@ export class CategorizationService extends BaseService {
       this.dataService.resolveConfidenceLevelId(CONFIDENCE.MEDIUM),
     ]);
     const insert = CategorizationMapper.toLearnedPatternInsert({
-      id: cds.utils.uuid(),
       vendorId,
       pattern: description,
       amount: transaction.amount,

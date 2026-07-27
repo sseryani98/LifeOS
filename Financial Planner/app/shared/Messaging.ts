@@ -1,20 +1,21 @@
 import MessageToast from "sap/m/MessageToast";
 import MessageBox from "sap/m/MessageBox";
 import { getText as resolveText } from "com/financialplanner/shared/util/i18n";
-import type Controller from "sap/ui/core/mvc/Controller";
-import type View from "sap/ui/core/mvc/View";
+import type { MessagingHost } from "com/financialplanner/shared/types";
 
 /**
- * Messaging — shared user-messaging helper for all controller types.
+ * Messaging — shared user-messaging helper for all controller types. The host
+ * only needs a getView() returning something that carries the "i18n" model, so
+ * a controller and an FE ExtensionAPI stand-in both satisfy it.
  */
 export default class Messaging {
-  private readonly _controller: Controller;
+  private readonly _host: MessagingHost;
 
   /**
-   * @param controller the owning controller (provides the view for i18n)
+   * @param host the owning controller or view provider (carries the i18n model)
    */
-  public constructor(controller: Controller) {
-    this._controller = controller;
+  public constructor(host: MessagingHost) {
+    this._host = host;
   }
 
   /**
@@ -64,11 +65,12 @@ export default class Messaging {
   }
 
   /**
-   * Resolves an i18n key against the owning view's "i18n" model.
+   * Resolves an i18n key against the host view's "i18n" model.
    * @param key the i18n message key
    * @returns the resolved text, or "" when the key is missing
    */
   private _resolveText(key: string): string {
-    return resolveText(this._controller.getView() as View, key);
+    const view = this._host.getView();
+    return view ? resolveText(view, key) : "";
   }
 }
