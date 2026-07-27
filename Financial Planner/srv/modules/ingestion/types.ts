@@ -1,4 +1,3 @@
-import type { CategorizationContext } from "../categorization/categorizationContextService.js";
 import type { EncryptionFactory, HttpClient, SleepFn } from "../shared/types.js";
 
 /** Deduplication outcomes for the two-tier strategy. */
@@ -188,6 +187,15 @@ export interface ParsedCsvFields {
 }
 
 /**
+ * Outcome of decoding one CSV row's cells. On failure it names the semantic
+ * field that could not be parsed and echoes the raw value; the i18n message key
+ * is the orchestrator's concern, keeping the decoder pure.
+ */
+export type CsvRowDecodeResult =
+  | { ok: true; fields: ParsedCsvFields }
+  | { ok: false; field: "date" | "amount"; rawValue: string };
+
+/**
  * A successfully parsed + deduped CSV row (New or Potential Duplicates tab).
  * The `suggested*` fields carry the categorization pre-fill so the wizard can
  * pre-populate the categorization value helps for the user to accept or change.
@@ -292,13 +300,4 @@ export interface RowBuckets {
   potentialDuplicates: CsvClassifiedRow[];
   excludedRows: CsvExcludedRow[];
   skippedCount: number;
-}
-
-/** Per-file parsing context threaded through the row loop. */
-export interface ParseContext {
-  config: CsvFormatConfigRecord;
-  headerMap: Map<string, number>;
-  attribution: Map<string, string>;
-  selectedId: string;
-  categorization: CategorizationContext;
 }

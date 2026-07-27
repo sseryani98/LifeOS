@@ -246,6 +246,18 @@ describe("CsvImportService", () => {
       expect(result?.configResolved).toBe(true);
     });
 
+    /** An absent request body must coerce every field to null and fail validation, never read undefined off a missing data block. */
+    it("coerces an absent request body to null fields and rejects it", async () => {
+      const mocks = buildCsvImportMocks();
+      const error = jest.fn();
+
+      const result = await mocks.service.parse({ error } as never);
+
+      expect(result).toBeUndefined();
+      expect(error).toHaveBeenCalled();
+      expect(mocks.data.getFormatConfigForCard).not.toHaveBeenCalled();
+    });
+
     /** A request missing the card must be rejected up front with a field error and never reach the parser. */
     it("reports validation errors and returns undefined", async () => {
       const mocks = buildCsvImportMocks();
