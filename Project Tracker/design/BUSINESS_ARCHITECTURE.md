@@ -1,8 +1,8 @@
 # Business Architecture — FRICEW Catalogue
 
 **Document ID:** BA-001
-**Version:** 1.1
-**Date:** 2026-07-26
+**Version:** 1.2
+**Date:** 2026-07-27
 **Status:** Approved
 
 ---
@@ -13,6 +13,7 @@
 | ---------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 2026-07-26 | Sandro & Claude | Initial creation from the Scope stage. 21 objects cut to the slice-1 surface in PSV-001 §6. Records D-19 through D-27.                                                                                                |
 | 2026-07-26 | Sandro & Claude | Amended after the Research stage. OI-01 and OI-02 resolved (D-29, D-30, D-31); INT-001's OI-02 carve-out corrected — it was inverted; INT-006 matcher corrected; INT-007 added for the CSV exporter. 21 → 22 objects. |
+| 2026-07-27 | Sandro & Claude | Amended at the Workshops stage. §11 added — the twelve-spec grouping (D-37). CNV-001's subtask count corrected from 6 to 7 and its stage-4/5 drivers named (D-38). Object count unchanged at 22.                      |
 
 ---
 
@@ -182,7 +183,7 @@ documentation read to v2.1.218. The full risk table and what would settle each i
 
 | ID      | Name                           | Wave | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Traces To                                                                             |
 | ------- | ------------------------------ | ---- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| CNV-001 | Methodology Library Seed       | 1    | Loads the Sprint Build methodology as `Methodology` + ordered `MethodologyStep` data: the 9 stages from `PLAN.md` §5 (Sprint Build, Code Quality, Test Quality, Functional Test, UX Test, Human Review, Documentation, PM Update, Commit) with their Required/Conditional/Recommended kinds, plus Sprint Build's 6 subtasks (brief → red tests → implement → gate → coverage → smoke). UX Test is conditional on `FRM-*` stories. Must land before anything can instantiate; the source is a prose table in Project Tracker's own continuity doc, so there is no machine-readable source and it is not a Financial Planner state file. **Not to be confused with Financial Planner's `CNV-001`** (Historical Transaction Backfill), the story cutover precedes.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | PSV P3; D-08, OI-03, OI-05; ENH-001, WFL-001                                          |
+| CNV-001 | Methodology Library Seed       | 1    | Loads the Sprint Build methodology as `Methodology` + ordered `MethodologyStep` data: the 9 stages from `PLAN.md` §5 (Sprint Build, Code Quality, Test Quality, Functional Test, UX Test, Human Review, Documentation, PM Update, Commit) with their Required/Conditional/Recommended kinds, plus Sprint Build's **7** subtasks (brief → red → implement → gate → coverage → smoke → **handoff**). UX Test is conditional on `FRM-*` stories. **D-38 corrected the subtask count from 6 to 7**: `.claude/workflows/build.js:7-13` declares a `Handoff` phase the prose table omitted, and Handoff is where the build workflow writes the sprint board — the exact write `INT-002` rewires onto `complete_stage`, which at six would have had no node to land on. D-38 also names stages 4 and 5 as driven by `/functional-test` and `/ux-test` (D-35), not by the bare agents. Must land before anything can instantiate; the source is a prose table in Project Tracker's own continuity doc, so there is no machine-readable source and it is not a Financial Planner state file. **Not to be confused with Financial Planner's `CNV-001`** (Historical Transaction Backfill), the story cutover precedes.                                                                                                                                                                                                      | PSV P3; D-08, OI-03, OI-05; ENH-001, WFL-001                                          |
 | CNV-002 | Hierarchy & Story Load         | 1    | One-time load of Financial Planner's board into the D-08 hierarchy: Area "Personal Software" → Engagement "Life OS" → Workspace "Financial Planner" → 3 Initiatives (W1-S1 merged `0a9804f` tag `v1.1`, W1-S2 merged `9bbe826` tag `v1.2`, W1-S3 current) → 12 story Milestones (11 Done, Financial Planner's CNV-001 Backlog). Remaps the `Type` cell on **Financial Planner's INT-001 and INT-002 board rows** from `Integration` to `Interfaces` at load, so D-09's correction reaches the data and not only `/pm-update`'s enum. Carve-out per D-15: W1-S1 and W1-S2 stories carry **no per-stage detail**, and under the same rule **Financial Planner's W1-S3 Done stories (its ENH-001, ENH-009 and FRM-001) get no stage history either** — "W1-S3 fully modelled" means CNV-004 instantiates the live chain for the one story that still has one, not that three finished stories get plausible stage records back-filled. Per **D-29** this loads into Project Tracker's **own Postgres database**, separate from Financial Planner's, which closes risk **R4** (two projects deploying into one schema each read the other's `cds_model` snapshot as "prior" and emit DROPs, with `schema_evolution: "auto"` on by driver default) and risk **R3** (two module roots each declaring `cds.requires.db`, where `cds.env` binds once and does not re-read) — both were live only under a shared database. | PSV P1, P4; D-08, D-09, D-11, D-12, D-15, D-24, D-29; CNV-003, CNV-004                |
 | CNV-003 | Register Seed                  | 1    | Loads the register history that genuinely exists: **4 Defects** from `DEFECT_LOG.md` (D-001 High/Closed, D-002 Medium/Closed, D-003 High/Closed, D-004 Medium/**Open**), whose prose descriptions carry inline `file:line` references and commit SHAs; **~6 Decisions** (3 narrative bullets and 3 FRM-003 scope decisions from the W1-S2 checkpoint); and **1 TestRun** against the W1-S2 Initiative from the checkpoint's metrics (20 suites, 174 tests, 98.73% statements, 89.37% branches) — the only test data in the repo that links to a sprint. The W1-S2 checkpoint's remaining prose becomes a **manual narrative Activity entry of kind "checkpoint"**, preserved verbatim, because slice 1 has no Checkpoint entity and inventing one for a single file would be wrong. Carve-out: **the five existing markdown test reports are not backfilled** — none names a story, sprint, branch or commit, and retention already caps at five, so `TestRun` history proper starts with Financial Planner's CNV-001. Consequence worth stating: the Decision register opens **nearly empty**, because Financial Planner's ~313 real design decisions live under `design/` and D-12 excludes them; it fills going forward via `record_decision`.                                                                                                                                                                 | PSV P1, P5; D-10, D-12, D-15, D-24; CNV-002, RPT-004, INT-004                         |
 | CNV-004 | W1-S3 Live Chain Instantiation | 1    | Instantiates the live methodology chain for **Financial Planner's `CNV-001`** — the last remaining W1-S3 story and the first to run entirely on the new system — materialising the 9 stage Tasks and Sprint Build's 6 Subtasks in their starting state. This is the object that makes PSV falsifiable check 1 testable.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | PSV P3, P4; D-13, D-15; CNV-001, CNV-002, ENH-001, WFL-001                            |
@@ -264,6 +265,74 @@ Three waves, each a testable increment.
 - **External blocker resolved:** CNV-005's **OI-01** blocker is closed by D-31, and what was an open
   item is now an in-catalogue dependency on **INT-007**. That is why INT-007 sits in wave 3 rather
   than later — it must exist before CNV-005 retires the markdown.
+
+---
+
+## 11. Spec Grouping
+
+**Decision D-37.** Twelve specs cover the 22 objects — five grouped (15 objects) and seven standalone.
+`DESIGN_WORKSHOP.md` §3 is Financial Planner's own grouping and is **not** inherited; its _principle_
+is: objects that cannot be designed without each other share a spec, and an object that merely reads
+another's output stands alone.
+
+**`/workshop` reads this table.** Its Phase 0 looks for a module grouping table and derives one only
+when there is none. Deriving it per session would re-litigate one question twelve times.
+
+**Spec number is build order.** `SPEC-01` … `SPEC-12` runs wave 1 → wave 3 in dependency sequence,
+so no second ordering table is needed. The `SPEC-nn` sequence is module-local and starts at `01`.
+
+| Spec | Name                             | Objects                   | Wave | Why this cut                                                                                           |
+| ---- | -------------------------------- | ------------------------- | ---- | ------------------------------------------------------------------------------------------------------ |
+| 01   | MCP Intent-Verb Layer            | INT-001                   | 1    | The boundary contract. Every other object reads it; only WFL-001 injects into it, at one named seam    |
+| 02   | Methodology & Stage Enforcement  | CNV-001, ENH-001, WFL-001 | 1    | A guard cannot be specified without the chain's shape, nor the chain without the library it comes from |
+| 03   | Financial Planner Migration Load | CNV-002, CNV-003, CNV-004 | 1    | One source, one execution order, one reconciliation question                                           |
+| 04   | Next Action                      | ENH-002, RPT-002          | 2    | Engine plus its visualization — the planner's ENH-002 / RPT-006 pattern                                |
+| 05   | Workspace Header & Health        | ENH-003, RPT-001, FRM-001 | 2    | Health's vocabulary, its display and its write surface co-design. **OI-04 resolves here**              |
+| 06   | Sprint Planning                  | FRM-002                   | 2    | Shares validation with the `plan_sprint` verb (D-20) but shares no design question with it             |
+| 07   | Chain & Registers                | RPT-003, RPT-004          | 2    | Two leaf displays over one display pattern at trivial volume                                           |
+| 08   | Consumer Rewiring                | INT-002, INT-003, INT-005 | 3    | One question asked three times: which verb replaces which markdown write                               |
+| 09   | Test Report → TestRun            | INT-004                   | 3    | Unique concerns — the `process.chdir` trap, the `posttest` lifecycle, the Jest JSON mapping            |
+| 10   | Cutover Guards                   | INT-006                   | 3    | Its own research document (RSH-004) and its own risks (R5, R6, R10)                                    |
+| 11   | Project State Exporter           | INT-007                   | 3    | CSV shape, the round-trip drill, R7, and cadence                                                       |
+| 12   | Decommission                     | CNV-005                   | 3    | A precondition checklist rather than a feature; terminal act of cutover                                |
+
+**Totals: 12 specs, 22 objects. Every FRICEW ID appears exactly once.**
+
+### 11.1 The contested cut — SPEC-01 and WFL-001
+
+`complete_stage`'s failure modes _are_ WFL-001's rejections, which is a real argument for merging
+SPEC-01 and SPEC-02. They stay split because the seam is clean and §4 of this document already drew
+it: **INT-001 specifies _that_ a rejection surfaces as a typed MCP error; WFL-001 specifies _which_
+rejections exist.** Splitting also unblocks the widest fan-out object in one session rather than
+four. If SPEC-02's workshop finds the seam leaking — a guard that cannot be stated without changing
+INT-001's verb signature — that is the trigger to amend D-37, not to patch it quietly.
+
+### 11.2 FRICEW-to-spec cross-reference
+
+| FRICEW ID | Name                            | Spec |
+| --------- | ------------------------------- | ---- |
+| INT-001   | MCP Intent-Verb Server          | 01   |
+| INT-002   | Build Chain Rewiring            | 08   |
+| INT-003   | `/pm-update` Retirement         | 08   |
+| INT-004   | Test Report → TestRun           | 09   |
+| INT-005   | Human Review → `log_defect`     | 08   |
+| INT-006   | Cutover Guards                  | 10   |
+| INT-007   | Project State Exporter          | 11   |
+| CNV-001   | Methodology Library Seed        | 02   |
+| CNV-002   | Hierarchy & Story Load          | 03   |
+| CNV-003   | Register Seed                   | 03   |
+| CNV-004   | W1-S3 Live Chain Instantiation  | 03   |
+| CNV-005   | Decommission                    | 12   |
+| ENH-001   | Methodology Chain Instantiation | 02   |
+| ENH-002   | Next-Action Resolver            | 04   |
+| ENH-003   | Calculated Health               | 05   |
+| FRM-001   | Workspace Header Editor         | 05   |
+| FRM-002   | Sprint Planning Form            | 06   |
+| RPT-001   | Workspace Header                | 05   |
+| RPT-002   | Next Action & Task Queue        | 04   |
+| RPT-003   | Methodology Chain               | 07   |
+| RPT-004   | Registers                       | 07   |
+| WFL-001   | Stage State Machine             | 02   |
 
 ---
 

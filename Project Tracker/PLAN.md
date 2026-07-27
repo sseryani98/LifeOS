@@ -1,6 +1,7 @@
 # Project Tracker — Plan
 
-**Status:** Plan phase — Ideate, Scope, Research and Scaffold complete; Workshops next
+**Status:** Plan phase — Ideate, Scope, Research and Scaffold complete; Workshops in progress
+(grouping settled, `SPEC-01` … `SPEC-12`)
 **Last updated:** 2026-07-27
 **Purpose:** The continuity document. Anyone (or any fresh chat) picking up Project Tracker
 starts here. Read this, then `design/PROBLEM_STATEMENT_AND_VISION.md` (PSV-001),
@@ -16,10 +17,11 @@ Backlog (`CNV-001` Historical backfill) and nothing In Progress. That gap is del
 is the cutover window.
 
 Project Tracker has a PRD, `design/PROBLEM_STATEMENT_AND_VISION.md` (PSV-001, **Draft**),
-`design/BUSINESS_ARCHITECTURE.md` (BA-001 v1.1, **Approved** — 22 objects in 3 waves), a
-`research/` pack of six documents, a decisions log (D-01 … D-32), and the three Plan-phase
-skills installed in `.claude/`. **No module code exists yet.** Ideate, Scope and Research all
-ran 2026-07-26; Scaffold is next. **OI-01 and OI-02 are closed**; OI-03, OI-04 and OI-05 remain.
+`design/BUSINESS_ARCHITECTURE.md` (BA-001 v1.2, **Approved** — 22 objects in 3 waves, grouped into
+12 specs), a `research/` pack of six documents, a decisions log (D-01 … D-39), a wired module folder,
+and the Plan-phase skills installed in `.claude/`. **No module code exists yet.** Ideate, Scope and
+Research ran 2026-07-26; Scaffold and the Workshops grouping ran 2026-07-27. **OI-01, OI-02 and
+OI-03 are closed**; OI-04 and OI-05 remain.
 
 ### The one-paragraph version
 
@@ -33,9 +35,10 @@ becomes the first real test of the new system.
 
 ## 2. Decisions already made
 
-Full rationale in `design/DECISIONS_LOG.md` (D-01 … D-32; D-19 … D-27 were added at Scope,
-D-28 … D-32 at Research). The founding twelve, summarized — note that **D-28 amends item 4's
-wording**: a bare `cds.connect.to()` throws, so the mechanism needs a construction step.
+Full rationale in `design/DECISIONS_LOG.md` (D-01 … D-39; D-19 … D-27 were added at Scope,
+D-28 … D-32 at Research, D-33 … D-36 at Scaffold, D-37 … D-39 at Workshops). The founding twelve,
+summarized — note that **D-28 amends item 4's wording**: a bare `cds.connect.to()` throws, so the
+mechanism needs a construction step.
 
 | #   | Decision                                                                                                                                  |
 | --- | ----------------------------------------------------------------------------------------------------------------------------------------- |
@@ -58,45 +61,57 @@ wording**: a bare `cds.connect.to()` throws, so the mechanism needs a constructi
 
 ### Stage status
 
-| #   | Stage              | Skill                                   | Skill status | Stage status                      |
-| --- | ------------------ | --------------------------------------- | ------------ | --------------------------------- |
-| 1   | Ideate             | `/generate-problem-statement-vision`    | Authored     | **Done** — 2026-07-26             |
-| 2   | Scope              | `/generate-business-architecture`       | Authored     | **Done** — 2026-07-26             |
-| 3   | Research           | `/gather-research`                      | Authored     | **Done** — 2026-07-26             |
-| 4   | Scaffold           | `/scaffold-module` → `scaffold-writer`  | Authored     | **Done** — 2026-07-27             |
-| 5   | Workshops          | `/workshop` → `spec-writer`             | Exists       | **Next**                          |
-| 6   | Information Arch.  | `/generate-information-architecture`    | Not authored | Not started — runs in full (D-21) |
-| 7   | Design System      | `/generate-design-system`               | Not authored | Not started — runs in full (D-21) |
-| 8   | Theme              | `/generate-theme`                       | Not authored | Not started — runs in full (D-21) |
-| 9   | Data Model         | `/generate-data-model`                  | Not authored | Not started                       |
-| 10  | Tech Stack         | `/generate-tech-stack`                  | Not authored | Not started                       |
-| 11  | Test Strategy      | `/generate-test-strategy`               | Not authored | Not started                       |
-| 12  | Project Planning   | `/generate-build-plan`                  | Not authored | Not started                       |
-| 13  | Build              | `/build` + chain                        | Exists       | Not started                       |
-| 14  | **Rewire tooling** | `lintNoMarkdownState` + PreToolUse hook | Not authored | Not started                       |
-| 15  | Cutover            | —                                       | —            | Not started                       |
-| 16  | Back to FP         | —                                       | —            | Blocked on cutover                |
+| #   | Stage              | Skill                                   | Skill status | Stage status                                        |
+| --- | ------------------ | --------------------------------------- | ------------ | --------------------------------------------------- |
+| 1   | Ideate             | `/generate-problem-statement-vision`    | Authored     | **Done** — 2026-07-26                               |
+| 2   | Scope              | `/generate-business-architecture`       | Authored     | **Done** — 2026-07-26                               |
+| 3   | Research           | `/gather-research`                      | Authored     | **Done** — 2026-07-26                               |
+| 4   | Scaffold           | `/scaffold-module` → `scaffold-writer`  | Authored     | **Done** — 2026-07-27                               |
+| 5   | Workshops          | `/workshop` → `spec-writer`             | Exists       | **In progress** — grouping settled (D-37), 12 specs |
+| 6   | Information Arch.  | `/generate-information-architecture`    | Not authored | Not started — runs in full (D-21)                   |
+| 7   | Design System      | `/generate-design-system`               | Not authored | Not started — runs in full (D-21)                   |
+| 8   | Theme              | `/generate-theme`                       | Not authored | Not started — runs in full (D-21)                   |
+| 9   | Data Model         | `/generate-data-model`                  | Not authored | Not started                                         |
+| 10  | Tech Stack         | `/generate-tech-stack`                  | Not authored | Not started                                         |
+| 11  | Test Strategy      | `/generate-test-strategy`               | Not authored | Not started                                         |
+| 12  | Project Planning   | `/generate-build-plan`                  | Not authored | Not started                                         |
+| 13  | Build              | `/build` + chain                        | Exists       | Not started                                         |
+| 14  | **Rewire tooling** | `lintNoMarkdownState` + PreToolUse hook | Not authored | Not started                                         |
+| 15  | Cutover            | —                                       | —            | Not started                                         |
+| 16  | Back to FP         | —                                       | —            | Blocked on cutover                                  |
 
 Stages 6–8 (IA, Design System, Theme) **run in full** — settled by D-21. Slice 1 carries four
 Reports and two Forms, which is a real UI rather than a thin shell.
 
 ### Immediate next action
 
-Run **Workshops** (`/workshop`) over the slice-1 objects, starting with `INT-001` — the widest
-fan-out object in BA-001, which every wave-1 and wave-3 object sits on. Its four implementation
-caveats from RSH-001 are spec input, and D-33 now settles how its TypeScript facade loads.
+**The spec grouping is settled — D-37, twelve specs, the table is `BUSINESS_ARCHITECTURE.md` §11.**
+`/workshop` reads that table; it does not re-derive a grouping per session. Spec number is build
+order, so the sequence is simply `SPEC-01` → `SPEC-12`.
 
-**Still open:** OI-04 (what calculated health computes — the `ENH-003` workshop), OI-05
+Run the workshops in that order, starting with **`SPEC-01` — `INT-001`**, the widest fan-out object
+in BA-001, which every wave-2 and wave-3 object sits on. Its four implementation caveats from
+RSH-001 §13 are spec input, and D-33 settles how its TypeScript facade loads.
+
+**Still open:** OI-04 (what calculated health computes — now the `SPEC-05` workshop), OI-05
 (methodology genericity — Data Model). **OI-03 is closed by D-35.** Research risks: R2 is closed
 by D-33 and R3/R8 dissolved with D-29; **R1, R4, R7 and R9 remain unexecuted** — see
-`research/README.md` §5. **R9 is the one with a deadline**: it must be settled before
-`RPT-001`…`RPT-004` are built.
+`research/README.md` §5. Two of the four now have an owner rather than only a description:
+
+- **R1 goes to Data Model (D-39), and it is worse than the research thought.** The finding is not
+  that Postgres is unproven for this module — it is that `Financial Planner/package.json:82-88`
+  declares `"password": ""`, which SCRAM rejects, so **neither module has ever connected to
+  Postgres**; all six planner integration suites run on in-memory SQLite. Standing the binding up is
+  a prerequisite of Data Model, not a detail inside it. **`SPEC-01` ships provisional on R1.**
+- **R9 is the one with a deadline**: it must be settled before `RPT-001`…`RPT-004` are built, which
+  is now the `SPEC-05` and `SPEC-07` workshops.
 
 ### Carried forward from Scaffold
 
-1. **Push to the git remote.** The remote is now configured
-   (`https://github.com/sseryani98/LifeOS.git`) but **nothing has been pushed** — so the repo
-   still has no off-machine copy, and D-31's durability destination is not yet real.
+1. ~~**Push to the git remote.**~~ **Done.** `https://github.com/sseryani98/LifeOS.git` carries
+   `main`, `sprint/W1-S1`, `sprint/W1-S2` and `sprint/W1-S3`; the working branch is in sync with its
+   upstream. D-31's durability destination is real, so the `INT-007` exporter has somewhere to export
+   to. The round-trip (**R7**) is still untested.
 2. **The `@sap/cds` pin is now load-bearing** (D-34). Both modules and the root are held at
    `9.8.4`; raising it is its own change, run with the suite green either side. 9.9.x breaks
    every `cds.test` suite.
@@ -136,18 +151,25 @@ with the live methodology chain.
 
 Instantiated per story. Grounded in the real `.claude/` inventory, not aspirational.
 
-| #   | Task                                                      | Driven by                                                                       | Kind                       |
-| --- | --------------------------------------------------------- | ------------------------------------------------------------------------------- | -------------------------- |
-| 1   | Sprint Build                                              | `/build` → `workflows/build.js`                                                 | Required                   |
-| ↳   | _brief → red tests → implement → gate → coverage → smoke_ | build-briefer, test-author, implementer, gate-runner, test-author, smoke-tester | Subtasks                   |
-| 2   | Code Quality                                              | `/code-quality`                                                                 | Required                   |
-| 3   | Test Quality                                              | `/test-quality`                                                                 | Required                   |
-| 4   | Functional Test                                           | `functional-tester` agent                                                       | Required                   |
-| 5   | UX Test                                                   | `ux-tester` agent                                                               | Conditional — `FRM-*` only |
-| 6   | Human Review                                              | `/human-review-loop`                                                            | Required — manual, Sandro  |
-| 7   | Documentation                                             | `/refresh-docs`                                                                 | Recommended                |
-| 8   | PM Update                                                 | `/pm-update`                                                                    | Required                   |
-| 9   | Commit                                                    | `/commit-diff`                                                                  | Required                   |
+| #   | Task                                                              | Driven by                                                                                    | Kind                       |
+| --- | ----------------------------------------------------------------- | -------------------------------------------------------------------------------------------- | -------------------------- |
+| 1   | Sprint Build                                                      | `/build` → `workflows/build.js`                                                              | Required                   |
+| ↳   | _brief → red → implement → gate → coverage → smoke → **handoff**_ | build-briefer, test-author, implementer, gate-runner, test-author, smoke-tester, implementer | Subtasks                   |
+| 2   | Code Quality                                                      | `/code-quality`                                                                              | Required                   |
+| 3   | Test Quality                                                      | `/test-quality`                                                                              | Required                   |
+| 4   | Functional Test                                                   | `/functional-test` → `functional-tester`                                                     | Required                   |
+| 5   | UX Test                                                           | `/ux-test` → `ux-tester`                                                                     | Conditional — `FRM-*` only |
+| 6   | Human Review                                                      | `/human-review-loop`                                                                         | Required — manual, Sandro  |
+| 7   | Documentation                                                     | `/refresh-docs`                                                                              | Recommended                |
+| 8   | PM Update                                                         | `/pm-update`                                                                                 | Required                   |
+| 9   | Commit                                                            | `/commit-diff`                                                                               | Required                   |
+
+**Re-verified against `.claude/` on 2026-07-27, and it had drifted twice — both corrected by D-38.**
+Sprint Build carries **seven** subtasks, not six: `.claude/workflows/build.js:7-13` declares a
+`Handoff` phase this table omitted, and Handoff is where the workflow writes the sprint board — the
+exact write `INT-002` rewires onto `complete_stage`. Stages 4 and 5 now name the commands D-35
+authored rather than the bare agents. This table is `CNV-001`'s only source, so a drift here becomes
+seeded data; re-verify it against `.claude/` before `CNV-001` is built, not after.
 
 ---
 
@@ -305,6 +327,38 @@ Settle before or during Scaffold.
 
 ## 8. Session log
 
+### 2026-07-27 — Workshops opened: grouping settled as D-37, two documents found stale
+
+- **Settled the grouping before running any workshop (D-37).** `DESIGN_WORKSHOP.md` §3 is the
+  planner's own 21-spec cut over 43 objects and is not inherited; its _principle_ is. Applying that
+  principle to 22 objects gives **twelve specs** — five grouped, seven standalone — recorded as
+  `BUSINESS_ARCHITECTURE.md` §11 rather than only in the decisions log, because `/workshop` Phase 0
+  reads a module grouping table and derives one only when there is none. Without it the same question
+  would have been re-litigated at the start of all twelve sessions, with no guarantee of the same
+  answer twice. **Spec number is build order**, which the planner's numbering is not — it needs §8 as
+  a second table to reconcile the two, and one sequence needs no reconciliation.
+- **The contested cut is `SPEC-01`.** `complete_stage`'s failure modes _are_ `WFL-001`'s rejections,
+  so merging `INT-001` and `WFL-001` was a real option. Split, on the seam BA-001 §4 already drew:
+  INT-001 says _that_ a rejection surfaces as a typed MCP error, WFL-001 says _which_ rejections
+  exist. Recorded with its own amendment trigger — if `SPEC-02`'s workshop cannot state a guard
+  without changing a verb signature, D-37 gets amended rather than quietly patched.
+- **`PLAN.md` §5 had drifted from `.claude/`, and §5 is `CNV-001`'s only source (D-38).** Sprint
+  Build has **seven** subtasks, not six — `build.js:7-13` declares a `Handoff` phase both this
+  document and BA-001 omitted. That is the load-bearing one: Handoff is where the build workflow
+  writes the sprint board, the exact write `INT-002` rewires onto `complete_stage`, so a chain seeded
+  six deep would have left the migration's most-cited handoff with no node to land on. Stages 4 and 5
+  also still named bare agents rather than the `/functional-test` and `/ux-test` commands D-35
+  authored. A continuity doc naming a superseded driver is P4 — in the document the seed reads from.
+- **R1 was attempted and is worse than the research recorded (D-39).** Postgres is listening on 5432
+  and `@cap-js/postgres` is installed, so the spike was cheap — but the server accepts neither an
+  empty password nor the default, and `Financial Planner/package.json:82-88` declares
+  `"password": ""`, which SCRAM rejects outright. **Financial Planner has never connected to this
+  Postgres either**; all six of its integration suites run `--in-memory` on SQLite. R1 is unproven
+  for _both_ modules. Deferred to **Data Model**, together with standing the binding up; `SPEC-01`
+  ships **provisional on R1** with the dependency stated in the spec rather than left in a register.
+- **The Scaffold push carry-forward is closed** — all four branches are on the remote and
+  `sprint/W1-S3` is in sync with its upstream.
+
 ### 2026-07-27 — Scaffold complete: module wired, root §Undecided emptied, R2 and OI-03 closed
 
 - Authored `/scaffold-module` + the `scaffold-writer` agent (D-14 — skills as their stage
@@ -450,9 +504,10 @@ stores them under the user's home directory, which the bridge cannot access.
 | -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
 | `Project Tracker/PRD.md`                                 | Full product design. Slice 1 is a small fraction of it.                                                                               |
 | `Project Tracker/design/PROBLEM_STATEMENT_AND_VISION.md` | PSV-001 — the traceability root: problems P1–P5, scope, boundary.                                                                     |
-| `Project Tracker/design/BUSINESS_ARCHITECTURE.md`        | BA-001 v1.1 — the FRICEW catalogue and the story backlog. 22 objects, 3 waves, deferred items in §3.                                  |
+| `Project Tracker/design/BUSINESS_ARCHITECTURE.md`        | BA-001 v1.2 — the FRICEW catalogue and the story backlog. 22 objects, 3 waves, deferred items in §3, **the 12-spec grouping in §11**. |
+| `Project Tracker/design/specs/`                          | The twelve functional specs, written in `SPEC-01` → `SPEC-12` order. Grouping and membership are BA-001 §11.                          |
 | `Project Tracker/research/`                              | Six research documents plus `README.md` — the index, assumption ledger, open risks and gate verdict. All **Draft**.                   |
-| `Project Tracker/design/DECISIONS_LOG.md`                | D-01 … D-32 with full rationale. (`IDEATE_KICKOFF.md` was scratch — absorbed and deleted 2026-07-26.)                                 |
+| `Project Tracker/design/DECISIONS_LOG.md`                | D-01 … D-39 with full rationale. (`IDEATE_KICKOFF.md` was scratch — absorbed and deleted 2026-07-26.)                                 |
 | `Standards (Documents)/METHODOLOGY_BLUEPRINT.md`         | The methodology→tooling map. **§7 is partly superseded** — the module is real, not a generator, and it writes rather than only reads. |
 | `Financial Planner/design/`                              | The artifact set this module's design phase mirrors.                                                                                  |
 | `Financial Planner/design/DESIGN_PHASE_TIMELINE.md`      | How the design phase actually ran, step by step.                                                                                      |
