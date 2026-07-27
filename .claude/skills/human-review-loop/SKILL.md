@@ -41,7 +41,7 @@ Grep these before diagnosing. Where a rule *isn't* is the diagnosis.
 | Custom linters | `Standards (Technical + Linting)/scripts/lint*.ts` (21, shared by every module) | Yes |
 | The chain | `{Module}/package.json` `lint` — `&&`-joined, **first failure hides the rest** | Yes |
 | Agent process | `.claude/settings.json` — **zero hooks today** | Yes |
-| Commit gate | `Financial Planner/.git/hooks/pre-commit` — lint only, untracked | Yes |
+| Commit gate | `.git/hooks/pre-commit` at the **repo root** — lint only, untracked. One git repo serves every module, so there is no per-module hook | Yes |
 
 ## Phase 1: Triage
 
