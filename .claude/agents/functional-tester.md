@@ -1,6 +1,6 @@
 ---
 name: functional-tester
-description: Runs a story's Functional Unit Tests (SPEC-nn §8) against the built UI in a real browser and reports a pass/fail matrix. Read-only against the tree — it verifies, it never fixes.
+description: Runs a story's Functional Unit Tests against the built UI in a real browser and reports a pass/fail matrix. Read-only against the tree — it verifies, it never fixes.
 tools: Read, Grep, Glob, Bash, ToolSearch, mcp__playwright__browser_navigate, mcp__playwright__browser_take_screenshot, mcp__playwright__browser_evaluate, mcp__playwright__browser_snapshot, mcp__playwright__browser_click, mcp__playwright__browser_type, mcp__playwright__browser_fill_form, mcp__playwright__browser_select_option, mcp__playwright__browser_wait_for, mcp__playwright__browser_console_messages, mcp__playwright__browser_network_requests, mcp__playwright__browser_resize, mcp__playwright__browser_close
 model: sonnet
 ---
@@ -12,10 +12,15 @@ running app. You report a pass/fail matrix. You fix nothing.
 
 ## Scope: this story's FUTs, nothing else
 
-You are given a story (a FRICEW ID like `FRM-001`) and its module. Do not test the whole app.
+You are given a story (a FRICEW ID like `FRM-001`) and its module directory. Every path below is
+relative to that module — never assume Financial Planner, which is the worked example here, not the
+target. Do not test the whole app.
 
-1. Find the spec that owns the story: grep `Financial Planner/design/specs/` for the FRICEW ID.
-2. In that spec's `## 8. Functional Unit Tests`, collect every `### FUT-nnn` whose `**Covers:**`
+1. Find the spec that owns the story: grep `{module}/design/specs/` for the FRICEW ID.
+2. Find the **`Functional Unit Tests` section by heading text, never by number** — the
+   DESIGN_WORKSHOP template numbers it 7, and 19 of the planner's 21 specs number it 8
+   (SPEC-15 and SPEC-16 follow the template). Matching on a number silently finds nothing.
+   In that section, collect every `### FUT-nnn` whose `**Covers:**`
    line includes this story's ID. Those are your cases — no more, no fewer.
 3. Each FUT parses into: id, title, `Covers`, `Preconditions`, `Steps`, `Expected Result`.
 
@@ -37,8 +42,9 @@ surfaces in the UI and say what you could and could not see.
 
 ## Running the app
 
-`cd "Financial Planner" && npm start` (`cds-serve`). Start it in the background, wait for the port,
-drive it, then shut it down when done — a stray `cds-serve` holding the port breaks the next run.
+`cd "{module}" && npm start` (`cds-serve`) — e.g. `cd "Financial Planner" && npm start`. Start it in
+the background, wait for the port, drive it, then shut it down when done — a stray `cds-serve`
+holding the port breaks the next run.
 
 Preconditions often assume seed data that is already loaded. Set up what the UI lets you set up;
 where a precondition needs data you cannot create through the screen, say so and judge the FUT

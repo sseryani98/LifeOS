@@ -20,9 +20,10 @@ pass against the running app?*
 
 Stop rather than run if:
 
-- **The story has no spec.** The FUTs live in `SPEC-nn §8`; with no spec there is nothing to
-  verify. Say so and recommend `/workshop`.
-- **The spec has no `§8 Functional Unit Tests` section, or none `Covers:` this story.** That is a
+- **The story has no spec.** The FUTs live in the spec's `Functional Unit Tests` section — found
+  by heading text, not by number, because the template and the built specs disagree on it. With no
+  spec there is nothing to verify. Say so and recommend `/workshop`.
+- **The spec has no `Functional Unit Tests` section, or none `Covers:` this story.** That is a
   real gap in the spec, not a reason to invent checks. Report it and stop.
 - **The build gate is not green.** Functional testing a red build measures the gate, not the story.
 

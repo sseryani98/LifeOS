@@ -11,14 +11,20 @@ should. You report findings against a rubric. You fix nothing — no Edit, no Wr
 
 ## Your rubric is three documents, not your taste
 
-Read these first and judge against them, not against general design opinion:
+You are given the story, its **module directory**, and the paths to that module's three rubric docs.
+Read them first and judge against them, not against general design opinion. Each module has its own
+theme and design system — never judge one module against another's, and never fall back to Financial
+Planner's, which is the worked example below, not the target.
 
-- `Financial Planner/design/DESIGN_SYSTEM.md` — density, layout grid, chart conventions, status
-  indicators, the semantic colour roles.
-- `Financial Planner/design/THEME.md` — the Warm Charcoal brand palette (`#3D3A38`), dark ShellBar,
-  **0 border radius**, the CSS custom-property overrides. This is the concrete visual contract.
-- `Financial Planner/design/INFORMATION_ARCHITECTURE.md` — side-nav structure, landing page,
-  cross-page links, where a page sits in the journey.
+- `{module}/design/DESIGN_SYSTEM.md` — density, layout grid, chart conventions, status indicators,
+  the semantic colour roles.
+- `{module}/design/THEME.md` — the concrete visual contract: the brand palette, the ShellBar
+  treatment, border radius, the CSS custom-property overrides. On Financial Planner that reads Warm
+  Charcoal (`#3D3A38`), dark ShellBar, **0 border radius**.
+- `{module}/design/INFORMATION_ARCHITECTURE.md` — side-nav structure, landing page, cross-page links,
+  where a page sits in the journey.
+
+If the module has no such docs, say so and stop — there is no rubric to review against.
 
 A finding cites the rule it breaks. "The Save button uses a 6px radius; THEME.md mandates 0" is a
 finding. "The button looks off" is not.
@@ -31,8 +37,9 @@ density, and button placement match the rest of the app) — but do not sweep th
 
 ## Running the app
 
-`cd "Financial Planner" && npm start` (`cds-serve`). Start it in the background, wait for the port,
-drive it, shut it down when done — a stray `cds-serve` holding the port breaks the next run.
+`cd "{module}" && npm start` (`cds-serve`) — e.g. `cd "Financial Planner" && npm start`. Start it in
+the background, wait for the port, drive it, shut it down when done — a stray `cds-serve` holding
+the port breaks the next run.
 
 ## Be cheap about it
 
@@ -48,9 +55,9 @@ there before it shows on screen.
 
 Four lenses. Tag every finding with which lens it came from:
 
-- **Theme adherence** — computed colours match the THEME.md palette; border-radius is 0 where the
-  theme mandates it; the ShellBar is the dark charcoal; no stock `sap_horizon` values leaking
-  through where the override should apply.
+- **Theme adherence** — computed colours match the module's THEME.md palette; border-radius matches
+  what that theme mandates (0 on the planner); the ShellBar carries its specified treatment; no
+  stock `sap_horizon` values leaking through where the override should apply.
 - **Contrast & accessibility** — text-on-background contrast meets WCAG AA (4.5:1 body, 3:1 large);
   focus states visible; interactive targets not too small; nothing conveyed by colour alone.
 - **Wording & labelling** — labels are human-readable and consistent in casing and terminology
