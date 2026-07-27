@@ -4,9 +4,9 @@
 **FRICEW Objects:** CNV-001 (Conversion), ENH-001 (Enhancement), WFL-001 (Workflow)
 **Wave:** 1
 **CDS Service:** Not yet defined — see §2. This spec is an input to the Data Model stage.
-**Status:** Draft
+**Status:** Approved
 **Provisional on:** **R1** (D-39), inherited from SPEC-01 — the validating spike ran on in-memory
-SQLite only.
+SQLite only. Approved as a design; **not Approved-for-build until R1 clears**.
 
 ---
 
@@ -15,6 +15,7 @@ SQLite only.
 | Date       | Author          | Description                                                                                      |
 | ---------- | --------------- | ------------------------------------------------------------------------------------------------ |
 | 2026-07-27 | Sandro & Claude | Initial creation from the SPEC-02 workshop. Records D-47 through D-57. Provisional on R1 (D-39). |
+| 2026-07-27 | Sandro          | Status → Approved. All eight DESIGN_WORKSHOP §6 criteria met. Still provisional on R1 for build. |
 
 ---
 
