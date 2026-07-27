@@ -186,9 +186,12 @@ Slice 1:
 - ~~TestRun record shape~~ — settled in `SPEC-01` §3.1, mapped field-by-field from the Jest JSON
   `generateTestReport.ts` already holds. Health-calculation inputs remain open (OI-04, `SPEC-05`).
 - `METHODOLOGY_BLUEPRINT.md` §5.1 wording fix ("interviewer" → "scouts") when the blueprint is next revised.
-- The Sprint Build methodology chain to model is `PLAN.md` §5 — 9 tasks, Sprint Build carrying
-  **7** subtasks, UX Test conditional on `FRM-*` stories. **Corrected from 6 by D-38**: `build.js`
-  declares a `Handoff` phase this note omitted, and Handoff is the board write `INT-002` rewires.
+- ~~The Sprint Build methodology chain to model is `PLAN.md` §5~~ — **settled in `SPEC-02` §3.1**,
+  which is now the authoritative seed: 9 stage steps, Sprint Build carrying **7** subtasks, with slug
+  codes, kinds, predicates and drivers. Corrected twice against `.claude/` along the way — from 6
+  subtasks to 7 by **D-38** (`build.js` declares a `Handoff` phase, the board write `INT-002`
+  rewires), and from `FRM-*` to the **`shipsUi`** predicate by **D-47**, because slice 1's four
+  Reports all ship pages and a prefix rule would have omitted UX Test from the whole project view.
 
 ---
 

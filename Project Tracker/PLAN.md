@@ -17,11 +17,12 @@ Backlog (`CNV-001` Historical backfill) and nothing In Progress. That gap is del
 is the cutover window.
 
 Project Tracker has a PRD, `design/PROBLEM_STATEMENT_AND_VISION.md` (PSV-001, **Draft**),
-`design/BUSINESS_ARCHITECTURE.md` (BA-001 v1.2, **Approved** — 22 objects in 3 waves, grouped into
-12 specs), a `research/` pack of six documents, a decisions log (D-01 … D-46), a wired module folder,
-**one written spec (`SPEC-01`, Draft)**, and the Plan-phase skills installed in `.claude/`. **No
-module code exists yet.** Ideate, Scope and Research ran 2026-07-26; Scaffold, the Workshops grouping
-and `SPEC-01` ran 2026-07-27. **OI-01, OI-02 and OI-03 are closed**; OI-04 and OI-05 remain.
+`design/BUSINESS_ARCHITECTURE.md` (BA-001 v1.3, **Approved** — 22 objects in 3 waves, grouped into
+12 specs), a `research/` pack of six documents, a decisions log (D-01 … D-57), a wired module folder,
+**two written specs (`SPEC-01` and `SPEC-02`, both Draft)**, and the Plan-phase skills installed in
+`.claude/`. **No module code exists yet.** Ideate, Scope and Research ran 2026-07-26; Scaffold, the
+Workshops grouping, `SPEC-01` and `SPEC-02` ran 2026-07-27. **OI-01, OI-02 and OI-03 are closed**;
+OI-04 and OI-05 remain.
 
 ### The one-paragraph version
 
@@ -35,9 +36,9 @@ becomes the first real test of the new system.
 
 ## 2. Decisions already made
 
-Full rationale in `design/DECISIONS_LOG.md` (D-01 … D-46; D-19 … D-27 were added at Scope,
-D-28 … D-32 at Research, D-33 … D-36 at Scaffold, D-37 … D-39 at the Workshops grouping and
-D-40 … D-46 at the `SPEC-01` workshop). The founding twelve,
+Full rationale in `design/DECISIONS_LOG.md` (D-01 … D-57; D-19 … D-27 were added at Scope,
+D-28 … D-32 at Research, D-33 … D-36 at Scaffold, D-37 … D-39 at the Workshops grouping,
+D-40 … D-46 at the `SPEC-01` workshop and D-47 … D-57 at the `SPEC-02` workshop). The founding twelve,
 summarized — note that **D-28 amends item 4's wording**: a bare `cds.connect.to()` throws, so the
 mechanism needs a construction step.
 
@@ -62,24 +63,24 @@ mechanism needs a construction step.
 
 ### Stage status
 
-| #   | Stage              | Skill                                   | Skill status | Stage status                                            |
-| --- | ------------------ | --------------------------------------- | ------------ | ------------------------------------------------------- |
-| 1   | Ideate             | `/generate-problem-statement-vision`    | Authored     | **Done** — 2026-07-26                                   |
-| 2   | Scope              | `/generate-business-architecture`       | Authored     | **Done** — 2026-07-26                                   |
-| 3   | Research           | `/gather-research`                      | Authored     | **Done** — 2026-07-26                                   |
-| 4   | Scaffold           | `/scaffold-module` → `scaffold-writer`  | Authored     | **Done** — 2026-07-27                                   |
-| 5   | Workshops          | `/workshop` → `spec-writer`             | Exists       | **In progress** — D-37 grouping; `SPEC-01` Draft (1/12) |
-| 6   | Information Arch.  | `/generate-information-architecture`    | Not authored | Not started — runs in full (D-21)                       |
-| 7   | Design System      | `/generate-design-system`               | Not authored | Not started — runs in full (D-21)                       |
-| 8   | Theme              | `/generate-theme`                       | Not authored | Not started — runs in full (D-21)                       |
-| 9   | Data Model         | `/generate-data-model`                  | Not authored | Not started                                             |
-| 10  | Tech Stack         | `/generate-tech-stack`                  | Not authored | Not started                                             |
-| 11  | Test Strategy      | `/generate-test-strategy`               | Not authored | Not started                                             |
-| 12  | Project Planning   | `/generate-build-plan`                  | Not authored | Not started                                             |
-| 13  | Build              | `/build` + chain                        | Exists       | Not started                                             |
-| 14  | **Rewire tooling** | `lintNoMarkdownState` + PreToolUse hook | Not authored | Not started                                             |
-| 15  | Cutover            | —                                       | —            | Not started                                             |
-| 16  | Back to FP         | —                                       | —            | Blocked on cutover                                      |
+| #   | Stage              | Skill                                   | Skill status | Stage status                                                       |
+| --- | ------------------ | --------------------------------------- | ------------ | ------------------------------------------------------------------ |
+| 1   | Ideate             | `/generate-problem-statement-vision`    | Authored     | **Done** — 2026-07-26                                              |
+| 2   | Scope              | `/generate-business-architecture`       | Authored     | **Done** — 2026-07-26                                              |
+| 3   | Research           | `/gather-research`                      | Authored     | **Done** — 2026-07-26                                              |
+| 4   | Scaffold           | `/scaffold-module` → `scaffold-writer`  | Authored     | **Done** — 2026-07-27                                              |
+| 5   | Workshops          | `/workshop` → `spec-writer`             | Exists       | **In progress** — D-37 grouping; `SPEC-01`, `SPEC-02` Draft (2/12) |
+| 6   | Information Arch.  | `/generate-information-architecture`    | Not authored | Not started — runs in full (D-21)                                  |
+| 7   | Design System      | `/generate-design-system`               | Not authored | Not started — runs in full (D-21)                                  |
+| 8   | Theme              | `/generate-theme`                       | Not authored | Not started — runs in full (D-21)                                  |
+| 9   | Data Model         | `/generate-data-model`                  | Not authored | Not started                                                        |
+| 10  | Tech Stack         | `/generate-tech-stack`                  | Not authored | Not started                                                        |
+| 11  | Test Strategy      | `/generate-test-strategy`               | Not authored | Not started                                                        |
+| 12  | Project Planning   | `/generate-build-plan`                  | Not authored | Not started                                                        |
+| 13  | Build              | `/build` + chain                        | Exists       | Not started                                                        |
+| 14  | **Rewire tooling** | `lintNoMarkdownState` + PreToolUse hook | Not authored | Not started                                                        |
+| 15  | Cutover            | —                                       | —            | Not started                                                        |
+| 16  | Back to FP         | —                                       | —            | Blocked on cutover                                                 |
 
 Stages 6–8 (IA, Design System, Theme) **run in full** — settled by D-21. Slice 1 carries four
 Reports and two Forms, which is a real UI rather than a thin shell.
@@ -90,11 +91,23 @@ Reports and two Forms, which is a real UI rather than a thin shell.
 `/workshop` reads that table; it does not re-derive a grouping per session. Spec number is build
 order, so the sequence is simply `SPEC-01` → `SPEC-12`.
 
-**`SPEC-01` is written** (`design/specs/SPEC-01-MCP-INTENT-VERB-LAYER.md`, **Draft**, provisional on
-R1) — eleven verbs, 29 business rules, 16 FUTs, D-40 … D-46. **Next is `SPEC-02` — Methodology &
-Stage Enforcement** (CNV-001, ENH-001, WFL-001), which owes three things `SPEC-01` deferred to it:
-the guard table behind BR-17's rejections, whether "cancel vs delete" needs a twelfth verb, and
-`MethodologyStep` slug codes seeded to match the codes the verbs accept.
+**`SPEC-01` and `SPEC-02` are written**, both **Draft** and both provisional on R1. `SPEC-01`
+(`design/specs/SPEC-01-MCP-INTENT-VERB-LAYER.md`) is eleven verbs, 29 business rules, 16 FUTs,
+D-40 … D-46. `SPEC-02` (`design/specs/SPEC-02-METHODOLOGY-AND-STAGE-ENFORCEMENT.md`) is 33 business
+rules, 18 FUTs, D-47 … D-57 — and it discharged all three things `SPEC-01` deferred to it: the guard
+table (14 rejections, nine new `wfl.*` keys), the twelfth-verb question (**not needed** — D-50), and
+the slug codes (16, with FUT-002 testing the contract rather than asserting it).
+
+**`SPEC-01` now carries four amendments owed**, all raised in `SPEC-02` §6 and none yet applied:
+FUT-005's precondition names `smoke` open on a backend-only Conversion where it is never
+materialised; §2's `MethodologyStep.conditional` becomes a predicate name rather than a boolean;
+§5 gains a guard precedence it currently lacks; and BR-13's silence on the reopened stage's own
+record is now filled by `SPEC-02` BR-28.
+
+**Next is `SPEC-03` — Financial Planner Migration Load** (CNV-002, CNV-003, CNV-004). It inherits two
+constraints from `SPEC-02`: **CNV-002 must set `shipsUi`** on every Milestone it creates, because
+ENH-001 reads it at creation; and **CNV-004 is no longer an instantiation step** (D-54) — the chain
+arrives with the Milestone, so CNV-004 becomes the assertion that it came out right.
 
 **Still open:** OI-04 (what calculated health computes — now the `SPEC-05` workshop), OI-05
 (methodology genericity — Data Model). **OI-03 is closed by D-35.** Research risks: R2 is closed
@@ -154,25 +167,35 @@ with the live methodology chain.
 
 Instantiated per story. Grounded in the real `.claude/` inventory, not aspirational.
 
-| #   | Task                                                              | Driven by                                                                                    | Kind                       |
-| --- | ----------------------------------------------------------------- | -------------------------------------------------------------------------------------------- | -------------------------- |
-| 1   | Sprint Build                                                      | `/build` → `workflows/build.js`                                                              | Required                   |
-| ↳   | _brief → red → implement → gate → coverage → smoke → **handoff**_ | build-briefer, test-author, implementer, gate-runner, test-author, smoke-tester, implementer | Subtasks                   |
-| 2   | Code Quality                                                      | `/code-quality`                                                                              | Required                   |
-| 3   | Test Quality                                                      | `/test-quality`                                                                              | Required                   |
-| 4   | Functional Test                                                   | `/functional-test` → `functional-tester`                                                     | Required                   |
-| 5   | UX Test                                                           | `/ux-test` → `ux-tester`                                                                     | Conditional — `FRM-*` only |
-| 6   | Human Review                                                      | `/human-review-loop`                                                                         | Required — manual, Sandro  |
-| 7   | Documentation                                                     | `/refresh-docs`                                                                              | Recommended                |
-| 8   | PM Update                                                         | `/pm-update`                                                                                 | Required                   |
-| 9   | Commit                                                            | `/commit-diff`                                                                               | Required                   |
+| #   | Task                                                              | Driven by                                                                                    | Kind                                                      |
+| --- | ----------------------------------------------------------------- | -------------------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| 1   | Sprint Build                                                      | `/build` → `workflows/build.js`                                                              | Required                                                  |
+| ↳   | _brief → red → implement → gate → coverage → smoke → **handoff**_ | build-briefer, test-author, implementer, gate-runner, test-author, smoke-tester, implementer | Subtasks — `smoke` Conditional (`shipsUi`), rest Required |
+| 2   | Code Quality                                                      | `/code-quality`                                                                              | Required                                                  |
+| 3   | Test Quality                                                      | `/test-quality`                                                                              | Required                                                  |
+| 4   | Functional Test                                                   | `/functional-test` → `functional-tester`                                                     | Required                                                  |
+| 5   | UX Test                                                           | `/ux-test` → `ux-tester`                                                                     | Conditional — `shipsUi`                                   |
+| 6   | Human Review                                                      | `/human-review-loop`                                                                         | Required — manual, Sandro                                 |
+| 7   | Documentation                                                     | `/refresh-docs`                                                                              | Recommended                                               |
+| 8   | PM Update                                                         | `/pm-update`                                                                                 | Required                                                  |
+| 9   | Commit                                                            | `/commit-diff`                                                                               | Required                                                  |
 
-**Re-verified against `.claude/` on 2026-07-27, and it had drifted twice — both corrected by D-38.**
-Sprint Build carries **seven** subtasks, not six: `.claude/workflows/build.js:7-13` declares a
-`Handoff` phase this table omitted, and Handoff is where the workflow writes the sprint board — the
-exact write `INT-002` rewires onto `complete_stage`. Stages 4 and 5 now name the commands D-35
-authored rather than the bare agents. This table is `CNV-001`'s only source, so a drift here becomes
-seeded data; re-verify it against `.claude/` before `CNV-001` is built, not after.
+**Re-verified against `.claude/` twice on 2026-07-27** — once preparing `SPEC-01` (D-38) and again
+preparing `SPEC-02` (D-47, D-48, D-49). It had drifted both times, which is the argument for
+re-verifying rather than trusting it. D-38: Sprint Build carries **seven** subtasks, not six —
+`.claude/workflows/build.js:7-13` declares a `Handoff` phase this table omitted, and Handoff is where
+the workflow writes the sprint board, the exact write `INT-002` rewires onto `complete_stage`; and
+stages 4 and 5 name the commands D-35 authored rather than the bare agents. D-47/D-48: **UX Test is
+conditional on `shipsUi`, not on `FRM-*`** — `.claude/commands/ux-test.md:10-12` tests whether a story
+ships UI, and slice 1's four Reports all ship pages, so the prefix rule would have omitted UX Test
+from the entire project view; and **two of the seven subtasks carry kinds of their own**, since
+`build.js:597` runs Coverage only on a shortfall and `:666` runs Smoke only for a frontend story.
+
+**This table is no longer `CNV-001`'s only source, despite what this section used to claim.**
+`.claude/skills/human-review-loop/SKILL.md:11-13` states the same nine stages in the same order
+independently — it **corroborates** the prose table rather than replacing it. The authoritative seed
+is now `SPEC-02` §3.1, which carries the slug codes, kinds, predicates and drivers this summary does
+not; re-verify **both** sources against `.claude/` before `CNV-001` is built, not after.
 
 ---
 
@@ -329,6 +352,51 @@ Settle before or during Scaffold.
 ---
 
 ## 8. Session log
+
+### 2026-07-27 — SPEC-02 written: the guard table, no twelfth verb, and a fourth drift in §5
+
+- **Ran the `SPEC-02` workshop over CNV-001, ENH-001 and WFL-001.** Wrote
+  `design/specs/SPEC-02-METHODOLOGY-AND-STAGE-ENFORCEMENT.md` (**Draft**, provisional on R1) with 33
+  business rules and 18 functional unit tests, and logged **D-47 … D-57**. All three things `SPEC-01`
+  deferred here are discharged.
+- **`PLAN.md` §5 had drifted a third time, and this section's claim about itself was also wrong.**
+  Re-verifying against `.claude/` before seeding found **UX Test's condition is `shipsUi`, not
+  `FRM-*`** (`.claude/commands/ux-test.md:10-12`) — the load-bearing one, because slice 1 carries four
+  Reports that all ship pages against two Forms, so the prefix rule would have left UX Test
+  structurally absent from the entire project view (D-47). Also: **two of the seven subtasks are
+  conditional in the workflow** (`build.js:597`, `:666`), resolved as `smoke` Conditional and
+  `coverage` Required, because `build.js:772` always yields a coverage outcome (D-48). And §5's claim
+  to be `CNV-001`'s only source is false — `human-review-loop/SKILL.md:11-13` states the same nine
+  stages in the same order.
+- **A fourth drift, inside `BA-001` itself and dated the same day.** Its CNV-004 row still read
+  "Sprint Build's **6** Subtasks" — D-38 corrected CNV-001's row and `PLAN.md` §5 and missed this one.
+  Fixed at BA-001 v1.3.
+- **D-37 §11.1's amendment trigger was tested and did not fire (D-55).** Every guard is decided from
+  `story`, `stage`, `subtask`, `reason` and the caller identity `INT-001` already carries under D-41,
+  so none needed a new or changed verb input and **D-37 stands unamended**. The seam held in a
+  stronger form than §11.1 anticipated: `SPEC-01`'s `verb.stage.blocked` is the **envelope** and
+  `SPEC-02`'s nine `wfl.*` keys are the rules inside it. Recorded rather than left silent, because a
+  tested-and-held trigger is a finding.
+- **No twelfth verb, and D-40's eleven stand (D-50).** With conditionality resolved once at
+  instantiation, a step that does not apply is **never created** — so there is nothing to cancel, and
+  "the record survives" becomes an invariant (nothing deletes a Task or Subtask) rather than a
+  transition needing a verb. `SPEC-01`'s BR-02 is untouched.
+- **`BA-001` said ENH-001 fires "on Milestone creation" — which collides with CNV-002 creating twelve
+  Milestones of which eleven must get no chain.** Settled as creation-in-Backlog (D-54), which turns
+  D-15's policy into a mechanism: you cannot honestly hold a chain for work finished before the system
+  existed. **Consequence for `SPEC-03`: CNV-004 stops being an instantiation step** and becomes the
+  assertion that the chain came out right.
+- **Two more `SPEC-01` amendments surfaced beyond the ones already known.** Its FUT-005 precondition
+  names `smoke` open on `financial-planner/CNV-001`, a backend-only Conversion where `smoke` is never
+  materialised; and its §5 lists rejection conditions with no precedence, which D-52 now supplies.
+  Four amendments are owed in total — listed in §3 and in `SPEC-02` §6, none applied yet.
+- **Reviewing the produced spec caught two defects the writer's own DoD check passed.** A business
+  rule was missing for D-56's `start_stage`-returns-subtasks ruling, leaving §3.3 citing a rule that
+  said nothing about it and FUT-006 asserting behaviour no rule carried; and FUT-016's precondition
+  was **unreachable through its own guards** — `functional-test` In Progress while `test-quality` was
+  Not Started is a state BR-19 refuses to create. Both fixed. The second is the same defect class as
+  the `SPEC-01` FUT-005 problem, which is worth noting: a spec that specifies ordering can write test
+  fixtures its own ordering forbids.
 
 ### 2026-07-27 — SPEC-01 written: eleven verbs, four of them forced
 
@@ -540,10 +608,10 @@ stores them under the user's home directory, which the bridge cannot access.
 | -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
 | `Project Tracker/PRD.md`                                 | Full product design. Slice 1 is a small fraction of it.                                                                               |
 | `Project Tracker/design/PROBLEM_STATEMENT_AND_VISION.md` | PSV-001 — the traceability root: problems P1–P5, scope, boundary.                                                                     |
-| `Project Tracker/design/BUSINESS_ARCHITECTURE.md`        | BA-001 v1.2 — the FRICEW catalogue and the story backlog. 22 objects, 3 waves, deferred items in §3, **the 12-spec grouping in §11**. |
-| `Project Tracker/design/specs/`                          | The twelve functional specs, written in `SPEC-01` → `SPEC-12` order. Grouping and membership are BA-001 §11. **1 of 12 written.**     |
+| `Project Tracker/design/BUSINESS_ARCHITECTURE.md`        | BA-001 v1.3 — the FRICEW catalogue and the story backlog. 22 objects, 3 waves, deferred items in §3, **the 12-spec grouping in §11**. |
+| `Project Tracker/design/specs/`                          | The twelve functional specs, written in `SPEC-01` → `SPEC-12` order. Grouping and membership are BA-001 §11. **2 of 12 written.**     |
 | `Project Tracker/research/`                              | Six research documents plus `README.md` — the index, assumption ledger, open risks and gate verdict. All **Draft**.                   |
-| `Project Tracker/design/DECISIONS_LOG.md`                | D-01 … D-46 with full rationale. (`IDEATE_KICKOFF.md` was scratch — absorbed and deleted 2026-07-26.)                                 |
+| `Project Tracker/design/DECISIONS_LOG.md`                | D-01 … D-57 with full rationale. (`IDEATE_KICKOFF.md` was scratch — absorbed and deleted 2026-07-26.)                                 |
 | `Standards (Documents)/METHODOLOGY_BLUEPRINT.md`         | The methodology→tooling map. **§7 is partly superseded** — the module is real, not a generator, and it writes rather than only reads. |
 | `Financial Planner/design/`                              | The artifact set this module's design phase mirrors.                                                                                  |
 | `Financial Planner/design/DESIGN_PHASE_TIMELINE.md`      | How the design phase actually ran, step by step.                                                                                      |
