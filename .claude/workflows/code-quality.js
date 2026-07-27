@@ -5,8 +5,8 @@ export const meta = {
     'After Claude Code builds a feature (review the uncommitted diff), or ad hoc against a module, backend, frontend, or all. Invoked by /code-quality.',
   phases: [
     { title: 'Lint', detail: 'run the 21-script lint suite so reviewers skip machine-checked rules' },
-    { title: 'Review', detail: 'parallel isolated finders: structure, comments, duplication, naming, /code-review, /simplify, cap-annotation-hunter' },
-    { title: 'Debate', detail: 'adversary challenges over-engineering; reviewer gets one rebuttal', model: 'opus' },
+    { title: 'Review', detail: 'parallel isolated finders: per-domain structure+comments, duplication, naming, /code-review, /simplify, cap-annotation-hunter' },
+    { title: 'Debate', detail: 'one adversary per file challenges its findings (Opus for high-severity batches, Sonnet otherwise); reviewer rebuts, may offer a smaller fix; adversary closes — withdraw or maintain', model: 'opus' },
     { title: 'Report', detail: 'consensus + contested tables' },
   ],
 }
@@ -38,18 +38,30 @@ const FINDINGS_SCHEMA = {
   additionalProperties: false,
 }
 
-const CHALLENGE_SCHEMA = {
+const CHALLENGE_BATCH_SCHEMA = {
   type: 'object',
   properties: {
-    challenged: { type: 'boolean', description: 'True if the finding fails on one of the three grounds' },
-    ground: {
-      type: 'string',
-      enum: ['over-engineering', 'readability', 'not-worth-a-row', 'none'],
-      description: 'Which ground you are challenging on. "none" when challenged is false.',
+    verdicts: {
+      type: 'array',
+      description: 'Exactly one verdict per finding you were given, keyed by its index.',
+      items: {
+        type: 'object',
+        properties: {
+          index: { type: 'number', description: '0-based index of the finding in the list you were given' },
+          challenged: { type: 'boolean', description: 'True if the finding fails on one of the three grounds' },
+          ground: {
+            type: 'string',
+            enum: ['over-engineering', 'readability', 'not-worth-a-row', 'none'],
+            description: 'Which ground you are challenging on. "none" when challenged is false.',
+          },
+          argument: { type: 'string', description: 'The case for your ground, or why the finding earns its row' },
+        },
+        required: ['index', 'challenged', 'ground', 'argument'],
+        additionalProperties: false,
+      },
     },
-    argument: { type: 'string', description: 'The case for your ground, or why you have no objection' },
   },
-  required: ['challenged', 'ground', 'argument'],
+  required: ['verdicts'],
   additionalProperties: false,
 }
 
@@ -58,8 +70,19 @@ const REBUTTAL_SCHEMA = {
   properties: {
     concedes: { type: 'boolean', description: 'True if the adversary is right and the finding should be dropped' },
     argument: { type: 'string', description: 'Your single response to the challenge' },
+    revisedFix: { type: 'string', description: 'A smaller fix that answers the challenge while still closing the defect, or empty if your fix is unchanged' },
   },
-  required: ['concedes', 'argument'],
+  required: ['concedes', 'argument', 'revisedFix'],
+  additionalProperties: false,
+}
+
+const CLOSE_SCHEMA = {
+  type: 'object',
+  properties: {
+    withdraws: { type: 'boolean', description: 'True if the rebuttal answered you. Restating your original challenge counts as withdrawing.' },
+    argument: { type: 'string', description: 'If maintaining, the NEW argument that engages the rebuttal — not a restatement. If withdrawing, why.' },
+  },
+  required: ['withdraws', 'argument'],
   additionalProperties: false,
 }
 
@@ -109,14 +132,25 @@ ${lint ?? 'Lint could not be run; rely on your own judgment but stay off mechani
 
 phase('Review')
 
+// A reviewer's model tracks how much reasoning its scope needs: Opus where there is real
+// logic (TS/CDS) to reason about, Sonnet for declarative-only scope (markup/config). The
+// naming finder is gated on code presence — id naming targets code identifiers, not markup.
+const LOGIC_EXTS = ['.ts', '.js', '.cds']
+const CODE_EXTS = ['.ts', '.js']
+const hasExtension = (names, exts) => names.some(name => exts.some(ext => name.endsWith(ext)))
+const pickModel = names => (hasExtension(names, LOGIC_EXTS) ? 'opus' : 'sonnet')
+
 const reviewers = []
 
+// One reviewer per domain covers both structure and comment substance, reading the domain
+// once. Two finders here read the identical files twice for no gain — the file read is the
+// cost, and structure and comments are one context away from each other.
 for (const domain of domains) {
   const domainFiles = (domain.files ?? []).join('\n')
 
   reviewers.push(() =>
     agent(
-      `You are the **structure reviewer** for the \`${domain.name}\` domain. Scope — read these and nothing else:
+      `You are the **domain reviewer** for the \`${domain.name}\` domain, covering both structure and comment substance. Scope — read these files once and nothing else:
 
 ${domainFiles}
 
@@ -124,26 +158,15 @@ ${lintGate}
 
 ${standards}
 
-Answer three questions, and report a finding only where the answer is genuinely bad:
+Report findings in two categories; report only where the answer is genuinely bad.
+
+## Structure (category \`structure\`)
 
 1. **Is this module doing too much?** Does it have more than one reason to change? Name the distinct responsibilities you found.
 2. **Is any class too big / doing too much?** Note: there is deliberately NO line-count rule in this repo — no \`max-lines\`, no \`max-classes-per-file\`, and neither CLAUDE.md nor TECHNICAL_STANDARDS.md states a class cap. So you cannot cite a rule. Argue from cohesion: what are the class's distinct reasons to change, and would splitting it make the code easier or harder to follow? A 400-line class with one job is fine. A 90-line class with three jobs is not.
 3. **Is the Facade/Service/DataService/Validator/Mapper split honored in spirit?** \`lint:facades\` and \`lint:mapper-methods\` check the letter — you check the intent. Business logic hiding in a DataService, a Validator that queries, a Service that shape-translates below the mapper threshold, a "Mapper" doing scalar conversion (that's a utility per CLAUDE.md:121).
 
-Use category \`structure\` for all findings.`,
-      { label: `structure:${domain.name}`, phase: 'Review', agentType: 'quality-reviewer', schema: FINDINGS_SCHEMA },
-    ),
-  )
-
-  reviewers.push(() =>
-    agent(
-      `You are the **comment reviewer** for the \`${domain.name}\` domain. Scope — read these and nothing else:
-
-${domainFiles}
-
-${lintGate}
-
-${standards}
+## Comments (category \`comments\`)
 
 \`lint:comment-length\` already caps comment prose at 5 lines. Length is handled. **You review substance.**
 
@@ -158,8 +181,8 @@ Flag:
 
 Do NOT flag a comment merely for existing. Sandro's preference is "Lean" trimming, not comment eradication.
 
-Use category \`comments\` for all findings.`,
-      { label: `comments:${domain.name}`, phase: 'Review', agentType: 'quality-reviewer', schema: FINDINGS_SCHEMA },
+Tag each finding \`structure\` or \`comments\` as appropriate.`,
+      { label: `review:${domain.name}`, phase: 'Review', model: pickModel(domain.files ?? []), agentType: 'quality-reviewer', schema: FINDINGS_SCHEMA },
     ),
   )
 }
@@ -184,9 +207,10 @@ You may read beyond the scope list to check whether something is duplicated or r
   ),
 )
 
-reviewers.push(() =>
-  agent(
-    `You are the **readability and naming reviewer**, working holistically across the whole target (${label}).
+if (hasExtension(files, CODE_EXTS))
+  reviewers.push(() =>
+    agent(
+      `You are the **readability and naming reviewer**, working holistically across the whole target (${label}).
 
 Files in scope:
 ${fileList}
@@ -206,9 +230,9 @@ Flag:
 Do not propose a rename that is merely a synonym of the current name. The bar is: a reader is actively misled today.
 
 Use category \`naming\` for all findings.`,
-    { label: 'holistic:naming', phase: 'Review', agentType: 'quality-reviewer', schema: FINDINGS_SCHEMA },
-  ),
-)
+      { label: 'holistic:naming', phase: 'Review', model: 'sonnet', agentType: 'quality-reviewer', schema: FINDINGS_SCHEMA },
+    ),
+  )
 
 reviewers.push(() =>
   agent(
@@ -279,7 +303,10 @@ const reviewResults = await parallel(reviewers)
 const merged = new Map()
 for (const result of reviewResults.filter(Boolean)) {
   for (const finding of result.findings ?? []) {
-    const key = `${finding.file}:${finding.line}:${finding.category}`
+    // Key on file:line, not file:line:category — the same defect surfaced under two category
+    // labels (a line flagged both `structure` and `simplification`) is one problem, and
+    // sending it to two adversaries wastes a challenge and ships Sandro a duplicate row.
+    const key = `${finding.file}:${finding.line}`
     const seen = merged.get(key)
     if (!seen) {
       merged.set(key, { ...finding, foundBy: 1 })
@@ -305,24 +332,49 @@ if (!findings.length) {
 
 phase('Debate')
 
-const judged = await pipeline(
-  findings,
-  finding =>
-    agent(
-      `You are the **adversary**. A reviewer proposes a change to Life OS code. Your job is to stop changes that make the codebase worse.
+// Batch the adversary by file: one agent reads a file once and judges every finding anchored
+// to it, rather than N agents each re-reading the same file. File reads are the debate's
+// dominant cost, and one file drew 8 findings last run. Model tiers by the batch's top
+// severity — Opus only where a `high` finding is at stake, Sonnet for the low/medium nit gate
+// (which is what `not-worth-a-row` mostly is). Rebuttals stay per-finding, tiered the same way.
+const fileBatches = [
+  ...findings.reduce((map, finding) => {
+    const bucket = map.get(finding.file) ?? []
+    bucket.push(finding)
+    return map.set(finding.file, bucket)
+  }, new Map()),
+].map(([file, batchFindings]) => ({ file, findings: batchFindings }))
 
-## The finding
-
-- **Where:** ${finding.file}:${finding.line}
+const judgedBatches = await pipeline(
+  fileBatches,
+  batch => {
+    const roster = batch.findings
+      .map(
+        (finding, index) => `### Finding ${index}
+- **Line:** ${finding.line}
 - **Category:** ${finding.category}
 - **Defect:** ${finding.summary}
 - **Reviewer's argument:** ${finding.argument}
 - **Proposed fix:** ${finding.fix}
-- **Severity claimed:** ${finding.severity}
+- **Severity claimed:** ${finding.severity}`,
+      )
+      .join('\n\n')
+    const batchModel = batch.findings.some(finding => finding.severity === 'high') ? 'opus' : 'sonnet'
+
+    return agent(
+      `You are the **adversary**. A reviewer proposes changes to one file of Life OS code. Your job is to stop changes that make the codebase worse.
+
+## The file
+
+\`${batch.file}\` — read it once, in full, before judging. Every finding below anchors to a line in it.
+
+## The findings (${batch.findings.length})
+
+${roster}
 
 ## Your mandate is narrow
 
-Read the actual code at that location first. Then challenge on **exactly three grounds, and no others**. Set \`ground\` to the one you are using.
+Judge **each** finding independently and return exactly one verdict per finding, keyed by its \`index\` (0..${batch.findings.length - 1}). For each, challenge on **exactly three grounds, and no others**. Set \`ground\` to the one you are using.
 
 1. **\`over-engineering\`** — the fix adds abstraction, indirection, or generality the code does not need. An extracted helper used once. A pattern applied because it is a pattern. A layer for a problem that isn't real yet. This is a single-user local personal ERP, not a platform — speculative generality has negative value here.
 2. **\`readability\`** — the code is easier to read as it stands. The "duplication" is two things that read clearly and happen to look alike. The rename is a synonym. The split scatters one coherent idea across three files.
@@ -348,18 +400,25 @@ Severity is your calibration, not your rule: most \`low\` findings should fail t
 
 ## Judgment, not reflex
 
-Do not challenge everything, and do not wave everything through. Both make you useless. Return \`challenged: false, ground: 'none'\` when the finding earns its row on all three grounds — and say briefly why it earns it. When you do challenge, name the ground and quote the code that makes your case.
+Do not challenge everything, and do not wave everything through. Both make you useless. For a finding that earns its row on all three grounds, return \`challenged: false, ground: 'none'\` and say briefly why it earns it. When you do challenge, name the ground and quote the code that makes your case. One verdict object per finding index — no more, no fewer.
 
 ${standards}`,
-      { label: `adversary:${finding.file.split(/[/\\]/).pop()}:${finding.line}`, phase: 'Debate', agentType: 'quality-reviewer', schema: CHALLENGE_SCHEMA },
-    ).then(challenge => ({ finding, challenge })),
+      { label: `adversary:${batch.file.split(/[/\\]/).pop()}`, phase: 'Debate', model: batchModel, agentType: 'quality-reviewer', schema: CHALLENGE_BATCH_SCHEMA },
+    ).then(result => ({ batch, verdicts: result?.verdicts ?? null }))
+  },
 
-  async ({ finding, challenge }) => {
-    if (!challenge) return { finding, verdict: 'consensus', note: 'adversary failed; passed through unchallenged' }
-    if (!challenge.challenged) return { finding, verdict: 'consensus', adversary: challenge.argument }
+  async ({ batch, verdicts }) => {
+    const byIndex = new Map((verdicts ?? []).map(verdict => [verdict.index, verdict]))
 
-    const rebuttal = await agent(
-      `You are the **reviewer**. You raised a finding. The adversary has challenged it. You get **one response** — this is your only reply, so make it count.
+    return Promise.all(
+      batch.findings.map(async (finding, index) => {
+        const challenge = byIndex.get(index)
+        if (!challenge) return { finding, verdict: 'contested', ground: 'none', adversary: '(adversary returned no verdict on this finding — silence is not endorsement, so it is flagged for your call rather than auto-accepted)', rebuttal: '' }
+        if (!challenge.challenged) return { finding, verdict: 'consensus', adversary: challenge.argument }
+
+        const rebuttalModel = finding.severity === 'high' ? 'opus' : 'sonnet'
+        const rebuttal = await agent(
+          `You are the **reviewer**. You raised a finding. The adversary has challenged it. You get **one response** — this is your only reply, so make it count.
 
 ## Your finding
 
@@ -388,15 +447,52 @@ Return \`concedes: true\` if they are right. The finding is dropped and never re
 
 Return \`concedes: false\` only with a specific case, citing the code. Do not repeat your original argument verbatim; the adversary read it. Add something.
 
-${standards}`,
-      { label: `rebuttal:${finding.file.split(/[/\\]/).pop()}:${finding.line}`, phase: 'Debate', agentType: 'quality-reviewer', schema: REBUTTAL_SCHEMA },
-    )
+If a smaller fix would answer the challenge while still closing the defect — especially against \`over-engineering\` — put it in \`revisedFix\`, and it carries forward in place of your original. Leave \`revisedFix\` empty if your fix already is the smallest. A fix that survives review beats one that is rejected.
 
-    if (!rebuttal) return { finding, verdict: 'contested', ground: challenge.ground, adversary: challenge.argument, rebuttal: '(reviewer failed to respond)' }
-    if (rebuttal.concedes) return { finding, verdict: 'dropped', ground: challenge.ground, adversary: challenge.argument, rebuttal: rebuttal.argument }
-    return { finding, verdict: 'contested', ground: challenge.ground, adversary: challenge.argument, rebuttal: rebuttal.argument }
+${standards}`,
+          { label: `rebuttal:${finding.file.split(/[/\\]/).pop()}:${finding.line}`, phase: 'Debate', model: rebuttalModel, agentType: 'quality-reviewer', schema: REBUTTAL_SCHEMA },
+        )
+
+        if (!rebuttal) return { finding, verdict: 'contested', ground: challenge.ground, adversary: challenge.argument, rebuttal: '(reviewer failed to respond)' }
+        if (rebuttal.concedes) return { finding, verdict: 'dropped', ground: challenge.ground, adversary: challenge.argument, rebuttal: rebuttal.argument }
+
+        // Reviewer held. Carry a revised (smaller) fix forward if one was offered, then give the
+        // adversary one close: withdraw → consensus, maintain-with-a-genuinely-new-argument → contested
+        // to Sandro. This is what makes 'contested' mean deadlock, not 'the reviewer pushed back once'.
+        const heldFinding = rebuttal.revisedFix ? { ...finding, fix: rebuttal.revisedFix, revised: true } : finding
+        const close = await agent(
+          `You are the **adversary**. You challenged this finding; the reviewer has answered. You get **one close** — then the matter is settled.
+
+## The exchange
+
+- **Where:** ${heldFinding.file}:${heldFinding.line}
+- **Defect:** ${heldFinding.summary}
+- **Fix now proposed:** ${heldFinding.fix}${heldFinding.revised ? '  ← revised in response to you' : ''}
+- **Your challenge (\`${challenge.ground}\`):** ${challenge.argument}
+- **Reviewer's response:** ${rebuttal.argument}
+
+## Decide
+
+- **\`withdraws: true\`** — the rebuttal answered you, or the revised fix resolves your objection. The finding becomes consensus and reaches Sandro as something to apply. **Withdrawing is the normal outcome of a good rebuttal, not a loss.**
+- **\`withdraws: false\`** — you maintain. Then you **must give a NEW argument that engages what the reviewer actually said.** Restating your challenge in different words is not maintaining — it is withdrawing, and it will be scored as one. If you cannot say something new, withdraw.
+
+## The stakes are asymmetric
+
+Maintaining does **not** drop the finding — it goes to Sandro as **contested**, and he rules. So maintaining is cheap for you and costs him a row of reading and a decision. **Do not maintain to win.** Maintain only where you genuinely believe applying this change makes the codebase worse and a human should look.
+
+${standards}`,
+          { label: `close:${finding.file.split(/[/\\]/).pop()}:${finding.line}`, phase: 'Debate', model: rebuttalModel, agentType: 'quality-reviewer', schema: CLOSE_SCHEMA },
+        )
+
+        if (!close) return { finding: heldFinding, verdict: 'contested', ground: challenge.ground, adversary: challenge.argument, rebuttal: rebuttal.argument, note: '(adversary failed to close; sent to you unresolved)' }
+        if (close.withdraws) return { finding: heldFinding, verdict: 'consensus', ground: challenge.ground, adversary: `Challenged (\`${challenge.ground}\`), then withdrew: ${close.argument}`, rebuttal: rebuttal.argument }
+        return { finding: heldFinding, verdict: 'contested', ground: challenge.ground, adversary: `${challenge.argument}\n\nMaintained after rebuttal: ${close.argument}`, rebuttal: rebuttal.argument }
+      }),
+    )
   },
 )
+
+const judged = judgedBatches.filter(Boolean).flat()
 
 // -------------------------------------------------------------- Phase 4: Report
 
