@@ -180,12 +180,15 @@ Slice 1:
 
 **Forward notes** — captured for later stages, not decided here:
 
-- Verb list sketched in `PLAN.md` §6 (`complete_stage`, `start_stage`, `log_defect`, `project_view`);
-  Design decides the full set.
-- TestRun record shape and the health-calculation inputs.
+- ~~Verb list sketched in `PLAN.md` §6; Design decides the full set.~~ **Settled by D-40 at the
+  `SPEC-01` workshop — eleven verbs**, four of them added because a catalogued object otherwise had
+  no legal write path.
+- ~~TestRun record shape~~ — settled in `SPEC-01` §3.1, mapped field-by-field from the Jest JSON
+  `generateTestReport.ts` already holds. Health-calculation inputs remain open (OI-04, `SPEC-05`).
 - `METHODOLOGY_BLUEPRINT.md` §5.1 wording fix ("interviewer" → "scouts") when the blueprint is next revised.
-- The Sprint Build methodology chain to model is `PLAN.md` §5 — 9 tasks, Sprint Build carrying 6
-  subtasks, UX Test conditional on `FRM-*` stories.
+- The Sprint Build methodology chain to model is `PLAN.md` §5 — 9 tasks, Sprint Build carrying
+  **7** subtasks, UX Test conditional on `FRM-*` stories. **Corrected from 6 by D-38**: `build.js`
+  declares a `Handoff` phase this note omitted, and Handoff is the board write `INT-002` rewires.
 
 ---
 
