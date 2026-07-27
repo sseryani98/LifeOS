@@ -7,3 +7,9 @@ export const OBJECT_PAGE = {
   /** Columns forced on the object-page forms at L/XL (M derives to cols-1). */
   FORM_COLUMNS: 3,
 } as const;
+
+/** Percentage math: the UI captures 0–100, backends store the 0–1 fraction. */
+export const PERCENT = {
+  /** Divisor converting an entered 0–100 percentage to its 0–1 fraction. */
+  DIVISOR: 100,
+} as const;

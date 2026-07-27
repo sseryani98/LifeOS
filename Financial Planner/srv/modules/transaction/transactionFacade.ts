@@ -3,11 +3,15 @@ import cds from "@sap/cds";
 import { BaseFacade } from "../shared/baseFacade.js";
 
 import type { TransactionService } from "./transactionService.js";
-import type { BulkCategorizeResult, SplitResult } from "./types.js";
+import type {
+  BulkCategorizeResult,
+  ReCategorizeResult,
+  SplitResult,
+} from "./types.js";
 
 /**
- * Facade wiring for transaction processing: the split, bulk-categorize, and
- * single-correction actions.
+ * Facade wiring for the transaction action handlers and the inline-edit
+ * learning hook.
  */
 export class TransactionFacade extends BaseFacade {
   private readonly service: TransactionService;
@@ -22,7 +26,7 @@ export class TransactionFacade extends BaseFacade {
     this.service = service;
   }
 
-  /** Registers the split, bulk-categorize, and correct-categorization handlers. */
+  /** Registers the transaction action handlers and the inline-edit learning hook. */
   registerHandlers(): void {
     this.srv.on(
       "splitTransaction",
@@ -47,6 +51,25 @@ export class TransactionFacade extends BaseFacade {
       this.wrapHandler(
         this._handleCorrectCategorization,
         "action-correctCategorization",
+        "Transactions",
+        "transaction.correct.failed",
+      ),
+    );
+    this.srv.on(
+      "reCategorize",
+      this.wrapHandler(
+        this._handleReCategorize,
+        "action-reCategorize",
+        "Transactions",
+        "transaction.recategorize.failed",
+      ),
+    );
+    this.srv.before(
+      "SAVE",
+      "Transactions",
+      this.wrapHandler(
+        this._handleLearnFromInlineEdit,
+        "before-SAVE",
         "Transactions",
         "transaction.correct.failed",
       ),
@@ -80,4 +103,21 @@ export class TransactionFacade extends BaseFacade {
   private _handleCorrectCategorization = (
     req: cds.Request,
   ): Promise<void> => this.service.correctCategorization(req);
+
+  /**
+   * Re-runs categorization across the selected transactions.
+   * @param req Request carrying the selected transaction ids.
+   * @returns The re-categorized and skipped counts, or undefined on validation failure.
+   */
+  private _handleReCategorize = (
+    req: cds.Request,
+  ): Promise<ReCategorizeResult | undefined> => this.service.runReCategorization(req);
+
+  /**
+   * Learns a MerchantPattern when a draft save changes a transaction's vendor.
+   * @param req The SAVE request carrying the activated row.
+   * @returns Resolves once any pattern is learned.
+   */
+  private _handleLearnFromInlineEdit = (req: cds.Request): Promise<void> =>
+    this.service.applyInlineEditLearning(req);
 }

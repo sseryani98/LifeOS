@@ -14,6 +14,7 @@ export interface CategorizationMocks {
   loadVendorCounts: jest.Mock;
   loadStatsByVendor: jest.Mock;
   loadTransactionForCorrection: jest.Mock;
+  loadTransactionsForRecategorization: jest.Mock;
   updateTransactionCategorization: jest.Mock;
   insertMerchantPattern: jest.Mock;
   resolvePatternSourceId: jest.Mock;
@@ -37,6 +38,7 @@ export function buildCategorizationMocks(): CategorizationMocks {
   const loadVendorCounts = jest.fn().mockResolvedValue(new Map());
   const loadStatsByVendor = jest.fn().mockResolvedValue(new Map());
   const loadTransactionForCorrection = jest.fn().mockResolvedValue(null);
+  const loadTransactionsForRecategorization = jest.fn().mockResolvedValue([]);
   const updateTransactionCategorization = jest.fn().mockResolvedValue(undefined);
   const insertMerchantPattern = jest.fn().mockResolvedValue(undefined);
   const resolvePatternSourceId = jest.fn().mockResolvedValue("source-learned");
@@ -46,6 +48,7 @@ export function buildCategorizationMocks(): CategorizationMocks {
     loadVendorCounts,
     loadStatsByVendor,
     loadTransactionForCorrection,
+    loadTransactionsForRecategorization,
     updateTransactionCategorization,
     insertMerchantPattern,
     resolvePatternSourceId,
@@ -57,6 +60,7 @@ export function buildCategorizationMocks(): CategorizationMocks {
     loadVendorCounts,
     loadStatsByVendor,
     loadTransactionForCorrection,
+    loadTransactionsForRecategorization,
     updateTransactionCategorization,
     insertMerchantPattern,
     resolvePatternSourceId,

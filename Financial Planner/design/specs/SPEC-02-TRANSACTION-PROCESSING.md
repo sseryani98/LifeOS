@@ -354,7 +354,7 @@ Helps the user understand why the system suggested what it did and pick alternat
 | ---------------------------------------------------------- | ------------------------------------------------- | -------------------------------------- |
 | Vendor value help: no match for typed text                 | Show "Create new vendor" option                   | `transaction.vendor.createNew`         |
 | Split: both percentage and amount entered                  | Validation error — enter one or the other         | `transaction.split.enterOneInput`      |
-| Split: percentage outside 0–100 range                      | Validation error                                  | `transaction.split.invalidPercentage`  |
+| Split: percentage outside 0–1 fraction range               | Validation error                                  | `@assert.range` on `mySharePct`        |
 | Split: my_share_amount exceeds transaction amount          | Validation error                                  | `transaction.split.amountExceedsTotal` |
 | Re-categorize: no rows selected                            | Warning — select at least one row                 | `transaction.recategorize.noSelection` |
 | Vendor merge: target has same ID as source                 | Validation error                                  | `admin.vendor.mergeSameVendor`         |

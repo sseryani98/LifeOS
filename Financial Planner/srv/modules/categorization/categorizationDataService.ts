@@ -5,6 +5,7 @@ import type {
   MerchantPatternRecord,
   TransactionCategorizationPatch,
   TransactionCategorizationRow,
+  TransactionRecategorizationRow,
 } from "./types.js";
 
 /**
@@ -117,6 +118,31 @@ export class CategorizationDataService {
       rawDescription: row.rawDescription,
       amount: Number(row.amount),
     };
+  }
+
+  /**
+   * Loads the selected transactions the re-categorize batch re-matches, with
+   * the status that decides whether each row is skipped.
+   * @param transactionIds The selected transaction ids.
+   * @returns The rows in re-categorization shape.
+   */
+  async loadTransactionsForRecategorization(
+    transactionIds: string[],
+  ): Promise<TransactionRecategorizationRow[]> {
+    const rows = (await SELECT.from(ENTITIES.TRANSACTION)
+      .columns("ID", "rawDescription", "amount", "categorizationStatus")
+      .where({ ID: { in: transactionIds } })) as Array<{
+        ID: string;
+        rawDescription: string;
+        amount: number | string;
+        categorizationStatus: string;
+      }>;
+    return rows.map(row => ({
+      ID: row.ID,
+      rawDescription: row.rawDescription,
+      amount: Number(row.amount),
+      categorizationStatus: row.categorizationStatus,
+    }));
   }
 
   /**

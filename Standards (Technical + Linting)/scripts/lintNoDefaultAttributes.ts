@@ -12,15 +12,21 @@ const SOURCE_DIRS = [join(ROOT_DIR, "app")];
 const SKIP_SEGMENTS = new Set(["node_modules", "gen", "dist", "coverage", ".git"]);
 
 /**
- * Attributes whose default is identical on EVERY control, so writing it is
- * always noise: `visible` (default true on the Control base) and `enabled`
- * (default true wherever exposed). `editable`/`expanded` are excluded — their
- * defaults are control-specific (false on SimpleForm/Panel, true elsewhere),
- * so guidance handles them, not this rule.
+ * Redundant attribute=value pairs, safe to flag by a flat line match because
+ * each is always the control's default wherever the pair can legally appear:
+ *   - `visible`/`enabled` default true on EVERY control (Control base), so the
+ *     pair is noise anywhere it occurs.
+ *   - `layout="ResponsiveGridLayout"` is control-specific, but that value
+ *     string only ever sits on `SimpleForm.layout`, where it IS the default
+ *     (since UI5 1.16) — so matching the value alone can't false-positive.
+ * `editable`/`expanded` stay excluded: their defaults are control-specific AND
+ * their values (`true`) are shared, so a flat match couldn't tell a redundant
+ * one from a required one. Guidance handles those, not this rule.
  */
 const REDUNDANT_DEFAULTS: Array<{ attr: string; value: string }> = [
   { attr: "visible", value: "true" },
   { attr: "enabled", value: "true" },
+  { attr: "layout", value: "ResponsiveGridLayout" },
 ];
 
 interface Violation {

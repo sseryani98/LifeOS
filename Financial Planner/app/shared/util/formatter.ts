@@ -65,6 +65,16 @@ const formatter = {
     };
     return statusMap[status] || status;
   },
+
+  /**
+   * Coerces a text input to a number, treating blank as absent. Shared so
+   * dialogs and forms parse numeric inputs one way instead of re-declaring it.
+   * @param value the raw input value
+   * @returns the number, or null when blank
+   */
+  toNumber(value: string | null | undefined): number | null {
+    return value === "" || value === undefined || value === null ? null : Number(value);
+  },
 };
 
 export default formatter;

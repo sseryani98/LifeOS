@@ -83,6 +83,8 @@ describe("Categorization against SQLite", () => {
     await service.correctCategorization({
       transactionId: MISSING_TXN_ID,
       vendor_ID: UBER_EATS_VENDOR_ID,
+      purchaseType_ID: null,
+      earningCategory_ID: null,
     });
 
     const state = await readTransactionState(MISSING_TXN_ID);

@@ -43,127 +43,12 @@
                         expanded="false"
                     >
                         <tnt:NavigationListItem
-                            text="{i18n>navWeeklyReview}"
-                            key="WEEKLY_REVIEW"
-                            visible="false"
-                        />
-                        <tnt:NavigationListItem
                             text="{i18n>navTransactionList}"
                             key="TRANSACTION_LIST"
-                            visible="false"
                         />
                         <tnt:NavigationListItem
                             text="{i18n>navCsvImport}"
                             key="CSV_IMPORT"
-                        />
-                    </tnt:NavigationListItem>
-
-                    <tnt:NavigationListItem
-                        text="{i18n>navChurningCards}"
-                        icon="sap-icon://credit-card"
-                        expanded="false"
-                        visible="false"
-                    >
-                        <tnt:NavigationListItem
-                            text="{i18n>navMyCards}"
-                            key="MY_CARDS"
-                            visible="false"
-                        />
-                        <tnt:NavigationListItem
-                            text="{i18n>navMarketCards}"
-                            key="MARKET_CARDS"
-                            visible="false"
-                        />
-                    </tnt:NavigationListItem>
-
-                    <tnt:NavigationListItem
-                        text="{i18n>navChurningAnalytics}"
-                        icon="sap-icon://business-objects-experience"
-                        expanded="false"
-                        visible="false"
-                    >
-                        <tnt:NavigationListItem
-                            text="{i18n>navChurnboard}"
-                            key="churnboard"
-                            visible="false"
-                        />
-                        <tnt:NavigationListItem
-                            text="{i18n>navTrophyCase}"
-                            key="TROPHY_CASE"
-                            visible="false"
-                        />
-                        <tnt:NavigationListItem
-                            text="{i18n>navCardAnalytics}"
-                            key="CARD_ANALYTICS"
-                            visible="false"
-                        />
-                        <tnt:NavigationListItem
-                            text="{i18n>navRecommendationMatrix}"
-                            key="RECOMMENDATION_MATRIX"
-                            visible="false"
-                        />
-                        <tnt:NavigationListItem
-                            text="{i18n>navPerkTracker}"
-                            key="PERK_TRACKER"
-                            visible="false"
-                        />
-                        <tnt:NavigationListItem
-                            text="{i18n>navPointsDashboard}"
-                            key="POINTS_DASHBOARD"
-                            visible="false"
-                        />
-                        <tnt:NavigationListItem
-                            text="{i18n>navAnnualSummary}"
-                            key="ANNUAL_SUMMARY"
-                            visible="false"
-                        />
-                    </tnt:NavigationListItem>
-
-                    <tnt:NavigationListItem
-                        text="{i18n>navFinances}"
-                        icon="sap-icon://wallet"
-                        expanded="false"
-                        visible="false"
-                    >
-                        <tnt:NavigationListItem
-                            text="{i18n>navBudgetDashboard}"
-                            key="BUDGET_DASHBOARD"
-                            visible="false"
-                        />
-                        <tnt:NavigationListItem
-                            text="{i18n>navIncomeEntry}"
-                            key="INCOME_ENTRY"
-                            visible="false"
-                        />
-                        <tnt:NavigationListItem
-                            text="{i18n>navGoals}"
-                            key="GOALS"
-                            visible="false"
-                        />
-                        <tnt:NavigationListItem
-                            text="{i18n>navGoalProgress}"
-                            key="GOAL_PROGRESS"
-                            visible="false"
-                        />
-                        <tnt:NavigationListItem
-                            text="{i18n>navSpendingTrends}"
-                            key="SPENDING_TRENDS"
-                            visible="false"
-                        />
-                        <tnt:NavigationListItem
-                            text="{i18n>navIncomeVsExpenses}"
-                            key="INCOME_VS_EXPENSES"
-                            visible="false"
-                        />
-                        <tnt:NavigationListItem
-                            text="{i18n>navFinancialPictureEntry}"
-                            key="FINANCIAL_PICTURE_ENTRY"
-                            visible="false"
-                        />
-                        <tnt:NavigationListItem
-                            text="{i18n>navFinancialPictureDashboard}"
-                            key="FINANCIAL_PICTURE_DASHBOARD"
-                            visible="false"
                         />
                     </tnt:NavigationListItem>
 
@@ -234,11 +119,6 @@
                         <tnt:NavigationListItem
                             text="{i18n>navSimplefinConnections}"
                             key="SIMPLEFIN_CONNECTIONS"
-                        />
-                        <tnt:NavigationListItem
-                            text="{i18n>navScraperApprovals}"
-                            key="SCRAPER_APPROVALS"
-                            visible="false"
                         />
                     </tnt:NavigationListItem>
                 </tnt:NavigationList>

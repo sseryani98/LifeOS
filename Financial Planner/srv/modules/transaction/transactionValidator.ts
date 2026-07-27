@@ -1,14 +1,8 @@
-import { CurrencyUtility } from "../shared/currencyUtility.js";
-
-import {
-  BULK_MESSAGE,
-  CORRECT_MESSAGE,
-  PERCENTAGE,
-  SPLIT_MESSAGE,
-} from "./constants.js";
+import { BULK_MESSAGE, CORRECT_MESSAGE, SPLIT_MESSAGE } from "./constants.js";
 import type {
   BulkCategorizeCommand,
   CorrectionCommand,
+  ReCategorizeCommand,
   SplitCommand,
   TransactionValidationError,
 } from "./types.js";
@@ -21,15 +15,18 @@ import type {
 export class TransactionValidator {
   /**
    * Validates a split request against the transaction's absolute amount. The
-   * user supplies exactly one of percentage or dollar share; the resulting share
-   * must fall within 0 and the full amount.
+   * user supplies exactly one of percentage or dollar share, and the resulting
+   * share must fall within 0 and the full amount. The percentage's own 0–1
+   * range is enforced by @assert.range on the action parameter.
    * @param command The split request.
    * @param absAmount The transaction amount's absolute value (the ceiling).
+   * @param share The pre-computed dollar share the split will persist.
    * @returns Validation errors, empty when the split is valid.
    */
   static validateSplit(
     command: SplitCommand,
     absAmount: number,
+    share: number,
   ): TransactionValidationError[] {
     const errors: TransactionValidationError[] = [];
     const pctGiven = command.mySharePct !== null;
@@ -41,20 +38,6 @@ export class TransactionValidator {
       });
       return errors;
     }
-    if (
-      pctGiven &&
-      ((command.mySharePct as number) < PERCENTAGE.MIN ||
-        (command.mySharePct as number) > PERCENTAGE.MAX)
-    ) {
-      errors.push({
-        field: "mySharePct",
-        messageKey: SPLIT_MESSAGE.INVALID_PERCENTAGE,
-      });
-      return errors;
-    }
-    // Only the dollar path reaches here out of range — a validated percentage
-    // (0–1) can never yield a share above the total.
-    const share = this.computeMyShareAmount(command, absAmount);
     if (share < 0 || share > absAmount) {
       errors.push({
         field: "myShareAmount",
@@ -65,26 +48,9 @@ export class TransactionValidator {
   }
 
   /**
-   * Computes the dollar share the split persists: a percentage of the amount
-   * (rounded to cents) or the entered dollar value. Always returns a number so
-   * myShareAmount is never left null.
-   * @param command The split request.
-   * @param absAmount The transaction amount's absolute value.
-   * @returns The share in dollars.
-   */
-  static computeMyShareAmount(
-    command: SplitCommand,
-    absAmount: number,
-  ): number {
-    if (command.mySharePct !== null) {
-      return CurrencyUtility.roundToCents(absAmount * command.mySharePct);
-    }
-    return command.myShareAmount ?? 0;
-  }
-
-  /**
-   * Validates a bulk categorization request: at least one row selected and a
-   * vendor to anchor the assignment and its learned pattern.
+   * Validates a bulk categorization request: at least one row must be selected.
+   * The vendor is enforced declaratively by @mandatory on the action param, so
+   * only the empty-selection guard (which @mandatory cannot express) lives here.
    * @param command The bulk categorization request.
    * @returns Validation errors, empty when the request is valid.
    */
@@ -98,10 +64,23 @@ export class TransactionValidator {
         messageKey: BULK_MESSAGE.NO_SELECTION,
       });
     }
-    if (!command.vendor_ID) {
+    return errors;
+  }
+
+  /**
+   * Validates a re-categorize request: at least one row must be selected before
+   * categorization is re-run over the selection.
+   * @param command The re-categorize request.
+   * @returns Validation errors, empty when the request is valid.
+   */
+  static validateReCategorize(
+    command: ReCategorizeCommand,
+  ): TransactionValidationError[] {
+    const errors: TransactionValidationError[] = [];
+    if (command.transactionIds.length === 0) {
       errors.push({
-        field: "vendor_ID",
-        messageKey: BULK_MESSAGE.VENDOR_REQUIRED,
+        field: "transactionIds",
+        messageKey: BULK_MESSAGE.NO_SELECTION,
       });
     }
     return errors;
