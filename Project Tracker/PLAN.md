@@ -9,9 +9,9 @@ starts here. Read this, then `IDEATE_KICKOFF.md` for the full decision rationale
 
 ## 1. Where we are right now
 
-Financial Planner is mid-sprint **W1-S3 — Transaction Processing**, with two stories left in
-Backlog (`FRM-001` Transaction List, `CNV-001` Historical backfill) and nothing In Progress.
-That gap is deliberate — it is the cutover window.
+Financial Planner is mid-sprint **W1-S3 — Transaction Processing**, with one story left in
+Backlog (`CNV-001` Historical backfill) and nothing In Progress. That gap is deliberate — it
+is the cutover window.
 
 Project Tracker has a PRD, a set of foundational decisions (below), and three newly authored
 Plan-phase skills. **No module code exists yet.** The Ideate stage has not run.
@@ -21,8 +21,8 @@ Plan-phase skills. **No module code exists yet.** The Ideate stage has not run.
 Project Tracker becomes a real CAP module that **owns project state**. The markdown files that
 currently hold that state (`SPRINT_BOARD.md`, `DEFECT_LOG.md`, sprint checkpoints, test
 reports) are retired, and the existing build skills are rewired to write to the module through
-an MCP server instead. This lands *before* Financial Planner's last two stories, so those
-stories become the first real test of the new system.
+an MCP server instead. This lands *before* Financial Planner's last story, so `CNV-001`
+becomes the first real test of the new system.
 
 ---
 
