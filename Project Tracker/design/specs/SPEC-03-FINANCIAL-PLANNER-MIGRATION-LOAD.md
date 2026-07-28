@@ -4,7 +4,7 @@
 **FRICEW Objects:** CNV-002 (Conversion), CNV-003 (Conversion), CNV-004 (Conversion)
 **Wave:** 1
 **CDS Service:** Not yet defined — see §2. This spec is an input to the Data Model stage.
-**Status:** Draft
+**Status:** Approved
 **Provisional on:** **R1** (D-39), inherited from SPEC-01 and SPEC-02 — the validating spike ran on
 in-memory SQLite only. **Not Approved-for-build until R1 clears.**
 
@@ -15,6 +15,7 @@ in-memory SQLite only. **Not Approved-for-build until R1 clears.**
 | Date       | Author          | Description                                                                                      |
 | ---------- | --------------- | ------------------------------------------------------------------------------------------------ |
 | 2026-07-28 | Sandro & Claude | Initial creation from the SPEC-03 workshop. Records D-58 through D-65. Provisional on R1 (D-39). |
+| 2026-07-28 | Sandro          | Status → Approved. All eight DESIGN_WORKSHOP §6 criteria met. Still provisional on R1 for build. |
 
 ---
 
