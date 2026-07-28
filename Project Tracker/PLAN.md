@@ -2,7 +2,7 @@
 
 **Status:** Plan phase — Ideate, Scope, Research and Scaffold complete; Workshops in progress
 (grouping settled, `SPEC-01` … `SPEC-12`)
-**Last updated:** 2026-07-27
+**Last updated:** 2026-07-28
 **Purpose:** The continuity document. Anyone (or any fresh chat) picking up Project Tracker
 starts here. Read this, then `design/PROBLEM_STATEMENT_AND_VISION.md` (PSV-001),
 `design/BUSINESS_ARCHITECTURE.md` (BA-001) and `design/DECISIONS_LOG.md` for the full
@@ -17,12 +17,12 @@ Backlog (`CNV-001` Historical backfill) and nothing In Progress. That gap is del
 is the cutover window.
 
 Project Tracker has a PRD, `design/PROBLEM_STATEMENT_AND_VISION.md` (PSV-001, **Draft**),
-`design/BUSINESS_ARCHITECTURE.md` (BA-001 v1.3, **Approved** — 22 objects in 3 waves, grouped into
-12 specs), a `research/` pack of six documents, a decisions log (D-01 … D-57), a wired module folder,
-**two written specs** — `SPEC-01` **Draft**, `SPEC-02` **Approved** — and the Plan-phase skills installed in
-`.claude/`. **No module code exists yet.** Ideate, Scope and Research ran 2026-07-26; Scaffold, the
-Workshops grouping, `SPEC-01` and `SPEC-02` ran 2026-07-27. **OI-01, OI-02 and OI-03 are closed**;
-OI-04 and OI-05 remain.
+`design/BUSINESS_ARCHITECTURE.md` (BA-001 v1.4, **Approved** — 22 objects in 3 waves, grouped into
+12 specs), a `research/` pack of six documents, a decisions log (D-01 … D-65), a wired module folder,
+**three written specs** — `SPEC-01` **Draft**, `SPEC-02` **Approved**, `SPEC-03` **Draft** — and the
+Plan-phase skills installed in `.claude/`. **No module code exists yet.** Ideate, Scope and Research ran
+2026-07-26; Scaffold, the Workshops grouping, `SPEC-01` and `SPEC-02` ran 2026-07-27; `SPEC-03` ran
+2026-07-28. **OI-01, OI-02 and OI-03 are closed**; OI-04 and OI-05 remain.
 
 ### The one-paragraph version
 
@@ -36,9 +36,10 @@ becomes the first real test of the new system.
 
 ## 2. Decisions already made
 
-Full rationale in `design/DECISIONS_LOG.md` (D-01 … D-57; D-19 … D-27 were added at Scope,
+Full rationale in `design/DECISIONS_LOG.md` (D-01 … D-65; D-19 … D-27 were added at Scope,
 D-28 … D-32 at Research, D-33 … D-36 at Scaffold, D-37 … D-39 at the Workshops grouping,
-D-40 … D-46 at the `SPEC-01` workshop and D-47 … D-57 at the `SPEC-02` workshop). The founding twelve,
+D-40 … D-46 at the `SPEC-01` workshop, D-47 … D-57 at the `SPEC-02` workshop and D-58 … D-65 at the
+`SPEC-03` workshop). The founding twelve,
 summarized — note that **D-28 amends item 4's wording**: a bare `cds.connect.to()` throws, so the
 mechanism needs a construction step.
 
@@ -63,24 +64,24 @@ mechanism needs a construction step.
 
 ### Stage status
 
-| #   | Stage              | Skill                                   | Skill status | Stage status                                                                |
-| --- | ------------------ | --------------------------------------- | ------------ | --------------------------------------------------------------------------- |
-| 1   | Ideate             | `/generate-problem-statement-vision`    | Authored     | **Done** — 2026-07-26                                                       |
-| 2   | Scope              | `/generate-business-architecture`       | Authored     | **Done** — 2026-07-26                                                       |
-| 3   | Research           | `/gather-research`                      | Authored     | **Done** — 2026-07-26                                                       |
-| 4   | Scaffold           | `/scaffold-module` → `scaffold-writer`  | Authored     | **Done** — 2026-07-27                                                       |
-| 5   | Workshops          | `/workshop` → `spec-writer`             | Exists       | **In progress** — D-37 grouping; `SPEC-01` Draft, `SPEC-02` Approved (2/12) |
-| 6   | Information Arch.  | `/generate-information-architecture`    | Not authored | Not started — runs in full (D-21)                                           |
-| 7   | Design System      | `/generate-design-system`               | Not authored | Not started — runs in full (D-21)                                           |
-| 8   | Theme              | `/generate-theme`                       | Not authored | Not started — runs in full (D-21)                                           |
-| 9   | Data Model         | `/generate-data-model`                  | Not authored | Not started                                                                 |
-| 10  | Tech Stack         | `/generate-tech-stack`                  | Not authored | Not started                                                                 |
-| 11  | Test Strategy      | `/generate-test-strategy`               | Not authored | Not started                                                                 |
-| 12  | Project Planning   | `/generate-build-plan`                  | Not authored | Not started                                                                 |
-| 13  | Build              | `/build` + chain                        | Exists       | Not started                                                                 |
-| 14  | **Rewire tooling** | `lintNoMarkdownState` + PreToolUse hook | Not authored | Not started                                                                 |
-| 15  | Cutover            | —                                       | —            | Not started                                                                 |
-| 16  | Back to FP         | —                                       | —            | Blocked on cutover                                                          |
+| #   | Stage              | Skill                                   | Skill status | Stage status                                                                                 |
+| --- | ------------------ | --------------------------------------- | ------------ | -------------------------------------------------------------------------------------------- |
+| 1   | Ideate             | `/generate-problem-statement-vision`    | Authored     | **Done** — 2026-07-26                                                                        |
+| 2   | Scope              | `/generate-business-architecture`       | Authored     | **Done** — 2026-07-26                                                                        |
+| 3   | Research           | `/gather-research`                      | Authored     | **Done** — 2026-07-26                                                                        |
+| 4   | Scaffold           | `/scaffold-module` → `scaffold-writer`  | Authored     | **Done** — 2026-07-27                                                                        |
+| 5   | Workshops          | `/workshop` → `spec-writer`             | Exists       | **In progress** — D-37 grouping; `SPEC-01` Draft, `SPEC-02` Approved, `SPEC-03` Draft (3/12) |
+| 6   | Information Arch.  | `/generate-information-architecture`    | Not authored | Not started — runs in full (D-21)                                                            |
+| 7   | Design System      | `/generate-design-system`               | Not authored | Not started — runs in full (D-21)                                                            |
+| 8   | Theme              | `/generate-theme`                       | Not authored | Not started — runs in full (D-21)                                                            |
+| 9   | Data Model         | `/generate-data-model`                  | Not authored | Not started                                                                                  |
+| 10  | Tech Stack         | `/generate-tech-stack`                  | Not authored | Not started                                                                                  |
+| 11  | Test Strategy      | `/generate-test-strategy`               | Not authored | Not started                                                                                  |
+| 12  | Project Planning   | `/generate-build-plan`                  | Not authored | Not started                                                                                  |
+| 13  | Build              | `/build` + chain                        | Exists       | Not started                                                                                  |
+| 14  | **Rewire tooling** | `lintNoMarkdownState` + PreToolUse hook | Not authored | Not started                                                                                  |
+| 15  | Cutover            | —                                       | —            | Not started                                                                                  |
+| 16  | Back to FP         | —                                       | —            | Blocked on cutover                                                                           |
 
 Stages 6–8 (IA, Design System, Theme) **run in full** — settled by D-21. Slice 1 carries four
 Reports and two Forms, which is a real UI rather than a thin shell.
@@ -91,24 +92,24 @@ Reports and two Forms, which is a real UI rather than a thin shell.
 `/workshop` reads that table; it does not re-derive a grouping per session. Spec number is build
 order, so the sequence is simply `SPEC-01` → `SPEC-12`.
 
-**`SPEC-01` and `SPEC-02` are written**, both provisional on R1. `SPEC-01`
+**`SPEC-01`, `SPEC-02` and `SPEC-03` are written**, all three provisional on R1. `SPEC-01`
 (`design/specs/SPEC-01-MCP-INTENT-VERB-LAYER.md`, **Draft**) is eleven verbs, 29 business rules, 16
 FUTs, D-40 … D-46. `SPEC-02` (`design/specs/SPEC-02-METHODOLOGY-AND-STAGE-ENFORCEMENT.md`,
 **Approved** 2026-07-27) is 33 business
 rules, 18 FUTs, D-47 … D-57 — and it discharged all three things `SPEC-01` deferred to it: the guard
 table (14 rejections, nine new `wfl.*` keys), the twelfth-verb question (**not needed** — D-50), and
-the slug codes (16, with FUT-002 testing the contract rather than asserting it).
+the slug codes (16, with FUT-002 testing the contract rather than asserting it). `SPEC-03`
+(`design/specs/SPEC-03-FINANCIAL-PLANNER-MIGRATION-LOAD.md`, **Draft** 2026-07-28) is 34 business
+rules, 12 FUTs, eleven Data Model amendments, D-58 … D-65.
 
-**`SPEC-01` now carries four amendments owed**, all raised in `SPEC-02` §6 and none yet applied:
-FUT-005's precondition names `smoke` open on a backend-only Conversion where it is never
-materialised; §2's `MethodologyStep.conditional` becomes a predicate name rather than a boolean;
-§5 gains a guard precedence it currently lacks; and BR-13's silence on the reopened stage's own
-record is now filled by `SPEC-02` BR-28.
+**`SPEC-01`'s four owed amendments are applied** (2026-07-28) and `SPEC-02` §6's rows are struck
+through. It now carries **a fifth, owed**: `SPEC-03` D-60 rules the FRICEW code-list values
+**singular**, so FUT-014's accepted value becomes `Interface` rather than `Interfaces` — one word,
+recorded in `SPEC-03` §6.
 
-**Next is `SPEC-03` — Financial Planner Migration Load** (CNV-002, CNV-003, CNV-004). It inherits two
-constraints from `SPEC-02`: **CNV-002 must set `shipsUi`** on every Milestone it creates, because
-ENH-001 reads it at creation; and **CNV-004 is no longer an instantiation step** (D-54) — the chain
-arrives with the Milestone, so CNV-004 becomes the assertion that it came out right.
+**Next is `SPEC-04` — Next Action** (ENH-002, RPT-002), the first Wave 2 spec. It inherits one
+question `SPEC-02` raised and did not answer: what `next_action` returns for a Done Milestone whose
+Recommended `documentation` stage is still open.
 
 **Still open:** OI-04 (what calculated health computes — now the `SPEC-05` workshop), OI-05
 (methodology genericity — Data Model). **OI-03 is closed by D-35.** Research risks: R2 is closed
@@ -353,6 +354,57 @@ Settle before or during Scaffold.
 ---
 
 ## 8. Session log
+
+### 2026-07-28 — SPEC-03 written: the verbs cannot perform the migration, and CNV-004 earns its row back
+
+- **Applied `SPEC-01`'s four owed amendments** before opening the workshop — FUT-005's precondition
+  mirrored onto `SPEC-02` FUT-014, `MethodologyStep.conditional` restated as a predicate name, the
+  `complete_stage` guard precedence added to §5, and BR-13 cross-referenced to `SPEC-02` BR-28. `SPEC-01`
+  stays **Draft**; `SPEC-02` §6's four rows are struck through as applied.
+- **Ran the `SPEC-03` workshop over CNV-002, CNV-003 and CNV-004.** Wrote
+  `design/specs/SPEC-03-FINANCIAL-PLANNER-MIGRATION-LOAD.md` (**Draft**, provisional on R1) with 34
+  business rules, 12 FUTs and eleven Data Model amendments, and logged **D-58 … D-65**.
+- **The load cannot run on the verb layer, and that is the spec's spine (D-58).** Testing CNV-002/003
+  against D-40's eleven found four separate blocks: no verb creates an Area, Engagement or Workspace;
+  `plan_sprint` creates Milestones in Backlog, so under D-54 all twelve would get a chain — the exact
+  inverse of D-15; `log_defect` requires a `story` and `DEFECT_LOG.md` records only a **Sprint**; and
+  `record_test_run` is **structurally blocked**, since `SPEC-02` BR-29 refuses a Not Started target Task
+  and W1-S2's Milestones have no Tasks at all. The migration writes through the CAP service layer
+  instead — D-05 binds _agents_ bypassing the service layer, the same reading D-20 used to clear the two
+  Forms. This also settles where the checkpoint narrative comes from: CNV-003 itself, not FRM-001, which
+  is Wave 2 and would have repeated D-51's rejected option B.
+- **CNV-004 was hollow and is now rescoped rather than deleted (D-59).** D-54 left it asserting what
+  `SPEC-02` FUT-004 and FUT-005 already assert. Widened from the chain alone to the **whole load's
+  tie-out** — counts, chain, typing, provenance — which is the reconciliation approach
+  `DESIGN_WORKSHOP.md` §4.2 demands of every Conversion and which genuinely spans CNV-002 and CNV-003.
+  BA-001 → **v1.4**. The distinction that saves it: `SPEC-02`'s FUTs test whether ENH-001's _rule_ works;
+  CNV-004 tests whether _this load's data_ came out right.
+- **Re-verifying the source paid for itself three times.** The board held **exactly** as documented (12
+  stories, 11 Done, nothing In Progress, three Initiatives, both SHAs and tags confirmed against git) —
+  but the checkpoint metrics are misquoted everywhere: BA-001, `PLAN.md` and the brief all say "98.73%
+  statements", the checkpoint separates **Statements 98.73%** from **Lines 98.71%**, and `SPEC-01`'s
+  `TestRun` carries `linesPct` with **no statements attribute**. The correct seed is **98.71**.
+  `DEFECT_LOG.md` has **no story column and no title column**. And the checkpoint records **five**
+  decisions, not six — its third narrative bullet says "(see FRM-003 decision 1)" and is that decision
+  recorded twice (D-65).
+- **A gap between two approved decisions, found only by specifying the object that exercises both
+  (D-64).** D-53 and `SPEC-02` BR-17 make `Milestone.status` derived and never written; D-54 fires
+  ENH-001 on "created with status Backlog". At creation both cases have zero Tasks and BR-17's "every
+  blocking Task is Complete" is **vacuously true over an empty set**, so the derivation returns Done for
+  both and cannot discriminate the very case the trigger turns on. It is a **transient creation input** —
+  not a stored flag either, which D-54 explicitly rejected. Amends `SPEC-02` §3.2.
+- **Reviewing the produced spec caught three defects the writer's own DoD check passed** — the third
+  session running that this has been worth doing. BR-23 was one-directional ("resolution only when
+  Closed"), so FUT-006's assertion that the three Closed defects **carry** resolutions had no rule behind
+  it; §5 claimed a failed migration leaves an **empty** database, which contradicts FUT-012's own second
+  fixture, since atomicity is per conversion and a failing CNV-003 leaves CNV-002's rows committed; and
+  BR-04 never named **which** conversion emits the `migration` Activity row, which a build persona would
+  have had to ask. All three fixed.
+- **Other rulings:** FRICEW code-list values are **singular** (D-60), so CNV-002 remaps only two rows and
+  `SPEC-01` FUT-014 owes one word; thin sources **derive shape, never linkage** (D-61), so every Defect
+  ships with a null story rather than an inferred one; Initiative status is **written**, Active/Complete,
+  with new `mergeCommit` and `tag` attributes (D-62); and the migration writes under a dedicated
+  **`migration`** identity emitting **two** Activity rows rather than one per row (D-63).
 
 ### 2026-07-27 — SPEC-02 written: the guard table, no twelfth verb, and a fourth drift in §5
 
@@ -609,10 +661,10 @@ stores them under the user's home directory, which the bridge cannot access.
 | -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
 | `Project Tracker/PRD.md`                                 | Full product design. Slice 1 is a small fraction of it.                                                                               |
 | `Project Tracker/design/PROBLEM_STATEMENT_AND_VISION.md` | PSV-001 — the traceability root: problems P1–P5, scope, boundary.                                                                     |
-| `Project Tracker/design/BUSINESS_ARCHITECTURE.md`        | BA-001 v1.3 — the FRICEW catalogue and the story backlog. 22 objects, 3 waves, deferred items in §3, **the 12-spec grouping in §11**. |
-| `Project Tracker/design/specs/`                          | The twelve functional specs, written in `SPEC-01` → `SPEC-12` order. Grouping and membership are BA-001 §11. **2 of 12 written.**     |
+| `Project Tracker/design/BUSINESS_ARCHITECTURE.md`        | BA-001 v1.4 — the FRICEW catalogue and the story backlog. 22 objects, 3 waves, deferred items in §3, **the 12-spec grouping in §11**. |
+| `Project Tracker/design/specs/`                          | The twelve functional specs, written in `SPEC-01` → `SPEC-12` order. Grouping and membership are BA-001 §11. **3 of 12 written.**     |
 | `Project Tracker/research/`                              | Six research documents plus `README.md` — the index, assumption ledger, open risks and gate verdict. All **Draft**.                   |
-| `Project Tracker/design/DECISIONS_LOG.md`                | D-01 … D-57 with full rationale. (`IDEATE_KICKOFF.md` was scratch — absorbed and deleted 2026-07-26.)                                 |
+| `Project Tracker/design/DECISIONS_LOG.md`                | D-01 … D-65 with full rationale. (`IDEATE_KICKOFF.md` was scratch — absorbed and deleted 2026-07-26.)                                 |
 | `Standards (Documents)/METHODOLOGY_BLUEPRINT.md`         | The methodology→tooling map. **§7 is partly superseded** — the module is real, not a generator, and it writes rather than only reads. |
 | `Financial Planner/design/`                              | The artifact set this module's design phase mirrors.                                                                                  |
 | `Financial Planner/design/DESIGN_PHASE_TIMELINE.md`      | How the design phase actually ran, step by step.                                                                                      |
