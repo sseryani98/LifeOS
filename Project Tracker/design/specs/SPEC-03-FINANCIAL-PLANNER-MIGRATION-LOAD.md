@@ -12,10 +12,11 @@ in-memory SQLite only. **Not Approved-for-build until R1 clears.**
 
 ## Change History
 
-| Date       | Author          | Description                                                                                      |
-| ---------- | --------------- | ------------------------------------------------------------------------------------------------ |
-| 2026-07-28 | Sandro & Claude | Initial creation from the SPEC-03 workshop. Records D-58 through D-65. Provisional on R1 (D-39). |
-| 2026-07-28 | Sandro          | Status → Approved. All eight DESIGN_WORKSHOP §6 criteria met. Still provisional on R1 for build. |
+| Date       | Author          | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| ---------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-07-28 | Sandro & Claude | Initial creation from the SPEC-03 workshop. Records D-58 through D-65. Provisional on R1 (D-39).                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| 2026-07-28 | Sandro          | Status → Approved. All eight DESIGN_WORKSHOP §6 criteria met. Still provisional on R1 for build.                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| 2026-07-28 | Sandro & Claude | Amended in-session at the SPEC-04 workshop (D-67). **CNV-002 now sets `Initiative.position` and `Milestone.position`** — §2 amendment 12, §3.1's two tables, BR-14a, CNV-004's BR-33a, and FUT-001 / FUT-002. ENH-002 orders open Milestones by these and has no fallback: the twelve migrated rows share one `createdAt`. Rules are inserted as `BR-14a` / `BR-33a` rather than renumbered, because SPEC-02 and this spec's own FUTs cite BR-15 … BR-34 by number. Status stays **Approved** — the load's data is unchanged, one attribute per row is added. |
 
 ---
 
@@ -49,8 +50,8 @@ a requirement this spec places on the Data Model stage.
 | **Area**               | Hierarchy root                                                         | `name`                                                                                                                                                                     |
 | **Engagement**         | Hierarchy level 2                                                      | `name`                                                                                                                                                                     |
 | **Workspace**          | Addressing root; the migration's target                                | `slug`, `name`, `currentFocus` (nullable)                                                                                                                                  |
-| **Initiative**         | The three sprints                                                      | `name`, `goal` (**nullable**), `branch`, `status`, `mergeCommit` (nullable), `tag` (nullable)                                                                              |
-| **Milestone**          | The twelve stories                                                     | `storyId`, `fricewType`, `description`, `shipsUi`, `status` (**derived**, SPEC-02 BR-17)                                                                                   |
+| **Initiative**         | The three sprints                                                      | `name`, `goal` (**nullable**), `branch`, `status`, `mergeCommit` (nullable), `tag` (nullable), **`position`**                                                              |
+| **Milestone**          | The twelve stories                                                     | `storyId`, `fricewType`, `description`, `shipsUi`, **`position`**, `status` (**derived**, SPEC-02 BR-17)                                                                   |
 | **Task** / **Subtask** | Written by ENH-001 as a consequence of CNV-002's load, not by the load | `stepCode`, `status`                                                                                                                                                       |
 | **Defect**             | CNV-003's four                                                         | `severity`, `status`, `title`, `description`, `references` (nullable), `resolution` (nullable), plus links to Milestone (nullable) and Initiative (nullable)               |
 | **Decision**           | CNV-003's five                                                         | `target`, `context` (nullable), `options` (nullable), `decision`, `rationale` (**nullable**)                                                                               |
@@ -73,6 +74,7 @@ a requirement this spec places on the Data Model stage.
 | 9   | **`Activity.kind` admits `checkpoint` and `migration`.**                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | 10  | **The actor identity admits a third kind — `migration`** — neither human nor agent. **Extends SPEC-02 §2 amendment 6**, which enumerates identities with `sandro` as the only human and everything else an agent.                                                                                                                                                                                                                                                                                                        |
 | 11  | **`Milestone.fricewType` code-list values are singular** — `Interface`, `Conversion`, `Enhancement`, `Form`, `Report`, `Workflow` (D-60).                                                                                                                                                                                                                                                                                                                                                                                |
+| 12  | New on `Initiative` and `Milestone`: **`position`** — Integer, **not null**, gapped by 10, unique within its parent (`@assert.unique`). Required by SPEC-04's ENH-002 as the ordering tiebreak, because every migrated row shares one `createdAt` and a load of twelve rows in one instant supplies no other total order (D-67). **Added at the SPEC-04 workshop.**                                                                                                                                                      |
 
 ---
 
@@ -98,11 +100,11 @@ having started, which is the only thing about a failed load that is true.
 
 #### Transformation rules — the three Initiatives
 
-| name                           | goal                                                                                                         | branch         | status   | mergeCommit | tag    |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------------ | -------------- | -------- | ----------- | ------ |
-| W1-S1 — Foundation & Seed Data | **null**                                                                                                     | `sprint/W1-S1` | Complete | `0a9804f`   | `v1.1` |
-| W1-S2 — Ingestion Pipeline     | From its checkpoint — "Transactions flow from SimpleFIN and CSV into the system. Connection health visible." | `sprint/W1-S2` | Complete | `9bbe826`   | `v1.2` |
-| W1-S3 — Transaction Processing | From the board — "Transactions categorized, splits supported, historical data backfilled."                   | `sprint/W1-S3` | Active   | null        | null   |
+| name                           | goal                                                                                                         | branch         | status   | mergeCommit | tag    | position |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------ | -------------- | -------- | ----------- | ------ | -------- |
+| W1-S1 — Foundation & Seed Data | **null**                                                                                                     | `sprint/W1-S1` | Complete | `0a9804f`   | `v1.1` | 10       |
+| W1-S2 — Ingestion Pipeline     | From its checkpoint — "Transactions flow from SimpleFIN and CSV into the system. Connection health visible." | `sprint/W1-S2` | Complete | `9bbe826`   | `v1.2` | 20       |
+| W1-S3 — Transaction Processing | From the board — "Transactions categorized, splits supported, historical data backfilled."                   | `sprint/W1-S3` | Active   | null        | null   | 30       |
 
 All three branches were verified present on the remote, and both SHAs verified as the
 `merge(sprint):` commits. W1-S1's goal is null because no W1-S1 checkpoint file exists — the folder
@@ -114,22 +116,27 @@ holds only `.gitkeep` and `W1-S2-checkpoint.md` (D-61).
 ID; per BA-001 §3.3 each is qualified as `financial-planner/{id}`, because Project Tracker's own
 CNV-001, CNV-002, INT-001, INT-002, ENH-001 and FRM-001 are different objects.
 
-| storyId                     | Initiative | fricewType            | shipsUi  | Creation status |
-| --------------------------- | ---------- | --------------------- | -------- | --------------- |
-| `financial-planner/CNV-002` | W1-S1      | Conversion            | false    | Done            |
-| `financial-planner/CNV-003` | W1-S1      | Conversion            | false    | Done            |
-| `financial-planner/FRM-009` | W1-S1      | Form                  | **true** | Done            |
-| `financial-planner/INT-001` | W1-S2      | **Interface** (remap) | false    | Done            |
-| `financial-planner/INT-002` | W1-S2      | **Interface** (remap) | false    | Done            |
-| `financial-planner/ENH-008` | W1-S2      | Enhancement           | false    | Done            |
-| `financial-planner/FRM-003` | W1-S2      | Form                  | **true** | Done            |
-| `financial-planner/FRM-010` | W1-S2      | Form                  | **true** | Done            |
-| `financial-planner/ENH-001` | W1-S3      | Enhancement           | false    | Done            |
-| `financial-planner/ENH-009` | W1-S3      | Enhancement           | false    | Done            |
-| `financial-planner/FRM-001` | W1-S3      | Form                  | **true** | Done            |
-| `financial-planner/CNV-001` | W1-S3      | Conversion            | false    | **Backlog**     |
+| storyId                     | Initiative | fricewType            | shipsUi  | position | Creation status |
+| --------------------------- | ---------- | --------------------- | -------- | -------- | --------------- |
+| `financial-planner/CNV-002` | W1-S1      | Conversion            | false    | 10       | Done            |
+| `financial-planner/CNV-003` | W1-S1      | Conversion            | false    | 20       | Done            |
+| `financial-planner/FRM-009` | W1-S1      | Form                  | **true** | 30       | Done            |
+| `financial-planner/INT-001` | W1-S2      | **Interface** (remap) | false    | 10       | Done            |
+| `financial-planner/INT-002` | W1-S2      | **Interface** (remap) | false    | 20       | Done            |
+| `financial-planner/ENH-008` | W1-S2      | Enhancement           | false    | 30       | Done            |
+| `financial-planner/FRM-003` | W1-S2      | Form                  | **true** | 40       | Done            |
+| `financial-planner/FRM-010` | W1-S2      | Form                  | **true** | 50       | Done            |
+| `financial-planner/ENH-001` | W1-S3      | Enhancement           | false    | 10       | Done            |
+| `financial-planner/ENH-009` | W1-S3      | Enhancement           | false    | 20       | Done            |
+| `financial-planner/FRM-001` | W1-S3      | Form                  | **true** | 30       | Done            |
+| `financial-planner/CNV-001` | W1-S3      | Conversion            | false    | 40       | **Backlog**     |
 
-Two notes on this table:
+`position` is **board order within each Initiative**, gapped by 10 and restarting per Initiative —
+required by SPEC-04's ENH-002, which has no other total order to fall back on because all twelve rows
+share one `createdAt` (D-67). W1-S3's four are ordered as the board prints them: its three Done
+stories, then `CNV-001` from the Backlog section.
+
+Two further notes on this table:
 
 - The `Integration` → `Interface` remap is **D-09 reaching the data**, not only `/pm-update`'s enum.
   It touches exactly two rows under D-60's singular values.
@@ -300,6 +307,7 @@ CNV-004 _is_ the reconciliation approach for CNV-002 and CNV-003.
 **Milestones — CNV-002**
 
 - **BR-14** Twelve Milestones — 3 under W1-S1, 5 under W1-S2, 4 under W1-S3 — with `storyId` and `description` taken verbatim from the board.
+- **BR-14a** `Initiative.position` is 10 / 20 / 30 for W1-S1 / W1-S2 / W1-S3, and `Milestone.position` is board order within each Initiative, gapped by 10 and restarting per Initiative. Both are not null and unique within their parent. Added at the SPEC-04 workshop, where ENH-002 needs a total order over open Milestones and the twelve migrated rows share one `createdAt` (D-67).
 - **BR-15** A Milestone's creation status is a transient input, not a stored attribute: Done for eleven, Backlog for `financial-planner/CNV-001`. Thereafter status is derived (SPEC-02 BR-17).
 - **BR-16** `shipsUi` is set on every Milestone, derived from its board description: true for Financial Planner's FRM-001, FRM-003, FRM-009 and FRM-010; false for the other eight.
 - **BR-17** `fricewType` values are singular. Financial Planner's INT-001 and INT-002 remap from `Integration` to `Interface` (D-09); the other ten pass through unchanged.
@@ -325,6 +333,7 @@ CNV-004 _is_ the reconciliation approach for CNV-002 and CNV-003.
 - **BR-31** Chain assertion: exactly one Milestone has a chain — `financial-planner/CNV-001` with 8 Tasks and 6 Subtasks, all Not Started; zero rows carry `stepCode` `ux-test` or `smoke`.
 - **BR-32** Type assertion: no Milestone carries `fricewType` = `Integration`.
 - **BR-33** Provenance assertion: every migrated row carries `createdBy` = `migration`.
+- **BR-33a** Ordering assertion: no Initiative and no Milestone carries a null `position`, and no two Milestones share a `position` within one Initiative. Added at the SPEC-04 workshop — a duplicate or absent position makes ENH-002's total order ambiguous, which is the one defect its ordering rule exists to be free of.
 - **BR-34** A failed assertion fails the migration loudly; it does not warn.
 
 ---
@@ -371,16 +380,17 @@ clears.**
 
 **Cross-spec notes raised, not designed here**
 
-| Note                                                                                                                                                                                                                                                              | Goes to |
-| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
-| **FUT-014 must be amended** — it asserts the canonical FRICEW value is `Interfaces` (plural); D-60 rules the code-list values singular, so the rejected value stays `Integration` and the accepted one becomes `Interface`. This is a **fifth** SPEC-01 amendment | SPEC-01 |
-| **§3.2's "`Milestone.status` at creation" is a transient input, not an attribute** — the derivation in BR-17 is vacuously Done over an empty Task set and cannot discriminate a Backlog from a Done Milestone at creation (D-64)                                  | SPEC-02 |
-| **§2 amendment 6's actor kind needs a third value, `migration`** — neither human nor agent (D-63)                                                                                                                                                                 | SPEC-02 |
-| **RPT-004 must render a sprint-scoped Defect** (no story) and a Decision with a null rationale — both exist in the seed from day one                                                                                                                              | SPEC-07 |
-| **The checkpoint narrative is loaded by CNV-003, not FRM-001.** FRM-001 owns ongoing manual narrative entries only; D-25's assignment is a Wave 2 concern and Wave 1 could not depend on it                                                                       | SPEC-05 |
-| **INT-004 must not conflate Jest's statements and lines** — SPEC-01 §3.1 maps `coverage.total.lines.pct` → `linesPct`, and the checkpoint's 98.73% is the statements figure                                                                                       | SPEC-09 |
-| **The exporter must carry `createdBy`** so a round-trip can still distinguish migrated rows from lived ones — sharpens R7, whose stated failure mode is exactly destroyed managed fields                                                                          | SPEC-11 |
-| **CNV-005 must not run before CNV-004's tie-out has passed**                                                                                                                                                                                                      | SPEC-12 |
+| Note                                                                                                                                                                                                                                                                                                                                            | Goes to           |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------- |
+| ~~**FUT-014 must be amended** — it asserts the canonical FRICEW value is `Interfaces` (plural); D-60 rules the code-list values singular, so the rejected value stays `Integration` and the accepted one becomes `Interface`. This is a **fifth** SPEC-01 amendment~~                                                                           | SPEC-01 — applied |
+| **§3.2's "`Milestone.status` at creation" is a transient input, not an attribute** — the derivation in BR-17 is vacuously Done over an empty Task set and cannot discriminate a Backlog from a Done Milestone at creation (D-64)                                                                                                                | SPEC-02           |
+| **§2 amendment 6's actor kind needs a third value, `migration`** — neither human nor agent (D-63)                                                                                                                                                                                                                                               | SPEC-02           |
+| **RPT-004 must render a sprint-scoped Defect** (no story) and a Decision with a null rationale — both exist in the seed from day one                                                                                                                                                                                                            | SPEC-07           |
+| **The checkpoint narrative is loaded by CNV-003, not FRM-001.** FRM-001 owns ongoing manual narrative entries only; D-25's assignment is a Wave 2 concern and Wave 1 could not depend on it                                                                                                                                                     | SPEC-05           |
+| **INT-004 must not conflate Jest's statements and lines** — SPEC-01 §3.1 maps `coverage.total.lines.pct` → `linesPct`, and the checkpoint's 98.73% is the statements figure                                                                                                                                                                     | SPEC-09           |
+| **The exporter must carry `createdBy`** so a round-trip can still distinguish migrated rows from lived ones — sharpens R7, whose stated failure mode is exactly destroyed managed fields                                                                                                                                                        | SPEC-11           |
+| **CNV-005 must not run before CNV-004's tie-out has passed**                                                                                                                                                                                                                                                                                    | SPEC-12           |
+| ~~**CNV-002 must set `Initiative.position` and `Milestone.position`** — SPEC-04's ENH-002 orders open Milestones by them, and the twelve migrated rows share one `createdAt`, so there is no fallback tiebreak (D-67)~~ — applied in this spec at the SPEC-04 workshop: §2 amendment 12, §3.1's two tables, BR-14a, BR-33a, FUT-001 and FUT-002 | SPEC-03 — applied |
 
 **BA-001 corrections** — all three **applied at BA-001 v1.4**, in this session.
 
@@ -413,6 +423,7 @@ clears.**
 - `0a9804f`/`v1.1`, `9bbe826`/`v1.2`, and W1-S3 with both null (BR-11).
 - All three `branch` values are `sprint/W1-S1`, `sprint/W1-S2`, `sprint/W1-S3` (BR-12).
 - **W1-S1's `goal` is null**; W1-S2's and W1-S3's are non-null (BR-13).
+- `position` is 10 / 20 / 30 in that order, none null (BR-14a).
 
 ### FUT-002: Twelve Milestones load, and only the Backlog one gets a chain
 
@@ -430,6 +441,7 @@ clears.**
 - Each `description` matches its board row verbatim (BR-14).
 - Exactly one Milestone has a chain — `financial-planner/CNV-001` (BR-15, BR-18).
 - The other eleven have zero Tasks and zero Subtasks (BR-19).
+- `position` restarts per Initiative and is gapped by 10 — W1-S1 carries 10/20/30, W1-S2 10…50, W1-S3 10…40 with `financial-planner/CNV-001` at 40; none is null and none is duplicated within its Initiative (BR-14a).
 
 ### FUT-003: `shipsUi` is set on all twelve
 
