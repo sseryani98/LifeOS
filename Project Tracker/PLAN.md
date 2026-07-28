@@ -19,7 +19,7 @@ is the cutover window.
 Project Tracker has a PRD, `design/PROBLEM_STATEMENT_AND_VISION.md` (PSV-001, **Draft**),
 `design/BUSINESS_ARCHITECTURE.md` (BA-001 v1.4, **Approved** — 22 objects in 3 waves, grouped into
 12 specs), a `research/` pack of six documents, a decisions log (D-01 … D-65), a wired module folder,
-**three written specs** — `SPEC-01` **Draft**, `SPEC-02` **Approved**, `SPEC-03` **Draft** — and the
+**three written specs** — `SPEC-01` **Draft**, `SPEC-02` and `SPEC-03` **Approved** — and the
 Plan-phase skills installed in `.claude/`. **No module code exists yet.** Ideate, Scope and Research ran
 2026-07-26; Scaffold, the Workshops grouping, `SPEC-01` and `SPEC-02` ran 2026-07-27; `SPEC-03` ran
 2026-07-28. **OI-01, OI-02 and OI-03 are closed**; OI-04 and OI-05 remain.
@@ -64,24 +64,24 @@ mechanism needs a construction step.
 
 ### Stage status
 
-| #   | Stage              | Skill                                   | Skill status | Stage status                                                                                 |
-| --- | ------------------ | --------------------------------------- | ------------ | -------------------------------------------------------------------------------------------- |
-| 1   | Ideate             | `/generate-problem-statement-vision`    | Authored     | **Done** — 2026-07-26                                                                        |
-| 2   | Scope              | `/generate-business-architecture`       | Authored     | **Done** — 2026-07-26                                                                        |
-| 3   | Research           | `/gather-research`                      | Authored     | **Done** — 2026-07-26                                                                        |
-| 4   | Scaffold           | `/scaffold-module` → `scaffold-writer`  | Authored     | **Done** — 2026-07-27                                                                        |
-| 5   | Workshops          | `/workshop` → `spec-writer`             | Exists       | **In progress** — D-37 grouping; `SPEC-01` Draft, `SPEC-02` Approved, `SPEC-03` Draft (3/12) |
-| 6   | Information Arch.  | `/generate-information-architecture`    | Not authored | Not started — runs in full (D-21)                                                            |
-| 7   | Design System      | `/generate-design-system`               | Not authored | Not started — runs in full (D-21)                                                            |
-| 8   | Theme              | `/generate-theme`                       | Not authored | Not started — runs in full (D-21)                                                            |
-| 9   | Data Model         | `/generate-data-model`                  | Not authored | Not started                                                                                  |
-| 10  | Tech Stack         | `/generate-tech-stack`                  | Not authored | Not started                                                                                  |
-| 11  | Test Strategy      | `/generate-test-strategy`               | Not authored | Not started                                                                                  |
-| 12  | Project Planning   | `/generate-build-plan`                  | Not authored | Not started                                                                                  |
-| 13  | Build              | `/build` + chain                        | Exists       | Not started                                                                                  |
-| 14  | **Rewire tooling** | `lintNoMarkdownState` + PreToolUse hook | Not authored | Not started                                                                                  |
-| 15  | Cutover            | —                                       | —            | Not started                                                                                  |
-| 16  | Back to FP         | —                                       | —            | Blocked on cutover                                                                           |
+| #   | Stage              | Skill                                   | Skill status | Stage status                                                                            |
+| --- | ------------------ | --------------------------------------- | ------------ | --------------------------------------------------------------------------------------- |
+| 1   | Ideate             | `/generate-problem-statement-vision`    | Authored     | **Done** — 2026-07-26                                                                   |
+| 2   | Scope              | `/generate-business-architecture`       | Authored     | **Done** — 2026-07-26                                                                   |
+| 3   | Research           | `/gather-research`                      | Authored     | **Done** — 2026-07-26                                                                   |
+| 4   | Scaffold           | `/scaffold-module` → `scaffold-writer`  | Authored     | **Done** — 2026-07-27                                                                   |
+| 5   | Workshops          | `/workshop` → `spec-writer`             | Exists       | **In progress** — D-37 grouping; `SPEC-01` Draft, `SPEC-02` + `SPEC-03` Approved (3/12) |
+| 6   | Information Arch.  | `/generate-information-architecture`    | Not authored | Not started — runs in full (D-21)                                                       |
+| 7   | Design System      | `/generate-design-system`               | Not authored | Not started — runs in full (D-21)                                                       |
+| 8   | Theme              | `/generate-theme`                       | Not authored | Not started — runs in full (D-21)                                                       |
+| 9   | Data Model         | `/generate-data-model`                  | Not authored | Not started                                                                             |
+| 10  | Tech Stack         | `/generate-tech-stack`                  | Not authored | Not started                                                                             |
+| 11  | Test Strategy      | `/generate-test-strategy`               | Not authored | Not started                                                                             |
+| 12  | Project Planning   | `/generate-build-plan`                  | Not authored | Not started                                                                             |
+| 13  | Build              | `/build` + chain                        | Exists       | Not started                                                                             |
+| 14  | **Rewire tooling** | `lintNoMarkdownState` + PreToolUse hook | Not authored | Not started                                                                             |
+| 15  | Cutover            | —                                       | —            | Not started                                                                             |
+| 16  | Back to FP         | —                                       | —            | Blocked on cutover                                                                      |
 
 Stages 6–8 (IA, Design System, Theme) **run in full** — settled by D-21. Slice 1 carries four
 Reports and two Forms, which is a real UI rather than a thin shell.
@@ -99,7 +99,7 @@ FUTs, D-40 … D-46. `SPEC-02` (`design/specs/SPEC-02-METHODOLOGY-AND-STAGE-ENFO
 rules, 18 FUTs, D-47 … D-57 — and it discharged all three things `SPEC-01` deferred to it: the guard
 table (14 rejections, nine new `wfl.*` keys), the twelfth-verb question (**not needed** — D-50), and
 the slug codes (16, with FUT-002 testing the contract rather than asserting it). `SPEC-03`
-(`design/specs/SPEC-03-FINANCIAL-PLANNER-MIGRATION-LOAD.md`, **Draft** 2026-07-28) is 34 business
+(`design/specs/SPEC-03-FINANCIAL-PLANNER-MIGRATION-LOAD.md`, **Approved** 2026-07-28) is 34 business
 rules, 12 FUTs, eleven Data Model amendments, D-58 … D-65.
 
 **`SPEC-01`'s four owed amendments are applied** (2026-07-28) and `SPEC-02` §6's rows are struck
@@ -362,7 +362,7 @@ Settle before or during Scaffold.
   `complete_stage` guard precedence added to §5, and BR-13 cross-referenced to `SPEC-02` BR-28. `SPEC-01`
   stays **Draft**; `SPEC-02` §6's four rows are struck through as applied.
 - **Ran the `SPEC-03` workshop over CNV-002, CNV-003 and CNV-004.** Wrote
-  `design/specs/SPEC-03-FINANCIAL-PLANNER-MIGRATION-LOAD.md` (**Draft**, provisional on R1) with 34
+  `design/specs/SPEC-03-FINANCIAL-PLANNER-MIGRATION-LOAD.md` (**Approved**, provisional on R1) with 34
   business rules, 12 FUTs and eleven Data Model amendments, and logged **D-58 … D-65**.
 - **The load cannot run on the verb layer, and that is the spec's spine (D-58).** Testing CNV-002/003
   against D-40's eleven found four separate blocks: no verb creates an Area, Engagement or Workspace;
