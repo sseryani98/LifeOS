@@ -11,9 +11,10 @@
 
 ## Change History
 
-| Date       | Author          | Description                                                                                                    |
-| ---------- | --------------- | -------------------------------------------------------------------------------------------------------------- |
-| 2026-07-27 | Sandro & Claude | Initial creation from the SPEC-01 workshop. Records D-40 through D-46. Eleven verbs, provisional on R1 (D-39). |
+| Date       | Author          | Description                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| ---------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-07-27 | Sandro & Claude | Initial creation from the SPEC-01 workshop. Records D-40 through D-46. Eleven verbs, provisional on R1 (D-39).                                                                                                                                                                                                                                                                                                                           |
+| 2026-07-27 | Sandro & Claude | Applied the four amendments SPEC-02 §6 raised, all consequences of D-47 … D-57 rather than new design. §2 `MethodologyStep.conditional` restated as a predicate name (D-47); §5 gains the `complete_stage` guard precedence (D-52); BR-13 cross-references SPEC-02 BR-28 for the reopened stage's own record (D-57); FUT-005's precondition corrected — `smoke` is never materialised on a backend story (D-48). Status stays **Draft**. |
 
 ---
 
@@ -38,22 +39,26 @@ Life OS module currently has. Every mechanism below is Verified — on SQLite.
 **input to** the data model rather than a reference to it (D-43). Every entity and attribute below is
 a requirement this spec places on the Data Model stage.
 
-| Entity              | Role in this spec                                      | Attributes this spec requires                                                                  |
-| ------------------- | ------------------------------------------------------ | ---------------------------------------------------------------------------------------------- |
-| **Workspace**       | Addressing root; the `{workspace}` half of a story ref | `slug` (unique, URL-safe), `name`                                                              |
-| **Initiative**      | Created by `plan_sprint`                               | `name`, `goal`, `branch`, `status`                                                             |
-| **Milestone**       | A story; the target of most verbs                      | `storyId`, `fricewType`, `description`, `status` (**derived**, see BR-12)                      |
-| **Task**            | A methodology stage instance                           | `stepCode`, `status`, `startedAt`, `completedAt`, `notes`                                      |
-| **Subtask**         | A workflow step instance                               | `stepCode`, `status`, `completedAt`                                                            |
-| **MethodologyStep** | Supplies the stage/subtask vocabulary                  | `code` (slug, the key), `name` (label), `kind`, `position`, `conditional`                      |
-| **Defect**          | `log_defect` / `resolve_defect`                        | `severity`, `status`, `title`, `description`, `references`, `resolution`                       |
-| **Decision**        | `record_decision`                                      | `target` (Workspace \| Initiative \| Milestone), `context`, `options`, `decision`, `rationale` |
-| **Activity**        | Emitted by every state-changing verb                   | `kind`, `actor`, `target`, `payload`, `occurredAt`                                             |
-| **TestRun**         | `record_test_run`                                      | `total`, `passed`, `failed`, `pending`, `durationMs`, `linesPct`, `branchesPct`, `failures`    |
+| Entity              | Role in this spec                                      | Attributes this spec requires                                                                    |
+| ------------------- | ------------------------------------------------------ | ------------------------------------------------------------------------------------------------ |
+| **Workspace**       | Addressing root; the `{workspace}` half of a story ref | `slug` (unique, URL-safe), `name`                                                                |
+| **Initiative**      | Created by `plan_sprint`                               | `name`, `goal`, `branch`, `status`                                                               |
+| **Milestone**       | A story; the target of most verbs                      | `storyId`, `fricewType`, `description`, `status` (**derived**, see BR-12)                        |
+| **Task**            | A methodology stage instance                           | `stepCode`, `status`, `startedAt`, `completedAt`, `notes`                                        |
+| **Subtask**         | A workflow step instance                               | `stepCode`, `status`, `completedAt`                                                              |
+| **MethodologyStep** | Supplies the stage/subtask vocabulary                  | `code` (slug, the key), `name` (label), `kind`, `position`, `conditional` (a **predicate name**) |
+| **Defect**          | `log_defect` / `resolve_defect`                        | `severity`, `status`, `title`, `description`, `references`, `resolution`                         |
+| **Decision**        | `record_decision`                                      | `target` (Workspace \| Initiative \| Milestone), `context`, `options`, `decision`, `rationale`   |
+| **Activity**        | Emitted by every state-changing verb                   | `kind`, `actor`, `target`, `payload`, `occurredAt`                                               |
+| **TestRun**         | `record_test_run`                                      | `total`, `passed`, `failed`, `pending`, `durationMs`, `linesPct`, `branchesPct`, `failures`      |
 
-**Amendment flagged for Data Model:** `MethodologyStep.code` must be the primary key and
-`MethodologyStep.name` a label (BR-08). `Milestone.status` must be computed, not stored writable
-(BR-12).
+**Amendments flagged for Data Model**
+
+| #   | Amendment                                                                                                                                                                                                                    |
+| --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | `MethodologyStep.code` must be the primary key and `MethodologyStep.name` a label (BR-08).                                                                                                                                   |
+| 2   | `Milestone.status` must be computed, not stored writable (BR-12).                                                                                                                                                            |
+| 3   | **`MethodologyStep.conditional` is a predicate name** (`shipsUi` or null), **not a boolean** — the step names _which_ predicate is evaluated, and ENH-001 evaluates it once at instantiation (D-47, SPEC-02 §2 amendment 1). |
 
 ---
 
@@ -169,7 +174,7 @@ one retry in the system is the single reconnect attempt in BR-20, which is a tra
 - **BR-10** `complete_stage` on an already-complete stage is rejected, and the rejection carries that stage's current status and completion timestamp.
 - **BR-11** `complete_stage` succeeds with a warning when the stage has incomplete subtasks. It does not reject.
 - **BR-12** A Milestone's completion is derived from its chain. No verb sets it.
-- **BR-13** `reopen_stage` reopens only the named stage. Later completed stages retain their completion records unchanged.
+- **BR-13** `reopen_stage` reopens only the named stage. Later completed stages retain their completion records unchanged. What becomes of the **reopened stage's own** record is [SPEC-02](SPEC-02-METHODOLOGY-AND-STAGE-ENFORCEMENT.md) BR-28 (D-57): In Progress, `startedAt` set to the reopen time, `completedAt` cleared, its Subtasks untouched.
 - **BR-14** `reopen_stage` requires a non-empty reason.
 
 **Responses**
@@ -218,6 +223,15 @@ one retry in the system is the single reconnect attempt in BR-20, which is a tra
 
 Rejections carry a `remediation` only where a methodology rule caused them. `ASSERT_*` validation
 failures pass through with their CAP message, because a malformed payload is the caller's own bug.
+
+**Guard precedence on `complete_stage`** (D-52, [SPEC-02](SPEC-02-METHODOLOGY-AND-STAGE-ENFORCEMENT.md)
+BR-30). The table above lists conditions, not an order; where more than one holds, **the first to fire
+is the response**:
+
+**blocking predecessor → human-only → not started → already complete → open-subtask warning.**
+
+Human-only sits second because it is a permanent property of the caller, so an agent learns the fact
+that will never change before facts that will.
 
 ---
 
@@ -307,15 +321,15 @@ module has. **This spec is not Approved-for-build until R1 clears.**
 ### FUT-005: Open subtasks warn rather than block
 
 **Covers:** INT-001
-**Preconditions:** `sprint-build` in progress with `smoke` and `handoff` incomplete.
+**Preconditions:** `financial-planner/CNV-001` (`shipsUi` false, so `smoke` is never materialised — D-48); `sprint-build` In Progress with `brief` … `coverage` Complete and `handoff` open.
 **Steps:**
 
 1. Call `complete_stage("financial-planner/CNV-001", "sprint-build")`.
 
 **Expected Result:**
 
-- Response `ok: true`.
-- `warnings[]` names both `smoke` and `handoff`.
+- Response `ok: true`, key `verb.stage.subtasksOpen` in `warnings[]`.
+- `warnings[]` names **`handoff` only**. `smoke` cannot appear — a Conditional step whose predicate fails has no row at all (SPEC-02 BR-12, FUT-014).
 - The stage is complete.
 
 ### FUT-006: Reopening a stage preserves later stages' records
