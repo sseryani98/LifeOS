@@ -121,8 +121,10 @@ by D-33 and R3/R8 dissolved with D-29; **R1, R4, R7 and R9 remain unexecuted** �
   declares `"password": ""`, which SCRAM rejects, so **neither module has ever connected to
   Postgres**; all six planner integration suites run on in-memory SQLite. Standing the binding up is
   a prerequisite of Data Model, not a detail inside it. **`SPEC-01` ships provisional on R1.**
-- **R9 is the one with a deadline**: it must be settled before `RPT-001`…`RPT-004` are built, which
-  is now the `SPEC-05` and `SPEC-07` workshops.
+- **R9 is the one with a deadline, and it lands sooner than this line used to say**: it must be
+  settled before `RPT-001`…`RPT-004` are built, which is the **`SPEC-04`**, `SPEC-05` and `SPEC-07`
+  workshops. `RPT-002` sits in `SPEC-04` per BA-001 §11, so the first spec carrying a Report is the
+  very next one, not `SPEC-05`. Corrected 2026-07-28.
 
 ### Carried forward from Scaffold
 
