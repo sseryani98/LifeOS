@@ -15,6 +15,7 @@
 | ---------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 2026-07-27 | Sandro & Claude | Initial creation from the SPEC-01 workshop. Records D-40 through D-46. Eleven verbs, provisional on R1 (D-39).                                                                                                                                                                                                                                                                                                                           |
 | 2026-07-27 | Sandro & Claude | Applied the four amendments SPEC-02 §6 raised, all consequences of D-47 … D-57 rather than new design. §2 `MethodologyStep.conditional` restated as a predicate name (D-47); §5 gains the `complete_stage` guard precedence (D-52); BR-13 cross-references SPEC-02 BR-28 for the reopened stage's own record (D-57); FUT-005's precondition corrected — `smoke` is never materialised on a backend story (D-48). Status stays **Draft**. |
+| 2026-07-28 | Sandro & Claude | Applied the fifth amendment, raised by SPEC-03 §6. **FUT-014's accepted FRICEW value becomes `Interface`, not `Interfaces`** — D-60 rules the code-list values singular. The rejected value stays `Integration`. One word; no rule, fixture or other FUT changes. Status stays **Draft**.                                                                                                                                                |
 
 ---
 
@@ -450,7 +451,7 @@ module has. **This spec is not Approved-for-build until R1 clears.**
 
 **Expected Result:**
 
-- Rejected 400 — `Integration` is not one of D-09's six values (`Interfaces` is).
+- Rejected 400 — `Integration` is not one of D-09's six values (`Interface` is — D-60 rules the code-list values singular).
 - No Initiative and no Milestone is created.
 
 ### FUT-015: `project_view` answers in one call
