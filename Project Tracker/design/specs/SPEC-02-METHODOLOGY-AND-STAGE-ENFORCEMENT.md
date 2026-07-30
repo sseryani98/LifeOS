@@ -12,10 +12,11 @@ SQLite only. Approved as a design; **not Approved-for-build until R1 clears**.
 
 ## Change History
 
-| Date       | Author          | Description                                                                                      |
-| ---------- | --------------- | ------------------------------------------------------------------------------------------------ |
-| 2026-07-27 | Sandro & Claude | Initial creation from the SPEC-02 workshop. Records D-47 through D-57. Provisional on R1 (D-39). |
-| 2026-07-27 | Sandro          | Status → Approved. All eight DESIGN_WORKSHOP §6 criteria met. Still provisional on R1 for build. |
+| Date       | Author          | Description                                                                                                                                                                                                                                                                                                                 |
+| ---------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-07-27 | Sandro & Claude | Initial creation from the SPEC-02 workshop. Records D-47 through D-57. Provisional on R1 (D-39).                                                                                                                                                                                                                            |
+| 2026-07-27 | Sandro          | Status → Approved. All eight DESIGN_WORKSHOP §6 criteria met. Still provisional on R1 for build.                                                                                                                                                                                                                            |
+| 2026-07-30 | Sandro & Claude | Citation sharpening at the SPEC-06 workshop. §3.2's Inputs table now names **which** callers set `Milestone.shipsUi` — `plan_sprint`'s `stories[]` (SPEC-01 BR-21, amended there by D-76), FRM-002's story rows (SPEC-06 BR-14), and CNV-002 (SPEC-03 BR-16). No rule, algorithm or FUT changed; status stays **Approved**. |
 
 ---
 
@@ -153,12 +154,12 @@ directions:
 
 #### Inputs
 
-| Input                                 | Source                                                    |
-| ------------------------------------- | --------------------------------------------------------- |
-| The seeded library, in position order | CNV-001                                                   |
-| The Milestone being created           | `plan_sprint` (INT-001), FRM-002, or CNV-002's load       |
-| `Milestone.status` at creation        | Backlog or Done                                           |
-| `Milestone.shipsUi`                   | Set by the creating caller; the only predicate in slice 1 |
+| Input                                 | Source                                                                                                                                                                    |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| The seeded library, in position order | CNV-001                                                                                                                                                                   |
+| The Milestone being created           | `plan_sprint` (INT-001), FRM-002, or CNV-002's load                                                                                                                       |
+| `Milestone.status` at creation        | Backlog or Done                                                                                                                                                           |
+| `Milestone.shipsUi`                   | Set by the creating caller — `plan_sprint`'s `stories[]` (SPEC-01 BR-21), FRM-002's story rows (SPEC-06 BR-14), or CNV-002 (SPEC-03 BR-16); the only predicate in slice 1 |
 
 #### Outputs
 

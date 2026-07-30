@@ -1,7 +1,7 @@
 # Project Tracker — Plan
 
 **Status:** Plan phase — Ideate, Scope, Research and Scaffold complete; Workshops in progress
-(grouping settled, `SPEC-01` … `SPEC-12`; **5 of 12 written**)
+(grouping settled, `SPEC-01` … `SPEC-12`; **6 of 12 written**)
 **Last updated:** 2026-07-30
 **Purpose:** The continuity document. Anyone (or any fresh chat) picking up Project Tracker
 starts here. Read this, then `design/PROBLEM_STATEMENT_AND_VISION.md` (PSV-001),
@@ -17,13 +17,14 @@ Backlog (`CNV-001` Historical backfill) and nothing In Progress. That gap is del
 is the cutover window.
 
 Project Tracker has a PRD, `design/PROBLEM_STATEMENT_AND_VISION.md` (PSV-001, **Draft**),
-`design/BUSINESS_ARCHITECTURE.md` (BA-001 v1.6, **Approved** — 22 objects in 3 waves, grouped into
-12 specs), a `research/` pack of six documents, a decisions log (D-01 … D-75), a wired module folder,
-**five written specs** — `SPEC-01` **Draft**, `SPEC-02` … `SPEC-05` **Approved** — and the
+`design/BUSINESS_ARCHITECTURE.md` (BA-001 v1.7, **Approved** — 22 objects in 3 waves, grouped into
+12 specs), a `research/` pack of six documents, a decisions log (D-01 … D-82), a wired module folder,
+**six written specs** — `SPEC-01` **Draft**, `SPEC-02` … `SPEC-06` **Approved** —
+and the
 Plan-phase skills installed in `.claude/`. **No module code exists yet.** Ideate, Scope and Research ran
 2026-07-26; Scaffold, the Workshops grouping, `SPEC-01` and `SPEC-02` ran 2026-07-27; `SPEC-03` and
-`SPEC-04` ran 2026-07-28; `SPEC-05` ran 2026-07-30. **OI-01, OI-02, OI-03 and now OI-04 are closed**;
-**only OI-05 remains**, at Data Model.
+`SPEC-04` ran 2026-07-28; `SPEC-05` and `SPEC-06` ran 2026-07-30. **OI-01, OI-02, OI-03 and OI-04 are
+closed**; **only OI-05 remains**, at Data Model.
 
 ### The one-paragraph version
 
@@ -37,11 +38,11 @@ becomes the first real test of the new system.
 
 ## 2. Decisions already made
 
-Full rationale in `design/DECISIONS_LOG.md` (D-01 … D-75; D-19 … D-27 were added at Scope,
+Full rationale in `design/DECISIONS_LOG.md` (D-01 … D-82; D-19 … D-27 were added at Scope,
 D-28 … D-32 at Research, D-33 … D-36 at Scaffold, D-37 … D-39 at the Workshops grouping,
 D-40 … D-46 at the `SPEC-01` workshop, D-47 … D-57 at the `SPEC-02` workshop, D-58 … D-65 at the
-`SPEC-03` workshop, D-66 … D-69 at the `SPEC-04` workshop and D-70 … D-75 at the `SPEC-05`
-workshop). The founding twelve,
+`SPEC-03` workshop, D-66 … D-69 at the `SPEC-04` workshop, D-70 … D-75 at the `SPEC-05` workshop and
+D-76 … D-82 at the `SPEC-06` workshop). The founding twelve,
 summarized — note that **D-28 amends item 4's wording**: a bare `cds.connect.to()` throws, so the
 mechanism needs a construction step.
 
@@ -72,7 +73,7 @@ mechanism needs a construction step.
 | 2   | Scope              | `/generate-business-architecture`       | Authored     | **Done** — 2026-07-26                                                                   |
 | 3   | Research           | `/gather-research`                      | Authored     | **Done** — 2026-07-26                                                                   |
 | 4   | Scaffold           | `/scaffold-module` → `scaffold-writer`  | Authored     | **Done** — 2026-07-27                                                                   |
-| 5   | Workshops          | `/workshop` → `spec-writer`             | Exists       | **In progress** — D-37 grouping; `SPEC-01` Draft, `SPEC-02` … `SPEC-05` Approved (5/12) |
+| 5   | Workshops          | `/workshop` → `spec-writer`             | Exists       | **In progress** — D-37 grouping; `SPEC-01` Draft, `SPEC-02` … `SPEC-06` Approved (6/12) |
 | 6   | Information Arch.  | `/generate-information-architecture`    | Not authored | Not started — runs in full (D-21)                                                       |
 | 7   | Design System      | `/generate-design-system`               | Not authored | Not started — runs in full (D-21)                                                       |
 | 8   | Theme              | `/generate-theme`                       | Not authored | Not started — runs in full (D-21)                                                       |
@@ -94,7 +95,7 @@ Reports and two Forms, which is a real UI rather than a thin shell.
 `/workshop` reads that table; it does not re-derive a grouping per session. Spec number is build
 order, so the sequence is simply `SPEC-01` → `SPEC-12`.
 
-**`SPEC-01` … `SPEC-05` are written**, all five provisional on R1 and `SPEC-04`/`SPEC-05` additionally on R9. `SPEC-01`
+**`SPEC-01` … `SPEC-06` are written**, all six provisional on R1 and `SPEC-04` … `SPEC-06` additionally on R9. `SPEC-01`
 (`design/specs/SPEC-01-MCP-INTENT-VERB-LAYER.md`, **Draft**) is eleven verbs, 29 business rules, 16
 FUTs, D-40 … D-46. `SPEC-02` (`design/specs/SPEC-02-METHODOLOGY-AND-STAGE-ENFORCEMENT.md`,
 **Approved** 2026-07-27) is 33 business
@@ -108,14 +109,17 @@ first amendment made to an **Approved** spec. `SPEC-04`
 (`design/specs/SPEC-04-NEXT-ACTION.md`, **Approved** 2026-07-28) is 34 business rules, 16 FUTs, two
 Data Model amendments, D-66 … D-69 — and it answers the question `SPEC-02` §6 handed it.
 
-**`SPEC-01`'s six owed amendments are all applied** — four on 2026-07-28, the fifth (FUT-014's
-accepted value `Interfaces` → **`Interface`**, D-60) the same day, and the sixth on 2026-07-30
+**`SPEC-01`'s amendments are all applied — eight of them now, not six.** Four on 2026-07-28, the fifth
+(FUT-014's accepted value `Interfaces` → **`Interface`**, D-60) the same day, the sixth on 2026-07-30
 (`next_action` names **both** modes and the null result; **BR-16 states the `nextAction` is
 story-scoped to the verb's target story and null when that story has no incomplete Task**, with no
-fallback to workspace scope — D-68). `SPEC-02` §6's four rows, `SPEC-03` §6's one and `SPEC-04` §6's
-one are struck through. **`SPEC-01` owes nothing.** It stays **Draft**, which is now a status with no
-outstanding work behind it — approving it is a decision nobody has been asked for rather than a
-blocked one.
+fallback to workspace scope — D-68), and **a seventh and eighth at the `SPEC-06` workshop, both
+applied in the same session** — `stories[]` gains **`shipsUi`** (D-76) and the verb gains an explicit
+**`workspace`** input (D-77). `SPEC-02` §6's four rows, `SPEC-03` §6's one and `SPEC-04` §6's two are
+struck through. **`SPEC-01` still owes nothing** — the claim held when it was made, was then falsified
+by two gaps found at the `SPEC-06` workshop, and holds again because both were applied rather than
+recorded as owed. It stays **Draft**, which is a status with no outstanding work behind it —
+approving it is a decision nobody has been asked for rather than a blocked one.
 
 **`SPEC-05` (`design/specs/SPEC-05-WORKSPACE-HEADER-AND-HEALTH.md`, **Approved** 2026-07-30) is 37
 business rules, 14 FUTs, one new attribute and one new code list, D-70 … D-75 — and **OI-04 is
@@ -124,9 +128,17 @@ Initiative-status gating (**no gate** — D-73, so `SPEC-04` BR-04 is unchanged 
 and the checkpoint-narrative split (FRM-001 may still write the `checkpoint` kind for entries after
 cutover; SPEC-03 §6's "ongoing only" excluded the migrated entry, not the kind).
 
-**Next is `SPEC-06` — Sprint Planning** (FRM-002), Wave 2, standalone. It owes `Milestone.position`
-from the order Sandro enters the stories, exactly as `plan_sprint` does (`SPEC-04` BR-34), and it
-shares validation with the `plan_sprint` verb (D-20) while sharing no design question with it.
+**`SPEC-06` (`design/specs/SPEC-06-SPRINT-PLANNING.md`, **Approved** 2026-07-30) is 31 business rules, 15
+FUTs, four Data Model amendments and **no new attribute**, D-76 … D-82.** FRM-002 turned out **not to be
+create-only** — it carries an **Add Story** mode, because none of D-40's eleven verbs creates a Milestone
+on an existing Initiative (D-78) — and BA-001 §7's "validation is shared rather than duplicated" is
+given a mechanism: a **CAP create-handler** on `Initiative` and `Milestone`, on D-58's precedent (D-79).
+It resolves **no** OI. `SPEC-04` §6's row addressed to it is struck through as applied (BR-16).
+
+**Next is `SPEC-07` — Chain & Registers** (RPT-003, RPT-004), Wave 2. `SPEC-06` owes it one thing:
+RPT-004's combined timeline must render the two Activity kinds this workshop added — **`sprintPlanned`
+and `storyAdded`** (D-81) — and `SPEC-06` BR-25's extension of `SPEC-05` BR-33's partition is what keeps
+that timeline separable into its machine and human halves without parsing payloads.
 
 **Still open:** **OI-05 alone** (methodology genericity — Data Model). **OI-03 is closed by D-35 and
 OI-04 by D-70.** Research risks: R2 is closed
@@ -140,7 +152,12 @@ by D-33 and R3/R8 dissolved with D-29; **R1, R4, R7 and R9 remain unexecuted** �
   a prerequisite of Data Model, not a detail inside it. **`SPEC-01` ships provisional on R1.**
 - **R9 now has an owner — the Information Architecture stage (D-69), assigned at the `SPEC-04`
   workshop.** `SPEC-04` is the first spec carrying a Report and **ships provisional on R9**, exactly
-  as `SPEC-01`…`SPEC-03` ship provisional on R1; `SPEC-05` and `SPEC-07` inherit that status. R9
+  as `SPEC-01`…`SPEC-03` ship provisional on R1; `SPEC-05`, **`SPEC-06`** and `SPEC-07` inherit that
+  status. **`SPEC-06` carries no Report and inherits R9 anyway (D-82)** — R9's mechanism is
+  **per-origin, not per-object-type**, and a Form is the more exposed case, since it issues OData
+  **writes** and a POST is not a CORS simple request, so it preflights. `research/README.md` §5's R9
+  **Affects cell was widened in that session** to name `FRM-001` and `FRM-002` alongside the four
+  Reports; ownership is unchanged. R9
   changes no business rule and no FUT in any Report spec — it decides which **origin** serves the
   page, not what the page says — which is why it was assigned rather than executed mid-workshop. Its
   deadline is unchanged: **before `RPT-001`…`RPT-004` are built**, which is Wave 2 _build_, not Wave 2
@@ -379,6 +396,76 @@ Settle before or during Scaffold.
 ---
 
 ## 8. Session log
+
+### 2026-07-30 — SPEC-06 written: a Form that was scoped create-only, and a verb that was missing two inputs
+
+- **Ran the `SPEC-06` workshop over FRM-002.** Wrote `design/specs/SPEC-06-SPRINT-PLANNING.md`
+  (**Approved**, provisional on **R1 and R9**) with 31 business rules, 15 FUTs, four Data Model amendments
+  and **no new attribute**, and logged **D-76 … D-82**. **It resolves no OI** — OI-05 is the only one
+  open and it is not a workshop question.
+- **Grepping `shipsUi` across three specs found a gap nobody had raised (D-76).** `SPEC-02` §3.2's
+  Inputs table says `Milestone.shipsUi` is "set by the creating caller" and names `plan_sprint` and
+  FRM-002 as creating callers; `SPEC-02` FUT-006 creates a story "via `plan_sprint` with `shipsUi`
+  true" — and `SPEC-01`'s verb row, BR-21 and FUT-013 all carry **three** fields per story. `SPEC-02` §6
+  raised exactly this for CNV-002 and it landed as `SPEC-03` BR-16; nobody raised it for the verb.
+  Unfixed, D-47's predicate would evaluate against **null** on every human-planned story, `ux-test` and
+  `smoke` would silently never materialise, and `SPEC-03` BR-16's "no Milestone carries a null
+  `shipsUi`" would be unsatisfiable for every row created after cutover. Deriving it from `fricewType`
+  is the `FRM-*` prefix rule **D-47 overturned**; it becomes a _pre-filled tick_ instead (BR-28).
+- **The same read found `plan_sprint` has no `workspace` input (D-77)**, while `SPEC-01` §5 already
+  rejects a "duplicate story ID **in workspace**". The verb works today only because D-11 gives slice 1
+  exactly one Workspace — and a duplicate check whose scope is implicit fails **by writing to the wrong
+  place rather than by erroring**, which is D-45's own argument one level up. Both amendments were
+  **applied in-session** as `SPEC-01`'s seventh and eighth; it is Draft, so no re-approval was needed.
+- **FRM-002 was scoped create-only, and that leaves a third "no legal write path" (D-78).**
+  `plan_sprint` creates a whole Initiative and **none of D-40's other ten verbs creates a Milestone**, so
+  adding a story to a live sprint could not be done at all — while Financial Planner's own W1-S3 carries
+  four stories and INT-006's hook hard-denies the markdown path that serves it today. Same analysis D-40
+  ran to find four missing verbs and D-74 ran to find `mergeCommit` had no writer; **third occurrence**.
+  Add Story is added; editing and descoping are refused as the start of the CRUD surface D-05 removed —
+  and descoping raises a question **D-50 does not answer**, since D-50 forbids deleting a Task or
+  Subtask and is silent on a Milestone. **Cost, stated:** a mistyped story ID has no correction path.
+- **BA-001 §7's "validation is shared rather than duplicated" named no mechanism, and now does (D-79).**
+  It is a **CAP create-handler** on `Initiative` and `Milestone`, on D-58's precedent (ENH-001 in a
+  create-handler rather than verb-layer logic). The repo's documented Validator-class pattern was
+  rejected for one property: it is **skippable**, and a caller that forgets to invoke it bypasses every
+  rule silently — the property D-05 removed the CRUD hatch to buy. Consequence worth knowing: because
+  the check is one check, the Form **reuses `verb.story.duplicate` verbatim** rather than minting a
+  `frm.*` key, which is the _opposite_ call from `SPEC-05`'s `frm.activity.kindNotPermitted` and correct
+  for the opposite reason — that rule was FRM-001's own, this one is the shared handler's.
+- **Two new Activity kinds, `sprintPlanned` and `storyAdded` (D-81)**, extending `SPEC-05` §2's kind list
+  to eight and `SPEC-05` BR-33's partition to cover them. One kind per action, because a single kind
+  would leave RPT-004's timeline unable to tell "planned a sprint" from "added a story mid-sprint"
+  without parsing payloads.
+- **R9 was ruled to reach a Form (D-82).** BA-001 §8 and `SPEC-04` §6 named only `SPEC-05` and
+  `SPEC-07`, and `research/README.md:106`'s Affects cell named `RPT-001`…`004`, so whether a Form
+  inherits R9 was simply unstated. It does, and for a **sharper** reason than a Report has: R9's
+  mechanism is **per-origin, not per-object-type**, and FRM-002 issues OData **writes** — a POST is not
+  a CORS simple request, so it preflights. The register was widened in-session to name both Forms.
+  Ownership is **not** re-decided: it stays with Information Architecture (D-69), deadline unchanged.
+- **One carve-out recorded as a Data Model instruction rather than an omission.** The live board header
+  carries `Sync point: #4 — Categorization engine trained` (`Financial Planner/project/SPRINT_BOARD.md:7`)
+  and **nothing in slice 1 reads it** — no Report renders it, no verb writes it, no rule turns on it. So
+  **no `Initiative.syncPoint` attribute exists** (§2 amendment 4), on D-22's principle, and `SPEC-03`
+  owes nothing.
+- **Reviewing the produced spec caught seven defects the writer's own DoD check passed** — the sixth
+  session running, and this time three of them were one class: **the rejection mechanism named cannot
+  fire.** §5 rejected a duplicate `Initiative.name` with 409 `frm.sprint.nameDuplicate` while §2
+  amendment 2 made it `@assert.unique` — under D-46 that passes through as `ASSERT_UNIQUE`/400 verbatim
+  and the named key is unreachable; uniqueness is now a handler check, mirroring `storyId`. The same
+  contradiction held for `branch`, whose `@mandatory` cannot produce a `frm.sprint.branchRequired`, so
+  that key is withdrawn. **This is `SPEC-05`'s `ASSERT_ENUM` defect recurring** — that one rejected a
+  legal value with an assertion that could not fire, this one rejected an illegal one with a key the
+  assertion pre-empts; **D-46's split is the module's most-missed rule, three specs running.** The third
+  substantive one is a D-64 echo: **BR-18 put BR-07 … BR-17 in a create-handler, but BR-12's story count
+  is invisible on a committed Initiative row** — vacuous over an empty set, exactly D-64's trap. BR-18
+  now states Plan Sprint arrives as **one deep insert**, which puts the rows in the handler's payload and
+  makes BR-22's atomicity structural rather than arranged. Plus four smaller: FUT-003 cited a bare
+  `BR-09` where `SPEC-05` carries one too; FUT-012 asserted an ENH-002 outcome its own steps never
+  produced; FUT-009's Form step read as impossible without saying that BR-14's refusal of a default is
+  what makes an untouched row null; and BR-10 and BR-11 carried `frm.*` keys **with no test at all**,
+  now FUT-015. The **unreachable-precondition class did not appear** this time — the first session in
+  six where it did not, because the writer had caught its own three before delivery.
 
 ### 2026-07-30 — SPEC-05 written: OI-04 resolves, and the PRD was thinner and wider than the catalogue said
 
