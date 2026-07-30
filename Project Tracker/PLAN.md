@@ -1,7 +1,7 @@
 # Project Tracker — Plan
 
 **Status:** Plan phase — Ideate, Scope, Research and Scaffold complete; Workshops in progress
-(grouping settled, `SPEC-01` … `SPEC-12`; **6 of 12 written**)
+(grouping settled, `SPEC-01` … `SPEC-12`; **7 of 12 written**)
 **Last updated:** 2026-07-30
 **Purpose:** The continuity document. Anyone (or any fresh chat) picking up Project Tracker
 starts here. Read this, then `design/PROBLEM_STATEMENT_AND_VISION.md` (PSV-001),
@@ -17,13 +17,13 @@ Backlog (`CNV-001` Historical backfill) and nothing In Progress. That gap is del
 is the cutover window.
 
 Project Tracker has a PRD, `design/PROBLEM_STATEMENT_AND_VISION.md` (PSV-001, **Draft**),
-`design/BUSINESS_ARCHITECTURE.md` (BA-001 v1.7, **Approved** — 22 objects in 3 waves, grouped into
-12 specs), a `research/` pack of six documents, a decisions log (D-01 … D-82), a wired module folder,
-**six written specs** — `SPEC-01` **Draft**, `SPEC-02` … `SPEC-06` **Approved** —
+`design/BUSINESS_ARCHITECTURE.md` (BA-001 v1.8, **Approved** — 22 objects in 3 waves, grouped into
+12 specs), a `research/` pack of six documents, a decisions log (D-01 … D-93), a wired module folder,
+**seven written specs** — `SPEC-01` **Draft**, `SPEC-02` … `SPEC-07` **Approved** —
 and the
 Plan-phase skills installed in `.claude/`. **No module code exists yet.** Ideate, Scope and Research ran
 2026-07-26; Scaffold, the Workshops grouping, `SPEC-01` and `SPEC-02` ran 2026-07-27; `SPEC-03` and
-`SPEC-04` ran 2026-07-28; `SPEC-05` and `SPEC-06` ran 2026-07-30. **OI-01, OI-02, OI-03 and OI-04 are
+`SPEC-04` ran 2026-07-28; `SPEC-05`, `SPEC-06` and `SPEC-07` ran 2026-07-30. **OI-01, OI-02, OI-03 and OI-04 are
 closed**; **only OI-05 remains**, at Data Model.
 
 ### The one-paragraph version
@@ -73,7 +73,7 @@ mechanism needs a construction step.
 | 2   | Scope              | `/generate-business-architecture`       | Authored     | **Done** — 2026-07-26                                                                   |
 | 3   | Research           | `/gather-research`                      | Authored     | **Done** — 2026-07-26                                                                   |
 | 4   | Scaffold           | `/scaffold-module` → `scaffold-writer`  | Authored     | **Done** — 2026-07-27                                                                   |
-| 5   | Workshops          | `/workshop` → `spec-writer`             | Exists       | **In progress** — D-37 grouping; `SPEC-01` Draft, `SPEC-02` … `SPEC-06` Approved (6/12) |
+| 5   | Workshops          | `/workshop` → `spec-writer`             | Exists       | **In progress** — D-37 grouping; `SPEC-01` Draft, `SPEC-02` … `SPEC-07` Approved (7/12) |
 | 6   | Information Arch.  | `/generate-information-architecture`    | Not authored | Not started — runs in full (D-21)                                                       |
 | 7   | Design System      | `/generate-design-system`               | Not authored | Not started — runs in full (D-21)                                                       |
 | 8   | Theme              | `/generate-theme`                       | Not authored | Not started — runs in full (D-21)                                                       |
@@ -135,10 +135,23 @@ on an existing Initiative (D-78) — and BA-001 §7's "validation is shared rath
 given a mechanism: a **CAP create-handler** on `Initiative` and `Milestone`, on D-58's precedent (D-79).
 It resolves **no** OI. `SPEC-04` §6's row addressed to it is struck through as applied (BR-16).
 
-**Next is `SPEC-07` — Chain & Registers** (RPT-003, RPT-004), Wave 2. `SPEC-06` owes it one thing:
-RPT-004's combined timeline must render the two Activity kinds this workshop added — **`sprintPlanned`
-and `storyAdded`** (D-81) — and `SPEC-06` BR-25's extension of `SPEC-05` BR-33's partition is what keeps
-that timeline separable into its machine and human halves without parsing payloads.
+**`SPEC-07` (`design/specs/SPEC-07-CHAIN-AND-REGISTERS.md`, **Approved** 2026-07-30) is 36 business rules,
+18 FUTs, two Data Model amendments and D-83 … D-92.** It resolves **no** OI, and it discharged **all five**
+cross-spec notes handed to it — the two enforcement-blind-spot rows, SPEC-03's sprint-scoped Defect and
+null-rationale Decision, SPEC-04's Subtask distinction, and the six Activity kinds. Its spine is that
+**no verb-emitted `Activity.kind` value existed anywhere** (D-83): SPEC-01 BR-03 required every write verb
+to emit one and no spec named a single value, leaving `SPEC-05` BR-33 and `SPEC-06` BR-25 forbidding a Form
+from writing "a kind a verb emits" — a rule over an empty set. Naming the nine collided immediately, since
+`plan_sprint` and FRM-002 both produce `sprintPlanned`, so **RPT-004's machine/human split now reads
+`actor`, not `kind`** (D-84) and both specs' §6 claim to the contrary is corrected.
+
+**`SPEC-01`'s status is now a decision rather than a habit (D-93).** It owes nothing — its **ninth**
+amendment was applied in-session here — and it **stays Draft until `SPEC-12` is written**. Six workshops
+out of six have amended it, five specs remain unwritten, and every remaining Report and Interface reads or
+writes through the verb layer, so a tenth amendment is likelier than not. Draft is what keeps the cheap
+in-session edit path cheap; approving it now would make each further amendment a re-approval ceremony.
+
+**Next is `SPEC-08`.** Read BA-001 §11 for its row; the grouping is not re-derived per session.
 
 **Still open:** **OI-05 alone** (methodology genericity — Data Model). **OI-03 is closed by D-35 and
 OI-04 by D-70.** Research risks: R2 is closed
@@ -396,6 +409,66 @@ Settle before or during Scaffold.
 ---
 
 ## 8. Session log
+
+### 2026-07-30 — SPEC-07 written: a rule over an empty set, and a partition that never worked
+
+- **Ran the `SPEC-07` workshop over RPT-003 and RPT-004.** Wrote
+  `design/specs/SPEC-07-CHAIN-AND-REGISTERS.md` (**Approved**, provisional on **R1 and R9**) with 36
+  business rules, 18 FUTs and two Data Model amendments, and logged **D-83 … D-92**. **It resolves no OI.**
+  All five inherited cross-spec notes are discharged.
+- **`Activity.kind` had no verb-emitted value anywhere, and two approved rules referenced that empty set
+  (D-83).** SPEC-01 BR-03 requires every state-changing verb to emit exactly one Activity event carrying a
+  `kind`; nine write verbs exist; **no spec named one value**. All eight kinds required so far are Form- or
+  migration-written. So `SPEC-05` BR-33 and `SPEC-06` BR-25 each forbade a Form writing "a kind a verb
+  emits" — a constraint over nothing — and RPT-004's timeline could not be tested against a vocabulary half
+  of which did not exist. **Fifth occurrence of D-40's analysis** (after D-40, D-74, D-76, D-77): an
+  attribute or rule whose values nothing produces is this module's most reliable defect shape.
+- **Naming the nine broke the mechanism they were supposed to serve (D-84).** `plan_sprint` is a verb and
+  FRM-002's Plan Sprint mode writes the same event, so `sprintPlanned` has **two writers of opposite
+  natures** and a kind-based machine/human split misfiles one of them. The fix was already in the data:
+  every Activity row carries `actor` (D-41, D-63, D-74). **The split reads `actor`, never `kind`** — and
+  `SPEC-05` §6 and `SPEC-06` §6's claim that the kind partition is what makes the timeline separable is an
+  overstatement, corrected in both. `SPEC-06` BR-25's "a kind a verb emits" clause is **struck**; its
+  positive enumeration already carried the whole constraint. `SPEC-05` BR-33 does **not** break.
+- **`project_view` returned "chain", singular, and never said whose (D-85).** RPT-003 is per-story by
+  BA-001 §8. Returning only the candidate set's chains was the trap: a **Done** story holds no incomplete
+  Task, so its chain would be invisible — and "did Code Quality run on that story" is exactly the question
+  asked about finished work. It returns **every** Milestone's chain; RPT-003 renders one at a time.
+- **Two Reports, one spec, opposite sides of D-22 (D-89).** RPT-004 has **no reachable empty state** — the
+  migration writes 4 Defects, 5 Decisions and 2 Activity rows before anyone opens the page and nothing
+  deletes any of them — so none is specified or tested. RPT-003's empty state is the **normal case**, on
+  eleven of twelve Milestones. That contrast is the clearest evidence available that the principle is being
+  applied rather than recited.
+- **D-64's vacuous-derivation trap, third occurrence (D-88)** — and it got sharper on inspection.
+  RPT-003's header renders **no** derived `Milestone.status`, because on eleven chainless Milestones
+  SPEC-02 BR-17 derives a computed claim rather than a recorded fact. Then the ambiguity: **BR-17's clauses
+  are ordered "Backlog when no Task has started" first**, so the literal rule returns **Backlog** over an
+  empty Task set while D-64 reasons from the last clause and concludes **Done**. Live on eleven rows,
+  raised to `SPEC-02` and Data Model rather than settled here.
+- **`Decision` had no date, so the register's ordering would have read the cutover date (D-92).** This is
+  **D-72 one table over** — `TestRun` gained `executedAt` for the identical reason, from the identical
+  source file, at the identical date — which makes the defect a pattern rather than a `TestRun` quirk: a
+  migrated row's managed timestamp is a load fact, not a domain fact. `Decision.decidedAt` added; **`SPEC-03`
+  amended a third time**.
+- **Re-verification paid for itself twice, and both were stale claims BA-001 made about itself.** §8's
+  RPT-003 row said "a story's **9** stage Tasks" when a `shipsUi: false` story materialises **8** — the only
+  chain in existence on day one. And §9's WFL-001 row still read "UX Test is skippable only on non-`FRM-*`
+  stories", **the prefix rule D-47 overturned** — while **v1.3's own change-history row claims that
+  correction was made**. D-47 called for two row edits; only §6's ENH-001 row received one. BA-001 → **v1.8**,
+  with a thirteenth §3.6 deferral row for `PRD.md:798` (D-91).
+- **Reviewing the produced spec caught seven defects the writer's own DoD check passed** — the seventh
+  session running. The sharpest: **BR-05 defaulted RPT-003 to the story `next_action()` resolves to, and
+  `next_action()` may return null** — SPEC-04 BR-15's own fourth state, reachable the moment every Task in
+  the Workspace is Complete, leaving the Report with no rule at all; now BR-05a and FUT-018. **FUT-004
+  asserted an outcome its own steps never produced** (SPEC-06 FUT-012's class, recurring). §2 declared
+  `Defect.description` and `Milestone.description` as read while **no rule rendered either** — and SPEC-03
+  BR-23 folds the _only Open Defect's_ content into `description`, so the register's one actionable row was
+  hiding what makes it actionable. `decidedAt` was made **not null with no writer** on the ongoing path.
+  Plus a bare `BR-31` where this spec carries one, and a wrong-rule citation. **And one defect was mine, not
+  the writer's:** I briefed that D-37 §11.1's trigger fires for the `project_view` change. It does not —
+  §11.1 scopes it to "a **guard** that cannot be stated without changing INT-001's verb signature", which
+  D-55 and D-77 both already applied, and D-77 recorded the trigger holding even when a signature genuinely
+  did change.
 
 ### 2026-07-30 — SPEC-06 written: a Form that was scoped create-only, and a verb that was missing two inputs
 
@@ -912,10 +985,10 @@ stores them under the user's home directory, which the bridge cannot access.
 | -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
 | `Project Tracker/PRD.md`                                 | Full product design. Slice 1 is a small fraction of it.                                                                               |
 | `Project Tracker/design/PROBLEM_STATEMENT_AND_VISION.md` | PSV-001 — the traceability root: problems P1–P5, scope, boundary.                                                                     |
-| `Project Tracker/design/BUSINESS_ARCHITECTURE.md`        | BA-001 v1.6 — the FRICEW catalogue and the story backlog. 22 objects, 3 waves, deferred items in §3, **the 12-spec grouping in §11**. |
-| `Project Tracker/design/specs/`                          | The twelve functional specs, written in `SPEC-01` → `SPEC-12` order. Grouping and membership are BA-001 §11. **5 of 12 written.**     |
+| `Project Tracker/design/BUSINESS_ARCHITECTURE.md`        | BA-001 v1.8 — the FRICEW catalogue and the story backlog. 22 objects, 3 waves, deferred items in §3, **the 12-spec grouping in §11**. |
+| `Project Tracker/design/specs/`                          | The twelve functional specs, written in `SPEC-01` → `SPEC-12` order. Grouping and membership are BA-001 §11. **7 of 12 written.**     |
 | `Project Tracker/research/`                              | Six research documents plus `README.md` — the index, assumption ledger, open risks and gate verdict. All **Draft**.                   |
-| `Project Tracker/design/DECISIONS_LOG.md`                | D-01 … D-75 with full rationale. (`IDEATE_KICKOFF.md` was scratch — absorbed and deleted 2026-07-26.)                                 |
+| `Project Tracker/design/DECISIONS_LOG.md`                | D-01 … D-93 with full rationale. (`IDEATE_KICKOFF.md` was scratch — absorbed and deleted 2026-07-26.)                                 |
 | `Standards (Documents)/METHODOLOGY_BLUEPRINT.md`         | The methodology→tooling map. **§7 is partly superseded** — the module is real, not a generator, and it writes rather than only reads. |
 | `Financial Planner/design/`                              | The artifact set this module's design phase mirrors.                                                                                  |
 | `Financial Planner/design/DESIGN_PHASE_TIMELINE.md`      | How the design phase actually ran, step by step.                                                                                      |
