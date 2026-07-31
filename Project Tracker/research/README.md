@@ -140,6 +140,7 @@ the call.
 | ---------------------------------------------------- | -------------------------------------------------------------------- |
 | **Scaffold**                                         | RSH-002 (workspace/dependency shape), RSH-001 §`cds.root` constraint |
 | **Workshops** — `INT-001`                            | RSH-001 in full. The four implementation caveats are spec input.     |
+| **Workshops** — `INT-004`                            | **RSH-001 §10 in full** — the `process.chdir`-before-require trap and the `process.exit(0)` teardown are _verified constraints_, not `R-nn` rows, so nothing in §5 would have carried them here. Added 2026-07-30 at the SPEC-09 workshop, which needed them and found no row (D-108). |
 | **Workshops** — `INT-006`                            | RSH-004 in full, plus risks R5, R6, R10.                             |
 | **Information Architecture / Design System / Theme** | RSH-003                                                              |
 | **Data Model**                                       | RSH-002 (one model or two; OI-05 also settles here per D-22)         |

@@ -95,8 +95,11 @@ Where this module departs from what Financial Planner does, and why.
   first UI5 app.
 - **No `test` / `posttest` script.** See Status. The root `npm test` runs `--workspaces --if-present`,
   so an absent script is skipped and a present-but-testless one fails the whole repo.
-- **No `scripts/` folder.** The planner has one for its `ENCRYPTION_KEY` generator. This module
-  encrypts nothing.
+- **No `scripts/` folder — until `INT-004`.** The planner has one for its `ENCRYPTION_KEY` generator,
+  and this module encrypts nothing. It gains one anyway at `INT-004` (`scripts/recordTestRun.ts`,
+  SPEC-09, D-103): that script must `process.chdir` to this module's root before requiring `@sap/cds`,
+  which hardcodes a module name, and the root `CLAUDE.md` says a script that names a module belongs in
+  the module rather than in the shared linter folder.
 - **`@sap/cds` is pinned to `9.8.4`, not `^9`** — at the root and in both modules. With two workspace
   packages npm hoists one CAP runtime for the whole repo, so a floating range upgrades every module
   at once, silently. 9.9.x `await`s `cds.plugins` in `bin/serve.js`, a dynamic import Jest's CJS VM

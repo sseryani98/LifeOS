@@ -1,7 +1,7 @@
 # Project Tracker — Plan
 
 **Status:** Plan phase — Ideate, Scope, Research and Scaffold complete; Workshops in progress
-(grouping settled, `SPEC-01` … `SPEC-12`; **8 of 12 written**)
+(grouping settled, `SPEC-01` … `SPEC-12`; **9 of 12 written**)
 **Last updated:** 2026-07-30
 **Purpose:** The continuity document. Anyone (or any fresh chat) picking up Project Tracker
 starts here. Read this, then `design/PROBLEM_STATEMENT_AND_VISION.md` (PSV-001),
@@ -17,13 +17,13 @@ Backlog (`CNV-001` Historical backfill) and nothing In Progress. That gap is del
 is the cutover window.
 
 Project Tracker has a PRD, `design/PROBLEM_STATEMENT_AND_VISION.md` (PSV-001, **Draft**),
-`design/BUSINESS_ARCHITECTURE.md` (BA-001 v1.8, **Approved** — 22 objects in 3 waves, grouped into
-12 specs), a `research/` pack of six documents, a decisions log (D-01 … D-102), a wired module folder,
-**seven written specs** — `SPEC-01` **Draft**, `SPEC-02` … `SPEC-07` **Approved** —
-and the
+`design/BUSINESS_ARCHITECTURE.md` (BA-001 v1.10, **Approved** — 22 objects in 3 waves, grouped into
+12 specs), a `research/` pack of six documents, a decisions log (D-01 … D-108), a wired module folder,
+**nine written specs** — `SPEC-01` **Draft**, `SPEC-02` … `SPEC-09` **Approved** except `SPEC-09`, which is
+**Draft** pending Sandro's approval — and the
 Plan-phase skills installed in `.claude/`. **No module code exists yet.** Ideate, Scope and Research ran
 2026-07-26; Scaffold, the Workshops grouping, `SPEC-01` and `SPEC-02` ran 2026-07-27; `SPEC-03` and
-`SPEC-04` ran 2026-07-28; `SPEC-05`, `SPEC-06` and `SPEC-07` ran 2026-07-30. **OI-01, OI-02, OI-03 and OI-04 are
+`SPEC-04` ran 2026-07-28; `SPEC-05` … `SPEC-09` ran 2026-07-30. **OI-01, OI-02, OI-03 and OI-04 are
 closed**; **only OI-05 remains**, at Data Model.
 
 ### The one-paragraph version
@@ -38,11 +38,12 @@ becomes the first real test of the new system.
 
 ## 2. Decisions already made
 
-Full rationale in `design/DECISIONS_LOG.md` (D-01 … D-82; D-19 … D-27 were added at Scope,
+Full rationale in `design/DECISIONS_LOG.md` (D-01 … D-108; D-19 … D-27 were added at Scope,
 D-28 … D-32 at Research, D-33 … D-36 at Scaffold, D-37 … D-39 at the Workshops grouping,
 D-40 … D-46 at the `SPEC-01` workshop, D-47 … D-57 at the `SPEC-02` workshop, D-58 … D-65 at the
 `SPEC-03` workshop, D-66 … D-69 at the `SPEC-04` workshop, D-70 … D-75 at the `SPEC-05` workshop and
-D-76 … D-82 at the `SPEC-06` workshop). The founding twelve,
+D-76 … D-82 at the `SPEC-06` workshop, D-83 … D-92 at `SPEC-07`, D-93 … D-102 at `SPEC-08` and
+D-103 … D-108 at `SPEC-09`). The founding twelve,
 summarized — note that **D-28 amends item 4's wording**: a bare `cds.connect.to()` throws, so the
 mechanism needs a construction step.
 
@@ -73,7 +74,7 @@ mechanism needs a construction step.
 | 2   | Scope              | `/generate-business-architecture`       | Authored     | **Done** — 2026-07-26                                                                                         |
 | 3   | Research           | `/gather-research`                      | Authored     | **Done** — 2026-07-26                                                                                         |
 | 4   | Scaffold           | `/scaffold-module` → `scaffold-writer`  | Authored     | **Done** — 2026-07-27                                                                                         |
-| 5   | Workshops          | `/workshop` → `spec-writer`             | Exists       | **In progress** — D-37 grouping; `SPEC-01` and `SPEC-08` Draft, `SPEC-02` … `SPEC-07` Approved (8/12 written) |
+| 5   | Workshops          | `/workshop` → `spec-writer`             | Exists       | **In progress** — D-37 grouping; `SPEC-01` and `SPEC-09` Draft, `SPEC-02` … `SPEC-08` Approved (9/12 written) |
 | 6   | Information Arch.  | `/generate-information-architecture`    | Not authored | Not started — runs in full (D-21)                                                                             |
 | 7   | Design System      | `/generate-design-system`               | Not authored | Not started — runs in full (D-21)                                                                             |
 | 8   | Theme              | `/generate-theme`                       | Not authored | Not started — runs in full (D-21)                                                                             |
@@ -162,7 +163,22 @@ references are prose inside agent prompts and no consumer ever needed a non-agen
 story and never a stage, so converting only the references would have left `complete_subtask('handoff')`
 refused by two SPEC-02 guards on its first call (D-102).
 
-**Next is `SPEC-09`.** Read BA-001 §11 for its row; the grouping is not re-derived per session.
+**`SPEC-09` (`design/specs/SPEC-09-TEST-REPORT-TO-TESTRUN.md`, **Draft** — written 2026-07-30, awaiting
+Sandro's approval) is 23 business rules, 13 FUTs, four Data Model amendments and D-103 … D-108** — the
+second Wave 3 spec, the second standalone one, and the **only object whose consumer is not an agent**.
+It resolves **no** OI and mints **no** error key. **SPEC-08 was approved in the same session (D-103)** —
+it owed nothing, and unlike SPEC-01 no decision held it in Draft.
+
+Three findings carried it. **The `posttest` hook cannot record a failing run (D-107)** — npm skips a
+`post` script when the main script exits non-zero, verified on npm 10.9.3, so `TestRun.failed > 0` was
+unreachable on the ongoing path and `SPEC-05` BR-10 was a rule over an empty set in an **Approved**
+spec. Both gate call sites now invoke `npm run record-test-run` explicitly, made safe by idempotence
+rather than a conditional. **`record_test_run` needed a second scope (D-104)** — the same shape D-96
+gave `log_defect`, seventh occurrence of D-40's analysis, and cheap because `SPEC-03` BR-26 already
+permitted the null-Task link. And **the script leaves the shared linter folder (D-103)**: `process.chdir`
+before requiring `@sap/cds` hardcodes a module name, which the root `CLAUDE.md` forbids there.
+
+**Next is `SPEC-10`.** Read BA-001 §11 for its row; the grouping is not re-derived per session.
 
 **Still open:** **OI-05 alone** (methodology genericity — Data Model). **OI-03 is closed by D-35 and
 OI-04 by D-70.** Research risks: R2 is closed
@@ -289,7 +305,7 @@ of this surface that omits the glob under-reports by six files.
 | --------------------------------------------------------------- | ----- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `.claude/skills/pm-update/SKILL.md`                             | 4     | Mostly retired — see below                                                                                                                                                                                                         |
 | `.claude/workflows/build.js`                                    | 3     | Per-story board handoff → `complete_subtask` / `complete_stage`. **All three refs are prose inside agent-prompt template literals** — a Workflow script has no filesystem and no Node API, so it instructs and never writes (D-94) |
-| `Standards (Technical + Linting)/scripts/generateTestReport.ts` | 2     | Stops writing markdown; emits a `TestRun` record                                                                                                                                                                                   |
+| `Standards (Technical + Linting)/scripts/generateTestReport.ts` | 2     | Stops writing markdown; emits a `TestRun`. **And it moves** to `Project Tracker/scripts/recordTestRun.ts` (D-103) — `process.chdir` before requiring `@sap/cds` hardcodes a module name, which a shared linter may not do. **Four `.md` files name its old path and none was ever measured** — `CLAUDE.md:48` (**the repo root, in no surface measurement at all**), `Financial Planner/CLAUDE.md:35` (a *different* line from the `project/` block INT-002 already owns), and `Financial Planner/design/TECH_STACK.md:143` + `TEST_STRATEGY.md:539,546`, which are D-12 markdown and go to the `/refresh-docs` sweep. The two `CLAUDE.md` lines are agent instructions under D-23 and are **owed to SPEC-08** |
 | `.claude/commands/build.md`                                     | 2     | Instructions repointed at MCP verbs                                                                                                                                                                                                |
 | `.claude/agents/build-briefer.md`                               | 2     | Reads board state via `project_view` instead of parsing                                                                                                                                                                            |
 | `.claude/workflows/test-quality.js`                             | 1     | Repoint                                                                                                                                                                                                                            |
@@ -430,6 +446,66 @@ Settle before or during Scaffold.
 ---
 
 ## 8. Session log
+
+### 2026-07-30 — SPEC-09 written: the hook that skips the run worth recording, and a script that had to leave the shared folder
+
+- **Ran the `SPEC-09` workshop over INT-004.** Wrote
+  `design/specs/SPEC-09-TEST-REPORT-TO-TESTRUN.md` (**Draft**, provisional on **R1** alone, **R9 ruled
+  out**) with 23 business rules, 13 FUTs and four Data Model amendments, and logged **D-103 … D-108**.
+  **SPEC-08 was approved in the same session** — it owed nothing, no decision held it in Draft, and
+  SPEC-09's amendments to it were applied rather than left owed (D-103).
+- **The `posttest` lifecycle was the session's real finding, and it was found by testing rather than
+  reading (D-107).** BA-001 §11 row 09 names it as one of three reasons INT-004 is cut standalone;
+  running the case shows **npm does not run a `post` script when the main script exits non-zero** (npm
+  10.9.3, both directions). Jest exits non-zero on failure, so the hook records only green runs — and
+  `build.js`'s phase-3 gate is _deliberately_ red. Unfixed, **`TestRun.failed > 0` is unreachable on the
+  ongoing path**, which makes `SPEC-05` BR-10 a rule over an empty set and its FUT-008 untestable
+  through the only writer — **D-83's shape live in an Approved spec** — and leaves a gate tile that can
+  only ever show a pass. Both gate call sites now call `npm run record-test-run` explicitly, made safe
+  by **idempotence on (`executedAt`, scope)** rather than by a conditional an instruction could get
+  wrong. `build.js:382` also tells the gate agent that generator "always fires", which is **false today**
+  and is corrected rather than repointed.
+- **`record_test_run` required a scope its only caller does not have (D-104)** — structurally D-96's
+  `log_defect` problem one verb over, and the **seventh** occurrence of D-40's analysis. It gains a
+  `workspace` mode as `SPEC-01`'s **eleventh** amendment, applied in-session under D-93. What made it
+  cheap is that **the entity already carried the shape**: `SPEC-03` BR-26 permits a null Task link and
+  the seeded run is permanently that shape, so no attribute and no link is added — and `SPEC-05` BR-13
+  already keeps such a run out of health, so a bare `npm test` is recorded without becoming a health
+  signal about a story it never ran against. **`SPEC-02` BR-29 is scoped to story mode** with it; SPEC-02
+  is Approved and was amended in-session, the third such amendment.
+- **The script leaves the shared linter folder, and the root `CLAUDE.md` is what forces it (D-103).**
+  RSH-001 §10 proves by execution that only `process.chdir(<PT root>)` **before** the first `@sap/cds`
+  import recovers `cds.env` — and that hardcodes a module name, which the root standard forbids in a
+  folder whose one copy serves every module. So `generateTestReport.ts` becomes
+  `Project Tracker/scripts/recordTestRun.ts`, reversing that module's "no `scripts/` folder" carve-out,
+  and it calls the **same CAP service the verbs call** on D-58's precedent and D-79's mechanism — a
+  third kind of caller, bypassing no guard. Two consequences worth carrying: static imports hoist, so
+  the CAP interaction needs a **dynamic `await import()`**; and the pool keeps the event loop alive, so
+  the script needs an explicit **`process.exit(0)`** or it hangs `npm test`.
+- **Re-verification paid for itself three times, and the third was the largest.** `executedAt` and
+  `linesPct` were both discharged as expected — but `SPEC-01`'s mapping table names **four** per-failure
+  fields where the source produces **three** (`generateTestReport.ts:95` sets `location` to `suite.name`
+  — D-106); `linesPct`/`branchesPct` are **nullable** and no spec said so, since the coverage summary is
+  read in a silent `catch`; and **grepping the script's own name found four `.md` files naming its old
+  path that no surface measurement had ever touched** — including the **repo-root `CLAUDE.md`**, which
+  has appeared in none. Two are agent instructions and go to INT-002 (SPEC-08 is **ten** files now, not
+  nine, at the same sixteen references); two are Financial Planner design docs and go to the
+  `/refresh-docs` sweep.
+- **`research/README.md` §7 had no "Workshops — INT-004" row (D-108)**, and the cause is worth the
+  entry: §5 routes work by `R-nn`, while the `chdir` trap and the `exit(0)` teardown are **verified
+  constraints rather than risks** — so nothing in the routing mechanism would ever have carried them to
+  a workshop. **D-39's lesson in a second form**: there a risk had no owner; here a certainty had no
+  route.
+- **Reviewing the produced spec caught nine defects the writer's own DoD check passed** — the ninth
+  session running, and the largest count yet. The sharpest: **FUT-001 asserted "exactly one TestRun
+  exists" against a fixture that already carries the seeded one** (`SPEC-03` BR-25), so a correct
+  implementation fails it. Four preconditions ran the recorder in **workspace mode without loading the
+  fixture**, which makes BR-15 fire and the asserted write unreachable — the unreachable-precondition
+  class, sixth session in nine. **FUT-008 and FUT-009 each asserted an outcome their own steps never
+  produced** (SPEC-06 FUT-012's class, recurring). Plus BR-03a stating an unconditional call that
+  SPEC-08 BR-13b carves out, §5 claiming "no agent in the loop" when BR-03a puts one there, §5 calling a
+  rejection "unreachable in practice" that nothing structurally prevents, and a cross-spec note whose
+  bold lead sentence belonged to a different note.
 
 ### 2026-07-30 — SPEC-08 written: a workflow that never wrote anything, and a chain nobody opened
 

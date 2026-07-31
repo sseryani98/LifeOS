@@ -21,6 +21,8 @@
 | 2026-07-30 | Sandro & Claude | Applied the **seventh** and **eighth** amendments at the SPEC-06 workshop. `plan_sprint`'s `stories[]` gains a fourth field, **`shipsUi`** (D-76) — SPEC-02 §3.2 already names `plan_sprint` as a caller that sets it, and without it D-47's predicate evaluates against null on every human-planned story while SPEC-03 BR-16 asserts no Milestone carries a null `shipsUi`. The verb gains an explicit **`workspace`** input (D-77), because §5 already rejects a "duplicate story ID in workspace" with no signature carrying that scope. §3.1's `plan_sprint` row, **BR-21** and **FUT-013**'s literal are updated; no rule is renumbered. **A verb signature changed and D-37 §11.1's amendment trigger does not fire** — that trigger is scoped to the SPEC-01/SPEC-02 seam, and this is neither a guard nor that seam. Status stays **Draft**.                                                                                                                                                                                                                                               |
 | 2026-07-30 | Sandro & Claude | Applied the **tenth** amendment at the SPEC-08 workshop (D-96). `log_defect` required a `story`, but `/human-review-loop` runs ad hoc as well as in-chain and the ad-hoc entry point has no story — while [SPEC-03](SPEC-03-FINANCIAL-PLANNER-MIGRATION-LOAD.md) BR-21 already permits an Initiative-scoped Defect and all four seeded Defects carry `story` null. So a legal state had **no verb that could create it**, the sixth occurrence of D-40's analysis after D-40, D-74, D-76, D-77, D-78 and D-83. §3.1's row now reads `story?`, `workspace?` with footnote ², new **BR-18a** requires exactly one of the two, §2's `Defect` row names the two nullable links, and §5 gains **`verb.defect.scopeRequired`** (400) — a verb-input shape check no CAP annotation can pre-empt, because with neither input there is nothing to resolve and no row to attempt. **FUT-009 is corrected** — it called `log_defect` with no scope at all, which BR-18a now rejects, so it names the story mode and its precondition names the story. **D-37 §11.1's trigger does not fire** — it is scoped to a _guard_ on the SPEC-01/SPEC-02 seam, and D-77 is the precedent for it holding when a signature genuinely changed. Status stays **Draft** (D-93). |
 
+| 2026-07-30 | Sandro & Claude | Applied the **eleventh** amendment at the SPEC-09 workshop (D-104, D-105, D-106). `record_test_run` required a `story` and a `stage`, and its only caller is a `posttest` script that on a bare `npm test` has neither — so the verb gains a **`workspace`** mode exactly as `log_defect` did at D-96, the **seventh** occurrence of D-40's analysis. §3.1's row now reads `story?`+`stage?`, `workspace?`, `metrics`, `executedAt` with footnote ³; new **BR-20a** (exactly one scope) and **BR-20b** (explicit `executedAt`); §5 gains **`verb.testrun.scopeRequired`** (400). The shape needed no entity change — [SPEC-03](SPEC-03-FINANCIAL-PLANNER-MIGRATION-LOAD.md) BR-26 already permits a null Task link and the seeded run is that shape. Two mapping-table corrections: **`startTime` → `executedAt`** is added, discharging [SPEC-05](SPEC-05-WORKSPACE-HEADER-AND-HEALTH.md) §6's obligation; and **`location` is dropped** from the per-failure shape, because `generateTestReport.ts:95` sets it to `suite.name` — the table named four fields where the source produces three (D-106). §2's `TestRun` row gains `executedAt` and its two nullable links, and **amendment 4 makes `executedAt` not null** now that both writers supply it. **D-37 §11.1's trigger does not fire** — a signature changed but it is neither a guard nor the SPEC-01/SPEC-02 seam; D-77 and D-96's precedent. Status stays **Draft** (D-93). |
+
 ---
 
 ## 1. Overview
@@ -55,7 +57,7 @@ a requirement this spec places on the Data Model stage.
 | **Defect**          | `log_defect` / `resolve_defect`                        | `severity`, `status`, `title`, `description`, `references`, `resolution`, plus its nullable links to Milestone and Initiative (SPEC-03 BR-21, BR-18a) |
 | **Decision**        | `record_decision`                                      | `target` (Workspace \| Initiative \| Milestone), `context`, `options`, `decision`, `rationale`                                                        |
 | **Activity**        | Emitted by every state-changing verb                   | `kind`, `actor`, `target`, `payload`, `occurredAt`                                                                                                    |
-| **TestRun**         | `record_test_run`                                      | `total`, `passed`, `failed`, `pending`, `durationMs`, `linesPct`, `branchesPct`, `failures`                                                           |
+| **TestRun**         | `record_test_run`                                      | `total`, `passed`, `failed`, `pending`, `durationMs`, `linesPct`, `branchesPct`, `failures`, **`executedAt`**, plus its nullable links to Task and Initiative (SPEC-03 BR-26, SPEC-05 §2 amendment 1) |
 
 **Amendments flagged for Data Model**
 
@@ -64,6 +66,7 @@ a requirement this spec places on the Data Model stage.
 | 1   | `MethodologyStep.code` must be the primary key and `MethodologyStep.name` a label (BR-08).                                                                                                                                   |
 | 2   | `Milestone.status` must be computed, not stored writable (BR-12).                                                                                                                                                            |
 | 3   | **`MethodologyStep.conditional` is a predicate name** (`shipsUi` or null), **not a boolean** — the step names _which_ predicate is evaluated, and ENH-001 evaluates it once at instantiation (D-47, SPEC-02 §2 amendment 1). |
+| 4   | **`TestRun.executedAt` becomes not null.** [SPEC-05](SPEC-05-WORKSPACE-HEADER-AND-HEALTH.md) §2 amendment 1 made it nullable because at that time only the migration wrote it and the ongoing path carried no input for it. BR-20b supplies one, and CNV-003 already sets it (SPEC-03 BR-25a), so **no writer can omit it** and the constraint is now honest. A missing value surfaces as `ASSERT_NOT_NULL` **verbatim** rather than a named key — the mechanism decides (D-46, D-105). |
 
 ---
 
@@ -99,7 +102,7 @@ in the last column ([SPEC-07](SPEC-07-CHAIN-AND-REGISTERS.md) BR-32, D-83).
 | `log_defect`       | `story?`, `workspace?`, `severity`, `title`, `description`, `references?` ² | envelope + `defectId`        | `defectLogged`     |
 | `resolve_defect`   | `defect`, `resolution`                                                      | envelope                     | `defectResolved`   |
 | `record_decision`  | `target`, `context`, `options?`, `decision`, `rationale`                    | envelope + `decisionId`      | `decisionRecorded` |
-| `record_test_run`  | `story`, `stage`, `metrics`                                                 | envelope                     | `testRunRecorded`  |
+| `record_test_run`  | `story?`+`stage?`, `workspace?`, `metrics`, `executedAt` ³                   | envelope                     | `testRunRecorded`  |
 | `plan_sprint`      | `workspace`, `name`, `goal`, `branch`, `stories[]`                          | envelope + `initiativeId`    | `sprintPlanned` ¹  |
 
 ¹ Shared with FRM-002's Plan Sprint mode ([SPEC-06](SPEC-06-SPRINT-PLANNING.md) BR-23) — one event
@@ -109,6 +112,13 @@ type, two writers. RPT-004 separates them by **`actor`**, never by kind (SPEC-07
 Milestone; `workspace` scopes it to that Workspace's Active Initiative
 ([SPEC-05](SPEC-05-WORKSPACE-HEADER-AND-HEALTH.md) BR-20). INT-005 uses the first in chain mode and
 the second ad hoc ([SPEC-08](SPEC-08-CONSUMER-REWIRING.md) §3.3, D-96).
+
+³ **Exactly one scope** (BR-20a): `story` **with** `stage`, or `workspace`. Story mode links the
+TestRun to that stage's Task; workspace mode links it to that Workspace's Active Initiative with a
+**null Task link**, the shape [SPEC-03](SPEC-03-FINANCIAL-PLANNER-MIGRATION-LOAD.md) BR-26 already
+permits and [SPEC-05](SPEC-05-WORKSPACE-HEADER-AND-HEALTH.md) BR-13 keeps out of health. INT-004 uses
+the first when a build supplies the story and the second on a bare `npm test`
+([SPEC-09](SPEC-09-TEST-REPORT-TO-TESTRUN.md) §3.1, D-104).
 
 **Read verbs.** Emit no Activity event.
 
@@ -153,9 +163,19 @@ modules' boards, so silent resolution would write to the wrong story.
 | `numFailedTests`                             | `failed`          |
 | `numPendingTests`                            | `pending`         |
 | `startTime` → elapsed                        | `durationMs`      |
+| `startTime`                                  | `executedAt`      |
 | `coverage.total.lines.pct`                   | `linesPct`        |
 | `coverage.total.branches.pct`                | `branchesPct`     |
-| per-failure `{suite,title,message,location}` | `failures`        |
+| per-failure `{suite,title,message}`          | `failures`        |
+
+**`lines.pct`, never `statements.pct`** — the two differ, and seeding one against writing the other
+is what [SPEC-03](SPEC-03-FINANCIAL-PLANNER-MIGRATION-LOAD.md) §6 raised to
+[SPEC-09](SPEC-09-TEST-REPORT-TO-TESTRUN.md) (SPEC-09 BR-05). `TestRun` carries no statements
+attribute, so there is nowhere for the other figure to land.
+
+**`location` is dropped.** This table named four per-failure fields; the source produces three
+distinct values — `generateTestReport.ts:95` sets `location` to `suite.name`, the same value
+`suite` already carries. Corrected at the SPEC-09 workshop (D-106).
 
 #### Scheduling and retry
 
@@ -203,6 +223,8 @@ one retry in the system is the single reconnect attempt in BR-20, which is a tra
 - **BR-18a** `log_defect` carries **exactly one** of `story` / `workspace`. `story` links the Defect to that Milestone; `workspace` links it to that Workspace's Active Initiative ([SPEC-05](SPEC-05-WORKSPACE-HEADER-AND-HEALTH.md) BR-20). Neither, or both, is rejected. Either way exactly one link is written, which satisfies [SPEC-03](SPEC-03-FINANCIAL-PLANNER-MIGRATION-LOAD.md) BR-21's at-least-one-present on rows created after cutover (D-96).
 - **BR-19** `resolve_defect` requires a non-empty resolution.
 - **BR-20** `record_decision` targets a Workspace, Initiative or Milestone, and carries Context, Decision and Rationale. Options is optional.
+- **BR-20a** `record_test_run` carries **exactly one scope**: `story` **with** `stage`, or `workspace`. Story mode links the TestRun to that stage's Task; workspace mode links it to that Workspace's Active Initiative ([SPEC-05](SPEC-05-WORKSPACE-HEADER-AND-HEALTH.md) BR-20) with a null Task link. Neither, both, or a `story` without a `stage`, is rejected. Either way exactly one link is written, satisfying [SPEC-03](SPEC-03-FINANCIAL-PLANNER-MIGRATION-LOAD.md) BR-26 on rows created after cutover (D-104).
+- **BR-20b** `record_test_run` carries an explicit **`executedAt`** — when the run executed, distinct from `createdAt`. It is a verb input, not a write-time default (D-105, [SPEC-05](SPEC-05-WORKSPACE-HEADER-AND-HEALTH.md) §6).
 - **BR-21** `plan_sprint` creates one Initiative and its story Milestones **in the named Workspace**. Each story carries ID, FRICEW type ∈ D-09's six values, description and `shipsUi`.
 - **BR-22** `project_view` returns the whole view in one call.
 
@@ -232,6 +254,7 @@ one retry in the system is the single reconnect attempt in BR-20, which is a tra
 | `reopen_stage` with empty reason                           | Reject 400                                                  | `verb.reopen.reasonRequired`     |
 | `resolve_defect` with empty resolution                     | Reject 400                                                  | `verb.defect.resolutionRequired` |
 | `log_defect` with neither or both of `story` / `workspace` | Reject 400, naming the two modes                            | `verb.defect.scopeRequired`      |
+| `record_test_run` with neither, both, or `story` sans `stage` | Reject 400, naming the two modes                         | `verb.testrun.scopeRequired`     |
 | Severity or FRICEW type outside its code list              | Reject 400 (`ASSERT_ENUM` surfaced verbatim)                | `verb.value.notInCodeList`       |
 | `plan_sprint` duplicate story ID in workspace              | Reject 409                                                  | `verb.story.duplicate`           |
 | Connection lost mid-call                                   | One reconnect, then reject 503                              | `verb.connection.unavailable`    |
