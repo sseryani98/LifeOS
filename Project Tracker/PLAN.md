@@ -20,7 +20,7 @@ Project Tracker has a PRD, `design/PROBLEM_STATEMENT_AND_VISION.md` (PSV-001, **
 `design/BUSINESS_ARCHITECTURE.md` (BA-001 v1.11, **Approved** — 22 objects in 3 waves, grouped into
 12 specs), a `research/` pack of six documents, a decisions log (D-01 … D-119), a wired module folder,
 **ten written specs** — `SPEC-01` **Draft** (deliberately, D-93), `SPEC-02` … `SPEC-09` **Approved**,
-`SPEC-10` **Draft** pending Sandro's approval — and the
+`SPEC-10` **Approved** — and the
 Plan-phase skills installed in `.claude/`. **No module code exists yet.** Ideate, Scope and Research ran
 2026-07-26; Scaffold, the Workshops grouping, `SPEC-01` and `SPEC-02` ran 2026-07-27; `SPEC-03` and
 `SPEC-04` ran 2026-07-28; `SPEC-05` … `SPEC-09` ran 2026-07-30; `SPEC-10` ran 2026-08-04. **OI-01,
@@ -74,7 +74,7 @@ mechanism needs a construction step.
 | 2   | Scope              | `/generate-business-architecture`       | Authored     | **Done** — 2026-07-26                                                                                         |
 | 3   | Research           | `/gather-research`                      | Authored     | **Done** — 2026-07-26                                                                                         |
 | 4   | Scaffold           | `/scaffold-module` → `scaffold-writer`  | Authored     | **Done** — 2026-07-27                                                                                         |
-| 5   | Workshops          | `/workshop` → `spec-writer`             | Exists       | **In progress** — D-37 grouping; `SPEC-01` and `SPEC-10` Draft, `SPEC-02` … `SPEC-09` Approved (10/12 written) |
+| 5   | Workshops          | `/workshop` → `spec-writer`             | Exists       | **In progress** — D-37 grouping; `SPEC-01` Draft (D-93), `SPEC-02` … `SPEC-10` Approved (10/12 written)      |
 | 6   | Information Arch.  | `/generate-information-architecture`    | Not authored | Not started — runs in full (D-21)                                                                             |
 | 7   | Design System      | `/generate-design-system`               | Not authored | Not started — runs in full (D-21)                                                                             |
 | 8   | Theme              | `/generate-theme`                       | Not authored | Not started — runs in full (D-21)                                                                             |
@@ -178,7 +178,7 @@ gave `log_defect`, seventh occurrence of D-40's analysis, and cheap because `SPE
 permitted the null-Task link. And **the script leaves the shared linter folder (D-103)**: `process.chdir`
 before requiring `@sap/cds` hardcodes a module name, which the root `CLAUDE.md` forbids there.
 
-**`SPEC-10` (`design/specs/SPEC-10-CUTOVER-GUARDS.md`, **Draft** — written 2026-08-04) is 29 business
+**`SPEC-10` (`design/specs/SPEC-10-CUTOVER-GUARDS.md`, **Approved** 2026-08-04) is 29 business
 rules, 16 FUTs, **no Data Model requirement at all** and D-109 … D-119** — the third Wave 3 spec, the
 third standalone one, and the **first spec that is not provisional on R1** (D-119). **SPEC-09 was
 approved in the same session (D-109)**, on D-103's precedent. It resolves **no** OI and mints **no**
@@ -484,7 +484,7 @@ Settle before or during Scaffold.
 ### 2026-08-04 — SPEC-10 written: a search that walked 4 files in 37, and a rule its own tests could not match
 
 - **Ran the `SPEC-10` workshop over INT-006.** Wrote
-  `design/specs/SPEC-10-CUTOVER-GUARDS.md` (**Draft**, **provisional on nothing** — **R1 ruled OUT**,
+  `design/specs/SPEC-10-CUTOVER-GUARDS.md` (**Approved**, **provisional on nothing** — **R1 ruled OUT**,
   R9 ruled out, **R5 discharged**, R6 confirmed closed, R10 owned by CNV-005) with 29 business rules,
   16 FUTs and **no Data Model requirement at all**, and logged **D-109 … D-119**. **SPEC-09 was
   approved in the same session (D-109)** on D-103's precedent. **SPEC-10 is the first spec not
