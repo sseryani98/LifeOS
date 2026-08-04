@@ -1,8 +1,8 @@
 # Project Tracker — Plan
 
 **Status:** Plan phase — Ideate, Scope, Research and Scaffold complete; Workshops in progress
-(grouping settled, `SPEC-01` … `SPEC-12`; **9 of 12 written**)
-**Last updated:** 2026-07-30
+(grouping settled, `SPEC-01` … `SPEC-12`; **10 of 12 written**)
+**Last updated:** 2026-08-04
 **Purpose:** The continuity document. Anyone (or any fresh chat) picking up Project Tracker
 starts here. Read this, then `design/PROBLEM_STATEMENT_AND_VISION.md` (PSV-001),
 `design/BUSINESS_ARCHITECTURE.md` (BA-001) and `design/DECISIONS_LOG.md` for the full
@@ -17,14 +17,14 @@ Backlog (`CNV-001` Historical backfill) and nothing In Progress. That gap is del
 is the cutover window.
 
 Project Tracker has a PRD, `design/PROBLEM_STATEMENT_AND_VISION.md` (PSV-001, **Draft**),
-`design/BUSINESS_ARCHITECTURE.md` (BA-001 v1.10, **Approved** — 22 objects in 3 waves, grouped into
-12 specs), a `research/` pack of six documents, a decisions log (D-01 … D-108), a wired module folder,
-**nine written specs** — `SPEC-01` **Draft**, `SPEC-02` … `SPEC-09` **Approved** except `SPEC-09`, which is
-**Draft** pending Sandro's approval — and the
+`design/BUSINESS_ARCHITECTURE.md` (BA-001 v1.11, **Approved** — 22 objects in 3 waves, grouped into
+12 specs), a `research/` pack of six documents, a decisions log (D-01 … D-119), a wired module folder,
+**ten written specs** — `SPEC-01` **Draft** (deliberately, D-93), `SPEC-02` … `SPEC-09` **Approved**,
+`SPEC-10` **Draft** pending Sandro's approval — and the
 Plan-phase skills installed in `.claude/`. **No module code exists yet.** Ideate, Scope and Research ran
 2026-07-26; Scaffold, the Workshops grouping, `SPEC-01` and `SPEC-02` ran 2026-07-27; `SPEC-03` and
-`SPEC-04` ran 2026-07-28; `SPEC-05` … `SPEC-09` ran 2026-07-30. **OI-01, OI-02, OI-03 and OI-04 are
-closed**; **only OI-05 remains**, at Data Model.
+`SPEC-04` ran 2026-07-28; `SPEC-05` … `SPEC-09` ran 2026-07-30; `SPEC-10` ran 2026-08-04. **OI-01,
+OI-02, OI-03 and OI-04 are closed**; **only OI-05 remains**, at Data Model.
 
 ### The one-paragraph version
 
@@ -38,12 +38,12 @@ becomes the first real test of the new system.
 
 ## 2. Decisions already made
 
-Full rationale in `design/DECISIONS_LOG.md` (D-01 … D-108; D-19 … D-27 were added at Scope,
+Full rationale in `design/DECISIONS_LOG.md` (D-01 … D-119; D-19 … D-27 were added at Scope,
 D-28 … D-32 at Research, D-33 … D-36 at Scaffold, D-37 … D-39 at the Workshops grouping,
 D-40 … D-46 at the `SPEC-01` workshop, D-47 … D-57 at the `SPEC-02` workshop, D-58 … D-65 at the
 `SPEC-03` workshop, D-66 … D-69 at the `SPEC-04` workshop, D-70 … D-75 at the `SPEC-05` workshop and
 D-76 … D-82 at the `SPEC-06` workshop, D-83 … D-92 at `SPEC-07`, D-93 … D-102 at `SPEC-08` and
-D-103 … D-108 at `SPEC-09`). The founding twelve,
+D-103 … D-108 at `SPEC-09` and **D-109 … D-119 at `SPEC-10`**). The founding twelve,
 summarized — note that **D-28 amends item 4's wording**: a bare `cds.connect.to()` throws, so the
 mechanism needs a construction step.
 
@@ -74,7 +74,7 @@ mechanism needs a construction step.
 | 2   | Scope              | `/generate-business-architecture`       | Authored     | **Done** — 2026-07-26                                                                                         |
 | 3   | Research           | `/gather-research`                      | Authored     | **Done** — 2026-07-26                                                                                         |
 | 4   | Scaffold           | `/scaffold-module` → `scaffold-writer`  | Authored     | **Done** — 2026-07-27                                                                                         |
-| 5   | Workshops          | `/workshop` → `spec-writer`             | Exists       | **In progress** — D-37 grouping; `SPEC-01` and `SPEC-09` Draft, `SPEC-02` … `SPEC-08` Approved (9/12 written) |
+| 5   | Workshops          | `/workshop` → `spec-writer`             | Exists       | **In progress** — D-37 grouping; `SPEC-01` and `SPEC-10` Draft, `SPEC-02` … `SPEC-09` Approved (10/12 written) |
 | 6   | Information Arch.  | `/generate-information-architecture`    | Not authored | Not started — runs in full (D-21)                                                                             |
 | 7   | Design System      | `/generate-design-system`               | Not authored | Not started — runs in full (D-21)                                                                             |
 | 8   | Theme              | `/generate-theme`                       | Not authored | Not started — runs in full (D-21)                                                                             |
@@ -178,7 +178,26 @@ gave `log_defect`, seventh occurrence of D-40's analysis, and cheap because `SPE
 permitted the null-Task link. And **the script leaves the shared linter folder (D-103)**: `process.chdir`
 before requiring `@sap/cds` hardcodes a module name, which the root `CLAUDE.md` forbids there.
 
-**Next is `SPEC-10`.** Read BA-001 §11 for its row; the grouping is not re-derived per session.
+**`SPEC-10` (`design/specs/SPEC-10-CUTOVER-GUARDS.md`, **Draft** — written 2026-08-04) is 29 business
+rules, 16 FUTs, **no Data Model requirement at all** and D-109 … D-119** — the third Wave 3 spec, the
+third standalone one, and the **first spec that is not provisional on R1** (D-119). **SPEC-09 was
+approved in the same session (D-109)**, on D-103's precedent. It resolves **no** OI and mints **no**
+error key — the first spec where minting none is structural rather than a disposition, since a hook has
+no i18n surface and its deny reason must name a verb.
+
+Three measured findings carried it. **`lintDocClaims.ts:15` already answered the rooting question
+D-103 opened (D-110)** — it locates the shared ESLint config from `import.meta.dirname` precisely so
+"renaming or moving the Standards folder cannot silently defeat the check", which honours the cwd
+rule's *purpose* where a `process.chdir` to a named module could not. **ripgrep and git disagree about
+`.claude/**/*.md` (D-116)**: `rg --files .claude/` walks 4 of 37 files while `git ls-files` reports
+them tracked, so the obvious implementation of the linter would hide all five `.md` consumers and
+report green. And **SPEC-08 BR-02's four literal strings are provably incomplete** against the ten
+files they are scoped to (D-117) — `Financial Planner/CLAUDE.md:77` reads `sprints/` bare and
+`generateTestReport.ts:6` splits its path across two literals — which is why the two guards now share
+**one tracked list** rather than two hand-maintained ones (D-111).
+
+**Next is `SPEC-11`** (INT-007, the project-state exporter). Read BA-001 §11 for its row; the grouping
+is not re-derived per session.
 
 **Still open:** **OI-05 alone** (methodology genericity — Data Model). **OI-03 is closed by D-35 and
 OI-04 by D-70.** Research risks: R2 is closed
@@ -297,9 +316,17 @@ Measured 2026-07-26 by grepping `.claude/` and `Standards (Technical + Linting)/
 `SPRINT_BOARD`, `DEFECT_LOG`, `sprints/`, `test-reports`. **Re-verified during Scope: all
 eight counts below hold exactly (16 refs), and two more files were found** — see D-23.
 
-**Measurement caveat.** A directory-scoped ripgrep over `.claude/` silently returns only the
-`.js` hits; the `.md` files match only with an explicit `**/*.md` glob. Any future measurement
-of this surface that omits the glob under-reports by six files.
+**Measurement caveat — cause and count both corrected 2026-08-04 (D-116).** A directory-scoped
+ripgrep over `.claude/` silently returns only the `.js` hits, and any measurement of this surface
+that omits an explicit `**/*.md` glob under-reports by **five** files, not six —
+`agents/build-briefer.md`, `agents/implementer.md`, `commands/build.md`,
+`skills/human-review-loop/SKILL.md`, `skills/pm-update/SKILL.md`. **The stated cause was wrong.**
+`rg --files .claude/` enumerates **4 of 37** files, because ripgrep applies `.gitignore:10`'s
+`.claude/*.md` at **every depth** while git does not — `git check-ignore` reports those files not
+ignored and `git ls-files` reports them **tracked**. The explicit glob works because command-line
+globs outrank ignore files, not because the `.md` files needed naming. `SPEC-10` BR-19 therefore
+forbids `lintNoMarkdownState` from delegating its walk to ripgrep, `git grep`, or any
+gitignore-respecting library at all.
 
 | File                                                            | Refs  | What changes                                                                                                                                                                                                                       |
 | --------------------------------------------------------------- | ----- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -350,8 +377,10 @@ ratchet it shut afterward.** The rewiring above is still real work.
 
 **1. `PreToolUse` hook — runtime enforcement.** _"You cannot do the wrong thing."_
 
-- Matcher: `Write|Edit|MultiEdit`. Inspects `tool_input.file_path` against the retired-path list
-  and **hard-denies**, returning a message naming the MCP verb to use instead.
+- Matcher: **two groups** — `Write|Edit|NotebookEdit` (exact list) and `mcp__.*` (regex); `MultiEdit`
+  is dropped, it is not a tool (D-32). Inspects the **union** of `file_path`, `notebook_path` and
+  `path` against the shared retired-artifact list and **hard-denies** with JSON on stdout and exit 0,
+  returning a message naming the MCP verb to use instead (`SPEC-10` BR-08, BR-10, BR-12; D-113).
 - Precise, no false positives, catches the overwhelming majority of regressions. Deliberately
   does **not** parse `Bash` commands — command regexing is fuzzy and the false positives aren't
   worth the residual shell loophole.
@@ -361,11 +390,16 @@ ratchet it shut afterward.** The rewiring above is still real work.
 **2. `lintNoMarkdownState.ts` — instruction enforcement.** _"Nothing tells you to do the wrong
 thing."_
 
-- Joins the existing ~20-linter suite in `Standards (Technical + Linting)/scripts/`. Scans for
-  references to retired paths and fails `npm run lint`, which is already in the gate. **The glob
+- Joins the existing **21**-linter suite in `Standards (Technical + Linting)/scripts/`. Scans for
+  references to retired paths and fails `npm run lint`, which is already in the gate. ~~**The glob
   this document used to state — `.claude/**` and `Standards/**` — reaches neither
   `Standards (Documents)/METHODOLOGY_BLUEPRINT.md` nor `Financial Planner/CLAUDE.md`** (D-100).
-  `SPEC-10` settles the real roots.
+  `SPEC-10` settles the real roots.~~ **Settled 2026-08-04.** There is no glob: `SPEC-10` BR-17 gives
+  a **declared root list** of six — repo `.claude/`, `Standards (Documents)/`,
+  `Standards (Technical + Linting)/`, the repo-root `CLAUDE.md`, every module's `CLAUDE.md`, and
+  `Project Tracker/scripts/` — and BR-16 derives the repo root from `import.meta.dirname` rather than
+  `process.cwd()`, on `lintDocClaims.ts:15`'s precedent (D-110). A missing root is skipped (D-36), which
+  matters immediately: the third root does not exist yet.
 - Catches what the hook structurally cannot see: a skill file still _instructing_ an agent to
   edit the board.
 
@@ -446,6 +480,65 @@ Settle before or during Scaffold.
 ---
 
 ## 8. Session log
+
+### 2026-08-04 — SPEC-10 written: a search that walked 4 files in 37, and a rule its own tests could not match
+
+- **Ran the `SPEC-10` workshop over INT-006.** Wrote
+  `design/specs/SPEC-10-CUTOVER-GUARDS.md` (**Draft**, **provisional on nothing** — **R1 ruled OUT**,
+  R9 ruled out, **R5 discharged**, R6 confirmed closed, R10 owned by CNV-005) with 29 business rules,
+  16 FUTs and **no Data Model requirement at all**, and logged **D-109 … D-119**. **SPEC-09 was
+  approved in the same session (D-109)** on D-103's precedent. **SPEC-10 is the first spec not
+  provisional on R1** — every prior spec inherited it, and neither guard touches CAP.
+- **The rooting fork had already been answered inside the suite, and nobody had looked (D-110).**
+  D-103 moved `generateTestReport.ts` out of the shared folder because `process.chdir(<module root>)`
+  hardcodes a module name, and the same collision recurs here: `lintNoMarkdownState`'s roots are under
+  no module's cwd. But `lintDocClaims.ts:15` already reaches outside cwd via `import.meta.dirname`,
+  with a comment saying why — "renaming or moving the Standards folder cannot silently defeat the
+  check". That honours the cwd rule's **purpose** (one copy serves every module, no module named)
+  where D-103's script could not, because a `chdir` target is irreducibly a module name. **D-103 was a
+  precedent for the question, not for the answer**, and the difference is whether the outside-cwd path
+  can be *derived* or must be *named*. A module-local script was rejected on measurement: `build.js:371`
+  runs `cd "${moduleDir}" && npm run lint`, so a Project-Tracker-only linter would never fire in the
+  gate that matters, and every retired path lives in Financial Planner.
+- **ripgrep and git disagree, and the whole guard rested on it (D-116).** `PLAN.md` §6 recorded that a
+  directory-scoped `rg` over `.claude/` "returns only the `.js` hits" and blamed a missing `**/*.md`
+  glob. Measured: `rg --files .claude/` enumerates **4 of 37** files. The cause is `.gitignore:10`'s
+  `.claude/*.md`, applied by ripgrep at **every depth** while `git check-ignore` reports those files
+  **not ignored** and `git ls-files` reports them **tracked**; the explicit glob works because
+  command-line globs outrank ignore files. So the obvious implementation of "scan for a string" hides
+  **every `.md` consumer SPEC-08 rewires** and reports green — **phantom enforcement in the object built
+  to end it**. BR-19 forbids delegating the walk at all. The caveat's **count** was wrong too: five, not
+  six, wrong since Scope and restated as verified at the SPEC-08 workshop.
+- **A rule and its own three tests used four different spellings, and two real references matched none
+  of them (D-117).** SPEC-08 BR-02 names `SPRINT_BOARD`, `DEFECT_LOG`, `project/sprints/`,
+  `project/test-reports/`. `Financial Planner/CLAUDE.md:77` reads **`sprints/`** bare under the
+  `project/` header at `:74`, so deleting `:75-76` and leaving `:77` would **pass BR-02** with the
+  retired path intact — only SPEC-08 FUT-006 catches it, and FUT-006 spells the string differently while
+  citing BR-02 as its authority. `generateTestReport.ts:6` splits the path as
+  `join(process.cwd(), "project", "test-reports")`, which no literal matches. Hence **one tracked list,
+  two projections** (D-111): the hook's path globs and the linter's tokens are fields on one record, so
+  a missed spelling is a token added rather than a second list to remember. It gained a **fifth record**
+  for the moved test-report generator — measured, that token is the *only* thing that makes the
+  repo-root `CLAUDE.md` guardable at all, which is exactly the gap SPEC-08 BR-14a describes.
+- **Two rulings the register had no column for.** `research/README.md` §5 has **no Owner column and no
+  Grade column**, which is why R5, R6 and R10 have carried neither. R5 is discharged, R6's closure
+  re-verified rather than assumed, and **R10 gains an owner — CNV-005**, because D-07 forbids the one
+  hook run that would settle it, so the settling event and the enablement event are the same event.
+  **D-39's and D-108's lesson a third time**: there a risk had no owner, then a certainty had no route;
+  here three risks had no column.
+- **Reviewing the produced spec caught eight defects the writer's own DoD check passed** — the tenth
+  session running. The sharpest: **BR-10 scoped the path read per tool**, so a `Write` carrying
+  `notebook_path` would have been allowed and FUT-003 asserted that weaker behaviour as correct — now a
+  union read, fail-safe. **FUT-008 listed five files as its expected set** while a correct implementation
+  reports seven, the SPEC-09 FUT-001 class recurring. **§5 asserted a fail-open behaviour with no rule
+  and no test behind it** — now BR-13a and FUT-016, and the asymmetry is load-bearing: a `PreToolUse`
+  deny beats `bypassPermissions`, so failing closed on the hook's own bug would block every `Write` in
+  the session with no override. And **BR-19 inherited the "six files" the same session proved was five**.
+- **Five BA-001 corrections applied in-session → v1.11.** INT-006's row had received **no maintenance
+  across nine amendments** while D-100 deferred work to it: it still carried the `Standards/**` glob
+  D-100 refuted (the correction had been applied to INT-003's row and not this one), still said
+  "20-linter suite" after D-36 corrected the count, and listed R6 as closed in §4 while §11 row 10 named
+  it a live reason for the cut.
 
 ### 2026-07-30 — SPEC-09 written: the hook that skips the run worth recording, and a script that had to leave the shared folder
 
