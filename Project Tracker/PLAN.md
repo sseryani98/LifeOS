@@ -1,7 +1,7 @@
 # Project Tracker — Plan
 
 **Status:** Plan phase — Ideate, Scope, Research and Scaffold complete; Workshops in progress
-(grouping settled, `SPEC-01` … `SPEC-12`; **10 of 12 written**)
+(grouping settled, `SPEC-01` … `SPEC-12`; **11 of 12 written**)
 **Last updated:** 2026-08-04
 **Purpose:** The continuity document. Anyone (or any fresh chat) picking up Project Tracker
 starts here. Read this, then `design/PROBLEM_STATEMENT_AND_VISION.md` (PSV-001),
@@ -18,12 +18,12 @@ is the cutover window.
 
 Project Tracker has a PRD, `design/PROBLEM_STATEMENT_AND_VISION.md` (PSV-001, **Draft**),
 `design/BUSINESS_ARCHITECTURE.md` (BA-001 v1.11, **Approved** — 22 objects in 3 waves, grouped into
-12 specs), a `research/` pack of six documents, a decisions log (D-01 … D-119), a wired module folder,
-**ten written specs** — `SPEC-01` **Draft** (deliberately, D-93), `SPEC-02` … `SPEC-09` **Approved**,
-`SPEC-10` **Approved** — and the
+12 specs), a `research/` pack of six documents, a decisions log (D-01 … D-128), a wired module folder,
+**eleven written specs** — `SPEC-01` **Draft** (deliberately, D-93), `SPEC-02` … `SPEC-10` **Approved**,
+`SPEC-11` **Approved** — and the
 Plan-phase skills installed in `.claude/`. **No module code exists yet.** Ideate, Scope and Research ran
 2026-07-26; Scaffold, the Workshops grouping, `SPEC-01` and `SPEC-02` ran 2026-07-27; `SPEC-03` and
-`SPEC-04` ran 2026-07-28; `SPEC-05` … `SPEC-09` ran 2026-07-30; `SPEC-10` ran 2026-08-04. **OI-01,
+`SPEC-04` ran 2026-07-28; `SPEC-05` … `SPEC-09` ran 2026-07-30; `SPEC-10` and `SPEC-11` ran 2026-08-04. **OI-01,
 OI-02, OI-03 and OI-04 are closed**; **only OI-05 remains**, at Data Model.
 
 ### The one-paragraph version
@@ -38,12 +38,12 @@ becomes the first real test of the new system.
 
 ## 2. Decisions already made
 
-Full rationale in `design/DECISIONS_LOG.md` (D-01 … D-119; D-19 … D-27 were added at Scope,
+Full rationale in `design/DECISIONS_LOG.md` (D-01 … D-128; D-19 … D-27 were added at Scope,
 D-28 … D-32 at Research, D-33 … D-36 at Scaffold, D-37 … D-39 at the Workshops grouping,
 D-40 … D-46 at the `SPEC-01` workshop, D-47 … D-57 at the `SPEC-02` workshop, D-58 … D-65 at the
 `SPEC-03` workshop, D-66 … D-69 at the `SPEC-04` workshop, D-70 … D-75 at the `SPEC-05` workshop and
 D-76 … D-82 at the `SPEC-06` workshop, D-83 … D-92 at `SPEC-07`, D-93 … D-102 at `SPEC-08` and
-D-103 … D-108 at `SPEC-09` and **D-109 … D-119 at `SPEC-10`**). The founding twelve,
+D-103 … D-108 at `SPEC-09`, D-109 … D-119 at `SPEC-10` and **D-120 … D-128 at `SPEC-11`**). The founding twelve,
 summarized — note that **D-28 amends item 4's wording**: a bare `cds.connect.to()` throws, so the
 mechanism needs a construction step.
 
@@ -74,7 +74,7 @@ mechanism needs a construction step.
 | 2   | Scope              | `/generate-business-architecture`       | Authored     | **Done** — 2026-07-26                                                                                         |
 | 3   | Research           | `/gather-research`                      | Authored     | **Done** — 2026-07-26                                                                                         |
 | 4   | Scaffold           | `/scaffold-module` → `scaffold-writer`  | Authored     | **Done** — 2026-07-27                                                                                         |
-| 5   | Workshops          | `/workshop` → `spec-writer`             | Exists       | **In progress** — D-37 grouping; `SPEC-01` Draft (D-93), `SPEC-02` … `SPEC-10` Approved (10/12 written)      |
+| 5   | Workshops          | `/workshop` → `spec-writer`             | Exists       | **In progress** — D-37 grouping; `SPEC-01` Draft (D-93), `SPEC-02` … `SPEC-11` Approved (11/12 written)      |
 | 6   | Information Arch.  | `/generate-information-architecture`    | Not authored | Not started — runs in full (D-21)                                                                             |
 | 7   | Design System      | `/generate-design-system`               | Not authored | Not started — runs in full (D-21)                                                                             |
 | 8   | Theme              | `/generate-theme`                       | Not authored | Not started — runs in full (D-21)                                                                             |
@@ -196,13 +196,37 @@ files they are scoped to (D-117) — `Financial Planner/CLAUDE.md:77` reads `spr
 `generateTestReport.ts:6` splits its path across two literals — which is why the two guards now share
 **one tracked list** rather than two hand-maintained ones (D-111).
 
-**Next is `SPEC-11`** (INT-007, the project-state exporter). Read BA-001 §11 for its row; the grouping
-is not re-derived per session.
+**`SPEC-11` (`design/specs/SPEC-11-PROJECT-STATE-EXPORTER.md`, **Approved** 2026-08-04, on the day it
+was written) is 21 business rules, 15 FUTs, **no new entity and no new attribute** and D-120 … D-128**
+— the fourth Wave 3 spec and the **fifth** standalone one (not the fourth; SPEC-11 §6 corrects the running count against BA-001 §11). It **reads every persisted entity and every
+persisted column**, so §2 places one *standing* requirement on the Data Model — a deterministic sort key
+per entity (BR-07) — rather than an amendment. It resolves **no** OI (D-31 already resolved OI-01; this
+object implements it) and mints **no** error key, the seventh running and the second where none is
+structurally possible. It is **provisional on R1 again (D-121)**, reversing `SPEC-10`'s rule-out, and it
+**takes ownership of R7** — whose drill is its own FUT-007, and **which settles R4 in the same execution**.
+
+Three findings carried it. **The rooting question had a third answer (D-103 vs D-110)** — the exporter
+must `chdir` to this module's root before importing `@sap/cds`, which names a module, so D-103's ruling
+applies and the script lands in `Project Tracker/scripts/`; *inside* the module D-110's
+`import.meta.dirname` still derives the output path, so the two rulings compose rather than conflict.
+**An export that logged itself could never be idempotent (D-124)** — `SPEC-01` BR-03 binds write verbs
+and the exporter is not one, so emitting no Activity is not merely permitted but required, and it is what
+makes byte-identical consecutive exports reachable at all. And **the two round-trip hazards fail
+differently (D-128)**: omitting keys aborts the deploy at `COMMIT` on `DEFERRABLE INITIALLY DEFERRED`
+constraints, while omitting managed fields loads every row, matches every count and rewrites the audit
+history — which is why the managed-field comparison is mandatory rather than advisory.
+
+**Next is `SPEC-12`** (CNV-005, decommission — the terminal act of cutover). Read BA-001 §11 for its row;
+the grouping is not re-derived per session.
 
 **Still open:** **OI-05 alone** (methodology genericity — Data Model). **OI-03 is closed by D-35 and
 OI-04 by D-70.** Research risks: R2 is closed
 by D-33 and R3/R8 dissolved with D-29; **R1, R4, R7 and R9 remain unexecuted** — see
-`research/README.md` §5. Two of the four now have an owner rather than only a description:
+`research/README.md` §5. **All four now have an owner rather than only a description** — R7's and R4's
+were assigned at the `SPEC-11` workshop (D-121): both belong to **`INT-007`'s own build**, because the
+drill needs a real Postgres, a built exporter and loaded data, and dropping and recreating a schema to
+re-deploy into it *is* R4's test. `research/README.md` §5 has no Owner column, so it is recorded in prose
+and in SPEC-11 §6, on `SPEC-10`'s precedent for R10. The other two:
 
 - **R1 goes to Data Model (D-39), and it is worse than the research thought.** The finding is not
   that Postgres is unproven for this module — it is that `Financial Planner/package.json:82-88`
@@ -480,6 +504,59 @@ Settle before or during Scaffold.
 ---
 
 ## 8. Session log
+
+### 2026-08-04 — SPEC-11 written: the object that reads everything, and the risk that had waited for it
+
+- **Ran the `SPEC-11` workshop over INT-007.** Wrote
+  `design/specs/SPEC-11-PROJECT-STATE-EXPORTER.md` (**Approved**, **provisional on R1** — R9 ruled out,
+  **R7 owned here and R4 settled in the same execution**) with 21 business rules, 15 FUTs, **no new
+  entity and no new attribute**, and logged **D-120 … D-128**. It is the fourth Wave 3 spec, the
+  **fifth** standalone one, and the first that **reads every persisted entity and every persisted
+  column** — so §2 states a read *surface* and one standing Data Model requirement (a deterministic
+  sort key per entity) rather than an amendment list.
+- **R1 comes back, one spec after being ruled out.** `SPEC-10` was the first spec not provisional on
+  R1 (D-119), because neither cutover guard touches CAP. This object reads the database and its drill
+  runs `cds deploy` against a real Postgres, which per D-39 **neither module has ever connected to**
+  — so R1 binds again, ruled explicitly on D-82's precedent rather than inherited either way. **R7
+  and R4 gain owners in the same act (D-121)**: both are `INT-007`'s own build, because the drill
+  needs a real Postgres, a built exporter and loaded data, and dropping and recreating a schema to
+  re-deploy into it *is* R4's test — the "highest-value unrun test in the wave" turns out to be a
+  step inside FUT-007 rather than a separate exercise.
+- **The rooting fork had a third instance, and the two prior rulings compose (D-103, D-110).** The
+  exporter must `process.chdir` to this module's root before importing `@sap/cds`, which names a
+  module irreducibly, so D-103 applies and the script lands in `Project Tracker/scripts/`. But
+  *inside* the module, D-110's `import.meta.dirname` still derives the output path, so
+  `npm run export-state` writes to the same folder from the repo root and from the module (FUT-012).
+  What forces the module home is the CAP chdir, not the file path.
+- **An export that logged itself could never be idempotent (D-124).** `SPEC-01` BR-03 binds *write*
+  verbs and the exporter is not one, so emitting no Activity is permitted — and it is also
+  **required**, because an Activity would change the state just captured and no two consecutive
+  exports could ever match. The read/write distinction and the idempotence property turned out to be
+  the same rule.
+- **The two round-trip hazards fail differently, and only one can announce itself (D-128).** Omitting
+  keys aborts the deploy at `COMMIT`, because all foreign keys are `DEFERRABLE INITIALLY DEFERRED`
+  inside one transaction (RSH-005 §5, 51 of 51 on the planner model). Omitting managed fields loads
+  every row, matches every count, and rewrites the audit history to `anonymous` at the deploy
+  timestamp. That asymmetry is why BR-20 makes the managed-field comparison **mandatory rather than
+  advisory**, and why FUT-008 is a negative test asserting a silent pass.
+- **`TestRun` volume is answered by the sort key, not a filter (D-125).** `SPEC-09` §6 raised it;
+  filtering would break the round-trip, the one property the object exists to provide. Determinism
+  and diff-friendliness are separate requirements — `ORDER BY ID` is byte-identical *and* scatters
+  new rows, because UUIDs do not sort chronologically — so append-growing entities declare a temporal
+  key first.
+- **A research document with a dedicated workshop had no route to it (D-127).** `research/README.md`
+  §7 routes by stage and by `R-nn`, and RSH-005's only entry sent it to Cutover/`CNV-005`. **This is
+  exactly the defect D-108 logged for INT-004**, one object over, and D-39's lesson in its fourth
+  form — a risk with no owner, then a certainty with no route, then three risks with no column, now a
+  document with no consumer. Four `research/README.md` corrections applied in-session: the new §7
+  row, the stale Cutover row (D-31 ruled on OI-01), §3's Feeds cell and §5's R7 Affects cell, neither
+  of which had ever named INT-007.
+- **Three §6 rows owed to SPEC-11 discharged**, from `SPEC-03`, `SPEC-05` and `SPEC-09` — the first
+  two by BR-03's emit-all-managed-fields rule, though `executedAt` and `createdBy` are carried by two
+  *different* rules and the spec says so; the third by BR-07. **Two BA-001 corrections applied
+  in-session → v1.12**: INT-007's Traces To named neither **INT-001**, the service layer it reads
+  through, nor **INT-004**, whose rows its sort key exists to handle; and its R7 clause is completed
+  with the owner D-121 assigns. The row had received no maintenance since it was created at v1.1.
 
 ### 2026-08-04 — SPEC-10 written: a search that walked 4 files in 37, and a rule its own tests could not match
 

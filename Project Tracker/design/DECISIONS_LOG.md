@@ -814,3 +814,69 @@ Amendments are made in place — the superseded text is struck through and marke
 - **Decision:** **R1 is ruled OUT.** R9 is ruled out on D-101's test; **R5 is discharged** by D-112 and D-113; **R6 is confirmed closed** by D-32 on a re-read rather than an assumption; and **R10 gains an owner — CNV-005.**
 - **Rationale:** Neither guard touches CAP. The hook is a Node process reading stdin; the linter is a filesystem scan. Nothing connects to Postgres, so R1 has nothing to attach to — and that is a genuine first rather than an oversight, which is why it is ruled explicitly on D-82's own argument rather than inherited silently. R6's narrowing survives contact with INT-006's own text: it names the **hook's** registration in `.claude/settings.json` (`.gitignore:8`), while `.mcp.json` (`.gitignore:13`) is D-44's. R10 is mitigated by re-measurement — 2.1.90, `MultiEdit` 1, `NotebookEdit` 8, every key literal present — but measurement is not execution, and D-07 forbids the one run that would settle it, so the settling event and the enablement event are the same event.
 - **Consequences:** `research/README.md` §5 carries no Owner column, which is why R5, R6 and R10 have had none; R10's owner is recorded in SPEC-10 §6 rather than in a column that does not exist. **This is D-39's and D-108's lesson a third time** — there a risk had no owner, then a certainty had no route; here three risks had no column.
+
+## D-120: The Export Destination Is a Tracked Folder Outside CAP's Data Discovery
+
+- **Context:** INT-007's CSV output has to be committed to git to be diffable, and CAP auto-discovers seed data from `cds.requires.db.data` and from any `data/`, `csv/` folder beside a `.cds` source (`cds-deploy.js:285-302`). Writing the export into a discovered folder makes restore automatic; writing it outside makes restore deliberate.
+- **Options:** A) `db/data/`, auto-discovered, B) `Project Tracker/state/`, outside discovery.
+- **Decision:** **B.** The exporter writes to `Project Tracker/state/`, tracked in git and outside `cds.requires.db.data`. Restore is a copy into `db/data/` followed by `cds deploy`.
+- **Rationale:** `db/data/` is already spoken for by the module's hand-written code-list seeds, so a generated export would mix with them in one folder with nothing to tell a reader which is which. And because `schema_evolution: "auto"` makes every load an `UPSERT` (`cds-deploy.js:210-211`), any `cds deploy` run mid-sprint would silently merge the last checkpoint's rows back over live data — a partial rollback that announces nothing. Restore stays possible and becomes deliberate, which is what a drill should be anyway.
+- **Consequences:** SPEC-11 BR-10 and BR-19. The restore step is one copy longer, which is the intended cost.
+
+## D-121: R7's Owner Is INT-007's Own Build, and the Same Drill Settles R4
+
+- **Context:** R7 — the CSV round-trip is untested — has carried no owner since Research, because `research/README.md` §5 has no Owner column. R4 — one `cds_model` snapshot per Postgres schema with `schema_evolution: "auto"` on by driver default — is graded the "highest-value unrun test in the wave" and has never been executed either.
+- **Decision:** **R7's owner is INT-007's own build**, and its drill is SPEC-11 FUT-007 rather than a separate exercise. **R4 is settled by the same execution.** The deadline is before CNV-005 runs.
+- **Rationale:** The drill needs a real Postgres, a built exporter and loaded data, all of which exist only at INT-007's build, so a separate owner would be a separate schedule for the same act. R4 asks what `cds deploy` does to a schema, and the drill drops and recreates one and re-deploys into it — so R1's spike is the precondition, and R7 and R4 are one execution rather than three.
+- **Consequences:** **SPEC-11 is provisional on R1, reversing SPEC-10's rule-out (D-119)** — SPEC-10 could rule R1 out because neither cutover guard touches CAP; this object reads the database and its drill runs `cds deploy` against Postgres, which per D-39 neither module has ever connected to. `research/README.md` §5 has no Owner and no Grade column, so the ownership is recorded in prose, on SPEC-10's precedent for R10.
+
+## D-122: The Exporter Is an npm Script a Human Runs, and the Written Procedure Is a Deliverable
+
+- **Context:** D-31 fixes the cadence at the sprint checkpoint but not the mechanism. Three shapes were available: a twelfth MCP verb, a scheduled job, or an npm script invoked by hand.
+- **Options:** A) a twelfth verb, B) a scheduled job, C) an npm script plus a written checkpoint procedure.
+- **Decision:** **C.** `npm run export-state`, no arguments, nothing scheduled — and the checkpoint procedure written into `Project Tracker/CLAUDE.md` as part of the object.
+- **Rationale:** The eleven verbs are the _agent_ write surface and a checkpoint is Sandro's ritual, not an agent's; a twelfth verb has been declined three times (D-50, D-78, D-107) and this is the fourth attempt to clear that bar, which it does not. B fails on a standing module property — this module schedules nothing (D-70). But an npm script alone reproduces D-102's finding, where converting a surface without adding the instruction left every chain unopened: a cadence nobody is instructed to run does not happen. So the procedure text is part of the object rather than documentation about it.
+- **Consequences:** SPEC-11 BR-11, BR-16, BR-17 and BR-18, with SPEC-11 FUT-015 testing the instruction side — the same shape as SPEC-08's FUTs over edited instructions.
+
+## D-123: The Entity Set Is Reflected From the CSN, Never a Hand-Maintained List
+
+- **Context:** The exporter has to know which entities to export. It can read the CSN at run time or carry a declared list, as SPEC-10 BR-17's linter roots and D-111's retired-path records do.
+- **Decision:** **The entity set is reflected from the CSN at run time.** No hand-maintained entity list exists anywhere in the exporter.
+- **Rationale:** A hand-maintained list silently drops an entity added at Data Model, and the export would still report success — the unconstrained-artifact defect D-31 rejects, reappearing inside the object D-31 created to fix it. The contrast with SPEC-10 BR-17's _declared_ root list and D-111's one tracked list is worth naming rather than leaving as an apparent inconsistency: those enumerate things that sit outside any schema, where nothing could derive them. The CSN is authoritative for entities, so deriving is available here and naming is not required.
+- **Consequences:** SPEC-11 BR-05, and SPEC-11 FUT-001 asserts the **relation** between the CSN and the file set rather than a file count.
+
+## D-124: The Exporter Emits No Activity, Which Is What Makes Idempotence Reachable
+
+- **Context:** SPEC-01 BR-03 requires every state-changing verb to emit exactly one Activity. The exporter reads every entity and writes none, so whether it should log its own run is an open question rather than an obvious one.
+- **Decision:** **The exporter writes nothing at all — no row, no verb call, and no Activity.**
+- **Rationale:** SPEC-01 BR-03 binds _write_ verbs and the exporter is not one, so emitting nothing is permitted. It is also required: an export that logged itself would change the state it just captured, so no two consecutive exports could ever match and idempotence would be unreachable by construction. The read/write distinction and the idempotence property turn out to be the same rule.
+- **Consequences:** SPEC-11 BR-14 and BR-15, with SPEC-11 FUT-003 the test BR-14 makes reachable.
+
+## D-125: TestRun Volume Is Answered by the Sort Key, Not by a Filter
+
+- **Context:** SPEC-09 §6 raised that `TestRun` volume changes shape at INT-004 — the old script capped at five files by rolling retention, nothing caps rows, and every `npm test` now writes one. The exporter's per-checkpoint cadence therefore carries a table that grows several times a day.
+- **Options:** A) filter or cap the exported rows, B) order the file so growth is an append.
+- **Decision:** **B.** `TestRun` declares `executedAt` as its first sort key and `Activity` declares `occurredAt`; nothing is filtered and nothing is capped.
+- **Rationale:** Filtering would break the round-trip, which is the one property the object exists to provide — an export that cannot restore what it exported is not a backup. Determinism and diff-friendliness are separate requirements and both are needed: `ORDER BY ID` gives byte-identical output for identical data while scattering new rows through the file, because UUIDs do not sort chronologically. A temporal first key makes several-times-a-day growth a pure append at the end of one file.
+- **Consequences:** SPEC-11 BR-07, tested by SPEC-11 FUT-004 and FUT-005. **Discharges SPEC-09 §6's TestRun-volume row.** Slice 1 still needs no retention — SPEC-05 BR-24 reads only the most recent and RPT-004 excludes TestRun (D-19).
+
+## D-126: The Export Is All-or-Nothing
+
+- **Context:** The exporter writes one file per entity, so a failure partway through leaves `state/` holding some new files and some old ones. That folder is committed at a checkpoint.
+- **Decision:** **All-or-nothing.** Files are written to a temporary location and moved into `state/` only after every entity has been read and written successfully. Any failure exits **non-zero** and leaves `state/` byte-for-byte unchanged.
+- **Rationale:** A partial export committed at a checkpoint looks like a backup and is not one, which is worse than no export at all — the same argument RSH-005 §8 makes about a drill that is not run manufacturing confidence never earned. Note the deliberate inversion of SPEC-09 BR-15, which swallows every failure into a stderr warning and exits 0 so the tracker never reddens a build: there the cost of failing loudly was a false red, here the cost of failing quietly is a false backup.
+- **Consequences:** SPEC-11 BR-21 and SPEC-11 FUT-011. It is also why SPEC-11 §5's disposition is stated as the opposite of SPEC-09's rather than left to be inferred from two specs that look alike.
+
+## D-127: `research/README.md` §7 Gains a `Workshops — INT-007` Row
+
+- **Context:** The research pack routes to consumers by stage and by `R-nn`. RSH-005's only routing entry in §7 sends it to Cutover/`CNV-005`, so the SPEC-11 workshop — which needs RSH-005 in full plus R7, R4 and R1 — had no route to its own research document.
+- **Decision:** §7 gains a **`Workshops — INT-007`** row naming RSH-005 in full plus R7, R4 and R1. The §7 Cutover row is corrected in the same edit.
+- **Rationale:** **This is exactly the defect D-108 logged for INT-004**, one object over, and D-39's lesson in its fourth form: a risk with no owner, then a certainty with no route, then three risks with no column, now a document with no consumer. The Cutover row is also stale — it says CNV-005 "stays blocked until OI-01 is ruled on", and D-31 ruled on it, making CNV-005's dependency an in-catalogue one on INT-007.
+- **Consequences:** Three further `research/README.md` corrections applied in the same session: §3's RSH-005 Feeds cell never named INT-007 or D-31, and §5's R7 Affects cell never named INT-007.
+
+## D-128: Omitting Keys Fails Loudly; Omitting Managed Fields Fails Silently
+
+- **Context:** RSH-005 §5 names three residual hazards an exporter must handle. Two of them — missing keys and missing managed fields — look like the same class of mistake, and R7's stated failure mode conflates them.
+- **Decision:** The round-trip drill treats them asymmetrically. **The managed-field comparison is mandatory, not advisory**, and a row-count match alone is never a pass.
+- **Rationale:** Dangling foreign keys abort the deploy at `COMMIT`, because all constraints are `DEFERRABLE INITIALLY DEFERRED` inside one transaction (RSH-005 §5, Verified — 51 of 51 on the planner model), so the omission announces itself. A missing managed field loads cleanly: every row lands, every count matches, and the audit history is rewritten to `anonymous` at the deploy timestamp (`cds-deploy.js:196-204`). The hazard that needs an explicit assertion is the one that cannot announce itself.
+- **Consequences:** SPEC-11 BR-20, with SPEC-11 FUT-008 and FUT-009 as the two negative tests — one asserting a silent pass with destroyed history, the other a loud abort.
