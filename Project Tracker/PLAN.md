@@ -1,7 +1,8 @@
 # Project Tracker — Plan
 
-**Status:** Plan phase — Ideate, Scope, Research and Scaffold complete; Workshops in progress
-(grouping settled, `SPEC-01` … `SPEC-12`; **11 of 12 written**)
+**Status:** Plan phase — Ideate, Scope, Research, Scaffold **and Workshops complete**
+(grouping settled, `SPEC-01` … `SPEC-12`; **12 of 12 written and all twelve Approved**).
+Next stage is **Information Architecture**.
 **Last updated:** 2026-08-04
 **Purpose:** The continuity document. Anyone (or any fresh chat) picking up Project Tracker
 starts here. Read this, then `design/PROBLEM_STATEMENT_AND_VISION.md` (PSV-001),
@@ -17,14 +18,14 @@ Backlog (`CNV-001` Historical backfill) and nothing In Progress. That gap is del
 is the cutover window.
 
 Project Tracker has a PRD, `design/PROBLEM_STATEMENT_AND_VISION.md` (PSV-001, **Draft**),
-`design/BUSINESS_ARCHITECTURE.md` (BA-001 v1.11, **Approved** — 22 objects in 3 waves, grouped into
-12 specs), a `research/` pack of six documents, a decisions log (D-01 … D-128), a wired module folder,
-**eleven written specs** — `SPEC-01` **Draft** (deliberately, D-93), `SPEC-02` … `SPEC-10` **Approved**,
-`SPEC-11` **Approved** — and the
+`design/BUSINESS_ARCHITECTURE.md` (BA-001 v1.13, **Approved** — 22 objects in 3 waves, grouped into
+12 specs), a `research/` pack of six documents, a decisions log (D-01 … D-136), a wired module folder,
+**twelve written specs — `SPEC-01` … `SPEC-12`, all twelve Approved** (`SPEC-01` flipped from Draft at
+the `SPEC-12` workshop, discharging D-93 — D-136) — and the
 Plan-phase skills installed in `.claude/`. **No module code exists yet.** Ideate, Scope and Research ran
 2026-07-26; Scaffold, the Workshops grouping, `SPEC-01` and `SPEC-02` ran 2026-07-27; `SPEC-03` and
-`SPEC-04` ran 2026-07-28; `SPEC-05` … `SPEC-09` ran 2026-07-30; `SPEC-10` and `SPEC-11` ran 2026-08-04. **OI-01,
-OI-02, OI-03 and OI-04 are closed**; **only OI-05 remains**, at Data Model.
+`SPEC-04` ran 2026-07-28; `SPEC-05` … `SPEC-09` ran 2026-07-30; `SPEC-10`, `SPEC-11` and `SPEC-12` ran
+2026-08-04. **OI-01, OI-02, OI-03 and OI-04 are closed**; **only OI-05 remains**, at Data Model.
 
 ### The one-paragraph version
 
@@ -38,12 +39,13 @@ becomes the first real test of the new system.
 
 ## 2. Decisions already made
 
-Full rationale in `design/DECISIONS_LOG.md` (D-01 … D-128; D-19 … D-27 were added at Scope,
+Full rationale in `design/DECISIONS_LOG.md` (D-01 … D-136; D-19 … D-27 were added at Scope,
 D-28 … D-32 at Research, D-33 … D-36 at Scaffold, D-37 … D-39 at the Workshops grouping,
 D-40 … D-46 at the `SPEC-01` workshop, D-47 … D-57 at the `SPEC-02` workshop, D-58 … D-65 at the
 `SPEC-03` workshop, D-66 … D-69 at the `SPEC-04` workshop, D-70 … D-75 at the `SPEC-05` workshop and
 D-76 … D-82 at the `SPEC-06` workshop, D-83 … D-92 at `SPEC-07`, D-93 … D-102 at `SPEC-08` and
-D-103 … D-108 at `SPEC-09`, D-109 … D-119 at `SPEC-10` and **D-120 … D-128 at `SPEC-11`**). The founding twelve,
+D-103 … D-108 at `SPEC-09`, D-109 … D-119 at `SPEC-10`, D-120 … D-128 at `SPEC-11` and
+**D-129 … D-136 at `SPEC-12`**). The founding twelve,
 summarized — note that **D-28 amends item 4's wording**: a bare `cds.connect.to()` throws, so the
 mechanism needs a construction step.
 
@@ -74,8 +76,8 @@ mechanism needs a construction step.
 | 2   | Scope              | `/generate-business-architecture`       | Authored     | **Done** — 2026-07-26                                                                                         |
 | 3   | Research           | `/gather-research`                      | Authored     | **Done** — 2026-07-26                                                                                         |
 | 4   | Scaffold           | `/scaffold-module` → `scaffold-writer`  | Authored     | **Done** — 2026-07-27                                                                                         |
-| 5   | Workshops          | `/workshop` → `spec-writer`             | Exists       | **In progress** — D-37 grouping; `SPEC-01` Draft (D-93), `SPEC-02` … `SPEC-11` Approved (11/12 written)      |
-| 6   | Information Arch.  | `/generate-information-architecture`    | Not authored | Not started — runs in full (D-21)                                                                             |
+| 5   | Workshops          | `/workshop` → `spec-writer`             | Exists       | **Done** — 2026-08-04. D-37 grouping; `SPEC-01` … `SPEC-12` all **Approved** (12/12 written; D-136)          |
+| 6   | Information Arch.  | `/generate-information-architecture`    | Not authored | **Next** — runs in full (D-21)                                                                                |
 | 7   | Design System      | `/generate-design-system`               | Not authored | Not started — runs in full (D-21)                                                                             |
 | 8   | Theme              | `/generate-theme`                       | Not authored | Not started — runs in full (D-21)                                                                             |
 | 9   | Data Model         | `/generate-data-model`                  | Not authored | Not started                                                                                                   |
@@ -216,8 +218,21 @@ differently (D-128)**: omitting keys aborts the deploy at `COMMIT` on `DEFERRABL
 constraints, while omitting managed fields loads every row, matches every count and rewrites the audit
 history — which is why the managed-field comparison is mandatory rather than advisory.
 
-**Next is `SPEC-12`** (CNV-005, decommission — the terminal act of cutover). Read BA-001 §11 for its row;
-the grouping is not re-derived per session.
+**`SPEC-12` (`design/specs/SPEC-12-DECOMMISSION.md`, **Approved** 2026-08-04) is 18 business rules, 15
+FUTs, **no Data Model requirement at all** and D-129 … D-136** — the fifth Wave 3 spec, the **sixth**
+standalone one, and the last. It resolves **no** OI and mints **no** error key — the eighth running and
+the third structurally. It is **provisional on R1** (D-133), **owns R10 and discharges it** via BR-14's
+proof run, **checks R7** rather than inheriting it, does not re-own R4, and rules R9 out. Its spine is
+that a precondition checklist needs something that checks it: `lintNoMarkdownState` is **run before it
+is wired in**, and zero violations across its six roots is the mechanical discharge of BA-001 §10's
+six-object fan-in (D-129). Three findings carried it — `generate.mjs` is **733 lines, not 734**;
+`project/test-reports/` is **gitignored**, so its five files are untracked and their deletion is
+irreversible while the other four artifacts have git as their archive (D-130); and `project/sprints/`
+holds a **tracked `.gitkeep`** that would outlive its contents. `SPEC-10` BR-28's "single act" became an
+**ordered sequence with a proof step** (D-131), because a `PreToolUse` deny beats `bypassPermissions`
+and no hook has ever fired in this repo.
+
+**Workshops is complete.** Twelve specs, twelve Approved. **Next is stage 6, Information Architecture.**
 
 **Still open:** **OI-05 alone** (methodology genericity — Data Model). **OI-03 is closed by D-35 and
 OI-04 by D-70.** Research risks: R2 is closed
@@ -504,6 +519,55 @@ Settle before or during Scaffold.
 ---
 
 ## 8. Session log
+
+### 2026-08-04 — SPEC-12 written: the checklist that checks itself, and the deletion git cannot undo
+
+- **Ran the `SPEC-12` workshop over CNV-005.** Wrote `design/specs/SPEC-12-DECOMMISSION.md`
+  (**Approved**, **provisional on R1** — R10 owned *and discharged*, R7 checked, R4 not re-owned, R9
+  ruled out) with 18 business rules, 15 FUTs, **no Data Model requirement at all**, and logged
+  **D-129 … D-136**. **Workshops is complete: twelve specs, all twelve Approved.**
+- **A precondition checklist needed something that checks it (D-129).** Three §6 rows and BA-001 §10's
+  fan-in hand CNV-005 four ordering constraints, and PSV §2's unconstrained-artifact defect was about
+  to reappear in the object that closes the cutover. The fix built nothing: `SPEC-10` BR-27 keeps
+  `lintNoMarkdownState` out of every `lint` chain *because* 27 live references would fail it — so
+  **that failure is the precondition test**. Run it before wiring it in; zero violations means INT-002,
+  INT-003 and INT-005 are done. Re-measured 2026-08-04: **27 references across 12 files**, exactly as
+  BR-27 states. The data-side half is RSH-005 §8's own rule — *answer a question through the
+  application, not through SQL* — so `project_view('financial-planner')` returning the right next
+  action is what discharges SPEC-03 §6's tie-out row.
+- **The four retired artifacts do not share a durability, and one deletion cannot be undone (D-130).**
+  D-02 deletes and D-12 keeps git as the system of record, which reads as "the archive is free".
+  Measured: **`project/test-reports/` is gitignored** (`Financial Planner/.gitignore:21`), so its five
+  files are **untracked** and `git rm` recovers nothing — while the other four artifacts are tracked
+  and need no archive at all. Accepted on D-24's existing finding rather than newly argued, and
+  sequenced **last** among the deletions so an abort before it costs nothing. `project/sprints/` also
+  holds a **tracked `.gitkeep`** that would have kept the directory alive after its contents left.
+- **"One act" was the wrong shape for the act that cannot be undone from inside (D-131).** `SPEC-10`
+  BR-28 enabled both guards together. But a `PreToolUse` deny beats `bypassPermissions` and
+  `--dangerously-skip-permissions` (D-112), and **no hook has ever fired in this repo** — so the
+  mechanism that makes cutover stick is also the one that would block the fix. BR-28 is amended
+  in-session to an **ordered sequence**: lint leg first (revertible by one `package.json` edit),
+  installer second, then **one run under `claude --debug-file`** — which is R10's settling event, since
+  D-115 already established that the enablement act and the proof are the same event. Rollback is
+  stated and machine-local, because `.claude/settings.json` is gitignored.
+- **`SPEC-01` owes nothing, and that absence is the finding (D-136).** Six of eleven workshops amended
+  it — eleven amendments, the last at `SPEC-09` (D-104). The twelfth found none: CNV-005 calls no verb
+  and `project_view(workspace?)` already carries what it needs. That is exactly D-93's condition, so
+  **`SPEC-01` flips Draft → Approved** and the ambiguity D-93 priced in is closed.
+- **Reviewing the produced spec caught eight defects the writer's own DoD check passed** — the eleventh
+  session running. The sharpest: **BR-17 said "no verb call" while BR-03 calls `project_view`** — now
+  scoped to *write*-verb calls, with FUT-014 stating why the Activity count holds anyway. **BR-16 said
+  `SPEC-10` FUT-014 inverts "all three assertions" while FUT-013 said two** — measured, only the two
+  enablement assertions invert, and **`SPEC-10` FUT-014's own closing note carried the same error** and
+  is corrected. **BR-13 said it "reverses" `SPEC-10` BR-27, whose text forbids the leg "in Wave 3"** —
+  and CNV-005 *is* Wave 3, so BR-27 read literally forbade the act BR-28 mandates; corrected to
+  withholding rather than forbidding. And **§7's preamble inverted BA-001 §3.3's ID convention**,
+  declaring unqualified IDs to be Financial Planner's while citing §3.3 as its authority.
+- **One BA-001 correction (→ v1.13)**: CNV-005's row said `generate.mjs` was **734 lines**; it is
+  **733**, and the file ends in a newline so there is no off-by-one to reconcile. **One
+  `research/README.md` correction**: §7 gains a **`Workshops — CNV-005`** row (D-135) — the **third**
+  occurrence of D-108's and D-127's defect, which makes it a pattern rather than three accidents:
+  §7 is written when a document is created and never maintained when a consumer is added.
 
 ### 2026-08-04 — SPEC-11 written: the object that reads everything, and the risk that had waited for it
 

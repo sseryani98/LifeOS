@@ -880,3 +880,64 @@ Amendments are made in place — the superseded text is struck through and marke
 - **Decision:** The round-trip drill treats them asymmetrically. **The managed-field comparison is mandatory, not advisory**, and a row-count match alone is never a pass.
 - **Rationale:** Dangling foreign keys abort the deploy at `COMMIT`, because all constraints are `DEFERRABLE INITIALLY DEFERRED` inside one transaction (RSH-005 §5, Verified — 51 of 51 on the planner model), so the omission announces itself. A missing managed field loads cleanly: every row lands, every count matches, and the audit history is rewritten to `anonymous` at the deploy timestamp (`cds-deploy.js:196-204`). The hazard that needs an explicit assertion is the one that cannot announce itself.
 - **Consequences:** SPEC-11 BR-20, with SPEC-11 FUT-008 and FUT-009 as the two negative tests — one asserting a silent pass with destroyed history, the other a loud abort.
+
+## D-129: CNV-005 Is a Gated Sequence, and the Linter Is the Gate
+
+- **Context:** Three §6 rows and BA-001 §10's fan-in hand CNV-005 four ordering constraints, and BA-001 §11 calls it a checklist. A checklist nothing checks is the unconstrained-artifact defect PSV §2 names, reappearing in the object that closes the cutover.
+- **Options:** A) a prose checklist verified by reading, B) a new programmatic gate script, C) run the linter **before** wiring it in, plus RSH-005 §8's application-level check.
+- **Decision:** **C.** Every precondition in SPEC-12 BR-02 … BR-06 is verified before anything is deleted or enabled, and a failed precondition aborts the whole conversion.
+- **Rationale:** A is the defect. B builds a thing inside the one spec whose point is that it builds nothing, and duplicates checks SPEC-10's linter and CNV-004 already perform. C costs no new code and **inverts the linter's role**: SPEC-10 BR-27 keeps it out of the `lint` chain because 27 live references across 12 files would fail it — that same failure _is_ the precondition test. RSH-005 §8's "answer a question through the application, not through SQL" supplies the data-side half, because one `project_view` call exercises the hierarchy, the stage chain and the registers together.
+- **Consequences:** SPEC-12 BR-01 … BR-06. **The three owed §6 rows all discharge as checks rather than as notes** — SPEC-03 §6 by BR-03, SPEC-08 §6 by BR-05, SPEC-09 §6 by BR-06.
+
+## D-130: The Four Retired Artifacts Do Not Share a Durability, and One Deletion Is Irreversible
+
+- **Context:** D-02 deletes and D-12 keeps git as the system of record, which together read as "the archive is free". Measured 2026-08-04: `project/test-reports/` is gitignored at `Financial Planner/.gitignore:21` and its five files are **untracked**.
+- **Options:** A) plain delete with the asymmetry stated, B) commit the five before deleting, C) copy all four artifacts into `Project Tracker/state/`.
+- **Decision:** **A.** The asymmetry is stated in the spec rather than left to be discovered, and no archive is made of anything.
+- **Rationale:** Git covers four of the five artifacts, so an archive of those is redundant. B puts the retired artifact back into git at the exact moment the guard retires the path. C is the wrong folder — SPEC-11 BR-09 deletes any file in `state/` whose entity is not in the CSN, so the copies would not survive the next export. The five test reports are accepted as lost on D-24's existing finding: none names a story, sprint, branch or commit; retention already caps at five; and `TestRun` history proper starts at Financial Planner's `CNV-001`.
+- **Consequences:** SPEC-12 BR-09, BR-10 and FUT-009, which makes the accepted irreversibility **visible** in the deletion commit rather than assumed. The irreversible step is sequenced **last** among the deletions, so an abort before it costs nothing.
+
+## D-131: BR-28's "Single Act" Is an Ordered Sequence With a Proof Step — SPEC-10 Amended
+
+- **Context:** SPEC-10 BR-28 enables both guards in one act. A `PreToolUse` deny beats `bypassPermissions` (D-112, SPEC-10 §5), and R10 records that **no hook has ever fired in this repo** on the installed 2.1.90 — so the mechanism that makes cutover stick is also the one that would block the fix.
+- **Options:** A) one act, no rollback, B) the linter only, deferring the hook, C) an ordered sequence — linter leg, installer, then one proof run — with a stated rollback.
+- **Decision:** **C.**
+- **Rationale:** B abandons D-07 and leaves the runtime guard permanently off, so "you cannot do the wrong thing" is never true. A leaves R10 unproven at the exact moment the guard goes live, which means the object that _owns_ R10 discharges nothing. C orders by **revertibility**: the lint leg is one `package.json` edit, the hook registration lives in a gitignored machine-local file (`.gitignore:8`), and the proof run is the settling event D-115 already predicted.
+- **Consequences:** SPEC-12 BR-12 … BR-16 and SPEC-12 FUT-012, FUT-013. **SPEC-10 is amended in-session in three places** — the fifth amendment to an Approved spec in this module (D-67, D-72, D-104, D-117 precedent). (1) **BR-28** becomes the ordered sequence. (2) **BR-27** read "not added to any module's `lint:*` block **in Wave 3**", and **CNV-005 is itself a Wave 3 object**, so taken literally it forbade the act BR-28 has always mandated; it is rescoped to "**by SPEC-10**" — the rule withholds, it does not forbid. (3) **FUT-014's closing note** claimed BR-28's act "inverts **all three** assertions"; measured against its own three expected results, **only two invert** — the `lint` chain and the `hooks` key. The third, that the four SPEC-10 artifacts exist and are **tracked**, is true before and after, because enabling a guard does not untrack it. **FUT-014's three assertions themselves are untouched**, which is what SPEC-12 BR-16 and FUT-013 depend on; BR-25 and BR-26 are untouched. Nothing about _what_ is enabled changes. Both (2) and (3) were found on the review pass over the produced SPEC-12, not at the interview — the same class of defect this module has now caught eleven sessions running, here reflected back onto the **Approved** spec that seeded it.
+
+## D-132: CNV-005 Writes No Project State, and the Deletion Commit Is the Record
+
+- **Context:** CNV-005 is the moment project state stops being markdown, and the register that now owns project state would hold no record of it.
+- **Options:** A) nothing, B) a human `checkpoint`-kind Activity at FRM-001 afterwards, C) a seventeenth `cutover` Activity kind.
+- **Decision:** **A.** No row, no verb call, no Activity.
+- **Rationale:** **D-124's argument one object over** — SPEC-01 BR-03 binds _write verbs_ and CNV-005 is not one, so emitting nothing is permitted; and D-12 already makes git the system of record for work product, which the retirement of markdown is. C would amend SPEC-07 BR-32 and SPEC-05 BR-33 for a row written exactly once, ever — a value with one producer and no second case, which is D-22's bar unmet. B is available to Sandro at any time and needs no rule.
+- **Consequences:** SPEC-12 BR-17 and SPEC-12 FUT-014. SPEC-07 BR-32's **sixteen** kinds stand; no error key and no `Activity.kind` is minted.
+
+## D-133: R1 Binds Again, R7 Is Checked Rather Than Inherited, and R9 Is Ruled Out
+
+- **Context:** SPEC-10 ruled R1 OUT (D-119) and SPEC-11 ruled it back IN (D-121). CNV-005 deletes files and edits a `lint` block, which touches no CAP — so inheritance is not obvious in either direction.
+- **Decision:** **R1 binds.** SPEC-12 BR-03's `project_view` call and BR-04's export check both read the database through the CAP service layer. **R7 is a precondition CNV-005 checks (BR-04), not one it inherits. R9 is ruled OUT** on D-101's test. **R4 is not re-owned** — SPEC-11 FUT-007 settles it in the same execution as R7.
+- **Rationale:** D-82 is the precedent for _deciding_ inheritance rather than assuming it, and a spec that quietly omits a risk its predecessors carried is indistinguishable from one that forgot. R7 is checked rather than inherited because RSH-005 §8's own argument is that an unrun drill manufactures confidence never earned — and CNV-005 deletes the only other copy.
+- **Consequences:** SPEC-12 §6's provisional block, and SPEC-12 BR-03 and BR-04.
+
+## D-134: The Conversion Template Survives an Object That Moves No Data
+
+- **Context:** `DESIGN_WORKSHOP.md` §4.2 demands of every Conversion a source format, transformation rules, validation/rejection criteria, execution order and reconciliation approach. CNV-005 moves no data. D-95 is the precedent for reshaping §3 when a template heading has no content.
+- **Options:** A) reshape §3 as D-95 did for SPEC-08, B) keep the five headings and answer each honestly.
+- **Decision:** **B.**
+- **Rationale:** Measured against the object, **four of the five headings fit directly** — the source format is the deletion inventory, the validation criteria are the precondition checklist, the execution order is the ordered act, and the reconciliation is the post-condition set. Only "transformation rules" has no content, and it is answered **"none — nothing is transformed; the data moved at CNV-002 and CNV-003"** rather than omitted, because an empty heading reads as an oversight while a stated "none" reads as a ruling. D-95 reshaped §3 because _three_ of four headings were empty; one is a different case.
+- **Consequences:** SPEC-12 §3's five sub-headings. Recorded so the next Conversion-shaped object that moves no data does not re-derive it.
+
+## D-135: `research/README.md` §7 Gains a `Workshops — CNV-005` Row — the Third Occurrence
+
+- **Context:** §7 routes research documents to consumers by stage and by `R-nn`. RSH-005 has a `Cutover / CNV-005` row and **no `Workshops` row**, so this workshop — which needs RSH-005 §8 in full plus R10, R7, R4, R1 and R9 — had no route to its own research.
+- **Decision:** §7 gains a **`Workshops — CNV-005`** row naming RSH-005 in full plus those five risks.
+- **Rationale:** **Exactly the defect D-108 logged for INT-004 and D-127 logged for INT-007**, now a third time, and D-39's lesson in its fifth form — a risk with no owner, then a certainty with no route, then three risks with no column, then a document with no consumer, now the same document with no consumer for its _second_ reader. Three occurrences make it a pattern rather than three accidents: **§7 is written when a document is created and not maintained when a consumer is added.**
+- **Consequences:** One row added. The pack's structure is precedent-only, so this is a precedent rather than a rule. **This is the last workshop**, so nothing further will exercise §7 from the Workshops stage — the durable fix belongs to whoever next edits the pack.
+
+## D-136: `SPEC-01` Is Approved — D-93 Discharged
+
+- **Context:** D-93 ruled that SPEC-01 stays Draft "through the Workshops stage and is approved after SPEC-12", with the stated cost that the Draft/Approved ambiguity persists until then. SPEC-12 is written and **owes SPEC-01 nothing**: CNV-005 calls no verb, and `project_view(workspace?)` already carries what SPEC-12 BR-03 needs.
+- **Decision:** **SPEC-01 → Approved.**
+- **Rationale:** D-93's condition is met exactly as written. Six of eleven workshops amended SPEC-01 — eleven amendments, the last being `record_test_run`'s workspace scope at the SPEC-09 workshop (D-104) — and the twelfth workshop found none, which is the evidence the verb layer has stopped moving that D-93 was waiting for. Every one of D-40's eleven verbs now has at least one specified consumer.
+- **Consequences:** All twelve specs are **Approved** and the Workshops stage is complete; `PLAN.md` §3's stage table and §1 are updated. Any later amendment to SPEC-01 is now a re-approval, which is the cost D-93 accepted.

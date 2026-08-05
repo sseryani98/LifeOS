@@ -13,6 +13,7 @@
 | ---------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 2026-07-26 | Sandro & Claude | Initial creation from the Research stage. Five topics researched in one parallel wave; gate verdict recorded.                                                                                       |
 | 2026-07-27 | Sandro & Claude | R1 amended at the Workshops stage (D-39). Attempting it found the binding, not just the proof, is missing — neither module has ever connected to Postgres. R1 deferred to Data Model with an owner. |
+| 2026-08-04 | Sandro & Claude | §7 gains a **`Workshops — CNV-005`** row (D-135) naming RSH-005 in full plus R10, R7, R4, R1 and R9. **Third occurrence of the same defect** — D-108 added the `INT-004` row, D-127 the `INT-007` row, and this one was missing for RSH-005's _second_ reader: §7 is written when a document is created and not maintained when a consumer is added. This was the last workshop, so the durable fix belongs to whoever next edits the pack. |
 
 ---
 
@@ -143,6 +144,7 @@ the call.
 | **Workshops** — `INT-004`                            | **RSH-001 §10 in full** — the `process.chdir`-before-require trap and the `process.exit(0)` teardown are _verified constraints_, not `R-nn` rows, so nothing in §5 would have carried them here. Added 2026-07-30 at the SPEC-09 workshop, which needed them and found no row (D-108). |
 | **Workshops** — `INT-006`                            | RSH-004 in full, plus risks R5, R6, R10.                             |
 | **Workshops** — `INT-007`                            | RSH-005 in full, plus risks R7, R4 and R1. Added 2026-08-04 at the SPEC-11 workshop, which needed it and found no row (D-127). |
+| **Workshops** — `CNV-005`                            | RSH-005 in full — **§8's restore-drill argument is the spec's own precondition rationale** — plus risks **R10** (owned here, D-119), **R7**, **R4**, **R1** and **R9**. Added 2026-08-04 at the SPEC-12 workshop, which needed it and found no row (D-135). |
 | **Information Architecture / Design System / Theme** | RSH-003                                                              |
 | **Data Model**                                       | RSH-002 (one model or two; OI-05 also settles here per D-22)         |
 | **Tech Stack**                                       | RSH-001 (R2, the TypeScript-impl question), RSH-002, RSH-003         |
