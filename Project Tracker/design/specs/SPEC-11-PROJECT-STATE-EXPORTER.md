@@ -13,10 +13,11 @@ reads the database. **R9 is ruled OUT** (D-101's precedent).
 
 ## Change History
 
-| Date       | Author          | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| ---------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Date       | Author          | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| ---------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | 2026-08-04 | Sandro & Claude | Initial creation from the SPEC-11 workshop. Records **D-120 … D-128**. **Fourth Wave 3 spec** and the **fifth standalone** one — not the fourth; see §6, where the running standalone count is corrected against BA-001 §11. Declares **no new entity and no new attribute** — it reads every persisted one — and places **one standing requirement** on the Data Model stage (BR-07). **SPEC-11 resolves no OI**; OI-01 was already resolved by D-31 and this object implements that resolution. **Mints no error key**, the seventh spec running and the second where none is structurally possible. **Provisional on R1, reversing [SPEC-10](SPEC-10-CUTOVER-GUARDS.md)'s rule-out (D-121)**; **R7 owned here and R4 settled in the same execution**; **R9 ruled out**. Discharges [SPEC-03](SPEC-03-FINANCIAL-PLANNER-MIGRATION-LOAD.md) §6's, [SPEC-05](SPEC-05-WORKSPACE-HEADER-AND-HEALTH.md) §6's and [SPEC-09](SPEC-09-TEST-REPORT-TO-TESTRUN.md) §6's rows owed to it. Two BA-001 amendments — one correction, one completion (→ v1.12) — and four `research/README.md` corrections applied in-session, listed in §6. Six defects found and fixed on review after the writer's own DoD check passed them, including two FUT preconditions that named the wrong Conversion. |
-| 2026-08-04 | Sandro & Claude | **Status → Approved** on the day it was written, the normal path for this module — only [SPEC-01](SPEC-01-MCP-INTENT-VERB-LAYER.md) is held in Draft by a decision (D-93). It owes nothing: all three §6 rows owed to it are discharged, and every correction it raised against BA-001, `research/README.md`, [SPEC-03](SPEC-03-FINANCIAL-PLANNER-MIGRATION-LOAD.md), [SPEC-05](SPEC-05-WORKSPACE-HEADER-AND-HEALTH.md), [SPEC-09](SPEC-09-TEST-REPORT-TO-TESTRUN.md) and `PLAN.md` was applied in-session rather than left owed. |
+| 2026-08-04 | Sandro & Claude | **Status → Approved** on the day it was written, the normal path for this module — only [SPEC-01](SPEC-01-MCP-INTENT-VERB-LAYER.md) is held in Draft by a decision (D-93). It owes nothing: all three §6 rows owed to it are discharged, and every correction it raised against BA-001, `research/README.md`, [SPEC-03](SPEC-03-FINANCIAL-PLANNER-MIGRATION-LOAD.md), [SPEC-05](SPEC-05-WORKSPACE-HEADER-AND-HEALTH.md), [SPEC-09](SPEC-09-TEST-REPORT-TO-TESTRUN.md) and `PLAN.md` was applied in-session rather than left owed.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| 2026-08-06 | Sandro & Claude | **BR-06's open clause is closed at the Design System stage (D-144).** It read "whether any becomes so is **not yet decided**", citing SPEC-05 §3 and SPEC-06 §3's deferral. Design System ruled **Fiori Elements FPM with draft enablement OFF**, so **no entity in this module is draft-enabled and none will be**. **BR-06's rule text is unchanged** — it was written to be true either way, and it stays an unconditional filter rather than a description of the model. Recorded correction: D-138's own consequence wording said BR-06 "becomes vacuous only if stage 7 rules freestyle"; that was wrong, since it is vacuous because drafts are off, which FPM permits. No business rule and no FUT changes. Status stays **Approved**.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 
 ---
 
@@ -42,11 +43,11 @@ a requirement this spec places on the Data Model stage.
 persisted column.** The read surface is therefore stated as a set, not as an enumeration of
 attributes — restating the data model is exactly the trap this object walks into.
 
-| Entity group    | Entities                                                              | Role         |
-| --------------- | --------------------------------------------------------------------- | ------------ |
-| Hierarchy (7)   | Area, Engagement, Workspace, Initiative, Milestone, Task, Subtask     | Read in full |
-| Methodology (2) | Methodology, MethodologyStep                                          | Read in full |
-| Registers (4)   | Defect, Decision, Activity, TestRun                                   | Read in full |
+| Entity group    | Entities                                                                                                                                  | Role                                            |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| Hierarchy (7)   | Area, Engagement, Workspace, Initiative, Milestone, Task, Subtask                                                                         | Read in full                                    |
+| Methodology (2) | Methodology, MethodologyStep                                                                                                              | Read in full                                    |
+| Registers (4)   | Defect, Decision, Activity, TestRun                                                                                                       | Read in full                                    |
 | Code lists      | Every code-list entity the Data Model creates, including `HealthState` ([SPEC-05](SPEC-05-WORKSPACE-HEADER-AND-HEALTH.md) §2 amendment 2) | Read in full — a code list is a table with rows |
 
 **One standing requirement on the Data Model, not an amendment:** every persisted entity must carry a
@@ -74,27 +75,27 @@ them: there is no external API, so the **contract** is the CLI/npm surface plus 
 
 #### Location and lifecycle
 
-| Aspect               | Contract                                                                                                                                                                                                                                                                                                             |
-| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Script               | `Project Tracker/scripts/exportProjectState.ts`                                                                                                                                                                                                                                                                      |
-| npm script           | `export-state`, no arguments                                                                                                                                                                                                                                                                                         |
-| Output folder        | `Project Tracker/state/`, tracked in git                                                                                                                                                                                                                                                                             |
-| Discovery            | **Outside** `cds.requires.db.data` — deliberately not auto-discovered                                                                                                                                                                                                                                                |
-| Runtime dependency   | `papaparse`. **Verified 2026-08-04**: resolved only under `Financial Planner/node_modules/`, declared at `Financial Planner/package.json:47`, **not** hoisted to the root. Project Tracker declares it itself — permitted, because it is a module runtime dependency rather than shared tooling                       |
-| Carve-out            | `Project Tracker/CLAUDE.md`'s "No `scripts/` folder — until `INT-004`" carve-out now also covers INT-007. The folder itself is created by [SPEC-09](SPEC-09-TEST-REPORT-TO-TESTRUN.md) BR-02                                                                                                                          |
+| Aspect             | Contract                                                                                                                                                                                                                                                                                        |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Script             | `Project Tracker/scripts/exportProjectState.ts`                                                                                                                                                                                                                                                 |
+| npm script         | `export-state`, no arguments                                                                                                                                                                                                                                                                    |
+| Output folder      | `Project Tracker/state/`, tracked in git                                                                                                                                                                                                                                                        |
+| Discovery          | **Outside** `cds.requires.db.data` — deliberately not auto-discovered                                                                                                                                                                                                                           |
+| Runtime dependency | `papaparse`. **Verified 2026-08-04**: resolved only under `Financial Planner/node_modules/`, declared at `Financial Planner/package.json:47`, **not** hoisted to the root. Project Tracker declares it itself — permitted, because it is a module runtime dependency rather than shared tooling |
+| Carve-out          | `Project Tracker/CLAUDE.md`'s "No `scripts/` folder — until `INT-004`" carve-out now also covers INT-007. The folder itself is created by [SPEC-09](SPEC-09-TEST-REPORT-TO-TESTRUN.md) BR-02                                                                                                    |
 
 #### The file format
 
-| Aspect        | Contract                                                                                                                                            |
-| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Aspect          | Contract                                                                                                                                                                                        |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | File per entity | `{namespace}-{Entity}.csv` — e.g. `com.lifeos.projecttracker-Milestone.csv`. This is the only shape `cds deploy` reads back: filename hyphens become dots (`cds-deploy.js:377-378`, Documented) |
-| Delimiter     | Comma                                                                                                                                               |
-| Header        | One row of column names                                                                                                                             |
-| Encoding      | UTF-8                                                                                                                                               |
-| Columns       | Every persisted column — all keys, all CAP-generated foreign keys (`xxx_ID` / `xxx_code`), and all four managed fields                             |
-| Row order     | A declared stable sort key, with the entity's key column as the final tiebreak (BR-07)                                                              |
-| Empty entity  | The file exists and holds its header row alone (BR-08)                                                                                              |
-| Writer        | `papaparse`'s `unparse`, which quotes the delimiter correctly (RSH-005 §7, Verified)                                                                |
+| Delimiter       | Comma                                                                                                                                                                                           |
+| Header          | One row of column names                                                                                                                                                                         |
+| Encoding        | UTF-8                                                                                                                                                                                           |
+| Columns         | Every persisted column — all keys, all CAP-generated foreign keys (`xxx_ID` / `xxx_code`), and all four managed fields                                                                          |
+| Row order       | A declared stable sort key, with the entity's key column as the final tiebreak (BR-07)                                                                                                          |
+| Empty entity    | The file exists and holds its header row alone (BR-08)                                                                                                                                          |
+| Writer          | `papaparse`'s `unparse`, which quotes the delimiter correctly (RSH-005 §7, Verified)                                                                                                            |
 
 #### Bootstrap sequence
 
@@ -116,7 +117,7 @@ roots itself at `process.cwd()` and names no module. D-103 moved `recordTestRun.
 module, because `process.chdir` names a module irreducibly; D-110 kept `lintNoMarkdownState.ts`
 **shared**, because `import.meta.dirname` derives the root without naming one. **INT-007 gets D-103's
 answer**: it must chdir to Project Tracker's root before importing `@sap/cds`, which names a module,
-so the script belongs in `Project Tracker/scripts/`. The nuance is worth stating — *inside* the
+so the script belongs in `Project Tracker/scripts/`. The nuance is worth stating — _inside_ the
 module, `import.meta.dirname` then derives the module root (step 1), so D-110's technique still does
 the work for the output path. What forces the module home is the CAP chdir, not the file path.
 
@@ -153,10 +154,10 @@ non-zero (BR-21); the operator re-runs the npm script.
 
 - **BR-01** One CSV per persisted entity, named `{namespace}-{Entity}.csv` (e.g. `com.lifeos.projecttracker-Milestone.csv`). This is the only shape `cds deploy` reads back: filename hyphens become dots (`cds-deploy.js:377-378`, Documented).
 - **BR-02** Comma-delimited, one header row of column names, UTF-8. **Verified 2026-08-04** against the repo's existing convention: `Financial Planner/db/data/` holds 22 files, all comma-delimited with an `ID,name`-style header row.
-- **BR-03** Every column of the entity is emitted: all key columns, all CAP-generated foreign keys (the `cardInstance_ID` / `xxx_code` shape), and **all four managed fields** — `createdAt`, `createdBy`, `modifiedAt`, `modifiedBy`. Omitting a key mints a fresh UUID per row on restore (`cds-deploy.js:191-194`); omitting a managed field stamps `'anonymous'` and the deploy timestamp (`:196-204`). They load correctly when present, because `_queries4` only *adds* columns that are absent.
+- **BR-03** Every column of the entity is emitted: all key columns, all CAP-generated foreign keys (the `cardInstance_ID` / `xxx_code` shape), and **all four managed fields** — `createdAt`, `createdBy`, `modifiedAt`, `modifiedBy`. Omitting a key mints a fresh UUID per row on restore (`cds-deploy.js:191-194`); omitting a managed field stamps `'anonymous'` and the deploy timestamp (`:196-204`). They load correctly when present, because `_queries4` only _adds_ columns that are absent.
 - **BR-04** Derived values are not exported, because they are not persisted — `Milestone.status` ([SPEC-02](SPEC-02-METHODOLOGY-AND-STAGE-ENFORCEMENT.md) BR-17) and workspace health ([SPEC-05](SPEC-05-WORKSPACE-HEADER-AND-HEALTH.md) BR-02).
 - **BR-05** The entity set is **reflected from the CSN at run time**, never a hand-maintained list. A hand-maintained list goes stale on the next Data Model change and silently drops an entity from every subsequent export — D-31's own rejection of hand-maintained artifacts, applied to the exporter itself.
-- **BR-06** Draft shadow tables (`.drafts`) are excluded, **if any exist** — drafts are transient by definition and are not project state. **No entity in this module is draft-enabled today, and whether any becomes so is not yet decided**: [SPEC-05](SPEC-05-WORKSPACE-HEADER-AND-HEALTH.md) §3 and [SPEC-06](SPEC-06-SPRINT-PLANNING.md) §3 both defer Fiori Elements vs freestyle to the Information Architecture / Design System stages. So the rule is a filter the exporter must carry unconditionally rather than a description of the current model — the exporter excludes what the CSN marks as a draft shadow, and asserts nothing about whether the set is non-empty. (`@cap-js/postgres` requiring `cds.fiori.lean_draft` — `cds-plugin.js:5-7`, Verified in RSH-005 — governs *how* drafts are stored where they exist; it does not create them.)
+- **BR-06** Draft shadow tables (`.drafts`) are excluded, **if any exist** — drafts are transient by definition and are not project state. **No entity in this module is draft-enabled** — ~~and whether any becomes so is not yet decided: [SPEC-05](SPEC-05-WORKSPACE-HEADER-AND-HEALTH.md) §3 and [SPEC-06](SPEC-06-SPRINT-PLANNING.md) §3 both defer Fiori Elements vs freestyle to the Information Architecture / Design System stages.~~ **and that is now decided rather than open.** The Design System stage ruled **Fiori Elements FPM with draft enablement OFF**, 2026-08-06 (D-144, [DESIGN_SYSTEM.md](../DESIGN_SYSTEM.md) §4.3), measured against the repo's only FPM app, which runs on a non-draft entity set. **This rule's text is unchanged**, because it was written to be true either way. Note that D-138's own consequence wording — that this rule "becomes vacuous only if stage 7 rules freestyle" — was wrong: it is vacuous because drafts are off, which FPM permits, and the Fiori-Elements-versus-freestyle axis was never the one that decided it. So the rule is a filter the exporter must carry unconditionally rather than a description of the current model — the exporter excludes what the CSN marks as a draft shadow, and asserts nothing about whether the set is non-empty. (`@cap-js/postgres` requiring `cds.fiori.lean_draft` — `cds-plugin.js:5-7`, Verified in RSH-005 — governs _how_ drafts are stored where they exist; it does not create them.)
 - **BR-07** Each file is sorted by a declared stable key, with the entity's key column as the final tiebreak. **Determinism and diff-friendliness are separate requirements and both are required**: `ORDER BY ID` alone gives byte-identical output for identical data but scatters new rows through the file, because UUIDs do not sort chronologically. Entities that grow by append declare a temporal sort key first — `TestRun` by `executedAt`, `Activity` by `occurredAt` — so growth appends rather than scatters.
 - **BR-08** An entity with zero rows still produces a file containing only its header row. A constant file set makes "this table is empty" a visible fact in the diff rather than an absence.
 - **BR-09** A file in `state/` whose entity is no longer in the CSN is deleted by the next export. Otherwise a removed entity's last export lingers forever and would be re-loaded by a restore.
@@ -170,7 +171,7 @@ non-zero (BR-21); the operator re-runs the npm script.
 - **BR-11** The exporter is `Project Tracker/scripts/exportProjectState.ts`, exposed as npm script `export-state`, and takes no arguments.
 - **BR-12** It follows [SPEC-09](SPEC-09-TEST-REPORT-TO-TESTRUN.md) §3.1's bootstrap verbatim: derive the root from `import.meta.dirname`, `process.chdir`, **dynamic** `await import('@sap/cds')`, read, `process.exit(0)`.
 - **BR-13** It reads through the **CAP service layer**, never raw SQL (D-05, D-58, D-79). It is the **fourth kind of caller**, after the MCP server ([SPEC-01](SPEC-01-MCP-INTENT-VERB-LAYER.md)), the two Forms ([SPEC-05](SPEC-05-WORKSPACE-HEADER-AND-HEALTH.md), [SPEC-06](SPEC-06-SPRINT-PLANNING.md)) and `recordTestRun.ts` ([SPEC-09](SPEC-09-TEST-REPORT-TO-TESTRUN.md)). A reader is not a writer, but it bypasses no guarantee and D-05's escape hatch stays shut.
-- **BR-14** The exporter **writes nothing** — no row, no verb call, and **no `Activity`**. [SPEC-01](SPEC-01-MCP-INTENT-VERB-LAYER.md) BR-03 requires every *write* verb to emit one; the exporter is not a write verb. This is not merely permitted, it is required: an export that emitted an Activity would change the state it just exported, so no two consecutive exports could ever match.
+- **BR-14** The exporter **writes nothing** — no row, no verb call, and **no `Activity`**. [SPEC-01](SPEC-01-MCP-INTENT-VERB-LAYER.md) BR-03 requires every _write_ verb to emit one; the exporter is not a write verb. This is not merely permitted, it is required: an export that emitted an Activity would change the state it just exported, so no two consecutive exports could ever match.
 - **BR-15** Idempotent: the same database content produces byte-identical files. BR-14 is what makes this reachable.
 - **BR-21** The export is **all-or-nothing**. Files are written to a temporary location and moved into `state/` only after every entity has been read and written successfully. Any failure exits non-zero and leaves `state/` byte-for-byte unchanged. A partial export committed at a checkpoint is the worst available outcome — it looks like a backup and is not one.
 
@@ -198,13 +199,13 @@ independent reasons, both structural:
 1. **A read path has no rejection.** The exporter writes nothing (BR-14), so there is no guard for a mechanism to get wrong, no state to roll back, and nothing to log. This is [SPEC-07](SPEC-07-CHAIN-AND-REGISTERS.md) §5's Report argument reaching the same place by the same route.
 2. **A standalone CLI process has no i18n surface and no caller.** Output is stderr and an exit code, read by Sandro at a checkpoint. This is [SPEC-10](SPEC-10-CUTOVER-GUARDS.md)'s "there is no key space to mint into" and [SPEC-09](SPEC-09-TEST-REPORT-TO-TESTRUN.md)'s "no rejection reaches a caller that could act on it", holding simultaneously.
 
-| Condition                          | Surface                                                                   |
-| ---------------------------------- | --------------------------------------------------------------------------- |
-| Database unreachable               | Abort, exit non-zero, `state/` unchanged (BR-21)                          |
-| An entity read fails               | Same (BR-21)                                                              |
-| `state/` unwritable                | Same (BR-21)                                                              |
-| A CAP `ASSERT_*` on read           | **Cannot occur** — reads assert nothing                                   |
-| An entity with zero rows           | **Not an error** — a header-only file (BR-08)                             |
+| Condition                | Surface                                          |
+| ------------------------ | ------------------------------------------------ |
+| Database unreachable     | Abort, exit non-zero, `state/` unchanged (BR-21) |
+| An entity read fails     | Same (BR-21)                                     |
+| `state/` unwritable      | Same (BR-21)                                     |
+| A CAP `ASSERT_*` on read | **Cannot occur** — reads assert nothing          |
+| An entity with zero rows | **Not an error** — a header-only file (BR-08)    |
 
 **The disposition on failure is the opposite of
 [SPEC-09](SPEC-09-TEST-REPORT-TO-TESTRUN.md) BR-15's, and that is the point worth stating.** SPEC-09
@@ -222,7 +223,7 @@ which is the exact failure mode this object exists to prevent.
 | OI-05 | **Not resolved here.** Methodology genericity settles at Data Model (D-22). |
 
 **SPEC-11 resolves no open item.** OI-05 is the only one still open and it is not a workshop question.
-**OI-01 is already resolved by D-31** — INT-007 *implements* that resolution rather than reopening it.
+**OI-01 is already resolved by D-31** — INT-007 _implements_ that resolution rather than reopening it.
 
 **Alerts:** asked per the standing rule — **none.** The exporter observes state, writes nothing, and
 schedules nothing.
@@ -252,9 +253,9 @@ schedules nothing.
 Provisional on R1 does **not** hold up approval, and did not for the nine specs that shipped that way
 before [SPEC-10](SPEC-10-CUTOVER-GUARDS.md) — the Definition of Done has two statuses, Draft and
 Approved, and "provisional" is a recorded dependency rather than a third. What R1 gates is the
-*execution* of FUT-007 … FUT-010, which is INT-007's build, not this spec's approval.
+_execution_ of FUT-007 … FUT-010, which is INT-007's build, not this spec's approval.
 
-**Not a gap to be closed by re-reading.** RSH-005 is a **Compare**-mode document that *does* carry a
+**Not a gap to be closed by re-reading.** RSH-005 is a **Compare**-mode document that _does_ carry a
 verdict — "`pg_dump` runbook + built CSV exporter", confidence "High on tooling, **Medium on
 restore**". The Medium is R7, and it closes by execution rather than by further reading.
 
@@ -267,7 +268,7 @@ restore**". The Medium is R7, and it closes by execution rather than by further 
    the distinction is worth stating because the two are not the same kind of thing: `executedAt` is a
    plain not-null domain attribute (D-72) carried by "emit every column", while `createdBy` is
    CAP-managed and carried by the explicit managed-field rule. They exist as separate attributes
-   *because* `createdAt` reads the cutover date rather than domain truth (D-72, D-92) — so the export
+   _because_ `createdAt` reads the cutover date rather than domain truth (D-72, D-92) — so the export
    carries both and they mean different things.
 3. **[SPEC-09](SPEC-09-TEST-REPORT-TO-TESTRUN.md) §6 — TestRun volume.** Discharged by BR-07, and
    **the answer is the sort key, not a filter**. Filtering would break the round-trip, the one
@@ -287,21 +288,21 @@ rather than advisory** — the hazard that needs a test is the one that cannot a
 
 ### Cross-spec notes raised, not designed here
 
-| Note                                                                                                                                                                                                                                                                              | Goes to                                            |
-| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
-| `research/README.md` §5's R8 is not struck, while `Project Tracker/CLAUDE.md` states R3 and R8 are dissolved by D-29. Documentation drift, not a live risk                                                                                                                        | **`/refresh-docs`** — raised                       |
-| `research/README.md` §6's decay row for `pg_dump` / `pgBackRest` is dated 2026-07-26 and records local machine state that has never been rechecked. The `pg_dump -Fc` half of D-31 depends on it                                                                                  | **Build** — before the checkpoint procedure is first run |
-| `Activity.kind`'s unsettled casing divergence — `checkpoint` / `migration` lowercase against camelCase for the rest ([SPEC-07](SPEC-07-CHAIN-AND-REGISTERS.md) §2, D-81) — is a CSV round-trip hazard as well as a display one, because a code-list value is exported literally | **Data Model** — already routed there; noted, not re-raised |
-| **The running "standalone" count in the spec headers is off by one, and this spec declines to propagate it.** [SPEC-09](SPEC-09-TEST-REPORT-TO-TESTRUN.md) calls itself the "second standalone" and [SPEC-10](SPEC-10-CUTOVER-GUARDS.md) the "third". BA-001 §11's table yields **six standalone specs — SPEC-01, SPEC-06, SPEC-09, SPEC-10, SPEC-11, SPEC-12** — because 22 objects less the six grouped specs' 16 leaves six specs of one object each, and SPEC-08 §6 already corrected the prose to that split. Neither SPEC-01 nor SPEC-06 describes itself as standalone, which is how the sequence started at two. SPEC-11 is therefore the **fifth**, and the Wave 3 ordinal (fourth) is unaffected. Two Approved specs' change-history rows carry the wrong ordinal | **`/refresh-docs`** — raised |
+| Note                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Goes to                                                     |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| `research/README.md` §5's R8 is not struck, while `Project Tracker/CLAUDE.md` states R3 and R8 are dissolved by D-29. Documentation drift, not a live risk                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | **`/refresh-docs`** — raised                                |
+| `research/README.md` §6's decay row for `pg_dump` / `pgBackRest` is dated 2026-07-26 and records local machine state that has never been rechecked. The `pg_dump -Fc` half of D-31 depends on it                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | **Build** — before the checkpoint procedure is first run    |
+| `Activity.kind`'s unsettled casing divergence — `checkpoint` / `migration` lowercase against camelCase for the rest ([SPEC-07](SPEC-07-CHAIN-AND-REGISTERS.md) §2, D-81) — is a CSV round-trip hazard as well as a display one, because a code-list value is exported literally                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | **Data Model** — already routed there; noted, not re-raised |
+| **The running "standalone" count in the spec headers is off by one, and this spec declines to propagate it.** [SPEC-09](SPEC-09-TEST-REPORT-TO-TESTRUN.md) calls itself the "second standalone" and [SPEC-10](SPEC-10-CUTOVER-GUARDS.md) the "third". BA-001 §11's table yields **six standalone specs — SPEC-01, SPEC-06, SPEC-09, SPEC-10, SPEC-11, SPEC-12** — because 22 objects less the six grouped specs' 16 leaves six specs of one object each, and SPEC-08 §6 already corrected the prose to that split. Neither SPEC-01 nor SPEC-06 describes itself as standalone, which is how the sequence started at two. SPEC-11 is therefore the **fifth**, and the Wave 3 ordinal (fourth) is unaffected. Two Approved specs' change-history rows carry the wrong ordinal | **`/refresh-docs`** — raised                                |
 
 ### `research/README.md` corrections — four, all applied in this session
 
-| Correction                                                                                                                                                                                                                       | Where            |
-| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- |
-| §7 gains a **`Workshops — INT-007`** row. The pack routes by stage and by `R-nn`, and RSH-005's only routing entry sent it to Cutover/CNV-005, so a workshop with a dedicated research document had no route to it (D-127)      | §7 — done        |
-| §7's Cutover row said CNV-005 "stays blocked until OI-01 is ruled on"; **D-31 ruled on it**, and CNV-005 now depends on INT-007 existing                                                                                          | §7 — done        |
-| §3's RSH-005 Feeds cell read `OI-01; CNV-005; D-27` and never named **INT-007 or D-31**, which supersedes D-27                                                                                                                   | §3 — done        |
-| §5's R7 Affects cell read `OI-01, CNV-005` and did not name **INT-007**; R7's owner is recorded in prose, since the table has no Owner column                                                                                     | §5 — done        |
+| Correction                                                                                                                                                                                                                 | Where     |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| §7 gains a **`Workshops — INT-007`** row. The pack routes by stage and by `R-nn`, and RSH-005's only routing entry sent it to Cutover/CNV-005, so a workshop with a dedicated research document had no route to it (D-127) | §7 — done |
+| §7's Cutover row said CNV-005 "stays blocked until OI-01 is ruled on"; **D-31 ruled on it**, and CNV-005 now depends on INT-007 existing                                                                                   | §7 — done |
+| §3's RSH-005 Feeds cell read `OI-01; CNV-005; D-27` and never named **INT-007 or D-31**, which supersedes D-27                                                                                                             | §3 — done |
+| §5's R7 Affects cell read `OI-01, CNV-005` and did not name **INT-007**; R7's owner is recorded in prose, since the table has no Owner column                                                                              | §5 — done |
 
 ### BA-001 amendments — two, applied in this session → v1.12: one correction and one completion
 
@@ -309,10 +310,10 @@ INT-007's row had received **no maintenance since it was created at v1.1**, whic
 under which INT-006's row accumulated five errors across nine amendments. Every other claim in it was
 re-read against RSH-005 and D-31 and still holds.
 
-| Correction                                                                                                                                                                                                                                                                    | Where             |
+| Correction                                                                                                                                                                                                                                                                   | Where             |
 | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------- |
 | ~~Traces To reads "PSV P1; OI-01, D-27, D-31; CNV-005, RPT-004"~~ → adds **D-120 … D-128**, **INT-001** (the CAP service layer it reads through, BR-13) and **INT-004** (which writes the TestRun rows whose growth BR-07 answers). The row's own prose named neither object | §4 INT-007 — done |
-| The **R7 clause** — "the round-trip is untested" — is **completed rather than corrected**: still untested, but now owned by INT-007's own build, with **R4 settled by the same execution** and SPEC-11 therefore provisional on **R1** (D-121)                                 | §4 INT-007 — done |
+| The **R7 clause** — "the round-trip is untested" — is **completed rather than corrected**: still untested, but now owned by INT-007's own build, with **R4 settled by the same execution** and SPEC-11 therefore provisional on **R1** (D-121)                               | §4 INT-007 — done |
 
 ---
 
@@ -425,7 +426,7 @@ and TestRun hold no rows. This is a state the chain passes through, not a contri
 ### FUT-007: The round-trip drill — managed fields survive
 
 **Covers:** INT-007
-*Provisional on R1 — requires Postgres.*
+_Provisional on R1 — requires Postgres._
 **Preconditions:** The fixture is loaded on Postgres; one export has run; `createdAt` and `createdBy`
 are captured for every row of every entity.
 **Steps:**
@@ -446,7 +447,7 @@ are captured for every row of every entity.
 ### FUT-008: Omitting managed fields destroys history while every count passes
 
 **Covers:** INT-007
-*Provisional on R1 — requires Postgres.*
+_Provisional on R1 — requires Postgres._
 **Preconditions:** The fixture is loaded on Postgres; an export in which the `createdAt` and
 `createdBy` columns have been removed from `…-Decision.csv`.
 **Steps:**
@@ -465,7 +466,7 @@ are captured for every row of every entity.
 ### FUT-009: Omitting keys fails loudly
 
 **Covers:** INT-007
-*Provisional on R1 — requires Postgres.*
+_Provisional on R1 — requires Postgres._
 **Preconditions:** The fixture is loaded on Postgres; an export in which the `ID` column has been
 removed from `…-Milestone.csv`.
 **Steps:**
@@ -483,7 +484,7 @@ removed from `…-Milestone.csv`.
 ### FUT-010: Restore is a merge, not a revert
 
 **Covers:** INT-007
-*Provisional on R1 — requires Postgres.*
+_Provisional on R1 — requires Postgres._
 **Preconditions:** The fixture is loaded on Postgres; one export has run; afterwards a new Defect is
 logged through `log_defect` in **workspace** scope (D-96).
 **Steps:**

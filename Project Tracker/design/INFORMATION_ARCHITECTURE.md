@@ -3,15 +3,16 @@
 **Document ID:** IA-001
 **Version:** 1.0
 **Date:** 2026-08-06
-**Status:** Draft
+**Status:** Approved
 
 ---
 
 ## 1. Change History
 
-| Date       | Author          | Description                                                                                                                                                                                                                                                      |
-| ---------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-08-06 | Sandro & Claude | Initial creation from the Information Architecture stage. 6 UI-bearing objects onto 1 route with 1 optional parameter; 8 navigation links mapped; shell placement ruled; risk **R9 executed** and regraded `Inferred` → `Verified`. Records D-137 through D-143. |
+| Date       | Author          | Description                                                                                                                                                                                                                                                                                                                                                                           |
+| ---------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-06 | Sandro & Claude | Initial creation from the Information Architecture stage. 6 UI-bearing objects onto 1 route with 1 optional parameter; 8 navigation links mapped; shell placement ruled; risk **R9 executed** and regraded `Inferred` → `Verified`. Records D-137 through D-143.                                                                                                                      |
+| 2026-08-06 | Sandro & Claude | **Status → Approved.** No amendment. The IA session ended without asking for approval, which was the one thing it left owed; Sandro approved it at the opening of the Design System stage. §5's deferral of build technology to stage 7 is discharged the same day by **D-144** — Fiori Elements FPM, drafts off — so this document's only forward-looking ruling now has its answer. |
 
 ---
 
