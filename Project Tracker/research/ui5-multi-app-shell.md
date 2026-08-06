@@ -49,11 +49,11 @@ two unrelated URL prefixes on one express app.
 
 Three properties of it do matter for a two-module shell:
 
-| Property                                                                                                                  | Evidence                                                                                                    | Why it matters                                                                             |
-| ------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| Apps are discovered from the `app/` folder **or from the CDS server's npm `dependencies`/`devDependencies`**              | `Documented` — `lib/findUI5Modules.js:91-109`; README line 5 ("or be a dependency of the CDS server")        | A shared shell, or a whole module's UI, can be an npm package that both modules depend on  |
-| Both `type: application` and `type: component` UI5 projects are mounted                                                   | `Documented` — `lib/findUI5Modules.js:134-136`                                                              | A reusable component library is a first-class citizen, not a workaround                    |
-| Mount path resolution order: `package.json` `cds/cds-plugin-ui5/modules/{id}/mountPath` → `ui5.yaml` `customConfiguration` → `metadata.name` | `Documented` — `lib/findUI5Modules.js:158-162`                                                              | The **consuming** server can re-mount a dependency's app without editing that app          |
+| Property                                                                                                                                     | Evidence                                                                                              | Why it matters                                                                            |
+| -------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| Apps are discovered from the `app/` folder **or from the CDS server's npm `dependencies`/`devDependencies`**                                 | `Documented` — `lib/findUI5Modules.js:91-109`; README line 5 ("or be a dependency of the CDS server") | A shared shell, or a whole module's UI, can be an npm package that both modules depend on |
+| Both `type: application` and `type: component` UI5 projects are mounted                                                                      | `Documented` — `lib/findUI5Modules.js:134-136`                                                        | A reusable component library is a first-class citizen, not a workaround                   |
+| Mount path resolution order: `package.json` `cds/cds-plugin-ui5/modules/{id}/mountPath` → `ui5.yaml` `customConfiguration` → `metadata.name` | `Documented` — `lib/findUI5Modules.js:158-162`                                                        | The **consuming** server can re-mount a dependency's app without editing that app         |
 
 That last row is the load-bearing one for OI-02: a Project Tracker CAP server could consume Financial
 Planner UI packages and relocate their mount paths from its own `package.json`, with no change to the
@@ -96,13 +96,13 @@ current state and would have to be built, not fallen back to.
 
 ## 5. Five Options Exist; Exactly One Is BTP-Only, and It Is the One Nobody Needs
 
-| Option                                              | Available locally?                                              | Evidence tier                                                        |
-| ----------------------------------------------------- | ----------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| **A. Hand-built shell app** (`sap.tnt.ToolPage` + `ComponentContainer`) | **Yes — running in this repo today**                    | `Verified` on disk (§6)                                              |
-| **B. `sap.ushell` sandbox** (`fioriSandbox.html` pattern)              | **Yes — on the pinned CDN, no backend required**        | `Verified` (fetched 1.136.16 CDN) + `Documented` (`@sap/cds-fiori`)  |
-| **C. UI5 component reuse** (one app consuming another's Component)     | Yes — and it is the mechanism A already uses            | `Documented` (`ComponentContainer` in repo)                          |
-| **D. Separate apps + plain cross-links**                               | Yes, but must be built — no per-app `index.html` exists | `Verified` (§4)                                                      |
-| **E. SAP Build Work Zone / SAP Launchpad service**                     | **No — BTP subscription**                               | `Reported` (see below)                                               |
+| Option                                                                  | Available locally?                                      | Evidence tier                                                       |
+| ----------------------------------------------------------------------- | ------------------------------------------------------- | ------------------------------------------------------------------- |
+| **A. Hand-built shell app** (`sap.tnt.ToolPage` + `ComponentContainer`) | **Yes — running in this repo today**                    | `Verified` on disk (§6)                                             |
+| **B. `sap.ushell` sandbox** (`fioriSandbox.html` pattern)               | **Yes — on the pinned CDN, no backend required**        | `Verified` (fetched 1.136.16 CDN) + `Documented` (`@sap/cds-fiori`) |
+| **C. UI5 component reuse** (one app consuming another's Component)      | Yes — and it is the mechanism A already uses            | `Documented` (`ComponentContainer` in repo)                         |
+| **D. Separate apps + plain cross-links**                                | Yes, but must be built — no per-app `index.html` exists | `Verified` (§4)                                                     |
+| **E. SAP Build Work Zone / SAP Launchpad service**                      | **No — BTP subscription**                               | `Reported` (see below)                                              |
 
 **Option E is the trap the brief warned about, and it is genuinely out.** SAP Build Work Zone,
 standard edition is consumed as a subscription in an SAP BTP subaccount — SAP publishes it in the SAP
@@ -265,14 +265,14 @@ be made together with the backend one, not after it.
 shell-specific configuration at all, so "one shell per module now" costs one file plus a routing
 strategy to reverse — not a per-app migration.** `Verified` from the manifest grep in §6.
 
-| What a later shared shell would need to change              | Cost                                                | Evidence                                       |
-| ------------------------------------------------------------- | ----------------------------------------------------- | ------------------------------------------------ |
-| Resource roots for the second module's apps                 | One `index.html`, a few lines                       | `Documented` — `app/index.html:17-24`          |
-| Nav entries for the second module's apps                    | One `NavConfig.ts`, one entry per app               | `Documented` — `NavConfig.ts`                  |
-| Mount paths aligned to the resource roots                   | One `ui5.yaml` line per app, already the convention | `Documented` — `app/*/ui5.yaml`                |
-| **OData data-source URIs, if the modules are two origins**  | **One line per app manifest, plus a CORS story**    | `Verified` — `manifest.json:13` ×4             |
-| **Hash arbitration across a larger app set**                | **Real shell logic, grows with app count**          | `Documented` — `App.controller.ts:76-79,138-149` |
-| App manifests (`crossNavigation`, `componentUsages`)        | **None — no app declares either**                   | `Verified` — grep returns no hits              |
+| What a later shared shell would need to change             | Cost                                                | Evidence                                         |
+| ---------------------------------------------------------- | --------------------------------------------------- | ------------------------------------------------ |
+| Resource roots for the second module's apps                | One `index.html`, a few lines                       | `Documented` — `app/index.html:17-24`            |
+| Nav entries for the second module's apps                   | One `NavConfig.ts`, one entry per app               | `Documented` — `NavConfig.ts`                    |
+| Mount paths aligned to the resource roots                  | One `ui5.yaml` line per app, already the convention | `Documented` — `app/*/ui5.yaml`                  |
+| **OData data-source URIs, if the modules are two origins** | **One line per app manifest, plus a CORS story**    | `Verified` — `manifest.json:13` ×4               |
+| **Hash arbitration across a larger app set**               | **Real shell logic, grows with app count**          | `Documented` — `App.controller.ts:76-79,138-149` |
+| App manifests (`crossNavigation`, `componentUsages`)       | **None — no app declares either**                   | `Verified` — grep returns no hits                |
 
 The bottom two rows are the ones that are not free. The apps are portable; the **shell** is not, and
 its hardest part is exactly the part that does not shrink. A hand-built shell that grows from 18 nav
@@ -294,13 +294,13 @@ independent rather than separately addressable, and BA-001 does not say which.
 **The prior assumption — "a single UI5 shell spanning both modules is achievable locally" — holds,
 with one condition it did not name.**
 
-| Part of the assumption                            | Grade                | Why                                                                                       |
-| --------------------------------------------------- | ---------------------- | ------------------------------------------------------------------------------------------- |
-| Achievable locally, without BTP                   | **Holds**            | Option A runs in this repo today; option B's assets are on the pinned CDN (§6, §7)         |
-| Requires no paid or hosted service                | **Holds**            | Only option E needs a BTP subscription, and it is not in the dependency tree (§5)          |
-| "Nobody has checked"                              | **Refuted as stated** | The Financial Planner shipped a working single-module multi-app shell; the untested part is the *cross-module* case |
-| Implicitly: the shell is a framework feature      | **Refuted**          | Neither `cds-plugin-ui5` nor CAP provides shell composition — it is application code (§3, §4) |
-| Implicitly: modules are independent of each other | **Conditional**      | A shared shell binds them to one origin, and today's absolute `/service/...` URIs make that binding real (§8) |
+| Part of the assumption                            | Grade                 | Why                                                                                                                 |
+| ------------------------------------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| Achievable locally, without BTP                   | **Holds**             | Option A runs in this repo today; option B's assets are on the pinned CDN (§6, §7)                                  |
+| Requires no paid or hosted service                | **Holds**             | Only option E needs a BTP subscription, and it is not in the dependency tree (§5)                                   |
+| "Nobody has checked"                              | **Refuted as stated** | The Financial Planner shipped a working single-module multi-app shell; the untested part is the _cross-module_ case |
+| Implicitly: the shell is a framework feature      | **Refuted**           | Neither `cds-plugin-ui5` nor CAP provides shell composition — it is application code (§3, §4)                       |
+| Implicitly: modules are independent of each other | **Conditional**       | A shared shell binds them to one origin, and today's absolute `/service/...` URIs make that binding real (§8)       |
 
 ---
 
@@ -332,9 +332,15 @@ with one condition it did not name.**
   cross-checked. `cap.cloud.sap/docs/advanced/fiori` returned 404 on 2026-07-26.
 - **The SAP Community article "A Fiori Launchpad Sandbox for all your CAP-based projects"** returned
   HTTP 403 and could not be read.
-- **UI5 component *libraries* (`type: library`) as a sharing mechanism** were not investigated. The
+- **UI5 component _libraries_ (`type: library`) as a sharing mechanism** were not investigated. ~~The
   repo's `app/shared` is declared `type: application` with `paths.webapp: "."`, not a UI5 library, so
-  the library route across two modules is unexplored territory here.
+  the library route across two modules is unexplored territory here.~~ **Corrected 2026-08-06 at the
+  Information Architecture stage — the claim conflated two different `type` fields.**
+  Re-measured: `Financial Planner/app/shared/manifest.json:5` declares `"type": "library"`; it is
+  `type: application` only in `app/shared/ui5.yaml:4`, which is the **UI5 tooling** project type and a
+  different field. So the repo _does_ already run a manifest-declared UI5 library, and what is
+  unexplored is not the library shape itself but consuming one **across two modules**, which is still
+  untested here.
 
 ---
 

@@ -1,9 +1,9 @@
 # Project Tracker — Plan
 
-**Status:** Plan phase — Ideate, Scope, Research, Scaffold **and Workshops complete**
-(grouping settled, `SPEC-01` … `SPEC-12`; **12 of 12 written and all twelve Approved**).
-Next stage is **Information Architecture**.
-**Last updated:** 2026-08-04
+**Status:** Plan phase — Ideate, Scope, Research, Scaffold, Workshops **and Information Architecture
+complete** (grouping settled, `SPEC-01` … `SPEC-12`; **12 of 12 written and all twelve Approved**;
+`IA-001` written, **Draft**). Next stage is **Design System**.
+**Last updated:** 2026-08-06
 **Purpose:** The continuity document. Anyone (or any fresh chat) picking up Project Tracker
 starts here. Read this, then `design/PROBLEM_STATEMENT_AND_VISION.md` (PSV-001),
 `design/BUSINESS_ARCHITECTURE.md` (BA-001) and `design/DECISIONS_LOG.md` for the full
@@ -70,24 +70,24 @@ mechanism needs a construction step.
 
 ### Stage status
 
-| #   | Stage              | Skill                                   | Skill status | Stage status                                                                                                  |
-| --- | ------------------ | --------------------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------- |
-| 1   | Ideate             | `/generate-problem-statement-vision`    | Authored     | **Done** — 2026-07-26                                                                                         |
-| 2   | Scope              | `/generate-business-architecture`       | Authored     | **Done** — 2026-07-26                                                                                         |
-| 3   | Research           | `/gather-research`                      | Authored     | **Done** — 2026-07-26                                                                                         |
-| 4   | Scaffold           | `/scaffold-module` → `scaffold-writer`  | Authored     | **Done** — 2026-07-27                                                                                         |
-| 5   | Workshops          | `/workshop` → `spec-writer`             | Exists       | **Done** — 2026-08-04. D-37 grouping; `SPEC-01` … `SPEC-12` all **Approved** (12/12 written; D-136)          |
-| 6   | Information Arch.  | `/generate-information-architecture`    | Not authored | **Next** — runs in full (D-21)                                                                                |
-| 7   | Design System      | `/generate-design-system`               | Not authored | Not started — runs in full (D-21)                                                                             |
-| 8   | Theme              | `/generate-theme`                       | Not authored | Not started — runs in full (D-21)                                                                             |
-| 9   | Data Model         | `/generate-data-model`                  | Not authored | Not started                                                                                                   |
-| 10  | Tech Stack         | `/generate-tech-stack`                  | Not authored | Not started                                                                                                   |
-| 11  | Test Strategy      | `/generate-test-strategy`               | Not authored | Not started                                                                                                   |
-| 12  | Project Planning   | `/generate-build-plan`                  | Not authored | Not started                                                                                                   |
-| 13  | Build              | `/build` + chain                        | Exists       | Not started                                                                                                   |
-| 14  | **Rewire tooling** | `lintNoMarkdownState` + PreToolUse hook | Not authored | Not started                                                                                                   |
-| 15  | Cutover            | —                                       | —            | Not started                                                                                                   |
-| 16  | Back to FP         | —                                       | —            | Blocked on cutover                                                                                            |
+| #   | Stage              | Skill                                              | Skill status | Stage status                                                                                                      |
+| --- | ------------------ | -------------------------------------------------- | ------------ | ----------------------------------------------------------------------------------------------------------------- |
+| 1   | Ideate             | `/generate-problem-statement-vision`               | Authored     | **Done** — 2026-07-26                                                                                             |
+| 2   | Scope              | `/generate-business-architecture`                  | Authored     | **Done** — 2026-07-26                                                                                             |
+| 3   | Research           | `/gather-research`                                 | Authored     | **Done** — 2026-07-26                                                                                             |
+| 4   | Scaffold           | `/scaffold-module` → `scaffold-writer`             | Authored     | **Done** — 2026-07-27                                                                                             |
+| 5   | Workshops          | `/workshop` → `spec-writer`                        | Exists       | **Done** — 2026-08-04. D-37 grouping; `SPEC-01` … `SPEC-12` all **Approved** (12/12 written; D-136)               |
+| 6   | Information Arch.  | `/generate-information-architecture` → `ia-writer` | Authored     | **Done** — 2026-08-06. `IA-001` **Draft**; 6 objects → 1 route + 1 `story` param; **R9 executed** (D-137 … D-143) |
+| 7   | Design System      | `/generate-design-system`                          | Not authored | **Next** — runs in full (D-21). Inherits the build-technology ruling D-138 defers to it                           |
+| 8   | Theme              | `/generate-theme`                                  | Not authored | Not started — runs in full (D-21)                                                                                 |
+| 9   | Data Model         | `/generate-data-model`                             | Not authored | Not started                                                                                                       |
+| 10  | Tech Stack         | `/generate-tech-stack`                             | Not authored | Not started                                                                                                       |
+| 11  | Test Strategy      | `/generate-test-strategy`                          | Not authored | Not started                                                                                                       |
+| 12  | Project Planning   | `/generate-build-plan`                             | Not authored | Not started                                                                                                       |
+| 13  | Build              | `/build` + chain                                   | Exists       | Not started                                                                                                       |
+| 14  | **Rewire tooling** | `lintNoMarkdownState` + PreToolUse hook            | Not authored | Not started                                                                                                       |
+| 15  | Cutover            | —                                                  | —            | Not started                                                                                                       |
+| 16  | Back to FP         | —                                                  | —            | Blocked on cutover                                                                                                |
 
 Stages 6–8 (IA, Design System, Theme) **run in full** — settled by D-21. Slice 1 carries four
 Reports and two Forms, which is a real UI rather than a thin shell.
@@ -98,7 +98,7 @@ Reports and two Forms, which is a real UI rather than a thin shell.
 `/workshop` reads that table; it does not re-derive a grouping per session. Spec number is build
 order, so the sequence is simply `SPEC-01` → `SPEC-12`.
 
-**`SPEC-01` … `SPEC-06` are written**, all six provisional on R1 and `SPEC-04` … `SPEC-06` additionally on R9. `SPEC-01`
+**`SPEC-01` … `SPEC-06` are written**, all six provisional on R1. ~~and `SPEC-04` … `SPEC-06` additionally on R9~~ — **R9 was executed and discharged at Information Architecture, 2026-08-06 (D-140)**, so no spec is provisional on it any more. `SPEC-01`
 (`design/specs/SPEC-01-MCP-INTENT-VERB-LAYER.md`, **Draft**) is eleven verbs, 29 business rules, 16
 FUTs, D-40 … D-46. `SPEC-02` (`design/specs/SPEC-02-METHODOLOGY-AND-STAGE-ENFORCEMENT.md`,
 **Approved** 2026-07-27) is 33 business
@@ -190,7 +190,7 @@ no i18n surface and its deny reason must name a verb.
 Three measured findings carried it. **`lintDocClaims.ts:15` already answered the rooting question
 D-103 opened (D-110)** — it locates the shared ESLint config from `import.meta.dirname` precisely so
 "renaming or moving the Standards folder cannot silently defeat the check", which honours the cwd
-rule's *purpose* where a `process.chdir` to a named module could not. **ripgrep and git disagree about
+rule's _purpose_ where a `process.chdir` to a named module could not. **ripgrep and git disagree about
 `.claude/**/*.md` (D-116)**: `rg --files .claude/` walks 4 of 37 files while `git ls-files` reports
 them tracked, so the obvious implementation of the linter would hide all five `.md` consumers and
 report green. And **SPEC-08 BR-02's four literal strings are provably incomplete** against the ten
@@ -201,7 +201,7 @@ files they are scoped to (D-117) — `Financial Planner/CLAUDE.md:77` reads `spr
 **`SPEC-11` (`design/specs/SPEC-11-PROJECT-STATE-EXPORTER.md`, **Approved** 2026-08-04, on the day it
 was written) is 21 business rules, 15 FUTs, **no new entity and no new attribute** and D-120 … D-128**
 — the fourth Wave 3 spec and the **fifth** standalone one (not the fourth; SPEC-11 §6 corrects the running count against BA-001 §11). It **reads every persisted entity and every
-persisted column**, so §2 places one *standing* requirement on the Data Model — a deterministic sort key
+persisted column**, so §2 places one _standing_ requirement on the Data Model — a deterministic sort key
 per entity (BR-07) — rather than an amendment. It resolves **no** OI (D-31 already resolved OI-01; this
 object implements it) and mints **no** error key, the seventh running and the second where none is
 structurally possible. It is **provisional on R1 again (D-121)**, reversing `SPEC-10`'s rule-out, and it
@@ -209,7 +209,7 @@ structurally possible. It is **provisional on R1 again (D-121)**, reversing `SPE
 
 Three findings carried it. **The rooting question had a third answer (D-103 vs D-110)** — the exporter
 must `chdir` to this module's root before importing `@sap/cds`, which names a module, so D-103's ruling
-applies and the script lands in `Project Tracker/scripts/`; *inside* the module D-110's
+applies and the script lands in `Project Tracker/scripts/`; _inside_ the module D-110's
 `import.meta.dirname` still derives the output path, so the two rulings compose rather than conflict.
 **An export that logged itself could never be idempotent (D-124)** — `SPEC-01` BR-03 binds write verbs
 and the exporter is not one, so emitting no Activity is not merely permitted but required, and it is what
@@ -232,15 +232,16 @@ holds a **tracked `.gitkeep`** that would outlive its contents. `SPEC-10` BR-28'
 **ordered sequence with a proof step** (D-131), because a `PreToolUse` deny beats `bypassPermissions`
 and no hook has ever fired in this repo.
 
-**Workshops is complete.** Twelve specs, twelve Approved. **Next is stage 6, Information Architecture.**
+**Workshops is complete.** Twelve specs, twelve Approved. **Information Architecture is complete too** — `design/INFORMATION_ARCHITECTURE.md` (IA-001, **Draft**), D-137 … D-143, with **R9 executed and closed**. **Next is stage 7, Design System.**
 
 **Still open:** **OI-05 alone** (methodology genericity — Data Model). **OI-03 is closed by D-35 and
 OI-04 by D-70.** Research risks: R2 is closed
-by D-33 and R3/R8 dissolved with D-29; **R1, R4, R7 and R9 remain unexecuted** — see
-`research/README.md` §5. **All four now have an owner rather than only a description** — R7's and R4's
+by D-33 and R3/R8 dissolved with D-29; **R9 is executed and closed** (D-140, 2026-08-06) and
+**R1, R4 and R7 remain unexecuted** — see
+`research/README.md` §5. **All now have an owner rather than only a description** — R7's and R4's
 were assigned at the `SPEC-11` workshop (D-121): both belong to **`INT-007`'s own build**, because the
 drill needs a real Postgres, a built exporter and loaded data, and dropping and recreating a schema to
-re-deploy into it *is* R4's test. `research/README.md` §5 has no Owner column, so it is recorded in prose
+re-deploy into it _is_ R4's test. `research/README.md` §5 has no Owner column, so it is recorded in prose
 and in SPEC-11 §6, on `SPEC-10`'s precedent for R10. The other two:
 
 - **R1 goes to Data Model (D-39), and it is worse than the research thought.** The finding is not
@@ -248,20 +249,22 @@ and in SPEC-11 §6, on `SPEC-10`'s precedent for R10. The other two:
   declares `"password": ""`, which SCRAM rejects, so **neither module has ever connected to
   Postgres**; all six planner integration suites run on in-memory SQLite. Standing the binding up is
   a prerequisite of Data Model, not a detail inside it. **`SPEC-01` ships provisional on R1.**
-- **R9 now has an owner — the Information Architecture stage (D-69), assigned at the `SPEC-04`
-  workshop.** `SPEC-04` is the first spec carrying a Report and **ships provisional on R9**, exactly
-  as `SPEC-01`…`SPEC-03` ship provisional on R1; `SPEC-05`, **`SPEC-06`** and `SPEC-07` inherit that
-  status. **`SPEC-06` carries no Report and inherits R9 anyway (D-82)** — R9's mechanism is
-  **per-origin, not per-object-type**, and a Form is the more exposed case, since it issues OData
-  **writes** and a POST is not a CORS simple request, so it preflights. `research/README.md` §5's R9
-  **Affects cell was widened in that session** to name `FRM-001` and `FRM-002` alongside the four
-  Reports; ownership is unchanged. R9
-  changes no business rule and no FUT in any Report spec — it decides which **origin** serves the
-  page, not what the page says — which is why it was assigned rather than executed mid-workshop. Its
-  deadline is unchanged: **before `RPT-001`…`RPT-004` are built**, which is Wave 2 _build_, not Wave 2
-  spec. IA is named because D-21 already gives it how the four Reports compose into one page and it
-  is the next stage to run. Assigning it at all is D-39's lesson applied: a risk recorded with no
-  owner is what left R1 unexecuted until a workshop tripped over it.
+- **R9 is EXECUTED and CLOSED — the Information Architecture stage did what D-69 assigned it, on
+  2026-08-06 (D-140).** It was owned rather than merely noted precisely because D-39's lesson was that
+  a risk with no owner goes unexecuted, and the owner ran it: two CAP servers on 4004 and 4005,
+  in-memory SQLite, one component composed into the other's host page, driven in a real browser and
+  repeated under `NODE_ENV=production`. **The premise everyone had been carrying was wrong.** R9 said
+  composition "would probably work under `cds watch`" and break in production. It **breaks in dev too**
+  — CAP's CORS middleware never sends `Access-Control-Allow-Headers` (`@sap/cds/server.js:93-102`)
+  while UI5's V4 model always sends `X-CSRF-Token`, so the `$batch` preflight is rejected one request
+  after `$metadata` succeeds. Two further measurements: under `NODE_ENV=production` CORS is off
+  entirely and the manifest fetch itself is blocked, and an absolute `http://` dataSource URI
+  **crashes CAP at boot** (`@sap/cds-fiori/app/routes.js:68`). **Ruling: one origin behind a reverse
+  proxy (D-141)**, which keeps every manifest's relative `/service/…` URI unchanged; the proxy itself
+  is untested and its execution belongs to **Tech Stack**. D-69's prediction held exactly — R9 changed
+  no business rule and no FUT anywhere — so **`SPEC-04` … `SPEC-07` are no longer provisional on R9**
+  (all four remain provisional on R1). D-82's widening to the two Forms was vindicated and sharpened:
+  the preflight does decide it, but it fails on the request **header**, not the method.
 
 ### Carried forward from Scaffold
 
@@ -280,7 +283,7 @@ and in SPEC-11 §6, on `SPEC-10`'s precedent for R10. The other two:
 
 ## 4. Slice 1 scope
 
-Catalogued as 21 FRICEW objects in `design/BUSINESS_ARCHITECTURE.md` (BA-001), which is now
+Catalogued as 22 FRICEW objects in `design/BUSINESS_ARCHITECTURE.md` (BA-001), which is now
 the authoritative cut. The list below is the summary; BA-001 §3 carries the deferred items and
 the boundary.
 
@@ -367,18 +370,18 @@ globs outrank ignore files, not because the `.md` files needed naming. `SPEC-10`
 forbids `lintNoMarkdownState` from delegating its walk to ripgrep, `git grep`, or any
 gitignore-respecting library at all.
 
-| File                                                            | Refs  | What changes                                                                                                                                                                                                                       |
-| --------------------------------------------------------------- | ----- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `.claude/skills/pm-update/SKILL.md`                             | 4     | Mostly retired — see below                                                                                                                                                                                                         |
-| `.claude/workflows/build.js`                                    | 3     | Per-story board handoff → `complete_subtask` / `complete_stage`. **All three refs are prose inside agent-prompt template literals** — a Workflow script has no filesystem and no Node API, so it instructs and never writes (D-94) |
-| `Standards (Technical + Linting)/scripts/generateTestReport.ts` | 2     | Stops writing markdown; emits a `TestRun`. **And it moves** to `Project Tracker/scripts/recordTestRun.ts` (D-103) — `process.chdir` before requiring `@sap/cds` hardcodes a module name, which a shared linter may not do. **Four `.md` files name its old path and none was ever measured** — `CLAUDE.md:48` (**the repo root, in no surface measurement at all**), `Financial Planner/CLAUDE.md:35` (a *different* line from the `project/` block INT-002 already owns), and `Financial Planner/design/TECH_STACK.md:143` + `TEST_STRATEGY.md:539,546`, which are D-12 markdown and go to the `/refresh-docs` sweep. The two `CLAUDE.md` lines are agent instructions under D-23 and are **owed to SPEC-08** |
-| `.claude/commands/build.md`                                     | 2     | Instructions repointed at MCP verbs                                                                                                                                                                                                |
-| `.claude/agents/build-briefer.md`                               | 2     | Reads board state via `project_view` instead of parsing                                                                                                                                                                            |
-| `.claude/workflows/test-quality.js`                             | 1     | Repoint                                                                                                                                                                                                                            |
-| `.claude/skills/human-review-loop/SKILL.md`                     | 1     | Feedback/defect capture → `log_defect`                                                                                                                                                                                             |
-| `.claude/agents/implementer.md`                                 | 1     | Board handoff → `complete_stage`                                                                                                                                                                                                   |
-| **`Standards (Documents)/METHODOLOGY_BLUEPRINT.md`**            | **5** | Ninth file, found at Scope. A "where state lives" table pointing at all four retired paths. The original grep only scanned `Standards (Technical + Linting)/`                                                                      |
-| **`Financial Planner/CLAUDE.md`**                               | **3** | Tenth file, found at Scope. Documents a `project/` folder that stops existing; neither guard reaches it                                                                                                                            |
+| File                                                            | Refs  | What changes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| --------------------------------------------------------------- | ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `.claude/skills/pm-update/SKILL.md`                             | 4     | Mostly retired — see below                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `.claude/workflows/build.js`                                    | 3     | Per-story board handoff → `complete_subtask` / `complete_stage`. **All three refs are prose inside agent-prompt template literals** — a Workflow script has no filesystem and no Node API, so it instructs and never writes (D-94)                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `Standards (Technical + Linting)/scripts/generateTestReport.ts` | 2     | Stops writing markdown; emits a `TestRun`. **And it moves** to `Project Tracker/scripts/recordTestRun.ts` (D-103) — `process.chdir` before requiring `@sap/cds` hardcodes a module name, which a shared linter may not do. **Four `.md` files name its old path and none was ever measured** — `CLAUDE.md:48` (**the repo root, in no surface measurement at all**), `Financial Planner/CLAUDE.md:35` (a _different_ line from the `project/` block INT-002 already owns), and `Financial Planner/design/TECH_STACK.md:143` + `TEST_STRATEGY.md:539,546`, which are D-12 markdown and go to the `/refresh-docs` sweep. The two `CLAUDE.md` lines are agent instructions under D-23 and are **owed to SPEC-08** |
+| `.claude/commands/build.md`                                     | 2     | Instructions repointed at MCP verbs                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `.claude/agents/build-briefer.md`                               | 2     | Reads board state via `project_view` instead of parsing                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `.claude/workflows/test-quality.js`                             | 1     | Repoint                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `.claude/skills/human-review-loop/SKILL.md`                     | 1     | Feedback/defect capture → `log_defect`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `.claude/agents/implementer.md`                                 | 1     | Board handoff → `complete_stage`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| **`Standards (Documents)/METHODOLOGY_BLUEPRINT.md`**            | **5** | Ninth file, found at Scope. A "where state lives" table pointing at all four retired paths. The original grep only scanned `Standards (Technical + Linting)/`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| **`Financial Planner/CLAUDE.md`**                               | **3** | Tenth file, found at Scope. Documents a `project/` folder that stops existing; neither guard reaches it                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 
 The blueprint was described here as the load-bearing one, because it sits inside
 `lintNoMarkdownState`'s stated `Standards/**` glob. **That is wrong, and the SPEC-08 workshop found
@@ -485,8 +488,9 @@ process runs exactly one CAP project by construction, so two models makes `INT-0
 a composed model would have dragged Financial Planner's 128 Postgres objects, its Postgres binding,
 its cron jobs and its `ENCRYPTION_KEY` into Project Tracker's process. A shared shell needs one
 **origin**, not one service, which is what lets the shell ruling compose with the backend one.
-Residual risk **R9**: two CAP processes serving into one shell page is _Inferred_ only, not
-executed.
+~~Residual risk **R9**: two CAP processes serving into one shell page is _Inferred_ only, not
+executed.~~ **R9 was executed at the Information Architecture stage, 2026-08-06, and is `Verified`
+(D-140).** The ruling is **one origin behind a reverse proxy** (D-141) — see §8's session entry.
 
 ### Non-blocking
 
@@ -520,20 +524,84 @@ Settle before or during Scaffold.
 
 ## 8. Session log
 
+### 2026-08-06 — Information Architecture: one page, one parameter, and a risk whose premise was backwards
+
+- **Ran the Information Architecture stage over the six UI-bearing objects.** Wrote
+  `design/INFORMATION_ARCHITECTURE.md` (IA-001, **Draft**) — 6 objects onto **1 route** plus **1**
+  optional `story` parameter, 8 navigation links, 2 negative link rulings, 4 in-page disclosures — and
+  logged **D-137 … D-143**. The skill and its `ia-writer` agent had never been executed; both ran.
+- **R9 was executed rather than deferred again, and its premise was wrong in both directions (D-140).**
+  D-69 assigned it here at the `SPEC-04` workshop specifically so it would not repeat R1's history, and
+  the settling test the register named was run: two CAP 9.8.4 servers on 4004/4005, in-memory SQLite
+  (**R1 does not gate R9** — the risk is about origin, not the database), one component composed into
+  the other's host page, in a real browser, then repeated under `NODE_ENV=production`. The register and
+  D-69 both said composition "would probably work under `cds watch`". **It does not.** `$metadata`
+  succeeds and `$batch` is rejected one request later, because CAP's CORS middleware sets only
+  `access-control-allow-origin` and `access-control-allow-methods` and **never** sends
+  `Access-Control-Allow-Headers` (`@sap/cds/server.js:93-102`, read directly), while UI5's OData V4
+  model always sends `X-CSRF-Token`. Under `NODE_ENV=production` CORS is off entirely and the manifest
+  fetch itself is blocked, giving a blank page. **Half of R9 never needed an experiment at all** — an
+  absolute `/service/…` path resolves against the **document** origin, which is arithmetic; all four
+  Financial Planner manifests use exactly that form (`manifest.json:13` ×4, re-measured).
+- **A third finding nobody had predicted:** an absolute `http://` dataSource URI **crashes the CAP
+  process at boot**, because `@sap/cds-fiori/app/routes.js:68` filters `!uri.startsWith('/')` and
+  treats everything else as relative, joining it into an Express route. The multi-origin fix therefore
+  costs three coordinated changes across two modules, and it was proven green under production **only
+  with `kind: dummy` auth** — credentialed cross-origin was never exercised, which is exactly the case
+  D-82 widened R9 to cover. **Ruling: one origin behind a reverse proxy (D-141)**, leaving every
+  manifest's relative URI untouched; the proxy is itself untested and belongs to **Tech Stack**.
+- **Build technology is ruled as a deferral with a deadline, not as silence (D-138).** Financial
+  Planner's own Design System owned this question — its IA has no Build Technology section because
+  DS-001 ran five days earlier — so stage 7 owns it here too, with a hard deadline of **before Data
+  Model**, because `SPEC-11` BR-06's `.drafts` filter is written against it. Two constraints go with
+  it: D-137's one-route shape **rules out a full Fiori Elements template app** (FE templates bring
+  their own routing), leaving freestyle or FE FPM; and FE templates need OData entity sets, which sits
+  in tension with D-05's removal of the CRUD path. **No spec ever deferred this for the four Reports** —
+  only the two Forms asked — so the ruling answers an unasked question as well as an asked one.
+- **`FRM-002`'s home was stated nowhere and is now a dialog (D-139).** BR-06 makes the Workspace
+  read-only context inherited from the view it renders on, so it must launch from the page; it is a
+  sprint-boundary surface competing with a daily one, which is what PSV falsifiable check 3 measures
+  against. `FRM-001` stays **inline**, which BA-001 §7 already said.
+- **§9 Task Flow Mapping survived one page as two flows and three stated "none" (D-142)**, on D-134's
+  precedent. Check 3 is the only true journey check and it is **degenerate** — one step, zero
+  navigation — and documenting it precisely is the point: the flow is the assertion under test.
+- **The shared shell is Financial-Planner-owned, and that is now named rather than discovered (D-143).**
+  Measured: `com.financialplanner.shell` in the manifest, `package.json`, `Component.ts`,
+  `tsconfig.json` and both `index.html` references; nothing outside Financial Planner references it.
+  Project Tracker registers into `Financial Planner/app/`, which gives this module's UI a build-time
+  dependency on the other module's folder. Relocation is owed to the third module's UI or the first
+  cross-module shell navigation, whichever comes first.
+- **Reviewing the produced document caught four defects the writer's own check passed** — the twelfth
+  session running. Two were the writer's (a nav-group ruling attributed to **D-140** when it is
+  **D-143**; §8's six rows reading as if they were §3's six objects, which they are not — the matching
+  count is a coincidence). **One was mine**: §4.2 cited `ui5-multi-app-shell.md:356` after my own
+  correction to that file shifted the line to **:361**. The fourth was a soft count — "all 5 manifests"
+  where there are **6** under `app/`, the sixth being the `type: library` shared manifest with no
+  `sap.ui5` block.
+- **Corrections applied in-session, none left owed.** `PLAN.md`: stage-6 row said _Not authored_ when
+  the skill was authored last session; §9 carried BA-001 at **v1.8** (it is **v1.14**), "8 of 12
+  written" (twelve, all Approved) and "D-01 … D-102" (it runs to **D-143**); §4 said **21** FRICEW
+  objects where BA-001 §10 and §11 both say **22**. `RSH-003` §11 claimed `app/shared` is
+  `type: application` — it is `"type": "library"` at `manifest.json:5`, and `type: application` only in
+  `ui5.yaml:4`, a different field. D-21's `PLAN.md:75` pointer now resolves to the Ideate row. R9's
+  grade was updated in all three registers that carry it — BA-001 §8 (→ **v1.14**), the module
+  `CLAUDE.md`, and `research/README.md` §5 — and discharged across all four Report/Form specs in
+  header, §6, footer and a new Change History row.
+
 ### 2026-08-04 — SPEC-12 written: the checklist that checks itself, and the deletion git cannot undo
 
 - **Ran the `SPEC-12` workshop over CNV-005.** Wrote `design/specs/SPEC-12-DECOMMISSION.md`
-  (**Approved**, **provisional on R1** — R10 owned *and discharged*, R7 checked, R4 not re-owned, R9
+  (**Approved**, **provisional on R1** — R10 owned _and discharged_, R7 checked, R4 not re-owned, R9
   ruled out) with 18 business rules, 15 FUTs, **no Data Model requirement at all**, and logged
   **D-129 … D-136**. **Workshops is complete: twelve specs, all twelve Approved.**
 - **A precondition checklist needed something that checks it (D-129).** Three §6 rows and BA-001 §10's
   fan-in hand CNV-005 four ordering constraints, and PSV §2's unconstrained-artifact defect was about
   to reappear in the object that closes the cutover. The fix built nothing: `SPEC-10` BR-27 keeps
-  `lintNoMarkdownState` out of every `lint` chain *because* 27 live references would fail it — so
+  `lintNoMarkdownState` out of every `lint` chain _because_ 27 live references would fail it — so
   **that failure is the precondition test**. Run it before wiring it in; zero violations means INT-002,
   INT-003 and INT-005 are done. Re-measured 2026-08-04: **27 references across 12 files**, exactly as
-  BR-27 states. The data-side half is RSH-005 §8's own rule — *answer a question through the
-  application, not through SQL* — so `project_view('financial-planner')` returning the right next
+  BR-27 states. The data-side half is RSH-005 §8's own rule — _answer a question through the
+  application, not through SQL_ — so `project_view('financial-planner')` returning the right next
   action is what discharges SPEC-03 §6's tie-out row.
 - **The four retired artifacts do not share a durability, and one deletion cannot be undone (D-130).**
   D-02 deletes and D-12 keeps git as the system of record, which reads as "the archive is free".
@@ -556,11 +624,11 @@ Settle before or during Scaffold.
   **`SPEC-01` flips Draft → Approved** and the ambiguity D-93 priced in is closed.
 - **Reviewing the produced spec caught eight defects the writer's own DoD check passed** — the eleventh
   session running. The sharpest: **BR-17 said "no verb call" while BR-03 calls `project_view`** — now
-  scoped to *write*-verb calls, with FUT-014 stating why the Activity count holds anyway. **BR-16 said
+  scoped to _write_-verb calls, with FUT-014 stating why the Activity count holds anyway. **BR-16 said
   `SPEC-10` FUT-014 inverts "all three assertions" while FUT-013 said two** — measured, only the two
   enablement assertions invert, and **`SPEC-10` FUT-014's own closing note carried the same error** and
   is corrected. **BR-13 said it "reverses" `SPEC-10` BR-27, whose text forbids the leg "in Wave 3"** —
-  and CNV-005 *is* Wave 3, so BR-27 read literally forbade the act BR-28 mandates; corrected to
+  and CNV-005 _is_ Wave 3, so BR-27 read literally forbade the act BR-28 mandates; corrected to
   withholding rather than forbidding. And **§7's preamble inverted BA-001 §3.3's ID convention**,
   declaring unqualified IDs to be Financial Planner's while citing §3.3 as its authority.
 - **One BA-001 correction (→ v1.13)**: CNV-005's row said `generate.mjs` was **734 lines**; it is
@@ -576,7 +644,7 @@ Settle before or during Scaffold.
   **R7 owned here and R4 settled in the same execution**) with 21 business rules, 15 FUTs, **no new
   entity and no new attribute**, and logged **D-120 … D-128**. It is the fourth Wave 3 spec, the
   **fifth** standalone one, and the first that **reads every persisted entity and every persisted
-  column** — so §2 states a read *surface* and one standing Data Model requirement (a deterministic
+  column** — so §2 states a read _surface_ and one standing Data Model requirement (a deterministic
   sort key per entity) rather than an amendment list.
 - **R1 comes back, one spec after being ruled out.** `SPEC-10` was the first spec not provisional on
   R1 (D-119), because neither cutover guard touches CAP. This object reads the database and its drill
@@ -584,15 +652,15 @@ Settle before or during Scaffold.
   — so R1 binds again, ruled explicitly on D-82's precedent rather than inherited either way. **R7
   and R4 gain owners in the same act (D-121)**: both are `INT-007`'s own build, because the drill
   needs a real Postgres, a built exporter and loaded data, and dropping and recreating a schema to
-  re-deploy into it *is* R4's test — the "highest-value unrun test in the wave" turns out to be a
+  re-deploy into it _is_ R4's test — the "highest-value unrun test in the wave" turns out to be a
   step inside FUT-007 rather than a separate exercise.
 - **The rooting fork had a third instance, and the two prior rulings compose (D-103, D-110).** The
   exporter must `process.chdir` to this module's root before importing `@sap/cds`, which names a
   module irreducibly, so D-103 applies and the script lands in `Project Tracker/scripts/`. But
-  *inside* the module, D-110's `import.meta.dirname` still derives the output path, so
+  _inside_ the module, D-110's `import.meta.dirname` still derives the output path, so
   `npm run export-state` writes to the same folder from the repo root and from the module (FUT-012).
   What forces the module home is the CAP chdir, not the file path.
-- **An export that logged itself could never be idempotent (D-124).** `SPEC-01` BR-03 binds *write*
+- **An export that logged itself could never be idempotent (D-124).** `SPEC-01` BR-03 binds _write_
   verbs and the exporter is not one, so emitting no Activity is permitted — and it is also
   **required**, because an Activity would change the state just captured and no two consecutive
   exports could ever match. The read/write distinction and the idempotence property turned out to be
@@ -605,7 +673,7 @@ Settle before or during Scaffold.
   advisory**, and why FUT-008 is a negative test asserting a silent pass.
 - **`TestRun` volume is answered by the sort key, not a filter (D-125).** `SPEC-09` §6 raised it;
   filtering would break the round-trip, the one property the object exists to provide. Determinism
-  and diff-friendliness are separate requirements — `ORDER BY ID` is byte-identical *and* scatters
+  and diff-friendliness are separate requirements — `ORDER BY ID` is byte-identical _and_ scatters
   new rows, because UUIDs do not sort chronologically — so append-growing entities declare a temporal
   key first.
 - **A research document with a dedicated workshop had no route to it (D-127).** `research/README.md`
@@ -617,7 +685,7 @@ Settle before or during Scaffold.
   of which had ever named INT-007.
 - **Three §6 rows owed to SPEC-11 discharged**, from `SPEC-03`, `SPEC-05` and `SPEC-09` — the first
   two by BR-03's emit-all-managed-fields rule, though `executedAt` and `createdBy` are carried by two
-  *different* rules and the spec says so; the third by BR-07. **Two BA-001 corrections applied
+  _different_ rules and the spec says so; the third by BR-07. **Two BA-001 corrections applied
   in-session → v1.12**: INT-007's Traces To named neither **INT-001**, the service layer it reads
   through, nor **INT-004**, whose rows its sort key exists to handle; and its R7 clause is completed
   with the owner D-121 assigns. The row had received no maintenance since it was created at v1.1.
@@ -638,7 +706,7 @@ Settle before or during Scaffold.
   check". That honours the cwd rule's **purpose** (one copy serves every module, no module named)
   where D-103's script could not, because a `chdir` target is irreducibly a module name. **D-103 was a
   precedent for the question, not for the answer**, and the difference is whether the outside-cwd path
-  can be *derived* or must be *named*. A module-local script was rejected on measurement: `build.js:371`
+  can be _derived_ or must be _named_. A module-local script was rejected on measurement: `build.js:371`
   runs `cd "${moduleDir}" && npm run lint`, so a Project-Tracker-only linter would never fire in the
   gate that matters, and every retired path lives in Financial Planner.
 - **ripgrep and git disagree, and the whole guard rested on it (D-116).** `PLAN.md` §6 recorded that a
@@ -659,7 +727,7 @@ Settle before or during Scaffold.
   `join(process.cwd(), "project", "test-reports")`, which no literal matches. Hence **one tracked list,
   two projections** (D-111): the hook's path globs and the linter's tokens are fields on one record, so
   a missed spelling is a token added rather than a second list to remember. It gained a **fifth record**
-  for the moved test-report generator — measured, that token is the *only* thing that makes the
+  for the moved test-report generator — measured, that token is the _only_ thing that makes the
   repo-root `CLAUDE.md` guardable at all, which is exactly the gap SPEC-08 BR-14a describes.
 - **Two rulings the register had no column for.** `research/README.md` §5 has **no Owner column and no
   Grade column**, which is why R5, R6 and R10 have carried neither. R5 is discharged, R6's closure
@@ -1359,14 +1427,15 @@ stores them under the user's home directory, which the bridge cannot access.
 
 ## 9. Related documents
 
-| Document                                                 | What it holds                                                                                                                         |
-| -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `Project Tracker/PRD.md`                                 | Full product design. Slice 1 is a small fraction of it.                                                                               |
-| `Project Tracker/design/PROBLEM_STATEMENT_AND_VISION.md` | PSV-001 — the traceability root: problems P1–P5, scope, boundary.                                                                     |
-| `Project Tracker/design/BUSINESS_ARCHITECTURE.md`        | BA-001 v1.8 — the FRICEW catalogue and the story backlog. 22 objects, 3 waves, deferred items in §3, **the 12-spec grouping in §11**. |
-| `Project Tracker/design/specs/`                          | The twelve functional specs, written in `SPEC-01` → `SPEC-12` order. Grouping and membership are BA-001 §11. **8 of 12 written.**     |
-| `Project Tracker/research/`                              | Six research documents plus `README.md` — the index, assumption ledger, open risks and gate verdict. All **Draft**.                   |
-| `Project Tracker/design/DECISIONS_LOG.md`                | D-01 … D-102 with full rationale. (`IDEATE_KICKOFF.md` was scratch — absorbed and deleted 2026-07-26.)                                |
-| `Standards (Documents)/METHODOLOGY_BLUEPRINT.md`         | The methodology→tooling map. **§7 is partly superseded** — the module is real, not a generator, and it writes rather than only reads. |
-| `Financial Planner/design/`                              | The artifact set this module's design phase mirrors.                                                                                  |
-| `Financial Planner/design/DESIGN_PHASE_TIMELINE.md`      | How the design phase actually ran, step by step.                                                                                      |
+| Document                                                 | What it holds                                                                                                                                    |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `Project Tracker/PRD.md`                                 | Full product design. Slice 1 is a small fraction of it.                                                                                          |
+| `Project Tracker/design/PROBLEM_STATEMENT_AND_VISION.md` | PSV-001 — the traceability root: problems P1–P5, scope, boundary.                                                                                |
+| `Project Tracker/design/BUSINESS_ARCHITECTURE.md`        | BA-001 v1.13 — the FRICEW catalogue and the story backlog. 22 objects, 3 waves, deferred items in §3, **the 12-spec grouping in §11**.           |
+| `Project Tracker/design/specs/`                          | The twelve functional specs, written in `SPEC-01` → `SPEC-12` order. Grouping and membership are BA-001 §11. **12 of 12 written, all Approved.** |
+| `Project Tracker/research/`                              | Six research documents plus `README.md` — the index, assumption ledger, open risks and gate verdict. All **Draft**.                              |
+| `Project Tracker/design/INFORMATION_ARCHITECTURE.md`     | IA-001 — page and route decomposition, build technology, navigation, shell placement and origin. **Draft.**                                      |
+| `Project Tracker/design/DECISIONS_LOG.md`                | D-01 … D-143 with full rationale. (`IDEATE_KICKOFF.md` was scratch — absorbed and deleted 2026-07-26.)                                           |
+| `Standards (Documents)/METHODOLOGY_BLUEPRINT.md`         | The methodology→tooling map. **§7 is partly superseded** — the module is real, not a generator, and it writes rather than only reads.            |
+| `Financial Planner/design/`                              | The artifact set this module's design phase mirrors.                                                                                             |
+| `Financial Planner/design/DESIGN_PHASE_TIMELINE.md`      | How the design phase actually ran, step by step.                                                                                                 |
