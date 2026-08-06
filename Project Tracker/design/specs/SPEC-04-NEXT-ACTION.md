@@ -5,9 +5,10 @@
 **Wave:** 2
 **CDS Service:** Not yet defined — see §2. This spec is an input to the Data Model stage.
 **Status:** Approved
-**Provisional on:** **R1** (D-39), inherited from SPEC-01, SPEC-02 and SPEC-03, and **R9** (D-69),
-which goes live here because this is the first spec carrying a Report. **Not Approved-for-build until
-both clear.**
+**Provisional on:** **R1** (D-39), inherited from SPEC-01, SPEC-02 and SPEC-03. ~~and **R9** (D-69),
+which goes live here because this is the first spec carrying a Report.~~ **R9 was executed and
+discharged at the Information Architecture stage, 2026-08-06 (D-140, D-141)** — it changed no business
+rule and no FUT here, exactly as D-69 predicted. **Not Approved-for-build until R1 clears.**
 
 ---
 
@@ -19,6 +20,7 @@ both clear.**
 | 2026-07-28 | Sandro & Claude | Four defects fixed on review, before approval. **FUT-010's precondition was unreachable through its own guards** — it named `commit` Not Started and then called `complete_stage` on it, which SPEC-02 §5 rejects with `verb.stage.notStarted`; `commit` is now In Progress. **BR-12 was overclaimed and contradicted by FUT-002**, which shows SPEC-02 BR-20 refusing `start_stage` on an In Progress Task; scoped to the verb the payload's `status` names. FUT-010 and FUT-012 cited bare `BR-16` / `BR-19` where this spec has rules of those numbers, so both now name SPEC-01 and SPEC-02. BR-06 narrowed to candidates — a Milestone with no Tasks has no tier. |
 | 2026-07-28 | Sandro          | Status → Approved. All eight DESIGN_WORKSHOP §6 criteria met. Still provisional on **R1 and R9** for build.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | 2026-07-30 | Sandro & Claude | §6's cross-spec row addressed to SPEC-06 is **struck through as applied** — BR-34's Milestone-position rule is carried by SPEC-06 BR-16, which resolves the row order at save (SPEC-06 BR-29) and adds the Add Story case. No rule changed; status stays **Approved**.                                                                                                                                                                                                                                                                                                                                                                                                 |
+| 2026-08-06 | Sandro & Claude | **R9 executed and discharged** at the Information Architecture stage (D-140, D-141) — the spec is now provisional on **R1 alone**. R9's stated premise was wrong: cross-origin composition fails under `cds watch` too, not only under `NODE_ENV=production`. Layout, routing and navigation deferred by BR-33 are settled in `INFORMATION_ARCHITECTURE.md` (D-137); RPT-002's story rows gain click navigation selecting RPT-003's chain.                                                                                                                                                                                                                             |
 
 ---
 
@@ -35,9 +37,9 @@ derived (D-53) and vacuous over an empty Task set (D-64). Its candidate ordering
 `Initiative.position` then `Milestone.position` — because the twelve migrated rows share one
 `createdAt` and supply no other total order (D-67).
 
-**This spec is provisional on R1 and R9.** Nothing here has been executed against Postgres, and two
+**This spec is provisional on R1.** Nothing here has been executed against Postgres. ~~and two
 CAP processes serving into one shell page has never been executed at all. Both are owned, not merely
-noted; see §6.
+noted; see §6.~~ **R9 was executed at the Information Architecture stage and is discharged** — see §6.
 
 ---
 
@@ -258,19 +260,23 @@ naming a stage nobody can run — is closed structurally rather than by notifica
 nine stages an invocation point, and BR-13 names `requiresHuman` on the payload so the caller knows
 before it calls.
 
-**Provisional dependencies — R1 and R9.**
+**Provisional dependencies — R1. R9 is discharged.**
 
 - **R1** inherited from SPEC-01, SPEC-02 and SPEC-03 (D-39). The Postgres repeat is owned by the Data
   Model stage.
-- **R9** is **new here** — SPEC-04 is the first spec carrying a Report, and R9 is two CAP processes
-  serving into one shell page, graded `Inferred` and never executed. **It is owned by the Information
-  Architecture stage** (D-69). R9 changes no BR and no FUT in this spec: it decides which **origin**
-  serves the page, not what the page **says**. It is assigned rather than merely noted because D-39's
-  lesson is exactly that — a risk recorded without an owner is what left R1 unexecuted until the
-  SPEC-01 workshop. **SPEC-05 and SPEC-07 inherit it**, and its deadline remains before
-  RPT-001 … RPT-004 are built.
+- ~~**R9** is **new here** — SPEC-04 is the first spec carrying a Report, and R9 is two CAP processes
+  serving into one shell page, graded `Inferred` and never executed.~~ **R9 was executed at the
+  Information Architecture stage on 2026-08-06 and is `Verified` (D-140).** D-69's prediction held —
+  it changed no BR and no FUT here, because it decided which **origin** serves the page rather than
+  what the page **says**. Two findings inverted its premise: cross-origin composition fails under
+  `cds watch` as well as in production, because CAP's CORS middleware never sends
+  `Access-Control-Allow-Headers` (`@sap/cds/server.js:93-102`, the `cors` getter) and UI5's V4 model
+  always sends `X-CSRF-Token`, so the `$batch` preflight is rejected; and an absolute `http://`
+  dataSource URI crashes CAP at boot (`@sap/cds-fiori/app/routes.js:68`). **The serving position is
+  one origin behind a reverse proxy (D-141)**, which leaves every manifest's relative `/service/…` URI
+  unchanged. Execution of the proxy belongs to the **Tech Stack** stage.
 
-**This spec is not Approved-for-build until both R1 and R9 clear.**
+**This spec is not Approved-for-build until R1 clears.**
 
 **Cross-spec notes raised, not designed here**
 
@@ -535,4 +541,4 @@ before it calls.
 
 ---
 
-_SPEC-04 specifies ENH-002 and RPT-002 — the engine that answers "what next" and the component that renders it — per [BA-001 §11 row 04](../BUSINESS_ARCHITECTURE.md). The chain it walks is [SPEC-02](SPEC-02-METHODOLOGY-AND-STAGE-ENFORCEMENT.md); the verb surface it is reached through is [SPEC-01](SPEC-01-MCP-INTENT-VERB-LAYER.md); the data it resolves over is [SPEC-03](SPEC-03-FINANCIAL-PLANNER-MIGRATION-LOAD.md). **Provisional on R1** ([D-39](../DECISIONS_LOG.md)) **and R9** ([D-69](../DECISIONS_LOG.md))._
+_SPEC-04 specifies ENH-002 and RPT-002 — the engine that answers "what next" and the component that renders it — per [BA-001 §11 row 04](../BUSINESS_ARCHITECTURE.md). The chain it walks is [SPEC-02](SPEC-02-METHODOLOGY-AND-STAGE-ENFORCEMENT.md); the verb surface it is reached through is [SPEC-01](SPEC-01-MCP-INTENT-VERB-LAYER.md); the data it resolves over is [SPEC-03](SPEC-03-FINANCIAL-PLANNER-MIGRATION-LOAD.md). **Provisional on R1** ([D-39](../DECISIONS_LOG.md)). **R9 executed and discharged** at Information Architecture ([D-140](../DECISIONS_LOG.md), [D-141](../DECISIONS_LOG.md)); layout, routing and navigation are settled in [INFORMATION_ARCHITECTURE.md](../INFORMATION_ARCHITECTURE.md) (D-137)._
