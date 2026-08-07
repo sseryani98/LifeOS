@@ -142,6 +142,17 @@ as explicitly as what is present, and to re-measure every count it reports rathe
 | **precedent** | The exemplar design system and theme, and the exemplar module's UI sources **on disk** — manifests, views, an FPM app if one exists | The exemplar's own split between design system and theme; the FE/FPM/freestyle shapes actually in the tree, re-measured; and **which exemplar answers are that module's alone**                  |
 | **decisions** | The module's decisions log, its vision doc, and whatever holds its plan                                                             | Decisions binding this stage (ID + one-line ruling), open items it could resolve, **risks assigned to it by ID with what would settle each**, and any prior ruling on vocabulary or health bands |
 
+## Step 0: the predecessor's status
+
+**Read the status of `design/INFORMATION_ARCHITECTURE.md` before anything else.** If it is not
+**Approved**, say so in your first message and ask Sandro to approve it or to authorise running on an
+unapproved input. Do not flip the status yourself and do not proceed silently — this stage styles
+what that document names, so its status is this stage's status.
+
+This check exists because it failed twice in a row: the Information Architecture stage and this one
+each closed without asking for approval of their own output, and the following stage discovered it.
+See the approval gate in Phase 6.
+
 ## Phase 0: Resolve inputs
 
 1. Confirm the module — cwd, and that `design/` exists. If `design/DESIGN_SYSTEM.md` already
@@ -259,9 +270,14 @@ the document never competes for context with the conversation you just held.
    Check every count against the artifact it describes, every cross-reference against a file, and
    every claim against its own evidence.
 5. Apply the spec amendments in-session rather than leaving them owed, and show the list.
-6. Show Sandro the path and the Summary, and ask for explicit approval. On approval, flip Draft →
-   Approved.
-7. Name the next stage — Theme — and stop. Do not start it.
+6. **The approval gate.** Show Sandro the path and the Summary, and ask for explicit approval. On
+   approval, flip Draft → Approved and add the Change History row. **Do not report the stage closed
+   without an answer to that question** — an unapproved artifact is owed work, and the next stage
+   should not be the thing that discovers it.
+7. **Check the encoding survived the write.** Run `git diff --stat` and grep for `â€` before
+   committing. A PowerShell `Add-Content -Encoding utf8` append to a UTF-8 markdown file
+   double-encodes every em-dash; append with `cat` or the Edit tool.
+8. Name the next stage — Theme — and stop. Do not start it.
 
 ## The exemplar's answers, which are not the standard
 

@@ -3,7 +3,7 @@
 **Document ID:** DS-001
 **Version:** 1.0
 **Date:** 2026-08-06
-**Status:** Draft
+**Status:** Approved
 
 ---
 
@@ -12,6 +12,7 @@
 | Date       | Author          | Description                                                                                                                                                                                                                                                                                                                                      |
 | ---------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | 2026-08-06 | Sandro & Claude | Initial creation from the Design System stage. Build technology ruled **Fiori Elements FPM** for all 6 UI-bearing objects with **drafts off**; the browser read path named; theme and density recorded as inherited; one `ObjectPageLayout` in 4 regions; **17** domain-to-role mappings; charts answered **none**. Records D-144 through D-152. |
+| 2026-08-06 | Sandro          | Approved at the opening of the Theme stage. Status Draft → Approved.                                                                                                                                                                                                                                                                             |
 
 ---
 
