@@ -8,7 +8,7 @@ story, a spec, a sprint row, and a commit trailer. Objects you miss get built ad
 invent get built for nothing. This is the highest-leverage half-day in the module.
 
 The catalogue is not a design. One line per object is the standard — what it is, what it touches,
-where it came from. The *how* belongs to the Workshops stage, which reads this file to know what it
+where it came from. The _how_ belongs to the Workshops stage, which reads this file to know what it
 is workshopping.
 
 ## Where this runs
@@ -24,14 +24,14 @@ that makes this skill serve the next module.
 Every rule below exists because something downstream reads this file. Know the consumers before you
 bend a rule:
 
-| Consumer | Reads | Breaks if |
-|---|---|---|
-| `/workshop` (domain scout) | Objects in scope for a spec: ID, name, description | An object has no ID, or its description is too thin to scope a workshop |
-| `/pm-update` (check 3) | Every board story ID must exist here | An ID is renumbered, deleted, or minted outside the catalogue |
-| Project Tracker / dashboard | Story list; `{PREFIX}-{NNN}`, PREFIX ∈ {FRM, INT, ENH, CNV, RPT, WFL} | A seventh prefix appears, or IDs aren't zero-padded to three digits |
-| Data Model stage | What entities must exist to back these objects | An object implies data nobody catalogued |
-| Build Plan stage | The full object set and its build order | An object has no wave |
-| Commits (`feat(scope): … FRM-001`) | The ID, forever | An ID is ever reused for a different object |
+| Consumer                           | Reads                                                                 | Breaks if                                                               |
+| ---------------------------------- | --------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `/workshop` (domain scout)         | Objects in scope for a spec: ID, name, description                    | An object has no ID, or its description is too thin to scope a workshop |
+| `/pm-update` (check 3)             | Every board story ID must exist here                                  | An ID is renumbered, deleted, or minted outside the catalogue           |
+| Project Tracker / dashboard        | Story list; `{PREFIX}-{NNN}`, PREFIX ∈ {FRM, INT, ENH, CNV, RPT, WFL} | A seventh prefix appears, or IDs aren't zero-padded to three digits     |
+| Data Model stage                   | What entities must exist to back these objects                        | An object implies data nobody catalogued                                |
+| Build Plan stage                   | The full object set and its build order                               | An object has no wave                                                   |
+| Commits (`feat(scope): … FRM-001`) | The ID, forever                                                       | An ID is ever reused for a different object                             |
 
 **IDs are permanent.** Once written they are cited in specs, commits, board rows, and defect
 records. You may add, you may mark an object absorbed or dropped, you may never renumber or reuse.
@@ -90,7 +90,7 @@ row breaks every citation of that ID and makes the count history unexplainable.
 
 ## Why this delegates its reading
 
-Source material at this stage is large and mostly *not* catalogue content: a PRD is largely
+Source material at this stage is large and mostly _not_ catalogue content: a PRD is largely
 rationale, background, future scope, and explicitly-undecided UX. Reading it in the main thread
 spends the interview's context on prose you will throw away. **Send a `domain-scout`; get back a
 classified candidate inventory.** Every candidate arrives with a `file:line`, a proposed
@@ -124,13 +124,13 @@ out-of-scope statements verbatim, and — if this is an amendment — the existi
 
 It returns a candidate inventory, each row classified:
 
-| Class | Meaning |
-|---|---|
-| **In** | A deliverable unit of behaviour, inside the stated scope |
-| **Deferred** | Real, well-formed, explicitly outside this slice |
+| Class             | Meaning                                                                                            |
+| ----------------- | -------------------------------------------------------------------------------------------------- |
+| **In**            | A deliverable unit of behaviour, inside the stated scope                                           |
+| **Deferred**      | Real, well-formed, explicitly outside this slice                                                   |
 | **Not an object** | Background, rationale, a design principle, an already-decided-out item, or explicitly-undecided UX |
-| **Not FRICEW** | Real and in scope, but belongs to another stage — an entity, a theme choice, an IA decision |
-| **Uncertain** | The scout cannot classify it from the sources alone |
+| **Not FRICEW**    | Real and in scope, but belongs to another stage — an entity, a theme choice, an IA decision        |
+| **Uncertain**     | The scout cannot classify it from the sources alone                                                |
 
 **Uncertain is the pile you spend Sandro's time on.** In, Deferred and Not-an-object you present for
 confirmation in bulk; Uncertain you work one question at a time.
@@ -156,7 +156,7 @@ the boundary as the deliverable of this phase, not a preamble to the real work.
    whole point — a deferred item that is written down is a later slice; a deferred item that is
    dropped silently is a hole nobody finds until the build.
 6. If the upstream vision artifact already carries an Out of Scope section, **reference it rather
-   than copying it**, and record in §3 only what *this stage* cut that the vision doc did not.
+   than copying it**, and record in §3 only what _this stage_ cut that the vision doc did not.
 
 When Sandro asks for a recommendation, give one with rationale — not a balanced menu. He is asking
 because he wants your judgment.
@@ -183,11 +183,11 @@ Work these, in order:
    - A **record written by a machine rather than a human** is still an object — catalogue it under
      the thing that writes it, and say in the description that no user-facing entry surface exists.
    - **Entities are not FRICEW objects.** They go to the Data Model stage. But ask the follow-up:
-     what creates and maintains this data? That answer usually *is* an object — a seed Conversion or
+     what creates and maintains this data? That answer usually _is_ an object — a seed Conversion or
      a maintenance Form.
 3. **Names.** Sandro's vocabulary, not the source doc's. If he calls it the Churnboard, it is the
    Churnboard.
-4. **Carve-outs.** For each object, ask what it explicitly does *not* do. This is where the
+4. **Carve-outs.** For each object, ask what it explicitly does _not_ do. This is where the
    catalogue earns its keep, and it is the question most often skipped.
 5. **Don't stop early.** After the pile clears, ask what the module needs that no source document
    thought to state — reference-data maintenance, the initial load, the recurring session that ties
@@ -199,7 +199,7 @@ The Scope stage owns build order; the exemplar carries it as the catalogue's las
 
 1. Derive dependencies from the descriptions — X consumes Y, Y seeds Z. Present the chains and ask
    what you have backwards.
-2. Group into **waves**: each wave is a *testable increment*, a coherent thing that works end to
+2. Group into **waves**: each wave is a _testable increment_, a coherent thing that works end to
    end, not a calendar phase. Name each wave for what it makes possible.
 3. **A small slice may be one wave.** Do not manufacture four. Keep the Wave column regardless —
    downstream ordering depends on it.
@@ -234,22 +234,25 @@ forty-row document never competes for context with the conversation you just hel
    writes `design/BUSINESS_ARCHITECTURE.md` at status **Draft**, and returns its validation check.
 3. If it returns a **gap** instead of a file, the interview left a hole. Ask Sandro that one
    question, add the answer to the record, re-invoke. Do not fill the hole yourself.
-4. Review the returned check. Show Sandro the path, the Summary counts, and the one-line boundary
-   statement, and ask for explicit approval. On approval, flip Draft → Approved.
+4. **The approval gate.** Review the returned check. Show Sandro the path, the Summary counts, and
+   the one-line boundary statement, and ask for explicit approval. On approval, flip Draft →
+   Approved and add the Change History row. **Do not report the stage closed without an answer to
+   that question** — an unapproved artifact is owed work, and the next stage should not be the thing
+   that discovers it.
 5. Name the next stage — Research, then Scaffold — and stop. Do not start it.
 
 ## Financial Planner's answers, which are not the standard
 
 The exemplar is one module. Carry the mechanics forward; do not carry these:
 
-| FP's answer | Status |
-|---|---|
-| 43 objects, six types all populated | FP's shape. A slice may have twelve objects and four types. |
-| Four waves, named Core Pipeline / Churning Depth / Analytics / Market Intelligence | FP's phasing. Waves are derived per module. |
-| All waves built before go-live | FP's release decision, logged as a decision there. Ask; don't assume. |
-| Traces To pointing at `PSV Pillar n` and `D-nn` | FP had a vision doc and a populated decisions log at Scope time. Use whatever anchors exist. |
-| Dependency-chain analysis (longest path, widest fan-in) | Worth it at 43 objects; overhead at 12. |
-| Prose-dense descriptions running four lines | Density scales with the object, not with FP's habit. |
+| FP's answer                                                                        | Status                                                                                       |
+| ---------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| 43 objects, six types all populated                                                | FP's shape. A slice may have twelve objects and four types.                                  |
+| Four waves, named Core Pipeline / Churning Depth / Analytics / Market Intelligence | FP's phasing. Waves are derived per module.                                                  |
+| All waves built before go-live                                                     | FP's release decision, logged as a decision there. Ask; don't assume.                        |
+| Traces To pointing at `PSV Pillar n` and `D-nn`                                    | FP had a vision doc and a populated decisions log at Scope time. Use whatever anchors exist. |
+| Dependency-chain analysis (longest path, widest fan-in)                            | Worth it at 43 objects; overhead at 12.                                                      |
+| Prose-dense descriptions running four lines                                        | Density scales with the object, not with FP's habit.                                         |
 
 What **is** the standard: the six prefixes, `{PREFIX}-{NNN}`, ID permanence, the five columns,
 one row per object, absorbed-not-deleted, and the rule that everything traces to something.

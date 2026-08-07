@@ -28,13 +28,13 @@ Two things are module-local and must not be flattened into one answer:
 
 ## What this stage owns, and what it does not
 
-| Owned here | Not here |
-|---|---|
+| Owned here                                                                     | Not here                                                                                               |
+| ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------ |
 | Page and **route** decomposition — what is a route, what is in-page disclosure | The **content** of each surface: sections, fields, ordering, empty states (Workshops, already settled) |
-| **Build technology per object** — Fiori Elements or freestyle | Controls, density, spacing, chart conventions (Design System) |
-| Navigation: entries, landing page, cross-page links, deep links | Colour, typography, radius, the CSS contract (Theme) |
-| Entry points and the discoverability audit | Entities and attributes (Data Model) |
-| **Where the module's UI sits in the shared shell, and which origin serves it** | The serving stack itself (Tech Stack) |
+| **Build technology per object** — Fiori Elements or freestyle                  | Controls, density, spacing, chart conventions (Design System)                                          |
+| Navigation: entries, landing page, cross-page links, deep links                | Colour, typography, radius, the CSS contract (Theme)                                                   |
+| Entry points and the discoverability audit                                     | Entities and attributes (Data Model)                                                                   |
+| **Where the module's UI sits in the shared shell, and which origin serves it** | The serving stack itself (Tech Stack)                                                                  |
 
 **The build-technology ruling is this stage's, and it is the one people expect elsewhere.** Fiori
 Elements versus freestyle is not a styling choice: it decides whether an entity is draft-enabled,
@@ -51,13 +51,13 @@ an IA answer — say it even when the answer is "unchanged, one origin, one shel
 
 Know the consumers before you bend a rule:
 
-| Consumer | Reads | Breaks if |
-|---|---|---|
-| `/ux-test` → `ux-tester` | `design/INFORMATION_ARCHITECTURE.md` for nav structure, landing page, cross-page links, where a page sits in the journey (`.claude/agents/ux-tester.md:24-25`) | The document is missing — the agent stops rather than reviews — or names pages that do not exist |
-| Design System | The page and route inventory it is styling | A surface is unnamed, so nothing specifies its density or layout |
-| Data Model | Draft enablement, which follows from the Fiori Elements ruling | The ruling is deferred, leaving a draft filter written against an undecided model |
-| Build (`build-briefer`, `implementer`) | Which app folder, which route, which technology per object | An object has a spec and no page |
-| Tech Stack | The origin and serving constraint this stage records | An origin assumption reaches build unexecuted |
+| Consumer                               | Reads                                                                                                                                                          | Breaks if                                                                                        |
+| -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `/ux-test` → `ux-tester`               | `design/INFORMATION_ARCHITECTURE.md` for nav structure, landing page, cross-page links, where a page sits in the journey (`.claude/agents/ux-tester.md:24-25`) | The document is missing — the agent stops rather than reviews — or names pages that do not exist |
+| Design System                          | The page and route inventory it is styling                                                                                                                     | A surface is unnamed, so nothing specifies its density or layout                                 |
+| Data Model                             | Draft enablement, which follows from the Fiori Elements ruling                                                                                                 | The ruling is deferred, leaving a draft filter written against an undecided model                |
+| Build (`build-briefer`, `implementer`) | Which app folder, which route, which technology per object                                                                                                     | An object has a spec and no page                                                                 |
+| Tech Stack                             | The origin and serving constraint this stage records                                                                                                           | An origin assumption reaches build unexecuted                                                    |
 
 ## The document standard
 
@@ -74,19 +74,19 @@ content is answered explicitly — "none, and here is why" — never dropped.** 
 ruling; a missing heading is indistinguishable from an oversight, and the next module cannot tell
 whether the question was considered.
 
-| # | The question | Section it becomes | Exemplar's answer shape |
-|---|---|---|---|
-| 1 | What is the record of this document? | Change History | Table |
-| 2 | What did this stage settle? | Summary | `Aspect \| Outcome` table |
-| 3 | Which objects ship UI, and onto what surface does each land? | Surface Inventory | The exemplar folds this into its sitemap |
-| 4 | What is a route, and what is in-page disclosure? | Page & Route Decomposition | Sitemap validation |
-| 5 | Fiori Elements or freestyle, per object, and why? | Build Technology | Absent — the exemplar inherited it from its Design System |
-| 6 | How is each surface reached — nav, landing, deep link, contextual link? | Navigation & Entry Points | Cross-Page Navigation + Entry Points |
-| 7 | Where does the module's UI live in the shared shell, and which origin serves it? | Shell Placement & Origin | Absent — one module, one origin, never asked |
-| 8 | Is every surface reachable, and by how many paths? | Discoverability Audit | Reachability table |
-| 9 | What journeys does the vision doc's falsifiable checks measure, and do they work? | Task Flow Mapping | Per-journey step tables |
-| 10 | What does this stage change in an Approved spec? | Spec Amendments | `Spec \| Amendment \| Decision` table |
-| 11 | Which decisions did this stage take? | Decisions Reference | `ID \| Title \| Summary` table |
+| #   | The question                                                                      | Section it becomes         | Exemplar's answer shape                                   |
+| --- | --------------------------------------------------------------------------------- | -------------------------- | --------------------------------------------------------- |
+| 1   | What is the record of this document?                                              | Change History             | Table                                                     |
+| 2   | What did this stage settle?                                                       | Summary                    | `Aspect \| Outcome` table                                 |
+| 3   | Which objects ship UI, and onto what surface does each land?                      | Surface Inventory          | The exemplar folds this into its sitemap                  |
+| 4   | What is a route, and what is in-page disclosure?                                  | Page & Route Decomposition | Sitemap validation                                        |
+| 5   | Fiori Elements or freestyle, per object, and why?                                 | Build Technology           | Absent — the exemplar inherited it from its Design System |
+| 6   | How is each surface reached — nav, landing, deep link, contextual link?           | Navigation & Entry Points  | Cross-Page Navigation + Entry Points                      |
+| 7   | Where does the module's UI live in the shared shell, and which origin serves it?  | Shell Placement & Origin   | Absent — one module, one origin, never asked              |
+| 8   | Is every surface reachable, and by how many paths?                                | Discoverability Audit      | Reachability table                                        |
+| 9   | What journeys does the vision doc's falsifiable checks measure, and do they work? | Task Flow Mapping          | Per-journey step tables                                   |
+| 10  | What does this stage change in an Approved spec?                                  | Spec Amendments            | `Spec \| Amendment \| Decision` table                     |
+| 11  | Which decisions did this stage take?                                              | Decisions Reference        | `ID \| Title \| Summary` table                            |
 
 Questions 5 and 7 are **not** in the exemplar and are not optional. The planner never faced them —
 it had one origin and a Design System that predated its IA. Every module after the first faces both.
@@ -115,11 +115,22 @@ interview's context on content you will not re-litigate. **Send scouts; get back
 Spawn the scouts **in one message** so they run concurrently. Tell each to report what is **absent**
 as explicitly as what is present, and to re-measure every count it reports rather than quoting one.
 
-| Scout | Reads | Returns (≤ ½ page, every claim cited `file:line`) |
-|---|---|---|
-| **surface** | Every spec in `design/specs/` that carries a Form, Report or Workflow — §3 and §7 — plus `design/BUSINESS_ARCHITECTURE.md`'s Forms/Reports/Workflows sections | One row per UI-bearing object: sections it holds, the addressing values its drill-down states, its stated empty states, and **every sentence that defers a decision to this stage, quoted** |
-| **precedent** | The exemplar IA, the module's research pack, and the shell/app sources as they are **on disk** | The shell mechanism as actually implemented — files, counts, mount paths, resource roots — re-measured; and which exemplar answers are the planner's alone |
+| Scout         | Reads                                                                                                                                                                           | Returns (≤ ½ page, every claim cited `file:line`)                                                                                                                                                            |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **surface**   | Every spec in `design/specs/` that carries a Form, Report or Workflow — §3 and §7 — plus `design/BUSINESS_ARCHITECTURE.md`'s Forms/Reports/Workflows sections                   | One row per UI-bearing object: sections it holds, the addressing values its drill-down states, its stated empty states, and **every sentence that defers a decision to this stage, quoted**                  |
+| **precedent** | The exemplar IA, the module's research pack, and the shell/app sources as they are **on disk**                                                                                  | The shell mechanism as actually implemented — files, counts, mount paths, resource roots — re-measured; and which exemplar answers are the planner's alone                                                   |
 | **decisions** | The module's decisions log, `design/PROBLEM_STATEMENT_AND_VISION.md`, and whatever holds its plan (`PLAN.md` on Project Tracker, `design/PROJECT_MANAGEMENT.md` on the planner) | Decisions binding this stage (ID + one-line ruling), open items it could resolve, **risks assigned to it by ID with what would settle each**, and the vision doc's falsifiable checks that measure a journey |
+
+## Step 0: the predecessor's status
+
+**Read the status of every document this stage consumes before anything else** — here, the
+UI-bearing specs. If one is not **Approved**, say so in your first message and ask Sandro to approve
+it or to authorise running on an unapproved input. Do not flip a status yourself and do not proceed
+silently.
+
+This check exists because it failed twice in a row: this stage and the Design System stage each
+closed without asking for approval of their own output, and the following stage discovered it. See
+the approval gate in Phase 6.
 
 ## Phase 0: Resolve inputs
 
@@ -229,23 +240,28 @@ document never competes for context with the conversation you just held.
    Check every count against the artifact it describes, every cross-reference against a file, and
    every claim against its own evidence.
 5. Apply the spec amendments in §10 in-session rather than leaving them owed, and show the list.
-6. Show Sandro the path and the Summary, and ask for explicit approval. On approval, flip Draft →
-   Approved.
-7. Name the next stage — Design System, then Theme — and stop. Do not start it.
+6. **The approval gate.** Show Sandro the path and the Summary, and ask for explicit approval. On
+   approval, flip Draft → Approved and add the Change History row. **Do not report the stage closed
+   without an answer to that question** — an unapproved artifact is owed work, and the next stage
+   should not be the thing that discovers it.
+7. **Check the encoding survived the write.** Run `git diff --stat` and grep for `â€` before
+   committing. A PowerShell `Add-Content -Encoding utf8` append to a UTF-8 markdown file
+   double-encodes every em-dash; append with `cat` or the Edit tool.
+8. Name the next stage — Design System, then Theme — and stop. Do not start it.
 
 ## The exemplar's answers, which are not the standard
 
 Carry the mechanics forward; do not carry these.
 
-| The planner's answer | Status |
-|---|---|
-| 23 side-nav entries across 5 groups | The planner's shape at design time. A slice may have one page and no nav group of its own. |
-| A landing page chosen from 23 candidates | Derived per module. With one page the question is what it opens **on**, not which page. |
-| 30+ cross-page contextual links | Scales with page count. Two pages have few, and that is not a thinness to fix. |
+| The planner's answer                                    | Status                                                                                                                                                      |
+| ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 23 side-nav entries across 5 groups                     | The planner's shape at design time. A slice may have one page and no nav group of its own.                                                                  |
+| A landing page chosen from 23 candidates                | Derived per module. With one page the question is what it opens **on**, not which page.                                                                     |
+| 30+ cross-page contextual links                         | Scales with page count. Two pages have few, and that is not a thinness to fix.                                                                              |
 | Sitemap Validation as a section — "changes from DS-001" | The planner ran Design System **before** IA. Where IA runs first, there is no sitemap to validate against; §4 becomes decomposition rather than validation. |
-| No Build Technology section | The planner inherited FE-vs-freestyle from its Design System. Every module after it rules here. |
-| No Shell Placement section | One module, one origin, never asked. |
-| Wave-gating: hidden until built | The planner's release decision. Ask; do not assume. |
+| No Build Technology section                             | The planner inherited FE-vs-freestyle from its Design System. Every module after it rules here.                                                             |
+| No Shell Placement section                              | One module, one origin, never asked.                                                                                                                        |
+| Wave-gating: hidden until built                         | The planner's release decision. Ask; do not assume.                                                                                                         |
 
 What **is** the standard: the eleven questions, a stated "none" over a dropped heading, counts
 measured not carried, navigation claims naming both ends and the trigger, and a decisions table that

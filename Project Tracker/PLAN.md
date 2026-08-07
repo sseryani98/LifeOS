@@ -1,8 +1,9 @@
 # Project Tracker — Plan
 
-**Status:** Plan phase — Ideate, Scope, Research, Scaffold, Workshops, Information Architecture **and
-Design System complete** (grouping settled, `SPEC-01` … `SPEC-12`; **12 of 12 written and all twelve
-Approved**; `IA-001` **Approved**; `DS-001` written, **Draft**). Next stage is **Theme**.
+**Status:** Plan phase — Ideate, Scope, Research, Scaffold, Workshops, Information Architecture,
+Design System **and Theme complete** (grouping settled, `SPEC-01` … `SPEC-12`; **12 of 12 written and
+all twelve Approved**; `IA-001` **Approved**; `DS-001` **Approved**; `TH-001` written, **Draft**).
+Next stage is **Data Model**.
 **Last updated:** 2026-08-06
 **Purpose:** The continuity document. Anyone (or any fresh chat) picking up Project Tracker
 starts here. Read this, then `design/PROBLEM_STATEMENT_AND_VISION.md` (PSV-001),
@@ -17,14 +18,19 @@ Financial Planner is mid-sprint **W1-S3 — Transaction Processing**, with one s
 Backlog (`CNV-001` Historical backfill) and nothing In Progress. That gap is deliberate — it
 is the cutover window.
 
-**Design System is complete.** `design/DESIGN_SYSTEM.md` (DS-001, **Draft**) rules **Fiori Elements
-FPM for all six UI-bearing objects with draft enablement OFF** (D-144), which is the answer the Data
-Model stage was waiting for, and it names the **browser read path** nobody had ever specified (D-145).
-`IA-001` is **Approved**. Decisions run **D-01 … D-152**.
+**Theme is complete, and the three UI stages D-21 rules must run in full are done.**
+`design/THEME.md` (TH-001, **Draft**) rules the module **inherits Financial Planner's theme
+wholesale and writes no CSS** (D-153) — the question DS-001 §13.1 handed it by name — and resolves
+DS-001 §9's 17 role mappings onto **5** Horizon custom properties measured against the pinned
+runtime (D-154). **Design System is complete** — `design/DESIGN_SYSTEM.md` (DS-001, **Approved** at
+this stage's opening) rules **Fiori Elements FPM for all six UI-bearing objects with draft
+enablement OFF** (D-144), the answer the Data Model stage was waiting for, and names the **browser
+read path** nobody had ever specified (D-145). `IA-001` is **Approved**. Decisions run
+**D-01 … D-159**.
 
 Project Tracker has a PRD, `design/PROBLEM_STATEMENT_AND_VISION.md` (PSV-001, **Draft**),
 `design/BUSINESS_ARCHITECTURE.md` (BA-001 v1.13, **Approved** — 22 objects in 3 waves, grouped into
-12 specs), a `research/` pack of six documents, a decisions log (D-01 … D-152), a wired module folder,
+12 specs), a `research/` pack of six documents, a decisions log (D-01 … D-159), a wired module folder,
 **twelve written specs — `SPEC-01` … `SPEC-12`, all twelve Approved** (`SPEC-01` flipped from Draft at
 the `SPEC-12` workshop, discharging D-93 — D-136) — and the
 Plan-phase skills installed in `.claude/`. **No module code exists yet.** Ideate, Scope and Research ran
@@ -44,14 +50,14 @@ becomes the first real test of the new system.
 
 ## 2. Decisions already made
 
-Full rationale in `design/DECISIONS_LOG.md` (D-01 … D-152; D-19 … D-27 were added at Scope,
+Full rationale in `design/DECISIONS_LOG.md` (D-01 … D-159; D-19 … D-27 were added at Scope,
 D-28 … D-32 at Research, D-33 … D-36 at Scaffold, D-37 … D-39 at the Workshops grouping,
 D-40 … D-46 at the `SPEC-01` workshop, D-47 … D-57 at the `SPEC-02` workshop, D-58 … D-65 at the
 `SPEC-03` workshop, D-66 … D-69 at the `SPEC-04` workshop, D-70 … D-75 at the `SPEC-05` workshop and
 D-76 … D-82 at the `SPEC-06` workshop, D-83 … D-92 at `SPEC-07`, D-93 … D-102 at `SPEC-08` and
 D-103 … D-108 at `SPEC-09`, D-109 … D-119 at `SPEC-10`, D-120 … D-128 at `SPEC-11` and
-D-129 … D-136 at `SPEC-12`, **D-137 … D-143 at Information Architecture and D-144 … D-152 at Design
-System**). The founding twelve,
+D-129 … D-136 at `SPEC-12`, **D-137 … D-143 at Information Architecture, D-144 … D-152 at Design
+System and D-153 … D-159 at Theme**). The founding twelve,
 summarized — note that **D-28 amends item 4's wording**: a bare `cds.connect.to()` throws, so the
 mechanism needs a construction step.
 
@@ -84,9 +90,9 @@ mechanism needs a construction step.
 | 4   | Scaffold           | `/scaffold-module` → `scaffold-writer`             | Authored     | **Done** — 2026-07-27                                                                                                |
 | 5   | Workshops          | `/workshop` → `spec-writer`                        | Exists       | **Done** — 2026-08-04. D-37 grouping; `SPEC-01` … `SPEC-12` all **Approved** (12/12 written; D-136)                  |
 | 6   | Information Arch.  | `/generate-information-architecture` → `ia-writer` | Authored     | **Done** — 2026-08-06. `IA-001` **Approved**; 6 objects → 1 route + 1 `story` param; **R9 executed** (D-137 … D-143) |
-| 7   | Design System      | `/generate-design-system` → `design-system-writer` | Authored     | **Done** — 2026-08-06. `DS-001` **Draft**; **FE FPM, drafts OFF**; the browser read path named (D-144 … D-152)       |
-| 8   | Theme              | `/generate-theme`                                  | Not authored | **Next** — runs in full (D-21). Inherits D-152's shared-shell CSS question                                           |
-| 9   | Data Model         | `/generate-data-model`                             | Not authored | Not started                                                                                                          |
+| 7   | Design System      | `/generate-design-system` → `design-system-writer` | Authored     | **Done** — 2026-08-06. `DS-001` **Approved**; **FE FPM, drafts OFF**; the browser read path named (D-144 … D-152)    |
+| 8   | Theme              | `/generate-theme` → `theme-writer`                 | Authored     | **Done** — 2026-08-06. `TH-001` **Draft**; **theme inherited wholesale, no CSS written** (D-153 … D-159)             |
+| 9   | Data Model         | `/generate-data-model`                             | Not authored | **Next** — owns **OI-05** and **R1**, plus D-145's read-path requirement                                             |
 | 10  | Tech Stack         | `/generate-tech-stack`                             | Not authored | Not started                                                                                                          |
 | 11  | Test Strategy      | `/generate-test-strategy`                          | Not authored | Not started                                                                                                          |
 | 12  | Project Planning   | `/generate-build-plan`                             | Not authored | Not started                                                                                                          |
@@ -96,7 +102,10 @@ mechanism needs a construction step.
 | 16  | Back to FP         | —                                                  | —            | Blocked on cutover                                                                                                   |
 
 Stages 6–8 (IA, Design System, Theme) **run in full** — settled by D-21. Slice 1 carries four
-Reports and two Forms, which is a real UI rather than a thin shell.
+Reports and two Forms, which is a real UI rather than a thin shell. **All three are now done**, and
+D-21 was vindicated at each: IA executed R9 and reversed its premise, Design System found a read path
+no spec had named, and Theme found the exemplar's own theme document wrong about its load mechanism
+and six of its stated defaults.
 
 ### Immediate next action
 
@@ -238,7 +247,7 @@ holds a **tracked `.gitkeep`** that would outlive its contents. `SPEC-10` BR-28'
 **ordered sequence with a proof step** (D-131), because a `PreToolUse` deny beats `bypassPermissions`
 and no hook has ever fired in this repo.
 
-**Workshops is complete.** Twelve specs, twelve Approved. **Information Architecture is complete too** — `design/INFORMATION_ARCHITECTURE.md` (IA-001, **Approved** 2026-08-06), D-137 … D-143, with **R9 executed and closed**. **Design System is complete** — `design/DESIGN_SYSTEM.md` (DS-001, **Draft**), D-144 … D-152: **FE FPM for all six objects, drafts OFF**, one `ObjectPageLayout`, 17 semantic-role mappings, no charts, and the browser read path named as a **SPEC-01 amendment**. **Next is stage 8, Theme.**
+**Workshops is complete.** Twelve specs, twelve Approved. **Information Architecture is complete too** — `design/INFORMATION_ARCHITECTURE.md` (IA-001, **Approved** 2026-08-06), D-137 … D-143, with **R9 executed and closed**. **Design System is complete** — `design/DESIGN_SYSTEM.md` (DS-001, **Approved**), D-144 … D-152: **FE FPM for all six objects, drafts OFF**, one `ObjectPageLayout`, 17 semantic-role mappings, no charts, and the browser read path named as a **SPEC-01 amendment**. **Theme is complete** — `design/THEME.md` (TH-001, **Draft**), D-153 … D-159: the module **inherits Financial Planner's theme wholesale and writes no CSS**, and DS-001 §9's 17 roles resolve onto **5** Horizon custom properties measured against the pinned runtime. **Next is stage 9, Data Model** — it owns **OI-05** and **R1**, plus D-145's read-path requirement.
 
 **Still open:** **OI-05 alone** (methodology genericity — Data Model). **OI-03 is closed by D-35 and
 OI-04 by D-70.** Research risks: R2 is closed
@@ -529,6 +538,75 @@ Settle before or during Scaffold.
 ---
 
 ## 8. Session log
+
+### 2026-08-06 — Theme: a document wrong about its own repo, and a contrast failure that turned out unreachable
+
+- **Authored `/generate-theme` and its `theme-writer` agent, then ran the stage.** Wrote
+  `design/THEME.md` (TH-001, **Draft**) and logged **D-153 … D-159**. The skill carries **15** fixed
+  questions against the exemplar's nine sections — **five of which the exemplar never faced**: theme
+  ownership, semantic token resolution, contrast verification, the shared-shell boundary, and risks
+  assigned to the stage. Every one produced a decision. **The pattern is now the house standard for
+  stages 9–12 (D-158)** rather than re-decided per stage. **The writer agent could not be invoked** —
+  Claude Code resolves its agent registry at session start, so a newly-authored agent is not callable
+  in the session that writes it, the same finding as the Design System session. The document was
+  written in the main thread against the same standard.
+- **`DS-001` was approved first (Step 0), and the pattern behind that was fixed rather than repeated
+  (D-159).** It had never been approved and the Design System session ended without asking — the
+  **second** stage running to do so, after `IA-001`. All four `/generate-*` skills now carry an
+  explicit **approval gate** ("do not report the stage closed without an answer") and a **Step 0**
+  that reads the predecessor's status. The encoding check went into the same Phase 6 in each.
+- **The ruling: this module inherits Financial Planner's theme wholesale and writes no CSS (D-153)** —
+  the question `DS-001` §13.1 handed this stage by name. `:root` custom properties are **global by
+  construction**, so an independent palette is the collision D-152 named rather than an alternative to
+  it. The scoped-override option failed on two measured facts: scoped selectors **cannot reach the
+  ShellBar or side nav**, and the shell **reclaims the last position in `<head>` on every rendering**.
+  The decisive positive fact: **none of the five Horizon semantic properties is overridden** by the
+  inherited CSS — 0 hits across 187 lines — so this module already renders stock Horizon semantics.
+- **The finding of the session: the exemplar's Theme is wrong about its own repo (D-156).**
+  `Financial Planner/design/THEME.md` §6.3 and its D-312 both describe a `<link rel="stylesheet">` in
+  `index.html` after the bootstrap. **There is none** — `app/index.html` carries exactly one
+  `rel="stylesheet"` element (the DM Sans font) and zero references to `theme-overrides`. The sheet is
+  injected by `app/shell/Component.ts:20` via `includeStylesheet` and re-appended to `<head>` by
+  `:27-32`. That is what made D-153 cheap: the rejected option depended on a cascade position the
+  shell actively takes back.
+- **The exemplar's numbers drifted five ways, which became the argument for a ruling (D-154).**
+  Measured: **44** custom properties in the file against **30** claimed in its Summary/D-314 and **35**
+  listed in its §7.1; **12** targeted-selector blocks against "~5", **6** and **8** in three places;
+  `--sapGroup_ContentBackground` documented as an override and **absent from the file**;
+  `--sapFontFamily` filed under "Not Overridden" while overridden at `:34`; and **six "Horizon
+  Default" values disagreeing with the runtime** despite a §7.3 claim they were CDN-verified. None
+  changes a rendered pixel. **So TH-001 restates no default table** — it names the token, the measured
+  value, and the method to reproduce it.
+- **A contrast failure found, then measured out of existence — and the measurement is the point
+  (D-155).** On the `#F0EDEA` page canvas, Warning is **4.44:1** and `sap.m.Link` **4.27:1**, both
+  below AA at `ObjectStatus`'s measured 14px. Resolving the container chain reversed it: the dynamic
+  header, lists, tables, tiles, `Panel` and `Card` are **all `#FFFFFF`**, where all seven pairings
+  pass. **`ObjectPageSubSection` carries no background rule of its own**, so it is the one exposed
+  surface — hence a rule rather than a tick: no semantic `ObjectStatus` or `Link` bare on the canvas.
+  One exemplar figure corrected in passing: Deep Gold on white is **4.98:1**, not the "~5.6:1" its
+  §3.4 states.
+- **This Theme amends `DS-001` in nothing, and that is a stated "none" (D-157)** — the first time a
+  downstream stage in this module has consumed an upstream document without correcting it. The
+  exemplar's Theme amended its own Design System retroactively because that document never
+  anticipated a Theme stage; `DS-001` §13 did.
+- **Reviewing the produced document caught six defects** — the fourteenth session running, and all six
+  were mine, since no writer agent ran. Two count contradictions (a font-selector list described as
+  **12** in one place and **13** in another; "the four Horizon defaults" over a five-row table). Two
+  wrong citations (`DS-001` §8.4 **§1** for a control that is in §8.4 **§2**; an unqualified
+  `design/DESIGN_SYSTEM.md:17` that is Financial Planner's). One overclaim in the footer — "the first
+  UI story implements nothing from this document" is false, since §5.3's state values and §9.3's
+  placement rule both bind it. And one inferred-as-measured: `Required` "takes no icon", which
+  `DS-001` §10 states by **having no row**, not by saying so.
+- **Corrections applied in-session.** `.claude/agents/ux-tester.md:21-23` told the UX agent Financial
+  Planner's theme is Warm Charcoal `#3D3A38`; that module's own D-314 superseded it with Obsidian
+  `#2A2725` and Amber `#C8973E`. **A live rubric, so it was fixed** rather than raised. Two
+  documentation items were **raised and left owed** on Sandro's call — the exemplar's §6.3/D-312 load
+  mechanism, and `Financial Planner/design/DESIGN_SYSTEM.md:17` and `:29`, which still name the
+  superseded brand. Both belong to a `/refresh-docs` sweep of that module.
+- **No risk is assigned to this stage, and that was checked rather than assumed** —
+  `research/README.md:148` routes IA / Design System / Theme → RSH-003, whose only live risk was R9,
+  executed and closed at D-140. **None is created here either**: the unbuilt scoped-override mechanism
+  is graded `Inferred` and D-153 removes the need for it.
 
 ### 2026-08-06 — Design System: a read path that was never named, and an FPM app that proved drafts optional
 
@@ -1508,8 +1586,9 @@ stores them under the user's home directory, which the bridge cannot access.
 | `Project Tracker/design/specs/`                          | The twelve functional specs, written in `SPEC-01` → `SPEC-12` order. Grouping and membership are BA-001 §11. **12 of 12 written, all Approved.** |
 | `Project Tracker/research/`                              | Six research documents plus `README.md` — the index, assumption ledger, open risks and gate verdict. All **Draft**.                              |
 | `Project Tracker/design/INFORMATION_ARCHITECTURE.md`     | IA-001 — page and route decomposition, navigation, shell placement and origin. **Approved.**                                                     |
-| `Project Tracker/design/DESIGN_SYSTEM.md`                | DS-001 — build technology, theme, density, layout, controls, semantic roles, status indicators, state conventions. **Draft.**                    |
-| `Project Tracker/design/DECISIONS_LOG.md`                | D-01 … D-152 with full rationale. (`IDEATE_KICKOFF.md` was scratch — absorbed and deleted 2026-07-26.)                                           |
+| `Project Tracker/design/DESIGN_SYSTEM.md`                | DS-001 — build technology, theme, density, layout, controls, semantic roles, status indicators, state conventions. **Approved.**                 |
+| `Project Tracker/design/THEME.md`                        | TH-001 — theme ownership, the inherited palette, semantic token resolution, border radius, contrast and the CSS contract. **Draft.**             |
+| `Project Tracker/design/DECISIONS_LOG.md`                | D-01 … D-159 with full rationale. (`IDEATE_KICKOFF.md` was scratch — absorbed and deleted 2026-07-26.)                                           |
 | `Standards (Documents)/METHODOLOGY_BLUEPRINT.md`         | The methodology→tooling map. **§7 is partly superseded** — the module is real, not a generator, and it writes rather than only reads.            |
 | `Financial Planner/design/`                              | The artifact set this module's design phase mirrors.                                                                                             |
 | `Financial Planner/design/DESIGN_PHASE_TIMELINE.md`      | How the design phase actually ran, step by step.                                                                                                 |

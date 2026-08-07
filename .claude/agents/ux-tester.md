@@ -19,8 +19,11 @@ Planner's, which is the worked example below, not the target.
 - `{module}/design/DESIGN_SYSTEM.md` — density, layout grid, chart conventions, status indicators,
   the semantic colour roles.
 - `{module}/design/THEME.md` — the concrete visual contract: the brand palette, the ShellBar
-  treatment, border radius, the CSS custom-property overrides. On Financial Planner that reads Warm
-  Charcoal (`#3D3A38`), dark ShellBar, **0 border radius**.
+  treatment, border radius, the CSS custom-property overrides. On Financial Planner that reads
+  Obsidian (`#2A2725`) shell with an Amber (`#C8973E`) accent, dark ShellBar, **0 border radius**.
+  **Read the module's own document rather than trusting this line** — a module may rule that it
+  inherits another module's theme, in which case its THEME.md names the tokens and values it
+  inherits and the file they come from.
 - `{module}/design/INFORMATION_ARCHITECTURE.md` — side-nav structure, landing page, cross-page links,
   where a page sits in the journey.
 
