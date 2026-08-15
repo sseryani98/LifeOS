@@ -1,10 +1,10 @@
 # Project Tracker — Plan
 
 **Status:** Plan phase — Ideate, Scope, Research, Scaffold, Workshops, Information Architecture,
-Design System **and Theme complete** (grouping settled, `SPEC-01` … `SPEC-12`; **12 of 12 written and
-all twelve Approved**; `IA-001` **Approved**; `DS-001` **Approved**; `TH-001` written, **Draft**).
-Next stage is **Data Model**.
-**Last updated:** 2026-08-06
+Design System, Theme **and Data Model complete** (grouping settled, `SPEC-01` … `SPEC-12`; **12 of 12
+written and all twelve Approved**; `IA-001`, `DS-001` and `TH-001` **Approved**; `DM-001` written,
+**Draft**). **All five open items are now closed.** Next stage is **Tech Stack**.
+**Last updated:** 2026-08-15
 **Purpose:** The continuity document. Anyone (or any fresh chat) picking up Project Tracker
 starts here. Read this, then `design/PROBLEM_STATEMENT_AND_VISION.md` (PSV-001),
 `design/BUSINESS_ARCHITECTURE.md` (BA-001) and `design/DECISIONS_LOG.md` for the full
@@ -18,15 +18,22 @@ Financial Planner is mid-sprint **W1-S3 — Transaction Processing**, with one s
 Backlog (`CNV-001` Historical backfill) and nothing In Progress. That gap is deliberate — it
 is the cutover window.
 
-**Theme is complete, and the three UI stages D-21 rules must run in full are done.**
-`design/THEME.md` (TH-001, **Draft**) rules the module **inherits Financial Planner's theme
+**Data Model is complete, and with it the last open item in the module.**
+`design/DATA_MODEL.md` (DM-001, **Draft**) consolidates the Data Model section of all **12** specs —
+**10** place requirements and **2** state they place none — into **25 persisted entities**: 13 domain
+entities and 12 code lists, plus two read-only projections. It resolves **OI-05** (D-161), settles the
+`Milestone.status` contradiction D-88 raised to it (D-162), names the CAP construct behind D-145's
+read path (D-163), and **measures R1 rather than inheriting it** (D-168). Decisions run
+**D-01 … D-169**.
+
+**The three UI stages D-21 rules must run in full are done.**
+`design/THEME.md` (TH-001, **Approved** at the Data Model stage's opening) rules the module **inherits Financial Planner's theme
 wholesale and writes no CSS** (D-153) — the question DS-001 §13.1 handed it by name — and resolves
 DS-001 §9's 17 role mappings onto **5** Horizon custom properties measured against the pinned
 runtime (D-154). **Design System is complete** — `design/DESIGN_SYSTEM.md` (DS-001, **Approved** at
 this stage's opening) rules **Fiori Elements FPM for all six UI-bearing objects with draft
 enablement OFF** (D-144), the answer the Data Model stage was waiting for, and names the **browser
-read path** nobody had ever specified (D-145). `IA-001` is **Approved**. Decisions run
-**D-01 … D-159**.
+read path** nobody had ever specified (D-145). `IA-001` is **Approved**.
 
 Project Tracker has a PRD, `design/PROBLEM_STATEMENT_AND_VISION.md` (PSV-001, **Draft**),
 `design/BUSINESS_ARCHITECTURE.md` (BA-001 v1.13, **Approved** — 22 objects in 3 waves, grouped into
@@ -82,24 +89,24 @@ mechanism needs a construction step.
 
 ### Stage status
 
-| #   | Stage              | Skill                                              | Skill status | Stage status                                                                                                         |
-| --- | ------------------ | -------------------------------------------------- | ------------ | -------------------------------------------------------------------------------------------------------------------- |
-| 1   | Ideate             | `/generate-problem-statement-vision`               | Authored     | **Done** — 2026-07-26                                                                                                |
-| 2   | Scope              | `/generate-business-architecture`                  | Authored     | **Done** — 2026-07-26                                                                                                |
-| 3   | Research           | `/gather-research`                                 | Authored     | **Done** — 2026-07-26                                                                                                |
-| 4   | Scaffold           | `/scaffold-module` → `scaffold-writer`             | Authored     | **Done** — 2026-07-27                                                                                                |
-| 5   | Workshops          | `/workshop` → `spec-writer`                        | Exists       | **Done** — 2026-08-04. D-37 grouping; `SPEC-01` … `SPEC-12` all **Approved** (12/12 written; D-136)                  |
-| 6   | Information Arch.  | `/generate-information-architecture` → `ia-writer` | Authored     | **Done** — 2026-08-06. `IA-001` **Approved**; 6 objects → 1 route + 1 `story` param; **R9 executed** (D-137 … D-143) |
-| 7   | Design System      | `/generate-design-system` → `design-system-writer` | Authored     | **Done** — 2026-08-06. `DS-001` **Approved**; **FE FPM, drafts OFF**; the browser read path named (D-144 … D-152)    |
-| 8   | Theme              | `/generate-theme` → `theme-writer`                 | Authored     | **Done** — 2026-08-06. `TH-001` **Draft**; **theme inherited wholesale, no CSS written** (D-153 … D-159)             |
-| 9   | Data Model         | `/generate-data-model`                             | Not authored | **Next** — owns **OI-05** and **R1**, plus D-145's read-path requirement                                             |
-| 10  | Tech Stack         | `/generate-tech-stack`                             | Not authored | Not started                                                                                                          |
-| 11  | Test Strategy      | `/generate-test-strategy`                          | Not authored | Not started                                                                                                          |
-| 12  | Project Planning   | `/generate-build-plan`                             | Not authored | Not started                                                                                                          |
-| 13  | Build              | `/build` + chain                                   | Exists       | Not started                                                                                                          |
-| 14  | **Rewire tooling** | `lintNoMarkdownState` + PreToolUse hook            | Not authored | Not started                                                                                                          |
-| 15  | Cutover            | —                                                  | —            | Not started                                                                                                          |
-| 16  | Back to FP         | —                                                  | —            | Blocked on cutover                                                                                                   |
+| #   | Stage              | Skill                                              | Skill status | Stage status                                                                                                                                  |
+| --- | ------------------ | -------------------------------------------------- | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Ideate             | `/generate-problem-statement-vision`               | Authored     | **Done** — 2026-07-26                                                                                                                         |
+| 2   | Scope              | `/generate-business-architecture`                  | Authored     | **Done** — 2026-07-26                                                                                                                         |
+| 3   | Research           | `/gather-research`                                 | Authored     | **Done** — 2026-07-26                                                                                                                         |
+| 4   | Scaffold           | `/scaffold-module` → `scaffold-writer`             | Authored     | **Done** — 2026-07-27                                                                                                                         |
+| 5   | Workshops          | `/workshop` → `spec-writer`                        | Exists       | **Done** — 2026-08-04. D-37 grouping; `SPEC-01` … `SPEC-12` all **Approved** (12/12 written; D-136)                                           |
+| 6   | Information Arch.  | `/generate-information-architecture` → `ia-writer` | Authored     | **Done** — 2026-08-06. `IA-001` **Approved**; 6 objects → 1 route + 1 `story` param; **R9 executed** (D-137 … D-143)                          |
+| 7   | Design System      | `/generate-design-system` → `design-system-writer` | Authored     | **Done** — 2026-08-06. `DS-001` **Approved**; **FE FPM, drafts OFF**; the browser read path named (D-144 … D-152)                             |
+| 8   | Theme              | `/generate-theme` → `theme-writer`                 | Authored     | **Done** — 2026-08-06. `TH-001` **Approved** 2026-08-15; **theme inherited wholesale, no CSS written** (D-153 … D-159)                        |
+| 9   | Data Model         | `/generate-data-model` → `data-model-writer`       | Authored     | **Done** — 2026-08-15. `DM-001` **Draft**; **25 entities, document only, no CDS**; **OI-05 closed**, R1 measured and re-owned (D-160 … D-169) |
+| 10  | Tech Stack         | `/generate-tech-stack`                             | Not authored | **Next** — inherits **R1** (D-168) and the untested reverse proxy (D-141)                                                                     |
+| 11  | Test Strategy      | `/generate-test-strategy`                          | Not authored | Not started                                                                                                                                   |
+| 12  | Project Planning   | `/generate-build-plan`                             | Not authored | Not started                                                                                                                                   |
+| 13  | Build              | `/build` + chain                                   | Exists       | Not started                                                                                                                                   |
+| 14  | **Rewire tooling** | `lintNoMarkdownState` + PreToolUse hook            | Not authored | Not started                                                                                                                                   |
+| 15  | Cutover            | —                                                  | —            | Not started                                                                                                                                   |
+| 16  | Back to FP         | —                                                  | —            | Blocked on cutover                                                                                                                            |
 
 Stages 6–8 (IA, Design System, Theme) **run in full** — settled by D-21. Slice 1 carries four
 Reports and two Forms, which is a real UI rather than a thin shell. **All three are now done**, and
@@ -538,6 +545,99 @@ Settle before or during Scaffold.
 ---
 
 ## 8. Session log
+
+### 2026-08-15 — Data Model: a derivation with two answers, and a register with no path to it
+
+- **Authored `/generate-data-model` and its `data-model-writer` agent, then ran the stage.** Wrote
+  `design/DATA_MODEL.md` (DM-001, **Draft**) and logged **D-160 … D-169**. The skill carries **16**
+  fixed questions against the exemplar's ten sections — **eight of which the exemplar never faced**:
+  the deliverable boundary, code lists, constraints-as-annotation-or-handler, drafts, sort keys, the
+  read projection, managed-versus-domain time, and risks assigned to the stage. **The writer agent
+  could not be invoked** — Claude Code resolves its agent registry at session start, so a
+  newly-authored agent is not callable in the session that writes it, the third stage running to hit
+  it. The document was written in the main thread against the same standard.
+- **`TH-001` was approved first (Step 0), and D-159's fix did not work — which is the finding
+  (D-169).** `IA-001`, then `DS-001`, now `TH-001`: **three stages running** have opened on an
+  unapproved predecessor. D-159 added an approval gate to four skills and left it at step 6 of an
+  eight-step Phase 6. Position is what carries, so in `/generate-data-model` the gate is **step 0** of
+  Phase 6 and Step 0 says a fourth occurrence is itself a finding. **Not retrofitted to the other four
+  skills** — raised, not done.
+- **The stage ships the document and no CDS file (D-160).** `db/` stays empty until Build. No Test
+  Strategy, no Build Plan and deliberately no `test` script exist, so a schema written here would be
+  code no test, gate or story covers — D-22 one level up. The exemplar is the precedent rather than
+  the counter-example: its `DATA_MODEL.md` is dated 2026-02-13 and its nine `db/` folders were written
+  during Build. `Project Tracker/CLAUDE.md` said `db/` is filled by "the Data Model stage"; that was an
+  expectation written at Scaffold, not a decision, and it is corrected rather than left to contradict
+  the ruling.
+- **OI-05 resolved — the module's last open item (D-161).** Methodology is **structurally generic,
+  functionally singular**: `Methodology` composes `MethodologyStep`, so a second methodology is a data
+  insert rather than a schema change, and **nothing anywhere selects between methodologies**. The fork
+  was narrower than OI-05's wording, because `SPEC-02` §2 and `SPEC-11` §2 had already foreclosed the
+  hardcoded direction. Leaving the steps free-standing would have left `Methodology` a one-row table
+  with **zero inbound references**; adding `Milestone.methodology` now would build a selector no
+  fixture can exercise. Cost stated: step codes are **globally unique across methodologies**, because
+  `MethodologyStep.code` is the sole key and the verbs address a step by code alone.
+- **The finding of the session: two of the three registers had no navigable path from a Workspace
+  (D-163).** `DS-001` §5.3 required `project_view`'s collections to be navigation properties and D-145
+  deliberately named no CAP construct. Standing one up found the gap: a `Defect` links to a Milestone
+  **or** an Initiative, so "every Defect in this Workspace" is a **union** that one association `on`
+  condition cannot express — and a Workspace-targeted `Decision` has no path through Initiative or
+  Milestone at all. So `Defect`, `Decision`, `Activity` and `TestRun` each gain a **mandatory
+  `workspace` association**, and `ProjectView` is a read-only projection on `Workspace` rather than a
+  CDS view (which flattens) or a function (which D-145 rules out). **No verb signature changes** —
+  every write verb already resolves a workspace — so D-37 §11.1's trigger does not fire.
+- **A derivation with two answers, settled (D-162).** `SPEC-02` BR-17's clauses are ordered "Backlog
+  when no Task has started" first and D-64 reasons from the last clause; over an **empty** Task set
+  both are vacuously true, so the rule was never a total function. D-88 found it, measured it live on
+  **eleven of twelve** Milestones, and raised it here. Ruling: **`Done`**, and by construction rather
+  than by luck — a Milestone is chainless **iff** it was created Done, since ENH-001 fires only on
+  creation with status Backlog, a Backlog Milestone materialises at least **eight** Tasks in the same
+  transaction, and no verb deletes a Task (D-50). **Nothing on screen changes**: four Approved specs
+  say they deliberately do not read this value, and none reads it. Amends an Approved spec anyway,
+  because a derivation with two answers is not a derivation.
+- **A flagged divergence that did not exist (D-165).** `SPEC-05` §2 amendment 6 handed this stage "two
+  code-list casing conventions" to settle once — `checkpoint` and `migration` lowercase against
+  camelCase for the rest. **A one-word camelCase identifier _is_ lowercase**, so all sixteen
+  `ActivityKind` codes are camelCase and two are single words. The real rule is that **a `code` is the
+  literal an Approved spec already froze** (`Interface` by SPEC-01 FUT-014, the severities by SPEC-03
+  BR-20's seed, the step kinds by SPEC-02 §3.1). The genuine exception is **three** lists —
+  `MilestoneStatus`, `SubtaskStatus`, `TaskStatus` — whose spec text is a **display phrase containing
+  a space** rather than an identifier; those take camelCase codes and keep the phrase in `name`.
+- **`SPEC-02`'s actor rule was already false against an Approved spec (D-166).** §2 amendment 6 states
+  "anything that is not `sandro` is an agent"; `SPEC-09` §2 amendment 4 adds **`test-report`** and says
+  in terms that it is **not an agent**. So `Actor` becomes a code list of eight identities each
+  carrying a `kind` ∈ {human, agent, system}, and BR-23 becomes referential integrity plus a lookup.
+  Cost stated: an unseeded actor is rejected at insert.
+- **R1 executed as far as it goes, and the register was wrong about why (D-168).** Measured: a
+  Postgres server **is** listening on 5432; `pg_hba.conf` is `scram-sha-256` on **every** line with no
+  `trust` entry; and **no credential exists anywhere reachable**. `research/README.md` §5 and D-39 both
+  say the declared `"password": ""` is something "SCRAM rejects" — **it is not**. An empty string is
+  falsy, so the driver treats it as absent and throws `SASL: … client password must be a string`
+  **before the handshake begins**; the server never sees an authentication attempt. Only a non-empty
+  wrong password reaches it and returns `28P01`. Both end in "no connection" and they point at
+  different fixes. **Grade stays `Inferred`; re-owned to Tech Stack**, deadline before `INT-001`.
+  Nothing in DM-001 is designed around R1 holding — `failures` and `payload` are `LargeString` rather
+  than a CDS `array of` so they map identically on both engines.
+- **The sort key is an annotation, not an attribute or a convention (D-164).** `SPEC-11` declares no
+  new attribute, and a hardcoded table inside the exporter would drift silently with no linter to
+  catch it. `INT-007` already reads the CSN to filter draft shadows (BR-06), so `@lifeos.sortKey` costs
+  it nothing. `Defect` deliberately gets **no** domain timestamp — nothing orders or renders a Defect
+  by date, so a `loggedAt` on D-72's precedent would be an attribute nothing tests.
+- **Reviewing the produced document caught four defects** — the fifteenth session running, and all four
+  were mine, since no writer agent ran. One count that contradicted its own table ("the seven domain
+  vocabularies" over **nine** PascalCase lists). One count restated wrongly in an amendment row (nine
+  frozen literals against a measured **eight** plus one minted here). Three code lists given `code`
+  values containing a **space** — `Not Started`, `In Progress` — which is a poor primary key, a poor CSV
+  value and a poor URL segment, and which the code/name split I had already declared should have
+  caught. And one amendment row inserted **out of sequence** in `SPEC-01` §2, between amendments 3 and 4.
+- **Corrections applied in-session — seven amendments.** `SPEC-02` BR-17 and §2 am. 6; `SPEC-01` §2
+  (new am. 5) and `SPEC-03` §2 (new am. 15), both **Approved**, both re-approvals; `SPEC-05` §2 am. 6
+  discharged; `research/README.md` §5's R1 row and D-39's finding sentence; `PSV-001` §8's OI-05 row
+  and this module's `CLAUDE.md` (the `db/` line, the stale `design/` listing, and R1's owner).
+- **The risk register was checked rather than assumed.** `research/README.md` §7 routes **Data Model →
+  RSH-002** and D-39 assigns **R1** here by name; no other §5 row names this stage. R4 and R7 belong to
+  `INT-007`'s build (D-121), R10 to `CNV-005` (D-119), and R9 is closed (D-140) and not re-opened.
+  **No risk is created here.**
 
 ### 2026-08-06 — Theme: a document wrong about its own repo, and a contrast failure that turned out unreachable
 
@@ -1587,8 +1687,9 @@ stores them under the user's home directory, which the bridge cannot access.
 | `Project Tracker/research/`                              | Six research documents plus `README.md` — the index, assumption ledger, open risks and gate verdict. All **Draft**.                              |
 | `Project Tracker/design/INFORMATION_ARCHITECTURE.md`     | IA-001 — page and route decomposition, navigation, shell placement and origin. **Approved.**                                                     |
 | `Project Tracker/design/DESIGN_SYSTEM.md`                | DS-001 — build technology, theme, density, layout, controls, semantic roles, status indicators, state conventions. **Approved.**                 |
-| `Project Tracker/design/THEME.md`                        | TH-001 — theme ownership, the inherited palette, semantic token resolution, border radius, contrast and the CSS contract. **Draft.**             |
-| `Project Tracker/design/DECISIONS_LOG.md`                | D-01 … D-159 with full rationale. (`IDEATE_KICKOFF.md` was scratch — absorbed and deleted 2026-07-26.)                                           |
+| `Project Tracker/design/THEME.md`                        | TH-001 — theme ownership, the inherited palette, semantic token resolution, border radius, contrast and the CSS contract. **Approved.**          |
+| `Project Tracker/design/DATA_MODEL.md`                   | DM-001 — 13 domain entities, 12 code lists, relationships, constraints, sort keys and the read projection. **Draft.**                            |
+| `Project Tracker/design/DECISIONS_LOG.md`                | D-01 … D-169 with full rationale. (`IDEATE_KICKOFF.md` was scratch — absorbed and deleted 2026-07-26.)                                           |
 | `Standards (Documents)/METHODOLOGY_BLUEPRINT.md`         | The methodology→tooling map. **§7 is partly superseded** — the module is real, not a generator, and it writes rather than only reads.            |
 | `Financial Planner/design/`                              | The artifact set this module's design phase mirrors.                                                                                             |
 | `Financial Planner/design/DESIGN_PHASE_TIMELINE.md`      | How the design phase actually ran, step by step.                                                                                                 |
