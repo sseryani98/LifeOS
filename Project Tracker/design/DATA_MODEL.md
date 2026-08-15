@@ -9,29 +9,29 @@
 
 ## 1. Change History
 
-| Date       | Author          | Description                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| ---------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-08-15 | Sandro & Claude | Initial creation from the Data Model stage. **25 persisted entities** — 13 domain entities and 12 code lists — consolidated from the Data Model section of all **12** specs, of which **10** place requirements and **2** ([SPEC-10](specs/SPEC-10-CUTOVER-GUARDS.md), [SPEC-12](specs/SPEC-12-DECOMMISSION.md)) state they place none. **OI-05 resolved** — the last open item in the module. Records D-160 through D-169. |
+| Date       | Author          | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| ---------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-15 | Sandro & Claude | Initial creation from the Data Model stage. **25 persisted entities** — 13 domain entities and 12 code lists — consolidated from the Data Model section of all **12** specs, of which **10** place requirements and **2** ([SPEC-10](specs/SPEC-10-CUTOVER-GUARDS.md), [SPEC-12](specs/SPEC-12-DECOMMISSION.md)) state they place none. **OI-05 resolved** — the last open item in the module. Records D-160 through D-175. **R1 executed and closed** — 20/20 checks against PostgreSQL 17.6, the first CDS model any Life OS module has deployed to Postgres, which changed four constraint mechanisms in §9. |
 
 ---
 
 ## 2. Summary
 
-| Aspect                     | Decision                                                                                                                                                             |
-| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Deliverable**            | **The document only.** `db/` stays empty; the CDS files are written by the first build story (D-160)                                                                 |
-| **Namespace**              | `com.lifeos.projecttracker` (D-03)                                                                                                                                   |
-| **Database**               | Its own Postgres database, `project_tracker` (D-29). Nothing reads across modules                                                                                    |
-| **Domain entities**        | **13** — 7 hierarchy, 2 methodology, 4 registers                                                                                                                     |
-| **Code lists**             | **12**. No `String enum` anywhere — the shared standards rule code lists for a finite vocabulary                                                                     |
-| **Persisted entities**     | **25** (13 + 12)                                                                                                                                                     |
-| **Read-only projections**  | **2** — `ProjectView` (the browser read path, D-145) and `TaskQueueItem` (the queue filter behind it)                                                                |
-| **Drafts**                 | **OFF on every entity.** Inherited from [DS-001](DESIGN_SYSTEM.md) §4.3 (D-144); not re-decided here                                                                 |
-| **Methodology genericity** | **Structurally generic, functionally singular** — `Methodology` composes `MethodologyStep`, and nothing anywhere selects between methodologies (**OI-05**, D-161)    |
-| **Sort keys**              | A `@lifeos.sortKey` **annotation** on every persisted entity, read from the CSN by `INT-007` (D-164)                                                                 |
-| **Register scope**         | `Defect`, `Decision`, `Activity` and `TestRun` each gain a **mandatory `workspace` association**. This is what makes D-145's navigation properties reachable (D-163) |
-| **Risk R1**                | **Executed as far as it goes, and blocked** — measured, not assumed. Re-owned to **Tech Stack** (D-168). Grade stays `Inferred`                                      |
-| **Amendments caused**      | **7**, all applied in-session — 5 spec amendments across 4 specs, plus `research/README.md`, `PSV-001` and this module's `CLAUDE.md` (§14)                           |
+| Aspect                     | Decision                                                                                                                                                                                              |
+| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Deliverable**            | **The document only.** `db/` stays empty; the CDS files are written by the first build story (D-160)                                                                                                  |
+| **Namespace**              | `com.lifeos.projecttracker` (D-03)                                                                                                                                                                    |
+| **Database**               | Its own Postgres database, `project_tracker` (D-29). Nothing reads across modules                                                                                                                     |
+| **Domain entities**        | **13** — 7 hierarchy, 2 methodology, 4 registers                                                                                                                                                      |
+| **Code lists**             | **12**. No `String enum` anywhere — the shared standards rule code lists for a finite vocabulary                                                                                                      |
+| **Persisted entities**     | **25** (13 + 12)                                                                                                                                                                                      |
+| **Read-only projections**  | **2** — `ProjectView` (the browser read path, D-145) and `TaskQueueItem` (the queue filter behind it)                                                                                                 |
+| **Drafts**                 | **OFF on every entity.** Inherited from [DS-001](DESIGN_SYSTEM.md) §4.3 (D-144); not re-decided here                                                                                                  |
+| **Methodology genericity** | **Structurally generic, functionally singular** — `Methodology` composes `MethodologyStep`, and nothing anywhere selects between methodologies (**OI-05**, D-161)                                     |
+| **Sort keys**              | A `@lifeos.sortKey` **annotation** on every persisted entity, read from the CSN by `INT-007` (D-164)                                                                                                  |
+| **Register scope**         | `Defect`, `Decision`, `Activity` and `TestRun` each gain a **mandatory `workspace` association**. This is what makes D-145's navigation properties reachable (D-163)                                  |
+| **Risk R1**                | **EXECUTED and CLOSED** — 20/20 checks on PostgreSQL 17.6 via `@cap-js/postgres`. Grade `Inferred` → **`Verified`** (D-170). Eleven specs are no longer provisional on it                             |
+| **Amendments caused**      | **9**, all applied in-session — 6 spec amendments across 5 specs, plus **the shared standards in `Financial Planner/CLAUDE.md`**, `research/README.md`, `PSV-001` and this module's `CLAUDE.md` (§14) |
 
 ### 2.1 Entity Index
 
@@ -477,8 +477,10 @@ SPEC-02 BR-23 (`complete_stage` on a `requiresHuman` step is rejected for an age
 an open set. SPEC-07 BR-30's machine/human split is the same test read the other way, and is
 unaffected: `system` falls in the machine half exactly as `agent` does.
 
-**Cost, stated:** an unseeded actor is rejected at insert, so adding an agent to `.claude/` requires
-one seed row before it may write. That is the intended behaviour — D-05 removed the CRUD escape
+**Cost, stated — and it depends on a flag.** An unseeded actor is rejected at insert **only because
+`cds.features.assert_integrity` is set to `'DB'` (§9, D-173)**. At CAP's default of `false` an
+unrecognised actor is written silently and this ruling buys nothing — measured while running R1.
+Adding an agent to `.claude/` therefore requires one seed row before it may write. That is the intended behaviour — D-05 removed the CRUD escape
 hatch so that nothing writes into the state of record unaccountably, and an unrecognised writer is
 the same class of thing.
 
@@ -490,24 +492,52 @@ The shared standards say reach for a CAP built-in before writing a handler. Ever
 classified, **with the reason**, so a build persona does not simplify a deliberate handler back into
 an annotation.
 
-| Constraint                                                        | Mechanism                               | Why                                                                                                                                                                            |
-| ----------------------------------------------------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `Workspace.slug` unique                                           | `@assert.unique`                        | No spec demands a named key for it                                                                                                                                             |
-| `Initiative.position` unique within Workspace                     | `@assert.unique`                        | SPEC-04 §2 am. 1 says so in terms                                                                                                                                              |
-| `Milestone.position` unique within Initiative                     | `@assert.unique`                        | SPEC-04 §2 am. 2 says so in terms                                                                                                                                              |
-| `Initiative.branch` present                                       | `@mandatory`                            | SPEC-06 §2 am. 3. Surfaces as `ASSERT_NOT_NULL` verbatim and mints no `frm.*` key                                                                                              |
-| `TestRun.executedAt` present                                      | not null                                | D-46 / D-105 — the mechanism decides the message, verbatim                                                                                                                     |
-| `Decision.decidedAt` present                                      | not null + `@cds.on.insert: $now`       | SPEC-07 §2 am. 2. No verb signature changes; `CNV-003`'s seed is the only override                                                                                             |
-| `Initiative.mergeCommit` and `tag` present when `status` Complete | cross-field `@assert`                   | SPEC-05 §2 am. 5 — what makes D-62's "Complete means merged and tagged" structural                                                                                             |
-| `Defect` has at least one of `milestone` / `initiative`           | cross-field `@assert`                   | SPEC-03 §2 am. 6; must hold on post-cutover rows too (SPEC-08 §2 am. 2)                                                                                                        |
-| `TestRun` has at least one of `task` / `initiative`               | cross-field `@assert`                   | SPEC-03 §2 am. 7                                                                                                                                                               |
-| **`Initiative.name` unique within Workspace**                     | **handler** — the shared create-handler | SPEC-06 §2 am. 2 rules this out of `@assert.unique` by name: it must reject 409 with a named key, and an annotation would pass `ASSERT_UNIQUE`/400 through verbatim under D-46 |
-| **`Milestone.storyId` unique within Initiative**                  | **handler** — the shared create-handler | SPEC-06 BR-19, same reason. D-79 gives both entities one shared create-handler                                                                                                 |
-| **No format assertion on `Initiative.branch`**                    | **neither**                             | SPEC-06 BR-11 rules it out; recorded so its absence reads as a decision                                                                                                        |
-| `MethodologyStep.conditional` names only `shipsUi`                | **neither** — `CNV-001` load validation | SPEC-02 §3.1 rejects the _load_, tested by FUT-001 and FUT-003. A model constraint over one legal value would be a second enforcement of a seed-time check                     |
-| `MethodologyStep.position` gapped by 10                           | **convention**                          | SPEC-02 §2 am. 4. Nothing enforces the gap; it exists so a step can be inserted between two                                                                                    |
+**Every row below was executed against PostgreSQL 17.6 while running R1 (§15), and four of them
+changed as a result.** The annotations this table originally assumed are not all the annotations CAP
+9.8.4 has.
 
----
+| Constraint                                                            | Mechanism                                         | Why                                                                                                                                                                                                            |
+| --------------------------------------------------------------------- | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Workspace.slug` unique                                               | `@assert.unique.slug: [slug]` — entity level      | **Measured (D-172):** the field-level form `slug : String(30) @assert.unique` fires nothing. Two Workspaces with slug `financial-planner` were written before it was caught                                    |
+| `Initiative.position` unique within Workspace                         | `@assert.unique.position: [workspace, position]`  | SPEC-04 §2 am. 1. Entity level, per the row above                                                                                                                                                              |
+| `Milestone.position` unique within Initiative                         | `@assert.unique.position: [initiative, position]` | SPEC-04 §2 am. 2. Entity level, per the row above                                                                                                                                                              |
+| `Initiative.branch` present                                           | `@mandatory`                                      | SPEC-06 §2 am. 3. **Measured (D-172): surfaces as `ASSERT_MANDATORY`, not `ASSERT_NOT_NULL`** — SPEC-06's own wording is corrected (§14)                                                                       |
+| `TestRun.executedAt` present                                          | `@mandatory`                                      | D-46 / D-105 — the mechanism decides the message verbatim, and the message is `ASSERT_MANDATORY`. A bare `not null` column is a **different** declaration, and one CAP cannot add to a populated table (§15.2) |
+| `Decision.decidedAt` present                                          | `@mandatory` + `@cds.on.insert: $now`             | SPEC-07 §2 am. 2. No verb signature changes; `CNV-003`'s seed is the only override                                                                                                                             |
+| Every association to a code list resolves to a seeded row             | **`cds.features.assert_integrity: 'DB'`**         | **Measured (D-173):** the default is `false`, so an unseeded code is accepted silently. With `'DB'` Postgres rejects it (`23503`). The literal `true` is invalid — CAP requires `DB` or `RT`                   |
+| **`Initiative.mergeCommit` and `tag` present when `status` Complete** | **handler** — the shared create/update handler    | **Measured (D-171): cross-field `@assert: (expr)` is not a CAP 9.8.4 feature and fires nothing.** An Initiative was set Complete with both fields null and no error was raised                                 |
+| **`Defect` has at least one of `milestone` / `initiative`**           | **handler**                                       | Same measurement. An orphan Defect was written and accepted (SPEC-03 §2 am. 6, SPEC-08 §2 am. 2)                                                                                                               |
+| **`TestRun` has at least one of `task` / `initiative`**               | **handler**                                       | Same measurement (SPEC-03 §2 am. 7)                                                                                                                                                                            |
+| **`Initiative.name` unique within Workspace**                         | **handler** — the shared create-handler           | SPEC-06 §2 am. 2 rules this out of `@assert.unique` by name: it must reject 409 with a named key. **Measured: the handler path works on Postgres** — the equivalent `storyId` guard returned 409               |
+| **`Milestone.storyId` unique within Initiative**                      | **handler** — the shared create-handler           | SPEC-06 BR-19, same reason. D-79 gives both entities one shared create-handler. **Measured: returns 409 with the named key on Postgres**                                                                       |
+| **No format assertion on `Initiative.branch`**                        | **neither**                                       | SPEC-06 BR-11 rules it out; recorded so its absence reads as a decision                                                                                                                                        |
+| `MethodologyStep.conditional` names only `shipsUi`                    | **neither** — `CNV-001` load validation           | SPEC-02 §3.1 rejects the _load_, tested by FUT-001 and FUT-003. A model constraint over one legal value would be a second enforcement of a seed-time check                                                     |
+| `MethodologyStep.position` gapped by 10                               | **convention**                                    | SPEC-02 §2 am. 4. Nothing enforces the gap; it exists so a step can be inserted between two                                                                                                                    |
+
+### 9.1 What CAP 9.8.4 actually supports (D-171)
+
+Measured in the installed compiler rather than inferred from the shared standards:
+
+| Annotation                          | Occurrences in `@sap/cds-compiler` + `@sap/cds` | Verdict                              |
+| ----------------------------------- | ----------------------------------------------- | ------------------------------------ |
+| `@assert.integrity`                 | 11                                              | Supported — `DB` or `RT`, not `true` |
+| `@assert.range`                     | 10                                              | Supported — emits `ASSERT_RANGE`     |
+| `@assert.unique`                    | 7                                               | Supported — **entity level only**    |
+| `@assert.format`                    | 6                                               | Supported — emits `ASSERT_FORMAT`    |
+| `@assert.enum`                      | 2                                               | Supported — emits `ASSERT_ENUM`      |
+| **`@assert.constraint`**            | **0**                                           | **Does not exist**                   |
+| **A boolean-expression `@assert:`** | **0**                                           | **Does not exist**                   |
+
+The emitted keys are `ASSERT_MANDATORY`, `ASSERT_RANGE`, `ASSERT_NOT_NULL`, `ASSERT_DATA_TYPE`,
+`ASSERT_FORMAT`, `ASSERT_ENUM` and `ASSERT_ARRAY`. **There is no `ASSERT_UNIQUE`** — `@assert.unique`
+compiles to a database unique index, so a violation surfaces as the driver's own error. That is still
+D-46's verbatim pass-through, but the message is Postgres's rather than CAP's.
+
+**This corrects a shared standard, not only this document.** `Financial Planner/CLAUDE.md` lists
+"`@assert: (case when … then …)` for cross-field" among the annotations to reach for before writing a
+handler. At the pinned runtime that annotation does nothing at all, so a build persona following it
+would ship a constraint that silently never fires. Corrected in-session (§14), because it is a live
+agent instruction rather than documentation.
 
 ## 10. Sort Keys (D-164)
 
@@ -561,6 +591,12 @@ BR-22a). D-145 named the requirement and not the CAP construct; this section nam
 
 **`ProjectView` is a read-only projection on `Workspace`** — not a CDS `select from` view, not a
 function import, and not a second stored entity.
+
+**`Workspace` carries `@cds.redirection.target: true` (D-174), and that is not optional.** Measured
+while running R1: a service exposing both `Workspace` and a projection of `Workspace` **fails to
+compile** — CAP cannot decide which one `Defect:workspace` and `Initiative:workspace` should
+redirect to, and raises four errors naming both candidates. The **writable** entity is the target,
+because D-79's shared create-handler writes there and both Forms bind it.
 
 | Rejected construct         | Why                                                                                                     |
 | -------------------------- | ------------------------------------------------------------------------------------------------------- |
@@ -642,8 +678,9 @@ filter is wrong.
 
 ## 14. Amendments
 
-Seven, **all applied in-session**. Five touch a spec — **all five on Approved specs**, across four
-distinct specs, because `SPEC-02` is amended twice.
+Nine, **all applied in-session**. Six touch a spec — **all six on Approved specs**, across five
+distinct specs, because `SPEC-02` is amended twice. The ninth reaches outside this module, into the
+shared standards.
 
 | #   | Target                                                                                                 | Change                                                                                                                                                                                                                                                                                                                                                                                              |
 | --- | ------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -653,57 +690,80 @@ distinct specs, because `SPEC-02` is amended twice.
 | 4   | [SPEC-05](specs/SPEC-05-WORKSPACE-HEADER-AND-HEALTH.md) §2 am. 6 (Approved)                            | **Discharged.** The flagged divergence does not exist as described. The cross-list rule is settled: **eight** of the twelve code lists keep the literal a spec froze, `ActorKind` is minted here, and the **three** status lists — the only ones whose spec text is a display phrase with a space — take a camelCase `code` with the phrase in `name`, changing nothing a person sees (D-165, §8.1) |
 | 5   | [SPEC-02](specs/SPEC-02-METHODOLOGY-AND-STAGE-ENFORCEMENT.md) §2 am. 6 (Approved)                      | Superseded. "Anything else is an agent" is already false against SPEC-09 §2 am. 4's `test-report`; the identity becomes a code list with a `kind` (D-166, §8.2)                                                                                                                                                                                                                                     |
 | 6   | `research/README.md` §5 R1, and D-39                                                                   | The account of **why** the binding fails is corrected — `pg` rejects the empty password client-side before any handshake; the server is never reached (D-168, §15)                                                                                                                                                                                                                                  |
+| 8   | [SPEC-06](specs/SPEC-06-SPRINT-PLANNING.md) §2 am. 3 (Approved)                                        | `Initiative.branch`'s `@mandatory` violation surfaces as **`ASSERT_MANDATORY`**, not `ASSERT_NOT_NULL`. Measured against the pinned runtime while running R1 (D-172, §9.1). The ruling is unchanged — only the key it names                                                                                                                                                                         |
+| 9   | **`Financial Planner/CLAUDE.md`** — the shared standards                                               | The CDS bullet lists "`@assert: (case when … then …)` for cross-field" among the annotations to reach for. **That annotation does not exist at `@sap/cds` 9.8.4** and fires nothing (D-171, §9.1). Corrected in place because it is a live agent instruction that would produce a silently-inert constraint                                                                                         |
 | 7   | [PSV-001](PROBLEM_STATEMENT_AND_VISION.md) §8 `OI-05`, and [CLAUDE.md](../CLAUDE.md) §Folder Structure | `OI-05` marked closed by D-161 — **the last open item**. `db/`'s filling stage corrected from Data Model to Build (D-160, §3)                                                                                                                                                                                                                                                                       |
 
 ---
 
 ## 15. Risks Assigned to This Stage
 
-**One — R1 — and it is the risk that has waited longest.** `research/README.md` §7 routes **Data
-Model → RSH-002**, and D-39 assigns **R1** here by name. Checked rather than assumed: no other row in
-`research/README.md` §5 names this stage. **R4 and R7 belong to `INT-007`'s own build** (D-121) and
-**R10 to `CNV-005`** (D-119); R9 is executed and closed (D-140) and is not re-opened.
+**One — R1 — and it is the risk that had waited longest. It is now EXECUTED and CLOSED.**
+`research/README.md` §7 routes **Data Model → RSH-002**, and D-39 assigns **R1** here by name.
+Checked rather than assumed: no other row in `research/README.md` §5 names this stage. **R4 and R7
+belong to `INT-007`'s own build** (D-121) and **R10 to `CNV-005`** (D-119); R9 is executed and closed
+(D-140) and is not re-opened.
 
-### 15.1 R1 — executed as far as it goes, and blocked (D-168)
+### 15.1 R1 — executed, and the verdict is Viable (D-170)
 
-**Grade stays `Inferred`. Re-owned to the Tech Stack stage.**
+**Grade: `Inferred` → `Verified`.** The register's settling test — repeat the D-05 spike's `run.js`
+against `@cap-js/postgres` — was run, in a scratch project outside this module's source tree, and the
+scratch project was deleted afterwards.
 
-The register says to repeat the D-05 spike's `run.js` against `@cap-js/postgres`, and D-39 says
-standing the binding up is a prerequisite of this stage rather than a detail inside it. It was
-attempted. What was measured, this session:
+**What ran.** A model mirroring DM-001's actual shapes — a `CodeList`, `cuid` + `managed` entities, an
+association chain, compositions, a read-only projection, and a service with `before` / `on` / `after`
+handlers — was deployed with `cds deploy` to a real `project_tracker` database on **PostgreSQL 17.6**
+via `@cap-js/postgres`, then driven by a 20-check suite. **This is the first CDS model either Life OS
+module has ever deployed to Postgres.**
 
-| Measurement                                                                   | Result                                                                                                                 |
-| ----------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| A Postgres server is listening on `localhost:5432`                            | **Yes** — seven `postgres` processes, PID 6788 holding the listen socket on `0.0.0.0` and `::`                         |
-| `pg_hba.conf` authentication method                                           | **`scram-sha-256` on every line.** No `trust` entry, local or host                                                     |
-| A credential for the `postgres` role anywhere in the repo or the user profile | **None** — no `pgpass.conf`, no `PG*` environment variable, and `Financial Planner/.env` carries only `ENCRYPTION_KEY` |
-| `password: ""` (both modules' `package.json` declare this)                    | **Fails before the server is reached** — `SASL: SCRAM-SERVER-FIRST-MESSAGE: client password must be a string`          |
-| Password omitted entirely                                                     | Same client-side failure                                                                                               |
-| `postgres` / `postgres`                                                       | **Reaches the server** and returns `28P01 password authentication failed`                                              |
+**Result: 20 of 20 checks pass.** The load-bearing ones:
 
-**The register's account of the failure is wrong, and the correction matters.** `research/README.md`
-§5 and D-39 both say the empty password is something "SCRAM rejects". It is not: an empty string is
-falsy, so the client library treats it as absent and throws a **type guard** before the handshake
-begins. The server never sees an authentication attempt at all. Only the third attempt above
-produces a genuine server-side rejection. Both readings end in "no connection", but they point at
-different fixes — the first at the driver, the second at a credential — and the second is the real
-one. Amendment 6 in §14.
+| Check                                                                       | Result                                                       |
+| --------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| Service dispatches with `cds.app === undefined` — no HTTP server, no socket | **Pass** — the D-05 property holds on Postgres               |
+| `managed` stamps `createdAt` / `createdBy`; `cuid` generates a UUID         | **Pass**                                                     |
+| `before` / `on` / `after` handlers fire                                     | **Pass** — all three                                         |
+| A handler rejection surfaces as **409 with its named key** (SPEC-06 BR-19)  | **Pass** — the shared create-handler pattern works           |
+| `@mandatory` violation rejected                                             | **Pass** — as `ASSERT_MANDATORY` (§9.1)                      |
+| `@assert.range` violation rejected                                          | **Pass** — as `ASSERT_RANGE`                                 |
+| Transaction rollback discards the insert                                    | **Pass** — no ghost row                                      |
+| **D-163's collections traverse as navigation properties**                   | **Pass** — `Workspace → initiatives → milestones`, `defects` |
+| Read-only projection readable, with its `on('READ')` handler firing         | **Pass**                                                     |
+| **D-164's sort key `ORDER BY` accepted**                                    | **Pass**                                                     |
+| Referential integrity on a code-list association                            | **Pass — only with `assert_integrity: 'DB'`** (§9)           |
 
-**Why re-owning rather than forcing it:** the two ways to proceed from here are to obtain the
-credential, which is Sandro's to supply, or to add a `trust` line to `pg_hba.conf` and reload — a
-change to a Postgres installation outside this repo, which is not a thing to do unasked as a side
-effect of writing a design document.
+**The verdict R1 could have moved, it did not move.** RSH-001's "Viable with caveats" stands, and the
+application-service handler layer behaves on Postgres as the SQLite spike said it would. **Eleven
+specs — SPEC-01 … SPEC-09, SPEC-11 and SPEC-12 — are no longer provisional on R1.**
 
-**Owner: the Tech Stack stage. Deadline: before `INT-001` is built.** That stage already owns the
-serving-stack ruling, the TypeScript-loader ruling (D-33) and the untested reverse proxy (D-141), and
-it is the last stage before the Build Plan orders the work. **Eleven specs — SPEC-01 … SPEC-09,
-SPEC-11 and SPEC-12 — remain provisional on R1**; SPEC-10 is the one that is not (D-119).
+**Four findings changed this document rather than merely confirming it**, and all four are the same
+class: an annotation this stage had assumed, which the pinned runtime does not have. They are
+recorded at §9, §9.1 and D-171 … D-173 rather than here, because they are model rulings, not risk
+outcomes.
 
-**Nothing in this document is designed around R1 holding.** Two rulings were made the portable way
-because of it: `failures` and `payload` are `LargeString` rather than a CDS `array of` (§7.4), and no
-constraint relies on a Postgres-specific type or a deferred-constraint mode.
+**One credential note.** The binding works with the `postgres` superuser password. It is **not**
+committed: `Financial Planner/package.json:82-88` and `Project Tracker/package.json` still declare
+`"password": ""`, and the working credential was supplied at run time through the environment. Where
+it should live — a gitignored `.env`, a dedicated non-superuser role, or a `pg_service.conf` — is the
+**Tech Stack** stage's to rule, together with the connection configuration it already owns. This
+stage measured that the binding is possible; it does not decide where the secret lives.
 
----
+### 15.2 R4's mechanism was observed in passing — handed on, not owned (D-175)
+
+R4 belongs to `INT-007`'s build (D-121) and is **not re-owned here**. But running R1 reproduced its
+mechanism twice, which is worth recording where the migration story will look:
+
+- **A second `cds.deploy` from a narrower model tried to `DROP` `cds.outbox.Messages`** and aborted
+  with `migration-unsupported-table-drop`. That is exactly R4's "each deploy reads the other's model
+  as prior and emits DROPs", reproduced **within one project** rather than across two — the
+  `cds_model` snapshot is per database and the delta is computed against it.
+- **`cds deploy` cannot add a `not null` column to a populated table.** Postgres rejects it with
+  `column … contains null values` and the deployment fails. This binds `CNV-002`'s and `CNV-003`'s
+  ordering directly: a column added after the load needs a default or a backfill, not a redeploy.
+
+Both are `Verified` observations of R4's code path. **R4's own settling test — two projects deploying
+into one schema — was not run**, because D-29 gives each module its own database and D-121 gives the
+drill to `INT-007`.
 
 ## 16. Open Items Resolved
 
@@ -715,18 +775,24 @@ constraint relies on a Postgres-specific type or a deferred-constraint mode.
 
 ## 17. Decisions Reference
 
-| ID        | Title                                                                                                         | Summary                                                                                                                                                                                                                                                                |
-| --------- | ------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **D-160** | The Data Model stage ships the document and no CDS file                                                       | `db/` stays empty until Build. No Test Strategy, no Build Plan and no `test` script exist yet, so a schema written here is code no gate covers. `CLAUDE.md`'s folder-structure claim is corrected rather than left contradicting the ruling                            |
-| **D-161** | OI-05 — structurally generic, functionally singular                                                           | `Methodology` composes `MethodologyStep`; nothing selects between methodologies. Two Approved specs had already foreclosed the hardcoded direction. Cost stated: step codes are globally unique, not per-methodology                                                   |
-| **D-162** | An empty Task set derives `Done`                                                                              | BR-17's ordered clauses return Backlog and D-64 returns Done; both are vacuously true. `chainless ⟺ created Done` by ENH-001 BR-09/BR-10 and D-50, so Done is correct by construction. Amends an Approved spec                                                         |
-| **D-163** | The read path is a read-only projection on `Workspace`, and the four registers gain a `workspace` association | A view flattens, a function is opaque. Without the association there is no navigable path: a Defect's scope is a union of two paths and a Workspace-targeted Decision has none                                                                                         |
-| **D-164** | The sort key is a CDS annotation, not an attribute or a convention                                            | SPEC-11 declares no new attribute, and the exporter already reads the CSN. A hardcoded table in the exporter drifts silently with no linter to catch it                                                                                                                |
-| **D-165** | A `code` is the literal a spec froze; three status lists are the exception                                    | The divergence SPEC-05 flagged does not exist — a one-word camelCase code **is** lowercase. Eight lists keep a frozen literal, `ActorKind` is minted here, and three carry a display phrase with a space, so those take a camelCase code and keep the phrase in `name` |
-| **D-166** | `Actor` is a code list carrying a kind                                                                        | SPEC-02's "anything not `sandro` is an agent" is already false against SPEC-09's `test-report`. Eight identities, three kinds; BR-23 becomes referential integrity plus a lookup                                                                                       |
-| **D-167** | `Activity.target` is a reference string; every other target is an explicit nullable FK                        | Sixteen kinds across eight entity types would need eight columns, seven null per row, on an append-only record. Decision's trichotomy is two nullable links plus the mandatory scope                                                                                   |
-| **D-168** | R1 is measured, blocked on a credential, and re-owned to Tech Stack                                           | The register's cause is wrong: `pg` rejects the empty password client-side and the server is never reached. Only `postgres`/`postgres` produces a real `28P01`. Grade stays `Inferred`                                                                                 |
-| **D-169** | D-159's approval gate failed a third time, and the fix is structural                                          | `TH-001` opened this stage unapproved after `IA-001` and `DS-001` did the same. The gate was step 6 of 8 in a numbered list; in `/generate-data-model` it is step **0** of Phase 6                                                                                     |
+| ID        | Title                                                                                                         | Summary                                                                                                                                                                                                                                                                 |
+| --------- | ------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **D-160** | The Data Model stage ships the document and no CDS file                                                       | `db/` stays empty until Build. No Test Strategy, no Build Plan and no `test` script exist yet, so a schema written here is code no gate covers. `CLAUDE.md`'s folder-structure claim is corrected rather than left contradicting the ruling                             |
+| **D-161** | OI-05 — structurally generic, functionally singular                                                           | `Methodology` composes `MethodologyStep`; nothing selects between methodologies. Two Approved specs had already foreclosed the hardcoded direction. Cost stated: step codes are globally unique, not per-methodology                                                    |
+| **D-162** | An empty Task set derives `Done`                                                                              | BR-17's ordered clauses return Backlog and D-64 returns Done; both are vacuously true. `chainless ⟺ created Done` by ENH-001 BR-09/BR-10 and D-50, so Done is correct by construction. Amends an Approved spec                                                          |
+| **D-163** | The read path is a read-only projection on `Workspace`, and the four registers gain a `workspace` association | A view flattens, a function is opaque. Without the association there is no navigable path: a Defect's scope is a union of two paths and a Workspace-targeted Decision has none                                                                                          |
+| **D-164** | The sort key is a CDS annotation, not an attribute or a convention                                            | SPEC-11 declares no new attribute, and the exporter already reads the CSN. A hardcoded table in the exporter drifts silently with no linter to catch it                                                                                                                 |
+| **D-165** | A `code` is the literal a spec froze; three status lists are the exception                                    | The divergence SPEC-05 flagged does not exist — a one-word camelCase code **is** lowercase. Eight lists keep a frozen literal, `ActorKind` is minted here, and three carry a display phrase with a space, so those take a camelCase code and keep the phrase in `name`  |
+| **D-166** | `Actor` is a code list carrying a kind                                                                        | SPEC-02's "anything not `sandro` is an agent" is already false against SPEC-09's `test-report`. Eight identities, three kinds; BR-23 becomes referential integrity plus a lookup                                                                                        |
+| **D-167** | `Activity.target` is a reference string; every other target is an explicit nullable FK                        | Sixteen kinds across eight entity types would need eight columns, seven null per row, on an append-only record. Decision's trichotomy is two nullable links plus the mandatory scope                                                                                    |
+| **D-168** | R1 is measured, blocked on a credential, and re-owned to Tech Stack                                           | The register's cause is wrong: `pg` rejects the empty password client-side and the server is never reached. Only `postgres`/`postgres` produces a real `28P01`. Grade stays `Inferred`                                                                                  |
+| **D-170** | R1 executed and closed — Postgres is proven                                                                   | 20/20 checks on PostgreSQL 17.6 via `@cap-js/postgres`: handlers, managed fields, cuid, rollback, a 409 named key, D-163's navigation and D-164's ORDER BY. The first CDS model any Life OS module has deployed to Postgres. Eleven specs lose their provisional status |
+| **D-171** | Cross-field `@assert: (expr)` does not exist; three constraints become handlers                               | `@assert.constraint` has **zero** occurrences in cds-compiler 9.8.4 and a boolean `@assert:` fires nothing — an Initiative went Complete with null `mergeCommit` and `tag`, and an orphan Defect was accepted. Corrects the shared standards, not only this document    |
+| **D-172** | `@mandatory` emits `ASSERT_MANDATORY`; `@assert.unique` is entity-level and emits no CAP key                  | Two Workspaces with the same `slug` were written before the field-level form was caught. There is **no `ASSERT_UNIQUE`** — the annotation compiles to a DB unique index, so D-46's verbatim message is Postgres's                                                       |
+| **D-173** | `assert_integrity` is set to `'DB'`, and the default would have made D-166 vacuous                            | CAP defaults it to `false`, and the literal `true` is rejected — `DB` or `RT` only. With `DB`, Postgres rejects an unseeded code list FK with `23503`; without it, an unrecognised actor is written silently                                                            |
+| **D-174** | `Workspace` carries `@cds.redirection.target: true`                                                           | A service exposing both `Workspace` and a projection of it **fails to compile** — CAP cannot choose a redirection target for `Defect:workspace` and `Initiative:workspace`. The writable entity wins, because D-79's create-handler writes there                        |
+| **D-175** | R4's mechanism observed in passing, and handed on rather than owned                                           | A second `cds.deploy` from a narrower model tried to DROP `cds.outbox.Messages`; and `cds deploy` cannot add a `not null` column to a populated table. Both bind CNV-002/CNV-003 ordering. R4's own drill stays with `INT-007` (D-121)                                  |
+| **D-169** | D-159's approval gate failed a third time, and the fix is structural                                          | `TH-001` opened this stage unapproved after `IA-001` and `DS-001` did the same. The gate was step 6 of 8 in a numbered list; in `/generate-data-model` it is step **0** of Phase 6                                                                                      |
 
 ---
 
@@ -735,4 +801,6 @@ read-only projections, and the constraints, sort keys and rulings behind them. E
 to the spec that required it; the twelve specs' Data Model sections are the input, not the reference
 ([D-43](DECISIONS_LOG.md)). It resolves **OI-05**, the module's last open item, and re-owns **R1**
 with what was measured. Decisions are logged in the [Decisions Log](DECISIONS_LOG.md) at
-D-160 … D-169. No CDS file is written here — that is the first build story's (§3)._
+D-160 … D-175. No CDS file is written here — that is the first build story's (§3), but the model was
+**executed** against PostgreSQL 17.6 to close R1, and four of §9's constraint mechanisms changed
+because of what that execution measured (§15.1)._
