@@ -1,8 +1,8 @@
 # Project Tracker — Plan
 
 **Status:** Plan phase — Ideate, Scope, Research, Scaffold, Workshops, Information Architecture,
-Design System, Theme **and Data Model complete** (grouping settled, `SPEC-01` … `SPEC-12`; **12 of 12
-written and all twelve Approved**; `IA-001`, `DS-001` and `TH-001` **Approved**; `DM-001` **Approved**). **All five open items are now closed and R1 is executed.** Next stage is **Tech Stack**.
+Design System, Theme, Data Model **and Tech Stack complete** (grouping settled, `SPEC-01` … `SPEC-12`; **12 of 12
+written and all twelve Approved**; `IA-001`, `DS-001`, `TH-001`, `DM-001` and `TS-001` **Approved**). **All five open items are closed; R1 is executed and R9's proxy residual is executed.** Next stage is **Test Strategy**.
 **Last updated:** 2026-08-15
 **Purpose:** The continuity document. Anyone (or any fresh chat) picking up Project Tracker
 starts here. Read this, then `design/PROBLEM_STATEMENT_AND_VISION.md` (PSV-001),
@@ -16,6 +16,14 @@ decision rationale.
 Financial Planner is mid-sprint **W1-S3 — Transaction Processing**, with one story left in
 Backlog (`CNV-001` Historical backfill) and nothing In Progress. That gap is deliberate — it
 is the cutover window.
+
+**Tech Stack is complete.** `design/TECH_STACK.md` (TS-001, **Approved**) settles the **5** questions
+the design documents defer to this stage by name across **14** files, in **18** sections. It **executes
+D-141's reverse proxy** — the last unexecuted thing any stage had assigned to a named owner — and
+the `$batch` POST plus an OData **write** are green in a real browser under `NODE_ENV=production`,
+with zero CORS headers. It also found that **`npm start` cannot load a TypeScript service
+implementation in either module** (D-180), corrected D-173's file placement (D-182), and minted
+**R11**. Decisions run **D-01 … D-185**.
 
 **Data Model is complete, and with it the last open item in the module.**
 `design/DATA_MODEL.md` (DM-001, **Approved**) consolidates the Data Model section of all **12** specs —
@@ -62,7 +70,7 @@ becomes the first real test of the new system.
 
 ## 2. Decisions already made
 
-Full rationale in `design/DECISIONS_LOG.md` (D-01 … D-159; D-19 … D-27 were added at Scope,
+Full rationale in `design/DECISIONS_LOG.md` (D-01 … **D-185**; D-19 … D-27 were added at Scope,
 D-28 … D-32 at Research, D-33 … D-36 at Scaffold, D-37 … D-39 at the Workshops grouping,
 D-40 … D-46 at the `SPEC-01` workshop, D-47 … D-57 at the `SPEC-02` workshop, D-58 … D-65 at the
 `SPEC-03` workshop, D-66 … D-69 at the `SPEC-04` workshop, D-70 … D-75 at the `SPEC-05` workshop and
@@ -105,8 +113,8 @@ mechanism needs a construction step.
 | 7   | Design System      | `/generate-design-system` → `design-system-writer` | Authored     | **Done** — 2026-08-06. `DS-001` **Approved**; **FE FPM, drafts OFF**; the browser read path named (D-144 … D-152)                                  |
 | 8   | Theme              | `/generate-theme` → `theme-writer`                 | Authored     | **Done** — 2026-08-06. `TH-001` **Approved** 2026-08-15; **theme inherited wholesale, no CSS written** (D-153 … D-159)                             |
 | 9   | Data Model         | `/generate-data-model` → `data-model-writer`       | Authored     | **Done** — 2026-08-15. `DM-001` **Approved**; **25 entities, document only, no CDS**; **OI-05 closed**, **R1 executed and closed** (D-160 … D-175) |
-| 10  | Tech Stack         | `/generate-tech-stack`                             | Not authored | **Next** — inherits the untested reverse proxy (D-141), the assert_integrity placement (D-173) and where the Postgres credential lives (D-170)     |
-| 11  | Test Strategy      | `/generate-test-strategy`                          | Not authored | Not started                                                                                                                                        |
+| 10  | Tech Stack         | `/generate-tech-stack` → `tech-stack-writer`       | Authored     | **Done** — 2026-08-15. `TS-001` **Approved**; **the proxy executed**, the loader ruled, the credential homed, **R11 minted** (D-176 … D-185)       |
+| 11  | Test Strategy      | `/generate-test-strategy`                          | Not authored | **Next** — inherits the `cds.test` TypeScript-loader question (D-180) and the SQLite test profile's stated blind spot (D-183)                      |
 | 12  | Project Planning   | `/generate-build-plan`                             | Not authored | Not started                                                                                                                                        |
 | 13  | Build              | `/build` + chain                                   | Exists       | Not started                                                                                                                                        |
 | 14  | **Rewire tooling** | `lintNoMarkdownState` + PreToolUse hook            | Not authored | Not started                                                                                                                                        |
@@ -556,6 +564,71 @@ Settle before or during Scaffold.
 ---
 
 ## 8. Session log
+
+### 2026-08-15 — Tech Stack: the proxy works, and `npm start` does not
+
+- **Authored `/generate-tech-stack` and its `tech-stack-writer` agent, then ran the stage.** Wrote
+  `design/TECH_STACK.md` (TS-001, **Approved**) and logged **D-176 … D-185**. The skill carries **18**
+  fixed questions against the exemplar's ten sections — **eight of which the exemplar never faced**:
+  process topology, implementation loading, the database credential, runtime flags, profiles and run
+  modes, the origin, risks assigned to the stage, and open items. Every one of those eight exists
+  because something the exemplar could take for granted — one process, one origin, one runtime copy, a
+  database it never actually reached — stopped being true. **The writer agent could not be invoked**:
+  Claude Code resolves its agent registry at session start, so a newly-authored agent is not callable
+  in the session that writes it — the **fourth** stage running to hit this. The document was written
+  in the main thread against the same standard.
+- **The surface was measured rather than inherited.** The handoff's list was a summary; grepping the
+  module found **5 distinct questions deferred here by name across 14 files**. Everything else in this
+  document is the stage's own standing surface, not something handed down — and saying which is which
+  is the first thing the stage owes.
+- **D-141's reverse proxy is EXECUTED and CLOSED (D-184).** D-140 recorded in terms that the spike
+  "did not test the reverse-proxy option at all". It has now been tested: a **31-line zero-dependency**
+  `node:http` proxy on :4000 fronting two CAP 9.8.4 servers, driven in a real browser. **The `$batch`
+  POST that D-140 measured being rejected on its `X-CSRF-Token` preflight returned 200**, and an
+  **OData write** succeeded and read back — the credentialed-write case D-82 widened R9 to cover and
+  the IA spike left unproven. **Zero CORS headers, zero `OPTIONS` preflights, no manifest change,
+  `cds.fiori.routes` untouched**, repeated under `NODE_ENV=production` and under `cds watch`. The
+  finding is that the cheap option is the complete one: multi-origin needs three coordinated
+  hand-maintained changes across two modules; one origin needs none. Residual stated: the proxy has no
+  `upgrade` handler, measured harmless today because `cds watch` 9.8.4 injects no livereload snippet
+  and its livereload server listens separately on :35729.
+- **`npm start` cannot load a TypeScript service implementation, in either module (D-180).** Measured
+  on one scratch tree with two entry points: `npx cds serve` resolved `srv/probe-service.ts` and
+  answered **200**; `npx cds-serve` resolved the generic `app-service.js` fallback and answered **501
+  `Service "X" has no handler`** — D-33's option-B failure mode exactly. The cause is in the installed
+  source: `@sap/cds-dk@9.7.2`'s `_prepareTsIfNeeded` (`bin/cds.js`) loads `tsx/cjs` **and** sets
+  `CDS_TYPESCRIPT` whenever the command is `serve` and a `tsconfig.json` sits at `cds.root` — so the
+  CLI supplies **both** of D-33's levers, and `cds-serve` is `@sap/cds`'s own bin and passes through
+  none of it. **`Financial Planner/package.json` declares `"start": "cds-serve"` over four `.ts`
+  services**; it has evidently never bitten because that module is developed under `cds watch`, which
+  is exactly why it would surface at the worst moment. **Raised, not fixed — Sandro's call.**
+- **Three inherited rulings were corrected by measurement rather than confirmed.** D-173 said the
+  `assert_integrity` flag "belongs in this module's `package.json` `cds` block" — measured,
+  `Financial Planner/.cdsrc.json:5-6` **already carries it**, so the house had a location and D-173
+  guessed a different one (D-182); the compiler's validator also lowercases both sides, so the casing
+  is not load-bearing. **CAP reads `.env` only under the development profile**
+  (`cds-env.js:211-216`), so "put the password in `.env`" works in the dev loop and silently does
+  nothing in production (D-181). And **RSH-002 §3's "`@sap/cds` is not hoisted" is false today** —
+  one copy at the root, none under either module, which is what D-34 produced.
+- **R11 is minted (D-185).** The `cds` command is a globally-installed, unpinned `@sap/cds-dk@9.7.2`
+  that appears in **no file in this repository** and is a patch line behind the pinned
+  `@sap/cds@9.8.4`. `cap-multi-module-backend.md` §5 flagged it as a fact "needing a home regardless"
+  and no risk row ever carried it. D-180 makes `npm start` depend on it, so it now has an owner —
+  whoever next raises the CAP pin, since adding `cds-dk` to the root is the same change and D-34
+  requires it be made with the suite green either side.
+- **Two forks were ruled toward safety over convenience.** The Postgres credential gets a **dedicated
+  non-superuser role**, not the `postgres` superuser, because an agent-driven write path
+  authenticating as superuser reaches `financial_planner` and undoes D-29's separation (D-181). And
+  **the dev loop moves to Postgres**: a `cds watch` against `:memory:` discards the board on every
+  restart, which is the exact property the module exists to supply (D-183). SQLite survives as the
+  test profile, with its blind spot named for Test Strategy.
+- **The stage shipped one line of non-document change (D-176).** `Project Tracker/.gitignore` did not
+  list `.env` — unlike Financial Planner's — so ruling that the password lives there would have
+  created the hazard the ruling removes. Everything else it configures is specified and left to the
+  first build story, on D-160's reasoning.
+- **The approval gate held again (Step 0).** `DM-001` was **Approved** when this stage opened — the
+  second consecutive stage that did not have to ask, after three in a row that did. D-169's reorder
+  now has two data points rather than one.
 
 ### 2026-08-15 — Data Model: a register with no path to its own scope, and four annotations that do not exist
 
@@ -1733,19 +1806,21 @@ stores them under the user's home directory, which the bridge cannot access.
 
 ## 9. Related documents
 
-| Document                                                 | What it holds                                                                                                                                    |
-| -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `Project Tracker/PRD.md`                                 | Full product design. Slice 1 is a small fraction of it.                                                                                          |
-| `Project Tracker/design/PROBLEM_STATEMENT_AND_VISION.md` | PSV-001 — the traceability root: problems P1–P5, scope, boundary.                                                                                |
-| `Project Tracker/design/BUSINESS_ARCHITECTURE.md`        | BA-001 v1.13 — the FRICEW catalogue and the story backlog. 22 objects, 3 waves, deferred items in §3, **the 12-spec grouping in §11**.           |
-| `Project Tracker/design/specs/`                          | The twelve functional specs, written in `SPEC-01` → `SPEC-12` order. Grouping and membership are BA-001 §11. **12 of 12 written, all Approved.** |
-| `Project Tracker/research/`                              | Six research documents plus `README.md` — the index, assumption ledger, open risks and gate verdict. All **Draft**.                              |
-| `Project Tracker/design/INFORMATION_ARCHITECTURE.md`     | IA-001 — page and route decomposition, navigation, shell placement and origin. **Approved.**                                                     |
-| `Project Tracker/design/DESIGN_SYSTEM.md`                | DS-001 — build technology, theme, density, layout, controls, semantic roles, status indicators, state conventions. **Approved.**                 |
-| `Project Tracker/design/THEME.md`                        | TH-001 — theme ownership, the inherited palette, semantic token resolution, border radius, contrast and the CSS contract. **Approved.**          |
-| `Project Tracker/design/DATA_MODEL.md`                   | DM-001 — 13 domain entities, 12 code lists, relationships, constraints, sort keys and the read projection. **Approved.**                         |
-| `Project Tracker/design/DATA_MODEL.md` §15               | The R1 execution record — 20/20 checks on PostgreSQL 17.6, and the four constraint mechanisms it corrected.                                      |
-| `Project Tracker/design/DECISIONS_LOG.md`                | D-01 … D-175 with full rationale. (`IDEATE_KICKOFF.md` was scratch — absorbed and deleted 2026-07-26.)                                           |
-| `Standards (Documents)/METHODOLOGY_BLUEPRINT.md`         | The methodology→tooling map. **§7 is partly superseded** — the module is real, not a generator, and it writes rather than only reads.            |
-| `Financial Planner/design/`                              | The artifact set this module's design phase mirrors.                                                                                             |
-| `Financial Planner/design/DESIGN_PHASE_TIMELINE.md`      | How the design phase actually ran, step by step.                                                                                                 |
+| Document                                                 | What it holds                                                                                                                                                                                                                |
+| -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Project Tracker/PRD.md`                                 | Full product design. Slice 1 is a small fraction of it.                                                                                                                                                                      |
+| `Project Tracker/design/PROBLEM_STATEMENT_AND_VISION.md` | PSV-001 — the traceability root: problems P1–P5, scope, boundary.                                                                                                                                                            |
+| `Project Tracker/design/BUSINESS_ARCHITECTURE.md`        | BA-001 v1.13 — the FRICEW catalogue and the story backlog. 22 objects, 3 waves, deferred items in §3, **the 12-spec grouping in §11**.                                                                                       |
+| `Project Tracker/design/specs/`                          | The twelve functional specs, written in `SPEC-01` → `SPEC-12` order. Grouping and membership are BA-001 §11. **12 of 12 written, all Approved.**                                                                             |
+| `Project Tracker/research/`                              | Six research documents plus `README.md` — the index, assumption ledger, open risks and gate verdict. All **Draft**.                                                                                                          |
+| `Project Tracker/design/INFORMATION_ARCHITECTURE.md`     | IA-001 — page and route decomposition, navigation, shell placement and origin. **Approved.**                                                                                                                                 |
+| `Project Tracker/design/DESIGN_SYSTEM.md`                | DS-001 — build technology, theme, density, layout, controls, semantic roles, status indicators, state conventions. **Approved.**                                                                                             |
+| `Project Tracker/design/THEME.md`                        | TH-001 — theme ownership, the inherited palette, semantic token resolution, border radius, contrast and the CSS contract. **Approved.**                                                                                      |
+| `Project Tracker/design/DATA_MODEL.md`                   | DM-001 — 13 domain entities, 12 code lists, relationships, constraints, sort keys and the read projection. **Approved.**                                                                                                     |
+| `Project Tracker/design/DATA_MODEL.md` §15               | The R1 execution record — 20/20 checks on PostgreSQL 17.6, and the four constraint mechanisms it corrected.                                                                                                                  |
+| `Project Tracker/design/TECH_STACK.md`                   | TS-001 — versions and their pins, process topology, the service split, libraries, implementation loading, the DB binding and its credential, runtime flags, profiles, the origin, structure and the run story. **Approved.** |
+| `Project Tracker/design/TECH_STACK.md` §11.1             | The reverse-proxy execution record — `$batch` POST and an OData write, in a real browser, under `NODE_ENV=production`, with zero CORS headers.                                                                               |
+| `Project Tracker/design/DECISIONS_LOG.md`                | D-01 … D-185 with full rationale. (`IDEATE_KICKOFF.md` was scratch — absorbed and deleted 2026-07-26.)                                                                                                                       |
+| `Standards (Documents)/METHODOLOGY_BLUEPRINT.md`         | The methodology→tooling map. **§7 is partly superseded** — the module is real, not a generator, and it writes rather than only reads.                                                                                        |
+| `Financial Planner/design/`                              | The artifact set this module's design phase mirrors.                                                                                                                                                                         |
+| `Financial Planner/design/DESIGN_PHASE_TIMELINE.md`      | How the design phase actually ran, step by step.                                                                                                                                                                             |
