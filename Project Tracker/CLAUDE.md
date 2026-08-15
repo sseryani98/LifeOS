@@ -22,8 +22,12 @@ What this means concretely:
   meaningless until the first build story creates the schema. **The Data Model stage does not** —
   `design/DATA_MODEL.md` (DM-001) is the entity contract and D-160 keeps the CDS files out of Design,
   because a schema written there would be code no test, gate or story covers.
-- **There is no `test` script.** Adding one now would red-line the repo-wide `npm test` for a module
-  with no tests. The Test Strategy stage adds it with the first test.
+- **There is no `test` script, and that is now a ruling rather than a pending task (D-186).**
+  `design/TEST_STRATEGY.md` (TST-001) specifies the exact script and `jest.config.ts`; the **first test
+  story** adds both. Measured on the installed Jest: `jest` with no matching tests exits **1** and
+  `jest --passWithNoTests` exits **0**, so a script added today is safe with that flag and buys a green
+  gate over zero tests — the same meaningless green as `cds build` above. It lands with the first test,
+  **without** the flag, so an empty run is loud.
 - **`npm run lint` passes and checks almost nothing.** Twenty linters run and find zero files. That
   is the correct result for an empty tree, not a green signal about code quality.
 
@@ -77,7 +81,7 @@ looks populated when it is not is the thing most likely to mislead the next agen
 .gitignore                   CAP generated output, coverage, local Postgres artifacts
 PLAN.md                      Continuity document — where the module is, what happens next
 PRD.md                       Full product design; slice 1 is a small fraction of it
-design/                      PSV, BUSINESS_ARCHITECTURE, specs/, IA, DESIGN_SYSTEM, THEME, DATA_MODEL, TECH_STACK, DECISIONS_LOG
+design/                      PSV, BUSINESS_ARCHITECTURE, specs/, IA, DESIGN_SYSTEM, THEME, DATA_MODEL, TECH_STACK, TEST_STRATEGY, DECISIONS_LOG
 research/                    Six research docs + README.md (pack index, risk register, gate verdict)
 dashboard/                   The v1 HTML generator. Deleted by CNV-005 at cutover (D-02) — not yet
 db/                          (empty)  ← Build. DM-001 is the contract; D-160 keeps the CDS out of Design
@@ -85,7 +89,7 @@ srv/                         (empty)  ← Workshops, then Build. One service, Tr
   _i18n/                     (empty)  ← first service
 mcp/                         (absent) ← Build. INT-001's server — a SIBLING of srv/, not under it (D-44)
 app/                         (empty)  ← Information Architecture / Design System / Theme, then Build
-test/                        (empty)  ← Test Strategy stage
+test/                        (empty)  ← Build. TST-001 §12 is the structure; D-186 keeps the files out of Design
 ```
 
 ## Carve-outs
@@ -160,7 +164,18 @@ therefore `cds serve`, not `cds-serve`.**
 
 **Set both levers explicitly in anything that is not a `cds` command** — `mcp/server.ts` and
 `scripts/recordTestRun.ts`. Set `process.env.CDS_TYPESCRIPT` _before_ requiring `@sap/cds`, and run
-under a `tsx` loader. The `cds.test` path is **not** settled: it belongs to Test Strategy (stage 11).
+under a `tsx` loader.
+
+~~The `cds.test` path is **not** settled: it belongs to Test Strategy (stage 11).~~ **Settled
+2026-08-15 — `design/TEST_STRATEGY.md` §4, D-187 — and it reverses the assumption behind the
+sentence.** `cds.test` **can** load a `.ts` service implementation. It needs **one** lever, not two:
+`process.env.CDS_TYPESCRIPT` set in a Jest **`setupFiles`** entry, because `factory.js:46`'s extension
+list is a module-load-time constant. No `tsx` loader is needed — CAP's `require` of the impl goes
+through Jest's registry and ts-jest transforms it; `moduleNameMapper` resolves the `./types.js`
+specifier. **Never set it per spec file.** Measured: without the lever, an action returns 501 but a
+`before CREATE` cross-field guard simply never registers and the invalid row is written — **a silent
+pass, not an error**. Financial Planner's suites carry the opposite belief in a comment and register
+the Facade by hand; this module inherits that workaround nowhere.
 
 ## Do NOT
 
