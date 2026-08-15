@@ -2,8 +2,7 @@
 
 **Status:** Plan phase — Ideate, Scope, Research, Scaffold, Workshops, Information Architecture,
 Design System, Theme **and Data Model complete** (grouping settled, `SPEC-01` … `SPEC-12`; **12 of 12
-written and all twelve Approved**; `IA-001`, `DS-001` and `TH-001` **Approved**; `DM-001` written,
-**Draft**). **All five open items are now closed and R1 is executed.** Next stage is **Tech Stack**.
+written and all twelve Approved**; `IA-001`, `DS-001` and `TH-001` **Approved**; `DM-001` **Approved**). **All five open items are now closed and R1 is executed.** Next stage is **Tech Stack**.
 **Last updated:** 2026-08-15
 **Purpose:** The continuity document. Anyone (or any fresh chat) picking up Project Tracker
 starts here. Read this, then `design/PROBLEM_STATEMENT_AND_VISION.md` (PSV-001),
@@ -19,7 +18,7 @@ Backlog (`CNV-001` Historical backfill) and nothing In Progress. That gap is del
 is the cutover window.
 
 **Data Model is complete, and with it the last open item in the module.**
-`design/DATA_MODEL.md` (DM-001, **Draft**) consolidates the Data Model section of all **12** specs —
+`design/DATA_MODEL.md` (DM-001, **Approved**) consolidates the Data Model section of all **12** specs —
 **10** place requirements and **2** state they place none — into **25 persisted entities**: 13 domain
 entities and 12 code lists, plus two read-only projections. It resolves **OI-05** (D-161), settles the
 `Milestone.status` contradiction D-88 raised to it (D-162), names the CAP construct behind D-145's
@@ -95,24 +94,24 @@ mechanism needs a construction step.
 
 ### Stage status
 
-| #   | Stage              | Skill                                              | Skill status | Stage status                                                                                                                                    |
-| --- | ------------------ | -------------------------------------------------- | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | Ideate             | `/generate-problem-statement-vision`               | Authored     | **Done** — 2026-07-26                                                                                                                           |
-| 2   | Scope              | `/generate-business-architecture`                  | Authored     | **Done** — 2026-07-26                                                                                                                           |
-| 3   | Research           | `/gather-research`                                 | Authored     | **Done** — 2026-07-26                                                                                                                           |
-| 4   | Scaffold           | `/scaffold-module` → `scaffold-writer`             | Authored     | **Done** — 2026-07-27                                                                                                                           |
-| 5   | Workshops          | `/workshop` → `spec-writer`                        | Exists       | **Done** — 2026-08-04. D-37 grouping; `SPEC-01` … `SPEC-12` all **Approved** (12/12 written; D-136)                                             |
-| 6   | Information Arch.  | `/generate-information-architecture` → `ia-writer` | Authored     | **Done** — 2026-08-06. `IA-001` **Approved**; 6 objects → 1 route + 1 `story` param; **R9 executed** (D-137 … D-143)                            |
-| 7   | Design System      | `/generate-design-system` → `design-system-writer` | Authored     | **Done** — 2026-08-06. `DS-001` **Approved**; **FE FPM, drafts OFF**; the browser read path named (D-144 … D-152)                               |
-| 8   | Theme              | `/generate-theme` → `theme-writer`                 | Authored     | **Done** — 2026-08-06. `TH-001` **Approved** 2026-08-15; **theme inherited wholesale, no CSS written** (D-153 … D-159)                          |
-| 9   | Data Model         | `/generate-data-model` → `data-model-writer`       | Authored     | **Done** — 2026-08-15. `DM-001` **Draft**; **25 entities, document only, no CDS**; **OI-05 closed**, **R1 executed and closed** (D-160 … D-175) |
-| 10  | Tech Stack         | `/generate-tech-stack`                             | Not authored | **Next** — inherits the untested reverse proxy (D-141), the assert_integrity placement (D-173) and where the Postgres credential lives (D-170)  |
-| 11  | Test Strategy      | `/generate-test-strategy`                          | Not authored | Not started                                                                                                                                     |
-| 12  | Project Planning   | `/generate-build-plan`                             | Not authored | Not started                                                                                                                                     |
-| 13  | Build              | `/build` + chain                                   | Exists       | Not started                                                                                                                                     |
-| 14  | **Rewire tooling** | `lintNoMarkdownState` + PreToolUse hook            | Not authored | Not started                                                                                                                                     |
-| 15  | Cutover            | —                                                  | —            | Not started                                                                                                                                     |
-| 16  | Back to FP         | —                                                  | —            | Blocked on cutover                                                                                                                              |
+| #   | Stage              | Skill                                              | Skill status | Stage status                                                                                                                                       |
+| --- | ------------------ | -------------------------------------------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Ideate             | `/generate-problem-statement-vision`               | Authored     | **Done** — 2026-07-26                                                                                                                              |
+| 2   | Scope              | `/generate-business-architecture`                  | Authored     | **Done** — 2026-07-26                                                                                                                              |
+| 3   | Research           | `/gather-research`                                 | Authored     | **Done** — 2026-07-26                                                                                                                              |
+| 4   | Scaffold           | `/scaffold-module` → `scaffold-writer`             | Authored     | **Done** — 2026-07-27                                                                                                                              |
+| 5   | Workshops          | `/workshop` → `spec-writer`                        | Exists       | **Done** — 2026-08-04. D-37 grouping; `SPEC-01` … `SPEC-12` all **Approved** (12/12 written; D-136)                                                |
+| 6   | Information Arch.  | `/generate-information-architecture` → `ia-writer` | Authored     | **Done** — 2026-08-06. `IA-001` **Approved**; 6 objects → 1 route + 1 `story` param; **R9 executed** (D-137 … D-143)                               |
+| 7   | Design System      | `/generate-design-system` → `design-system-writer` | Authored     | **Done** — 2026-08-06. `DS-001` **Approved**; **FE FPM, drafts OFF**; the browser read path named (D-144 … D-152)                                  |
+| 8   | Theme              | `/generate-theme` → `theme-writer`                 | Authored     | **Done** — 2026-08-06. `TH-001` **Approved** 2026-08-15; **theme inherited wholesale, no CSS written** (D-153 … D-159)                             |
+| 9   | Data Model         | `/generate-data-model` → `data-model-writer`       | Authored     | **Done** — 2026-08-15. `DM-001` **Approved**; **25 entities, document only, no CDS**; **OI-05 closed**, **R1 executed and closed** (D-160 … D-175) |
+| 10  | Tech Stack         | `/generate-tech-stack`                             | Not authored | **Next** — inherits the untested reverse proxy (D-141), the assert_integrity placement (D-173) and where the Postgres credential lives (D-170)     |
+| 11  | Test Strategy      | `/generate-test-strategy`                          | Not authored | Not started                                                                                                                                        |
+| 12  | Project Planning   | `/generate-build-plan`                             | Not authored | Not started                                                                                                                                        |
+| 13  | Build              | `/build` + chain                                   | Exists       | Not started                                                                                                                                        |
+| 14  | **Rewire tooling** | `lintNoMarkdownState` + PreToolUse hook            | Not authored | Not started                                                                                                                                        |
+| 15  | Cutover            | —                                                  | —            | Not started                                                                                                                                        |
+| 16  | Back to FP         | —                                                  | —            | Blocked on cutover                                                                                                                                 |
 
 Stages 6–8 (IA, Design System, Theme) **run in full** — settled by D-21. Slice 1 carries four
 Reports and two Forms, which is a real UI rather than a thin shell. **All three are now done**, and
@@ -1744,7 +1743,7 @@ stores them under the user's home directory, which the bridge cannot access.
 | `Project Tracker/design/INFORMATION_ARCHITECTURE.md`     | IA-001 — page and route decomposition, navigation, shell placement and origin. **Approved.**                                                     |
 | `Project Tracker/design/DESIGN_SYSTEM.md`                | DS-001 — build technology, theme, density, layout, controls, semantic roles, status indicators, state conventions. **Approved.**                 |
 | `Project Tracker/design/THEME.md`                        | TH-001 — theme ownership, the inherited palette, semantic token resolution, border radius, contrast and the CSS contract. **Approved.**          |
-| `Project Tracker/design/DATA_MODEL.md`                   | DM-001 — 13 domain entities, 12 code lists, relationships, constraints, sort keys and the read projection. **Draft.**                            |
+| `Project Tracker/design/DATA_MODEL.md`                   | DM-001 — 13 domain entities, 12 code lists, relationships, constraints, sort keys and the read projection. **Approved.**                         |
 | `Project Tracker/design/DATA_MODEL.md` §15               | The R1 execution record — 20/20 checks on PostgreSQL 17.6, and the four constraint mechanisms it corrected.                                      |
 | `Project Tracker/design/DECISIONS_LOG.md`                | D-01 … D-175 with full rationale. (`IDEATE_KICKOFF.md` was scratch — absorbed and deleted 2026-07-26.)                                           |
 | `Standards (Documents)/METHODOLOGY_BLUEPRINT.md`         | The methodology→tooling map. **§7 is partly superseded** — the module is real, not a generator, and it writes rather than only reads.            |

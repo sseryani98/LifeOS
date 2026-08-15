@@ -3,7 +3,7 @@
 **Document ID:** DM-001
 **Version:** 1.0
 **Date:** 2026-08-15
-**Status:** Draft
+**Status:** Approved
 
 ---
 
@@ -11,6 +11,7 @@
 
 | Date       | Author          | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-15 | Sandro          | **Status → Approved.** All ten Phase 5 coverage checks met; the approval gate D-169 moved to step 0 of Phase 6 was answered before the stage closed.                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | 2026-08-15 | Sandro & Claude | Initial creation from the Data Model stage. **25 persisted entities** — 13 domain entities and 12 code lists — consolidated from the Data Model section of all **12** specs, of which **10** place requirements and **2** ([SPEC-10](specs/SPEC-10-CUTOVER-GUARDS.md), [SPEC-12](specs/SPEC-12-DECOMMISSION.md)) state they place none. **OI-05 resolved** — the last open item in the module. Records D-160 through D-175. **R1 executed and closed** — 20/20 checks against PostgreSQL 17.6, the first CDS model any Life OS module has deployed to Postgres, which changed four constraint mechanisms in §9. |
 
 ---
