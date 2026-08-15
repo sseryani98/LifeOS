@@ -4,6 +4,9 @@ gen/
 .cds-services.json
 *.sqlite
 
+# Secrets — the Postgres password reaches CAP as CDS_REQUIRES_DB_CREDENTIALS_PASSWORD (TS-001 §8, D-181)
+.env
+
 # Test artifacts
 coverage/
 
