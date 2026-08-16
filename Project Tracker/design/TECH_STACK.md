@@ -124,6 +124,12 @@ lasting five seconds cannot answer it and neither can a document.
 | ---------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------- |
 | `TrackerService` | `/service/trackerSvcs` | `ProjectView` and `TaskQueueItem` read-only (DM-001 §11); `Initiative`, `Milestone`, `Workspace` writable for D-79's shared create-handler | Every UI object, and INT-001 |
 
+**The Exposes column names the UI-relevant surface, not the compiled service (D-230, `SPEC-01`).** The
+service exposes **all 25 entities** plus both read projections, because a verb reaches the real
+handlers only through an entity the service exposes, and the two uniqueness guards and three
+cross-field rules `DM-001` §9 makes handlers would otherwise be bypassed by every verb write. D-05's
+escape hatch is the **tool** surface — still eleven verbs, asserted by `SPEC-01` FUT-001.
+
 **Why one.** The exemplar's four services partition four problem domains with four independent
 consumer sets (`Financial Planner` D-49). This module has **one** domain, **one** page (IA-001 §4) and
 **one** write path — D-05 removes the CRUD surface on purpose, so a second service would partition a
@@ -135,8 +141,9 @@ surface that has a single consumer. `cds.serve('all').from(model)` then `cds.con
 gives the proxy a **single unambiguous prefix** (§11), so the route table is one row rather than a
 per-service list that drifts.
 
-`Workspace` carries `@cds.redirection.target: true` here, without which the service does not compile —
-D-174, measured while running R1.
+`TrackerService.Workspaces` carries `@cds.redirection.target` here, without which the service does not
+compile — D-174, measured while running R1; **the annotation belongs on the service entity rather than
+the database one, and `Tasks` needs a second one** (D-220, measured at `SPEC-01`).
 
 ---
 
@@ -146,8 +153,11 @@ D-174, measured while running R1.
 
 | Need                           | Library                     | Version             | Required by                                                                                 |
 | ------------------------------ | --------------------------- | ------------------- | ------------------------------------------------------------------------------------------- |
-| MCP protocol + stdio transport | `@modelcontextprotocol/sdk` | `^1.29.0`           | `INT-001` (SPEC-01 §3.1)                                                                    |
-| Typed tool-input schemas       | `zod`                       | as the SDK requires | `INT-001` — typed inputs are what make a malformed write fail loudly at the boundary (D-05) |
+| MCP protocol + stdio transport | `@modelcontextprotocol/sdk` | `^1.29.0` → **1.30.0** | `INT-001` (SPEC-01 §3.1)                                                                    |
+| Typed tool-input schemas       | `zod`                       | `^4.4.3` → **4.4.3**   | `INT-001` — typed inputs are what make a malformed write fail loudly at the boundary (D-05) |
+
+**Both installed at `SPEC-01`.** `npm ls @sap/cds` before and after reports **one** copy, `9.8.4`, at
+the repository root and none under either module — the pin D-34 makes load-bearing is undisturbed.
 | Postgres driver                | `@cap-js/postgres`          | `^2` → 2.3.0        | D-29. **Already declared**                                                                  |
 | SQLite driver (test profile)   | `@cap-js/sqlite`            | `^2.2.0` → 2.4.0    | §10. **Already declared**                                                                   |
 
@@ -459,7 +469,8 @@ Project Tracker/
     project-view/                       The one FPM page (IA-001 §4, DS-001 §4)
       webapp/ annotations/              manifest, Component.ts, view, annotations
   scripts/
-    recordTestRun.ts                    INT-004 (D-103) — the module's only script
+    installMcpServer.mjs                ← NEW at SPEC-01 (D-224). Writes the gitignored registration
+    recordTestRun.ts                    INT-004 (D-103)
   test/                                 Structure is Test Strategy's (stage 11)
 ```
 

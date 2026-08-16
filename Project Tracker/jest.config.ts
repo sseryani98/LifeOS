@@ -40,6 +40,21 @@ const config: Config = {
       lines: 85,
       branches: 80,
     },
+    // Each band lands with the story that creates the first file under its
+    // folder: Jest resolves a group against the files it actually covered, and
+    // a group matching none is a hard error rather than a skip.
+    "./srv/modules/**/*Validator.ts": {
+      lines: 100,
+      branches: 100,
+    },
+    "./srv/modules/**/*Service.ts": {
+      lines: 90,
+      branches: 85,
+    },
+    "./mcp/verbs/**/*.ts": {
+      lines: 90,
+      branches: 85,
+    },
   },
 };
 

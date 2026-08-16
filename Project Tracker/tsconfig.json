@@ -15,6 +15,6 @@
       "#cds-models/*": ["./@cds-models/*"]
     }
   },
-  "include": ["srv/**/*.ts", "db/**/*.ts", "test/**/*.ts"],
+  "include": ["srv/**/*.ts", "db/**/*.ts", "mcp/**/*.ts", "test/**/*.ts"],
   "exclude": ["node_modules", "gen", "@cds-models"]
 }

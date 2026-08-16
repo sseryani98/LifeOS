@@ -10,8 +10,9 @@
   "scripts": {
     "start": "cds serve --port 4005",
     "build": "cds build",
+    "install-mcp": "node scripts/installMcpServer.mjs",
     "test": "jest --json --outputFile=coverage/test-results.json --coverage",
-    "lint": "eslint srv/ app/ --no-error-on-unmatched-pattern && npm run lint:i18n && npm run lint:annotations && npm run lint:filenames && npm run lint:tracking-ids && npm run lint:default-attrs && npm run lint:test-data && npm run lint:test-structure && npm run lint:test-cql && npm run lint:grouped-constants && npm run lint:frontend-constants && npm run lint:domain-types && npm run lint:comment-length && npm run lint:mapper-methods && npm run lint:messaging && npm run lint:frontend-data-access && npm run lint:frontend-controller-shape && npm run lint:control-ids && npm run lint:event-handlers && npm run lint:handler-event-types && npm run lint:facades && npm run lint:doc-claims",
+    "lint": "eslint srv/ app/ mcp/ scripts/ --no-error-on-unmatched-pattern && npm run lint:i18n && npm run lint:annotations && npm run lint:filenames && npm run lint:tracking-ids && npm run lint:default-attrs && npm run lint:test-data && npm run lint:test-structure && npm run lint:test-cql && npm run lint:grouped-constants && npm run lint:frontend-constants && npm run lint:domain-types && npm run lint:comment-length && npm run lint:mapper-methods && npm run lint:messaging && npm run lint:frontend-data-access && npm run lint:frontend-controller-shape && npm run lint:control-ids && npm run lint:event-handlers && npm run lint:handler-event-types && npm run lint:facades && npm run lint:doc-claims",
     "lint:i18n": "tsx \"../Standards (Technical + Linting)/scripts/lintI18n.ts\"",
     "lint:annotations": "tsx \"../Standards (Technical + Linting)/scripts/lintAnnotations.ts\"",
     "lint:filenames": "tsx \"../Standards (Technical + Linting)/scripts/lintFilenames.ts\"",
@@ -36,7 +37,9 @@
   },
   "dependencies": {
     "@cap-js/postgres": "^2",
-    "@sap/cds": "9.8.4"
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "@sap/cds": "9.8.4",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@cap-js/cds-test": "^0.4.1",

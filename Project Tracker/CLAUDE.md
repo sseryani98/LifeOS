@@ -11,29 +11,30 @@ Sandro is the user. The agents are instruments writing into it, not users (D-04)
 
 ## Status
 
-**Build has started. `S-00 Module Bootstrap` is done (2026-08-16); `SPEC-01` is next.** The module now
-has configuration, a test runner and one test. It still has **no CDS model, no service, no MCP server
-and no UI** — `db/`, `srv/`, `app/` and `mcp/` are empty or absent by design, and `SPEC-01` is what
-fills the first three of them (BP-001 §4.2, D-160).
+**Build is under way. `S-00 Module Bootstrap` (2026-08-16) and `SPEC-01 MCP Intent-Verb Layer`
+(2026-08-16) are done; `SPEC-02` is next.** The module now has a CDS model, one CAP service, a read
+projection and an MCP verb server. It still has **no UI** — `app/` is empty by design and
+`SPEC-04` fills it.
 
 What this means concretely:
 
-- **`npm run build` (`cds build`) succeeds and produces nothing of substance.** It emits an empty
-  `gen/srv/srv/csn.json` because there is still no CDS model to compile — it now also emits a `gen/pg/`
-  tree, since the dev-loop database is Postgres rather than the inherited in-memory SQLite (D-183).
-  Treat a green build here as meaningless until `SPEC-01` creates the schema.
-- **`npm test` runs and is green over `3` tests in `1` suite.** The script landed at `S-00` **without**
-  `--passWithNoTests`, so an empty run is loud (D-186). The tests are the script tier's, over
-  `Standards (Technical + Linting)/scripts/serveOneOrigin.mjs`. Coverage carries the **global** band
-  only; each per-layer band lands with the story that creates its folder, because a Jest threshold
-  group matching no covered file is a hard error rather than a skip (D-215).
-- **The database binding is live and proven.** `npm start` is `cds serve --port 4005` (D-214) and
-  connects to Postgres as the dedicated non-superuser `project_tracker` role, whose password reaches
-  CAP from a **gitignored `.env`** (D-181, D-217). The schema is **empty** — R1's spike model was
-  dropped at `S-00` so `SPEC-01` deploys clean.
-- **`npm run lint` passes and checks almost nothing yet.** Twenty-one linters run and find four test
-  files and no source. That is the correct result for a tree with no `srv/`, not a green signal about
-  code quality.
+- **`npm run build` compiles a real model.** `db/schema.cds` declares the **25 persisted entities**
+  the entity contract names, plus two read views that persist nothing. A green build here now means
+  something.
+- **The schema is deployed.** `cds deploy` ran clean against Postgres into the empty schema and left
+  **27 base tables** — this module's 25, plus CAP's own `cds_model` and `cds_outbox_messages`. Code-list
+  referential integrity is **live and measured**: an unseeded code is rejected with Postgres `23503`
+  (D-229). **The store is empty of data** — the methodology library and the migrated workspace are
+  `SPEC-02`'s and `SPEC-03`'s.
+- **`npm test` is green over `90` tests in `16` suites**, across four tiers: unit, integration (both
+  entry points), protocol and script. Coverage carries the global band plus **three** per-layer bands
+  — Validators 100/100, Services 90/85, verbs 90/85. `./scripts/**/*.ts` still has none, and lands
+  with `SPEC-09` (D-215, D-224).
+- **`npm run lint` checks real code now.** Twenty-one linters over `srv/`, `mcp/`, `scripts/` and the
+  test tree. `mcp/` was invisible to four of them until `SPEC-01` added it (D-225).
+- **The verb server runs as its own process.** `npm run install-mcp` writes the gitignored
+  registration; the server declares its caller through `PROJECT_TRACKER_ACTOR` (D-223) and every log
+  line goes to stderr, because stdout carries JSON-RPC frames and nothing else (D-228).
 
 `PLAN.md` is the continuity document — read it first for where the module sits in the methodology.
 `design/DECISIONS_LOG.md` carries every `D-nn` cited below.
@@ -91,12 +92,21 @@ PRD.md                       Full product design; slice 1 is a small fraction of
 design/                      PSV, BUSINESS_ARCHITECTURE, specs/, IA, DESIGN_SYSTEM, THEME, DATA_MODEL, TECH_STACK, TEST_STRATEGY, DECISIONS_LOG
 research/                    Six research docs + README.md (pack index, risk register, gate verdict)
 dashboard/                   The v1 HTML generator. Deleted by CNV-005 at cutover (D-02) — not yet
-db/                          (empty)  ← Build. DM-001 is the contract; D-160 keeps the CDS out of Design
-srv/                         (empty)  ← Workshops, then Build. One service, TrackerService (TS-001 §5, D-178)
-  _i18n/                     (empty)  ← first service
-mcp/                         (absent) ← Build. INT-001's server — a SIBLING of srv/, not under it (D-44)
-app/                         (empty)  ← Information Architecture / Design System / Theme, then Build
-test/                        setEnv.ts (the lever) + script/{data,support,tests}/ — TST-001 §12 is the structure
+db/
+  schema.cds                 The 25 persisted entities + the two read views. No story after SPEC-01 adds one (D-205)
+srv/
+  tracker-service.cds        TrackerService at /service/trackerSvcs — the only service (D-178)
+  tracker-service.ts         Entry point; registers the facade
+  _i18n/                     i18n.properties (labels) + messages.properties (runtime keys)
+  modules/shared/            baseFacade, logger, messagingUtility, constants
+  modules/tracker/           Facade / Service / DataService / Validator / Mapper + milestoneStatus
+mcp/                         A SIBLING of srv/, not under it (D-44)
+  server.ts                  Bootstrap, stdout guard, tool registration, transport. Excluded from coverage
+  verbs/                     The eleven intent verbs + shared/. Never imports the MCP SDK (D-228)
+scripts/
+  installMcpServer.mjs       Writes the gitignored .mcp.json registration (D-224)
+app/                         (empty)  ← SPEC-04 builds the one FPM page
+test/                        setEnv.ts (the lever) + {unit,integration,protocol,script,shared}/ — TST-001 §12
 ```
 
 ## Carve-outs
@@ -111,11 +121,12 @@ app/admin-master-data && ui5lint` — a named app folder sitting inside a block 
   failing run — npm skips a `post` script when the main one exits non-zero (D-107, D-196) — so both
   gate call sites will invoke `record-test-run` explicitly instead, from `SPEC-09`, which is also when
   the `scripts/recordTestRun.ts` it points at exists (D-213).
-- **No `scripts/` folder — until `INT-004`.** The planner has one for its `ENCRYPTION_KEY` generator,
-  and this module encrypts nothing. It gains one anyway at `INT-004` (`scripts/recordTestRun.ts`,
-  SPEC-09, D-103): that script must `process.chdir` to this module's root before requiring `@sap/cds`,
-  which hardcodes a module name, and the root `CLAUDE.md` says a script that names a module belongs in
-  the module rather than in the shared linter folder.
+- **`scripts/` exists, and holds one `.mjs`.** ~~No `scripts/` folder until `INT-004`.~~ **Amended at
+  `SPEC-01` (D-224):** BR-29 requires a tracked installer for the server registration, it names this
+  module in every line, and D-103 puts such a script in the module rather than in the shared linter
+  folder. It is `.mjs` deliberately — that keeps it out of `tsc`'s program and out of
+  `./scripts/**/*.ts`, the coverage band `SPEC-09` owns. `scripts/recordTestRun.ts` still arrives at
+  `INT-004` (D-213).
 - **`@sap/cds` is pinned to `9.8.4`, not `^9`** — at the root and in both modules. With two workspace
   packages npm hoists one CAP runtime for the whole repo, so a floating range upgrades every module
   at once, silently. 9.9.x `await`s `cds.plugins` in `bin/serve.js`, a dynamic import Jest's CJS VM

@@ -12,6 +12,7 @@ const SOURCE_DIRS = [
   join(ROOT_DIR, "srv"),
   join(ROOT_DIR, "db"),
   join(ROOT_DIR, "app"),
+  join(ROOT_DIR, "mcp"),
   join(ROOT_DIR, "test"),
   join(ROOT_DIR, "scripts"),
 ];
@@ -88,6 +89,20 @@ function collectFiles(dir: string): string[] {
 }
 
 /**
+ * Reports whether a file is test fixture data. The ban exists so a design
+ * reference never leaks into shipped source; inside a `data/` folder the same
+ * literal is a value under test, and a module whose domain is the story board
+ * holds story identifiers as data. Only `data/` is exempt, so a spec and every
+ * source file still carry the ban.
+ * @param filePath Absolute path of the file being scanned.
+ * @returns True when the file is a fixture under the test tree.
+ */
+function isFixtureFile(filePath: string): boolean {
+  const normalized = filePath.split("\\").join("/");
+  return normalized.includes("/test/") && normalized.includes("/data/");
+}
+
+/**
  * Scans a single file for banned tracking IDs, returning one violation per
  * offending line.
  */
@@ -115,7 +130,9 @@ function scanFile(filePath: string): Violation[] {
  * belong only in design docs and commit bodies.
  */
 function main(): void {
-  const files = SOURCE_DIRS.flatMap(collectFiles);
+  const files = SOURCE_DIRS.flatMap(collectFiles).filter(
+    file => !isFixtureFile(file),
+  );
   const violations = files.flatMap(scanFile);
 
   console.log(

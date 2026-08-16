@@ -1,14 +1,19 @@
-import { readdirSync, readFileSync } from "fs";
+import { existsSync, readdirSync, readFileSync } from "fs";
 import { join, relative } from "path";
 
 const ROOT_DIR = process.cwd();
 
 /**
- * Both product TypeScript surfaces the constants-grouping convention governs:
- * srv/ and app/ (UI5, now strict TS). scripts/ and test/ are tooling/fixtures
- * where loose top-level constants are expected.
+ * The product TypeScript surfaces the constants-grouping convention governs:
+ * srv/, app/ (UI5, now strict TS) and mcp/ where a module has one. scripts/ and
+ * test/ are tooling/fixtures where loose top-level constants are expected. A
+ * tree a module does not have is skipped.
  */
-const SOURCE_DIRS = [join(ROOT_DIR, "srv"), join(ROOT_DIR, "app")];
+const SOURCE_DIRS = [
+  join(ROOT_DIR, "srv"),
+  join(ROOT_DIR, "app"),
+  join(ROOT_DIR, "mcp"),
+];
 
 const SKIP_SEGMENTS = new Set([
   "node_modules",
@@ -74,6 +79,7 @@ function isGroupableLiteral(initializer: string): boolean {
  */
 function collectFiles(dir: string): string[] {
   const found: string[] = [];
+  if (!existsSync(dir)) return found;
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
     if (SKIP_SEGMENTS.has(entry.name)) continue;
     const full = join(dir, entry.name);
