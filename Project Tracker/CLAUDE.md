@@ -11,28 +11,29 @@ Sandro is the user. The agents are instruments writing into it, not users (D-04)
 
 ## Status
 
-**Scaffold complete. No module code exists.** The folder is wired into the npm workspace and every
-config resolves, but `db/`, `srv/`, `app/` and `test/` are empty by design — Scaffold produces
-structure, not behaviour, and no FRICEW object has been built.
+**Build has started. `S-00 Module Bootstrap` is done (2026-08-16); `SPEC-01` is next.** The module now
+has configuration, a test runner and one test. It still has **no CDS model, no service, no MCP server
+and no UI** — `db/`, `srv/`, `app/` and `mcp/` are empty or absent by design, and `SPEC-01` is what
+fills the first three of them (BP-001 §4.2, D-160).
 
 What this means concretely:
 
-- **`npm run build` (`cds build`) succeeds and produces nothing.** It emits an empty
-  `gen/srv/srv/csn.json` because there is no CDS model to compile. Treat a green build here as
-  meaningless until the first build story creates the schema. **The Data Model stage does not** —
-  `design/DATA_MODEL.md` (DM-001) is the entity contract and D-160 keeps the CDS files out of Design,
-  because a schema written there would be code no test, gate or story covers.
-- **There is no `test` script, and that is now a ruling rather than a pending task (D-186).**
-  `design/TEST_STRATEGY.md` (TST-001) specifies the exact script and `jest.config.ts`; the **first test
-  story** adds both — **and that story now has a name: `S-00 Module Bootstrap`**, the first story in
-  `design/BUILD_PLAN.md` (BP-001 §4, D-199). `S-00` is also **the first _build_ story** every Tech
-  Stack ruling defers to, and it carries one script-tier test of its own precisely so the `test`
-  script can land without `--passWithNoTests`. Measured on the installed Jest: `jest` with no matching tests exits **1** and
-  `jest --passWithNoTests` exits **0**, so a script added today is safe with that flag and buys a green
-  gate over zero tests — the same meaningless green as `cds build` above. It lands with the first test,
-  **without** the flag, so an empty run is loud.
-- **`npm run lint` passes and checks almost nothing.** Twenty linters run and find zero files. That
-  is the correct result for an empty tree, not a green signal about code quality.
+- **`npm run build` (`cds build`) succeeds and produces nothing of substance.** It emits an empty
+  `gen/srv/srv/csn.json` because there is still no CDS model to compile — it now also emits a `gen/pg/`
+  tree, since the dev-loop database is Postgres rather than the inherited in-memory SQLite (D-183).
+  Treat a green build here as meaningless until `SPEC-01` creates the schema.
+- **`npm test` runs and is green over `3` tests in `1` suite.** The script landed at `S-00` **without**
+  `--passWithNoTests`, so an empty run is loud (D-186). The tests are the script tier's, over
+  `Standards (Technical + Linting)/scripts/serveOneOrigin.mjs`. Coverage carries the **global** band
+  only; each per-layer band lands with the story that creates its folder, because a Jest threshold
+  group matching no covered file is a hard error rather than a skip (D-215).
+- **The database binding is live and proven.** `npm start` is `cds serve --port 4005` (D-214) and
+  connects to Postgres as the dedicated non-superuser `project_tracker` role, whose password reaches
+  CAP from a **gitignored `.env`** (D-181, D-217). The schema is **empty** — R1's spike model was
+  dropped at `S-00` so `SPEC-01` deploys clean.
+- **`npm run lint` passes and checks almost nothing yet.** Twenty-one linters run and find four test
+  files and no source. That is the correct result for a tree with no `srv/`, not a green signal about
+  code quality.
 
 `PLAN.md` is the continuity document — read it first for where the module sits in the methodology.
 `design/DECISIONS_LOG.md` carries every `D-nn` cited below.
@@ -82,6 +83,9 @@ looks populated when it is not is the thing most likely to mislead the next agen
     tsconfig.base.json       Shared compilerOptions — this module's tsconfig.json extends it
     scripts/                 The 21 shared linters, called by path from the lint:* block
 .gitignore                   CAP generated output, coverage, local Postgres artifacts
+.cdsrc.json                  assert_integrity: 'DB' — without it code-list integrity is imaginary
+.env                         GITIGNORED. The Postgres role's password, and nothing else
+jest.config.ts               The runner config; setupFiles carries the CDS_TYPESCRIPT lever
 PLAN.md                      Continuity document — where the module is, what happens next
 PRD.md                       Full product design; slice 1 is a small fraction of it
 design/                      PSV, BUSINESS_ARCHITECTURE, specs/, IA, DESIGN_SYSTEM, THEME, DATA_MODEL, TECH_STACK, TEST_STRATEGY, DECISIONS_LOG
@@ -92,7 +96,7 @@ srv/                         (empty)  ← Workshops, then Build. One service, Tr
   _i18n/                     (empty)  ← first service
 mcp/                         (absent) ← Build. INT-001's server — a SIBLING of srv/, not under it (D-44)
 app/                         (empty)  ← Information Architecture / Design System / Theme, then Build
-test/                        (empty)  ← Build. TST-001 §12 is the structure; D-186 keeps the files out of Design
+test/                        setEnv.ts (the lever) + script/{data,support,tests}/ — TST-001 §12 is the structure
 ```
 
 ## Carve-outs
@@ -103,8 +107,10 @@ Where this module departs from what Financial Planner does, and why.
 app/admin-master-data && ui5lint` — a named app folder sitting inside a block the root `CLAUDE.md`
   describes as already module-relative. There is no app to point it at yet. Both return with the
   first UI5 app.
-- **No `test` / `posttest` script.** See Status. The root `npm test` runs `--workspaces --if-present`,
-  so an absent script is skipped and a present-but-testless one fails the whole repo.
+- **A `test` script but no `posttest`, and no `record-test-run` yet.** `posttest` cannot record a
+  failing run — npm skips a `post` script when the main one exits non-zero (D-107, D-196) — so both
+  gate call sites will invoke `record-test-run` explicitly instead, from `SPEC-09`, which is also when
+  the `scripts/recordTestRun.ts` it points at exists (D-213).
 - **No `scripts/` folder — until `INT-004`.** The planner has one for its `ENCRYPTION_KEY` generator,
   and this module encrypts nothing. It gains one anyway at `INT-004` (`scripts/recordTestRun.ts`,
   SPEC-09, D-103): that script must `process.chdir` to this module's root before requiring `@sap/cds`,

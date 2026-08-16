@@ -1,5 +1,5 @@
 import { readdirSync, readFileSync } from "fs";
-import { join, relative, sep } from "path";
+import { basename, join, relative, sep } from "path";
 
 import typescript from "typescript";
 
@@ -25,6 +25,20 @@ const SKIP_SEGMENTS = new Set([
 const DATA_SEGMENT = "data";
 const SUPPORT_SEGMENT = "support";
 const SPEC_SEGMENTS = new Set(["tests", "scenarios"]);
+
+/**
+ * Runner lifecycle files, allowed at the root of `test/` and nowhere else. They
+ * belong to the runner rather than to any test module — a `setupFiles` entry
+ * loads before a module exists — so the data/support/tests split has no role for
+ * them, and a worse home would be the cost of enforcing one anyway. Root only:
+ * the same name one folder down still has to earn a role.
+ */
+const RUNNER_FILES = new Set([
+  "setEnv.ts",
+  "globalSetup.ts",
+  "globalTeardown.ts",
+  "setupAfterEnv.ts",
+]);
 
 /**
  * Object/array literals at or above this recursive weight are data fixtures.
@@ -83,7 +97,10 @@ function literalWeight(node: typescript.Node): number {
 /** Unwraps `x as const` / `x as T` to the underlying initializer expression. */
 function unwrapAssertions(node: typescript.Expression): typescript.Expression {
   let current = node;
-  while (typescript.isAsExpression(current) || typescript.isTypeAssertionExpression(current)) {
+  while (
+    typescript.isAsExpression(current) ||
+    typescript.isTypeAssertionExpression(current)
+  ) {
     current = current.expression;
   }
   return current;
@@ -118,7 +135,9 @@ function scanSupportForData(filePath: string): Violation[] {
       if (!declaration.initializer) continue;
       const initializer = unwrapAssertions(declaration.initializer);
       if (literalWeight(initializer) < MAX_LITERAL_WEIGHT) continue;
-      const { line } = source.getLineAndCharacterOfPosition(declaration.getStart());
+      const { line } = source.getLineAndCharacterOfPosition(
+        declaration.getStart(),
+      );
       const name = declaration.name.getText(source);
       violations.push({
         filePath: relative(ROOT_DIR, filePath),
@@ -144,9 +163,13 @@ function checkPlacement(filePath: string): Violation | null {
     return {
       filePath: relative(ROOT_DIR, filePath),
       line: 1,
-      reason: "a *.test.ts spec must live under a tests/ (or scenarios/) folder",
+      reason:
+        "a *.test.ts spec must live under a tests/ (or scenarios/) folder",
     };
   }
+
+  if (roleSegment.length === 0 && RUNNER_FILES.has(basename(filePath)))
+    return null;
 
   if (
     roleSegment.includes(DATA_SEGMENT) ||
@@ -157,7 +180,8 @@ function checkPlacement(filePath: string): Violation | null {
   return {
     filePath: relative(ROOT_DIR, filePath),
     line: 1,
-    reason: "a non-spec test file must live under a data/ (fixtures) or support/ (builders) folder",
+    reason:
+      "a non-spec test file must live under a data/ (fixtures) or support/ (builders) folder",
   };
 }
 
@@ -178,7 +202,9 @@ function main(): void {
     }
   }
 
-  console.log(`Scanning ${files.length} test file(s) for structure violations...`);
+  console.log(
+    `Scanning ${files.length} test file(s) for structure violations...`,
+  );
 
   if (violations.length === 0) {
     console.log("Test tree follows the data/support/tests contract.");
@@ -191,8 +217,8 @@ function main(): void {
   }
   console.log(
     `\nFound ${violations.length} test-structure violation(s). Layout is ` +
-    `test/{unit,integration}/<module>/{data,support,tests} (+ test/shared/` +
-    `{data,support}): fixtures in data/, builders in support/, specs in tests/.`,
+      `test/{unit,integration}/<module>/{data,support,tests} (+ test/shared/` +
+      `{data,support}): fixtures in data/, builders in support/, specs in tests/.`,
   );
   process.exit(1);
 }

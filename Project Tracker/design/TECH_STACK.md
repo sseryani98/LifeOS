@@ -33,7 +33,7 @@
 | **Credential**         | A dedicated non-superuser `project_tracker` role; password as `CDS_REQUIRES_DB_CREDENTIALS_PASSWORD` from a **gitignored `.env`** (D-181) |
 | **Runtime flags**      | `assert_integrity: 'DB'` in **`.cdsrc.json`**, not `package.json` — **correcting D-173** (D-182)                                          |
 | **Dev-loop database**  | **Postgres**, not the inherited in-memory SQLite. SQLite survives as the **test** profile only (D-183)                                    |
-| **Origin**             | **One** — `http://localhost:4000`, a tracked **31-line zero-dependency** Node reverse proxy fronting :4004 and :4005 (D-184)              |
+| **Origin**             | **One** — `http://localhost:4000`, a tracked **zero-dependency** Node reverse proxy fronting :4004 and :4005 (D-184). The **47-line** delivered script is `S-00`'s; §11.1's "31-line" is the spike it implements |
 | **Risk R9 residual**   | **EXECUTED and CLOSED.** The proxy D-141 ruled for is proven, in a real browser, in both profiles (D-184)                                 |
 | **Risk R11**           | **Minted.** `cds` is a globally-installed, unpinned `@sap/cds-dk@9.7.2` that nothing in the repo holds (D-185)                            |
 | **Deliverable**        | The document, plus **one** `.gitignore` line. Every other config edit is ruled here and applied by the first build story (D-176)          |
@@ -202,13 +202,13 @@ configuration at all.
 
 ### 7.2 The ruling, per invocation path
 
-| Path                           | Command                                    | Levers              | How                                                                                                                                             |
-| ------------------------------ | ------------------------------------------ | ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Dev loop**                   | `cds watch`                                | Both, **automatic** | dk CLI, `tsconfig.json` present                                                                                                                 |
-| **`npm start`**                | **`cds serve`** — changed from `cds-serve` | Both, **automatic** | Same. The current script is measured broken for a TypeScript impl                                                                               |
-| **MCP server**                 | `mcp/server.ts` under `tsx`                | Both, **explicit**  | The launcher sets `process.env.CDS_TYPESCRIPT` **before** requiring `@sap/cds`, and runs under a `tsx` loader. Neither is supplied for it       |
-| **`scripts/recordTestRun.ts`** | `tsx …` (INT-004, D-103)                   | Both, **explicit**  | Same shape. It also `process.chdir`s to this module's root before requiring `@sap/cds`                                                          |
-| **`cds.test` suites**          | Jest                                       | **Unsettled here**  | Financial Planner's suites carry the comment "cds.test cannot load the TypeScript service impl". **Handed to Test Strategy (stage 11) by name** |
+| Path                           | Command                                                | Levers              | How                                                                                                                                                             |
+| ------------------------------ | ------------------------------------------------------ | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Dev loop**                   | `cds watch`                                            | Both, **automatic** | dk CLI, `tsconfig.json` present                                                                                                                                 |
+| **`npm start`**                | **`cds serve --port 4005`** — changed from `cds-serve` | Both, **automatic** | Same. The current script is measured broken for a TypeScript impl. **The port is not optional** — bare `cds serve` binds :4004, the other module's port (D-214) |
+| **MCP server**                 | `mcp/server.ts` under `tsx`                            | Both, **explicit**  | The launcher sets `process.env.CDS_TYPESCRIPT` **before** requiring `@sap/cds`, and runs under a `tsx` loader. Neither is supplied for it                       |
+| **`scripts/recordTestRun.ts`** | `tsx …` (INT-004, D-103)                               | Both, **explicit**  | Same shape. It also `process.chdir`s to this module's root before requiring `@sap/cds`                                                                          |
+| **`cds.test` suites**          | Jest                                                   | **Unsettled here**  | Financial Planner's suites carry the comment "cds.test cannot load the TypeScript service impl". **Handed to Test Strategy (stage 11) by name**                 |
 
 **The `npm start` change is not cosmetic and its cost is stated.** It makes this module's start command
 depend on a globally-installed `@sap/cds-dk@9.7.2` that nothing in the repo pins — **R11** (§16). The
@@ -369,8 +369,16 @@ Ports: Financial Planner **4004** (its existing default), Project Tracker **4005
 fronts both modules, so it belongs to neither, and the root `CLAUDE.md` forbids a non-module folder at
 the repo root — the Standards folder is the only shared home available. It takes **no** module name:
 its route table is prefixes and ports, which is configuration, so the shared-linter rule that a shared
-script may not name a module is honoured by construction. **The script itself is written by the first
-build story** (D-176); this section is the proven design it implements.
+script may not name a module is honoured by construction. ~~**The script itself is written by the first
+build story** (D-176)~~ — **written at `S-00`, 2026-08-16**; this section is the proven design it
+implements.
+
+**One thing the script adds to this design, and it is not a change to it (D-216).** The four route
+values read from `ONE_ORIGIN_PORT`, `ONE_ORIGIN_PREFIX`, `ONE_ORIGIN_PREFIX_PORT` and
+`ONE_ORIGIN_DEFAULT_PORT`, **defaulting to exactly the topology above** — so `node …/serveOneOrigin.mjs`
+with no environment is this table. The overrides exist because `S-00`'s test drives the real script,
+and a suite that must bind 4004 would either collide with a running dev server or, worse, get answered
+by it.
 
 ### 11.1 R9's residual — executed (D-184)
 

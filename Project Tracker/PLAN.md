@@ -5,8 +5,9 @@ Scaffold, Workshops, Information Architecture, Design System, Theme, Data Model,
 Strategy **and Project Planning** (grouping settled, `SPEC-01` … `SPEC-12`; **12 of 12 written and all
 twelve Approved**; `IA-001`, `DS-001`, `TH-001`, `DM-001`, `TS-001` and `TST-001` **Approved**;
 `BP-001` **Approved**). **All five open items are closed; R1 is executed and R9's proxy
-residual is executed.** Next stage is **Build — `S-00 Module Bootstrap`, then `SPEC-01`**.
-**Last updated:** 2026-08-15
+residual is executed.** **Build is open: `S-00 Module Bootstrap` is DONE (2026-08-16) — the module's
+first code — and `SPEC-01` is next.** Decisions run **D-01 … D-217**.
+**Last updated:** 2026-08-16
 **Purpose:** The continuity document. Anyone (or any fresh chat) picking up Project Tracker
 starts here. Read this, then `design/PROBLEM_STATEMENT_AND_VISION.md` (PSV-001),
 `design/BUSINESS_ARCHITECTURE.md` (BA-001) and `design/DECISIONS_LOG.md` for the full
@@ -146,7 +147,7 @@ mechanism needs a construction step.
 | 10  | Tech Stack         | `/generate-tech-stack` → `tech-stack-writer`       | Authored     | **Done** — 2026-08-15. `TS-001` **Approved**; **the proxy executed**, the loader ruled, the credential homed, **R11 minted** (D-176 … D-185)             |
 | 11  | Test Strategy      | `/generate-test-strategy` → `test-strategy-writer` | Authored     | **Done** — 2026-08-15. `TST-001` **Approved**; **the harness question executed and the exemplar's belief reversed**; 180 FUTs classified (D-186 … D-197) |
 | 12  | Project Planning   | `/generate-build-plan` → `build-plan-writer`       | Authored     | **Done** — 2026-08-15. `BP-001` **Approved**; **13 stories, 3 sprints**; story zero resolves the eight "first build story" items (D-198 … D-209)         |
-| 13  | Build              | `/build` + chain                                   | Exists       | **Next** — `S-00 Module Bootstrap`, then `SPEC-01`, in sprint `PT-W1` (BP-001 §3, §6)                                                                    |
+| 13  | Build              | `/build` + chain                                   | Exists       | **In progress** — `S-00 Module Bootstrap` **Done** 2026-08-16 (D-210 … D-217); **`SPEC-01` next**, in sprint `PT-W1` (BP-001 §3, §6)                     |
 | 14  | **Rewire tooling** | `lintNoMarkdownState` + PreToolUse hook            | Not authored | Not started                                                                                                                                              |
 | 15  | Cutover            | —                                                  | —            | Not started                                                                                                                                              |
 | 16  | Back to FP         | —                                                  | —            | Blocked on cutover                                                                                                                                       |
@@ -594,6 +595,44 @@ Settle before or during Scaffold.
 ---
 
 ## 8. Session log
+
+### 2026-08-16 — Build `S-00 Module Bootstrap`: the module's first code, and five things the documents had wrong
+
+- **Built `S-00` — eight items, by hand in the main thread.** `.cdsrc.json`, a gitignored `.env`,
+  `"password": ""` removed, the Postgres binding with SQLite moved to a `[test]` profile,
+  `"start": "cds serve --port 4005"`, `Standards (Technical + Linting)/scripts/serveOneOrigin.mjs`,
+  `jest.config.ts` + `test/setEnv.ts` + the `test` script, and **one script-tier test over the proxy —
+  3 tests, green**. Logged **D-210 … D-217**. Gate green: `tsc` 0, 21 linters 0, `npm test` 0 over 3
+  tests, `cds build` 0.
+- **The human prerequisite was cleared in-session.** Sandro supplied the superuser credential and the
+  `project_tracker` role was created, given ownership of its database and schema, and verified
+  non-superuser (D-217). Its password lives only in the gitignored `.env`.
+- **Five things measured wrong before they could mislead a later story.**
+  1. **`npm start` bound :4004** — the other module's port. Bare `cds serve` takes CAP's default and
+     nothing in this module set 4005, so `BP-001` §4 item 6 and `BP-001` §10's own contract row
+     disagreed with each other (**D-214**).
+  2. **A Jest coverage threshold over an empty folder is a hard error**, not a skip, so `TST-001`
+     §13.1's four bands could not all land — and counting the test harness put global branch coverage
+     at 66.66% against an 80% floor (**D-215**).
+  3. **`lint:test-structure` did reject `test/setEnv.ts`**, as `TST-001` §12 anticipated. The carve-out
+     it named is applied — four runner-lifecycle names, root of `test/` only (**D-212**).
+  4. **`cds deploy` cannot run from `S-00` at all.** With no CDS model it loads `0 file(s)`, which CAP
+     refuses as a maximally _narrow_ deploy (D-175). The credential was proven by what the command
+     reached before refusing, and by a live `npm start` (**D-211**).
+  5. **R1's spike schema was still in the database** — 9 tables, 10 views and a 7-entity `cds_model`
+     snapshot, superuser-owned, which blocked the new role and would have been diffed against
+     `DM-001`'s 25 entities on `SPEC-01`'s first deploy. Dropped on Sandro's ruling (**D-217**).
+- **Also found: `npx tsc --noEmit` was red in this module before `S-00`** — `TS18003`, no inputs, since
+  every folder in `tsconfig.json`'s `include` held only a `.gitkeep`. The gate `BP-001` §8.1 specifies
+  had never been runnable here. `S-00`'s four test files turn it green.
+- **`/build` could not drive this story and was not taught to (D-210).** `build.md` §1 resolves a
+  FRICEW ID or a `SPRINT_BOARD.md` row, and `build-briefer` resolves a story to its spec; `S-00` is
+  none of those. Editing either is a repo-wide tooling change with no story owning it, and both files
+  are `SPEC-08`'s rewiring targets. **The question is open for `SPEC-01`**, which has a spec but still
+  no board row.
+- **Amendments applied in-session: five.** `BP-001` §4 items 6 and 8, §4.1 and §10; `TST-001` §3.2,
+  §3.3 and §12; `TS-001` §7.2 and §11; this module's `CLAUDE.md` §Status, §Carve-outs and
+  §Folder Structure; and `PLAN.md` §1, §3 and this entry.
 
 ### 2026-08-15 — Project Planning: a story that did not exist, and eight things assigned to it
 

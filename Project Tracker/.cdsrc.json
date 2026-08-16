@@ -1,0 +1,8 @@
+{
+  "build": {
+    "target": "gen"
+  },
+  "features": {
+    "assert_integrity": "db"
+  }
+}

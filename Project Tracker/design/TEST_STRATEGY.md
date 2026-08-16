@@ -86,6 +86,19 @@ The last two rows of the middle block are the ones the exemplar's own document o
 lists neither `testTimeout` nor `moduleNameMapper`, both of which are present in
 `Financial Planner/jest.config.ts` and both of which this module needs (§18).
 
+> **Amended 2026-08-16 at `S-00`, by D-215, having run it.** Two corrections, both measured against
+> the installed Jest rather than reasoned about.
+>
+> 1. **`coverageThreshold` lands one band at a time.** Jest classifies a threshold group only when a
+>    **covered file matches it**; a group matching none is a hard error — `Jest: Coverage data for
+<group> was not found.` — not a skip. So §13.1's four bands cannot all land while
+>    `srv/modules/`, `mcp/verbs/` and `scripts/` are empty. `S-00` ships the **global** band; each
+>    per-layer band lands with the story that creates the first file under its folder.
+> 2. **`coveragePathIgnorePatterns` gains `/test/`.** Jest drops the specs but not their `data/` and
+>    `support/` siblings, and a builder's timeout and error paths are not the subject of any coverage
+>    claim. Measured at `S-00`: with the harness counted, global branch coverage was **66.66%**
+>    against an 80% floor.
+
 ### 3.3 The `test` script — specified, not added (D-186)
 
 ```json
@@ -111,6 +124,12 @@ test**, without the flag, so an empty run is loud. The measurement is recorded h
 rediscover it under pressure.
 
 **There is no `posttest` script** — §16 explains why, and it is not an omission.
+
+**The two scripts land in different stories — amended 2026-08-16 by D-213.** `test` lands at `S-00`,
+with that story's one script-tier test, exactly as ruled. **`record-test-run` lands at `SPEC-09`**,
+alongside the `scripts/recordTestRun.ts` it points at: declaring it earlier is a script that fails
+with a module-resolution error for eight stories, and `BP-001` §10 already has the gate consuming it
+"from `SPEC-09` onward". The block above stays the specification for both.
 
 ---
 
@@ -472,9 +491,15 @@ closed list of test types. `protocol/` and `script/` are test types this module 
 does not.
 
 **`test/setEnv.ts` sits at the root of `test/`, not inside a role folder.** It is neither fixture, nor
-builder, nor spec. If `lint:test-structure` rejects it when the first test lands, the fix is the
+builder, nor spec. ~~If `lint:test-structure` rejects it when the first test lands, the fix is the
 linter's carve-out for a Jest setup file — a Standards change with a story behind it — not a worse
-home for the lever.
+home for the lever.~~
+
+**Discharged 2026-08-16 at `S-00`, by D-212.** It **did** reject it, measured rather than assumed, and
+the carve-out was applied: a file directly at the root of `test/` whose basename is one of four
+runner-lifecycle names (`setEnv.ts`, `globalSetup.ts`, `globalTeardown.ts`, `setupAfterEnv.ts`) is
+exempt. Root only, and an allowlist rather than a blanket exemption, so the folder does not become a
+drawer.
 
 ---
 
