@@ -1,8 +1,11 @@
 # Project Tracker — Plan
 
-**Status:** Plan phase — Ideate, Scope, Research, Scaffold, Workshops, Information Architecture,
-Design System, Theme, Data Model, Tech Stack **and Test Strategy complete** (grouping settled, `SPEC-01` … `SPEC-12`; **12 of 12
-written and all twelve Approved**; `IA-001`, `DS-001`, `TH-001`, `DM-001` and `TS-001` **Approved**; `TST-001` **Approved**). **All five open items are closed; R1 is executed and R9's proxy residual is executed.** Next stage is **Project Planning (the Build Plan)**.
+**Status:** **Plan + Design phase COMPLETE — all twelve stages run.** Ideate, Scope, Research,
+Scaffold, Workshops, Information Architecture, Design System, Theme, Data Model, Tech Stack, Test
+Strategy **and Project Planning** (grouping settled, `SPEC-01` … `SPEC-12`; **12 of 12 written and all
+twelve Approved**; `IA-001`, `DS-001`, `TH-001`, `DM-001`, `TS-001` and `TST-001` **Approved**;
+`BP-001` **Approved**). **All five open items are closed; R1 is executed and R9's proxy
+residual is executed.** Next stage is **Build — `S-00 Module Bootstrap`, then `SPEC-01`**.
 **Last updated:** 2026-08-15
 **Purpose:** The continuity document. Anyone (or any fresh chat) picking up Project Tracker
 starts here. Read this, then `design/PROBLEM_STATEMENT_AND_VISION.md` (PSV-001),
@@ -16,6 +19,25 @@ decision rationale.
 Financial Planner is mid-sprint **W1-S3 — Transaction Processing**, with one story left in
 Backlog (`CNV-001` Historical backfill) and nothing In Progress. That gap is deliberate — it
 is the cutover window.
+
+**Project Planning is complete, and with it the whole Plan + Design phase.**
+`design/BUILD_PLAN.md` (BP-001, **Approved**) settles the **4** distinct questions the design documents
+defer to this stage by name across **4** files — and, more usefully, resolves the **8 things three
+documents assigned to "the first build story"**, a story that did not exist. **A story is a spec**
+(D-198): **13 stories**, `S-00 Module Bootstrap` plus `SPEC-01` … `SPEC-12`, because `TST-001` §14.2
+attributes all 180 FUTs per spec and four specs carry FUTs spanning their objects. **Three sprints,
+one per wave, with no branch, merge or tag of their own** — D-13 puts cutover before Financial
+Planner's `CNV-001`, so all three run inside its open `sprint/W1-S3` (D-202). Decisions run
+**D-01 … D-209**.
+
+**Two findings carried the stage.** `S-00` **must carry a test**: `TST-001` §3.3 measured `jest`
+exiting **1** with no tests and D-186 forbids `--passWithNoTests`, so a bootstrap story that added the
+runner and no test would hand `SPEC-01` a red gate on day one — it ships one script-tier test over
+`serveOneOrigin.mjs`, which makes it the first build story and the first test story at once (D-199).
+And **no repo-wide dependency change can land at any point during this build**: the deferred docket's
+first four items — R11's `@sap/cds-dk` pin, Financial Planner's `"start": "cds-serve"`, `@sapui5/types`
+resolving 1.150.0, and that module's namespace rename — all unblock on Financial Planner's W1-S3
+closing, which D-13 puts **downstream of `PT-W3`** (D-206).
 
 **Test Strategy is complete.** `design/TEST_STRATEGY.md` (TST-001, **Approved**) settles the **4** questions
 the design documents defer to this stage by name across **2** files, in **21** sections. It **executes the
@@ -57,7 +79,7 @@ enablement OFF** (D-144), the answer the Data Model stage was waiting for, and n
 read path** nobody had ever specified (D-145). `IA-001` is **Approved**.
 
 Project Tracker has a PRD, `design/PROBLEM_STATEMENT_AND_VISION.md` (PSV-001, **Draft**),
-`design/BUSINESS_ARCHITECTURE.md` (BA-001 v1.13, **Approved** — 22 objects in 3 waves, grouped into
+`design/BUSINESS_ARCHITECTURE.md` (BA-001 v1.15, **Approved** — 22 objects in 3 waves, grouped into
 12 specs), a `research/` pack of six documents, a decisions log (D-01 … D-159), a wired module folder,
 **twelve written specs — `SPEC-01` … `SPEC-12`, all twelve Approved** (`SPEC-01` flipped from Draft at
 the `SPEC-12` workshop, discharging D-93 — D-136) — and the
@@ -123,8 +145,8 @@ mechanism needs a construction step.
 | 9   | Data Model         | `/generate-data-model` → `data-model-writer`       | Authored     | **Done** — 2026-08-15. `DM-001` **Approved**; **25 entities, document only, no CDS**; **OI-05 closed**, **R1 executed and closed** (D-160 … D-175)       |
 | 10  | Tech Stack         | `/generate-tech-stack` → `tech-stack-writer`       | Authored     | **Done** — 2026-08-15. `TS-001` **Approved**; **the proxy executed**, the loader ruled, the credential homed, **R11 minted** (D-176 … D-185)             |
 | 11  | Test Strategy      | `/generate-test-strategy` → `test-strategy-writer` | Authored     | **Done** — 2026-08-15. `TST-001` **Approved**; **the harness question executed and the exemplar's belief reversed**; 180 FUTs classified (D-186 … D-197) |
-| 12  | Project Planning   | `/generate-build-plan`                             | Not authored | **Next** — reads TST-001 §14's FUT contract for a story's definition of done                                                                             |
-| 13  | Build              | `/build` + chain                                   | Exists       | Not started                                                                                                                                              |
+| 12  | Project Planning   | `/generate-build-plan` → `build-plan-writer`       | Authored     | **Done** — 2026-08-15. `BP-001` **Approved**; **13 stories, 3 sprints**; story zero resolves the eight "first build story" items (D-198 … D-209)         |
+| 13  | Build              | `/build` + chain                                   | Exists       | **Next** — `S-00 Module Bootstrap`, then `SPEC-01`, in sprint `PT-W1` (BP-001 §3, §6)                                                                    |
 | 14  | **Rewire tooling** | `lintNoMarkdownState` + PreToolUse hook            | Not authored | Not started                                                                                                                                              |
 | 15  | Cutover            | —                                                  | —            | Not started                                                                                                                                              |
 | 16  | Back to FP         | —                                                  | —            | Blocked on cutover                                                                                                                                       |
@@ -572,6 +594,82 @@ Settle before or during Scaffold.
 ---
 
 ## 8. Session log
+
+### 2026-08-15 — Project Planning: a story that did not exist, and eight things assigned to it
+
+- **Authored `/generate-build-plan` and its `build-plan-writer` agent, then ran the stage.** Wrote
+  `design/BUILD_PLAN.md` (BP-001, **Approved**) and logged **D-198 … D-209**. The skill carries **20**
+  fixed questions against the exemplar's seven numbered sections — **eleven of which appear in neither
+  `BUILD_PLAN.md` nor its `PROJECT_MANAGEMENT.md` sibling**, and **three of the exemplar's seven do not
+  transfer at all**: §3 is a verbatim `CLAUDE.md` draft (this module maintains its own), §4 is a
+  Scaffold Prompt (Scaffold is now a stage with its own skill), and §6 is a 32-prompt playbook written
+  before the repo had an agent fleet and a `/build` chain on disk. **The writer agent could not be
+  invoked** — Claude Code resolves its agent registry at session start, so a newly-authored agent is
+  not callable in the session that writes it, the **sixth** stage running to hit it. The document was
+  written in the main thread against the same standard.
+- **The measured surface was small; the useful one was a different list.** Grepping found **6 sentences
+  deferring to this stage by name across 4 files → 4 distinct questions**. What actually shaped the
+  stage was **17 occurrences of "the first build story" / "the first test story" across 6 files**,
+  resolving to **eight distinct items** assigned by **three documents using two different referents** —
+  one of which (D-160) names two FRICEW objects rather than a story. `S-00 Module Bootstrap` is what
+  they resolve to (D-199), except the Postgres role, which is a **human prerequisite** because no story
+  can own a change to a PostgreSQL installation outside the repo (D-200).
+- **The finding of the session: `S-00` has to carry a test, and that is what makes D-186 coherent.**
+  `TST-001` §3.3 measured `jest` with no tests exiting **1** and D-186 rules the `test` script lands
+  **without** `--passWithNoTests` so an empty run is loud — so a bootstrap story adding the runner and
+  no test hands `SPEC-01` a red gate on day one. `S-00` ships **one script-tier test over
+  `serveOneOrigin.mjs`**, a real Node entry point `TS-001` §11 specifies exactly, inside that tier's
+  stated ceiling (it starts its own two `node:http` origins and assumes no CAP server it did not
+  start). **So `S-00` is the first build story and the first test story at once**, and D-186's pairing
+  holds exactly rather than by exception.
+- **A story is a spec, and the reason is mechanical (D-198).** `TST-001` §14.2 attributes all **180**
+  FUTs **per spec and never per object**, and four specs carry FUTs that span their objects — `SPEC-08`
+  FUT-001 and FUT-012 cover all three of `INT-002`, `INT-003` and `INT-005` at once. A per-object cut
+  leaves roughly **60 FUTs with no owner** and re-runs D-194. Re-measured against the specs themselves
+  rather than carried: **180 FUTs and 366 business rules**, per-spec figures agreeing with `TST-001`
+  §14 exactly. A story's **ID is its spec's ID**, so `build-briefer` resolves one straight to a file.
+- **The second finding: no repo-wide dependency change can land during this build at all (D-206).** The
+  deferred docket collects **eight** raised-and-owed items, and **four share one unblocking event** —
+  Financial Planner's W1-S3 closing — which D-13 puts **downstream of `PT-W3`**, since cutover precedes
+  that module's `CNV-001`. R11's `@sap/cds-dk` pin, its `"start": "cds-serve"` defect, `@sapui5/types`
+  resolving 1.150.0, and D-16's namespace rename all wait on the same thing. `S-00` therefore
+  **inherits R11 knowingly** rather than settling it.
+- **Three sprints, and no branch, merge or tag of their own (D-202).** Each wave in `BA-001` §10 is
+  already a testable increment, so the boundary is earned. The git half is a consequence: measured this
+  session, the repo carries tags **`v1.1`** and **`v1.2`**, so a `PT-W1` tag under `v{wave}.{sprint}`
+  collides with Financial Planner's sequence, and a separate branch would have to be merged back across
+  `.claude/` and `Financial Planner/CLAUDE.md` — the exact files `SPEC-08` and `SPEC-12` rewrite.
+  Everything commits to `sprint/W1-S3`.
+- **`BA-001` §10 was left where it is, cited rather than restated (D-201)**, with a reciprocal pointer
+  added to §10 so neither document reads as the whole plan. Two orderings in two documents is a failure
+  this repo has already had — `PLAN.md` §5 drifted three times and `BA-001` drifted against itself in
+  eight sessions.
+- **This module tracks its own build nowhere, and that is structural (D-207).** `CNV-002` loads exactly
+  **one** Workspace, none of the eleven verbs creates a Workspace, and `FRM-002`'s carve-out rules out a
+  hierarchy maintenance form — so there is no path to a second Workspace in slice 1. Financial Planner's
+  board is that module's and `SPEC-12` deletes it; a new markdown board is the defect this module exists
+  to fix. `PLAN.md` §8 is the record. **Cost stated: no dogfooding in slice 1.** One consequence worth
+  knowing at Build — chain stage 8, `/pm-update`, is Required and Financial-Planner-scoped, so on a
+  Project Tracker story it correctly finds nothing to reconcile.
+- **No risk assigned, but three became schedulable for the first time (D-209).** `research/README.md`
+  §5's live rows and §7's routing table were read rather than assumed, and **§7 had no Project Planning
+  row** — the **sixth** occurrence of the defect D-135 named, and the third time the consuming stage
+  fixed its own. **R4** and **R7** → `SPEC-11` FUT-007, sprint `PT-W3`; **R10** → `SPEC-12` FUT-012,
+  same sprint. **No owner changes** — D-121 and D-119 stand; what changes is that R7's "before
+  `CNV-005` runs" deadline is now guaranteed by the sprint order rather than asserted. **R11 is docketed
+  rather than scheduled.**
+- **`TST-001` §17.2's linter candidate is answered rather than passed on (D-208).** No new shared
+  linter — that is a Standards change with no story owning it, D-22 one level up — and the
+  `setupFiles` lever gets an in-module guard in `SPEC-01`'s definition of done instead, `SPEC-01` being
+  the earliest story with a `.ts` implementation for the harness to load.
+- **Amendments — five, all applied in-session.** `PLAN.md` (§1, §3, §8, §9), `research/README.md` §7,
+  `Project Tracker/CLAUDE.md` §Status (the two "first story" phrases now name `S-00`),
+  `BUSINESS_ARCHITECTURE.md` §10 with its change history (v1.14 → **v1.15**), and `TEST_STRATEGY.md`
+  §17.2 with its change history (v1.0 → **v1.1**). **Nothing raised and owed** — the six
+  previously-owed items are on the docket rather than newly raised.
+- **The approval gate held a fourth time (Step 0).** `TST-001` was **Approved** when this stage opened.
+  Four consecutive stages have now not had to ask, after three in a row that did. D-169's reorder has
+  four data points.
 
 ### 2026-08-15 — Test Strategy: the harness can do the thing every document says it cannot
 
@@ -1906,7 +2004,7 @@ stores them under the user's home directory, which the bridge cannot access.
 | -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `Project Tracker/PRD.md`                                 | Full product design. Slice 1 is a small fraction of it.                                                                                                                                                                                                           |
 | `Project Tracker/design/PROBLEM_STATEMENT_AND_VISION.md` | PSV-001 — the traceability root: problems P1–P5, scope, boundary.                                                                                                                                                                                                 |
-| `Project Tracker/design/BUSINESS_ARCHITECTURE.md`        | BA-001 v1.13 — the FRICEW catalogue and the story backlog. 22 objects, 3 waves, deferred items in §3, **the 12-spec grouping in §11**.                                                                                                                            |
+| `Project Tracker/design/BUSINESS_ARCHITECTURE.md`        | BA-001 v1.15 — the FRICEW catalogue and the story backlog. 22 objects, 3 waves, deferred items in §3, **the 12-spec grouping in §11**.                                                                                                                            |
 | `Project Tracker/design/specs/`                          | The twelve functional specs, written in `SPEC-01` → `SPEC-12` order. Grouping and membership are BA-001 §11. **12 of 12 written, all Approved.**                                                                                                                  |
 | `Project Tracker/research/`                              | Six research documents plus `README.md` — the index, assumption ledger, open risks and gate verdict. All **Draft**.                                                                                                                                               |
 | `Project Tracker/design/INFORMATION_ARCHITECTURE.md`     | IA-001 — page and route decomposition, navigation, shell placement and origin. **Approved.**                                                                                                                                                                      |
@@ -1919,6 +2017,9 @@ stores them under the user's home directory, which the bridge cannot access.
 | `Project Tracker/design/TEST_STRATEGY.md`                | TST-001 — tooling, harness loading, the tier list, per-tier standards, the assertable surface, the test profile's blind spot, test data, file structure, coverage targets and their layer mapping, the FUT contract, run recording and enforcement. **Approved.** |
 | `Project Tracker/design/TEST_STRATEGY.md` §4             | The harness execution record — `cds.test` **can** load a `.ts` service impl, and omitting the lever is a silent pass rather than an error.                                                                                                                        |
 | `Project Tracker/design/TEST_STRATEGY.md` §14            | The FUT coverage contract — all 180 Functional Unit Tests classified onto six destinations.                                                                                                                                                                       |
+| `Project Tracker/design/BUILD_PLAN.md`                   | BP-001 — the story list, story zero, the sprint plan, the definition of done, per-story test obligations, cross-story contracts, the deferred change docket, progress tracking and enforcement. **Approved.**                                                     |
+| `Project Tracker/design/BUILD_PLAN.md` §4                | Story zero — the eight things three documents assigned to "the first build story", each resolved to `S-00` or to a named human prerequisite.                                                                                                                      |
+| `Project Tracker/design/BUILD_PLAN.md` §12               | The deferred change docket — eight owed changes, four of them sharing one unblocking event that is downstream of this plan.                                                                                                                                       |
 | `Project Tracker/design/DECISIONS_LOG.md`                | D-01 … D-197 with full rationale. (`IDEATE_KICKOFF.md` was scratch — absorbed and deleted 2026-07-26.)                                                                                                                                                            |
 | `Standards (Documents)/METHODOLOGY_BLUEPRINT.md`         | The methodology→tooling map. **§7 is partly superseded** — the module is real, not a generator, and it writes rather than only reads.                                                                                                                             |
 | `Financial Planner/design/`                              | The artifact set this module's design phase mirrors.                                                                                                                                                                                                              |

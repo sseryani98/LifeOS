@@ -1,7 +1,7 @@
 # Test Strategy
 
 **Document ID:** TST-001
-**Version:** 1.0
+**Version:** 1.1
 **Date:** 2026-08-15
 **Status:** Approved
 
@@ -11,6 +11,7 @@
 
 | Date       | Author          | Description                                                                                                                                                                                                                                                                                                                                                              |
 | ---------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 2026-08-15 | Sandro & Claude | **v1.1 — amended at the Project Planning stage.** §17.2's linter candidate is **answered rather than left open**: no new linter, and the `setupFiles` lever gets an in-module guard in story `SPEC-01`'s definition of done instead (BP-001 §11, D-208). No threshold, tier, folder or count changes.                                                                    |
 | 2026-08-15 | Sandro          | **Status → Approved.** All twelve Phase 5 coverage checks met; the approval gate at step 0 of Phase 6 was answered before the stage closed — the **third** stage running, after `DM-001` and `TS-001`.                                                                                                                                                                   |
 | 2026-08-15 | Sandro & Claude | Initial creation from the Test Strategy stage. Settles the **4** questions the design documents defer here by name across **2** files. Records D-186 through D-197. **The harness question is EXECUTED** — `cds.test` **can** load a TypeScript service implementation, reversing the exemplar's stated belief. Classifies all **180** Functional Unit Tests onto tiers. |
 
@@ -712,6 +713,12 @@ session, which is D-36's rule holding.
 **No linter is proposed here.** A shared linter asserting the lever would be a Standards change with
 no story owning it, which is the thing D-22 rules against one level up. It is named as a candidate for
 whoever writes the Build Plan, not specified as work.
+
+**Answered 2026-08-15 by [BP-001](BUILD_PLAN.md) §11 (D-208): still no linter, and the lever gets an
+in-module guard instead.** Story `SPEC-01`'s definition of done carries one assertion, in
+`test/integration/`, that `CDS_TYPESCRIPT` is set at test time. `SPEC-01` is the earliest story that
+can carry it, because it is the first with a `.ts` service implementation for the harness to load.
+The other four rules in this table stay enforced by nothing and are re-listed as such in `BP-001` §15.2.
 
 ---
 

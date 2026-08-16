@@ -24,7 +24,10 @@ What this means concretely:
   because a schema written there would be code no test, gate or story covers.
 - **There is no `test` script, and that is now a ruling rather than a pending task (D-186).**
   `design/TEST_STRATEGY.md` (TST-001) specifies the exact script and `jest.config.ts`; the **first test
-  story** adds both. Measured on the installed Jest: `jest` with no matching tests exits **1** and
+  story** adds both — **and that story now has a name: `S-00 Module Bootstrap`**, the first story in
+  `design/BUILD_PLAN.md` (BP-001 §4, D-199). `S-00` is also **the first _build_ story** every Tech
+  Stack ruling defers to, and it carries one script-tier test of its own precisely so the `test`
+  script can land without `--passWithNoTests`. Measured on the installed Jest: `jest` with no matching tests exits **1** and
   `jest --passWithNoTests` exits **0**, so a script added today is safe with that flag and buys a green
   gate over zero tests — the same meaningless green as `cds build` above. It lands with the first test,
   **without** the flag, so an empty run is loud.
