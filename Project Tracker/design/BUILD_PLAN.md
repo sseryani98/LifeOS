@@ -90,17 +90,18 @@ tidy-up; it is a re-run of D-194's classification.
 story existed.** Measured this session: **17 occurrences of those phrases across 6 files**, resolving
 to **eight distinct items**. `S-00` is what they resolve to.
 
-| #     | Item                                                                           | Assigned by                                   | Resolves to                       |
-| ----- | ------------------------------------------------------------------------------ | --------------------------------------------- | --------------------------------- |
-| **1** | `CREATE ROLE project_tracker LOGIN PASSWORD …; GRANT …`                        | [TS-001](TECH_STACK.md) §8, §14 step 2        | **Human prerequisite** — see §4.1 |
-| **2** | `Project Tracker/.cdsrc.json` carrying `cds.features.assert_integrity: 'DB'`   | [TS-001](TECH_STACK.md) §9 (D-182)            | `S-00`                            |
-| **3** | `Project Tracker/.env` with `CDS_REQUIRES_DB_CREDENTIALS_PASSWORD`             | [TS-001](TECH_STACK.md) §8 (D-181)            | `S-00`                            |
-| **4** | Removing `"password": ""` from `Project Tracker/package.json`                  | [TS-001](TECH_STACK.md) §8 (D-181)            | `S-00`                            |
-| **5** | The `[development]` profile bound to Postgres                                  | [TS-001](TECH_STACK.md) §10 (D-183)           | `S-00`                            |
-| **6** | `"start": "cds serve"` — **not** `cds-serve`                                   | [TS-001](TECH_STACK.md) §7.2 (D-180)          | `S-00`                            |
-| **7** | `Standards (Technical + Linting)/scripts/serveOneOrigin.mjs`                   | [TS-001](TECH_STACK.md) §11 (D-184)           | `S-00`                            |
-| **8** | `jest.config.ts`, `test/setEnv.ts`, and the `test` + `record-test-run` scripts | [TST-001](TEST_STRATEGY.md) §3.3, §12 (D-186) | `S-00`                            |
-| —     | `db/schema.cds` — the 25 persisted entities                                    | [DM-001](DATA_MODEL.md) §3 (D-160)            | **`SPEC-01`** — see §4.2          |
+| #     | Item                                                                         | Assigned by                                   | Resolves to                       |
+| ----- | ---------------------------------------------------------------------------- | --------------------------------------------- | --------------------------------- |
+| **1** | `CREATE ROLE project_tracker LOGIN PASSWORD …; GRANT …`                      | [TS-001](TECH_STACK.md) §8, §14 step 2        | **Human prerequisite** — see §4.1 |
+| **2** | `Project Tracker/.cdsrc.json` carrying `cds.features.assert_integrity: 'DB'` | [TS-001](TECH_STACK.md) §9 (D-182)            | `S-00`                            |
+| **3** | `Project Tracker/.env` with `CDS_REQUIRES_DB_CREDENTIALS_PASSWORD`           | [TS-001](TECH_STACK.md) §8 (D-181)            | `S-00`                            |
+| **4** | Removing `"password": ""` from `Project Tracker/package.json`                | [TS-001](TECH_STACK.md) §8 (D-181)            | `S-00`                            |
+| **5** | The `[development]` profile bound to Postgres                                | [TS-001](TECH_STACK.md) §10 (D-183)           | `S-00`                            |
+| **6** | `"start": "cds serve --port 4005"` — **not** `cds-serve`                     | [TS-001](TECH_STACK.md) §7.2 (D-180)          | `S-00` — amended by D-214         |
+| **7** | `Standards (Technical + Linting)/scripts/serveOneOrigin.mjs`                 | [TS-001](TECH_STACK.md) §11 (D-184)           | `S-00`                            |
+| **8** | `jest.config.ts`, `test/setEnv.ts`, and the `test` script                    | [TST-001](TEST_STRATEGY.md) §3.3, §12 (D-186) | `S-00` — amended by D-213         |
+| —     | The `record-test-run` script                                                 | [TST-001](TEST_STRATEGY.md) §3.3 (D-186)      | **`SPEC-09`** — D-213             |
+| —     | `db/schema.cds` — the 25 persisted entities                                  | [DM-001](DATA_MODEL.md) §3 (D-160)            | **`SPEC-01`** — see §4.2          |
 
 `Project Tracker/.gitignore` already carries `.env`; that one line was applied at the Tech Stack
 stage (D-176) precisely so item 3 could not create the hazard it removes.
@@ -114,6 +115,13 @@ starts**, and `S-00`'s first act is to fail loudly if it is absent: `cds deploy`
 role returns a driver error rather than a silent fallback, because `"password": ""` is removed rather
 than left (D-181, and D-168's measurement that a falsy password throws client-side before the
 handshake).
+
+> **Amended 2026-08-16 by D-211, having run it.** The role was created at `S-00` and the loud failure
+> is real — but it is a **connection probe**, not a deploy of this story's own model. `S-00` writes no
+> CDS, so `cds deploy` loads `0 file(s)` and CAP refuses it as a maximally **narrow** deploy (D-175),
+> which is a different error from the credential one. The credential was proven by what `cds deploy`
+> reached before refusing, and by `npm start` connecting and listening. **The first real deploy is
+> `SPEC-01`'s**, into an empty schema (D-217).
 
 ### 4.2 Why the schema is `SPEC-01`'s and not `S-00`'s
 
@@ -313,16 +321,16 @@ tests are therefore bounded by Part A of the definition of done, not by Part B.
 
 What each story hands the ones after it. A story that consumes a row below must not create it again.
 
-| Producer      | Artifact                                                                                                                                                                                          | Consumed by                                | The contract                                                                                                                                               |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`S-00`**    | `.cdsrc.json`, `.env`, the Postgres `[development]` profile, `"start": "cds serve"`, `serveOneOrigin.mjs`, `jest.config.ts`, `test/setEnv.ts`, the `test` + `record-test-run` scripts             | every later story                          | `npm start` serves on :4005; the proxy fronts :4000; `npm test` runs; `CDS_TYPESCRIPT` is set by `setupFiles` and never per spec                           |
-| **`SPEC-01`** | `db/schema.cds` (25 persisted entities), `srv/tracker-service.{cds,ts}` — one service `TrackerService` at `/service/trackerSvcs` — the `ProjectView` projection, `mcp/server.ts` and `mcp/verbs/` | every later story                          | `cds deploy` succeeds against Postgres; `cds.connect.to('TrackerService')` + `srv.tx({ user })` reaches the real handlers (D-189); the eleven verbs answer |
-| **`SPEC-02`** | The seeded Methodology library, chain instantiation, and the guard set                                                                                                                            | `SPEC-03`, `SPEC-04`, `SPEC-07`, `SPEC-08` | A Milestone created in Backlog materialises **9** Tasks on a `shipsUi` story and **8** otherwise, with 7 Subtasks under `sprint-build` alone               |
-| **`SPEC-03`** | The loaded workspace — 1 Area, 1 Engagement, 1 Workspace, 3 Initiatives, 12 Milestones, 4 Defects, 5 Decisions, 1 TestRun, 2 Activity rows                                                        | `SPEC-04` … `SPEC-07`, `SPEC-11`           | `CNV-004`'s reconciliation ties out. Every Report reads real data rather than a fixture; the exporter has rows to export                                   |
-| **`SPEC-04`** | **`app/project-view/`** — the one FPM app, its `manifest.json`, `Component.ts` and the single route with its optional `story` parameter (`IA-001` §4)                                             | `SPEC-05`, `SPEC-06`, `SPEC-07`            | Later UI stories **add sections and a dialog to this app**. No story creates a second app, a second route or a second component                            |
-| **`SPEC-09`** | `Project Tracker/scripts/` and `recordTestRun.ts`                                                                                                                                                 | the gate, from `SPEC-09` onward            | Both gate call sites invoke `npm run record-test-run` explicitly, after the test command, whatever its exit code (D-107)                                   |
-| **`SPEC-10`** | `Standards (Technical + Linting)/retired-paths.json` (5 records), `lintNoMarkdownState.ts`, and the hook installer — **all delivered unregistered** (D-07, `SPEC-10` BR-25)                       | `SPEC-12`                                  | `SPEC-12` runs the installer and enables both guards. Neither is enabled earlier; `SPEC-10` FUT-014 asserts that                                           |
-| **`SPEC-11`** | The CSV exporter, and the round-trip drill it runs                                                                                                                                                | `SPEC-12`                                  | `CNV-005` cannot retire markdown until the diffable form of state exists (`BA-001` §10, D-31)                                                              |
+| Producer      | Artifact                                                                                                                                                                                          | Consumed by                                | The contract                                                                                                                                                               |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`S-00`**    | `.cdsrc.json`, `.env`, the Postgres binding with SQLite moved to `[test]`, `"start": "cds serve --port 4005"`, `serveOneOrigin.mjs`, `jest.config.ts`, `test/setEnv.ts`, the `test` script        | every later story                          | `npm start` serves on :4005; the proxy fronts :4000; `npm test` runs; `CDS_TYPESCRIPT` is set by `setupFiles` and never per spec. `record-test-run` is `SPEC-09`'s (D-213) |
+| **`SPEC-01`** | `db/schema.cds` (25 persisted entities), `srv/tracker-service.{cds,ts}` — one service `TrackerService` at `/service/trackerSvcs` — the `ProjectView` projection, `mcp/server.ts` and `mcp/verbs/` | every later story                          | `cds deploy` succeeds against Postgres; `cds.connect.to('TrackerService')` + `srv.tx({ user })` reaches the real handlers (D-189); the eleven verbs answer                 |
+| **`SPEC-02`** | The seeded Methodology library, chain instantiation, and the guard set                                                                                                                            | `SPEC-03`, `SPEC-04`, `SPEC-07`, `SPEC-08` | A Milestone created in Backlog materialises **9** Tasks on a `shipsUi` story and **8** otherwise, with 7 Subtasks under `sprint-build` alone                               |
+| **`SPEC-03`** | The loaded workspace — 1 Area, 1 Engagement, 1 Workspace, 3 Initiatives, 12 Milestones, 4 Defects, 5 Decisions, 1 TestRun, 2 Activity rows                                                        | `SPEC-04` … `SPEC-07`, `SPEC-11`           | `CNV-004`'s reconciliation ties out. Every Report reads real data rather than a fixture; the exporter has rows to export                                                   |
+| **`SPEC-04`** | **`app/project-view/`** — the one FPM app, its `manifest.json`, `Component.ts` and the single route with its optional `story` parameter (`IA-001` §4)                                             | `SPEC-05`, `SPEC-06`, `SPEC-07`            | Later UI stories **add sections and a dialog to this app**. No story creates a second app, a second route or a second component                                            |
+| **`SPEC-09`** | `Project Tracker/scripts/` and `recordTestRun.ts`                                                                                                                                                 | the gate, from `SPEC-09` onward            | Both gate call sites invoke `npm run record-test-run` explicitly, after the test command, whatever its exit code (D-107)                                                   |
+| **`SPEC-10`** | `Standards (Technical + Linting)/retired-paths.json` (5 records), `lintNoMarkdownState.ts`, and the hook installer — **all delivered unregistered** (D-07, `SPEC-10` BR-25)                       | `SPEC-12`                                  | `SPEC-12` runs the installer and enables both guards. Neither is enabled earlier; `SPEC-10` FUT-014 asserts that                                                           |
+| **`SPEC-11`** | The CSV exporter, and the round-trip drill it runs                                                                                                                                                | `SPEC-12`                                  | `CNV-005` cannot retire markdown until the diffable form of state exists (`BA-001` §10, D-31)                                                                              |
 
 ### 10.1 The two shared surfaces, named rather than discovered
 
