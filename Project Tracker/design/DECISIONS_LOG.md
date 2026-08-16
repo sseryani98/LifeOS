@@ -1546,3 +1546,97 @@ Amendments are made in place — the superseded text is struck through and marke
 - **Decision:** `CREATE ROLE project_tracker LOGIN PASSWORD …`, then `ALTER DATABASE project_tracker OWNER TO project_tracker` and `ALTER SCHEMA public OWNER TO project_tracker`. **Then, on Sandro's ruling, `DROP SCHEMA public CASCADE; CREATE SCHEMA public AUTHORIZATION project_tracker` — deleting R1's 9 tables, 10 views and its `cds_model` snapshot.** Verified: the role logs in, `rolsuper` is false, it holds `CREATE` on `public`, and it can drop and recreate its own schema.
 - **Rationale:** Ownership rather than a grant list, because D-181's point is that the role owns exactly one database and nothing else. Measured in passing: **no `financial_planner` database exists** — that module's is `life_os` — and this role can still `CONNECT` to it under Postgres' default `PUBLIC` grant. Tightening that touches another module's database mid-sprint and is not taken here. The drop is the second half: R1 (D-170) deployed a **7-entity** probe model as the superuser, so its tables blocked the new role until reassigned, and its `cds_model` snapshot would have been diffed against `DM-001`'s **25** entities on `SPEC-01`'s first deploy — producing the same `Dropping tables is not supported` refusal at the worst moment. The artifacts held no data any document depends on.
 - **Consequences:** `TS-001` §8, §14 steps 1 and 2. **`SPEC-01` deploys into an empty schema**, which is the simple case rather than a migration. The role's password lives in the gitignored `Project Tracker/.env` as `CDS_REQUIRES_DB_CREDENTIALS_PASSWORD` and nowhere else in the repository.
+
+## D-218: `SPEC-01` Is Built by Hand Too, and `/build`'s Resolution Stays `SPEC-08`'s
+
+- **Context:** D-210 built `S-00` by hand and left `SPEC-01` open: those stories have specs, but `.claude/commands/build.md` §1 still resolves `$ARGUMENTS` to a FRICEW ID or a `Financial Planner/project/SPRINT_BOARD.md` Backlog row, and the workflow's `Handoff` phase writes a board this module does not use (D-207).
+- **Options:** A) build by hand in the main thread against the spec; B) pass `INT-001` and let `build-briefer` find `SPEC-01`; C) teach `build.md` to resolve a spec ID.
+- **Decision:** **A**, on D-210's reasoning, unchanged by the story having a spec.
+- **Rationale:** B is the tempting one and it fails on the second half rather than the first: `build-briefer` would resolve the spec, and then `Handoff` would still write a board row for a module that has no board, so the chain's last subtask fails on every Project Tracker story. C edits `build.md` and `build-briefer.md`, which `PLAN.md` §6 counts as `SPEC-08`'s rewiring targets with 2 references each — a repo-wide tooling change with no story owning it, which is D-22 one level up, and a collision with a later story's deliverable. The cost is the one D-210 priced, now paid twice: the seven-subtask workflow this module exists to model has still not run on its own build.
+- **Consequences:** `BP-001` §14. **The question is now `SPEC-08`'s permanently** rather than open per story — two stories have answered it the same way, and `INT-002`'s rewiring is where the board write becomes `complete_stage`.
+
+## D-219: The Code-List Aspect Is This Module's Own, Not `sap.common.CodeList`
+
+- **Context:** `DM-001` §8 specifies every code list as `{ key code : String; name : String; }`. The shared standards say to reach for a CAP built-in, and the exemplar uses `sap.common.CodeList`.
+- **Decision:** A local `CodeList` aspect in `db/schema.cds`, with a non-localized `name`.
+- **Rationale:** `sap.common.CodeList` declares `name` and `descr` as **`localized`**, and a localized element makes the compiler emit a `_texts` table per entity plus `sap.common.Languages`. Twelve code lists would therefore have deployed **12 extra tables and 12 extra views** beyond the 25 the entity contract names — and `INT-007` reads tables, so the exporter would have found them and exported them. The local aspect matches `DM-001` §8 literally. **Measured after the deploy: 25 base tables of this module's own, exactly the contract.**
+- **Consequences:** `db/schema.cds`. `HealthState` and `MilestoneStatus` persist as tables with no inbound foreign key, which `DM-001` §8 already rules correct.
+
+## D-220: `@cds.redirection.target` Belongs on the Service Entity, Not the Database One
+
+- **Context:** D-174 measured that a service exposing both `Workspace` and a projection of it fails to compile, and records the fix as "`Workspace` carries `@cds.redirection.target: true`". `DM-001` §11 and `TS-001` §5 repeat it that way.
+- **Decision:** The annotation goes on **`TrackerService.Workspaces`**, and a second one on `TrackerService.Tasks`.
+- **Rationale:** Measured this session: with the annotation on the database entity the service **still fails to compile**, with the same four errors. Annotations propagate into every projection, so at the database level both candidates inherit it and the tie is unresolved. The compiler's own message names the two service entities, not the database one. A second, unrecorded occurrence of the same tie surfaced at the same time — `Tasks` against the queue view built over it — which no document predicted because no document had built the view yet.
+- **Consequences:** `srv/tracker-service.cds`; `DM-001` §11 and `TS-001` §5 amended. D-174's ruling is unchanged, only the file the annotation lives in.
+
+## D-221: `Activity.occurredAt` Becomes `Timestamp`
+
+- **Context:** `DM-001` §7.3 types `occurredAt` as `DateTime`, §10 makes it the register's leading sort key, and `SPEC-01` FUT-016 requires two concurrent writes to carry "distinct, strictly ordered timestamps".
+- **Decision:** **`Timestamp`.** Amended in `DM-001` §7.3 in-session.
+- **Rationale:** Measured in the installed drivers rather than reasoned about: both render a `DateTime` to whole seconds **on read** — `@cap-js/sqlite` uses `substr(e,0,20)||'Z'` and `@cap-js/postgres` uses `to_char(…,'HH24:MI:SS"Z"')`. Two events written inside one second therefore come back tied, on the one column the register orders by, on an append-only log. FUT-016 is unreachable with `DateTime` and would have been "passed" only by a clock that lied about when things happened.
+- **Consequences:** `db/schema.cds`, `DM-001` §7.3. A second measurement came with it and is why the verbs carry `toSecondPrecision`: a `DateTime` element **rejects** a fractional-second value outright with `ASSERT_DATA_TYPE`, so every write to `startedAt`, `completedAt`, `decidedAt` and `executedAt` trims its stamp. `TestRun.executedAt` is left `DateTime` and noted rather than changed — its writer is `INT-004`, and truncating a Jest `startTime` is that story's call.
+
+## D-222: The Failure Envelope Gains `status` and `rule`
+
+- **Context:** `SPEC-01` §3.1 defines a failure as `{ ok, timestamp, code, message, target?, remediation? }`. `SPEC-01` FUT-011 expects a blocked completion under key `verb.stage.blocked`; `SPEC-02` FUT-010 expects the same rejection under key `wfl.stage.predecessorOpen` **and** states that "SPEC-01 FUT-011 passes unchanged against this behaviour".
+- **Decision:** The envelope carries **both**: `code` is `verb.stage.blocked`, the category the verb layer rejects under, and a new **`rule`** names the specific guard. It also carries **`status`**, because a failure surfaces as an MCP tool error "with the CAP status code intact" and the object is the only thing that crosses the transport.
+- **Rationale:** Two Approved specs are simultaneously true only if the envelope has two fields. Deferring it to `SPEC-02` would mean discovering there that one of the two FUTs has to change — a re-approval of an Approved spec found under build pressure. Adding the field now costs one line and leaves `SPEC-02` adding rule names rather than reshaping the envelope.
+- **Consequences:** `SPEC-01` §3.1 amended. Every rejection carries `status`; only a guard rejection carries `rule`.
+
+## D-223: The Caller's Identity Comes From the Registration, Not From a Verb Input
+
+- **Context:** D-41 requires every write to run under the calling agent's own name, and `SPEC-01` §5 rejects a call that declares none with `verb.identity.missing`. No verb signature in §3.1 carries an actor.
+- **Decision:** The server reads `PROJECT_TRACKER_ACTOR` from its environment; the installer script writes it into the registration. An empty value rejects every verb.
+- **Rationale:** The alternative is a twelfth input on all eleven verbs, which changes every signature in an Approved spec to carry something no caller should be able to lie about. Registration-scoped identity also matches D-44's tracked installer: one registration per agent is what the harness already produces, and a caller cannot spoof a value it does not send. The cost is stated: two agents sharing one registration share one identity, and nothing detects it.
+- **Consequences:** `mcp/server.ts`, `scripts/installMcpServer.mjs`. `SPEC-01` §3.1's Identity row gains the mechanism.
+
+## D-224: `scripts/` Arrives Here, Because BR-29's Installer Has Nowhere Else to Live
+
+- **Context:** `SPEC-01` BR-29 requires the server registration to be produced by a tracked installer script. `CLAUDE.md` §Carve-outs says this module has no `scripts/` folder until `INT-004`, and the root `CLAUDE.md` says a script naming a module belongs in the module rather than in the shared linter folder (D-103).
+- **Decision:** `Project Tracker/scripts/installMcpServer.mjs`, and the carve-out is amended.
+- **Rationale:** The installer names this module in every line — its server key, its entry point, its actor variable — so D-103's rule puts it here, and the Standards folder is closed to it. `.mjs` rather than `.ts` is deliberate: it keeps the file out of `tsc`'s program and out of `./scripts/**/*.ts`, the coverage band `SPEC-09` owns, so this story does not claim a threshold that is not its own.
+- **Consequences:** `CLAUDE.md` §Carve-outs amended — the folder arrives here; `recordTestRun.ts` still arrives at `SPEC-09` (D-213). The module's `eslint` invocation gains `scripts/` and `mcp/`.
+
+## D-225: `mcp/` Joins Four Shared Linters, and Two of Them Were Failing D-36
+
+- **Context:** The module's `lint` block ran `eslint srv/ app/`, and the shared linters' `SOURCE_DIRS` name `srv/ db/ app/ test/ scripts/`. **`mcp/` appears in none of them** — this module's largest logic surface was invisible to the entire suite.
+- **Decision:** `mcp/` is added to `lintCommentLength`, `lintNoTrackingIds`, `lintDomainTypes` and `lintGroupedConstants`, and to the module's own `eslint` invocation.
+- **Rationale:** A folder name is not a module name, so D-36's contract holds: the linters still root at `process.cwd()`, still take no arguments, and a module without an `mcp/` tree skips it. The addition is not cosmetic — it caught three loose constants in `mcp/server.ts` and one over-long comment on its first run. **Two of the four had no missing-folder guard at all** and would have crashed on any module lacking a scanned tree; `existsSync` was added to both, which is D-36 applied where it was already owed.
+- **Consequences:** Four files in `Standards (Technical + Linting)/scripts/`. `lintFacades`, `lintMapperMethods` and the frontend linters are deliberately **not** extended — they encode conventions scoped to `srv/` and `app/` by construction.
+
+## D-226: A Story Identifier in a Fixture Is Data, and `lintNoTrackingIds` Now Says So
+
+- **Context:** `lintNoTrackingIds` bans FRICEW, business-rule and decision IDs from every source tree including `test/`. This module's canonical test world is the migrated Financial Planner workspace, whose story identifiers **are** `CNV-001`, `ENH-009` and the rest — and `SPEC-01`'s own FUTs name `financial-planner/CNV-001` literally.
+- **Options:** A) rename the fixtures to non-FRICEW-shaped identifiers; B) exempt `test/`; C) exempt `data/` folders under `test/`.
+- **Decision:** **C.**
+- **Rationale:** A makes the canonical world stop being the canonical world, against a Test Strategy that fixes it row by row, and it would make the FUTs' own literals untestable. B is too wide — a spec file could then carry a live design reference, which is exactly what the linter exists to stop. C is narrow because the test-structure rule already forces fixtures into `data/`: a file there cannot instruct an agent and cannot hide a reference inside logic. The premise the ban rests on — a FRICEW ID in source is a design reference leaking into code — is false only for the module whose domain is the board, and only where the ID is a value.
+- **Consequences:** `Standards (Technical + Linting)/scripts/lintNoTrackingIds.ts`. Five inline literals in spec files were moved into fixtures rather than exempted, which the test-data rule wanted anyway.
+
+## D-227: `ProjectView`'s Read Handler Ships Now, Filling What This Story Owns and Nulling the Rest
+
+- **Context:** `DM-001` §11.1 puts an `after READ` handler on the read projection, filling `health` (`ENH-003`, `SPEC-05`), the four `nextAction*` scalars (`ENH-002`, `SPEC-04`) and six `gate*` scalars (`SPEC-05`). None of those engines exists yet, and D-205 says no story after this one extends the projection.
+- **Options:** A) no handler; B) the handler with stub scalars; C) the handler filling everything.
+- **Decision:** **B, with the stub made honest.** The handler ships, sets every derived element to `null` explicitly, and fills the one derivation this story does own — a story's status, which `SPEC-01` BR-12 requires and FUT-006 asserts.
+- **Rationale:** A leaves `SPEC-04` adding a handler to a projection D-205 closes. C builds two later stories' engines. The objection to B — a stub is code no test covers — is answered by making the stub do something: the handler is exercised by the read-path suite, and the explicit `null` is not decoration. Measured rather than assumed: a virtual element the handler does not set is **absent** from the read, and a caller binding an absent field cannot tell "not computed yet" from "not part of the shape".
+- **Consequences:** `srv/modules/tracker/trackerService.ts`, `trackerFacade.ts`. `SPEC-04` and `SPEC-05` fill values into an existing seam rather than adding a handler.
+
+## D-228: Where `mcp/server.ts` Ends and a Verb Begins
+
+- **Context:** `TST-001` §13.2 excludes `mcp/server.ts` from coverage as bootstrap wiring, while §13.1 holds `mcp/verbs/**` to 90/85. A verb file that also wired transport would drag an excluded concern into a thresholded folder, and the first shortfall would be argued rather than fixed.
+- **Decision:** **A verb file never imports `@modelcontextprotocol/sdk`.** `server.ts` holds the CAP bootstrap, the log redirection, tool registration, the transport and the single reconnect. `mcp/verbs/**` holds pure functions over a connected service, a `zod` input shape and a definition record.
+- **Rationale:** The line is one grep rather than a judgment. It also pays for itself: with no SDK import in the verb tree, nothing under `mcp/verbs/` loads `@sap/cds` at module scope either, which is what lets `server.ts` set `CDS_TYPESCRIPT` before its dynamic import of the runtime — an ordering an ES module cannot otherwise guarantee, because static imports are hoisted above every statement.
+- **Consequences:** `mcp/`. `randomUUID` from `node:crypto` replaces `cds.utils.uuid()` in the gateway for the same reason.
+
+## D-229: The First Real Deploy Is Clean, and `23503` Is Real
+
+- **Context:** `SPEC-01` runs the first deploy of a Life OS module's production model to Postgres, into the schema D-217 emptied. **R4** is graded `Inferred` and is scheduled to `INT-007`'s build (D-121, D-209); `TST-001` §10 names code-list referential integrity as the one constraint with **no automated cover anywhere**.
+- **Decision:** Record what the deploy did; do not re-own R4.
+- **Rationale:** Measured. `cds deploy` reported `successfully deployed to localhost:5432` with no `DROP` refusal — the empty-schema case D-217 bought is the simple one, as predicted. The schema holds **27 base tables**: this module's **25**, exactly `DM-001`'s count, plus CAP's own `cds_model` and `cds_outbox_messages`. One database view backs the queue; the remaining views are the service's. And the probe `TST-001` §10 cannot run under SQLite was run here: an `Activity` row naming an unseeded actor was rejected with Postgres **`23503`**, so `assert_integrity: 'DB'` enforces what D-173 said it would and D-166's actor ruling is not vacuous.
+- **Consequences:** `research/README.md` §5's R4 row keeps its grade and its owner. The blind spot `TST-001` §10 names is unchanged — it is still invisible to every suite; what changed is that the mechanism behind it is `Verified` rather than inferred.
+
+## D-230: The Service Exposes Every Entity, and the Escape Hatch Stays Closed Where D-05 Put It
+
+- **Context:** D-05 removes the CRUD escape hatch. `TS-001` §5 names the service's surface as the read projections plus `Initiative`, `Milestone` and `Workspace` writable for the shared create-handler. But the eleven verbs write `Task`, `Subtask`, `Defect`, `Decision`, `Activity` and `TestRun`, and a verb reaches the real handlers only through an entity the service exposes.
+- **Decision:** `TrackerService` exposes all 25 entities plus both read projections; the two projections are `@readonly` and nothing else is.
+- **Rationale:** The alternative is for the verbs to write through `cds.db` directly, which bypasses every handler — including the two uniqueness guards and the three cross-field rules `DM-001` §9 makes handlers precisely because no annotation can carry them. D-05's escape hatch is the **tool** surface, and `SPEC-01` BR-01 says so in those terms: no CRUD tool, no raw-SQL tool and no generic query tool is **exposed**. The tool list is still eleven verbs, asserted by FUT-001. `TS-001` §5's table names the UI-relevant surface rather than the compiled service, and is amended to say so.
+- **Consequences:** `srv/tracker-service.cds`; `TS-001` §5 amended. Stated plainly: the OData surface is writable by anything that can reach `localhost:4005`, which is the single-user local posture both modules already have, and it is not a path any agent is given.

@@ -1,14 +1,19 @@
-import { readdirSync, readFileSync } from "fs";
+import { existsSync, readdirSync, readFileSync } from "fs";
 import { basename, join, relative } from "path";
 
 const ROOT_DIR = process.cwd();
 
 /**
- * Both TypeScript surfaces the types-in-a-types.ts convention governs: srv/
- * ({domain}/types.ts) and app/ (each UI5 app's model/types.ts). scripts/ is
- * tooling with its own idioms and no equivalent shared-contract convention.
+ * The TypeScript surfaces the types-in-a-types.ts convention governs: srv/
+ * ({domain}/types.ts), app/ (each UI5 app's model/types.ts) and mcp/ where a
+ * module has one. scripts/ is tooling with its own idioms and no equivalent
+ * shared-contract convention. A tree a module does not have is skipped.
  */
-const SOURCE_DIRS = [join(ROOT_DIR, "srv"), join(ROOT_DIR, "app")];
+const SOURCE_DIRS = [
+  join(ROOT_DIR, "srv"),
+  join(ROOT_DIR, "app"),
+  join(ROOT_DIR, "mcp"),
+];
 
 const SKIP_SEGMENTS = new Set([
   "node_modules",
@@ -53,6 +58,7 @@ interface Violation {
  */
 function collectFiles(dir: string): string[] {
   const found: string[] = [];
+  if (!existsSync(dir)) return found;
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
     if (SKIP_SEGMENTS.has(entry.name)) continue;
     const full = join(dir, entry.name);

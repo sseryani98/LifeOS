@@ -5,8 +5,9 @@ Scaffold, Workshops, Information Architecture, Design System, Theme, Data Model,
 Strategy **and Project Planning** (grouping settled, `SPEC-01` … `SPEC-12`; **12 of 12 written and all
 twelve Approved**; `IA-001`, `DS-001`, `TH-001`, `DM-001`, `TS-001` and `TST-001` **Approved**;
 `BP-001` **Approved**). **All five open items are closed; R1 is executed and R9's proxy
-residual is executed.** **Build is open: `S-00 Module Bootstrap` is DONE (2026-08-16) — the module's
-first code — and `SPEC-01` is next.** Decisions run **D-01 … D-217**.
+residual is executed.** **Build is under way: `S-00 Module Bootstrap` and `SPEC-01 MCP Intent-Verb
+Layer` are both DONE (2026-08-16) — the module has a model, a service and eleven verbs — and `SPEC-02`
+is next.** Decisions run **D-01 … D-230**.
 **Last updated:** 2026-08-16
 **Purpose:** The continuity document. Anyone (or any fresh chat) picking up Project Tracker
 starts here. Read this, then `design/PROBLEM_STATEMENT_AND_VISION.md` (PSV-001),
@@ -147,7 +148,7 @@ mechanism needs a construction step.
 | 10  | Tech Stack         | `/generate-tech-stack` → `tech-stack-writer`       | Authored     | **Done** — 2026-08-15. `TS-001` **Approved**; **the proxy executed**, the loader ruled, the credential homed, **R11 minted** (D-176 … D-185)             |
 | 11  | Test Strategy      | `/generate-test-strategy` → `test-strategy-writer` | Authored     | **Done** — 2026-08-15. `TST-001` **Approved**; **the harness question executed and the exemplar's belief reversed**; 180 FUTs classified (D-186 … D-197) |
 | 12  | Project Planning   | `/generate-build-plan` → `build-plan-writer`       | Authored     | **Done** — 2026-08-15. `BP-001` **Approved**; **13 stories, 3 sprints**; story zero resolves the eight "first build story" items (D-198 … D-209)         |
-| 13  | Build              | `/build` + chain                                   | Exists       | **In progress** — `S-00 Module Bootstrap` **Done** 2026-08-16 (D-210 … D-217); **`SPEC-01` next**, in sprint `PT-W1` (BP-001 §3, §6)                     |
+| 13  | Build              | `/build` + chain                                   | Exists       | **In progress** — `S-00` **Done** 2026-08-16 (D-210 … D-217) and `SPEC-01` **Done** 2026-08-16 (D-218 … D-230); **`SPEC-02` next**, in sprint `PT-W1` (BP-001 §3, §6) |
 | 14  | **Rewire tooling** | `lintNoMarkdownState` + PreToolUse hook            | Not authored | Not started                                                                                                                                              |
 | 15  | Cutover            | —                                                  | —            | Not started                                                                                                                                              |
 | 16  | Back to FP         | —                                                  | —            | Blocked on cutover                                                                                                                                       |
@@ -595,6 +596,43 @@ Settle before or during Scaffold.
 ---
 
 ## 8. Session log
+
+### 2026-08-16 — Build `SPEC-01 MCP Intent-Verb Layer`: the model, the service and the verbs, and six things the documents had wrong
+
+- **Built `SPEC-01` — six deliverables, by hand in the main thread again (D-218).** `db/schema.cds`
+  with **DM-001's 25 persisted entities** plus two read views; `srv/tracker-service.{cds,ts}` — one
+  service, `TrackerService` at `/service/trackerSvcs` — with the `ProjectView` projection and its
+  `after READ` handler; `mcp/server.ts` and **eleven verbs** under `mcp/verbs/`;
+  `scripts/installMcpServer.mjs`; the two new dependencies; and the in-module assertion that
+  `CDS_TYPESCRIPT` is set at test time, which `BP-001` §11 owed to this story. Logged **D-218 … D-230**.
+- **All sixteen FUTs are covered at the tiers TST-001 §14.2 assigns** — 13 at the verb tier
+  (integration entry point A) and **3 at the protocol tier**, one of which spawns the server as a real
+  child process and parses every line of its stdout.
+- **Gate green:** `tsc` 0, **21 linters** 0, `npm test` 0 over **90 tests in 16 suites**, `cds build` 0.
+  Root `npm test` 0 over **376** — Financial Planner's **286 in 29 suites** untouched. Coverage:
+  three per-layer bands added and all met; overall **97.36% statements, 95.30% branches**
+  against floors of 85 and 80.
+- **The first real deploy of a Life OS production model to Postgres ran clean (D-229).** 25 tables of
+  this module's own into the schema `S-00` emptied, no `DROP` refusal, and the probe TST-001 §10 says
+  no suite can run: an unseeded code list value **is** rejected with `23503`. R4 keeps its grade and
+  its owner; what changed is that the mechanism under it is now measured.
+- **Six findings, five of them measurements that contradicted a document.**
+  **(1)** `sap.common.CodeList` would have deployed **12 tables and 12 views beyond the contract**,
+  because its `name` is `localized` — the aspect is local instead (D-219). **(2)**
+  `@cds.redirection.target` **does not work on the database entity** as D-174 recorded it: annotations
+  propagate into every projection, so both candidates inherit it and the tie survives. It belongs on
+  the service entity, and a second, unpredicted occurrence was found on `Tasks` (D-220). **(3)** Both
+  drivers render a `DateTime` to **whole seconds on read**, so `Activity.occurredAt` becomes
+  `Timestamp` — FUT-016's "distinct, strictly ordered timestamps" is otherwise unreachable — and a
+  `DateTime` **rejects** a fractional-second value outright with `ASSERT_DATA_TYPE` (D-221). **(4)**
+  `SPEC-01` FUT-011 and `SPEC-02` FUT-010 assert **different keys on the same rejection** while
+  SPEC-02 states FUT-011 passes unchanged; the envelope gains `rule` so both Approved specs can be
+  true (D-222). **(5)** **`mcp/` was invisible to the entire lint suite** — absent from the module's
+  `eslint` invocation and from every shared linter's roots — and two of those linters would have
+  crashed on a module lacking a scanned folder, which is D-36 unmet (D-225).
+- **Five amendments applied in-session, nothing left owed** — `DM-001` §7.3, §8 and §11; `TS-001` §5,
+  §6 and §12; `TST-001` §8 and §13.1; `BP-001` §10 and §14; and **`SPEC-01` itself**, a third
+  re-approval carrying the envelope and the identity mechanism.
 
 ### 2026-08-16 — Build `S-00 Module Bootstrap`: the module's first code, and five things the documents had wrong
 

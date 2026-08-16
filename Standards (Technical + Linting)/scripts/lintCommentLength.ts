@@ -13,6 +13,7 @@ const SOURCE_DIRS = [
   join(ROOT_DIR, "srv"),
   join(ROOT_DIR, "db"),
   join(ROOT_DIR, "app"),
+  join(ROOT_DIR, "mcp"),
   join(ROOT_DIR, "test"),
   join(ROOT_DIR, "scripts"),
 ];

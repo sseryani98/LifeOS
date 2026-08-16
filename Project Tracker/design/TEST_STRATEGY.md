@@ -333,7 +333,11 @@ identifiers or set up and tear down around themselves.
 | The amended `plan_sprint` signature carries both new inputs | It is a tool-schema assertion, not a behavioural one                                                   | SPEC-06 FUT-014 |
 
 **Mechanism:** the MCP SDK's in-memory linked transport pair — a client and the server in one
-process, no stdio pipe — driven from a Jest spec. `research/mcp-over-cap-in-process.md` §5 already ran
+process, no stdio pipe — driven from a Jest spec. **Amended 2026-08-16 at `SPEC-01`, having built it:
+the stdout guard cannot use that pair.** A linked pair never touches a file descriptor, so the one
+failure it exists to catch is invisible to it; that test spawns the server as a real child process,
+drives a whole session over raw pipes and parses every line of captured stdout. The other three
+tests use the pair as specified. `research/mcp-over-cap-in-process.md` §5 already ran
 a real client against a real CAP service in one process and is graded `Verified`, so the shape is
 proven; what this section adds is that it is a **tier with four named tests**, not a spike.
 
@@ -342,8 +346,8 @@ proven; what this section adds is that it is a **tier with four named tests**, n
 carries on**, so every call still completes. The corruption is invisible to any assertion that is not
 reading the raw stream.
 
-**The SDK is not installed yet** — `@modelcontextprotocol/sdk` is one of TS-001 §6's two new
-dependencies and lands with `INT-001`. This tier's first test lands in the same story.
+~~**The SDK is not installed yet**~~ — **installed at `SPEC-01`, 2026-08-16** (`1.30.0`), with `zod`
+`4.4.3`. This tier's first tests landed in the same story.
 
 ---
 
@@ -516,6 +520,12 @@ that exists is a number no gate can fairly enforce — and the exemplar demonstr
 | **Services + verbs + scripts** | 90%  | 85%    | `./srv/modules/**/*Service.ts`, `./mcp/verbs/**/*.ts`, `./scripts/**/*.ts` |
 | **Utilities**                  | 100% | 100%   | **None — this module has no utility layer** (§6.1)                         |
 | **Overall**                    | 85%  | 80%    | Global                                                                     |
+
+> **Landed 2026-08-16 at `SPEC-01`.** Three of the four bands are now live —
+> `**/*Validator.ts` 100/100, `**/*Service.ts` 90/85 and `mcp/verbs/**` 90/85 — because that story
+> creates the first file under each folder, which is what D-215 requires. **`./scripts/**/*.ts` is
+> still absent**: `SPEC-01` puts one `.mjs` installer there and a `.ts` band over a folder with no
+> covered `.ts` file is the hard error D-215 measured. It lands with `SPEC-09`.
 
 **Three mapping notes, each a consequence rather than a choice.**
 

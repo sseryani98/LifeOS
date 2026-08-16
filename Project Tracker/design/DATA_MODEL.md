@@ -347,7 +347,7 @@ three, and the scope association earns its keep twice.
 | `actor`      | Association to Actor        | yes      | SPEC-02 §2 am. 6, D-166   | The caller's declared identity, carrying its own `kind` (§8.2)                        |
 | `target`     | String(120)                 | yes      | SPEC-01 §2, SPEC-07 BR-28 | A reference **string**, not a foreign key — see below                                 |
 | `payload`    | LargeString                 | no       | SPEC-01 §2                | JSON-encoded. Renders only on expansion; **no summary is derived from it** (BR-29)    |
-| `occurredAt` | DateTime                    | yes      | SPEC-01 §2                | The domain clock. `RPT-004` orders by it and **never** by `createdAt` (SPEC-07 BR-26) |
+| `occurredAt` | **Timestamp**               | yes      | SPEC-01 §2                | The domain clock. `RPT-004` orders by it and **never** by `createdAt` (SPEC-07 BR-26). **Timestamp, not DateTime — amended at `SPEC-01` (D-221):** both drivers render a `DateTime` to whole seconds on read, so two events written inside one second come back tied on the column this register is ordered by |
 | `workspace`  | Association to Workspace    | yes      | **D-163**                 | The scope root                                                                        |
 
 **`target` is a String, and that is deliberate.** Sixteen kinds point at eight different entity types
@@ -393,6 +393,11 @@ Twelve code lists. **No `String enum` anywhere** — the shared standards rule a
 any finite vocabulary needing dropdown UX, and the exemplar's §9 Enum Values table predates that
 rule. Every code list is `{ key code : String; name : String; }` with `@Common: { Text: name,
 TextArrangement: #TextOnly }` and `ValueListWithFixedValues` where a Form binds it.
+
+**The aspect behind that shape is this module's own, not `sap.common.CodeList` (D-219, `SPEC-01`).**
+CAP's built-in declares `name` and `descr` as `localized`, which emits a `_texts` table per entity
+plus `sap.common.Languages` — **12 tables and 12 views beyond the 25 this document counts**, and
+`INT-007` exports tables. The shape above is taken literally instead.
 
 | Code list          | `code` values                                                                                                                                                                                                                                                                        | Rows | `name`                                       |
 | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---- | -------------------------------------------- |
@@ -593,11 +598,18 @@ BR-22a). D-145 named the requirement and not the CAP construct; this section nam
 **`ProjectView` is a read-only projection on `Workspace`** — not a CDS `select from` view, not a
 function import, and not a second stored entity.
 
-**`Workspace` carries `@cds.redirection.target: true` (D-174), and that is not optional.** Measured
+**The writable entity carries `@cds.redirection.target` (D-174), and that is not optional.** Measured
 while running R1: a service exposing both `Workspace` and a projection of `Workspace` **fails to
 compile** — CAP cannot decide which one `Defect:workspace` and `Initiative:workspace` should
 redirect to, and raises four errors naming both candidates. The **writable** entity is the target,
 because D-79's shared create-handler writes there and both Forms bind it.
+
+**Corrected at `SPEC-01` (D-220): the annotation goes on the _service_ entity, not the database one.**
+Measured while building: on `com.lifeos.projecttracker.Workspace` it does not resolve the tie, because
+annotations propagate into every projection and both candidates then carry it. It sits on
+`TrackerService.Workspaces`. **A second occurrence no document predicted was found at the same time** —
+`TrackerService.Tasks` against the `TaskQueueItem` view built over `Task` — and takes the same
+annotation.
 
 | Rejected construct         | Why                                                                                                     |
 | -------------------------- | ------------------------------------------------------------------------------------------------------- |
