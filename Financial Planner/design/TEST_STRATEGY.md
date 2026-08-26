@@ -16,6 +16,7 @@
 | 2026-02-20 | Sandro & Claude | Added TDD workflow reference in §2 Summary (D-230). Primary definition in TECHNICAL_STANDARDS.md §13. |
 | 2026-02-20 | Claude          | Status → Approved. Step 12 complete — all 21 specs approved.                                          |
 | 2026-07-15 | Sandro & Claude | Life OS restructure — §12.1 test report script now shared from Standards.                             |
+| 2026-08-26 | Sandro & Claude | §6.4 rewritten — `integration/scenarios/` becomes the Functional Test stage's evidence, mandatory for a story that ships no UI. Proven on Project Tracker (D-238).           |
 
 ---
 
@@ -92,6 +93,7 @@ Jest is CAP's documented test framework. `cds.test()` is framework-agnostic but 
 | Integration tests use SQLite, not PostgreSQL                    | `cds.test()` makes SQLite zero-config. Pragmatic trade-off for a solo project — PostgreSQL-specific edge cases caught in manual testing. |
 | Functional tests are integration tests with storylines          | Same `cds.test()` + SQLite infrastructure. Organized by user journey, not by endpoint.                                                   |
 | Functional tests nest under `test/integration/scenarios/`       | Not a separate top-level folder — same test infrastructure, different organization.                                                      |
+| A story that ships **no UI** discharges Functional Test here    | The browser instrument does not apply, but the FUTs stay executable at that story's outermost surface. See §6.4.                          |
 
 ---
 
@@ -190,9 +192,12 @@ Each test file targets one CDS service. Tests within a file share seed data but 
 - Unique identifiers to avoid collisions, or
 - Per-test setup/teardown around the mutation
 
-### 6.4 Scenario Tests
+### 6.4 Scenario Tests — and the Functional Test stage's evidence
 
-Nested under `test/integration/scenarios/`. These chain multiple OData calls to simulate FUT workflows:
+Nested under `test/integration/scenarios/`. Two things live here, and only the second is mandatory.
+
+**(a) Storyline scenarios.** Chains of OData calls simulating a user journey, organised by journey
+rather than by endpoint:
 
 | Scenario                  | Steps                                                                                    |
 | ------------------------- | ---------------------------------------------------------------------------------------- |
@@ -200,6 +205,31 @@ Nested under `test/integration/scenarios/`. These chain multiple OData calls to 
 | Card onboarding (WFL-004) | POST card instance → POST provider account → trigger sync → verify bonus tracking starts |
 | CSV import (FRM-003)      | POST CSV upload action → GET review buckets → PATCH approvals → verify counts            |
 | Card lifecycle (WFL-002)  | Create Focus card → meet bonus → verify auto-transition → manually cancel → close        |
+
+**(b) The Functional Test stage's evidence, for a story that ships no UI. Mandatory.** Methodology
+stage 4 drives a story's FUTs through the running app in a real browser. A story with **no UI** has
+no browser surface — but "no browser" is not "cannot be executed", and closing the stage on a
+traceability matrix instead records an argument where an output belongs. **Such a story discharges
+stage 4 by executing every one of its FUTs here**, at whatever its outermost caller-facing surface
+actually is — an MCP tool call, a service action, a CLI entry point.
+
+| Rule                                                               | Why                                                                                                    |
+| -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| **One spec per FUT**, not one per journey                          | The stage asks *does each named unit pass*, which a merged storyline cannot answer per unit             |
+| **The spec title carries the FUT identifier**                      | A run of the tier then answers traceability in its own output, with no separate matrix to keep true     |
+| **The identifiers live in the sibling `data/` folder**             | `lint:tracking-ids` bans a design identifier anywhere under `test/` outside `data/`; specs interpolate  |
+| **Drive the real surface, not an internal function**               | A FUT verified below the boundary it is written against is not that FUT                                 |
+| **The FUT's own Preconditions/Steps/Expected Result are the spec** | The spec is the contract; a scenario that improves on it has stopped testing the FUT                    |
+
+**This tier deliberately re-asserts what the unit and integration tiers already cover**, which is a
+real exception to the rule that a FUT is written at the outermost tier that can observe it, **once**.
+That rule assumed a browser tier existed to be the outermost one. The tier suites own regression;
+this tier owns the stage. When a UI story reaches stage 4 and the browser *does* apply, this tier may
+have nothing to add — re-read the rule then rather than duplicating by reflex.
+
+**Proven on one module, not two.** Project Tracker's `INT-001` is the first story to run it (D-238):
+sixteen FUTs, sixteen specs, driven through a real MCP client, all passing. Treat the shape as
+settled and the vocabulary as provisional until a second module runs it.
 
 ### 6.5 Test Data Rule
 
