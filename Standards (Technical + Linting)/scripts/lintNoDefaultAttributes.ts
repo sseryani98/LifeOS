@@ -1,5 +1,7 @@
-import { readdirSync, readFileSync } from "fs";
+import { readFileSync } from "fs";
 import { join, relative } from "path";
+
+import { collectFiles, reportViolations } from "./lib/lintWalk.js";
 
 const ROOT_DIR = process.cwd();
 
@@ -8,8 +10,6 @@ const ROOT_DIR = process.cwd();
  * is a UI5 XML concern, so we scan nothing else.
  */
 const SOURCE_DIRS = [join(ROOT_DIR, "app")];
-
-const SKIP_SEGMENTS = new Set(["node_modules", "gen", "dist", "coverage", ".git"]);
 
 /**
  * Redundant attribute=value pairs, safe to flag by a flat line match because
@@ -46,20 +46,6 @@ const PATTERNS = REDUNDANT_DEFAULTS.map(({ attr, value }) => ({
   regex: new RegExp(`\\s${attr}\\s*=\\s*["']${value}["']`),
 }));
 
-function collectXmlFiles(dir: string): string[] {
-  const found: string[] = [];
-  for (const entry of readdirSync(dir, { withFileTypes: true })) {
-    if (SKIP_SEGMENTS.has(entry.name)) continue;
-    const full = join(dir, entry.name);
-    if (entry.isDirectory()) {
-      found.push(...collectXmlFiles(full));
-    } else if (entry.name.endsWith(".xml")) {
-      found.push(full);
-    }
-  }
-  return found;
-}
-
 function scanFile(filePath: string): Violation[] {
   const violations: Violation[] = [];
   const lines = readFileSync(filePath, "utf8").split(/\r?\n/);
@@ -79,27 +65,21 @@ function scanFile(filePath: string): Violation[] {
 }
 
 function main(): void {
-  const files = SOURCE_DIRS.flatMap(collectXmlFiles);
+  const files = SOURCE_DIRS.flatMap(dir => collectFiles(dir, [".xml"]));
   const violations = files.flatMap(scanFile);
 
-  console.log(`Scanning ${files.length} UI5 view(s) for redundant default attributes...`);
-
-  if (violations.length === 0) {
-    console.log("No redundant default attributes found.");
-    process.exit(0);
-  }
-
-  console.log();
-  for (const violation of violations) {
-    console.log(`${violation.filePath}:${violation.line}  "${violation.match}"  →  ${violation.text}`);
-  }
-  console.log(
+  reportViolations(
+    `Scanning ${files.length} UI5 view(s) for redundant default attributes...`,
+    "No redundant default attributes found.",
+    violations.map(
+      violation =>
+        `${violation.filePath}:${violation.line}  "${violation.match}"  →  ${violation.text}`,
+    ),
     `\nFound ${violations.length} redundant default attribute(s). ` +
       `visible/enabled default to true on every control — omit them. ` +
       `(Control-specific defaults like SimpleForm.editable and Panel.expanded ` +
       `are intentionally NOT flagged; setting those to true can be required.)`,
   );
-  process.exit(1);
 }
 
 main();

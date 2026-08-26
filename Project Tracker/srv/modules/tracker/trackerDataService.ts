@@ -1,6 +1,6 @@
 import { ENTITIES } from "../shared/constants.js";
 
-import type { ChainTaskRow } from "./types.js";
+import type { ChainTaskRow, InitiativePayload } from "./types.js";
 
 /** Every query the handler layer issues. No logic lives here. */
 export class TrackerDataService {
@@ -40,6 +40,21 @@ export class TrackerDataService {
       ID: string;
     }>;
     return rows.filter(row => row.ID !== excludeId).length;
+  }
+
+  /**
+   * Reads the completion facts an Initiative currently holds, for judging a
+   * partial update against the state it produces.
+   * @param initiativeId The Initiative being written.
+   * @returns The stored completion fields, or undefined when no row exists.
+   */
+  async readInitiativeCompletion(
+    initiativeId: string,
+  ): Promise<InitiativePayload | undefined> {
+    const rows = (await SELECT.from(ENTITIES.INITIATIVE)
+      .columns("status_code", "mergeCommit", "tag")
+      .where({ ID: initiativeId })) as InitiativePayload[];
+    return rows[0];
   }
 
   /**

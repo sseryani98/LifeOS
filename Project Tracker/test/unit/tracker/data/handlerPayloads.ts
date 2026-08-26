@@ -39,6 +39,18 @@ export const DERIVATION_CHAINS = {
     { status_code: "complete", stepKind: "Required" },
     { status_code: "notStarted", stepKind: "Recommended" },
   ],
+  ALL_RECOMMENDED_UNTOUCHED: [
+    { status_code: "notStarted", stepKind: "Recommended" },
+    { status_code: "notStarted", stepKind: "Recommended" },
+  ],
+  CONDITIONAL_OPEN: [
+    { status_code: "complete", stepKind: "Required" },
+    { status_code: "notStarted", stepKind: "Conditional" },
+  ],
+  CONDITIONAL_ALL_COMPLETE: [
+    { status_code: "complete", stepKind: "Required" },
+    { status_code: "complete", stepKind: "Conditional" },
+  ],
 } as const;
 
 /** A read result with a tree hanging off it, and one with nothing. */

@@ -1,3 +1,4 @@
+import { DERIVED_SCALARS } from "../../../../srv/modules/shared/constants.js";
 import { WORLD } from "../../../shared/data/world.js";
 import {
   clearWorld,
@@ -12,6 +13,8 @@ import {
 } from "../data/chainStates.js";
 import {
   COMPLETE_INITIATIVE_MISSING_FACTS,
+  COMPLETE_INITIATIVE_WITH_FACTS,
+  COMPLETION_FACTS_PATCH,
   DUPLICATE_SLUG_WORKSPACE,
   ORPHAN_DEFECT,
   ORPHAN_TEST_RUN,
@@ -21,6 +24,8 @@ import {
   SECOND_STORY,
 } from "../data/writePayloads.js";
 import {
+  patchExpectingRejection,
+  patchExpectingSuccess,
   postExpectingRejection,
   postExpectingSuccess,
   readCollection,
@@ -64,15 +69,14 @@ describe("the browser read path", () => {
     expect(rows[0].defects).toHaveLength(0);
   });
 
-  /** The scalars the later engines fill must exist and be empty, not be absent from the shape. */
-  it("carries the derived scalars as empty rather than missing", async () => {
-    const rows = (await readCollection(
-      PATHS.PROJECT_VIEW,
-    )) as unknown as ProjectViewRow[];
+  /** The list is a hand-kept mirror of the view's virtuals, so the read itself has to hold it honest. */
+  it("carries every derived scalar the constant names as empty rather than missing", async () => {
+    const rows = await readCollection(PATHS.PROJECT_VIEW);
 
-    expect(rows[0].health).toBeNull();
-    expect(rows[0].nextActionStoryId).toBeNull();
-    expect(rows[0].gateTotal).toBeNull();
+    for (const key of DERIVED_SCALARS) {
+      expect(rows[0]).toHaveProperty(key);
+      expect(rows[0][key]).toBeNull();
+    }
   });
 
   /** The status is filled on read wherever a story is read, or it is only true on one path. */
@@ -133,12 +137,98 @@ describe("the browser read path", () => {
     expect(rejected.code).toBe("tracker.initiative.completionFieldsRequired");
   });
 
+  /** The rule judges the state a patch produces, not the fields it happens to carry. */
+  it("accepts completing a sprint whose facts were recorded by an earlier patch", async () => {
+    const created = await postExpectingSuccess(PATHS.INITIATIVES, {
+      ...SECOND_INITIATIVE,
+      workspace_ID: world.workspaceId,
+    });
+
+    await patchExpectingSuccess(
+      `${PATHS.INITIATIVES}(${created.ID as string})`,
+      { ...COMPLETION_FACTS_PATCH },
+    );
+    const completed = await patchExpectingSuccess(
+      `${PATHS.INITIATIVES}(${created.ID as string})`,
+      { status_code: "Complete" },
+    );
+
+    expect(completed.status_code).toBe("Complete");
+  });
+
+  /** Patching a fact away from a complete sprint recreates the state the rule forbids. */
+  it("refuses patching a completion fact off an already complete sprint", async () => {
+    const created = await postExpectingSuccess(PATHS.INITIATIVES, {
+      ...COMPLETE_INITIATIVE_WITH_FACTS,
+      workspace_ID: world.workspaceId,
+    });
+
+    const rejected = await patchExpectingRejection(
+      `${PATHS.INITIATIVES}(${created.ID as string})`,
+      { mergeCommit: null },
+    );
+
+    expect(rejected.status).toBe(400);
+    expect(rejected.code).toBe("tracker.initiative.completionFieldsRequired");
+  });
+
+  /** A rename that omits the workspace skips the pre-check; the store constraint has to hold the line. */
+  it("refuses renaming a sprint onto a sibling's name through the store constraint", async () => {
+    const created = await postExpectingSuccess(PATHS.INITIATIVES, {
+      ...SECOND_INITIATIVE,
+      workspace_ID: world.workspaceId,
+    });
+
+    const rejected = await patchExpectingRejection(
+      `${PATHS.INITIATIVES}(${created.ID as string})`,
+      { name: WORLD.INITIATIVE.name },
+    );
+
+    expect(rejected.status).toBe(500);
+    expect(rejected.code).toBe("SQLITE_CONSTRAINT_UNIQUE");
+    expect(rejected.message).toContain("Initiative.name");
+  });
+
+  /** A rename that omits the sprint skips the pre-check too, so the same backstop has to hold for stories. */
+  it("refuses renaming a story onto a sibling's identifier through the store constraint", async () => {
+    const created = await postExpectingSuccess(PATHS.MILESTONES, {
+      ...SECOND_STORY,
+      initiative_ID: world.initiativeId,
+    });
+
+    const rejected = await patchExpectingRejection(
+      `${PATHS.MILESTONES}(${created.ID as string})`,
+      { storyId: WORLD.STORY.storyId },
+    );
+
+    expect(rejected.status).toBe(500);
+    expect(rejected.code).toBe("SQLITE_CONSTRAINT_UNIQUE");
+    expect(rejected.message).toContain("Milestone.storyId");
+  });
+
   /** A defect linked to nothing cannot be shown under any workspace, so the write is refused. */
   it("refuses a defect that links to neither a story nor a sprint", async () => {
     const rejected = await postExpectingRejection(PATHS.DEFECTS, {
       ...ORPHAN_DEFECT,
       workspace_ID: world.workspaceId,
     });
+
+    expect(rejected.status).toBe(400);
+    expect(rejected.code).toBe("tracker.defect.scopeRequired");
+  });
+
+  /** Patching both links off a live defect orphans it out of every register, through the other verb. */
+  it("refuses a patch that nulls the only link a defect is scoped by", async () => {
+    const created = await postExpectingSuccess(PATHS.DEFECTS, {
+      ...ORPHAN_DEFECT,
+      milestone_ID: world.milestoneId,
+      workspace_ID: world.workspaceId,
+    });
+
+    const rejected = await patchExpectingRejection(
+      `${PATHS.DEFECTS}(${created.ID as string})`,
+      { milestone_ID: null },
+    );
 
     expect(rejected.status).toBe(400);
     expect(rejected.code).toBe("tracker.defect.scopeRequired");
@@ -166,6 +256,8 @@ describe("the browser read path", () => {
       engagement_ID: engagements[0].ID,
     });
 
-    expect(rejected.status).toBeGreaterThanOrEqual(400);
+    expect(rejected.status).toBe(500);
+    expect(rejected.code).toBe("SQLITE_CONSTRAINT_UNIQUE");
+    expect(rejected.message).toContain("Workspace.slug");
   });
 });

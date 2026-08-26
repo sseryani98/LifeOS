@@ -3,7 +3,7 @@ import { z } from "zod";
 import { CODES } from "../../srv/modules/shared/constants.js";
 
 import { buildActivityTarget } from "./shared/addressing.js";
-import { ACTIVITY_KINDS, PLANNING, VERB_KEYS } from "./shared/constants.js";
+import { ACTIVITY_KINDS, HTTP, VERB_KEYS } from "./shared/constants.js";
 import { rejectVerb } from "./shared/envelope.js";
 import { runWriteVerb } from "./shared/runVerb.js";
 import type {
@@ -13,7 +13,7 @@ import type {
 } from "./shared/types.js";
 
 /** The tool schema, as the transport advertises it. */
-export const inputShape = {
+const inputShape = {
   defect: z.string().describe("Identifier of the defect to close"),
   resolution: z.string().describe("How the defect was resolved"),
 };
@@ -37,14 +37,14 @@ export async function resolveDefect(
   return runWriteVerb(ctx, async (gateway, timestamp) => {
     if (!input.resolution.trim()) {
       rejectVerb(
-        PLANNING.HTTP_BAD_REQUEST,
+        HTTP.BAD_REQUEST,
         VERB_KEYS.DEFECT_RESOLUTION_REQUIRED,
       );
     }
     const defect = await gateway.readDefect(input.defect);
     if (!defect) {
       rejectVerb(
-        PLANNING.HTTP_NOT_FOUND,
+        HTTP.NOT_FOUND,
         VERB_KEYS.TARGET_NOT_FOUND,
         ["defect", input.defect, ""],
         { target: input.defect },

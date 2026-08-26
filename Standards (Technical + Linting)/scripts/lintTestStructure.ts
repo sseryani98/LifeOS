@@ -1,21 +1,12 @@
-import { readdirSync, readFileSync } from "fs";
+import { readFileSync } from "fs";
 import { basename, join, relative, sep } from "path";
 
 import typescript from "typescript";
 
+import { collectFiles, reportViolations } from "./lib/lintWalk.js";
+
 const ROOT_DIR = process.cwd();
 const TEST_DIR = join(ROOT_DIR, "test");
-
-/**
- * Subtrees skipped entirely (generated output, dependencies, build artifacts).
- */
-const SKIP_SEGMENTS = new Set([
-  "node_modules",
-  "gen",
-  "dist",
-  "coverage",
-  ".git",
-]);
 
 /**
  * The three role folders every test file must live under. `data/` holds
@@ -56,21 +47,6 @@ interface Violation {
 /** Path segments of a test file relative to `test/`, e.g. `unit/ingestion/data`. */
 function segmentsOf(filePath: string): string[] {
   return relative(TEST_DIR, filePath).split(sep);
-}
-
-/** Recursively collects `.ts` file paths under a directory. */
-function collectTsFiles(dir: string): string[] {
-  const found: string[] = [];
-  for (const entry of readdirSync(dir, { withFileTypes: true })) {
-    if (SKIP_SEGMENTS.has(entry.name)) continue;
-    const full = join(dir, entry.name);
-    if (entry.isDirectory()) {
-      found.push(...collectTsFiles(full));
-    } else if (entry.name.endsWith(".ts")) {
-      found.push(full);
-    }
-  }
-  return found;
 }
 
 /** Recursive size of a literal: own members plus the weight of nested literals. */
@@ -191,7 +167,7 @@ function checkPlacement(filePath: string): Violation | null {
  * lives in data/, builders in support/, specs in tests/ — no data in support/.
  */
 function main(): void {
-  const files = collectTsFiles(TEST_DIR);
+  const files = collectFiles(TEST_DIR, [".ts"]);
   const violations: Violation[] = [];
 
   for (const filePath of files) {
@@ -202,25 +178,16 @@ function main(): void {
     }
   }
 
-  console.log(
+  reportViolations(
     `Scanning ${files.length} test file(s) for structure violations...`,
-  );
-
-  if (violations.length === 0) {
-    console.log("Test tree follows the data/support/tests contract.");
-    process.exit(0);
-  }
-
-  console.log();
-  for (const violation of violations) {
-    console.log(`${violation.filePath}:${violation.line}  ${violation.reason}`);
-  }
-  console.log(
+    "Test tree follows the data/support/tests contract.",
+    violations.map(
+      violation => `${violation.filePath}:${violation.line}  ${violation.reason}`,
+    ),
     `\nFound ${violations.length} test-structure violation(s). Layout is ` +
       `test/{unit,integration}/<module>/{data,support,tests} (+ test/shared/` +
       `{data,support}): fixtures in data/, builders in support/, specs in tests/.`,
   );
-  process.exit(1);
 }
 
 main();

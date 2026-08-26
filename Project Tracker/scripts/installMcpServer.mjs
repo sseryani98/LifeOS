@@ -12,21 +12,29 @@ const MODULE_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 /** The repository root, one level above the module. */
 const REPO_ROOT = resolve(MODULE_ROOT, "..");
 
-/** The gitignored registration file the harness reads. */
-const REGISTRATION_FILE = join(REPO_ROOT, ".mcp.json");
+/**
+ * The gitignored registration file the harness reads. The override exists so a
+ * test can run this script without writing the developer's own registry.
+ */
+const REGISTRATION_FILE =
+  process.env.MCP_REGISTRATION_FILE ?? join(REPO_ROOT, ".mcp.json");
 
-/** The server key and the command that starts it. */
+/** The key this module registers under. */
 const SERVER_NAME = "project-tracker";
 
 /**
  * Reads the existing registration file, or an empty registry when none exists.
+ * Anything else — a corrupt or half-written file included — aborts: the
+ * registry is shared repo-root state, and replacing it with an empty one would
+ * silently drop every other module's server.
  * @returns The parsed registry.
  */
 function readRegistry() {
   try {
     return JSON.parse(readFileSync(REGISTRATION_FILE, "utf8"));
-  } catch {
-    return {};
+  } catch (error) {
+    if (error?.code === "ENOENT") return {};
+    throw error;
   }
 }
 

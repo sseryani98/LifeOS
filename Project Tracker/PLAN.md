@@ -597,6 +597,45 @@ Settle before or during Scaffold.
 
 ## 8. Session log
 
+### 2026-08-25 → 26 — `SPEC-01` QA chain, stages 2–3: 39 findings applied, and two rejections that were reaching the caller as a lost store
+
+- **The gap this closes.** `SPEC-01` was committed at `5b3a53c` on the build gate alone — `tsc`, 21
+  linters, 90 tests, `cds build`. Chain stages 2–6 of §5 never ran, while the stage table above said
+  **Done**. Sandro ruled the chain runs before `SPEC-02` starts. That drift is the argument for §5's
+  own re-verification note: look for a stage's output, not its mention.
+- **Code Quality (stage 2) — 39 consensus findings, all applied.** 3 high, 0 contested, 19 dropped,
+  from an isolated-agent review with a reviewer-vs-adversary debate. Sandro ruled **all 39** and
+  resurrected none of the dropped. Logged **D-232 … D-234**.
+- **The two schema constraints were verified rather than trusted (D-232).** `@assert.unique` on
+  `Initiative [workspace, name]` and `Milestone [initiative, storyId]` deployed into the live
+  Postgres schema — the first **schema evolution** any Life OS module has run, which is R4's
+  "confirm on first deploy" — and a probe then inserted duplicate pairs inside rolled-back
+  transactions: both fired with **`23505`**. D-174's lesson is why the deploy log was not the
+  evidence.
+- **Test Quality (stage 3) ran and was cut short mid-Implement, but its writes stand and two of
+  them caught real bugs.** The suite went **90 → 137 tests in 17 suites**. Two authored tests failed
+  against the code, and both failures were the code's:
+  **(1)** a CAP handler rejection reaches the verb layer as **`code: 409` — the number** — with the
+  message key as `message` and **no `status` field at all**, so the envelope's rejection detection
+  (written earlier the same session, from the shape `baseFacade.isRejection` checks) never matched
+  and every 409/400 surfaced as **503 `verb.connection.unavailable`**, which is the retryable code.
+  A driver SQLSTATE (`"23505"`) is a _string_, and that is now the discriminator that keeps a
+  constraint violation from reading as a status. **(2)** `verb.value.notInCodeList` was defined,
+  had a message, and was **read by nothing** — the severity code list guarded only the advertised
+  zod schema, so a verb called in-process reached the store and returned a driver error instead of
+  the named 400 `SPEC-01` specifies.
+- **Gate green at close:** `tsc` 0, **21 linters** 0, `npm test` 0 over **137 tests in 17 suites**,
+  `cds build` 0. Root `npm test` 0 over **423** — Financial Planner's **286** untouched.
+- **The shared lint suite lost its copy-pasted walker.** `collectFiles`, `SKIP_SEGMENTS`, the
+  missing-root guard and the report-and-exit shape moved into
+  `Standards (Technical + Linting)/scripts/lib/lintWalk.ts`; **16 of the 21 linters** now import it,
+  five keep walkers that were never copies. Scan counts are identical everywhere except
+  `lint:tracking-ids` in Financial Planner (**177 → 172**), which is exactly the drift being healed:
+  three generated `srv/@cds-models/**/*.js` and two `app/**/*.gen.d.ts` that four linters skipped
+  and one did not.
+- **Still owed on this chain:** Functional Test (stage 4) and Human Review (stage 5). UX Test skips —
+  `SPEC-01` ships no UI. `/pm-update` correctly finds nothing here (D-207).
+
 ### 2026-08-16 — Build `SPEC-01 MCP Intent-Verb Layer`: the model, the service and the verbs, and six things the documents had wrong
 
 - **Built `SPEC-01` — six deliverables, by hand in the main thread again (D-218).** `db/schema.cds`

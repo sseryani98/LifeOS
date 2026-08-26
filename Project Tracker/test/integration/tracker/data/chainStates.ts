@@ -100,11 +100,32 @@ export const TWO_STAGES_STARTABLE = {
   },
 } as const;
 
+/**
+ * Every stage this fixture names closed, with the last one left open. On a
+ * backend story that leaves commit as the only open stage; on a UI story the
+ * Conditional ux-test stage, which this names nowhere, stays open as well.
+ */
+export const COMMIT_LAST_OPEN = {
+  ...WHOLE_CHAIN_COMPLETE,
+  commit: { status: "inProgress", startedAt: CHAIN_TIMES.HUMAN_REVIEW_DONE },
+} as const;
+
+/**
+ * Blocked and already complete at once: human review never ran, yet commit
+ * carries a completion time. Which of the two the caller is told is the guard
+ * order, not the guard set.
+ */
+export const BLOCKED_AND_COMPLETE = {
+  ...HUMAN_REVIEW_OPEN,
+  commit: { status: "complete", completedAt: CHAIN_TIMES.HUMAN_REVIEW_DONE },
+} as const;
+
 /** The stage and step codes the lifecycle assertions address. */
 export const STAGE = {
   BUILD: "sprint-build",
   CODE_QUALITY: "code-quality",
   TEST_QUALITY: "test-quality",
+  UX_TEST: "ux-test",
   HUMAN_REVIEW: "human-review",
   DOCUMENTATION: "documentation",
   PM_UPDATE: "pm-update",

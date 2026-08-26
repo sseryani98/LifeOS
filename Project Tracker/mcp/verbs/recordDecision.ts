@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { buildActivityTarget, parseDecisionTarget } from "./shared/addressing.js";
-import { ACTIVITY_KINDS, PLANNING, VERB_KEYS } from "./shared/constants.js";
+import { ACTIVITY_KINDS, HTTP, VERB_KEYS } from "./shared/constants.js";
 import { rejectVerb } from "./shared/envelope.js";
 import { runWriteVerb } from "./shared/runVerb.js";
 import { toSecondPrecision } from "./shared/writeQueue.js";
@@ -14,7 +14,7 @@ import type {
 } from "./shared/types.js";
 
 /** The tool schema, as the transport advertises it. */
-export const inputShape = {
+const inputShape = {
   target: z
     .string()
     .describe(
@@ -112,7 +112,7 @@ async function _resolveDecisionTarget(
   );
   if (!initiative) {
     rejectVerb(
-      PLANNING.HTTP_NOT_FOUND,
+      HTTP.NOT_FOUND,
       VERB_KEYS.TARGET_NOT_FOUND,
       ["story or sprint", innerName, workspace.slug],
       { target: innerName },

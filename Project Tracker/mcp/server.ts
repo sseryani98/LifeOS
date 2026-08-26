@@ -4,7 +4,6 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import type cds from "@sap/cds";
 
 import { VERB_DEFINITIONS } from "./verbs/index.js";
-import { VERB_KEYS } from "./verbs/shared/constants.js";
 import type { VerbContext, VerbResult } from "./verbs/shared/types.js";
 
 /** The CAP runtime, as the dynamic import hands it back. */
@@ -16,7 +15,11 @@ const BOOTSTRAP = {
   SERVICE_NAME: "TrackerService",
   /** Where the calling agent declares who it is. */
   ACTOR_VARIABLE: "PROJECT_TRACKER_ACTOR",
-  /** Logged once the transport is live, so the guard has something to guard. */
+  /**
+   * Logged once the transport is live. The stdout-purity test
+   * (test/protocol/tests/stdoutGuard.test.ts) asserts this exact line lands on
+   * stderr, which is what makes the redirection below load-bearing.
+   */
   READY_MESSAGE: "project tracker verb server ready",
   /** Server identity advertised to a client. */
   SERVER_INFO: { name: "project-tracker", version: "1.0.0" },
@@ -46,7 +49,7 @@ export function createTrackerMcpServer(
       },
       async (input: unknown) => {
         let result = await verb.run(context, input);
-        if (_isConnectionFailure(result) && reconnect) {
+        if (_isRetryableFailure(result) && reconnect) {
           await reconnect();
           result = await verb.run(context, input);
         }
@@ -74,25 +77,28 @@ export async function startTrackerMcpServer(): Promise<void> {
   redirectLogsToStderr(cds);
   const model = await cds.load("*");
   if (_isInMemoryDatabase(cds)) await _deploySilently(cds, model);
+  // Serving happens exactly once, at boot: with nothing served there is
+  // nothing to connect to, but a reconnect reopens the connection only.
+  await cds.serve("all").from(model as never);
   const context: VerbContext = {
-    service: await _connectService(cds, model),
+    service: await cds.connect.to(BOOTSTRAP.SERVICE_NAME),
     actor: process.env[BOOTSTRAP.ACTOR_VARIABLE] ?? "",
   };
   const reconnect = async (): Promise<void> => {
-    context.service = await _connectService(cds, model);
+    context.service = await cds.connect.to(BOOTSTRAP.SERVICE_NAME);
   };
   await createTrackerMcpServer(context, reconnect).connect(
     new StdioServerTransport(),
   );
-  // Deliberately after the transport is live: this is the exact line that would
-  // corrupt the frame stream if the redirection above had not taken.
+  // Deliberately after the transport is live: this is the exact line the
+  // stdout-purity test (see BOOTSTRAP.READY_MESSAGE) needs emitted last.
   cds.log("app").info(BOOTSTRAP.READY_MESSAGE);
 }
 
 /**
  * Sends every log line to stderr. A single line on stdout lands inside the live
  * JSON-RPC frame stream, where the client reports a parse error and carries on —
- * so the corruption is invisible to every assertion but this guard.
+ * which is why test/protocol/tests/stdoutGuard.test.ts asserts stdout purity.
  * @param runtime The CAP runtime whose logger factory is being replaced.
  */
 export function redirectLogsToStderr(runtime: {
@@ -114,22 +120,6 @@ export function redirectLogsToStderr(runtime: {
     warn: write,
     error: write,
   });
-}
-
-/**
- * Serves the model in this process and connects to the one service behind it.
- * A bare connect is never used: with nothing served, there is nothing to
- * connect to.
- * @param cds The CAP runtime.
- * @param model The loaded model.
- * @returns The connected service.
- */
-async function _connectService(
-  cds: CdsRuntime,
-  model: unknown,
-): Promise<cds.Service> {
-  await cds.serve("all").from(model as never);
-  return cds.connect.to(BOOTSTRAP.SERVICE_NAME);
 }
 
 /**
@@ -157,12 +147,13 @@ function _isInMemoryDatabase(cds: CdsRuntime): boolean {
 }
 
 /**
- * Reports whether a result failed because the store was unreachable.
+ * Reports whether a result failed because the store was unreachable, by the
+ * flag the envelope sets where the error's nature is actually known.
  * @param result The verb result.
- * @returns True when the failure is a connection failure.
+ * @returns True when the failure is worth one reconnect-and-retry.
  */
-function _isConnectionFailure(result: VerbResult): boolean {
-  return !result.ok && result.code === VERB_KEYS.CONNECTION_UNAVAILABLE;
+function _isRetryableFailure(result: VerbResult): boolean {
+  return !result.ok && result.retryable === true;
 }
 
 // Started as a process rather than imported: the protocol tier builds the server

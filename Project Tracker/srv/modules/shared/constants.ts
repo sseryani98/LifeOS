@@ -37,9 +37,11 @@ export const CODES = {
 } as const;
 
 /**
- * The read projection's derived elements. They are filled with nothing here and
- * are still set, because a caller binding a field that is absent from the
- * payload has no way to tell "not computed yet" from "not part of the shape".
+ * The read projection's derived elements — a hand-kept mirror of the `virtual`
+ * elements ProjectView declares in srv/tracker-service.cds, the authority: a
+ * virtual added or renamed there must change this list in the same commit, or
+ * the field silently vanishes from the payload. They are still set to null so
+ * a caller can tell "not computed yet" from "not part of the shape".
  */
 export const DERIVED_SCALARS = [
   "health",

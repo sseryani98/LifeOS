@@ -1,14 +1,14 @@
 import { z } from "zod";
 
 import { buildActivityTarget } from "./shared/addressing.js";
-import { ACTIVITY_KINDS, PLANNING, VERB_KEYS } from "./shared/constants.js";
+import { ACTIVITY_KINDS, HTTP, VERB_KEYS } from "./shared/constants.js";
 import { rejectVerb } from "./shared/envelope.js";
 import { runWriteVerb } from "./shared/runVerb.js";
 import { toSecondPrecision } from "./shared/writeQueue.js";
 import {
+  resolveActiveSprint,
   resolveStage,
   resolveStoryContext,
-  resolveWorkspace,
 } from "./shared/stageGuards.js";
 import type { TrackerGateway } from "./shared/trackerGateway.js";
 import type {
@@ -19,7 +19,7 @@ import type {
 } from "./shared/types.js";
 
 /** The tool schema, as the transport advertises it. */
-export const inputShape = {
+const inputShape = {
   story: z.string().optional().describe("Story reference, with a stage"),
   stage: z.string().optional().describe("Stage code the run belongs to"),
   workspace: z
@@ -46,7 +46,10 @@ export const inputShape = {
         .optional(),
     })
     .describe("Counts and coverage from the run"),
-  executedAt: z.string().describe("When the run executed, as an ISO timestamp"),
+  executedAt: z
+    .iso
+    .datetime({ offset: true })
+    .describe("When the run executed, as an ISO timestamp"),
 };
 
 interface RecordTestRunInput {
@@ -69,6 +72,7 @@ export async function recordTestRun(
   input: RecordTestRunInput,
 ): Promise<VerbResult> {
   return runWriteVerb(ctx, async (gateway, timestamp) => {
+    const executedAt = _normalizeExecutedAt(input.executedAt);
     const scope = await _resolveTestRunScope(gateway, input);
     const metrics = input.metrics;
     await gateway.insertTestRun({
@@ -80,7 +84,7 @@ export async function recordTestRun(
       linesPct: metrics.linesPct ?? null,
       branchesPct: metrics.branchesPct ?? null,
       failures: metrics.failures ? JSON.stringify(metrics.failures) : null,
-      executedAt: toSecondPrecision(input.executedAt),
+      executedAt,
       task_ID: scope.taskId,
       initiative_ID: scope.initiativeId,
       workspace_ID: scope.workspaceId,
@@ -100,8 +104,24 @@ export async function recordTestRun(
 }
 
 /**
- * Resolves which of the two scopes the caller asked for. A story without a
- * stage is rejected rather than widened: it names a target that does not exist.
+ * Normalises the caller's timestamp to UTC before it is trimmed to whole
+ * seconds: toSecondPrecision assumes a toISOString shape, and an offset form
+ * would otherwise have its wall-clock time silently restamped as UTC.
+ * @param executedAt The timestamp the caller supplied.
+ * @returns The same instant as a second-precision UTC timestamp.
+ */
+function _normalizeExecutedAt(executedAt: string): string {
+  const parsed = new Date(executedAt);
+  if (Number.isNaN(parsed.getTime())) {
+    rejectVerb(HTTP.BAD_REQUEST, VERB_KEYS.TIMESTAMP_INVALID, [executedAt]);
+  }
+  return toSecondPrecision(parsed.toISOString());
+}
+
+/**
+ * Resolves which of the two scopes the caller asked for. A scope must arrive
+ * whole: a story without a stage — or a stage without a story — names a target
+ * that does not exist, so both are rejected rather than widened.
  * @param gateway The gateway the reads run through.
  * @param input The verb input carrying at most one scope.
  * @returns The workspace, the link to write and the activity target.
@@ -119,8 +139,8 @@ async function _resolveTestRunScope(
   const hasStage = Boolean(input.stage?.trim());
   const hasWorkspace = Boolean(input.workspace?.trim());
   const storyMode = hasStory && hasStage;
-  if (storyMode === hasWorkspace || (hasStory && !hasStage)) {
-    rejectVerb(PLANNING.HTTP_BAD_REQUEST, VERB_KEYS.TESTRUN_SCOPE_REQUIRED);
+  if (storyMode === hasWorkspace || hasStory !== hasStage) {
+    rejectVerb(HTTP.BAD_REQUEST, VERB_KEYS.TESTRUN_SCOPE_REQUIRED);
   }
   if (storyMode) {
     const { workspace, milestone } = await resolveStoryContext(
@@ -140,15 +160,10 @@ async function _resolveTestRunScope(
       ),
     };
   }
-  const workspace = await resolveWorkspace(gateway, input.workspace as string);
-  const initiative = await gateway.readActiveInitiative(workspace.ID);
-  if (!initiative) {
-    rejectVerb(PLANNING.HTTP_NOT_FOUND, VERB_KEYS.TARGET_NOT_FOUND, [
-      "active sprint",
-      workspace.slug,
-      "",
-    ]);
-  }
+  const { workspace, initiative } = await resolveActiveSprint(
+    gateway,
+    input.workspace as string,
+  );
   return {
     workspaceId: workspace.ID,
     taskId: null,

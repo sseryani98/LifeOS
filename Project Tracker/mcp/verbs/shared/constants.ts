@@ -7,13 +7,16 @@ export const VERB_KEYS = {
   REOPEN_REASON_REQUIRED: "verb.reopen.reasonRequired",
   STAGE_ALREADY_COMPLETE: "verb.stage.alreadyComplete",
   STAGE_BLOCKED: "verb.stage.blocked",
+  STAGE_NOT_COMPLETE: "verb.stage.notComplete",
   STAGE_NOT_STARTED: "verb.stage.notStarted",
   STAGE_SUBTASKS_OPEN: "verb.stage.subtasksOpen",
   STORY_DUPLICATE: "verb.story.duplicate",
   STORY_UNQUALIFIED: "verb.story.unqualified",
   TARGET_NOT_FOUND: "verb.target.notFound",
   TESTRUN_SCOPE_REQUIRED: "verb.testrun.scopeRequired",
+  TIMESTAMP_INVALID: "verb.timestamp.invalid",
   VALUE_NOT_IN_CODE_LIST: "verb.value.notInCodeList",
+  WORKSPACE_AMBIGUOUS: "verb.workspace.ambiguous",
 } as const;
 
 /** Remediation templates, and the rule name a guard rejection carries. */
@@ -50,12 +53,44 @@ export const FRICEW_TYPES = [
 /** The four defect severities. */
 export const DEFECT_SEVERITIES = ["Critical", "High", "Medium", "Low"] as const;
 
-/** Numbers the verb layer works in. */
+/** Spacing between planned positions, leaving room to insert between rows. */
 export const PLANNING = {
   POSITION_GAP: 10,
-  HTTP_BAD_REQUEST: 400,
-  HTTP_NOT_FOUND: 404,
-  HTTP_CONFLICT: 409,
+} as const;
+
+/**
+ * HTTP statuses the failure envelope carries. `SERVER_ERROR_CEILING` bounds
+ * what counts as a status when one is read off a thrown value.
+ */
+export const HTTP = {
+  BAD_REQUEST: 400,
+  NOT_FOUND: 404,
+  CONFLICT: 409,
+  SERVICE_UNAVAILABLE: 503,
+  SERVER_ERROR_CEILING: 599,
+} as const;
+
+/**
+ * What counts as a lost store: Node socket error codes plus the Postgres
+ * connection-exception classes. Only these make a failure retryable — anything
+ * else is an answer, not a transport fault.
+ */
+export const CONNECTION = {
+  ERROR_CODES: [
+    "ECONNREFUSED",
+    "ECONNRESET",
+    "EHOSTUNREACH",
+    "ENETUNREACH",
+    "ENOTFOUND",
+    "EPIPE",
+    "ETIMEDOUT",
+    "08000",
+    "08003",
+    "08006",
+    "57P01",
+    "57P02",
+    "57P03",
+  ],
 } as const;
 
 /** Reference-string separators the addressing forms use. */

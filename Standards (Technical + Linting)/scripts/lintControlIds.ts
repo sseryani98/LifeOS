@@ -1,5 +1,7 @@
-import { readdirSync, readFileSync } from "fs";
+import { readFileSync } from "fs";
 import { join, relative } from "path";
+
+import { collectFiles, reportViolations } from "./lib/lintWalk.js";
 
 const ROOT_DIR = process.cwd();
 
@@ -8,8 +10,6 @@ const ROOT_DIR = process.cwd();
  * other source tree is scanned.
  */
 const SOURCE_DIRS = [join(ROOT_DIR, "app")];
-
-const SKIP_SEGMENTS = new Set(["node_modules", "gen", "dist", "coverage", ".git"]);
 
 interface ControlId {
   className: string;
@@ -22,20 +22,6 @@ interface Violation {
   filePath: string;
   idValue: string;
   line: number;
-}
-
-function collectXmlFiles(dir: string): string[] {
-  const found: string[] = [];
-  for (const entry of readdirSync(dir, { withFileTypes: true })) {
-    if (SKIP_SEGMENTS.has(entry.name)) continue;
-    const full = join(dir, entry.name);
-    if (entry.isDirectory()) {
-      found.push(...collectXmlFiles(full));
-    } else if (entry.name.endsWith(".xml")) {
-      found.push(full);
-    }
-  }
-  return found;
 }
 
 /**
@@ -129,28 +115,20 @@ function scanFile(filePath: string): Violation[] {
 }
 
 function main(): void {
-  const files = SOURCE_DIRS.flatMap(collectXmlFiles);
+  const files = SOURCE_DIRS.flatMap(dir => collectFiles(dir, [".xml"]));
   const violations = files.flatMap(scanFile);
 
-  console.log(`Scanning ${files.length} UI5 view(s) for control-ID naming...`);
-
-  if (violations.length === 0) {
-    console.log("All control IDs match ^id.*?<ControlClass>$.");
-    process.exit(0);
-  }
-
-  console.log();
-  for (const violation of violations) {
-    console.log(
-      `${violation.filePath}:${violation.line}  "${violation.idValue}"  should match  ^id.*?${violation.className}$`,
-    );
-  }
-  console.log(
+  reportViolations(
+    `Scanning ${files.length} UI5 view(s) for control-ID naming...`,
+    "All control IDs match ^id.*?<ControlClass>$.",
+    violations.map(
+      violation =>
+        `${violation.filePath}:${violation.line}  "${violation.idValue}"  should match  ^id.*?${violation.className}$`,
+    ),
     `\nFound ${violations.length} control ID(s) not matching ^id.*?<ControlClass>$. ` +
       `Every control id must start with "id" and end with its control's class name ` +
       `(e.g. a sap.m.Button id → idNavBackButton).`,
   );
-  process.exit(1);
 }
 
 main();

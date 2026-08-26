@@ -1,5 +1,7 @@
-import { existsSync, readdirSync, readFileSync } from "fs";
+import { readFileSync } from "fs";
 import { join, relative } from "path";
+
+import { collectFiles, reportViolations } from "./lib/lintWalk.js";
 
 const ROOT_DIR = process.cwd();
 
@@ -33,17 +35,6 @@ const SCANNED_EXTENSIONS = [
 ];
 
 /**
- * Subtrees skipped entirely (generated output, dependencies, build artifacts).
- */
-const SKIP_SEGMENTS = new Set([
-  "node_modules",
-  "gen",
-  "dist",
-  "coverage",
-  ".git",
-]);
-
-/**
  * Banned design-tracking ID patterns: FRICEW object IDs (FRM/RPT/INT/CNV/ENH/
  * WFL plus the project's FUT/REP variants), business-rule IDs (BR-nn), and
  * spec/decision IDs (SPEC-nn, D-nn). Word-boundary anchored so embedded
@@ -66,26 +57,6 @@ interface Violation {
   line: number;
   text: string;
   match: string;
-}
-
-/**
- * Recursively collects scannable source file paths under a directory. A missing
- * root is skipped rather than fatal: SOURCE_DIRS is the union of trees any module
- * might have, and no module has all of them — a scaffolded one has almost none.
- */
-function collectFiles(dir: string): string[] {
-  if (!existsSync(dir)) return [];
-  const found: string[] = [];
-  for (const entry of readdirSync(dir, { withFileTypes: true })) {
-    if (SKIP_SEGMENTS.has(entry.name)) continue;
-    const full = join(dir, entry.name);
-    if (entry.isDirectory()) {
-      found.push(...collectFiles(full));
-    } else if (SCANNED_EXTENSIONS.some(ext => entry.name.endsWith(ext))) {
-      found.push(full);
-    }
-  }
-  return found;
 }
 
 /**
@@ -130,33 +101,23 @@ function scanFile(filePath: string): Violation[] {
  * belong only in design docs and commit bodies.
  */
 function main(): void {
-  const files = SOURCE_DIRS.flatMap(collectFiles).filter(
-    file => !isFixtureFile(file),
-  );
+  const files = SOURCE_DIRS.flatMap(dir =>
+    collectFiles(dir, SCANNED_EXTENSIONS),
+  ).filter(file => !isFixtureFile(file));
   const violations = files.flatMap(scanFile);
 
-  console.log(
+  reportViolations(
     `Scanning ${files.length} source file(s) for design-tracking IDs...`,
-  );
-
-  if (violations.length === 0) {
-    console.log("No tracking IDs found in source.");
-    process.exit(0);
-  }
-
-  console.log();
-  for (const violation of violations) {
-    console.log(
-      `${violation.filePath}:${violation.line}  ` +
+    "No tracking IDs found in source.",
+    violations.map(
+      violation =>
+        `${violation.filePath}:${violation.line}  ` +
         `"${violation.match}"  →  ${violation.text}`,
-    );
-  }
-  console.log(
+    ),
     `\nFound ${violations.length} tracking-ID reference(s). FRICEW IDs, ` +
       `business rules, spec/decision IDs, and section refs belong in design ` +
       `docs and commit bodies, never in source.`,
   );
-  process.exit(1);
 }
 
 main();

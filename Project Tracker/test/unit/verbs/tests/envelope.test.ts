@@ -5,7 +5,13 @@ import {
   toFailure,
 } from "../../../../mcp/verbs/shared/envelope.js";
 import { VerbError } from "../../../../mcp/verbs/shared/verbError.js";
-import { ENVELOPE_DETAIL, ENVELOPE_KEYS } from "../data/verbFixtures.js";
+import {
+  CAP_REJECTION,
+  CAP_REJECTION_BY_KEY,
+  ENVELOPE_DETAIL,
+  ENVELOPE_KEYS,
+  SOCKET_ERROR_CODE,
+} from "../data/verbFixtures.js";
 
 const STAMP = "2026-08-16T10:00:00.000Z";
 
@@ -45,7 +51,34 @@ describe("the response envelope", () => {
     expect(detailed.rule).toBe(ENVELOPE_DETAIL.rule);
   });
 
-  /** Anything thrown that is not a deliberate rejection is a lost store, which is the one thing a caller can retry. */
+  /** A CAP rejection is a methodology answer: its status and key must reach the caller intact. */
+  it("surfaces a CAP handler rejection under its own status and code", () => {
+    const result = toFailure(
+      Object.assign(new Error(CAP_REJECTION.message), CAP_REJECTION),
+      STAMP,
+    );
+
+    expect(result.status).toBe(CAP_REJECTION.status);
+    expect(result.code).toBe(CAP_REJECTION.code);
+    expect(result.message).toBe(CAP_REJECTION.message);
+    expect(result).not.toHaveProperty("retryable");
+  });
+
+  /** req.reject leaves the status on statusCode and the key as the message; missing either fallback reports a 409 as a lost store or hands back a raw key. */
+  it("reads a rejection that carries statusCode and no resolved message", () => {
+    const byKey = toFailure(
+      Object.assign(new Error(CAP_REJECTION_BY_KEY.message), {
+        ...CAP_REJECTION_BY_KEY,
+      }),
+      STAMP,
+    );
+
+    expect(byKey.status).toBe(CAP_REJECTION_BY_KEY.statusCode);
+    expect(byKey.code).toBe(CAP_REJECTION_BY_KEY.code);
+    expect(byKey.message).toContain("already exists");
+  });
+
+  /** Anything thrown that is not a deliberate rejection is a lost store, but only a genuine transport fault may be retried. */
   it("reports an unexpected throw as a connection failure", () => {
     const fromError = toFailure(new Error("socket closed"), STAMP);
     const fromValue = toFailure("socket closed", STAMP);
@@ -53,7 +86,21 @@ describe("the response envelope", () => {
     expect(fromError.status).toBe(503);
     expect(fromError.code).toBe("verb.connection.unavailable");
     expect(fromError.message).toContain("socket closed");
+    expect(fromError).not.toHaveProperty("retryable");
     expect(fromValue.message).toContain("socket closed");
+  });
+
+  /** The retry flag exists for exactly one case: an error the sockets or the driver marked as connection loss. */
+  it("marks only a recognisable connection error as retryable", () => {
+    const socket = toFailure(
+      Object.assign(new Error("connect refused"), { code: SOCKET_ERROR_CODE }),
+      STAMP,
+    );
+    const typeError = toFailure(new TypeError("x is not a function"), STAMP);
+
+    expect(socket.retryable).toBe(true);
+    expect(socket.code).toBe("verb.connection.unavailable");
+    expect(typeError).not.toHaveProperty("retryable");
   });
 
   /** A rejection has to throw rather than return, or a verb body would carry on past its own guard. */

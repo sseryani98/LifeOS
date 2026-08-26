@@ -25,6 +25,13 @@ export const WORLD = {
   },
 } as const;
 
+/** A second workspace, for suites about multi-workspace ambiguity. */
+export const SECOND_WORKSPACE = {
+  slug: "project-tracker",
+  name: "Project Tracker",
+  currentFocus: null,
+} as const;
+
 /** The qualified reference the verbs address the canonical story by. */
 export const STORY_REFERENCE = "financial-planner/CNV-001";
 
@@ -103,6 +110,51 @@ export const SPRINT_PLAN_WITH_DUPLICATE_STORY = [
   },
 ] as const;
 
+/** A plan carrying the same new story identifier twice. */
+export const SPRINT_PLAN_WITH_REPEATED_STORY = [
+  {
+    id: "ENH-021",
+    type: "Enhancement",
+    description: "First carrier of the identifier",
+    shipsUi: false,
+  },
+  {
+    id: "ENH-021",
+    type: "Enhancement",
+    description: "Second carrier of the same identifier",
+    shipsUi: false,
+  },
+] as const;
+
+/**
+ * A plan whose second story carries no description, which `@mandatory` refuses.
+ * The first story is written before it, so the failure lands mid-transaction
+ * rather than before the first insert.
+ */
+export const SPRINT_PLAN_FAILING_MIDWAY = [
+  {
+    id: "ENH-030",
+    type: "Enhancement",
+    description: "Written before the plan dies",
+    shipsUi: false,
+  },
+  {
+    id: "ENH-031",
+    type: "Enhancement",
+    description: "",
+    shipsUi: false,
+  },
+  {
+    id: "ENH-032",
+    type: "Enhancement",
+    description: "Never reached",
+    shipsUi: false,
+  },
+] as const;
+
+/** A severity outside the four the code list holds. */
+export const BAD_SEVERITY = "Catastrophic";
+
 /** The same plan with one story typed outside the code list. */
 export const SPRINT_PLAN_WITH_BAD_TYPE = {
   name: "W1-S5",
@@ -158,3 +210,12 @@ export const STAGE_NOTES = "Two findings, both fixed in place.";
 
 /** When that run executed. */
 export const TEST_RUN_EXECUTED_AT = "2026-08-16T10:15:00.000Z";
+
+/** The same instant written with a zone offset, and the UTC form it stores as. */
+export const OFFSET_EXECUTED_AT = {
+  SUPPLIED: "2026-08-16T12:15:00+02:00",
+  STORED: "2026-08-16T10:15:00Z",
+} as const;
+
+/** A timestamp no calendar produced. */
+export const INVALID_EXECUTED_AT = "not-a-timestamp";

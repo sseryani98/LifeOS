@@ -3,8 +3,8 @@ import { z } from "zod";
 import { CODES } from "../../srv/modules/shared/constants.js";
 
 import { buildActivityTarget } from "./shared/addressing.js";
-import { ACTIVITY_KINDS, PLANNING, VERB_KEYS } from "./shared/constants.js";
-import { rejectVerb } from "./shared/envelope.js";
+import { ACTIVITY_KINDS, GUARD, HTTP, VERB_KEYS } from "./shared/constants.js";
+import { rejectVerb, resolveMessage } from "./shared/envelope.js";
 import { runWriteVerb } from "./shared/runVerb.js";
 import { toSecondPrecision } from "./shared/writeQueue.js";
 import {
@@ -19,7 +19,7 @@ import type {
 } from "./shared/types.js";
 
 /** The tool schema, as the transport advertises it. */
-export const inputShape = {
+const inputShape = {
   story: z.string().describe("Story reference, as {workspace-slug}/{story-id}"),
   stage: z.string().describe("Methodology stage code to reopen"),
   reason: z.string().describe("Why the stage is being reopened"),
@@ -45,7 +45,7 @@ export async function reopenStage(
 ): Promise<VerbResult> {
   return runWriteVerb(ctx, async (gateway, timestamp) => {
     if (!input.reason.trim()) {
-      rejectVerb(PLANNING.HTTP_BAD_REQUEST, VERB_KEYS.REOPEN_REASON_REQUIRED);
+      rejectVerb(HTTP.BAD_REQUEST, VERB_KEYS.REOPEN_REASON_REQUIRED);
     }
     const { workspace, milestone } = await resolveStoryContext(
       gateway,
@@ -53,6 +53,19 @@ export async function reopenStage(
     );
     const chain = await gateway.readChain(milestone.ID);
     const task = resolveStage(chain, input.stage);
+    // Only a complete stage reopens: anything else would make this verb an
+    // ungated start_stage, skipping the predecessor-blocking guard.
+    if (task.status_code !== CODES.TASK_STATUS.COMPLETE) {
+      rejectVerb(
+        HTTP.CONFLICT,
+        VERB_KEYS.STAGE_NOT_COMPLETE,
+        [task.step_code, task.status_code],
+        {
+          target: task.step_code,
+          remediation: resolveMessage(GUARD.REMEDIATION_START_STAGE),
+        },
+      );
+    }
     await gateway.updateTask(task.ID, {
       status_code: CODES.TASK_STATUS.IN_PROGRESS,
       startedAt: toSecondPrecision(timestamp),

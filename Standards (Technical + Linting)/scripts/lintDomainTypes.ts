@@ -1,5 +1,7 @@
-import { existsSync, readdirSync, readFileSync } from "fs";
+import { readFileSync } from "fs";
 import { basename, join, relative } from "path";
+
+import { collectFiles, reportViolations } from "./lib/lintWalk.js";
 
 const ROOT_DIR = process.cwd();
 
@@ -14,14 +16,6 @@ const SOURCE_DIRS = [
   join(ROOT_DIR, "app"),
   join(ROOT_DIR, "mcp"),
 ];
-
-const SKIP_SEGMENTS = new Set([
-  "node_modules",
-  "gen",
-  "dist",
-  "coverage",
-  ".git",
-]);
 
 /** The one filename allowed to declare a domain's exported types. */
 const TYPES_FILE = "types.ts";
@@ -48,27 +42,6 @@ interface TypeDeclaration {
 interface Violation {
   filePath: string;
   declarations: TypeDeclaration[];
-}
-
-/**
- * Recursively collects scannable TypeScript source files under a directory,
- * excluding generated shims (`*.d.ts`) and the skip-listed build/vendor folders.
- * @param dir Directory to walk.
- * @returns Absolute paths of every scannable `.ts` file beneath it.
- */
-function collectFiles(dir: string): string[] {
-  const found: string[] = [];
-  if (!existsSync(dir)) return found;
-  for (const entry of readdirSync(dir, { withFileTypes: true })) {
-    if (SKIP_SEGMENTS.has(entry.name)) continue;
-    const full = join(dir, entry.name);
-    if (entry.isDirectory()) {
-      found.push(...collectFiles(full));
-    } else if (entry.name.endsWith(".ts") && !entry.name.endsWith(".d.ts")) {
-      found.push(full);
-    }
-  }
-  return found;
 }
 
 /**
@@ -99,34 +72,25 @@ function scanFile(filePath: string): Violation | null {
  * in one place instead of scattered atop the service and data-service classes.
  */
 function main(): void {
-  const files = SOURCE_DIRS.flatMap(collectFiles);
+  const files = SOURCE_DIRS.flatMap(dir => collectFiles(dir, [".ts"]));
   const violations = files
     .map(scanFile)
     .filter((violation): violation is Violation => violation !== null);
 
-  console.log(
+  reportViolations(
     `Scanning ${files.length} TypeScript file(s) for misplaced types...`,
-  );
-
-  if (violations.length === 0) {
-    console.log("All domain types live in a types.ts.");
-    process.exit(0);
-  }
-
-  console.log();
-  for (const violation of violations) {
-    const names = violation.declarations
-      .map(entry => `${entry.name} (l.${entry.line})`)
-      .join(", ");
-    console.log(`${violation.filePath}  —  ${names}`);
-  }
-  console.log(
+    "All domain types live in a types.ts.",
+    violations.map(violation => {
+      const names = violation.declarations
+        .map(entry => `${entry.name} (l.${entry.line})`)
+        .join(", ");
+      return `${violation.filePath}  —  ${names}`;
+    }),
     `\nFound type declaration(s) outside a types.ts. Move each into the domain's ` +
       `types.ts (srv/modules/ingestion/types.ts, or a UI5 app's model/types.ts). ` +
       `Exported types always belong there; a file that declares a class may keep ` +
       `no named type beside it either. Private types in non-class modules may stay local.`,
   );
-  process.exit(1);
 }
 
 main();

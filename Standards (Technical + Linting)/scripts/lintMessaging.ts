@@ -1,18 +1,12 @@
-import { readdirSync, readFileSync } from "fs";
+import { readFileSync } from "fs";
 import { join, relative } from "path";
+
+import { collectFiles, reportViolations } from "./lib/lintWalk.js";
 
 const ROOT_DIR = process.cwd();
 
 /** The UI5 frontend is the surface this rule governs. */
 const SOURCE_DIRS = [join(ROOT_DIR, "app")];
-
-const SKIP_SEGMENTS = new Set([
-  "node_modules",
-  "gen",
-  "dist",
-  "coverage",
-  ".git",
-]);
 
 /**
  * The imperative user-messaging modules that must funnel through the shared
@@ -34,26 +28,6 @@ const IMPORT_DECL = /^\s*import\s+[^"']*?from\s+["']([^"']+)["']/;
 interface Violation {
   filePath: string;
   imports: { module: string; line: number }[];
-}
-
-/**
- * Recursively collects scannable TypeScript source files under a directory,
- * excluding generated shims (`*.d.ts`) and skip-listed folders.
- * @param dir Directory to walk.
- * @returns Absolute paths of every scannable `.ts` file beneath it.
- */
-function collectFiles(dir: string): string[] {
-  const found: string[] = [];
-  for (const entry of readdirSync(dir, { withFileTypes: true })) {
-    if (SKIP_SEGMENTS.has(entry.name)) continue;
-    const full = join(dir, entry.name);
-    if (entry.isDirectory()) {
-      found.push(...collectFiles(full));
-    } else if (entry.name.endsWith(".ts") && !entry.name.endsWith(".d.ts")) {
-      found.push(full);
-    }
-  }
-  return found;
 }
 
 /**
@@ -83,35 +57,26 @@ function scanFile(filePath: string): Violation | null {
  * consistent UX) instead of scattered across controllers.
  */
 function main(): void {
-  const files = SOURCE_DIRS.flatMap(collectFiles);
+  const files = SOURCE_DIRS.flatMap(dir => collectFiles(dir, [".ts"]));
   const violations = files
     .map(scanFile)
     .filter((violation): violation is Violation => violation !== null);
 
-  console.log(
+  reportViolations(
     `Scanning ${files.length} frontend file(s) for direct messaging imports...`,
-  );
-
-  if (violations.length === 0) {
-    console.log("All user messaging funnels through the shared Messaging helper.");
-    process.exit(0);
-  }
-
-  console.log();
-  for (const violation of violations) {
-    const names = violation.imports
-      .map(entry => `${entry.module} (l.${entry.line})`)
-      .join(", ");
-    console.log(`${violation.filePath}  —  ${names}`);
-  }
-  console.log(
+    "All user messaging funnels through the shared Messaging helper.",
+    violations.map(violation => {
+      const names = violation.imports
+        .map(entry => `${entry.module} (l.${entry.line})`)
+        .join(", ");
+      return `${violation.filePath}  —  ${names}`;
+    }),
     `\nFound direct messaging import(s) outside app/shared/Messaging.ts. Route ` +
       `user messaging through the shared helper instead: ` +
       `\`private readonly _messages = new Messaging(this)\`, then ` +
       `\`this._messages.showToast("i18nKey")\` / .showError / .showWarning / ` +
       `.showSuccess / .showConfirm.`,
   );
-  process.exit(1);
 }
 
 main();

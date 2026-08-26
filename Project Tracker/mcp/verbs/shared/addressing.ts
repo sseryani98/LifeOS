@@ -1,4 +1,4 @@
-import { ADDRESSING, PLANNING, VERB_KEYS } from "./constants.js";
+import { ADDRESSING, HTTP, VERB_KEYS } from "./constants.js";
 import { rejectVerb } from "./envelope.js";
 
 /**
@@ -14,7 +14,7 @@ export function parseStoryReference(reference: string): {
 } {
   const parts = (reference ?? "").split(ADDRESSING.STORY_SEPARATOR);
   if (parts.length !== 2 || !parts[0].trim() || !parts[1].trim()) {
-    rejectVerb(PLANNING.HTTP_BAD_REQUEST, VERB_KEYS.STORY_UNQUALIFIED, [
+    rejectVerb(HTTP.BAD_REQUEST, VERB_KEYS.STORY_UNQUALIFIED, [
       reference,
     ]);
   }
@@ -23,7 +23,8 @@ export function parseStoryReference(reference: string): {
 
 /**
  * Splits a decision target. One segment addresses the workspace itself; two
- * address something inside it, resolved as a story first and a sprint second.
+ * carry an inner name this function does not interpret — the decision verb
+ * owns how it is resolved.
  * @param target The reference the caller supplied.
  * @returns The workspace slug and the optional inner name.
  */
@@ -33,7 +34,7 @@ export function parseDecisionTarget(target: string): {
 } {
   const parts = (target ?? "").split(ADDRESSING.STORY_SEPARATOR);
   if (parts.length > 2 || !parts[0].trim()) {
-    rejectVerb(PLANNING.HTTP_BAD_REQUEST, VERB_KEYS.STORY_UNQUALIFIED, [
+    rejectVerb(HTTP.BAD_REQUEST, VERB_KEYS.STORY_UNQUALIFIED, [
       target,
     ]);
   }

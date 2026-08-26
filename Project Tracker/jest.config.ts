@@ -30,19 +30,13 @@ const config: Config = {
     // the specs; without this their helpers' error paths drag the product number.
     "/test/",
   ],
-  // Only the global band is here, and that is measured rather than a trim of the
-  // strategy's table. Jest resolves a threshold group against the files it
-  // actually covered, and a group matching none is a hard error — not a skip. The
-  // per-layer bands (Validators 100/100, Services and verbs and scripts 90/85)
-  // land with the story that creates the first file under each folder.
   coverageThreshold: {
     global: {
       lines: 85,
       branches: 80,
     },
-    // Each band lands with the story that creates the first file under its
-    // folder: Jest resolves a group against the files it actually covered, and
-    // a group matching none is a hard error rather than a skip.
+    // Jest resolves a threshold group against the files it actually covered;
+    // a group matching none is a hard error, not a skip.
     "./srv/modules/**/*Validator.ts": {
       lines: 100,
       branches: 100,

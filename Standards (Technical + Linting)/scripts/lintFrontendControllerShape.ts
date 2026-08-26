@@ -1,18 +1,12 @@
-import { readdirSync, readFileSync } from "fs";
-import { basename, join, relative } from "path";
+import { readFileSync } from "fs";
+import { basename, dirname, join, relative } from "path";
+
+import { collectFiles, reportViolations } from "./lib/lintWalk.js";
 
 const ROOT_DIR = process.cwd();
 
 /** The UI5 frontend is the surface this rule governs. */
 const SOURCE_DIRS = [join(ROOT_DIR, "app")];
-
-const SKIP_SEGMENTS = new Set([
-  "node_modules",
-  "gen",
-  "dist",
-  "coverage",
-  ".git",
-]);
 
 /** Type-only modules carry no runtime code and are governed by lint:domain-types. */
 const EXEMPT_NAMES = new Set(["types.ts"]);
@@ -87,26 +81,6 @@ function blankNonCode(source: string): string {
 }
 
 /**
- * Recursively collects controller/extension modules under a directory,
- * excluding generated shims and skip-listed folders.
- * @param dir Directory to walk.
- * @returns Absolute paths of every governed `.ts` file beneath it.
- */
-function collectFiles(dir: string): string[] {
-  const found: string[] = [];
-  for (const entry of readdirSync(dir, { withFileTypes: true })) {
-    if (SKIP_SEGMENTS.has(entry.name)) continue;
-    const full = join(dir, entry.name);
-    if (entry.isDirectory()) {
-      found.push(...collectFiles(full));
-    } else if (entry.name.endsWith(".ts") && isControllerModule(entry.name, basename(dir))) {
-      found.push(full);
-    }
-  }
-  return found;
-}
-
-/**
  * Scans one controller/extension module for code living outside the class and
  * for a non-class default export.
  * @param filePath Absolute path of the file to scan.
@@ -166,23 +140,17 @@ function scanFile(filePath: string): Violation[] {
  * not free functions or module-level state.
  */
 function main(): void {
-  const files = SOURCE_DIRS.flatMap(collectFiles);
+  const files = SOURCE_DIRS.flatMap(dir => collectFiles(dir, [".ts"])).filter(
+    file => isControllerModule(basename(file), basename(dirname(file))),
+  );
   const violations = files.flatMap(scanFile);
 
-  console.log(
+  reportViolations(
     `Scanning ${files.length} controller/extension module(s) for shape...`,
-  );
-
-  if (violations.length === 0) {
-    console.log("All controllers/extensions are a single class with no free code.");
-    process.exit(0);
-  }
-
-  console.log();
-  for (const violation of violations) {
-    console.log(`${violation.filePath}:${violation.line}  ${violation.label}`);
-  }
-  console.log(
+    "All controllers/extensions are a single class with no free code.",
+    violations.map(
+      violation => `${violation.filePath}:${violation.line}  ${violation.label}`,
+    ),
     `\nFound ${violations.length} controller-shape violation(s). No controller or ` +
       `extension holds code outside a class: no free functions, no module-level ` +
       `let/var state. A registered controller (\`*.controller.ts\`) must \`export ` +
@@ -191,7 +159,6 @@ function main(): void {
       `behaviour into a helper class (e.g. app/shared/DialogManager.ts, ` +
       `app/shared/Messaging.ts) held as a class field.`,
   );
-  process.exit(1);
 }
 
 main();

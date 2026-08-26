@@ -1,30 +1,19 @@
-import { readdirSync, readFileSync } from "fs";
+import { readFileSync } from "fs";
 import { join, relative } from "path";
 
 import typescript from "typescript";
 
+import { collectFiles, reportViolations } from "./lib/lintWalk.js";
+
 const ROOT_DIR = process.cwd();
 const TEST_DIR = join(ROOT_DIR, "test");
-
-/**
- * Subtrees skipped entirely (generated output, dependencies, build artifacts).
- */
-const SKIP_SEGMENTS = new Set([
-  "node_modules",
-  "gen",
-  "dist",
-  "coverage",
-  ".git",
-]);
 
 /**
  * Only `*.test.ts` files carry the "no inline data" rule. `test/data/` (named
  * fixtures) and `test/support/` (mock/service/seed builders) are exactly where
  * inline construction is allowed to live — the rule pushes data *there*.
  */
-function isTestFile(name: string): boolean {
-  return name.endsWith(".test.ts");
-}
+const SPEC_EXTENSIONS = [".test.ts"];
 
 /** Full-string UUID literal — an identifier that belongs in a `test/data/` constant. */
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -73,23 +62,6 @@ interface Violation {
   line: number;
   reason: string;
   text: string;
-}
-
-/**
- * Recursively collects `*.test.ts` file paths under a directory.
- */
-function collectTestFiles(dir: string): string[] {
-  const found: string[] = [];
-  for (const entry of readdirSync(dir, { withFileTypes: true })) {
-    if (SKIP_SEGMENTS.has(entry.name)) continue;
-    const full = join(dir, entry.name);
-    if (entry.isDirectory()) {
-      found.push(...collectTestFiles(full));
-    } else if (isTestFile(entry.name)) {
-      found.push(full);
-    }
-  }
-  return found;
 }
 
 /** Recursive size of a literal: own members plus the weight of nested literals. */
@@ -222,28 +194,20 @@ function scanFile(filePath: string): Violation[] {
  * fixtures belong in `test/data/`, builders in `test/support/`.
  */
 function main(): void {
-  const files = collectTestFiles(TEST_DIR);
+  const files = collectFiles(TEST_DIR, SPEC_EXTENSIONS);
   const violations = files.flatMap(scanFile);
 
-  console.log(`Scanning ${files.length} test file(s) for inline test data...`);
-
-  if (violations.length === 0) {
-    console.log("No inline test data found.");
-    process.exit(0);
-  }
-
-  console.log();
-  for (const violation of violations) {
-    console.log(
-      `${violation.filePath}:${violation.line}  ` +
-      `[${violation.reason}]  →  ${violation.text}`,
-    );
-  }
-  console.log(
+  reportViolations(
+    `Scanning ${files.length} test file(s) for inline test data...`,
+    "No inline test data found.",
+    violations.map(
+      violation =>
+        `${violation.filePath}:${violation.line}  ` +
+        `[${violation.reason}]  →  ${violation.text}`,
+    ),
     `\nFound ${violations.length} inline-test-data violation(s). Move payloads ` +
     `and identifiers to test/data/ constants and builders to test/support/.`,
   );
-  process.exit(1);
 }
 
 main();

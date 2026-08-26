@@ -1,13 +1,15 @@
-import { existsSync, readdirSync, readFileSync } from "fs";
+import { readFileSync } from "fs";
 import { join, relative } from "path";
 
 import typescript from "typescript";
+
+import { collectFiles, reportViolations } from "./lib/lintWalk.js";
 
 const ROOT_DIR = process.cwd();
 
 /**
  * Source trees whose comments are governed by the prose cap. Generated shims
- * (@cds-models, *.d.ts) and dependencies are excluded below.
+ * (@cds-models, *.d.ts) and dependencies are excluded by the shared walker.
  */
 const SOURCE_DIRS = [
   join(ROOT_DIR, "srv"),
@@ -23,15 +25,6 @@ const SOURCE_DIRS = [
  * the TS scanner can tokenise comments reliably.
  */
 const SCANNED_EXTENSIONS = [".ts", ".js"];
-
-const SKIP_SEGMENTS = new Set([
-  "node_modules",
-  "gen",
-  "dist",
-  "coverage",
-  ".git",
-  "@cds-models",
-]);
 
 /**
  * Maximum prose lines per comment block. Only the description counts — tag
@@ -106,30 +99,6 @@ function countBlockProse(commentText: string): number {
 }
 
 /**
- * Recursively collects scannable source file paths under a directory, skipping
- * generated trees and type-declaration shims.
- * @param dir Directory to walk.
- * @returns Absolute paths of every scannable `.ts`/`.js` file beneath it.
- */
-function collectFiles(dir: string): string[] {
-  const found: string[] = [];
-  if (!existsSync(dir)) return found;
-  for (const entry of readdirSync(dir, { withFileTypes: true })) {
-    if (SKIP_SEGMENTS.has(entry.name)) continue;
-    const full = join(dir, entry.name);
-    if (entry.isDirectory()) {
-      found.push(...collectFiles(full));
-    } else if (
-      SCANNED_EXTENSIONS.some(ext => entry.name.endsWith(ext)) &&
-      !entry.name.endsWith(".d.ts")
-    ) {
-      found.push(full);
-    }
-  }
-  return found;
-}
-
-/**
  * Tokenises a file and returns one entry per comment block: each multi-line
  * comment, and each run of consecutive single-line comments. Using the TS
  * scanner keeps `//` and `/*` inside string/template literals from being
@@ -193,7 +162,7 @@ function extractComments(text: string): CommentBlock[] {
  * intent rather than restating the code.
  */
 function main(): void {
-  const files = SOURCE_DIRS.flatMap(collectFiles);
+  const files = SOURCE_DIRS.flatMap(dir => collectFiles(dir, SCANNED_EXTENSIONS));
   const violations: Violation[] = [];
   for (const filePath of files) {
     for (const block of extractComments(readFileSync(filePath, "utf8"))) {
@@ -207,26 +176,18 @@ function main(): void {
     }
   }
 
-  console.log(`Scanning ${files.length} source file(s) for over-long comments...`);
-
-  if (violations.length === 0) {
-    console.log(`No comment blocks exceed ${MAX_PROSE_LINES} prose lines.`);
-    process.exit(0);
-  }
-
-  console.log();
-  for (const violation of violations) {
-    console.log(
-      `${violation.filePath}:${violation.line}  —  ` +
+  reportViolations(
+    `Scanning ${files.length} source file(s) for over-long comments...`,
+    `No comment blocks exceed ${MAX_PROSE_LINES} prose lines.`,
+    violations.map(
+      violation =>
+        `${violation.filePath}:${violation.line}  —  ` +
         `${violation.proseLines} prose lines (cap ${MAX_PROSE_LINES})`,
-    );
-  }
-  console.log(
+    ),
     `\nFound ${violations.length} over-long comment block(s). Trim the ` +
       `description to ${MAX_PROSE_LINES} lines or fewer — state why, not what. ` +
       `@param/@returns/@example lines are exempt, so widen signatures freely.`,
   );
-  process.exit(1);
 }
 
 main();

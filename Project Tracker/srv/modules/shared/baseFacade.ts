@@ -55,6 +55,8 @@ export class BaseFacade {
   ): (...args: Parameters<T>) => Promise<ReturnType<T>> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return async (...args: any[]) => {
+      // The request's argument position varies by handler phase — after-handlers
+      // receive the results first — so it is located by shape, not by index.
       const req = (args.find(
         (arg): arg is cds.Request =>
           arg !== null &&

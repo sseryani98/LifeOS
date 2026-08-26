@@ -1,3 +1,4 @@
+import { toPayloadList } from "../../../../srv/modules/shared/payloadList.js";
 import { deriveMilestoneStatus } from "../../../../srv/modules/tracker/milestoneStatus.js";
 import { TrackerDataService } from "../../../../srv/modules/tracker/trackerDataService.js";
 import { TrackerMapper } from "../../../../srv/modules/tracker/trackerMapper.js";
@@ -33,6 +34,27 @@ describe("the status derivation", () => {
       deriveMilestoneStatus([...DERIVATION_CHAINS.BLOCKING_ALL_COMPLETE]),
     ).toBe("done");
   });
+
+  /** An empty blocking set must not be vacuously complete, or an untouched chain reads as finished. */
+  it("derives Backlog from an untouched chain of only recommended stages", () => {
+    expect(
+      deriveMilestoneStatus([...DERIVATION_CHAINS.ALL_RECOMMENDED_UNTOUCHED]),
+    ).toBe("backlog");
+  });
+
+  /** A conditional stage blocks like a required one, or a UI story reads Done without its UX test. */
+  it("holds a story open while a conditional stage is unfinished", () => {
+    expect(deriveMilestoneStatus([...DERIVATION_CHAINS.CONDITIONAL_OPEN])).toBe(
+      "inProgress",
+    );
+  });
+
+  /** The mirror case: a conditional stage that ran must release the story, not block it forever. */
+  it("derives Done once the conditional stage is closed too", () => {
+    expect(
+      deriveMilestoneStatus([...DERIVATION_CHAINS.CONDITIONAL_ALL_COMPLETE]),
+    ).toBe("done");
+  });
 });
 
 describe("the read-shape translations", () => {
@@ -52,9 +74,9 @@ describe("the read-shape translations", () => {
 
   /** One row and many rows have to reach the guards the same way, or a verb write skips them. */
   it("normalises a payload into a list whether it arrived as one or many", () => {
-    expect(TrackerMapper.toPayloadList([{ a: 1 }, { a: 2 }])).toHaveLength(2);
-    expect(TrackerMapper.toPayloadList({ a: 1 })).toHaveLength(1);
-    expect(TrackerMapper.toPayloadList(undefined)).toHaveLength(0);
+    expect(toPayloadList([{ a: 1 }, { a: 2 }])).toHaveLength(2);
+    expect(toPayloadList({ a: 1 })).toHaveLength(1);
+    expect(toPayloadList(undefined)).toHaveLength(0);
   });
 
   /** Grouping is what lets one read answer for every story on the page. */
