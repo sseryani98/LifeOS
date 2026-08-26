@@ -148,7 +148,7 @@ mechanism needs a construction step.
 | 10  | Tech Stack         | `/generate-tech-stack` → `tech-stack-writer`       | Authored     | **Done** — 2026-08-15. `TS-001` **Approved**; **the proxy executed**, the loader ruled, the credential homed, **R11 minted** (D-176 … D-185)             |
 | 11  | Test Strategy      | `/generate-test-strategy` → `test-strategy-writer` | Authored     | **Done** — 2026-08-15. `TST-001` **Approved**; **the harness question executed and the exemplar's belief reversed**; 180 FUTs classified (D-186 … D-197) |
 | 12  | Project Planning   | `/generate-build-plan` → `build-plan-writer`       | Authored     | **Done** — 2026-08-15. `BP-001` **Approved**; **13 stories, 3 sprints**; story zero resolves the eight "first build story" items (D-198 … D-209)         |
-| 13  | Build              | `/build` + chain                                   | Exists       | **In progress** — `S-00` **Done** 2026-08-16 (D-210 … D-217); `SPEC-01` **Done** 2026-08-16 (D-218 … D-230), with **§5's chain run retroactively 2026-08-25 → 26** — stages 2 and 3 closed, 4 **N/A** (no UI), 5 skipped, **6 Human Review still owed** (D-232 … D-237); **`SPEC-02` next**, in sprint `PT-W1` (BP-001 §3, §6) |
+| 13  | Build              | `/build` + chain                                   | Exists       | **In progress** — `S-00` **Done** 2026-08-16 (D-210 … D-217); `SPEC-01` **Done** 2026-08-16 (D-218 … D-230), with **§5's chain run retroactively 2026-08-25 → 26** — stages 2, 3 and 4 closed, 5 skipped, **6 Human Review still owed** (D-232 … D-238); **`SPEC-02` next**, in sprint `PT-W1` (BP-001 §3, §6) |
 | 14  | **Rewire tooling** | `lintNoMarkdownState` + PreToolUse hook            | Not authored | Not started                                                                                                                                              |
 | 15  | Cutover            | —                                                  | —            | Not started                                                                                                                                              |
 | 16  | Back to FP         | —                                                  | —            | Blocked on cutover                                                                                                                                       |
@@ -597,17 +597,33 @@ Settle before or during Scaffold.
 
 ## 8. Session log
 
-### 2026-08-26 — `SPEC-01` QA chain, stages 4–5: Functional Test ruled Not Applicable, and the 500 that should have been a 409
+### 2026-08-26 — `SPEC-01` QA chain, stages 4–5: the functional units executed, and the 500 that should have been a 409
 
-- **Stage 4 Functional Test — ruled Not Applicable, on evidence rather than on prose (D-236).**
-  `/functional-test` drives FUTs through a running app in a real browser; `INT-001` ships no UI,
-  `app/` holds only `.gitkeep`, and `TST-001` §14.2 assigns its 16 FUTs **13 verb-tier, 3
-  protocol-tier, 0 browser**. Running the browser agent would have produced sixteen
-  `out-of-UI-scope` rows with no observation in any of them. Instead the stage's own question —
-  _does each FUT pass?_ — was answered at the tier that can observe it. **This is the precedent for
-  every non-UI story:** 0 browser FUTs in §14.2 means stage 4 closes on a traceability matrix, and
-  the matrix is what proves it was answered rather than skipped.
-- **The matrix. 16 of 16 FUTs map to a live, passing test, split exactly as §14.2 assigns.**
+- **Stage 4 Functional Test — it ran, and all 16 units passed (D-236, D-238).** It was first ruled
+  Not Applicable on the grounds that `/functional-test` drives a browser and `INT-001` ships no UI.
+  **Sandro rejected the premise the same day, and he was right:** "no browser" is not "cannot be
+  executed". The 16 units are executable through a real client over the advertised tools — this
+  story's entire caller-facing surface, since a tool call is the outermost thing anyone can hold
+  when there is no page. **The precedent for every non-UI story is therefore the opposite of what
+  was first written:** stage 4 **runs**; only the browser instrument is inapplicable.
+- **`test/integration/scenarios/` is now a live tier (D-238), one spec per unit, each named by its
+  own identifier.** `TST-001` §12 had already reserved that folder for "Multi-step FUT workflows";
+  this is the first tier to occupy it. Every unit is driven through a real MCP client over
+  `InMemoryTransport`, except the stdout guard, which spawns the server as its own process because
+  nothing else reproduces a log line inside a live frame stream. **16/16 pass**, about 6.5 seconds,
+  four of them the spawned process.
+- **Two things the run itself taught.** The composed view answers under
+  `initiatives[].milestones[]`, not `stories[]` — the single assertion of the sixteen that failed on
+  first run, a mismatch between the spec's vocabulary and the payload's. And `lint:tracking-ids`
+  bans a design identifier anywhere under `test/` outside a `data/` folder, so the sixteen live in
+  `scenarios/data/functionalUnits.ts` and the specs interpolate them into their titles — which is
+  what makes a run of this tier answer the traceability question in its own output.
+- **The tier deliberately re-asserts what the verb and protocol tiers already cover**, a real
+  exception to `TST-001` §14's rule that a FUT is written at the outermost tier that can observe it,
+  **once**. The tiers own regression; this tier owns the stage. Thinning the overlap is a judgement
+  for whoever next reads §14, not a defect to fix quietly.
+- **The traceability matrix stands as a second reading. 16 of 16 FUTs map to a live, passing test at
+  the tier §14.2 assigns.**
 
 | FUT | What it pins | Tier | Test |
 | --- | --- | --- | --- |
@@ -628,9 +644,9 @@ Settle before or during Scaffold.
 | 015 | `project_view` answers header, queue, chain and all three registers in one call | Verb | `test/integration/tracker/tests/projectView.test.ts:66` |
 | 016 | Concurrent writes serialize | Verb + **Unit** | `stageLifecycle.test.ts:276`; the ordered-timestamp half at `test/unit/verbs/tests/writeQueue.test.ts:9` |
 
-- **What the matrix found that the prose could not.** **No test file in this module names a FUT id
-  anywhere.** The "all sixteen FUTs are covered" claim in the 2026-08-16 entry below was true, but
-  unverifiable without re-deriving it from the specs — which is what this stage did. Two rows came
+- **What the matrix found that the prose could not.** **No test file in this module named a FUT id
+  anywhere** — the new tier is the first that does. The "all sixteen FUTs are covered" claim in the
+  2026-08-16 entry below was true, but unverifiable without re-deriving it. Two rows came
   out different from §14.2’s single-tier column: **FUT-016 is covered across two tiers**, the verb
   tier taking "both succeed, two events" and the unit tier taking "distinct, strictly ordered
   timestamps"; and **FUT-003’s `isError: true`** is a protocol fact asserted in the protocol suite,
@@ -653,8 +669,8 @@ Settle before or during Scaffold.
   missing a mandatory association never reaches the handler and a patch of a vanished row is a 404,
   so those defensive branches have no OData route — which is exactly what the `*Service.ts` 85%
   branch floor is for.
-- **Gate green at close:** `tsc` 0, **21 linters** 0, `npm test` 0 over **143 tests in 18 suites**,
-  `cds build` 0. Root `npm test` 0 over **429** — Financial Planner’s **286 in 29 suites**
+- **Gate green at close:** `tsc` 0, **21 linters** 0, `npm test` 0 over **159 tests in 19 suites**,
+  `cds build` 0. Root `npm test` 0 over **445** — Financial Planner’s **286 in 29 suites**
   untouched.
 - **Still owed on this chain:** **Human Review (stage 6)** — manual, Sandro’s, over `6fa1406`,
   `9bb6a36` and whatever this lands. `/pm-update` (stage 8) correctly finds nothing here (D-207).
