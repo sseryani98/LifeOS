@@ -148,7 +148,7 @@ mechanism needs a construction step.
 | 10  | Tech Stack         | `/generate-tech-stack` → `tech-stack-writer`       | Authored     | **Done** — 2026-08-15. `TS-001` **Approved**; **the proxy executed**, the loader ruled, the credential homed, **R11 minted** (D-176 … D-185)             |
 | 11  | Test Strategy      | `/generate-test-strategy` → `test-strategy-writer` | Authored     | **Done** — 2026-08-15. `TST-001` **Approved**; **the harness question executed and the exemplar's belief reversed**; 180 FUTs classified (D-186 … D-197) |
 | 12  | Project Planning   | `/generate-build-plan` → `build-plan-writer`       | Authored     | **Done** — 2026-08-15. `BP-001` **Approved**; **13 stories, 3 sprints**; story zero resolves the eight "first build story" items (D-198 … D-209)         |
-| 13  | Build              | `/build` + chain                                   | Exists       | **In progress** — `S-00` **Done** 2026-08-16 (D-210 … D-217) and `SPEC-01` **Done** 2026-08-16 (D-218 … D-230); **`SPEC-02` next**, in sprint `PT-W1` (BP-001 §3, §6) |
+| 13  | Build              | `/build` + chain                                   | Exists       | **In progress** — `S-00` **Done** 2026-08-16 (D-210 … D-217); `SPEC-01` **Done** 2026-08-16 (D-218 … D-230), with **§5's chain run retroactively 2026-08-25 → 26** — stages 2 and 3 closed, 4 **N/A** (no UI), 5 skipped, **6 Human Review still owed** (D-232 … D-237); **`SPEC-02` next**, in sprint `PT-W1` (BP-001 §3, §6) |
 | 14  | **Rewire tooling** | `lintNoMarkdownState` + PreToolUse hook            | Not authored | Not started                                                                                                                                              |
 | 15  | Cutover            | —                                                  | —            | Not started                                                                                                                                              |
 | 16  | Back to FP         | —                                                  | —            | Blocked on cutover                                                                                                                                       |
@@ -597,6 +597,68 @@ Settle before or during Scaffold.
 
 ## 8. Session log
 
+### 2026-08-26 — `SPEC-01` QA chain, stages 4–5: Functional Test ruled Not Applicable, and the 500 that should have been a 409
+
+- **Stage 4 Functional Test — ruled Not Applicable, on evidence rather than on prose (D-236).**
+  `/functional-test` drives FUTs through a running app in a real browser; `INT-001` ships no UI,
+  `app/` holds only `.gitkeep`, and `TST-001` §14.2 assigns its 16 FUTs **13 verb-tier, 3
+  protocol-tier, 0 browser**. Running the browser agent would have produced sixteen
+  `out-of-UI-scope` rows with no observation in any of them. Instead the stage's own question —
+  _does each FUT pass?_ — was answered at the tier that can observe it. **This is the precedent for
+  every non-UI story:** 0 browser FUTs in §14.2 means stage 4 closes on a traceability matrix, and
+  the matrix is what proves it was answered rather than skipped.
+- **The matrix. 16 of 16 FUTs map to a live, passing test, split exactly as §14.2 assigns.**
+
+| FUT | What it pins | Tier | Test |
+| --- | --- | --- | --- |
+| 001 | The tool list is exactly eleven, with no generic data tool | Protocol | `test/protocol/tests/toolSurface.test.ts:59` |
+| 002 | A completed stage advances the chain and emits one event | Verb | `test/integration/tracker/tests/stageLifecycle.test.ts:72` |
+| 003 | A rejected verb writes nothing and logs nothing | Verb | `stageLifecycle.test.ts:110`; the `isError: true` half at `toolSurface.test.ts:140` |
+| 004 | A second completion is 409 with status and original time | Verb | `stageLifecycle.test.ts:128` |
+| 005 | Open subtasks warn rather than block, naming only materialised ones | Verb | `stageLifecycle.test.ts:146` |
+| 006 | A reopen preserves later stages’ records and undoes Done | Verb | `stageLifecycle.test.ts:169` |
+| 007 | A reopen with an empty reason is refused | Verb | `stageLifecycle.test.ts:194` |
+| 008 | A bare story ID is rejected, not resolved | Verb | `test/integration/tracker/tests/addressing.test.ts:48` |
+| 009 | The calling agent’s identity reaches the row and the event | Verb | `addressing.test.ts:67` |
+| 010 | stdout carries only JSON-RPC frames; logs go to stderr | Protocol | `test/protocol/tests/stdoutGuard.test.ts:15`, `:26` |
+| 011 | A methodology rejection names the blocking stage and its command | Verb | `stageLifecycle.test.ts:232` |
+| 012 | Closing a defect requires a resolution, then succeeds with one | Verb | `test/integration/tracker/tests/registers.test.ts:83` |
+| 013 | `plan_sprint` writes the sprint, its stories and **one** event | Verb | `registers.test.ts:129` |
+| 014 | An invalid FRICEW type is refused at the zod boundary | Protocol | `toolSurface.test.ts:122` |
+| 015 | `project_view` answers header, queue, chain and all three registers in one call | Verb | `test/integration/tracker/tests/projectView.test.ts:66` |
+| 016 | Concurrent writes serialize | Verb + **Unit** | `stageLifecycle.test.ts:276`; the ordered-timestamp half at `test/unit/verbs/tests/writeQueue.test.ts:9` |
+
+- **What the matrix found that the prose could not.** **No test file in this module names a FUT id
+  anywhere.** The "all sixteen FUTs are covered" claim in the 2026-08-16 entry below was true, but
+  unverifiable without re-deriving it from the specs — which is what this stage did. Two rows came
+  out different from §14.2’s single-tier column: **FUT-016 is covered across two tiers**, the verb
+  tier taking "both succeed, two events" and the unit tier taking "distinct, strictly ordered
+  timestamps"; and **FUT-003’s `isError: true`** is a protocol fact asserted in the protocol suite,
+  not in the verb-tier test that carries the rest of it. Neither is a gap.
+- **Stage 5 UX Test — skipped.** Conditional on `shipsUi`, which `BP-001` §3 records as **No** for
+  `INT-001`. The same predicate is why the build’s smoke subtask never ran either.
+- **The 500 that should have been a 409 is fixed (D-237).** D-235 recorded it as a measurement: a
+  PATCH renaming a sprint onto a sibling’s name, or a story onto a sibling’s identifier, carries
+  only one half of the unique pair, so the pre-check `continue`d past it and the write landed on
+  D-232’s `@assert.unique` as a raw driver string. Sandro ruled the behavioural fix in. Both guards
+  now judge the **merged** row — the shape `_mergeStoredInitiative` already used for the completion
+  rule — so `readInitiativeCompletion` becomes `readInitiativeRow` and carries `name` and
+  `workspace_ID` on the same read, and `readMilestoneRow` joins it. The two tests that pinned the
+  500 now assert the named **409**; they were written to pin measured behaviour and said so.
+- **Six tests added, and two of the five are branches OData cannot reach.** One integration case for
+  the mirror-image write the fix makes possible — **moving** a story into a sprint that already
+  holds its identifier, where the payload carries the sprint half and the stored row supplies the
+  story half. Five in a new `test/unit/tracker/tests/writeGuards.test.ts`, for the pairs a merge
+  cannot complete: a create carrying one half, and an update whose stored row is gone. A create
+  missing a mandatory association never reaches the handler and a patch of a vanished row is a 404,
+  so those defensive branches have no OData route — which is exactly what the `*Service.ts` 85%
+  branch floor is for.
+- **Gate green at close:** `tsc` 0, **21 linters** 0, `npm test` 0 over **143 tests in 18 suites**,
+  `cds build` 0. Root `npm test` 0 over **429** — Financial Planner’s **286 in 29 suites**
+  untouched.
+- **Still owed on this chain:** **Human Review (stage 6)** — manual, Sandro’s, over `6fa1406`,
+  `9bb6a36` and whatever this lands. `/pm-update` (stage 8) correctly finds nothing here (D-207).
+
 ### 2026-08-25 → 26 — `SPEC-01` QA chain, stages 2–3: 39 findings applied, and two rejections that were reaching the caller as a lost store
 
 - **The gap this closes.** `SPEC-01` was committed at `5b3a53c` on the build gate alone — `tsc`, 21
@@ -643,7 +705,7 @@ Settle before or during Scaffold.
   `SQLITE_CONSTRAINT_UNIQUE` message that never names the offending value** — two findings had
   predicted a 400 naming it. The constraint holds the invariant, which is what D-232 bought; it does
   not carry a usable message, and that is now pinned by assertion rather than assumed.
-- **Still owed on this chain:** Functional Test (stage 4) and Human Review (stage 5). UX Test skips —
+- **Still owed on this chain:** Functional Test (stage 4) and Human Review (stage 6). UX Test (stage 5) skips —
   `SPEC-01` ships no UI. `/pm-update` correctly finds nothing here (D-207).
 
 ### 2026-08-16 — Build `SPEC-01 MCP Intent-Verb Layer`: the model, the service and the verbs, and six things the documents had wrong

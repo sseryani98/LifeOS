@@ -1,3 +1,15 @@
+/** Writes carrying only one half of a two-column unique key. */
+export const HALF_PAIR_WRITES = {
+  INITIATIVE_NAME_ONLY: { name: "W1-S4" },
+  INITIATIVE_RENAME: { ID: "initiative-gone", name: "W1-S4" },
+  MILESTONE_DESCRIPTION_ONLY: {
+    ID: "milestone-1",
+    description: "Reworded, nothing else",
+  },
+  MILESTONE_SPRINT_ONLY: { initiative_ID: "initiative-1" },
+  MILESTONE_RENAME: { ID: "milestone-gone", storyId: "ENH-009" },
+} as const;
+
 /** A sprint marked complete, with and without the facts a complete one records. */
 export const COMPLETION_PAYLOADS = {
   ACTIVE: { status_code: "Active" },
