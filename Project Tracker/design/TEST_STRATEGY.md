@@ -611,6 +611,22 @@ Three consequences, each deliberate:
 | SPEC-12 — CNV-005                 | 15      | —    | 2        | —         | —        | **7**  | —       | **6**    |
 | **Total**                         | **180** | —    | **59**   | **41**    | **4**    | **59** | **10**  | **7**    |
 
+> **Amended 2026-08-26 at `SPEC-01`'s Functional Test stage (D-238).** The columns above classify
+> where each FUT's **assertions** live, and they still do. What is new is that the FUTs are now also
+> **executed as FUTs**, in `test/integration/scenarios/` — the folder §12 reserved and nothing had
+> yet occupied — one spec per FUT, named by its identifier, driven through a real client over the
+> advertised tools. All **16** of `SPEC-01`'s pass. **No column was added for the other eleven
+> specs**: their FUT tiers do not exist yet and inventing a count for them would be fabrication.
+> Whoever builds each spec adds its own row note.
+>
+> **This creates a deliberate exception to §14's "written at the outermost tier that can observe it,
+> _once_" rule**, and it should be read as one rather than as a licence to duplicate. The tier suites
+> own regression; the scenarios tier owns the Functional Test stage's evidence — the question of
+> whether each _named unit_ passes, which a coverage percentage cannot answer. **The rule as written
+> assumed a browser tier existed to be the outermost one.** For a story that ships no UI it does not,
+> and the stage still has to produce an output. Re-read this when the first UI story reaches stage 4:
+> if `/functional-test` drives the browser there, the scenarios tier may have nothing to add.
+
 **Two findings the table makes unavoidable.**
 
 **The largest single destination is the script tier — 59 of 180 — and the exemplar has no such tier

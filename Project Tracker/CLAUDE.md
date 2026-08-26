@@ -26,8 +26,9 @@ What this means concretely:
   referential integrity is **live and measured**: an unseeded code is rejected with Postgres `23503`
   (D-229). **The store is empty of data** — the methodology library and the migrated workspace are
   `SPEC-02`'s and `SPEC-03`'s.
-- **`npm test` is green over `90` tests in `16` suites**, across four tiers: unit, integration (both
-  entry points), protocol and script. Coverage carries the global band plus **three** per-layer bands
+- **`npm test` is green over `159` tests in `19` suites**, across five tiers: unit, integration (both
+  entry points), protocol, script, and the `scenarios` tier that executes `SPEC-01`'s sixteen
+  functional units through a real MCP client (D-238). Coverage carries the global band plus **three** per-layer bands
   — Validators 100/100, Services 90/85, verbs 90/85. `./scripts/**/*.ts` still has none, and lands
   with `SPEC-09` (D-215, D-224).
 - **`npm run lint` checks real code now.** Twenty-one linters over `srv/`, `mcp/`, `scripts/` and the
@@ -107,6 +108,7 @@ scripts/
   installMcpServer.mjs       Writes the gitignored .mcp.json registration (D-224)
 app/                         (empty)  ← SPEC-04 builds the one FPM page
 test/                        setEnv.ts (the lever) + {unit,integration,protocol,script,shared}/ — TST-001 §12
+  integration/scenarios/     One spec per functional unit, named by its identifier. Stage 4's evidence (D-238)
 ```
 
 ## Carve-outs
