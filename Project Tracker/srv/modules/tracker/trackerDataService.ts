@@ -1,6 +1,10 @@
 import { ENTITIES } from "../shared/constants.js";
 
-import type { ChainTaskRow, InitiativePayload } from "./types.js";
+import type {
+  ChainTaskRow,
+  InitiativePayload,
+  MilestonePayload,
+} from "./types.js";
 
 /** Every query the handler layer issues. No logic lives here. */
 export class TrackerDataService {
@@ -43,17 +47,33 @@ export class TrackerDataService {
   }
 
   /**
-   * Reads the completion facts an Initiative currently holds, for judging a
-   * partial update against the state it produces.
+   * Reads the facts an Initiative currently holds that a partial update has to
+   * be judged against - the completion pair and the name/workspace pair the
+   * duplicate rule counts on. One read serves both rules.
    * @param initiativeId The Initiative being written.
-   * @returns The stored completion fields, or undefined when no row exists.
+   * @returns The stored fields, or undefined when no row exists.
    */
-  async readInitiativeCompletion(
+  async readInitiativeRow(
     initiativeId: string,
   ): Promise<InitiativePayload | undefined> {
     const rows = (await SELECT.from(ENTITIES.INITIATIVE)
-      .columns("status_code", "mergeCommit", "tag")
+      .columns("status_code", "mergeCommit", "tag", "name", "workspace_ID")
       .where({ ID: initiativeId })) as InitiativePayload[];
+    return rows[0];
+  }
+
+  /**
+   * Reads the identifying pair a Milestone currently holds, so a partial update
+   * carrying only one half is still counted against its real siblings.
+   * @param milestoneId The Milestone being written.
+   * @returns The stored story ID and Initiative, or undefined when no row exists.
+   */
+  async readMilestoneRow(
+    milestoneId: string,
+  ): Promise<MilestonePayload | undefined> {
+    const rows = (await SELECT.from(ENTITIES.MILESTONE)
+      .columns("storyId", "initiative_ID")
+      .where({ ID: milestoneId })) as MilestonePayload[];
     return rows[0];
   }
 

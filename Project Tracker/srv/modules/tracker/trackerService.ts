@@ -26,6 +26,26 @@ function _mentionsDefectScope(data: DefectPayload): boolean {
 }
 
 /**
+ * Reports whether a payload touches either half of the pair an Initiative is
+ * unique on, which is what makes the duplicate rule worth evaluating.
+ * @param data The payload being written.
+ * @returns True when the name or the Workspace appears in it.
+ */
+function _mentionsInitiativeIdentity(data: InitiativePayload): boolean {
+  return "name" in data || "workspace_ID" in data;
+}
+
+/**
+ * Reports whether a payload touches either half of the pair a Milestone is
+ * unique on.
+ * @param data The payload being written.
+ * @returns True when the story ID or the Initiative appears in it.
+ */
+function _mentionsMilestoneIdentity(data: MilestonePayload): boolean {
+  return "storyId" in data || "initiative_ID" in data;
+}
+
+/**
  * The handler-layer logic: the friendly named 409s in front of the store's two
  * unique constraints, and the status derivation that is filled on read because
  * no verb may write it.
@@ -70,23 +90,22 @@ export class TrackerService {
   }
 
   /**
-   * Guards an Initiative write: a Complete one carries both git facts, judged
-   * on the merged row for an update, and a duplicate name in the Workspace
-   * gets its named 409. That pre-check runs only when the write supplies both
-   * name and workspace; a partial update omitting either is left to the
-   * store's unique constraint, which backstops every write path.
+   * Guards an Initiative write: a Complete one carries both git facts, and a
+   * duplicate name in the Workspace gets its named 409. Both rules judge the
+   * merged row, so a partial update carrying one half of the unique pair is
+   * counted against its real siblings rather than falling through to the store
+   * constraint's raw driver error. That constraint stays as the backstop.
    * @param req Request carrying the Initiative payload.
    */
   async checkInitiativeWrite(req: cds.Request): Promise<void> {
     for (const data of toPayloadList<InitiativePayload>(req.data)) {
-      this.validator.validateInitiativeCompletion(
-        req,
-        await this._mergeStoredInitiative(req, data),
-      );
-      if (!data.name || !data.workspace_ID) continue;
+      const merged = await this._mergeStoredInitiative(req, data);
+      this.validator.validateInitiativeCompletion(req, merged);
+      if (!_mentionsInitiativeIdentity(data)) continue;
+      if (!merged.name || !merged.workspace_ID) continue;
       const duplicates = await this.data.countInitiativesNamed(
-        data.workspace_ID,
-        data.name,
+        merged.workspace_ID,
+        merged.name,
         data.ID,
       );
       if (duplicates > 0) req.reject(409, HANDLER_KEYS.INITIATIVE_DUPLICATE);
@@ -95,17 +114,19 @@ export class TrackerService {
 
   /**
    * Guards a Milestone write: a duplicate story ID inside the Initiative gets
-   * its named 409. The pre-check runs only when the write itself supplies both
-   * the story ID and the initiative; a partial update that omits either is
-   * left to the store's unique constraint, which backstops every write path.
+   * its named 409, judged on the merged row so a partial update carrying only
+   * the story ID or only the Initiative is still counted against its real
+   * siblings. The store's unique constraint stays as the backstop.
    * @param req Request carrying the Milestone payload.
    */
   async checkMilestoneWrite(req: cds.Request): Promise<void> {
     for (const data of toPayloadList<MilestonePayload>(req.data)) {
-      if (!data.storyId || !data.initiative_ID) continue;
+      if (!_mentionsMilestoneIdentity(data)) continue;
+      const merged = await this._mergeStoredMilestone(req, data);
+      if (!merged.storyId || !merged.initiative_ID) continue;
       const duplicates = await this.data.countMilestonesWithStoryId(
-        data.initiative_ID,
-        data.storyId,
+        merged.initiative_ID,
+        merged.storyId,
         data.ID,
       );
       if (duplicates > 0) req.reject(409, HANDLER_KEYS.STORY_DUPLICATE);
@@ -136,10 +157,10 @@ export class TrackerService {
   }
 
   /**
-   * Overlays an update's payload on the stored row, so the completion rule is
-   * judged against the state the write produces rather than the fields it
-   * happens to carry. A create, or an update whose row cannot be read, is
-   * judged on the payload alone.
+   * Overlays an update's payload on the stored row, so the completion and
+   * duplicate rules are judged against the state the write produces rather than
+   * the fields it happens to carry. A create, or an update whose row cannot be
+   * read, is judged on the payload alone.
    * @param req Request carrying the Initiative payload.
    * @param data One payload row of the write.
    * @returns The merged view of the row being written.
@@ -149,7 +170,24 @@ export class TrackerService {
     data: InitiativePayload,
   ): Promise<InitiativePayload> {
     if (req.event !== "UPDATE" || !data.ID) return data;
-    const stored = await this.data.readInitiativeCompletion(data.ID);
+    const stored = await this.data.readInitiativeRow(data.ID);
+    if (!stored) return data;
+    return { ...stored, ...data };
+  }
+
+  /**
+   * Overlays an update's payload on the stored Milestone, so the duplicate rule
+   * sees the pair the write produces. Same shape as the Initiative merge.
+   * @param req Request carrying the Milestone payload.
+   * @param data One payload row of the write.
+   * @returns The merged view of the row being written.
+   */
+  private async _mergeStoredMilestone(
+    req: cds.Request,
+    data: MilestonePayload,
+  ): Promise<MilestonePayload> {
+    if (req.event !== "UPDATE" || !data.ID) return data;
+    const stored = await this.data.readMilestoneRow(data.ID);
     if (!stored) return data;
     return { ...stored, ...data };
   }

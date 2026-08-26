@@ -172,8 +172,8 @@ describe("the browser read path", () => {
     expect(rejected.code).toBe("tracker.initiative.completionFieldsRequired");
   });
 
-  /** A rename that omits the workspace skips the pre-check; the store constraint has to hold the line. */
-  it("refuses renaming a sprint onto a sibling's name through the store constraint", async () => {
+  /** A rename carries only half the unique pair, so the guard has to read the other half off the stored row. */
+  it("refuses renaming a sprint onto a sibling's name with the named 409", async () => {
     const created = await postExpectingSuccess(PATHS.INITIATIVES, {
       ...SECOND_INITIATIVE,
       workspace_ID: world.workspaceId,
@@ -184,13 +184,12 @@ describe("the browser read path", () => {
       { name: WORLD.INITIATIVE.name },
     );
 
-    expect(rejected.status).toBe(500);
-    expect(rejected.code).toBe("SQLITE_CONSTRAINT_UNIQUE");
-    expect(rejected.message).toContain("Initiative.name");
+    expect(rejected.status).toBe(409);
+    expect(rejected.code).toBe("verb.initiative.duplicate");
   });
 
-  /** A rename that omits the sprint skips the pre-check too, so the same backstop has to hold for stories. */
-  it("refuses renaming a story onto a sibling's identifier through the store constraint", async () => {
+  /** The same half-a-pair rename on a story, judged on the merged row rather than left to the constraint. */
+  it("refuses renaming a story onto a sibling's identifier with the named 409", async () => {
     const created = await postExpectingSuccess(PATHS.MILESTONES, {
       ...SECOND_STORY,
       initiative_ID: world.initiativeId,
@@ -201,9 +200,29 @@ describe("the browser read path", () => {
       { storyId: WORLD.STORY.storyId },
     );
 
-    expect(rejected.status).toBe(500);
-    expect(rejected.code).toBe("SQLITE_CONSTRAINT_UNIQUE");
-    expect(rejected.message).toContain("Milestone.storyId");
+    expect(rejected.status).toBe(409);
+    expect(rejected.code).toBe("verb.story.duplicate");
+  });
+
+  /** A move carries the sprint half only, so the guard has to read the story's identifier off the stored row. */
+  it("refuses moving a story into a sprint that already holds its identifier", async () => {
+    const secondSprint = await postExpectingSuccess(PATHS.INITIATIVES, {
+      ...SECOND_INITIATIVE,
+      workspace_ID: world.workspaceId,
+    });
+    const moving = await postExpectingSuccess(PATHS.MILESTONES, {
+      ...SECOND_STORY,
+      storyId: WORLD.STORY.storyId,
+      initiative_ID: secondSprint.ID as string,
+    });
+
+    const rejected = await patchExpectingRejection(
+      `${PATHS.MILESTONES}(${moving.ID as string})`,
+      { initiative_ID: world.initiativeId },
+    );
+
+    expect(rejected.status).toBe(409);
+    expect(rejected.code).toBe("verb.story.duplicate");
   });
 
   /** A defect linked to nothing cannot be shown under any workspace, so the write is refused. */
