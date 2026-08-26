@@ -6,15 +6,15 @@ import { buildActivityTarget } from "./shared/addressing.js";
 import {
   ACTIVITY_KINDS,
   DEFECT_SEVERITIES,
-  PLANNING,
+  HTTP,
   VERB_KEYS,
 } from "./shared/constants.js";
 import { rejectVerb } from "./shared/envelope.js";
 import { runWriteVerb } from "./shared/runVerb.js";
 import {
+  resolveActiveSprint,
   resolveNextAction,
   resolveStoryContext,
-  resolveWorkspace,
 } from "./shared/stageGuards.js";
 import type { TrackerGateway } from "./shared/trackerGateway.js";
 import type {
@@ -25,7 +25,7 @@ import type {
 } from "./shared/types.js";
 
 /** The tool schema, as the transport advertises it. */
-export const inputShape = {
+const inputShape = {
   story: z
     .string()
     .optional()
@@ -65,6 +65,17 @@ export async function logDefect(
   input: LogDefectInput,
 ): Promise<VerbResult> {
   return runWriteVerb(ctx, async (gateway, timestamp) => {
+    // The advertised schema carries the same code list, but it only guards the
+    // transport: a verb called in-process reaches the store otherwise, where a
+    // bad code is a driver constraint error rather than a named 400.
+    if (!(DEFECT_SEVERITIES as readonly string[]).includes(input.severity)) {
+      rejectVerb(
+        HTTP.BAD_REQUEST,
+        VERB_KEYS.VALUE_NOT_IN_CODE_LIST,
+        [input.severity, DEFECT_SEVERITIES.join(", ")],
+        { target: "severity" },
+      );
+    }
     const scope = await _resolveDefectScope(gateway, input);
     const defectId = await gateway.insertDefect({
       severity_code: input.severity,
@@ -111,7 +122,7 @@ async function _resolveDefectScope(
   const hasStory = Boolean(input.story?.trim());
   const hasWorkspace = Boolean(input.workspace?.trim());
   if (hasStory === hasWorkspace) {
-    rejectVerb(PLANNING.HTTP_BAD_REQUEST, VERB_KEYS.DEFECT_SCOPE_REQUIRED);
+    rejectVerb(HTTP.BAD_REQUEST, VERB_KEYS.DEFECT_SCOPE_REQUIRED);
   }
   if (hasStory) {
     const { workspace, milestone } = await resolveStoryContext(
@@ -127,15 +138,10 @@ async function _resolveDefectScope(
       nextAction: resolveNextAction(chain, milestone.storyId),
     };
   }
-  const workspace = await resolveWorkspace(gateway, input.workspace as string);
-  const initiative = await gateway.readActiveInitiative(workspace.ID);
-  if (!initiative) {
-    rejectVerb(PLANNING.HTTP_NOT_FOUND, VERB_KEYS.TARGET_NOT_FOUND, [
-      "active sprint",
-      workspace.slug,
-      "",
-    ]);
-  }
+  const { workspace, initiative } = await resolveActiveSprint(
+    gateway,
+    input.workspace as string,
+  );
   return {
     workspaceId: workspace.ID,
     milestoneId: null,

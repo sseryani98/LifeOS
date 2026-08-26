@@ -13,6 +13,7 @@ import {
   CHAIN_FIXTURE,
   FINISHED_CHAIN,
   FIXTURE_STORY_ID,
+  GUARD_KEYS,
   SUBTASK_FIXTURE,
 } from "../data/verbFixtures.js";
 
@@ -42,15 +43,33 @@ describe("stage guards", () => {
     expect(() => assertStageNotBlocked(CHAIN_FIXTURE, HUMAN_REVIEW)).not.toThrow();
   });
 
-  /** The rejection must carry the state that explains it, or the caller retries blind. */
+  /** The rejection must name the key and the reopen route, or the caller retries blind against a closed stage. */
   it("refuses a transition on a stage that is already complete", () => {
-    expect(() => assertStageNotComplete(BUILD)).toThrow(VerbError);
+    let raised: VerbError | null = null;
+    try {
+      assertStageNotComplete(BUILD);
+    } catch (error: unknown) {
+      raised = error as VerbError;
+    }
+
+    expect(raised?.code).toBe(GUARD_KEYS.ALREADY_COMPLETE);
+    expect(raised?.target).toBe(BUILD.step_code);
+    expect(raised?.remediation).toContain("reopen_stage");
     expect(() => assertStageNotComplete(COMMIT)).not.toThrow();
   });
 
-  /** Completing a stage nobody started would invent a start time. */
+  /** Completing a stage nobody started would invent a start time, and the rejection must say to start it. */
   it("refuses a completion on a stage that never started", () => {
-    expect(() => assertStageStarted(COMMIT)).toThrow(VerbError);
+    let raised: VerbError | null = null;
+    try {
+      assertStageStarted(COMMIT);
+    } catch (error: unknown) {
+      raised = error as VerbError;
+    }
+
+    expect(raised?.code).toBe(GUARD_KEYS.NOT_STARTED);
+    expect(raised?.target).toBe(COMMIT.step_code);
+    expect(raised?.remediation).toContain("start_stage");
     expect(() => assertStageStarted(BUILD)).not.toThrow();
   });
 

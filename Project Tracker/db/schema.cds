@@ -113,10 +113,16 @@ entity Workspace : cuid, managed {
                    on taskQueue.workspaceId = ID      @Common.Label: '{i18n>Workspace.taskQueue}';
 }
 
-@assert.unique : {position: [
-  workspace,
-  position
-]}
+@assert.unique : {
+  position       : [
+    workspace,
+    position
+  ],
+  nameInWorkspace: [
+    workspace,
+    name
+  ]
+}
 @lifeos.sortKey: [
   'workspace_ID',
   'position',
@@ -135,10 +141,16 @@ entity Initiative : cuid, managed {
                   on milestones.initiative = $self        @Common.Label: '{i18n>Initiative.milestones}';
 }
 
-@assert.unique : {position: [
-  initiative,
-  position
-]}
+@assert.unique : {
+  position: [
+    initiative,
+    position
+  ],
+  storyId : [
+    initiative,
+    storyId
+  ]
+}
 @lifeos.sortKey: [
   'initiative_ID',
   'position',
@@ -252,7 +264,9 @@ entity Decision : cuid, managed {
   rationale  : LargeString                         @Common.Label: '{i18n>Decision.rationale}';
   context    : LargeString                         @Common.Label: '{i18n>Decision.context}';
   options    : LargeString                         @Common.Label: '{i18n>Decision.options}';
-  decidedAt  : DateTime not null                   @mandatory  @cds.on.insert: $now  @Common.Label: '{i18n>Decision.decidedAt}';
+  // No @cds.on.insert stamp: the verb layer is the only writer and always
+  // supplies the envelope's own timestamp, which a managed stamp would discard.
+  decidedAt  : DateTime not null                   @mandatory  @Common.Label: '{i18n>Decision.decidedAt}';
   initiative : Association to Initiative           @Common.Label: '{i18n>Decision.initiative}';
   milestone  : Association to Milestone            @Common.Label: '{i18n>Decision.milestone}';
   workspace  : Association to Workspace not null   @mandatory  @Common.Label: '{i18n>Decision.workspace}';
@@ -301,7 +315,7 @@ entity TestRun : cuid, managed {
 }
 
 /* ------------------------------------------------------------------------- */
-/* Read views — no table behind either                                       */
+/* Read view — no table behind it                                            */
 /* ------------------------------------------------------------------------- */
 
 // The queue the browser binds: incomplete Tasks with the owning workspace

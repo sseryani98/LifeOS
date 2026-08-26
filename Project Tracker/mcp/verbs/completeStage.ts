@@ -22,7 +22,7 @@ import type {
 } from "./shared/types.js";
 
 /** The tool schema, as the transport advertises it. */
-export const inputShape = {
+const inputShape = {
   story: z.string().describe("Story reference, as {workspace-slug}/{story-id}"),
   stage: z.string().describe("Methodology stage code, such as code-quality"),
   notes: z.string().optional().describe("What the stage concluded"),

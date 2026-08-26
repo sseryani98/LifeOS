@@ -5,13 +5,16 @@ import {
 } from "../../../../mcp/verbs/shared/writeQueue.js";
 
 describe("write ordering", () => {
-  /** Two writes inside one millisecond would tie, and the register is ordered by exactly this value. */
-  it("hands out strictly increasing timestamps", () => {
+  /** A counter that only ever increments would also pass this, and date every register row from the epoch. */
+  it("hands out strictly increasing timestamps anchored to the wall clock", () => {
+    const before = Date.now();
     const stamps = Array.from({ length: 5 }, () => nextTimestamp());
 
     for (let index = 1; index < stamps.length; index++) {
       expect(stamps[index] > stamps[index - 1]).toBe(true);
     }
+    expect(new Date(stamps[0]).getTime()).toBeGreaterThanOrEqual(before);
+    expect(new Date(stamps[4]).getTime()).toBeLessThan(before + 1000);
   });
 
   /** A fractional second is refused outright by the elements that take a date and a time. */

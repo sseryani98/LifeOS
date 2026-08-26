@@ -27,7 +27,9 @@ export async function runReadVerb(
   ctx: VerbContext,
   work: (gateway: TrackerGateway) => Promise<VerbOutcome>,
 ): Promise<VerbResult> {
-  const timestamp = nextTimestamp();
+  // A plain stamp, not nextTimestamp(): the monotonic counter exists to order
+  // written activity rows, and a read must not advance the write clock.
+  const timestamp = new Date().toISOString();
   try {
     assertCallerIdentity(ctx.actor);
     const outcome = await work(new TrackerGateway(ctx.service));

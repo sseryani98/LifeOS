@@ -1,12 +1,12 @@
-import { readdirSync, readFileSync } from "fs";
+import { readFileSync } from "fs";
 import { join, relative } from "path";
+
+import { collectFiles, reportViolations } from "./lib/lintWalk.js";
 
 const ROOT_DIR = process.cwd();
 
 /** Event-handler bindings only exist in UI5 views/fragments. */
 const SOURCE_DIRS = [join(ROOT_DIR, "app")];
-
-const SKIP_SEGMENTS = new Set(["node_modules", "gen", "dist", "coverage", ".git"]);
 
 /**
  * An opening tag: optional `ns:` prefix + the control class (local) name, up to
@@ -29,20 +29,6 @@ interface Violation {
   event: string;
   handler: string;
   expected: string;
-}
-
-function collectXmlFiles(dir: string): string[] {
-  const found: string[] = [];
-  for (const entry of readdirSync(dir, { withFileTypes: true })) {
-    if (SKIP_SEGMENTS.has(entry.name)) continue;
-    const full = join(dir, entry.name);
-    if (entry.isDirectory()) {
-      found.push(...collectXmlFiles(full));
-    } else if (entry.name.endsWith(".xml")) {
-      found.push(full);
-    }
-  }
-  return found;
 }
 
 /**
@@ -95,30 +81,22 @@ function scanFile(filePath: string): Violation[] {
 }
 
 function main(): void {
-  const files = SOURCE_DIRS.flatMap(collectXmlFiles);
+  const files = SOURCE_DIRS.flatMap(dir => collectFiles(dir, [".xml"]));
   const violations = files.flatMap(scanFile);
 
-  console.log(`Scanning ${files.length} UI5 view(s) for event-handler naming...`);
-
-  if (violations.length === 0) {
-    console.log("All event handlers match the on{ControlName}…{EventName} shape.");
-    process.exit(0);
-  }
-
-  console.log();
-  for (const violation of violations) {
-    console.log(
-      `${violation.filePath}:${violation.line}  "${violation.handler}"  ` +
+  reportViolations(
+    `Scanning ${files.length} UI5 view(s) for event-handler naming...`,
+    "All event handlers match the on{ControlName}…{EventName} shape.",
+    violations.map(
+      violation =>
+        `${violation.filePath}:${violation.line}  "${violation.handler}"  ` +
         `(${violation.control}.${violation.event})  →  expected ${violation.expected}`,
-    );
-  }
-  console.log(
+    ),
     `\nFound ${violations.length} misnamed event handler(s). Names must include ` +
       `the control class and end with the capitalised event, per the ui5plugin ` +
       `TagAttributeLinter (e.g. a Button press → onButtonSyncNowPress). The ` +
       `meaning-prefix (onCardInstances…) is enforced in-editor by the plugin.`,
   );
-  process.exit(1);
 }
 
 main();

@@ -6,6 +6,7 @@ import { buildActivityTarget } from "./shared/addressing.js";
 import {
   ACTIVITY_KINDS,
   FRICEW_TYPES,
+  HTTP,
   PLANNING,
   VERB_KEYS,
 } from "./shared/constants.js";
@@ -21,7 +22,7 @@ import type {
 } from "./shared/types.js";
 
 /** The tool schema, as the transport advertises it. */
-export const inputShape = {
+const inputShape = {
   workspace: z.string().describe("Workspace slug the sprint is planned in"),
   name: z.string().describe("Sprint name, such as W1-S4"),
   goal: z.string().describe("What the sprint is for"),
@@ -101,9 +102,10 @@ export async function planSprint(
 }
 
 /**
- * Refuses a plan that would create a story ID already live in the workspace.
- * The uniqueness the model enforces is per sprint; the addressing form the
- * verbs use is per workspace, so this is the wider of the two.
+ * Refuses a plan that would create a story ID already live in the workspace —
+ * or carried twice inside the plan itself. The uniqueness the model enforces
+ * is per sprint; the addressing form the verbs use is per workspace, so this
+ * is the wider of the two.
  * @param gateway The gateway the read runs through.
  * @param workspaceId The workspace being planned into.
  * @param stories The stories the caller asked for.
@@ -119,12 +121,13 @@ async function _assertStoryIdsFree(
   for (const story of stories) {
     if (existing.has(story.id)) {
       rejectVerb(
-        PLANNING.HTTP_CONFLICT,
+        HTTP.CONFLICT,
         VERB_KEYS.STORY_DUPLICATE,
         [story.id],
         { target: story.id },
       );
     }
+    existing.add(story.id);
   }
 }
 

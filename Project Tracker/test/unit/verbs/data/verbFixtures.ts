@@ -106,6 +106,12 @@ export const SUBTASK_FIXTURE = [
 /** The story identifier the resolver stamps onto a next action. */
 export const FIXTURE_STORY_ID = "CNV-001";
 
+/** Message keys the stage guards name their rejections with. */
+export const GUARD_KEYS = {
+  ALREADY_COMPLETE: "verb.stage.alreadyComplete",
+  NOT_STARTED: "verb.stage.notStarted",
+} as const;
+
 /** Message keys the envelope suite resolves and rejects under. */
 export const ENVELOPE_KEYS = {
   KNOWN: "verb.identity.missing",
@@ -119,6 +125,23 @@ export const ENVELOPE_DETAIL = {
   remediation: "Complete human-review first.",
   rule: "wfl.stage.predecessorOpen",
 } as const;
+
+/** A rejection shaped the way a CAP before-handler throws one. */
+export const CAP_REJECTION = {
+  status: 409,
+  code: "verb.story.duplicate",
+  message: 'Story "ENH-020" already exists in this sprint.',
+} as const;
+
+/** The other shape a CAP rejection takes: statusCode, and the key as its message. */
+export const CAP_REJECTION_BY_KEY = {
+  statusCode: 409,
+  code: "verb.story.duplicate",
+  message: "verb.story.duplicate",
+} as const;
+
+/** The code a refused socket carries. */
+export const SOCKET_ERROR_CODE = "ECONNREFUSED";
 
 /** An activity event with no payload, and one with. */
 export const ACTIVITY_EVENTS = {
@@ -186,3 +209,55 @@ export const INITIATIVE_ROWS = [
     position: 10,
   },
 ];
+
+/**
+ * Stories spanning both INITIATIVE_ROWS sprints, listed so that neither sprint
+ * order nor story order is the order they arrive in. A flat sort by position
+ * would interleave the two sprints, so this separates grouping from sorting.
+ */
+export const MILESTONE_ROWS = [
+  {
+    ID: "milestone-cnv-005",
+    storyId: "CNV-005",
+    fricewType_code: "Conversion",
+    description: "Retire the markdown dashboard",
+    shipsUi: false,
+    position: 20,
+    initiative_ID: "init-1",
+  },
+  {
+    ID: "milestone-rpt-003",
+    storyId: "RPT-003",
+    fricewType_code: "Report",
+    description: "Sprint burndown",
+    shipsUi: true,
+    position: 20,
+    initiative_ID: "init-2",
+  },
+  {
+    ID: "milestone-int-001",
+    storyId: "INT-001",
+    fricewType_code: "Interface",
+    description: "MCP intent-verb layer",
+    shipsUi: false,
+    position: 10,
+    initiative_ID: "init-1",
+  },
+  {
+    ID: "milestone-enh-020",
+    storyId: "ENH-020",
+    fricewType_code: "Enhancement",
+    description: "Stage guard remediation",
+    shipsUi: false,
+    position: 10,
+    initiative_ID: "init-2",
+  },
+];
+
+/** The build sequence MILESTONE_ROWS reads as: sprint by position, then story. */
+export const MILESTONE_ORDER = [
+  "INT-001",
+  "CNV-005",
+  "ENH-020",
+  "RPT-003",
+] as const;

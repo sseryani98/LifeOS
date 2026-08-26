@@ -1,21 +1,12 @@
-import { readdirSync, readFileSync } from "fs";
+import { readFileSync } from "fs";
 import { join, relative } from "path";
 
 import typescript from "typescript";
 
+import { collectFiles, reportViolations } from "./lib/lintWalk.js";
+
 const ROOT_DIR = process.cwd();
 const TEST_DIR = join(ROOT_DIR, "test");
-
-/**
- * Subtrees skipped entirely (generated output, dependencies, build artifacts).
- */
-const SKIP_SEGMENTS = new Set([
-  "node_modules",
-  "gen",
-  "dist",
-  "coverage",
-  ".git",
-]);
 
 /**
  * The CAP CQL constructor globals. Any of these appearing in a spec means the
@@ -37,21 +28,6 @@ interface Violation {
   filePath: string;
   line: number;
   reason: string;
-}
-
-/** Recursively collects `*.test.ts` spec paths under a directory. */
-function collectSpecFiles(dir: string): string[] {
-  const found: string[] = [];
-  for (const entry of readdirSync(dir, { withFileTypes: true })) {
-    if (SKIP_SEGMENTS.has(entry.name)) continue;
-    const full = join(dir, entry.name);
-    if (entry.isDirectory()) {
-      found.push(...collectSpecFiles(full));
-    } else if (entry.name.endsWith(".test.ts")) {
-      found.push(full);
-    }
-  }
-  return found;
 }
 
 /**
@@ -108,26 +84,19 @@ function scanSpec(filePath: string): Violation[] {
  * support/ helper (`seedX`, `readXById`), not inline in a `*.test.ts`.
  */
 function main(): void {
-  const files = collectSpecFiles(TEST_DIR);
+  const files = collectFiles(TEST_DIR, [".test.ts"]);
   const violations = files.flatMap(scanSpec);
 
-  console.log(`Scanning ${files.length} spec file(s) for inline CQL...`);
-
-  if (violations.length === 0) {
-    console.log("No direct DB access in specs — all CQL lives in support/.");
-    process.exit(0);
-  }
-
-  console.log();
-  for (const violation of violations) {
-    console.log(`${violation.filePath}:${violation.line}  ${violation.reason}`);
-  }
-  console.log(
+  reportViolations(
+    `Scanning ${files.length} spec file(s) for inline CQL...`,
+    "No direct DB access in specs — all CQL lives in support/.",
+    violations.map(
+      violation => `${violation.filePath}:${violation.line}  ${violation.reason}`,
+    ),
     `\nFound ${violations.length} inline-CQL violation(s). A *.test.ts is ` +
       `imports + arrange-act-assert: wrap each SELECT/INSERT/UPDATE/DELETE/` +
       `UPSERT (and cds.run/cds.ql) in a named support/ helper and call that.`,
   );
-  process.exit(1);
 }
 
 main();

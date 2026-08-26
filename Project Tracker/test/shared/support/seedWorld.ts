@@ -6,7 +6,7 @@ import {
   STAGE_STEPS,
   SUBTASK_STEPS,
 } from "../data/methodology.js";
-import { WORLD } from "../data/world.js";
+import { SECOND_WORKSPACE, WORLD } from "../data/world.js";
 
 /** Database-level entity names, so seeding never passes through a write guard. */
 const TABLE = {
@@ -111,6 +111,24 @@ export async function seedStoryChain(
       });
     }
   }
+}
+
+/**
+ * Seeds a second workspace under the already-seeded engagement, for suites
+ * about multi-workspace ambiguity.
+ * @returns The new workspace's identifier.
+ */
+export async function seedSecondWorkspace(): Promise<string> {
+  const engagements = (await SELECT.from(TABLE.ENGAGEMENT).columns(
+    "ID",
+  )) as Array<{ ID: string }>;
+  const workspaceId = randomUUID();
+  await INSERT.into(TABLE.WORKSPACE).entries({
+    ID: workspaceId,
+    ...SECOND_WORKSPACE,
+    engagement_ID: engagements[0].ID,
+  });
+  return workspaceId;
 }
 
 /**

@@ -12,9 +12,11 @@ import {
   UNRESOLVABLE,
   WORLD,
 } from "../../../shared/data/world.js";
+import { readActivityLog } from "../../../shared/support/readTracker.js";
 import {
   clearWorld,
   seedCanonicalWorld,
+  seedSecondWorkspace,
   setChainStates,
   type SeededWorld,
 } from "../../../shared/support/seedWorld.js";
@@ -109,6 +111,17 @@ describe("the read verbs", () => {
     expect(result.code).toBe("verb.target.notFound");
   });
 
+  /** Several workspaces with no slug is an ambiguity the verb names, never resolves alphabetically. */
+  it("refuses an unscoped project view when several workspaces exist", async () => {
+    await seedSecondWorkspace();
+
+    const result = expectFailure(await projectView(context, {}));
+
+    expect(result.status).toBe(400);
+    expect(result.code).toBe("verb.workspace.ambiguous");
+    expect(result.message).toContain(WORLD.WORKSPACE.slug);
+  });
+
   /** An empty store must say so rather than answer for a workspace that is not there. */
   it("refuses a project view when the store holds no workspace at all", async () => {
     await clearWorld();
@@ -131,6 +144,14 @@ describe("the read verbs", () => {
     expect(scoped.nextAction?.stepCode).toBe(STAGE.CODE_QUALITY);
     expect(scoped.nextAction?.driver).toBe("/code-quality");
     expect(overall.nextAction?.stepCode).toBe(STAGE.CODE_QUALITY);
+  });
+
+  /** A read verb records no state change, or every page render floods the register the timeline is drawn from. */
+  it("writes no activity event for either read verb", async () => {
+    expectSuccess(await projectView(context, {}));
+    expectSuccess(await nextAction(context, {}));
+
+    expect(await readActivityLog(world.workspaceId)).toHaveLength(0);
   });
 
   /** A finished chain answers null, and null is a success rather than an error. */

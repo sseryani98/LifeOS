@@ -1,5 +1,7 @@
-import { readdirSync, readFileSync } from "fs";
+import { readFileSync } from "fs";
 import { basename, join, relative } from "path";
+
+import { collectFiles, reportViolations } from "./lib/lintWalk.js";
 
 const ROOT_DIR = process.cwd();
 
@@ -9,14 +11,6 @@ const ROOT_DIR = process.cwd();
  * test/ are tooling/fixtures where co-located data literals are expected.
  */
 const SOURCE_DIRS = [join(ROOT_DIR, "app")];
-
-const SKIP_SEGMENTS = new Set([
-  "node_modules",
-  "gen",
-  "dist",
-  "coverage",
-  ".git",
-]);
 
 /** The one filename allowed to declare a module's named data constants. */
 const CONSTANTS_FILE = "constants.ts";
@@ -53,26 +47,6 @@ function isDataLiteral(initializer: string): boolean {
 }
 
 /**
- * Recursively collects scannable TypeScript source files under a directory,
- * excluding generated shims (`*.gen.d.ts`, `*.d.ts`) and skip-listed folders.
- * @param dir Directory to walk.
- * @returns Absolute paths of every scannable `.ts` file beneath it.
- */
-function collectFiles(dir: string): string[] {
-  const found: string[] = [];
-  for (const entry of readdirSync(dir, { withFileTypes: true })) {
-    if (SKIP_SEGMENTS.has(entry.name)) continue;
-    const full = join(dir, entry.name);
-    if (entry.isDirectory()) {
-      found.push(...collectFiles(full));
-    } else if (entry.name.endsWith(".ts") && !entry.name.endsWith(".d.ts")) {
-      found.push(full);
-    }
-  }
-  return found;
-}
-
-/**
  * Scans one file for SCREAMING_SNAKE object/array-literal constants that belong
  * in a constants.ts. Files named constants.ts are the designated home and skipped.
  * @param filePath Absolute path of the file to scan.
@@ -98,34 +72,25 @@ function scanFile(filePath: string): Violation | null {
  * formatter/controller/component modules focused on behaviour, not lookup data.
  */
 function main(): void {
-  const files = SOURCE_DIRS.flatMap(collectFiles);
+  const files = SOURCE_DIRS.flatMap(dir => collectFiles(dir, [".ts"]));
   const violations = files
     .map(scanFile)
     .filter((violation): violation is Violation => violation !== null);
 
-  console.log(
+  reportViolations(
     `Scanning ${files.length} frontend file(s) for misplaced data constants...`,
-  );
-
-  if (violations.length === 0) {
-    console.log("All frontend data constants live in a constants.ts.");
-    process.exit(0);
-  }
-
-  console.log();
-  for (const violation of violations) {
-    const names = violation.constants
-      .map(entry => `${entry.name} (l.${entry.line})`)
-      .join(", ");
-    console.log(`${violation.filePath}  —  ${names}`);
-  }
-  console.log(
+    "All frontend data constants live in a constants.ts.",
+    violations.map(violation => {
+      const names = violation.constants
+        .map(entry => `${entry.name} (l.${entry.line})`)
+        .join(", ");
+      return `${violation.filePath}  —  ${names}`;
+    }),
     `\nFound object/array-literal constant(s) outside a constants.ts. Move ` +
       `each into the app's constants.ts (e.g. app/connection-manager/webapp/` +
       `model/constants.ts), grouped under an \`as const\` namespace. Scalar ` +
       `one-offs (a single fragment/route name) may stay local.`,
   );
-  process.exit(1);
 }
 
 main();

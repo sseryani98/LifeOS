@@ -1,6 +1,6 @@
 import type cds from "@sap/cds";
 
-import { ACTORS, STORY_REFERENCE } from "../../../shared/data/world.js";
+import { readDerivedMilestoneStatus } from "../../../shared/support/readTracker.js";
 import {
   clearWorld,
   seedCanonicalWorld,
@@ -11,12 +11,9 @@ import {
   readTypescriptLever,
   trackerServer,
 } from "../../../shared/support/trackerHarness.js";
-import { CODE_QUALITY_COMPLETE, STAGE } from "../data/chainStates.js";
-import {
-  buildVerbContext,
-  expectFailure,
-} from "../support/verbHarness.js";
-import { completeStage } from "../../../../mcp/verbs/completeStage.js";
+import { WHOLE_CHAIN_COMPLETE } from "../data/chainStates.js";
+import { ORPHAN_DEFECT, PATHS } from "../data/writePayloads.js";
+import { postExpectingRejection } from "../support/odataHarness.js";
 
 describe("the harness lever", () => {
   let service: cds.Service;
@@ -31,19 +28,20 @@ describe("the harness lever", () => {
     expect(readTypescriptLever()).toBe("true");
   });
 
-  /** With the lever missing the handlers never register, so this rejection is the lever's own proof. */
-  it("has the service implementation loaded, proven by a handler that fires", async () => {
+  /** Both halves are the lever's own proof: generic CRUD derives no status and refuses no orphan. */
+  it("has the service implementation loaded, proven by a derivation and a guard", async () => {
     await clearWorld();
     const world = await seedCanonicalWorld();
-    await setChainStates(world.milestoneId, CODE_QUALITY_COMPLETE);
+    await setChainStates(world.milestoneId, WHOLE_CHAIN_COMPLETE);
 
-    const result = expectFailure(
-      await completeStage(buildVerbContext(service, ACTORS.IMPLEMENTER), {
-        story: STORY_REFERENCE,
-        stage: STAGE.CODE_QUALITY,
-      }),
-    );
+    const derived = await readDerivedMilestoneStatus(service, world.milestoneId);
+    const rejected = await postExpectingRejection(PATHS.DEFECTS, {
+      ...ORPHAN_DEFECT,
+      workspace_ID: world.workspaceId,
+    });
 
-    expect(result.code).toBe("verb.stage.alreadyComplete");
+    expect(derived).toBe("done");
+    expect(rejected.status).toBe(400);
+    expect(rejected.code).toBe("tracker.defect.scopeRequired");
   });
 });

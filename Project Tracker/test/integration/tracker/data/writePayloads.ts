@@ -1,3 +1,5 @@
+import { WORLD } from "../../../shared/data/world.js";
+
 /** The service paths the read-path suite writes to and reads from. */
 export const PATHS = {
   DEFECTS: "/service/trackerSvcs/Defects",
@@ -37,6 +39,35 @@ export const SECOND_STORY = {
   description: "Categorization rules",
   shipsUi: false,
   position: 20,
+} as const;
+
+/** A story that ships UI, so its chain materialises the one Conditional stage. */
+export const UI_STORY = {
+  storyId: "RPT-010",
+  fricewType_code: "Report",
+  description: "Valuation report page",
+  shipsUi: true,
+  position: 30,
+} as const;
+
+/** The qualified reference the verbs address that story by. */
+export const UI_STORY_REFERENCE = `${WORLD.WORKSPACE.slug}/${UI_STORY.storyId}`;
+
+/** A sprint completed properly, for patching one of its facts away afterwards. */
+export const COMPLETE_INITIATIVE_WITH_FACTS = {
+  name: "W1-S8",
+  goal: "Closed and recorded",
+  branch: "sprint/W1-S8",
+  position: 80,
+  status_code: "Complete",
+  mergeCommit: "abc1234",
+  tag: "v0.8",
+} as const;
+
+/** The two git facts a sprint records before being marked complete. */
+export const COMPLETION_FACTS_PATCH = {
+  mergeCommit: "def5678",
+  tag: "v0.9",
 } as const;
 
 /** A defect with neither of the two links a defect must carry one of. */

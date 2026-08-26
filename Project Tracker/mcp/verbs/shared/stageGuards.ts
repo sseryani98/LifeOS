@@ -1,11 +1,12 @@
 import { CODES } from "../../../srv/modules/shared/constants.js";
 
-import { GUARD, PLANNING, VERB_KEYS } from "./constants.js";
+import { GUARD, HTTP, VERB_KEYS } from "./constants.js";
 import { parseStoryReference } from "./addressing.js";
 import { rejectVerb, resolveMessage } from "./envelope.js";
 import type { TrackerGateway } from "./trackerGateway.js";
 import type {
   ChainRow,
+  InitiativeRow,
   MilestoneRow,
   NextAction,
   SubtaskRow,
@@ -21,7 +22,7 @@ import type {
 export function assertCallerIdentity(actor: string): string {
   const trimmed = (actor ?? "").trim();
   if (!trimmed) {
-    rejectVerb(PLANNING.HTTP_BAD_REQUEST, VERB_KEYS.IDENTITY_MISSING);
+    rejectVerb(HTTP.BAD_REQUEST, VERB_KEYS.IDENTITY_MISSING);
   }
   return trimmed;
 }
@@ -34,7 +35,7 @@ export function assertCallerIdentity(actor: string): string {
 export function assertStageNotComplete(task: ChainRow): void {
   if (task.status_code !== CODES.TASK_STATUS.COMPLETE) return;
   rejectVerb(
-    PLANNING.HTTP_CONFLICT,
+    HTTP.CONFLICT,
     VERB_KEYS.STAGE_ALREADY_COMPLETE,
     [task.step_code, task.status_code, task.completedAt ?? ""],
     {
@@ -65,7 +66,7 @@ export function assertStageNotBlocked(chain: ChainRow[], task: ChainRow): void {
     blocking.map(row => row.driver).join(", "),
   ]);
   rejectVerb(
-    PLANNING.HTTP_CONFLICT,
+    HTTP.CONFLICT,
     VERB_KEYS.STAGE_BLOCKED,
     [task.step_code],
     {
@@ -83,7 +84,7 @@ export function assertStageNotBlocked(chain: ChainRow[], task: ChainRow): void {
 export function assertStageStarted(task: ChainRow): void {
   if (task.status_code !== CODES.TASK_STATUS.NOT_STARTED) return;
   rejectVerb(
-    PLANNING.HTTP_CONFLICT,
+    HTTP.CONFLICT,
     VERB_KEYS.STAGE_NOT_STARTED,
     [task.step_code],
     {
@@ -121,7 +122,7 @@ export function resolveStage(chain: ChainRow[], stepCode: string): ChainRow {
   const task = chain.find(row => row.step_code === stepCode);
   if (!task) {
     rejectVerb(
-      PLANNING.HTTP_NOT_FOUND,
+      HTTP.NOT_FOUND,
       VERB_KEYS.TARGET_NOT_FOUND,
       ["stage", stepCode, chain.map(row => row.step_code).join(", ")],
       { target: stepCode },
@@ -143,7 +144,7 @@ export function resolveSubtask(
   const subtask = subtasks.find(row => row.step_code === stepCode);
   if (!subtask) {
     rejectVerb(
-      PLANNING.HTTP_NOT_FOUND,
+      HTTP.NOT_FOUND,
       VERB_KEYS.TARGET_NOT_FOUND,
       ["step", stepCode, subtasks.map(row => row.step_code).join(", ")],
       { target: stepCode },
@@ -190,13 +191,37 @@ export async function resolveStoryContext(
   const milestone = await gateway.readMilestone(workspace.ID, storyId);
   if (!milestone) {
     rejectVerb(
-      PLANNING.HTTP_NOT_FOUND,
+      HTTP.NOT_FOUND,
       VERB_KEYS.TARGET_NOT_FOUND,
       ["story", storyId, workspace.slug],
       { target: storyId },
     );
   }
   return { workspace, milestone };
+}
+
+/**
+ * Resolves a sprint-scoped write's target: the one rule saying sprint scope
+ * means the workspace's active initiative, shared by every verb that files a
+ * register row against the sprint.
+ * @param gateway The gateway the reads run through.
+ * @param slug The workspace slug the caller supplied.
+ * @returns The workspace and its active initiative.
+ */
+export async function resolveActiveSprint(
+  gateway: TrackerGateway,
+  slug: string,
+): Promise<{ workspace: WorkspaceRow; initiative: InitiativeRow }> {
+  const workspace = await resolveWorkspace(gateway, slug);
+  const initiative = await gateway.readActiveInitiative(workspace.ID);
+  if (!initiative) {
+    rejectVerb(HTTP.NOT_FOUND, VERB_KEYS.TARGET_NOT_FOUND, [
+      "active sprint",
+      workspace.slug,
+      "",
+    ]);
+  }
+  return { workspace, initiative };
 }
 
 /**
@@ -212,7 +237,7 @@ export async function resolveWorkspace(
   const workspace = await gateway.readWorkspaceBySlug(slug);
   if (!workspace) {
     rejectVerb(
-      PLANNING.HTTP_NOT_FOUND,
+      HTTP.NOT_FOUND,
       VERB_KEYS.TARGET_NOT_FOUND,
       ["workspace", slug, ""],
       { target: slug },

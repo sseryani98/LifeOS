@@ -44,6 +44,8 @@ export interface VerbFailure {
   target?: string;
   remediation?: string;
   rule?: string;
+  /** Present and true only when the store itself was unreachable. */
+  retryable?: boolean;
 }
 
 /** Either envelope. */

@@ -11,7 +11,7 @@ import type {
 } from "./shared/types.js";
 
 /** The tool schema, as the transport advertises it. */
-export const inputShape = {
+const inputShape = {
   story: z
     .string()
     .optional()

@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import { ENTITIES } from "../../../srv/modules/shared/constants.js";
+import { CODES, ENTITIES } from "../../../srv/modules/shared/constants.js";
 
 import type {
   ActivityEvent,
@@ -147,7 +147,7 @@ export class TrackerGateway {
     const rows = (await this.runner.run(
       SELECT.from(ENTITIES.INITIATIVE).where({
         workspace_ID: workspaceId,
-        status_code: "Active",
+        status_code: CODES.INITIATIVE_STATUS.ACTIVE,
       }),
     )) as InitiativeRow[];
     return rows[0];
@@ -229,7 +229,9 @@ export class TrackerGateway {
   }
 
   /**
-   * Reads one story by its identifier inside a workspace.
+   * Reads one story by its identifier inside a workspace, as its own filtered
+   * statement: this is the hot path every story-addressed verb resolves
+   * through, so it must not scan the whole workspace for one row.
    * @param workspaceId The workspace the story belongs to.
    * @param storyId The story identifier.
    * @returns The milestone row, or undefined when no such story exists.
@@ -238,8 +240,13 @@ export class TrackerGateway {
     workspaceId: string,
     storyId: string,
   ): Promise<MilestoneRow | undefined> {
-    const milestones = await this.readMilestones(workspaceId);
-    return milestones.find(row => row.storyId === storyId);
+    const rows = (await this.runner.run(
+      SELECT.from(ENTITIES.MILESTONE).where({
+        storyId,
+        "initiative.workspace_ID": workspaceId,
+      }),
+    )) as MilestoneRow[];
+    return rows[0];
   }
 
   /**

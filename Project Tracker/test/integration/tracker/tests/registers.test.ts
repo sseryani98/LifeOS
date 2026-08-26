@@ -8,14 +8,19 @@ import { recordTestRun } from "../../../../mcp/verbs/recordTestRun.js";
 import { resolveDefect } from "../../../../mcp/verbs/resolveDefect.js";
 import {
   ACTORS,
+  BAD_SEVERITY,
   DECISION_INPUT,
   DECISION_WITHOUT_OPTIONS,
   DEFECT_INPUT,
   DEFECT_RESOLUTION,
   DEFECT_WITHOUT_REFERENCES,
+  INVALID_EXECUTED_AT,
   MINIMAL_TEST_RUN_METRICS,
+  OFFSET_EXECUTED_AT,
   SPRINT_PLAN,
+  SPRINT_PLAN_FAILING_MIDWAY,
   SPRINT_PLAN_WITH_DUPLICATE_STORY,
+  SPRINT_PLAN_WITH_REPEATED_STORY,
   STORY_REFERENCE,
   TEST_RUN_EXECUTED_AT,
   TEST_RUN_METRICS,
@@ -23,6 +28,8 @@ import {
   WORLD,
 } from "../../../shared/data/world.js";
 import {
+  countAllMilestones,
+  countDefectsOf,
   countInitiativesOf,
   readActivityLog,
   readDecisionById,
@@ -45,6 +52,7 @@ import {
 } from "../../../shared/support/trackerHarness.js";
 import {
   buildSprintPlanInput,
+  buildStageWithoutStoryTestRunInput,
   buildStoryTestRunInput,
   buildWorkspaceTestRunInput,
 } from "../../../shared/support/verbInputs.js";
@@ -89,12 +97,32 @@ describe("registers", () => {
       }),
     );
     const closed = await readDefectById(defectId);
+    const events = await readActivityLog(world.workspaceId);
 
     expect(refused.status).toBe(400);
     expect(refused.code).toBe("verb.defect.resolutionRequired");
     expect(stillOpen.status_code).toBe("Open");
     expect(closed.status_code).toBe("Closed");
     expect(closed.resolution).toBe(DEFECT_RESOLUTION);
+    expect(events.map(event => event.kind_code)).toEqual([
+      "defectLogged",
+      "defectResolved",
+    ]);
+  });
+
+  /** A CAP handler's own 409 is a methodology answer; reported as a lost store it would be retried. */
+  it("carries a handler's duplicate-name rejection through the envelope unchanged", async () => {
+    const result = expectFailure(
+      await planSprint(context, {
+        ...buildSprintPlanInput(),
+        name: WORLD.INITIATIVE.name,
+      } as never),
+    );
+
+    expect(result.status).toBe(409);
+    expect(result.code).toBe("verb.initiative.duplicate");
+    expect(result.retryable).toBeUndefined();
+    expect(await countInitiativesOf(world.workspaceId)).toBe(1);
   });
 
   /** A sprint and its stories are one act, so the register must record one event and not four. */
@@ -128,6 +156,51 @@ describe("registers", () => {
     expect(result.status).toBe(409);
     expect(result.code).toBe("verb.story.duplicate");
     expect(await countInitiativesOf(world.workspaceId)).toBe(1);
+  });
+
+  /** The same identifier twice in one plan breaks per-workspace addressing just as surely. */
+  it("refuses a plan that carries one story identifier twice", async () => {
+    const result = expectFailure(
+      await planSprint(
+        context,
+        buildSprintPlanInput([...SPRINT_PLAN_WITH_REPEATED_STORY]) as never,
+      ),
+    );
+
+    expect(result.status).toBe(409);
+    expect(result.code).toBe("verb.story.duplicate");
+    expect(await countInitiativesOf(world.workspaceId)).toBe(1);
+  });
+
+  /** A plan is one act: dying on story two must leave no sprint, or the register holds an orphan. */
+  it("rolls the whole plan back when a later story cannot be written", async () => {
+    const before = await countAllMilestones();
+
+    const result = expectFailure(
+      await planSprint(
+        context,
+        buildSprintPlanInput([...SPRINT_PLAN_FAILING_MIDWAY]) as never,
+      ),
+    );
+
+    expect(result.status).toBe(400);
+    expect(await countInitiativesOf(world.workspaceId)).toBe(1);
+    expect(await countAllMilestones()).toBe(before);
+    expect(await readActivityLog(world.workspaceId)).toHaveLength(0);
+  });
+
+  /** A severity outside the code list must be refused, or the register groups defects it cannot. */
+  it("refuses a defect whose severity is outside the code list", async () => {
+    const result = expectFailure(
+      await logDefect(context, {
+        story: STORY_REFERENCE,
+        ...DEFECT_INPUT,
+        severity: BAD_SEVERITY,
+      }),
+    );
+
+    expect(result.status).toBe(400);
+    expect(await countDefectsOf(world.workspaceId)).toBe(0);
   });
 
   /** A defect must carry exactly one scope, or there is nothing to resolve it against. */
@@ -185,7 +258,13 @@ describe("registers", () => {
     const workspaceRow = await readDecisionById(onWorkspace.decisionId as string);
     const storyRow = await readDecisionById(onStory.decisionId as string);
     const sprintRow = await readDecisionById(onSprint.decisionId as string);
+    const events = await readActivityLog(world.workspaceId);
 
+    expect(events.map(event => event.kind_code)).toEqual([
+      "decisionRecorded",
+      "decisionRecorded",
+      "decisionRecorded",
+    ]);
     expect(workspaceRow.milestone_ID).toBeNull();
     expect(workspaceRow.initiative_ID).toBeNull();
     expect(storyRow.milestone_ID).toBe(world.milestoneId);
@@ -219,10 +298,15 @@ describe("registers", () => {
       await recordTestRun(context, buildWorkspaceTestRunInput() as never),
     );
     const runs = await readTestRunsOf(world.workspaceId);
+    const events = await readActivityLog(world.workspaceId);
 
     expect(runs).toHaveLength(2);
     expect(runs.filter(run => run.task_ID !== null)).toHaveLength(1);
     expect(runs.filter(run => run.initiative_ID !== null)).toHaveLength(1);
+    expect(events.map(event => event.kind_code)).toEqual([
+      "testRunRecorded",
+      "testRunRecorded",
+    ]);
   });
 
   /** The optional halves of a register row are optional, so leaving them out must still write a row. */
@@ -280,6 +364,62 @@ describe("registers", () => {
 
     expect(result.status).toBe(400);
     expect(result.code).toBe("verb.testrun.scopeRequired");
+  });
+
+  /** The mirror case: a stage with no story must be refused, never silently filed to the sprint. */
+  it("refuses a test run naming a stage without its story", async () => {
+    const result = expectFailure(
+      await recordTestRun(
+        context,
+        buildStageWithoutStoryTestRunInput(STAGE.BUILD),
+      ),
+    );
+    const runs = await readTestRunsOf(world.workspaceId);
+
+    expect(result.status).toBe(400);
+    expect(result.code).toBe("verb.testrun.scopeRequired");
+    expect(runs).toHaveLength(0);
+  });
+
+  /** An offset timestamp names one instant; storing its wall-clock digits as UTC would be another. */
+  it("normalises an offset executedAt to UTC and refuses an unparseable one", async () => {
+    expectSuccess(
+      await recordTestRun(context, {
+        workspace: WORLD.WORKSPACE.slug,
+        metrics: { ...TEST_RUN_METRICS },
+        executedAt: OFFSET_EXECUTED_AT.SUPPLIED,
+      }),
+    );
+    const refused = expectFailure(
+      await recordTestRun(context, {
+        workspace: WORLD.WORKSPACE.slug,
+        metrics: { ...TEST_RUN_METRICS },
+        executedAt: INVALID_EXECUTED_AT,
+      }),
+    );
+    const runs = await readTestRunsOf(world.workspaceId);
+
+    expect(runs).toHaveLength(1);
+    expect(String(runs[0].executedAt)).toContain(
+      OFFSET_EXECUTED_AT.STORED.slice(0, 19),
+    );
+    expect(refused.status).toBe(400);
+    expect(refused.code).toBe("verb.timestamp.invalid");
+  });
+
+  /** The register row and the envelope must agree on when the decision landed. */
+  it("stores the explicit decidedAt the verb writes", async () => {
+    const result = expectSuccess(
+      await recordDecision(context, {
+        target: WORLD.WORKSPACE.slug,
+        ...DECISION_INPUT,
+      }),
+    );
+    const row = await readDecisionById(result.decisionId as string);
+
+    expect(String(row.decidedAt)).toContain(
+      String(result.timestamp).slice(0, 19),
+    );
   });
 
   /** Closing a workflow step has to be recorded, or the open-step warning can never clear. */

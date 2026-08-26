@@ -1,12 +1,12 @@
-import { readdirSync, readFileSync } from "fs";
+import { readFileSync } from "fs";
 import { join, relative } from "path";
+
+import { collectFiles, reportViolations } from "./lib/lintWalk.js";
 
 const ROOT_DIR = process.cwd();
 
 /** Event handlers live in freestyle controllers and FE extensions only. */
 const SOURCE_DIRS = [join(ROOT_DIR, "app")];
-
-const SKIP_SEGMENTS = new Set(["node_modules", "gen", "dist", "coverage", ".git"]);
 
 /** Only `controller/` and `ext/` hold XML-bound handlers (V+C layers). */
 const HANDLER_DIRS = ["controller", "ext"];
@@ -29,20 +29,6 @@ interface Violation {
   filePath: string;
   line: number;
   handler: string;
-}
-
-function collectHandlerFiles(dir: string): string[] {
-  const found: string[] = [];
-  for (const entry of readdirSync(dir, { withFileTypes: true })) {
-    if (SKIP_SEGMENTS.has(entry.name)) continue;
-    const full = join(dir, entry.name);
-    if (entry.isDirectory()) {
-      found.push(...collectHandlerFiles(full));
-    } else if (entry.name.endsWith(".ts") && !entry.name.endsWith(".d.ts")) {
-      found.push(full);
-    }
-  }
-  return found;
 }
 
 /** True when the file sits under a `controller/` or `ext/` path segment. */
@@ -70,31 +56,25 @@ function scanFile(filePath: string): Violation[] {
 }
 
 function main(): void {
-  const files = SOURCE_DIRS.flatMap(collectHandlerFiles).filter(isHandlerFile);
+  const files = SOURCE_DIRS.flatMap(dir => collectFiles(dir, [".ts"])).filter(
+    isHandlerFile,
+  );
   const violations = files.flatMap(scanFile);
 
-  console.log(`Scanning ${files.length} controller/extension file(s) for event-type annotations...`);
-
-  if (violations.length === 0) {
-    console.log("No handler is typed with the global DOM Event.");
-    process.exit(0);
-  }
-
-  console.log();
-  for (const violation of violations) {
-    console.log(
-      `${violation.filePath}:${violation.line}  "${violation.handler}"  ` +
+  reportViolations(
+    `Scanning ${files.length} controller/extension file(s) for event-type annotations...`,
+    "No handler is typed with the global DOM Event.",
+    violations.map(
+      violation =>
+        `${violation.filePath}:${violation.line}  "${violation.handler}"  ` +
         `→ first parameter typed with the global DOM Event`,
-    );
-  }
-  console.log(
+    ),
     `\nFound ${violations.length} handler(s) typed with the global DOM Event. A ` +
       `UI5 handler receives a control event (e.g. Button$PressEvent from ` +
       `"sap/m/Button"), never lib.dom's Event. Import the control's event type; ` +
       `TypeScript then enforces the specific shape (matching the ui5plugin ` +
       `EventTypeLinter in-editor).`,
   );
-  process.exit(1);
 }
 
 main();

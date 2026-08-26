@@ -2,6 +2,8 @@ import { TrackerGateway } from "../../../../mcp/verbs/shared/trackerGateway.js";
 import {
   ACTIVITY_EVENTS,
   INITIATIVE_ROWS,
+  MILESTONE_ORDER,
+  MILESTONE_ROWS,
   QUEUE_ROWS,
   WORKSPACE_ROWS,
 } from "../data/verbFixtures.js";
@@ -32,15 +34,20 @@ describe("the verb layer's data access", () => {
     );
   });
 
-  /** Every insert stamps its own key, so the caller has an identifier without reading the row back. */
+  /** The identifier returned must be the one on the row, or the next verb addresses a key that names nothing. */
   it("returns the identifier it wrote for each created row", async () => {
-    const gateway = new TrackerGateway(buildRecordingRunner());
+    const runner = buildRecordingRunner();
+    const gateway = new TrackerGateway(runner);
 
     const defectId = await gateway.insertDefect({});
     const decisionId = await gateway.insertDecision({});
     const initiativeId = await gateway.insertInitiative({});
     const milestoneId = await gateway.insertMilestone({});
 
+    expect(readInsertedEntries(runner.statements[0])[0].ID).toBe(defectId);
+    expect(readInsertedEntries(runner.statements[1])[0].ID).toBe(decisionId);
+    expect(readInsertedEntries(runner.statements[2])[0].ID).toBe(initiativeId);
+    expect(readInsertedEntries(runner.statements[3])[0].ID).toBe(milestoneId);
     for (const id of [defectId, decisionId, initiativeId, milestoneId]) {
       expect(id).toMatch(/^[0-9a-f-]{36}$/);
     }
@@ -53,6 +60,17 @@ describe("the verb layer's data access", () => {
 
     expect(await gateway.readMilestones("workspace-1")).toEqual([]);
     expect(runner.statements).toHaveLength(1);
+  });
+
+  /** The story list is the build sequence the dashboard reads, so it must group by sprint rather than sort flat. */
+  it("orders stories by sprint position, then by story position within it", async () => {
+    const gateway = new TrackerGateway(
+      buildRecordingRunner([INITIATIVE_ROWS, MILESTONE_ROWS]),
+    );
+
+    const milestones = await gateway.readMilestones("workspace-1");
+
+    expect(milestones.map(row => row.storyId)).toEqual([...MILESTONE_ORDER]);
   });
 
   /** The queue drives what to do next, so its order is the answer rather than a presentation detail. */

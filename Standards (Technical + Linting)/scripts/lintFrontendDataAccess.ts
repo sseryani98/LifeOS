@@ -1,18 +1,12 @@
-import { readdirSync, readFileSync } from "fs";
+import { readFileSync } from "fs";
 import { join, relative } from "path";
+
+import { collectFiles, reportViolations } from "./lib/lintWalk.js";
 
 const ROOT_DIR = process.cwd();
 
 /** The UI5 frontend is the surface this rule governs. */
 const SOURCE_DIRS = [join(ROOT_DIR, "app")];
-
-const SKIP_SEGMENTS = new Set([
-  "node_modules",
-  "gen",
-  "dist",
-  "coverage",
-  ".git",
-]);
 
 /**
  * The view layer: freestyle controllers and Fiori Elements extensions. OData
@@ -43,26 +37,6 @@ const MODEL_VAR_ASSIGN = /\b(\w{3,})\s*=\s*[^=;][^;]*\.getModel\s*\(/g;
 interface Violation {
   filePath: string;
   hits: { api: string; line: number }[];
-}
-
-/**
- * Recursively collects scannable TypeScript source files under a directory,
- * excluding generated shims (`*.d.ts`) and skip-listed folders.
- * @param dir Directory to walk.
- * @returns Absolute paths of every scannable `.ts` file beneath it.
- */
-function collectFiles(dir: string): string[] {
-  const found: string[] = [];
-  for (const entry of readdirSync(dir, { withFileTypes: true })) {
-    if (SKIP_SEGMENTS.has(entry.name)) continue;
-    const full = join(dir, entry.name);
-    if (entry.isDirectory()) {
-      found.push(...collectFiles(full));
-    } else if (entry.name.endsWith(".ts") && !entry.name.endsWith(".d.ts")) {
-      found.push(full);
-    }
-  }
-  return found;
 }
 
 /**
@@ -109,36 +83,27 @@ function scanFile(filePath: string): Violation | null {
  * (MVC), the way ConnectionService owns AdminService for the Connection Manager.
  */
 function main(): void {
-  const files = SOURCE_DIRS.flatMap(collectFiles).filter(file =>
-    VIEW_LAYER_DIR.test(relative(ROOT_DIR, file).replace(/\\/g, "/")),
+  const files = SOURCE_DIRS.flatMap(dir => collectFiles(dir, [".ts"])).filter(
+    file => VIEW_LAYER_DIR.test(relative(ROOT_DIR, file).replace(/\\/g, "/")),
   );
   const violations = files
     .map(scanFile)
     .filter((violation): violation is Violation => violation !== null);
 
-  console.log(
+  reportViolations(
     `Scanning ${files.length} view-layer file(s) for direct OData calls...`,
-  );
-
-  if (violations.length === 0) {
-    console.log("No OData calls in the view layer — all backend access is in model/.");
-    process.exit(0);
-  }
-
-  console.log();
-  for (const violation of violations) {
-    const names = violation.hits
-      .map(hit => `${hit.api} (l.${hit.line})`)
-      .join(", ");
-    console.log(`${violation.filePath}  —  ${names}`);
-  }
-  console.log(
+    "No OData calls in the view layer — all backend access is in model/.",
+    violations.map(violation => {
+      const names = violation.hits
+        .map(hit => `${hit.api} (l.${hit.line})`)
+        .join(", ");
+      return `${violation.filePath}  —  ${names}`;
+    }),
     `\nFound OData call(s) in the view layer. Move backend access into the app's ` +
       `model/ service class (e.g. \`model/XxxService.ts\`), expose an intent-named ` +
       `method, and call it from the controller: ` +
       `\`private _service!: XxxService\` set in onInit, then \`this._service.doThing()\`.`,
   );
-  process.exit(1);
 }
 
 main();

@@ -25,11 +25,13 @@ import {
   trackerServer,
 } from "../../../shared/support/trackerHarness.js";
 import {
+  BLOCKED_AND_COMPLETE,
   BUILD_IN_PROGRESS,
   CHAIN_TIMES,
   CLOSED_STEPS,
   CODE_QUALITY_COMPLETE,
   CODE_QUALITY_IN_PROGRESS,
+  COMMIT_LAST_OPEN,
   EMPTY_REASON,
   HUMAN_REVIEW_OPEN,
   OPEN_STEP,
@@ -38,6 +40,12 @@ import {
   TWO_STAGES_STARTABLE,
   WHOLE_CHAIN_COMPLETE,
 } from "../data/chainStates.js";
+import {
+  SECOND_STORY,
+  UI_STORY,
+  UI_STORY_REFERENCE,
+} from "../data/writePayloads.js";
+import { seedExtraStory } from "../support/seedExtraStory.js";
 import {
   buildVerbContext,
   expectFailure,
@@ -79,6 +87,7 @@ describe("stage lifecycle", () => {
     expect(task.completedAt).toBeTruthy();
     expect(events).toHaveLength(1);
     expect(events[0].actor).toBe(ACTORS.IMPLEMENTER);
+    expect(events[0].kind_code).toBe("stageCompleted");
   });
 
   /** What a stage concluded is the only prose the chain carries, so it has to reach the row. */
@@ -170,10 +179,12 @@ describe("stage lifecycle", () => {
     );
     const reopened = await readTaskByCode(world.milestoneId, STAGE.CODE_QUALITY);
     const later = await readTaskByCode(world.milestoneId, STAGE.TEST_QUALITY);
+    const events = await readActivityLog(world.workspaceId);
 
     expect(reopened.status_code).toBe("inProgress");
     expect(reopened.completedAt).toBeNull();
     expect(later.completedAt).toBe(before.completedAt);
+    expect(events[0].kind_code).toBe("stageReopened");
     expect(
       await readDerivedMilestoneStatus(service, world.milestoneId),
     ).not.toBe("done");
@@ -198,6 +209,25 @@ describe("stage lifecycle", () => {
     expect(task.completedAt).toBe(CHAIN_TIMES.CODE_QUALITY_DONE);
   });
 
+  /** Reopening a stage that never completed would be an ungated start, skipping the blocking guard. */
+  it("refuses to reopen a stage that is not complete", async () => {
+    await setChainStates(world.milestoneId, HUMAN_REVIEW_OPEN);
+
+    const result = expectFailure(
+      await reopenStage(context, {
+        story: STORY_REFERENCE,
+        stage: STAGE.COMMIT,
+        reason: REOPEN_REASON,
+      }),
+    );
+    const task = await readTaskByCode(world.milestoneId, STAGE.COMMIT);
+
+    expect(result.status).toBe(409);
+    expect(result.code).toBe("verb.stage.notComplete");
+    expect(task.status_code).toBe("inProgress");
+    expect(await readActivityLog(world.workspaceId)).toHaveLength(0);
+  });
+
   /** A methodology rejection has to name what clears it, or the agent has nothing to act on. */
   it("names the blocking stage and its command in the remediation", async () => {
     await setChainStates(world.milestoneId, HUMAN_REVIEW_OPEN);
@@ -217,8 +247,33 @@ describe("stage lifecycle", () => {
     expect(result.remediation).not.toContain(STAGE.DOCUMENTATION);
   });
 
-  /** Concurrent writes must serialize, or two events share a timestamp and the register loses its order. */
-  it("serializes concurrent writes into strictly ordered events", async () => {
+  /** Unserialized, both callers read the same open stage and both complete it, twice over. */
+  it("serializes two completions of one stage into a success and a conflict", async () => {
+    await setChainStates(world.milestoneId, CODE_QUALITY_IN_PROGRESS);
+
+    const results = await Promise.all([
+      completeStage(context, {
+        story: STORY_REFERENCE,
+        stage: STAGE.CODE_QUALITY,
+      }),
+      completeStage(context, {
+        story: STORY_REFERENCE,
+        stage: STAGE.CODE_QUALITY,
+      }),
+    ]);
+    const refused = results.filter(result => !result.ok);
+    const events = await readActivityLog(world.workspaceId);
+
+    expect(results.filter(result => result.ok)).toHaveLength(1);
+    expect(refused).toHaveLength(1);
+    expect(expectFailure(refused[0]).status).toBe(409);
+    expect(expectFailure(refused[0]).code).toBe("verb.stage.alreadyComplete");
+    expect(events).toHaveLength(1);
+    expect(events[0].kind_code).toBe("stageCompleted");
+  });
+
+  /** Each verb labels its own event; a start filed under any other kind is history nothing can correct. */
+  it("labels both concurrent stage starts as started events", async () => {
     await setChainStates(world.milestoneId, TWO_STAGES_STARTABLE);
 
     const results = await Promise.all([
@@ -232,7 +287,56 @@ describe("stage lifecycle", () => {
 
     results.forEach(result => expectSuccess(result));
     expect(events).toHaveLength(2);
-    expect(events[0].occurredAt).not.toBe(events[1].occurredAt);
-    expect(events[0].occurredAt < events[1].occurredAt).toBe(true);
+    expect(events.map(event => event.kind_code)).toEqual([
+      "stageStarted",
+      "stageStarted",
+    ]);
+  });
+
+  /** The guard order is the rule: told it is merely complete, a caller reopens a stage it should not. */
+  it("reports the block, not the completion, when both conditions hold", async () => {
+    await setChainStates(world.milestoneId, BLOCKED_AND_COMPLETE);
+
+    const result = expectFailure(
+      await completeStage(context, {
+        story: STORY_REFERENCE,
+        stage: STAGE.COMMIT,
+      }),
+    );
+
+    expect(result.code).toBe("verb.stage.blocked");
+    expect(result.rule).toBe("wfl.stage.predecessorOpen");
+  });
+
+  /** A conditional stage blocks like a required one, or a UI story commits without its UX test. */
+  it("refuses to commit a UI story whose conditional UX test never ran", async () => {
+    const uiStoryId = await seedExtraStory(world.initiativeId, UI_STORY);
+    await setChainStates(uiStoryId, COMMIT_LAST_OPEN);
+
+    const result = expectFailure(
+      await completeStage(context, {
+        story: UI_STORY_REFERENCE,
+        stage: STAGE.COMMIT,
+      }),
+    );
+
+    expect(result.code).toBe("verb.stage.blocked");
+    expect(result.rule).toBe("wfl.stage.predecessorOpen");
+    expect(result.remediation).toContain(STAGE.UX_TEST);
+  });
+
+  /** The next action is scoped to the story just written; a sibling's open chain is not this agent's. */
+  it("answers no next action when the written story is finished, though a sibling is untouched", async () => {
+    await seedExtraStory(world.initiativeId, SECOND_STORY);
+    await setChainStates(world.milestoneId, COMMIT_LAST_OPEN);
+
+    const result = expectSuccess(
+      await completeStage(context, {
+        story: STORY_REFERENCE,
+        stage: STAGE.COMMIT,
+      }),
+    );
+
+    expect(result.nextAction).toBeNull();
   });
 });

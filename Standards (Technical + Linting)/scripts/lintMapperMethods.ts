@@ -1,5 +1,7 @@
-import { readdirSync, readFileSync } from "fs";
+import { readFileSync } from "fs";
 import { join, relative } from "path";
+
+import { collectFiles, reportViolations } from "./lib/lintWalk.js";
 
 const ROOT_DIR = process.cwd();
 
@@ -8,14 +10,6 @@ const ROOT_DIR = process.cwd();
  * `{domain}Mapper.ts`; DataService row-shaping and app/ (UI5) are out of scope.
  */
 const SOURCE_DIRS = [join(ROOT_DIR, "srv")];
-
-const SKIP_SEGMENTS = new Set([
-  "node_modules",
-  "gen",
-  "dist",
-  "coverage",
-  ".git",
-]);
 
 /**
  * A returned object literal with at least this many fields read off a source
@@ -54,26 +48,6 @@ interface MapperMethod {
 interface Violation {
   filePath: string;
   methods: MapperMethod[];
-}
-
-/**
- * Recursively collects scannable TypeScript source files under a directory,
- * excluding generated shims (`*.d.ts`) and the skip-listed build/vendor folders.
- * @param dir Directory to walk.
- * @returns Absolute paths of every scannable `.ts` file beneath it.
- */
-function collectFiles(dir: string): string[] {
-  const found: string[] = [];
-  for (const entry of readdirSync(dir, { withFileTypes: true })) {
-    if (SKIP_SEGMENTS.has(entry.name)) continue;
-    const full = join(dir, entry.name);
-    if (entry.isDirectory()) {
-      found.push(...collectFiles(full));
-    } else if (entry.name.endsWith(".ts") && !entry.name.endsWith(".d.ts")) {
-      found.push(full);
-    }
-  }
-  return found;
 }
 
 /**
@@ -132,34 +106,27 @@ function scanFile(filePath: string): Violation | null {
  * dedicated `{domain}Mapper.ts` instead of bloating the orchestration layer.
  */
 function main(): void {
-  const files = SOURCE_DIRS.flatMap(collectFiles).filter(filePath =>
-    isGovernedFile(filePath.split(/[\\/]/).pop() ?? ""),
+  const files = SOURCE_DIRS.flatMap(dir => collectFiles(dir, [".ts"])).filter(
+    filePath => isGovernedFile(filePath.split(/[\\/]/).pop() ?? ""),
   );
   const violations = files
     .map(scanFile)
     .filter((violation): violation is Violation => violation !== null);
 
-  console.log(`Scanning ${files.length} Service file(s) for inline mappers...`);
-
-  if (violations.length === 0) {
-    console.log("No inline mapper methods found.");
-    process.exit(0);
-  }
-
-  console.log();
-  for (const violation of violations) {
-    const names = violation.methods
-      .map(entry => `${entry.name} (l.${entry.line}, ${entry.fields} mapped fields)`)
-      .join(", ");
-    console.log(`${violation.filePath}  —  ${names}`);
-  }
-  console.log(
+  reportViolations(
+    `Scanning ${files.length} Service file(s) for inline mappers...`,
+    "No inline mapper methods found.",
+    violations.map(violation => {
+      const names = violation.methods
+        .map(entry => `${entry.name} (l.${entry.line}, ${entry.fields} mapped fields)`)
+        .join(", ");
+      return `${violation.filePath}  —  ${names}`;
+    }),
     `\nFound inline data-mapping method(s). Move each into a ` +
       `\`{domain}Mapper.ts\` class (e.g. SimpleFINMapper.toTransactionRow) so ` +
       `Services stay orchestration-only. Scalar converters (epoch→ISO) are ` +
       `utilities, not mappers, and are exempt.`,
   );
-  process.exit(1);
 }
 
 main();

@@ -2,20 +2,41 @@ import { z } from "zod";
 
 import { deriveMilestoneStatus } from "../../srv/modules/tracker/milestoneStatus.js";
 
-import { PLANNING, VERB_KEYS } from "./shared/constants.js";
+import { HTTP, VERB_KEYS } from "./shared/constants.js";
 import { rejectVerb } from "./shared/envelope.js";
 import { runReadVerb } from "./shared/runVerb.js";
 import { resolveNextAction, resolveWorkspace } from "./shared/stageGuards.js";
 import type { TrackerGateway } from "./shared/trackerGateway.js";
 import type {
+  ChainRow,
+  InitiativeRow,
+  MilestoneRow,
+  NextAction,
+  SubtaskRow,
   VerbContext,
   VerbDefinition,
   VerbResult,
   WorkspaceRow,
 } from "./shared/types.js";
 
+/** A stage of the composed tree, with its steps nested on. */
+interface ComposedStage extends ChainRow {
+  subtasks: SubtaskRow[];
+}
+
+/** A story of the composed tree, with its derived status and its chain. */
+interface ComposedStory extends MilestoneRow {
+  status: string;
+  chain: ComposedStage[];
+}
+
+/** A sprint of the composed tree, with its stories nested on. */
+interface ComposedInitiative extends InitiativeRow {
+  milestones: ComposedStory[];
+}
+
 /** The tool schema, as the transport advertises it. */
-export const inputShape = {
+const inputShape = {
   workspace: z
     .string()
     .optional()
@@ -41,6 +62,12 @@ export async function projectView(
     const workspace = await _selectWorkspace(gateway, input.workspace);
     const initiatives = await _composeInitiatives(gateway, workspace.ID);
     const nextAction = _selectFirstNextAction(initiatives);
+    const [taskQueue, defects, decisions, activities] = await Promise.all([
+      gateway.readTaskQueue(workspace.ID),
+      gateway.readDefects(workspace.ID),
+      gateway.readDecisions(workspace.ID),
+      gateway.readActivities(workspace.ID),
+    ]);
     return {
       nextAction,
       extra: {
@@ -55,11 +82,11 @@ export async function projectView(
             health: null,
           },
           nextAction,
-          taskQueue: await gateway.readTaskQueue(workspace.ID),
+          taskQueue,
           initiatives,
-          defects: await gateway.readDefects(workspace.ID),
-          decisions: await gateway.readDecisions(workspace.ID),
-          activities: await gateway.readActivities(workspace.ID),
+          defects,
+          decisions,
+          activities,
         },
       },
     };
@@ -76,16 +103,16 @@ export async function projectView(
 async function _composeInitiatives(
   gateway: TrackerGateway,
   workspaceId: string,
-): Promise<Record<string, unknown>[]> {
+): Promise<ComposedInitiative[]> {
   const milestones = await gateway.readMilestones(workspaceId);
-  const composed: Record<string, unknown>[] = [];
+  const composed: ComposedInitiative[] = [];
   for (const initiative of await gateway.readInitiatives(workspaceId)) {
-    const stories = [];
+    const stories: ComposedStory[] = [];
     for (const milestone of milestones.filter(
       row => row.initiative_ID === initiative.ID,
     )) {
       const chain = await gateway.readChain(milestone.ID);
-      const stages = [];
+      const stages: ComposedStage[] = [];
       for (const task of chain) {
         stages.push({ ...task, subtasks: await gateway.readSubtasks(task.ID) });
       }
@@ -101,7 +128,9 @@ async function _composeInitiatives(
 }
 
 /**
- * Reads the workspace the caller named, or the only one there is.
+ * Reads the workspace the caller named, or the only one there is. Several
+ * workspaces with no slug is an ambiguity, rejected rather than silently
+ * resolved to any of them.
  * @param gateway The gateway the reads run through.
  * @param slug The workspace slug, when the caller supplied one.
  * @returns The workspace row.
@@ -113,10 +142,15 @@ async function _selectWorkspace(
   if (slug?.trim()) return resolveWorkspace(gateway, slug);
   const workspaces = await gateway.readWorkspaces();
   if (workspaces.length === 0) {
-    rejectVerb(PLANNING.HTTP_NOT_FOUND, VERB_KEYS.TARGET_NOT_FOUND, [
+    rejectVerb(HTTP.NOT_FOUND, VERB_KEYS.TARGET_NOT_FOUND, [
       "workspace",
       "",
       "",
+    ]);
+  }
+  if (workspaces.length > 1) {
+    rejectVerb(HTTP.BAD_REQUEST, VERB_KEYS.WORKSPACE_AMBIGUOUS, [
+      workspaces.map(row => row.slug).join(", "),
     ]);
   }
   return workspaces[0];
@@ -128,15 +162,11 @@ async function _selectWorkspace(
  * @returns The next action, or null when nothing is incomplete.
  */
 function _selectFirstNextAction(
-  initiatives: Record<string, unknown>[],
-): ReturnType<typeof resolveNextAction> {
+  initiatives: ComposedInitiative[],
+): NextAction | null {
   for (const initiative of initiatives) {
-    const stories = initiative.milestones as Record<string, unknown>[];
-    for (const story of stories) {
-      const resolved = resolveNextAction(
-        story.chain as Parameters<typeof resolveNextAction>[0],
-        story.storyId as string,
-      );
+    for (const story of initiative.milestones) {
+      const resolved = resolveNextAction(story.chain, story.storyId);
       if (resolved) return resolved;
     }
   }

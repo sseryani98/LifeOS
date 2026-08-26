@@ -109,6 +109,7 @@ export async function readDefectById(defectId: string): Promise<{
  */
 export async function readDecisionById(decisionId: string): Promise<{
   decision: string;
+  decidedAt: string;
   workspace_ID: string;
   initiative_ID: string | null;
   milestone_ID: string | null;
@@ -117,6 +118,7 @@ export async function readDecisionById(decisionId: string): Promise<{
     ID: decisionId,
   })) as {
     decision: string;
+    decidedAt: string;
     workspace_ID: string;
     initiative_ID: string | null;
     milestone_ID: string | null;
@@ -144,6 +146,18 @@ export async function readStoriesOf(
  */
 export async function countInitiativesOf(workspaceId: string): Promise<number> {
   const rows = (await SELECT.from(TABLE.INITIATIVE).where({
+    workspace_ID: workspaceId,
+  })) as unknown[];
+  return rows.length;
+}
+
+/**
+ * Counts the defects of a workspace.
+ * @param workspaceId The workspace to read.
+ * @returns How many defects it holds.
+ */
+export async function countDefectsOf(workspaceId: string): Promise<number> {
+  const rows = (await SELECT.from(TABLE.DEFECT).where({
     workspace_ID: workspaceId,
   })) as unknown[];
   return rows.length;
