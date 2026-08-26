@@ -612,9 +612,13 @@ Settle before or during Scaffold.
   "confirm on first deploy" — and a probe then inserted duplicate pairs inside rolled-back
   transactions: both fired with **`23505`**. D-174's lesson is why the deploy log was not the
   evidence.
-- **Test Quality (stage 3) ran and was cut short mid-Implement, but its writes stand and two of
-  them caught real bugs.** The suite went **90 → 137 tests in 17 suites**. Two authored tests failed
-  against the code, and both failures were the code's:
+- **Test Quality (stage 3) — 32 findings after dedup, 5 folded, and _nothing challenged_.** Five
+  reviewers (three lenses plus integration/mocks and functional-coverage), then one adversary per
+  bucket: **0 contested, 0 dropped**, so all **27** live findings were written. The run was killed
+  during Implement and its report died with it; the outcome was recovered from the workflow's
+  `journal.jsonl`, and each of the third bucket's ten items was then confirmed present in the tree
+  by the tests it prescribed. The suite went **90 → 137 tests in 17 suites**. Two authored tests
+  failed against the code, and both failures were the code's:
   **(1)** a CAP handler rejection reaches the verb layer as **`code: 409` — the number** — with the
   message key as `message` and **no `status` field at all**, so the envelope's rejection detection
   (written earlier the same session, from the shape `baseFacade.isRejection` checks) never matched
@@ -633,6 +637,12 @@ Settle before or during Scaffold.
   `lint:tracking-ids` in Financial Planner (**177 → 172**), which is exactly the drift being healed:
   three generated `srv/@cds-models/**/*.js` and two `app/**/*.gen.d.ts` that four linters skipped
   and one did not.
+- **What the new tests measured that the findings had guessed wrong.** A store-constraint backstop
+  is **not** a friendly rejection: the partial-update path that `checkInitiativeWrite` and
+  `checkMilestoneWrite` skip lands on `@assert.unique` and surfaces as **500 with a raw
+  `SQLITE_CONSTRAINT_UNIQUE` message that never names the offending value** — two findings had
+  predicted a 400 naming it. The constraint holds the invariant, which is what D-232 bought; it does
+  not carry a usable message, and that is now pinned by assertion rather than assumed.
 - **Still owed on this chain:** Functional Test (stage 4) and Human Review (stage 5). UX Test skips —
   `SPEC-01` ships no UI. `/pm-update` correctly finds nothing here (D-207).
 
