@@ -311,6 +311,17 @@ export default [
     },
   },
 
+  // === The shared linters themselves (this folder's scripts/) ===
+  // Exempt from the class-only rule and the keyword ban by Sandro's ruling. An
+  // absolute basePath, because a relative `scripts/**` also matches module scripts.
+  {
+    basePath: import.meta.dirname,
+    files: ["scripts/**/*.ts"],
+    rules: {
+      "no-restricted-syntax": ["error", ...restrictedSyntax],
+    },
+  },
+
   // === Test File Overrides ===
   {
     files: ["test/**/*.test.ts", "test/**/*.ts"],

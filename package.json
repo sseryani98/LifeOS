@@ -9,7 +9,8 @@
     "Project Tracker"
   ],
   "scripts": {
-    "lint": "npm run lint --workspaces --if-present",
+    "lint": "npm run lint:standards && npm run lint --workspaces --if-present",
+    "lint:standards": "cd \"Standards (Technical + Linting)\" && eslint scripts/",
     "test": "npm run test --workspaces --if-present"
   },
   "devDependencies": {
