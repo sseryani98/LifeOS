@@ -1,7 +1,7 @@
 /**
  * Formatter functions for display logic.
  */
-const formatter = {
+export default {
   /**
    * Formats a signed amount to two decimals for review tables and totals.
    * @param value the raw amount
@@ -76,5 +76,3 @@ const formatter = {
     return value === "" || value === undefined || value === null ? null : Number(value);
   },
 };
-
-export default formatter;

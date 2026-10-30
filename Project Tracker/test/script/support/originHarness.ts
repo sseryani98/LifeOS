@@ -53,11 +53,11 @@ export interface OriginEcho {
  * @param errorPath Path this origin answers with an upstream error, if any.
  * @returns The listening server, once it is accepting connections.
  */
-export function startMarkerOrigin(
+export const startMarkerOrigin = (
   port: number,
   marker: string,
   errorPath?: string,
-): Promise<Server> {
+): Promise<Server> => {
   const server = createServer((incoming, response) => {
     let body = "";
     incoming.setEncoding("utf8");
@@ -85,18 +85,18 @@ export function startMarkerOrigin(
     server.once("error", reject);
     server.listen(port, LOCALHOST, () => resolve(server));
   });
-}
+};
 
 /**
  * Stops an origin started by startMarkerOrigin.
  * @param server The server to close.
  * @returns Resolves once the port is released.
  */
-export function stopMarkerOrigin(server: Server): Promise<void> {
+export const stopMarkerOrigin = (server: Server): Promise<void> => {
   return new Promise(resolve => {
     server.close(() => resolve());
   });
-}
+};
 
 /**
  * Spawns the real proxy script bound to the harness ports and waits for the
@@ -105,10 +105,10 @@ export function stopMarkerOrigin(server: Server): Promise<void> {
  * @param prefix Path prefix routed to the prefixed upstream.
  * @returns The running child process.
  */
-export function startOneOriginProxy(
+export const startOneOriginProxy = (
   ports: OriginPorts,
   prefix: string,
-): Promise<ChildProcess> {
+): Promise<ChildProcess> => {
   const child = spawn(process.execPath, [PROXY_SCRIPT], {
     env: {
       ...process.env,
@@ -150,19 +150,19 @@ export function startOneOriginProxy(
       reject(error);
     });
   });
-}
+};
 
 /**
  * Stops a proxy started by startOneOriginProxy.
  * @param child The running proxy process.
  * @returns Resolves once the process has exited.
  */
-export function stopOneOriginProxy(child: ChildProcess): Promise<void> {
+export const stopOneOriginProxy = (child: ChildProcess): Promise<void> => {
   return new Promise(resolve => {
     child.once("exit", () => resolve());
     child.kill();
   });
-}
+};
 
 /**
  * Issues a request through the proxy and collects the whole response.
@@ -171,11 +171,11 @@ export function stopOneOriginProxy(child: ChildProcess): Promise<void> {
  * @param options Method, headers and body the proxy has to carry upstream.
  * @returns The status code and body text the proxy returned.
  */
-export function readThroughProxy(
+export const readThroughProxy = (
   port: number,
   path: string,
   options: ProxyRequestOptions = {},
-): Promise<{ status: number; body: string }> {
+): Promise<{ status: number; body: string }> => {
   return new Promise((resolve, reject) => {
     const call = request(
       {
@@ -199,7 +199,7 @@ export function readThroughProxy(
     call.on("error", reject);
     call.end(options.body);
   });
-}
+};
 
 /**
  * Issues a request through the proxy and reads the origin's echo of it.
@@ -208,25 +208,25 @@ export function readThroughProxy(
  * @param options Method, headers and body the proxy has to carry upstream.
  * @returns The relayed status and what the origin saw arrive.
  */
-export async function echoThroughProxy(
+export const echoThroughProxy = async (
   port: number,
   path: string,
   options: ProxyRequestOptions = {},
-): Promise<{ status: number; echo: OriginEcho }> {
+): Promise<{ status: number; echo: OriginEcho }> => {
   const response = await readThroughProxy(port, path, options);
   return {
     status: response.status,
     echo: JSON.parse(response.body) as OriginEcho,
   };
-}
+};
 
 /**
  * Reads the CSRF token off an inbound request's headers.
  * @param headers The headers the origin received.
  * @returns The token, or null when the request carried none.
  */
-function _readCsrfHeader(headers: NodeJS.Dict<string | string[]>): string | null {
+const _readCsrfHeader = (headers: NodeJS.Dict<string | string[]>): string | null => {
   const value = headers[PROXY_REQUEST.CSRF_HEADER];
   if (value === undefined) return null;
   return Array.isArray(value) ? value.join(",") : value;
-}
+};

@@ -1,11 +1,11 @@
 import type cds from "@sap/cds";
 
-import { completeSubtask } from "../../../../mcp/verbs/completeSubtask.js";
-import { logDefect } from "../../../../mcp/verbs/logDefect.js";
-import { planSprint } from "../../../../mcp/verbs/planSprint.js";
-import { recordDecision } from "../../../../mcp/verbs/recordDecision.js";
-import { recordTestRun } from "../../../../mcp/verbs/recordTestRun.js";
-import { resolveDefect } from "../../../../mcp/verbs/resolveDefect.js";
+import { CompleteSubtaskVerb } from "../../../../mcp/verbs/completeSubtask.js";
+import { LogDefectVerb } from "../../../../mcp/verbs/logDefect.js";
+import { PlanSprintVerb } from "../../../../mcp/verbs/planSprint.js";
+import { RecordDecisionVerb } from "../../../../mcp/verbs/recordDecision.js";
+import { RecordTestRunVerb } from "../../../../mcp/verbs/recordTestRun.js";
+import { ResolveDefectVerb } from "../../../../mcp/verbs/resolveDefect.js";
 import {
   ACTORS,
   BAD_SEVERITY,
@@ -63,6 +63,13 @@ import {
   expectSuccess,
 } from "../support/verbHarness.js";
 
+const completeSubtask = new CompleteSubtaskVerb();
+const logDefect = new LogDefectVerb();
+const planSprint = new PlanSprintVerb();
+const recordDecision = new RecordDecisionVerb();
+const recordTestRun = new RecordTestRunVerb();
+const resolveDefect = new ResolveDefectVerb();
+
 describe("registers", () => {
   let service: cds.Service;
   let world: SeededWorld;
@@ -82,16 +89,16 @@ describe("registers", () => {
   /** A closed defect with no resolution is exactly the state the register exists to prevent. */
   it("refuses to close a defect without a resolution, then closes it with one", async () => {
     const logged = expectSuccess(
-      await logDefect(context, { story: STORY_REFERENCE, ...DEFECT_INPUT }),
+      await logDefect.run(context, { story: STORY_REFERENCE, ...DEFECT_INPUT }),
     );
     const defectId = logged.defectId as string;
 
     const refused = expectFailure(
-      await resolveDefect(context, { defect: defectId, resolution: "" }),
+      await resolveDefect.run(context, { defect: defectId, resolution: "" }),
     );
     const stillOpen = await readDefectById(defectId);
     expectSuccess(
-      await resolveDefect(context, {
+      await resolveDefect.run(context, {
         defect: defectId,
         resolution: DEFECT_RESOLUTION,
       }),
@@ -113,7 +120,7 @@ describe("registers", () => {
   /** A CAP handler's own 409 is a methodology answer; reported as a lost store it would be retried. */
   it("carries a handler's duplicate-name rejection through the envelope unchanged", async () => {
     const result = expectFailure(
-      await planSprint(context, {
+      await planSprint.run(context, {
         ...buildSprintPlanInput(),
         name: WORLD.INITIATIVE.name,
       } as never),
@@ -128,7 +135,7 @@ describe("registers", () => {
   /** A sprint and its stories are one act, so the register must record one event and not four. */
   it("creates a sprint with its stories and emits one event", async () => {
     const result = expectSuccess(
-      await planSprint(context, buildSprintPlanInput() as never),
+      await planSprint.run(context, buildSprintPlanInput() as never),
     );
     const stories = await readStoriesOf(result.initiativeId as string);
     const events = await readActivityLog(world.workspaceId);
@@ -147,7 +154,7 @@ describe("registers", () => {
   /** A story ID already live in the workspace must be refused, or two stories share one address. */
   it("refuses a plan that reuses a story ID already in the workspace", async () => {
     const result = expectFailure(
-      await planSprint(
+      await planSprint.run(
         context,
         buildSprintPlanInput([...SPRINT_PLAN_WITH_DUPLICATE_STORY]) as never,
       ),
@@ -161,7 +168,7 @@ describe("registers", () => {
   /** The same identifier twice in one plan breaks per-workspace addressing just as surely. */
   it("refuses a plan that carries one story identifier twice", async () => {
     const result = expectFailure(
-      await planSprint(
+      await planSprint.run(
         context,
         buildSprintPlanInput([...SPRINT_PLAN_WITH_REPEATED_STORY]) as never,
       ),
@@ -177,7 +184,7 @@ describe("registers", () => {
     const before = await countAllMilestones();
 
     const result = expectFailure(
-      await planSprint(
+      await planSprint.run(
         context,
         buildSprintPlanInput([...SPRINT_PLAN_FAILING_MIDWAY]) as never,
       ),
@@ -192,7 +199,7 @@ describe("registers", () => {
   /** A severity outside the code list must be refused, or the register groups defects it cannot. */
   it("refuses a defect whose severity is outside the code list", async () => {
     const result = expectFailure(
-      await logDefect(context, {
+      await logDefect.run(context, {
         story: STORY_REFERENCE,
         ...DEFECT_INPUT,
         severity: BAD_SEVERITY,
@@ -206,10 +213,10 @@ describe("registers", () => {
   /** A defect must carry exactly one scope, or there is nothing to resolve it against. */
   it("refuses a defect with neither scope and one with both", async () => {
     const neither = expectFailure(
-      await logDefect(context, { ...DEFECT_INPUT }),
+      await logDefect.run(context, { ...DEFECT_INPUT }),
     );
     const both = expectFailure(
-      await logDefect(context, {
+      await logDefect.run(context, {
         story: STORY_REFERENCE,
         workspace: WORLD.WORKSPACE.slug,
         ...DEFECT_INPUT,
@@ -223,7 +230,7 @@ describe("registers", () => {
   /** The ad-hoc entry point has no story, so a workspace-scoped defect must reach the active sprint. */
   it("scopes a workspace-mode defect to the active sprint", async () => {
     const result = expectSuccess(
-      await logDefect(context, {
+      await logDefect.run(context, {
         workspace: WORLD.WORKSPACE.slug,
         ...DEFECT_INPUT,
       }),
@@ -237,19 +244,19 @@ describe("registers", () => {
   /** A decision with no inner target belongs to the workspace itself, which is a legal target. */
   it("records a decision against the workspace, the sprint and a story", async () => {
     const onWorkspace = expectSuccess(
-      await recordDecision(context, {
+      await recordDecision.run(context, {
         target: WORLD.WORKSPACE.slug,
         ...DECISION_INPUT,
       }),
     );
     const onStory = expectSuccess(
-      await recordDecision(context, {
+      await recordDecision.run(context, {
         target: STORY_REFERENCE,
         ...DECISION_INPUT,
       }),
     );
     const onSprint = expectSuccess(
-      await recordDecision(context, {
+      await recordDecision.run(context, {
         target: `${WORLD.WORKSPACE.slug}/${WORLD.INITIATIVE.name}`,
         ...DECISION_INPUT,
       }),
@@ -274,7 +281,7 @@ describe("registers", () => {
   /** A target that resolves to neither a story nor a sprint must be refused, not written to the workspace. */
   it("refuses a decision target that resolves to nothing", async () => {
     const result = expectFailure(
-      await recordDecision(context, {
+      await recordDecision.run(context, {
         target: `${WORLD.WORKSPACE.slug}/${UNRESOLVABLE.DECISION_TARGET}`,
         ...DECISION_INPUT,
       }),
@@ -289,13 +296,13 @@ describe("registers", () => {
     await setChainStates(world.milestoneId, BUILD_IN_PROGRESS);
 
     expectSuccess(
-      await recordTestRun(
+      await recordTestRun.run(
         context,
         buildStoryTestRunInput(STORY_REFERENCE, STAGE.BUILD),
       ),
     );
     expectSuccess(
-      await recordTestRun(context, buildWorkspaceTestRunInput() as never),
+      await recordTestRun.run(context, buildWorkspaceTestRunInput() as never),
     );
     const runs = await readTestRunsOf(world.workspaceId);
     const events = await readActivityLog(world.workspaceId);
@@ -312,19 +319,19 @@ describe("registers", () => {
   /** The optional halves of a register row are optional, so leaving them out must still write a row. */
   it("writes a defect with no references, a decision with no options and a bare run", async () => {
     const defect = expectSuccess(
-      await logDefect(context, {
+      await logDefect.run(context, {
         story: STORY_REFERENCE,
         ...DEFECT_WITHOUT_REFERENCES,
       }),
     );
     const decision = expectSuccess(
-      await recordDecision(context, {
+      await recordDecision.run(context, {
         target: WORLD.WORKSPACE.slug,
         ...DECISION_WITHOUT_OPTIONS,
       }),
     );
     expectSuccess(
-      await recordTestRun(context, buildWorkspaceTestRunInput(true) as never),
+      await recordTestRun.run(context, buildWorkspaceTestRunInput(true) as never),
     );
     const runs = await readTestRunsOf(world.workspaceId);
 
@@ -339,13 +346,13 @@ describe("registers", () => {
     await setInitiativeStatus(world.initiativeId, "Complete");
 
     const defect = expectFailure(
-      await logDefect(context, {
+      await logDefect.run(context, {
         workspace: WORLD.WORKSPACE.slug,
         ...DEFECT_INPUT,
       }),
     );
     const run = expectFailure(
-      await recordTestRun(context, buildWorkspaceTestRunInput() as never),
+      await recordTestRun.run(context, buildWorkspaceTestRunInput() as never),
     );
 
     expect(defect.status).toBe(404);
@@ -355,7 +362,7 @@ describe("registers", () => {
   /** A story without a stage names a target that does not exist, so it must be refused rather than widened. */
   it("refuses a test run scoped to a story with no stage", async () => {
     const result = expectFailure(
-      await recordTestRun(context, {
+      await recordTestRun.run(context, {
         story: STORY_REFERENCE,
         metrics: { ...TEST_RUN_METRICS },
         executedAt: TEST_RUN_EXECUTED_AT,
@@ -369,7 +376,7 @@ describe("registers", () => {
   /** The mirror case: a stage with no story must be refused, never silently filed to the sprint. */
   it("refuses a test run naming a stage without its story", async () => {
     const result = expectFailure(
-      await recordTestRun(
+      await recordTestRun.run(
         context,
         buildStageWithoutStoryTestRunInput(STAGE.BUILD),
       ),
@@ -384,14 +391,14 @@ describe("registers", () => {
   /** An offset timestamp names one instant; storing its wall-clock digits as UTC would be another. */
   it("normalises an offset executedAt to UTC and refuses an unparseable one", async () => {
     expectSuccess(
-      await recordTestRun(context, {
+      await recordTestRun.run(context, {
         workspace: WORLD.WORKSPACE.slug,
         metrics: { ...TEST_RUN_METRICS },
         executedAt: OFFSET_EXECUTED_AT.SUPPLIED,
       }),
     );
     const refused = expectFailure(
-      await recordTestRun(context, {
+      await recordTestRun.run(context, {
         workspace: WORLD.WORKSPACE.slug,
         metrics: { ...TEST_RUN_METRICS },
         executedAt: INVALID_EXECUTED_AT,
@@ -410,7 +417,7 @@ describe("registers", () => {
   /** The register row and the envelope must agree on when the decision landed. */
   it("stores the explicit decidedAt the verb writes", async () => {
     const result = expectSuccess(
-      await recordDecision(context, {
+      await recordDecision.run(context, {
         target: WORLD.WORKSPACE.slug,
         ...DECISION_INPUT,
       }),
@@ -428,7 +435,7 @@ describe("registers", () => {
     const build = await readTaskByCode(world.milestoneId, STAGE.BUILD);
 
     expectSuccess(
-      await completeSubtask(context, {
+      await completeSubtask.run(context, {
         story: STORY_REFERENCE,
         stage: STAGE.BUILD,
         subtask: OPEN_STEP,
@@ -447,7 +454,7 @@ describe("registers", () => {
     await setChainStates(world.milestoneId, BUILD_IN_PROGRESS);
 
     const result = expectFailure(
-      await completeSubtask(context, {
+      await completeSubtask.run(context, {
         story: STORY_REFERENCE,
         stage: STAGE.BUILD,
         subtask: "smoke",
@@ -461,7 +468,7 @@ describe("registers", () => {
   /** A defect that does not exist must be refused rather than created on the way to being closed. */
   it("refuses to resolve a defect that does not exist", async () => {
     const result = expectFailure(
-      await resolveDefect(context, {
+      await resolveDefect.run(context, {
         defect: UNRESOLVABLE.DEFECT,
         resolution: DEFECT_RESOLUTION,
       }),

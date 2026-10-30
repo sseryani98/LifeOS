@@ -46,9 +46,14 @@ function readRegistry() {
 function installServer() {
   const registry = readRegistry();
   registry.mcpServers = registry.mcpServers ?? {};
+  // Node directly, not `npx tsx`. A wrapper is an extra process between the
+  // harness and the server — the shape SDK issue #2023 names as the orphan
+  // source — and an extra stdout producer the purity guard never observes.
+  // test/shared/data/launch.ts holds the same command, and the installer test
+  // asserts against it, because the tested path drifted from this one before.
   registry.mcpServers[SERVER_NAME] = {
-    command: "npx",
-    args: ["tsx", join(MODULE_ROOT, "mcp", "server.ts")],
+    command: "node",
+    args: ["--import", "tsx", join(MODULE_ROOT, "mcp", "server.ts")],
     env: { PROJECT_TRACKER_ACTOR: process.env.PROJECT_TRACKER_ACTOR ?? "sandro" },
   };
   writeFileSync(REGISTRATION_FILE, `${JSON.stringify(registry, null, 2)}\n`);

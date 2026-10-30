@@ -1,7 +1,6 @@
-// Named cell/config fixtures for the CsvRowReaderService decoder unit test.
-// The reader decodes one row's cells against a resolved format config, so these
-// fixtures are single rows (not whole files). Configs + card ids are reused from
-// the shared CSV fixtures; sign/header variants are derived here.
+// Single-row cell/config fixtures for the CsvRowReaderService decoder — it decodes
+// one row against a resolved config, not whole files. Configs + card ids come from
+// the shared CSV fixtures; only sign/header variants are derived here.
 
 import type { CsvFormatConfigRecord } from "../../../../srv/modules/ingestion/types.js";
 import { SCOTIA_CONFIG } from "../../../shared/data/ingestion/csv.js";

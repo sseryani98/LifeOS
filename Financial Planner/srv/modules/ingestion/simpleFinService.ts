@@ -3,10 +3,10 @@ import cds from "@sap/cds";
 import { BaseService } from "../shared/baseService.js";
 import { HTTP } from "../shared/constants.js";
 import { DateTimeUtility } from "../shared/dateTimeUtility.js";
-import { defaultEncryptionFactory } from "../shared/encryptionFactory.js";
+import { DefaultEncryptionFactory } from "../shared/encryptionFactory.js";
 import { MessagingUtility } from "../shared/messagingUtility.js";
-import { defaultHttpClient } from "../shared/httpClient.js";
-import { defaultSleep } from "../shared/sleep.js";
+import { DefaultHttpClient } from "../shared/httpClient.js";
+import { DefaultSleep } from "../shared/sleep.js";
 import type { EncryptionUtility } from "../shared/encryptionUtility.js";
 import type { EncryptionFactory, HttpClient, SleepFn } from "../shared/types.js";
 
@@ -56,10 +56,11 @@ export class SimpleFINService extends BaseService {
     super("integration.simplefin");
     this.dataService = dataService;
     this.dedupService = dedupService;
-    this.http = options.http ?? defaultHttpClient;
-    this.sleep = options.sleep ?? defaultSleep;
+    this.http = options.http ?? new DefaultHttpClient();
+    this.sleep = options.sleep ?? (milliseconds => DefaultSleep.createDelay(milliseconds));
     this.now = options.now ?? (() => Date.now());
-    this.encryptionFactory = options.encryptionFactory ?? defaultEncryptionFactory;
+    this.encryptionFactory =
+      options.encryptionFactory ?? (() => DefaultEncryptionFactory.createEncryptionUtility());
   }
 
   /**

@@ -1,7 +1,6 @@
-// Integration test for CSV save (cds.test + SQLite): the save engine + data
-// layer persist against the real in-memory DB, proving the new Transaction FKs,
+// Runs CSV save against the real in-memory DB to prove the new Transaction FKs,
 // derived categorization status, and Import Log entity round-trip through the
-// schema. Custom logic only. Fixtures in data/, harness in support/.
+// schema. Custom logic only.
 
 import cds from "@sap/cds";
 

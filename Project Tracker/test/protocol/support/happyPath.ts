@@ -30,10 +30,10 @@ const FIRST_STAGE = { story: STORY_REFERENCE, stage: STAGE.BUILD };
  * @param tool The tool about to be called.
  * @returns The arguments that tool should succeed with.
  */
-export async function arrangeHappyPath(
+export const arrangeHappyPath = async (
   client: Client,
   tool: string,
-): Promise<Record<string, unknown>> {
+): Promise<Record<string, unknown>> => {
   switch (tool) {
     case "complete_stage":
       await _driveTool(client, "start_stage", { ...FIRST_STAGE });
@@ -58,22 +58,22 @@ export async function arrangeHappyPath(
     default:
       return { ...FIRST_STAGE };
   }
-}
+};
 
 /**
  * Logs the defect a resolution needs something to close.
  * @param client The connected client.
  * @returns The arguments resolve_defect should succeed with.
  */
-async function _arrangeResolveDefect(
+const _arrangeResolveDefect = async (
   client: Client,
-): Promise<Record<string, unknown>> {
+): Promise<Record<string, unknown>> => {
   const logged = await _driveTool(client, "log_defect", {
     story: STORY_REFERENCE,
     ...DEFECT_INPUT,
   });
   return { defect: logged.defectId as string, resolution: DEFECT_RESOLUTION };
-}
+};
 
 /**
  * Calls one tool as a prerequisite, refusing to continue on a rejection so an
@@ -83,11 +83,11 @@ async function _arrangeResolveDefect(
  * @param args The arguments to call it with.
  * @returns The success envelope it answered with.
  */
-async function _driveTool(
+const _driveTool = async (
   client: Client,
   name: string,
   args: Record<string, unknown>,
-): Promise<Record<string, unknown>> {
+): Promise<Record<string, unknown>> => {
   const envelope = readToolEnvelope(
     await client.callTool({ name, arguments: args }),
   );
@@ -95,4 +95,4 @@ async function _driveTool(
     throw new Error(`Arranging "${name}" failed: ${String(envelope.message)}`);
   }
   return envelope;
-}
+};

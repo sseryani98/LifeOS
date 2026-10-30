@@ -36,16 +36,16 @@ export interface ActivityState {
  * @param stepCode The stage code.
  * @returns The stage row.
  */
-export async function readTaskByCode(
+export const readTaskByCode = async (
   milestoneId: string,
   stepCode: string,
-): Promise<TaskState> {
+): Promise<TaskState> => {
   const rows = (await SELECT.from(TABLE.TASK).where({
     milestone_ID: milestoneId,
     step_code: stepCode,
   })) as TaskState[];
   return rows[0];
-}
+};
 
 /**
  * Reads one workflow step of a stage by its step code.
@@ -53,45 +53,45 @@ export async function readTaskByCode(
  * @param stepCode The step code.
  * @returns The step row.
  */
-export async function readSubtaskByCode(
+export const readSubtaskByCode = async (
   taskId: string,
   stepCode: string,
-): Promise<{ ID: string; status_code: string; completedAt: string | null }> {
+): Promise<{ ID: string; status_code: string; completedAt: string | null }> => {
   const rows = (await SELECT.from(TABLE.SUBTASK).where({
     task_ID: taskId,
     step_code: stepCode,
   })) as { ID: string; status_code: string; completedAt: string | null }[];
   return rows[0];
-}
+};
 
 /**
  * Reads a workspace's activity register in the order it was written.
  * @param workspaceId The workspace to read.
  * @returns The activity rows, oldest first.
  */
-export async function readActivityLog(
+export const readActivityLog = async (
   workspaceId: string,
-): Promise<ActivityState[]> {
+): Promise<ActivityState[]> => {
   const rows = (await SELECT.from(TABLE.ACTIVITY)
     .columns("kind_code", "actor_code as actor", "target", "occurredAt", "createdBy")
     .where({ workspace_ID: workspaceId })) as ActivityState[];
   return rows.sort((left, right) =>
     left.occurredAt.localeCompare(right.occurredAt),
   );
-}
+};
 
 /**
  * Reads one defect.
  * @param defectId The defect wanted.
  * @returns The defect row.
  */
-export async function readDefectById(defectId: string): Promise<{
+export const readDefectById = async (defectId: string): Promise<{
   status_code: string;
   resolution: string | null;
   milestone_ID: string | null;
   initiative_ID: string | null;
   createdBy: string;
-}> {
+}> => {
   const rows = (await SELECT.from(TABLE.DEFECT).where({ ID: defectId })) as {
     status_code: string;
     resolution: string | null;
@@ -100,20 +100,20 @@ export async function readDefectById(defectId: string): Promise<{
     createdBy: string;
   }[];
   return rows[0];
-}
+};
 
 /**
  * Reads one decision.
  * @param decisionId The decision wanted.
  * @returns The decision row.
  */
-export async function readDecisionById(decisionId: string): Promise<{
+export const readDecisionById = async (decisionId: string): Promise<{
   decision: string;
   decidedAt: string;
   workspace_ID: string;
   initiative_ID: string | null;
   milestone_ID: string | null;
-}> {
+}> => {
   const rows = (await SELECT.from(TABLE.DECISION).where({
     ID: decisionId,
   })) as {
@@ -124,66 +124,66 @@ export async function readDecisionById(decisionId: string): Promise<{
     milestone_ID: string | null;
   }[];
   return rows[0];
-}
+};
 
 /**
  * Reads every story of a sprint.
  * @param initiativeId The sprint to read.
  * @returns The story rows.
  */
-export async function readStoriesOf(
+export const readStoriesOf = async (
   initiativeId: string,
-): Promise<{ storyId: string; fricewType_code: string; position: number }[]> {
+): Promise<{ storyId: string; fricewType_code: string; position: number }[]> => {
   return (await SELECT.from(TABLE.MILESTONE).where({
     initiative_ID: initiativeId,
   })) as { storyId: string; fricewType_code: string; position: number }[];
-}
+};
 
 /**
  * Counts the sprints of a workspace.
  * @param workspaceId The workspace to read.
  * @returns How many sprints it holds.
  */
-export async function countInitiativesOf(workspaceId: string): Promise<number> {
+export const countInitiativesOf = async (workspaceId: string): Promise<number> => {
   const rows = (await SELECT.from(TABLE.INITIATIVE).where({
     workspace_ID: workspaceId,
   })) as unknown[];
   return rows.length;
-}
+};
 
 /**
  * Counts the defects of a workspace.
  * @param workspaceId The workspace to read.
  * @returns How many defects it holds.
  */
-export async function countDefectsOf(workspaceId: string): Promise<number> {
+export const countDefectsOf = async (workspaceId: string): Promise<number> => {
   const rows = (await SELECT.from(TABLE.DEFECT).where({
     workspace_ID: workspaceId,
   })) as unknown[];
   return rows.length;
-}
+};
 
 /**
  * Counts every story in the store.
  * @returns How many stories exist.
  */
-export async function countAllMilestones(): Promise<number> {
+export const countAllMilestones = async (): Promise<number> => {
   return ((await SELECT.from(TABLE.MILESTONE)) as unknown[]).length;
-}
+};
 
 /**
  * Reads the test runs of a workspace.
  * @param workspaceId The workspace to read.
  * @returns The test-run rows.
  */
-export async function readTestRunsOf(workspaceId: string): Promise<
+export const readTestRunsOf = async (workspaceId: string): Promise<
   {
     total: number;
     task_ID: string | null;
     initiative_ID: string | null;
     executedAt: string;
   }[]
-> {
+> => {
   return (await SELECT.from(TABLE.TEST_RUN).where({
     workspace_ID: workspaceId,
   })) as {
@@ -192,7 +192,7 @@ export async function readTestRunsOf(workspaceId: string): Promise<
     initiative_ID: string | null;
     executedAt: string;
   }[];
-}
+};
 
 /**
  * Reads a story's status through the service, so the derivation that fills it on
@@ -201,12 +201,12 @@ export async function readTestRunsOf(workspaceId: string): Promise<
  * @param milestoneId The story wanted.
  * @returns The derived status code.
  */
-export async function readDerivedMilestoneStatus(
+export const readDerivedMilestoneStatus = async (
   service: cds.Service,
   milestoneId: string,
-): Promise<string> {
+): Promise<string> => {
   const rows = (await service.run(
     SELECT.from("TrackerService.Milestones").where({ ID: milestoneId }),
   )) as { status: string }[];
   return rows[0].status;
-}
+};

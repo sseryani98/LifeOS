@@ -1,6 +1,6 @@
 import PageController from "sap/fe/core/PageController";
 import History from "sap/ui/core/routing/History";
-import { getText as resolveText } from "com/financialplanner/shared/util/i18n";
+import I18n from "com/financialplanner/shared/util/i18n";
 import type View from "sap/ui/core/mvc/View";
 import type UIComponent from "sap/ui/core/UIComponent";
 import type Router from "sap/ui/core/routing/Router";
@@ -28,7 +28,7 @@ export default class BasePageController extends PageController {
    * @returns the resolved text, or "" when the key is missing
    */
   public getText(key: string): string {
-    return resolveText(this.getView() as View, key);
+    return I18n.getText(this.getView() as View, key);
   }
 
   /**

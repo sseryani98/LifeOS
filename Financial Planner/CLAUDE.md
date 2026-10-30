@@ -98,13 +98,15 @@ scripts/
 > `app/` is TypeScript too — see **SAPUI5** for its (different) tooling. These rules are backend-specific.
 
 - `strict: true` (all sub-flags). No `any`, ever. Entity imports from `#cds-models/com/financialplanner`. Handler registration passes entity references, not strings
-- **Named types → `{domain}/types.ts`.** A file that declares a class holds NO named `interface`/`type` beside it — exported or file-private, it moves to the domain's `types.ts`. In non-class modules, file-private types may stay local; exported types still belong in `types.ts`. Anonymous inline shapes are always exempt. `lint:domain-types`
-- **Constants → grouped `as const` objects**, imported by namespace (`ALERTS.TYPE.STALE_DATA`), never a wall of loose `const`s. Placement: cross-module/generic → `shared/constants.ts`; domain-scoped → `{domain}/constants.ts`; private to one file → local `as const` at top. Derived single-use values (a `join()` path) may stay loose. `lint:grouped-constants` fires at ≥3 loose literals. Frontend variant — any SCREAMING_SNAKE object/array-literal map lives in the app's `constants.ts`, never beside a formatter/controller; scalar one-offs and camelCase subjects (`formatter`, `navConfig`) stay put. `lint:frontend-constants`
+- **Every code file is imports + one class** — no top-level functions, arrow consts, loose consts or statements; a process entry goes in a `static {}` block. Exempt: `types.ts`, `constants.ts`, `*.d.ts`, `*.config.ts`, tests, and only two UI5 shapes — `app/**/ext/*.ts` action handlers and `formatter.ts` may `export default {…}`. `no-restricted-syntax`
+- **Never the `function` keyword** — class methods, or arrows inside them. Tests included. `no-restricted-syntax`
+- **Named types → `{domain}/types.ts`.** No named `interface`/`type` beside a class — exported or file-private. Anonymous inline shapes are exempt. `lint:domain-types`
+- **Constants → grouped `as const` objects in a `constants.ts`**, imported by namespace (`ALERTS.TYPE.STALE_DATA`), never beside a class. Cross-module/generic → `shared/constants.ts`; domain-scoped → `{domain}/constants.ts`. `lint:grouped-constants` fires at ≥3 loose literals. Frontend variant — any SCREAMING_SNAKE object/array-literal map lives in the app's `constants.ts`, never beside a formatter/controller; scalar one-offs and camelCase subjects (`formatter`, `navConfig`) stay put. `lint:frontend-constants`
 - **Identifier length ≥3 letters** (only `i` and `id` exempt; object keys exempt — CAP's `ID`, external payload keys). `id-length`
 - **Method names = verb + object** (`_fetchAccounts` not `_fetch`). Exempt: framework lifecycle names (`init`, `onInit`, `render`) and interface methods named for the class itself (`DedupService.evaluate`)
 - **Method ordering** (no section-divider comments): visibility (public → `_`private at bottom) → importance → alphabetical
 - **JSDoc** documents every `@param` and `@returns`, types omitted (the signature is the source of truth). `eslint-plugin-jsdoc`
-- **Comment prose ≤5 lines** (`@param`/`@returns`/tags and delimiters exempt). A long description is the tell it's restating _what_ — cut to the _why_. `lint:comment-length`
+- **Comment prose: inline `//` ≤3 lines, JSDoc ≤5** (`@param`/`@returns`/tags and delimiters exempt). A long description is the tell it's restating _what_ — cut to the _why_. `lint:comment-length`
 
 ### Handler Pattern — 4 Files (+ Mapper when translating shapes)
 
@@ -224,6 +226,6 @@ Look up details here — do not duplicate:
 - Put logic in Facades — pure wiring
 - Use `any`; log decrypted sensitive data; use `!important` in CSS overrides
 - Duplicate information already in design docs — reference it
-- Comment the _what_ — comment the _why_ (rationale, gotchas, invariants); prose ≤5 lines
+- Comment the _what_ — comment the _why_ (rationale, gotchas, invariants); inline ≤3 lines, JSDoc ≤5
 - Use FRICEW IDs (FRM-xxx, RPT-xxx) in source code — semantic names only; FRICEW IDs belong in design docs and commit bodies
 - Commit `.env`, `logs/`, `node_modules/`, `gen/`

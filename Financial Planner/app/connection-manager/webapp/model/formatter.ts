@@ -1,13 +1,13 @@
-import { getText as resolveText } from "com/financialplanner/shared/util/i18n";
+import I18n from "com/financialplanner/shared/util/i18n";
 import { SYNC_STATUS } from "com/financialplanner/connectionmanager/model/constants";
 import type ManagedObject from "sap/ui/base/ManagedObject";
 
 /**
  * Connection-health display formatters. Referenced from the view via
  * core:require; each is invoked with `this` bound to the formatted control,
- * so i18n resolution flows through the shared getText helper.
+ * so i18n resolution flows through the shared I18n helper.
  */
-const formatter = {
+export default {
   /**
    * Maps a sync status to a status icon.
    * @param status sync status code (success | error | never_synced)
@@ -32,8 +32,6 @@ const formatter = {
    * @returns localized status label
    */
   formatStatusText(this: ManagedObject, status: string): string {
-    return resolveText(this, SYNC_STATUS.TEXT_KEY[status] || "statusNeverSynced");
+    return I18n.getText(this, SYNC_STATUS.TEXT_KEY[status] || "statusNeverSynced");
   },
 };
-
-export default formatter;

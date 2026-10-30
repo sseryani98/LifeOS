@@ -37,7 +37,7 @@ export interface SimpleFinMocks {
 }
 
 /** Builds a fresh SimpleFINService with every collaborator mocked. */
-export function buildSimpleFinMocks(): SimpleFinMocks {
+export const buildSimpleFinMocks = (): SimpleFinMocks => {
   const data = {
     getConfig: jest.fn(async (key: string) => CONFIG[key] ?? null),
     getNumericConfig: jest.fn(async (key: string, fallback: number) => {
@@ -81,4 +81,4 @@ export function buildSimpleFinMocks(): SimpleFinMocks {
   });
 
   return { data, dedup, httpGet, httpPost, sleep, encryption, service };
-}
+};

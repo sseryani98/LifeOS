@@ -16,9 +16,9 @@ export const trackerServer = cds.test(PROJECT_ROOT);
  * Connects to the one service the module serves.
  * @returns The connected service.
  */
-export async function connectTrackerService(): Promise<cds.Service> {
+export const connectTrackerService = async (): Promise<cds.Service> => {
   return cds.connect.to("TrackerService");
-}
+};
 
 /**
  * Reports whether the harness lever that lets CAP load a TypeScript service
@@ -26,6 +26,6 @@ export async function connectTrackerService(): Promise<cds.Service> {
  * spec about the lever rather than about an environment variable.
  * @returns The value the runner set, or undefined when nothing set it.
  */
-export function readTypescriptLever(): string | undefined {
+export const readTypescriptLever = (): string | undefined => {
   return process.env.CDS_TYPESCRIPT;
-}
+};

@@ -1,3 +1,5 @@
+import type { VerbErrorDetail } from "./types.js";
+
 /**
  * A rejection a verb raises deliberately. It carries the status the caller sees
  * and the i18n key it was rejected under, so the envelope can be built from the
@@ -21,7 +23,7 @@ export class VerbError extends Error {
     status: number,
     code: string,
     message: string,
-    detail?: { target?: string; remediation?: string; rule?: string },
+    detail?: VerbErrorDetail,
   ) {
     super(message);
     this.name = "VerbError";

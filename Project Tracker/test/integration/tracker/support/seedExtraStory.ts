@@ -23,10 +23,10 @@ interface ExtraStory {
  * @param story The story columns to write.
  * @returns The new story's identifier.
  */
-export async function seedExtraStory(
+export const seedExtraStory = async (
   initiativeId: string,
   story: ExtraStory,
-): Promise<string> {
+): Promise<string> => {
   const milestoneId = randomUUID();
   await INSERT.into(MILESTONE_TABLE).entries({
     ID: milestoneId,
@@ -35,4 +35,4 @@ export async function seedExtraStory(
   });
   await seedStoryChain(milestoneId, story.shipsUi);
   return milestoneId;
-}
+};

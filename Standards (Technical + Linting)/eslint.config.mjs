@@ -64,6 +64,41 @@ const restrictedSyntax = [
   },
 ];
 
+// ESTree models every class and object method as a FunctionExpression, so the
+// keyword ban exempts exactly those parents — everything else is `function`.
+const noFunctionKeyword = [
+  {
+    selector: "FunctionDeclaration, TSDeclareFunction",
+    message: "No `function` keyword. Use a class method, or an arrow function inside one.",
+  },
+  {
+    selector:
+      "FunctionExpression:not(MethodDefinition > FunctionExpression, TSAbstractMethodDefinition > FunctionExpression, Property[method=true] > FunctionExpression, Property[kind='get'] > FunctionExpression, Property[kind='set'] > FunctionExpression)",
+    message: "No `function` keyword. Use a class method, or an arrow function inside one.",
+  },
+];
+
+// A code file is its imports plus a class. Named types live in types.ts and
+// constants in constants.ts — the one override below that relaxes this.
+const classOnlyMessage =
+  "Top-level code belongs in a class. Types go in types.ts, constants in constants.ts.";
+const classOnlyModule = [
+  {
+    selector:
+      "Program > :not(ImportDeclaration, ClassDeclaration, ExportNamedDeclaration, ExportDefaultDeclaration, ExportAllDeclaration)",
+    message: classOnlyMessage,
+  },
+  {
+    selector:
+      "ExportNamedDeclaration > :not(ClassDeclaration, ExportSpecifier, Literal, ImportAttribute)",
+    message: classOnlyMessage,
+  },
+  {
+    selector: "ExportDefaultDeclaration > :not(ClassDeclaration, Identifier)",
+    message: classOnlyMessage,
+  },
+];
+
 // Single source of truth for TypeScript rules — applied IDENTICALLY to the CAP
 // backend (srv/, db/, scripts/) and the UI5 frontend (app/). The backend and
 // frontend blocks below add ONLY the divergences that have a concrete reason
@@ -96,7 +131,12 @@ const tsRules = {
   "no-throw-literal": "error",
   "object-shorthand": ["error", "always"],
   "prefer-arrow-callback": "error",
-  "no-restricted-syntax": ["error", ...restrictedSyntax],
+  "no-restricted-syntax": [
+    "error",
+    ...restrictedSyntax,
+    ...noFunctionKeyword,
+    ...classOnlyModule,
+  ],
 
   // --- Complexity (warn) ---
   "max-depth": ["warn", 4],
@@ -206,7 +246,8 @@ const tsPlugins = {
 const typeAwareParserOptions = {
   ecmaVersion: 2022,
   sourceType: "module",
-  projectService: true,
+  // A module's root config files (jest.config.ts) sit in no tsconfig `include`.
+  projectService: { allowDefaultProject: ["*/*.ts"] },
   tsconfigRootDir: join(import.meta.dirname, ".."),
 };
 
@@ -216,6 +257,7 @@ export default [
     ignores: [
       "**/node_modules/**",
       "**/@cds-models/**",
+      "**/coverage/**",
       "**/gen/**",
       "**/dist/**",
       "**/*.min.js",
@@ -224,9 +266,11 @@ export default [
     ],
   },
 
-  // === TypeScript Backend (srv/, db/, scripts/) ===
+  // === TypeScript Backend (srv/, mcp/, db/, scripts/) ===
+  // A folder passed to eslint but matched by no block here is skipped with a
+  // warning, not an error — mcp/ sat outside this list and was never linted.
   {
-    files: ["srv/**/*.ts", "db/**/*.ts", "scripts/**/*.ts"],
+    files: ["*.ts", "srv/**/*.ts", "mcp/**/*.ts", "db/**/*.ts", "scripts/**/*.ts"],
     languageOptions: {
       parser: tsParser,
       parserOptions: typeAwareParserOptions,
@@ -290,6 +334,8 @@ export default [
       // Root cause of the `const m` miss: this block previously defined no
       // id-length, so test files had zero minimum-length enforcement.
       "id-length": idLength,
+      // Tests are exempt from the class-only rule, not from the keyword ban.
+      "no-restricted-syntax": ["error", ...noFunctionKeyword],
     },
   },
 
@@ -341,6 +387,8 @@ export default [
       "no-restricted-syntax": [
         "error",
         ...restrictedSyntax,
+        ...noFunctionKeyword,
+        ...classOnlyModule,
         {
           selector: "MethodDefinition[key.name=/^format/]",
           message:
@@ -355,6 +403,52 @@ export default [
           selector: "CallExpression[callee.property.name='getResourceBundle']",
           message:
             "Resolve i18n via the shared getText helper (app/shared/util/i18n), not getResourceBundle directly.",
+        },
+      ],
+    },
+  },
+
+  // === UI5 object modules — FE custom-action handlers and formatters ===
+  // SAP binds an FE action to a plain object module's methods, and a formatter
+  // is resolved off core:require the same way. Only `export default {…}` is
+  // allowed — every other class-only selector still applies.
+  {
+    files: ["app/**/ext/*.ts", "app/**/formatter.ts"],
+    ignores: ["**/*.controller.ts"],
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        ...restrictedSyntax,
+        ...noFunctionKeyword,
+        ...classOnlyModule.slice(0, 2),
+      ],
+    },
+  },
+
+  // === Declaration files — types.ts, constants.ts, *.d.ts, tool configs ===
+  // Last before the catch-all so it wins over the app block too. These hold the shapes and values the class-only rule moves out of code
+  // files, or a shape a tool dictates (jest.config.ts). The keyword ban stays.
+  {
+    files: ["**/types.ts", "**/constants.ts", "**/*.d.ts", "*.config.ts"],
+    rules: {
+      "no-restricted-syntax": ["error", ...restrictedSyntax, ...noFunctionKeyword],
+    },
+  },
+
+  // === Catch-all — a .ts file no block above covers ===
+  // ESLint skips such a file in silence when it sits inside a passed folder,
+  // which is how mcp/ went unlinted. Keep `ignores` equal to the globs above.
+  {
+    files: ["**/*.ts"],
+    ignores: ["*.ts", "srv/**", "mcp/**", "db/**", "scripts/**", "test/**", "app/**"],
+    languageOptions: { parser: tsParser },
+    rules: {
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "Program",
+          message:
+            "No lint block covers this file. Add its folder to a files: glob in Standards (Technical + Linting)/eslint.config.mjs.",
         },
       ],
     },

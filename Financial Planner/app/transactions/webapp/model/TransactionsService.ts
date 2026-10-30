@@ -1,8 +1,5 @@
 import type ODataModel from "sap/ui/model/odata/v4/ODataModel";
-
-const RECATEGORIZE_OPERATION = "/TransactionService.reCategorize(...)";
-const SPLIT_OPERATION = "/TransactionService.splitTransaction(...)";
-const BULK_CATEGORIZE_OPERATION = "/TransactionService.bulkCategorize(...)";
+import { ODATA_OPERATION } from "com/financialplanner/transactions/constants";
 
 /**
  * Owns every OData V4 action call for the Transactions app.
@@ -31,7 +28,7 @@ export default class TransactionsService {
     purchaseTypeId: string | null,
     earningCategoryId: string | null,
   ): Promise<void> {
-    const operation = this._model.bindContext(BULK_CATEGORIZE_OPERATION);
+    const operation = this._model.bindContext(ODATA_OPERATION.BULK_CATEGORIZE);
     operation.setParameter("transactionIds", transactionIds);
     operation.setParameter("vendor_ID", vendorId);
     operation.setParameter("purchaseType_ID", purchaseTypeId);
@@ -46,7 +43,7 @@ export default class TransactionsService {
    * @returns resolves once the re-run completes and the model is refreshed
    */
   public async runReCategorization(transactionIds: string[]): Promise<void> {
-    const operation = this._model.bindContext(RECATEGORIZE_OPERATION);
+    const operation = this._model.bindContext(ODATA_OPERATION.RECATEGORIZE);
     operation.setParameter("transactionIds", transactionIds);
     await operation.invoke();
     this._model.refresh();
@@ -69,7 +66,7 @@ export default class TransactionsService {
     splitDescription: string | null,
     isRecurring: boolean,
   ): Promise<void> {
-    const operation = this._model.bindContext(SPLIT_OPERATION);
+    const operation = this._model.bindContext(ODATA_OPERATION.SPLIT);
     operation.setParameter("transactionId", transactionId);
     operation.setParameter("mySharePct", mySharePct);
     operation.setParameter("myShareAmount", myShareAmount);

@@ -1,9 +1,4 @@
-import {
-  rejectVerb,
-  resolveMessage,
-  succeed,
-  toFailure,
-} from "../../../../mcp/verbs/shared/envelope.js";
+import { Envelope } from "../../../../mcp/verbs/shared/envelope.js";
 import { VerbError } from "../../../../mcp/verbs/shared/verbError.js";
 import {
   CAP_REJECTION,
@@ -18,13 +13,13 @@ const STAMP = "2026-08-16T10:00:00.000Z";
 describe("the response envelope", () => {
   /** A key with no entry must still return something addressable, or a message becomes empty text. */
   it("falls back to the key when no message is defined for it", () => {
-    expect(resolveMessage(ENVELOPE_KEYS.KNOWN)).not.toBe(ENVELOPE_KEYS.KNOWN);
-    expect(resolveMessage(ENVELOPE_KEYS.UNKNOWN)).toBe(ENVELOPE_KEYS.UNKNOWN);
+    expect(Envelope.resolveMessage(ENVELOPE_KEYS.KNOWN)).not.toBe(ENVELOPE_KEYS.KNOWN);
+    expect(Envelope.resolveMessage(ENVELOPE_KEYS.UNKNOWN)).toBe(ENVELOPE_KEYS.UNKNOWN);
   });
 
   /** A success with nothing to add still carries the two fields every caller reads. */
   it("defaults the next action and the warnings on a bare success", () => {
-    const result = succeed(STAMP, null);
+    const result = Envelope.buildSuccess(STAMP, null);
 
     expect(result.ok).toBe(true);
     expect(result.timestamp).toBe(STAMP);
@@ -34,11 +29,11 @@ describe("the response envelope", () => {
 
   /** Optional detail must be absent rather than null, or a caller cannot tell "no remediation" from "none applies". */
   it("carries only the detail a rejection actually supplied", () => {
-    const bare = toFailure(
+    const bare = Envelope.toFailure(
       new VerbError(400, ENVELOPE_KEYS.KNOWN, "no identity"),
       STAMP,
     );
-    const detailed = toFailure(
+    const detailed = Envelope.toFailure(
       new VerbError(409, ENVELOPE_KEYS.BLOCKED, "blocked", ENVELOPE_DETAIL),
       STAMP,
     );
@@ -53,7 +48,7 @@ describe("the response envelope", () => {
 
   /** A CAP rejection is a methodology answer: its status and key must reach the caller intact. */
   it("surfaces a CAP handler rejection under its own status and code", () => {
-    const result = toFailure(
+    const result = Envelope.toFailure(
       Object.assign(new Error(CAP_REJECTION.message), CAP_REJECTION),
       STAMP,
     );
@@ -66,7 +61,7 @@ describe("the response envelope", () => {
 
   /** req.reject leaves the status on statusCode and the key as the message; missing either fallback reports a 409 as a lost store or hands back a raw key. */
   it("reads a rejection that carries statusCode and no resolved message", () => {
-    const byKey = toFailure(
+    const byKey = Envelope.toFailure(
       Object.assign(new Error(CAP_REJECTION_BY_KEY.message), {
         ...CAP_REJECTION_BY_KEY,
       }),
@@ -78,25 +73,32 @@ describe("the response envelope", () => {
     expect(byKey.message).toContain("already exists");
   });
 
-  /** Anything thrown that is not a deliberate rejection is a lost store, but only a genuine transport fault may be retried. */
-  it("reports an unexpected throw as a connection failure", () => {
-    const fromError = toFailure(new Error("socket closed"), STAMP);
-    const fromValue = toFailure("socket closed", STAMP);
+  /** Reported as a lost store, a fault in this layer sent the caller chasing an outage that was not happening. */
+  it("reports an unexpected throw as a fault in the verb layer", () => {
+    const fromError = Envelope.toFailure(new Error("x is not a function"), STAMP);
+    const fromValue = Envelope.toFailure("x is not a function", STAMP);
 
-    expect(fromError.status).toBe(503);
-    expect(fromError.code).toBe("verb.connection.unavailable");
-    expect(fromError.message).toContain("socket closed");
+    expect(fromError.status).toBe(500);
+    expect(fromError.code).toBe("verb.internal.failure");
     expect(fromError).not.toHaveProperty("retryable");
-    expect(fromValue.message).toContain("socket closed");
+    expect(fromValue.status).toBe(500);
+  });
+
+  /** The thrown text is the one path a stack, a file path or a SQL fragment reaches the model. */
+  it("keeps the thrown detail out of what the caller reads", () => {
+    const leaky = Envelope.toFailure(new Error("SELECT * FROM Activity -- C:/secret"), STAMP);
+
+    expect(leaky.message).not.toContain("SELECT");
+    expect(leaky.message).not.toContain("C:/secret");
   });
 
   /** The retry flag exists for exactly one case: an error the sockets or the driver marked as connection loss. */
   it("marks only a recognisable connection error as retryable", () => {
-    const socket = toFailure(
+    const socket = Envelope.toFailure(
       Object.assign(new Error("connect refused"), { code: SOCKET_ERROR_CODE }),
       STAMP,
     );
-    const typeError = toFailure(new TypeError("x is not a function"), STAMP);
+    const typeError = Envelope.toFailure(new TypeError("x is not a function"), STAMP);
 
     expect(socket.retryable).toBe(true);
     expect(socket.code).toBe("verb.connection.unavailable");
@@ -105,6 +107,6 @@ describe("the response envelope", () => {
 
   /** A rejection has to throw rather than return, or a verb body would carry on past its own guard. */
   it("throws the rejection it builds", () => {
-    expect(() => rejectVerb(400, ENVELOPE_KEYS.KNOWN)).toThrow(VerbError);
+    expect(() => Envelope.rejectVerb(400, ENVELOPE_KEYS.KNOWN)).toThrow(VerbError);
   });
 });

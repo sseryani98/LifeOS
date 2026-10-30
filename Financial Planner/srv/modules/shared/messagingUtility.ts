@@ -1,19 +1,14 @@
 import { readFileSync } from "fs";
 import { join } from "path";
 
-/** Path to the runtime messages properties file. */
-const MESSAGES_PATH = join(
-  process.cwd(),
-  "srv",
-  "_i18n",
-  "messages.properties",
-);
+import { MESSAGES_FILE } from "./constants.js";
 
 /**
  * Utility for retrieving i18n runtime messages.
  * Reads from srv/_i18n/messages.properties (camelCase.dots key format).
  */
 export class MessagingUtility {
+  private static readonly messagesPath = join(process.cwd(), ...MESSAGES_FILE.SEGMENTS);
   private static messages: Map<string, string> | null = null;
 
   /**
@@ -50,7 +45,7 @@ export class MessagingUtility {
     }
     MessagingUtility.messages = new Map();
     try {
-      const content = readFileSync(MESSAGES_PATH, "utf-8");
+      const content = readFileSync(MessagingUtility.messagesPath, "utf-8");
       const lines = content.split("\n");
       for (const line of lines) {
         const trimmed = line.trim();

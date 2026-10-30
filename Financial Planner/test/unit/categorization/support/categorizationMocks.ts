@@ -26,14 +26,14 @@ export interface CategorizationMocks {
  * Builds a matching context over the given patterns, reusing the canonical
  * vendor counts and category stats.
  */
-export function buildCategorizationContext(
+export const buildCategorizationContext = (
   patterns: MerchantPatternRecord[],
-): CategorizationContext {
+): CategorizationContext => {
   return new CategorizationContext(patterns, VENDOR_COUNTS, STATS_BY_VENDOR);
-}
+};
 
 /** Builds a CategorizationService with its data layer fully mocked. */
-export function buildCategorizationMocks(): CategorizationMocks {
+export const buildCategorizationMocks = (): CategorizationMocks => {
   const loadActivePatterns = jest.fn().mockResolvedValue([]);
   const loadVendorCounts = jest.fn().mockResolvedValue(new Map());
   const loadStatsByVendor = jest.fn().mockResolvedValue(new Map());
@@ -67,4 +67,4 @@ export function buildCategorizationMocks(): CategorizationMocks {
     resolveConfidenceLevelId,
     service,
   };
-}
+};

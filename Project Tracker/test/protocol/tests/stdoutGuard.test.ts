@@ -1,6 +1,11 @@
-import { READY_LOG, SPAWN_TIMEOUT_MS } from "../data/toolSurface.js";
+import {
+  READY_LOG,
+  SHUTDOWN_GRACE_MS,
+  SPAWN_TIMEOUT_MS,
+} from "../data/toolSurface.js";
 import {
   captureServerStreams,
+  captureStdinShutdown,
   type CapturedStreams,
 } from "../support/mcpHarness.js";
 
@@ -27,4 +32,11 @@ describe("the stdout guard", () => {
     expect(streams.stderr).toContain(READY_LOG);
     expect(streams.stdout).not.toContain(READY_LOG);
   });
+
+  /** Closing stdin is the spec's only portable stop signal; every other test kills the child. */
+  it("ends on its own when the client closes stdin", async () => {
+    const shutdown = await captureStdinShutdown(SHUTDOWN_GRACE_MS);
+
+    expect(shutdown.exited).toBe(true);
+  }, SHUTDOWN_GRACE_MS + SPAWN_TIMEOUT_MS);
 });

@@ -36,38 +36,38 @@ export interface DraftHelpers {
 }
 
 /** Binds the draft create/activate helpers to a cds.test POST handle. */
-export function buildDraftHelpers(post: PostFn): DraftHelpers {
+export const buildDraftHelpers = (post: PostFn): DraftHelpers => {
   /** Creates a draft, applies data, and activates it. Returns the active entity. */
-  async function createViaDraft(
+  const createViaDraft = async (
     entity: string,
     data: Record<string, unknown>,
-  ): Promise<DraftResponse> {
+  ): Promise<DraftResponse> => {
     const draft = await post(`${SERVICE}/${entity}`, data);
     const id = draft.data.ID;
     return post(
       `${SERVICE}/${entity}(ID=${id},IsActiveEntity=false)/AdminService.draftActivate`,
       {},
     );
-  }
+  };
 
   /** Creates a draft, applies data, and attempts activation. Returns the error or activated entity. */
-  async function createViaDraftExpectError(
+  const createViaDraftExpectError = async (
     entity: string,
     data: Record<string, unknown>,
-  ): Promise<DraftResponse | { status: number }> {
+  ): Promise<DraftResponse | { status: number }> => {
     const draft = await post(`${SERVICE}/${entity}`, data);
     const id = draft.data.ID;
     return post(
       `${SERVICE}/${entity}(ID=${id},IsActiveEntity=false)/AdminService.draftActivate`,
       {},
     ).catch((error: { status: number }) => error);
-  }
+  };
 
   return { createViaDraft, createViaDraftExpectError };
-}
+};
 
 /** Seeds the card + budget fixture world not covered by db/data/*.csv. */
-export async function seedAdmin(): Promise<void> {
+export const seedAdmin = async (): Promise<void> => {
   // Reference data is already seeded from db/data/*.csv by cds.deploy.
   // Only insert entities that have no CSV seed files.
   await INSERT.into("com.financialplanner.MarketCard").entries([AMEX_COBALT]);
@@ -81,4 +81,4 @@ export async function seedAdmin(): Promise<void> {
     GROCERIES_ALLOCATION_CURRENT,
     DINING_ALLOCATION_CURRENT,
   ]);
-}
+};

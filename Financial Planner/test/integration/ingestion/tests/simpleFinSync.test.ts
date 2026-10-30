@@ -1,8 +1,6 @@
-// Integration test for SimpleFIN sync (cds.test + SQLite). The sync engine and
-// its data layer run against the real in-memory database with only the SimpleFIN
-// network call stubbed. We test custom behaviour (sync ingests simplefin
-// transactions, dedup, auto-mapping, backfill, encrypted access URL) — never CAP
-// CRUD/draft machinery. Fixtures live in a data/ folder, the harness in support/.
+// Runs SimpleFIN sync against the real in-memory DB with only the network call
+// stubbed: ingestion, dedup, auto-mapping, backfill, encrypted access URL.
+// Custom behaviour only — never CAP CRUD/draft machinery.
 
 import cds from "@sap/cds";
 

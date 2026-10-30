@@ -32,7 +32,8 @@ What this means concretely:
   — Validators 100/100, Services 90/85, verbs 90/85. `./scripts/**/*.ts` still has none, and lands
   with `SPEC-09` (D-215, D-224).
 - **`npm run lint` checks real code now.** Twenty-one linters over `srv/`, `mcp/`, `scripts/` and the
-  test tree. `mcp/` was invisible to four of them until `SPEC-01` added it (D-225).
+  test tree. `mcp/` was invisible to four of them until `SPEC-01` added it (D-225) — and to ESLint
+  itself until 2026-10-30, when the leg became `eslint .` (that claim was phantom until then).
 - **The verb server runs as its own process.** `npm run install-mcp` writes the gitignored
   registration; the server declares its caller through `PROJECT_TRACKER_ACTOR` (D-223) and every log
   line goes to stderr, because stdout carries JSON-RPC frames and nothing else (D-228).
@@ -134,9 +135,9 @@ app/admin-master-data && ui5lint` — a named app folder sitting inside a block 
   at once, silently. 9.9.x `await`s `cds.plugins` in `bin/serve.js`, a dynamic import Jest's CJS VM
   rejects without `--experimental-vm-modules`; it red-lines every `cds.test` suite in the repo. Raise
   the pin deliberately, with the suite green.
-- **`eslint` runs with `--no-error-on-unmatched-pattern`.** ESLint exits 2 when a passed directory
-  contains nothing lintable, which is the normal state of a scaffolded module. The flag makes an
-  empty tree inert; a file with a real violation still exits 1.
+- ~~**`eslint` runs with `--no-error-on-unmatched-pattern`.**~~ **Replaced 2026-10-30:** the leg is
+  `eslint .`, covering `mcp/` and `test/` for the first time. `mcp/` had matched no `files:` block,
+  so ESLint skipped it in silence since `SPEC-01` — see the root `CLAUDE.md` §The Shared Lint Suite.
 
 ## Open Risks
 

@@ -30,3 +30,9 @@ export const SYNC_STATUS = {
     never_synced: "statusNeverSynced",
   } as Record<string, string>,
 };
+
+/** OData V4 operation paths the ConnectionService invokes. */
+export const ODATA_OPERATION = {
+  CLAIM_SETUP_TOKEN: "/AdminService.claimSetupToken(...)",
+  SYNC_NOW: "AdminService.syncNow(...)",
+} as const;

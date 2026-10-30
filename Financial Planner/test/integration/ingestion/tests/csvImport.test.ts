@@ -1,8 +1,6 @@
-// Integration test for CSV import (cds.test + SQLite): the engine + data layer
-// run against the real in-memory DB. Proves the *seeded* format config resolves
-// and parses correctly (guarding the corrected TD/CIBC column indices) and that
-// natural-key dedup fires against real persisted transactions. Custom logic
-// only — never CAP CRUD machinery. Fixtures in data/, harness in support/.
+// Runs CSV import against the real in-memory DB: proves the *seeded* format
+// configs parse (guarding the corrected TD/CIBC column indices) and that
+// natural-key dedup fires against persisted transactions. Custom logic only.
 
 import cds from "@sap/cds";
 

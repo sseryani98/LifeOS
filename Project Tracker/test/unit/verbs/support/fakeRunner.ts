@@ -13,7 +13,7 @@ export interface RecordingRunner extends QueryRunner {
  * @param results One result per call, in call order.
  * @returns The recording runner.
  */
-export function buildRecordingRunner(results: unknown[] = []): RecordingRunner {
+export const buildRecordingRunner = (results: unknown[] = []): RecordingRunner => {
   const queue = [...results];
   const statements: unknown[] = [];
   return {
@@ -23,18 +23,18 @@ export function buildRecordingRunner(results: unknown[] = []): RecordingRunner {
       return Promise.resolve(queue.length > 0 ? queue.shift() : []);
     }) as QueryRunner["run"],
   };
-}
+};
 
 /**
  * Reads back the rows an INSERT statement carried.
  * @param statement The recorded statement.
  * @returns The entries it would have written.
  */
-export function readInsertedEntries(
+export const readInsertedEntries = (
   statement: unknown,
-): Record<string, unknown>[] {
+): Record<string, unknown>[] => {
   const insert = (statement as { INSERT?: { entries?: unknown } }).INSERT;
   const entries = insert?.entries;
   if (Array.isArray(entries)) return entries as Record<string, unknown>[];
   return entries ? [entries as Record<string, unknown>] : [];
-}
+};

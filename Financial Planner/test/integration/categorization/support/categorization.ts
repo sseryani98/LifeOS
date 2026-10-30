@@ -33,12 +33,12 @@ export interface TransactionStateRow {
 }
 
 /** The real categorization engine wired to the in-memory DB. */
-export function buildCategorizationService(): CategorizationService {
+export const buildCategorizationService = (): CategorizationService => {
   return new CategorizationService(new CategorizationDataService());
-}
+};
 
 /** Seeds vendors, contains + amount patterns, and categorized/uncategorized rows. */
-export async function seedCategorization(): Promise<void> {
+export const seedCategorization = async (): Promise<void> => {
   await INSERT.into(VENDOR).entries(CATEGORIZATION_VENDORS);
   await INSERT.into(MERCHANT_PATTERN).entries([UBER_EATS_PATTERN, ICLOUD_PATTERN]);
   await INSERT.into(TRANSACTION).entries(UBER_EATS_TRANSACTIONS);
@@ -46,27 +46,27 @@ export async function seedCategorization(): Promise<void> {
     ICLOUD_TRANSACTION,
     PADEL_UNCATEGORIZED_TRANSACTION,
   ]);
-}
+};
 
 /** Reads a transaction's categorization state by id. */
-export async function readTransactionState(
+export const readTransactionState = async (
   transactionId: string,
-): Promise<TransactionStateRow | null> {
+): Promise<TransactionStateRow | null> => {
   const row = (await SELECT.one
     .from(TRANSACTION)
     .columns("vendor_ID", "categorizationStatus")
     .where({ ID: transactionId })) as TransactionStateRow | undefined;
   return row ?? null;
-}
+};
 
 /** Reads the learned patterns a vendor has accumulated. */
-export async function readLearnedPatternsForVendor(
+export const readLearnedPatternsForVendor = async (
   vendorId: string,
-): Promise<LearnedPatternRow[]> {
+): Promise<LearnedPatternRow[]> => {
   return (await SELECT.from(MERCHANT_PATTERN)
     .columns("pattern", "matchType", "amount", "isActive")
     .where({
       vendor_ID: vendorId,
       patternSource_ID: LEARNED_PATTERN_SOURCE.ID,
     })) as LearnedPatternRow[];
-}
+};

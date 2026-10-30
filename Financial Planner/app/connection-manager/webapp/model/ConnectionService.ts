@@ -1,8 +1,6 @@
 import type ODataModel from "sap/ui/model/odata/v4/ODataModel";
 import type Context from "sap/ui/model/odata/v4/Context";
-
-const CLAIM_TOKEN_OPERATION = "/AdminService.claimSetupToken(...)";
-const SYNC_NOW_OPERATION = "AdminService.syncNow(...)";
+import { ODATA_OPERATION } from "com/financialplanner/connectionmanager/model/constants";
 
 /**
  * ConnectionService — owns every OData V4 call for the Connection Manager app.
@@ -25,7 +23,7 @@ export default class ConnectionService {
    * @returns resolves once the connection is created
    */
   public async claimSetupToken(token: string, displayName: string): Promise<void> {
-    const operation = this._model.bindContext(CLAIM_TOKEN_OPERATION);
+    const operation = this._model.bindContext(ODATA_OPERATION.CLAIM_SETUP_TOKEN);
     operation.setParameter("setupToken", token);
     operation.setParameter("displayName", displayName);
     await operation.invoke();
@@ -39,7 +37,7 @@ export default class ConnectionService {
    * @returns resolves once the sync completes
    */
   public async syncNow(context: Context): Promise<void> {
-    const operation = this._model.bindContext(SYNC_NOW_OPERATION, context);
+    const operation = this._model.bindContext(ODATA_OPERATION.SYNC_NOW, context);
     await operation.invoke();
     this._model.refresh();
   }

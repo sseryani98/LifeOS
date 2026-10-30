@@ -13,7 +13,7 @@ export interface CsvImportSaveMocks {
 }
 
 /** Builds a fresh CsvImportSaveService with its data layer mocked. */
-export function buildCsvImportSaveMocks(vendorName = "Amazon"): CsvImportSaveMocks {
+export const buildCsvImportSaveMocks = (vendorName = "Amazon"): CsvImportSaveMocks => {
   const data = {
     insertTransactions: jest.fn(async () => undefined),
     insertImportLog: jest.fn(async () => undefined),
@@ -22,12 +22,12 @@ export function buildCsvImportSaveMocks(vendorName = "Amazon"): CsvImportSaveMoc
 
   const service = new CsvImportSaveService(data);
   return { data, service };
-}
+};
 
 /** Wraps a save request as an action request with a spy error() collaborator. */
-export function saveRequestOf(request: CsvSaveRequest): {
+export const saveRequestOf = (request: CsvSaveRequest): {
   data: CsvSaveRequest;
   error: jest.Mock;
-} {
+} => {
   return { data: request, error: jest.fn() };
-}
+};

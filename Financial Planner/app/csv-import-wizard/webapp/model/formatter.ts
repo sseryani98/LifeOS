@@ -2,7 +2,7 @@
  * Display formatters for the CSV Import Wizard. Object-literal module — no
  * UI5 class, so no @namespace is needed.
  */
-const formatter = {
+export default {
   /**
    * Maps a cleared flag to the row's ObjectStatus semantic state.
    * @param cleared whether the row has been cleared
@@ -22,5 +22,3 @@ const formatter = {
     return name ? name : "—";
   },
 };
-
-export default formatter;

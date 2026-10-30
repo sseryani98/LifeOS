@@ -1,3 +1,4 @@
+import { LAUNCH } from "../../shared/data/launch.js";
 import {
   FOREIGN_REGISTRY,
   REGISTRY_ENV,
@@ -36,7 +37,23 @@ describe("installMcpServer", () => {
     const registry = readRegistry(path);
 
     expect(Object.keys(registry.mcpServers)).toEqual([REGISTRY_KEYS.TRACKER]);
-    expect(registry.mcpServers[REGISTRY_KEYS.TRACKER].args).toHaveLength(2);
+    expect(registry.mcpServers[REGISTRY_KEYS.TRACKER].args).toHaveLength(
+      LAUNCH.ARGS.length + 1,
+    );
+  });
+
+  /** The suite spawned one command and the registration named another, and nothing compared them. */
+  it("registers the launch command the protocol suite actually spawns", async () => {
+    const path = makeRegistryPath();
+
+    await runInstaller(path);
+    const entry = readRegistry(path).mcpServers[REGISTRY_KEYS.TRACKER];
+
+    expect(entry.command).toBe(LAUNCH.COMMAND);
+    expect(entry.args.slice(0, LAUNCH.ARGS.length)).toEqual([...LAUNCH.ARGS]);
+    expect(entry.args.at(-1)?.split("\\").join("/")).toContain(
+      LAUNCH.ENTRY.join("/"),
+    );
   });
 
   /** A registration that declares no actor registers a server whose every verb is refused. */

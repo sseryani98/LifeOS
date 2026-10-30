@@ -1,7 +1,6 @@
-// Integration test for the transaction actions (cds.test + SQLite): the engines
-// run against the real in-memory DB, and the OData actions + before-SAVE hook
-// run through the real facade, proving the split round-trips the schema, the
-// action signatures bind, and learning dedupes by description. Custom logic only.
+// Runs the engines against the real in-memory DB and the OData actions + before-SAVE
+// hook through the real facade: the split round-trips the schema, the action
+// signatures bind, and learning dedupes by description. Custom logic only.
 
 import cds from "@sap/cds";
 

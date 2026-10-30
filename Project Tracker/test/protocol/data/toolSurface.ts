@@ -1,3 +1,11 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
+import {
+  DEFECT_SEVERITIES,
+  FRICEW_TYPES,
+} from "../../../mcp/verbs/shared/constants.js";
+
 /**
  * The exposed surface, exhaustive — the list is the contract, and so is each
  * tool's read-only flag: a host that auto-approves read-only tools runs a write
@@ -37,12 +45,54 @@ export const WRITE_TOOL_KINDS = {
   plan_sprint: "sprintPlanned",
 } as const;
 
-/** Where the advertised schema declares the FRICEW code list, key by key. */
-export const FRICEW_SCHEMA_PATH = {
-  TOOL: "plan_sprint",
-  PROPERTY: "stories",
-  MEMBER: "type",
-} as const;
+/**
+ * Every code list the advertised schema declares, and where. One hard-coded
+ * path proved the pattern for one tool and left every other enum-valued
+ * parameter unchecked; a table checks them all and grows with the surface.
+ * A `MEMBER` names a property of an array's items, and its absence means the
+ * enum sits directly on the tool's own property.
+ */
+export const ENUM_SCHEMA_PATHS = [
+  { TOOL: "plan_sprint", PROPERTY: "stories", MEMBER: "type" },
+  { TOOL: "log_defect", PROPERTY: "severity" },
+] as const;
+
+/**
+ * What a description has to clear to count as one. The floor is deliberately
+ * low — this catches a description emptied, stubbed or pasted from a sibling,
+ * not a thin one, because only the first three are mechanically decidable.
+ */
+export const DESCRIPTION_FLOOR = 40;
+
+/**
+ * Phrases the server's instructions have to carry. They are the premise a
+ * client is told once at initialize and nowhere else, so an instructions block
+ * that loses them has stopped doing the job it was added for.
+ */
+export const INSTRUCTIONS_MARKERS = ["only write path", "no query"] as const;
+
+/** The values each path above must advertise, so a shortened list is caught too. */
+export const EXPECTED_CODE_LISTS: Record<string, readonly string[]> = {
+  plan_sprint: FRICEW_TYPES,
+  log_defect: DEFECT_SEVERITIES,
+};
+
+/**
+ * The version the manifest declares, read rather than copied. Copying it would
+ * make the assertion pass while the two facts it compares drifted apart, which
+ * is the defect it exists to catch.
+ */
+export const MANIFEST_VERSION = (
+  JSON.parse(
+    readFileSync(join(__dirname, "..", "..", "..", "package.json"), "utf8"),
+  ) as { version: string }
+).version;
+
+/** A key no tool's schema declares, sent to prove an undeclared one is refused. */
+export const UNKNOWN_ARGUMENT = { key: "workspaceSlug", value: "typo" } as const;
+
+/** How many calls the overlap check has in flight against one server at once. */
+export const CONCURRENT_READS = 8;
 
 /** A lost store, as the retry gate recognises one. */
 export const CONNECTION_FAILURE = {
@@ -59,6 +109,13 @@ export const RETRY_OUTCOME = {
 
 /** Identity the client announces to the server. */
 export const CLIENT_INFO = { name: "protocol-suite", version: "1.0.0" } as const;
+
+/**
+ * How long a server whose stdin has closed gets to end on its own. Generous:
+ * the point is to distinguish "shuts down" from "never shuts down", not to
+ * measure how quickly.
+ */
+export const SHUTDOWN_GRACE_MS = 10_000;
 
 /** How long the spawned server gets to boot before the suite gives up. */
 export const SPAWN_TIMEOUT_MS = 25_000;

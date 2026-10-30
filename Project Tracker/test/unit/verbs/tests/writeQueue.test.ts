@@ -1,14 +1,10 @@
-import {
-  nextTimestamp,
-  runSerialized,
-  toSecondPrecision,
-} from "../../../../mcp/verbs/shared/writeQueue.js";
+import { WriteQueue } from "../../../../mcp/verbs/shared/writeQueue.js";
 
 describe("write ordering", () => {
   /** A counter that only ever increments would also pass this, and date every register row from the epoch. */
   it("hands out strictly increasing timestamps anchored to the wall clock", () => {
     const before = Date.now();
-    const stamps = Array.from({ length: 5 }, () => nextTimestamp());
+    const stamps = Array.from({ length: 5 }, () => WriteQueue.createTimestamp());
 
     for (let index = 1; index < stamps.length; index++) {
       expect(stamps[index] > stamps[index - 1]).toBe(true);
@@ -19,7 +15,7 @@ describe("write ordering", () => {
 
   /** A fractional second is refused outright by the elements that take a date and a time. */
   it("trims a timestamp to whole seconds", () => {
-    expect(toSecondPrecision("2026-08-16T10:00:00.123Z")).toBe(
+    expect(WriteQueue.toSecondPrecision("2026-08-16T10:00:00.123Z")).toBe(
       "2026-08-16T10:00:00Z",
     );
   });
@@ -34,9 +30,9 @@ describe("write ordering", () => {
     };
 
     await Promise.all([
-      runSerialized(work(1, 20)),
-      runSerialized(work(2, 1)),
-      runSerialized(work(3, 1)),
+      WriteQueue.runSerialized(work(1, 20)),
+      WriteQueue.runSerialized(work(2, 1)),
+      WriteQueue.runSerialized(work(3, 1)),
     ]);
 
     expect(order).toEqual([1, 2, 3]);
@@ -44,10 +40,10 @@ describe("write ordering", () => {
 
   /** One failed write must not park every later one behind a promise that never settles. */
   it("keeps the chain running after a write rejects", async () => {
-    const failing = runSerialized(() => Promise.reject(new Error("nope")));
+    const failing = WriteQueue.runSerialized(() => Promise.reject(new Error("nope")));
 
     await expect(failing).rejects.toThrow("nope");
-    await expect(runSerialized(() => Promise.resolve("after"))).resolves.toBe(
+    await expect(WriteQueue.runSerialized(() => Promise.resolve("after"))).resolves.toBe(
       "after",
     );
   });

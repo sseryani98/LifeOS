@@ -1,10 +1,29 @@
 import {
+  REOPEN_REASON,
+  STAGE,
+} from "../../integration/tracker/data/chainStates.js";
+import {
   MINIMAL_TEST_RUN_METRICS,
   SPRINT_PLAN,
+  STORY_REFERENCE,
   TEST_RUN_EXECUTED_AT,
   TEST_RUN_METRICS,
   WORLD,
 } from "../data/world.js";
+
+/**
+ * Builds a reopen input aimed at the canonical story's first stage, which is
+ * freshly seeded and therefore not complete — the state whose rejection carries
+ * the remediation.
+ * @returns The verb input.
+ */
+export const buildReopenStageInput = (): Record<string, unknown> => {
+  return {
+    story: STORY_REFERENCE,
+    stage: STAGE.BUILD,
+    reason: REOPEN_REASON,
+  };
+};
 
 /**
  * Builds the sprint-plan input, optionally with a different story list, so the
@@ -12,14 +31,14 @@ import {
  * @param stories The stories to plan; the standard three when omitted.
  * @returns The verb input.
  */
-export function buildSprintPlanInput(
+export const buildSprintPlanInput = (
   stories: {
     id: string;
     type: string;
     description: string;
     shipsUi: boolean;
   }[] = [...SPRINT_PLAN.stories],
-): Record<string, unknown> {
+): Record<string, unknown> => {
   return {
     workspace: WORLD.WORKSPACE.slug,
     name: SPRINT_PLAN.name,
@@ -27,7 +46,7 @@ export function buildSprintPlanInput(
     branch: SPRINT_PLAN.branch,
     stories,
   };
-}
+};
 
 /**
  * Builds a test-run input scoped to one stage of a story.
@@ -35,7 +54,7 @@ export function buildSprintPlanInput(
  * @param stage The stage code the run belongs to.
  * @returns The verb input.
  */
-export function buildStoryTestRunInput(
+export const buildStoryTestRunInput = (
   story: string,
   stage: string,
 ): {
@@ -43,14 +62,14 @@ export function buildStoryTestRunInput(
   stage: string;
   metrics: typeof TEST_RUN_METRICS;
   executedAt: string;
-} {
+} => {
   return {
     story,
     stage,
     metrics: { ...TEST_RUN_METRICS },
     executedAt: TEST_RUN_EXECUTED_AT,
   };
-}
+};
 
 /**
  * Builds the mirror-case input a scope guard must refuse: a stage named with
@@ -58,19 +77,19 @@ export function buildStoryTestRunInput(
  * @param stage The stage code named without its story.
  * @returns The verb input.
  */
-export function buildStageWithoutStoryTestRunInput(stage: string): {
+export const buildStageWithoutStoryTestRunInput = (stage: string): {
   stage: string;
   workspace: string;
   metrics: typeof TEST_RUN_METRICS;
   executedAt: string;
-} {
+} => {
   return {
     stage,
     workspace: WORLD.WORKSPACE.slug,
     metrics: { ...TEST_RUN_METRICS },
     executedAt: TEST_RUN_EXECUTED_AT,
   };
-}
+};
 
 /**
  * Builds a test-run input scoped to the workspace, with the full metrics or the
@@ -78,11 +97,11 @@ export function buildStageWithoutStoryTestRunInput(stage: string): {
  * @param minimal Whether to carry only the counts a bare invocation produces.
  * @returns The verb input.
  */
-export function buildWorkspaceTestRunInput(minimal = false): {
+export const buildWorkspaceTestRunInput = (minimal = false): {
   workspace: string;
   metrics: Record<string, unknown>;
   executedAt: string;
-} {
+} => {
   const metrics = minimal
     ? {
         ...MINIMAL_TEST_RUN_METRICS,
@@ -94,4 +113,4 @@ export function buildWorkspaceTestRunInput(minimal = false): {
     metrics,
     executedAt: TEST_RUN_EXECUTED_AT,
   };
-}
+};

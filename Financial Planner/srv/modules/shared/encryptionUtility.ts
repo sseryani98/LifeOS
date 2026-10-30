@@ -1,14 +1,6 @@
 import { createCipheriv, createDecipheriv, randomBytes } from "crypto";
 
-/** AES-256-GCM storage-format spec — {iv}:{authTag}:{ciphertext}, hex-encoded. */
-const ENCRYPTION = {
-  ALGORITHM: "aes-256-gcm",
-  IV_LENGTH: 12,
-  AUTH_TAG_LENGTH: 16,
-  KEY_LENGTH: 32,
-  SEPARATOR: ":",
-  ENCRYPTED_PARTS: 3,
-} as const;
+import { ENCRYPTION } from "./constants.js";
 
 /**
  * AES-256-GCM encryption utility for sensitive fields.

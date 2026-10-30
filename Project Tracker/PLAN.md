@@ -148,7 +148,7 @@ mechanism needs a construction step.
 | 10  | Tech Stack         | `/generate-tech-stack` → `tech-stack-writer`       | Authored     | **Done** — 2026-08-15. `TS-001` **Approved**; **the proxy executed**, the loader ruled, the credential homed, **R11 minted** (D-176 … D-185)             |
 | 11  | Test Strategy      | `/generate-test-strategy` → `test-strategy-writer` | Authored     | **Done** — 2026-08-15. `TST-001` **Approved**; **the harness question executed and the exemplar's belief reversed**; 180 FUTs classified (D-186 … D-197) |
 | 12  | Project Planning   | `/generate-build-plan` → `build-plan-writer`       | Authored     | **Done** — 2026-08-15. `BP-001` **Approved**; **13 stories, 3 sprints**; story zero resolves the eight "first build story" items (D-198 … D-209)         |
-| 13  | Build              | `/build` + chain                                   | Exists       | **In progress** — `S-00` **Done** 2026-08-16 (D-210 … D-217); `SPEC-01` **Done** 2026-08-16 (D-218 … D-230), with **§5's chain run retroactively 2026-08-25 → 26** — stages 2, 3 and 4 closed, 5 skipped, **6 Human Review still owed** (D-232 … D-238); **`SPEC-02` next**, in sprint `PT-W1` (BP-001 §3, §6) |
+| 13  | Build              | `/build` + chain                                   | Exists       | **In progress** — `S-00` **Done** 2026-08-16 (D-210 … D-217); `SPEC-01` **Done** 2026-08-16 (D-218 … D-230), with **§5's chain run retroactively 2026-08-25 → 26** — stages 2, 3 and 4 closed, 5 skipped, **6 Human Review now closed** (D-232 … D-238); **`SPEC-02` next**, in sprint `PT-W1` (BP-001 §3, §6) |
 | 14  | **Rewire tooling** | `lintNoMarkdownState` + PreToolUse hook            | Not authored | Not started                                                                                                                                              |
 | 15  | Cutover            | —                                                  | —            | Not started                                                                                                                                              |
 | 16  | Back to FP         | —                                                  | —            | Blocked on cutover                                                                                                                                       |
@@ -596,6 +596,35 @@ Settle before or during Scaffold.
 ---
 
 ## 8. Session log
+
+### 2026-10-30 — `SPEC-01` QA chain, stage 6 Human Review: five findings mechanised, and a server no client could start
+
+- **Stage 6 closed, and it was Sandro's.** He raised five findings over the uncommitted tree; each
+  went through `/human-review-loop` and is now lint-enforced in **both** modules, not just this one.
+  **#0** — ESLint never linted `mcp/` or `test/`: no `files:` glob matched them, and ESLint skips an
+  unmatched file inside a passed folder silently. Both modules' leg is now `eslint .`, `mcp/**` joins
+  the backend block, and a final catch-all fails any `.ts` no glob covers. **#1** imports plus one
+  class per non-test file, an entry point in `static {}`; **#2** types and constants out to
+  `types.ts` / `constants.ts`; **#3** `id-length`, which had simply never run here; **#4** comment
+  caps (3 inline lines, 5 JSDoc); **#5** no `function` keyword, tests included. A guided sample of
+  four files — the shared config, `mcp/server.ts`, `mcp/verbs/completeStage.ts`, and Financial
+  Planner's `NavConfig.ts` — then drew **no further findings**.
+- **The verb server could not start under its own registration, and had not since `SPEC-01`.** A
+  client spawns it from the project it is open in — the repo root — and CAP roots its project at
+  cwd, so `cds.connect.to("TrackerService")` threw before the transport opened. Every protocol test
+  spawned from the module root, which is exactly the one cwd that hid it. The harness now spawns
+  from the client's cwd (Red: the three stdout-guard tests failed with the production error), and
+  `startServer` changes into the module root before CAP loads (Green). `.mcp.json` was re-registered
+  through `npm run install-mcp`, replacing a stale `npx tsx` entry.
+- **Also uncommitted until now: the 2026-08-27 hardening** from `research/mcp-verb-server-critique.md`
+  — the server `instructions`, `.strict()` input schemas, and a connection-loss 503 with one
+  reconnect-and-retry. It shares files with the refactor, so it lands in the same commit.
+- **Logged on Financial Planner, not fixed:** `D-005` — Connection Manager and Transactions render
+  blank on deep-link. It reproduces on unchanged `4b6615e`.
+- **Gate green at close:** Project Tracker `tsc` 0, lint 0, `npm test` 0 over **181 tests in 19
+  suites**, `cds build` 0; Financial Planner `tsc` 0, lint 0, **286 in 29 suites**, build 0.
+- **Owed on this chain:** nothing. `/refresh-docs` (stage 7) ran in this session; `/pm-update`
+  (stage 8) finds nothing here (D-207).
 
 ### 2026-08-26 — `SPEC-01` QA chain, stages 4–5: the functional units executed, and the 500 that should have been a 409
 

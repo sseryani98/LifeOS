@@ -19,7 +19,7 @@ export interface CsvImportMocks {
 }
 
 /** Builds a fresh CsvImportService with data, dedup, and categorization mocked. */
-export function buildCsvImportMocks(): CsvImportMocks {
+export const buildCsvImportMocks = (): CsvImportMocks => {
   const data = {
     getFormatConfigForCard: jest.fn(async () => ({ ...SCOTIA_CONFIG })),
     getAttributionCards: jest.fn(async () => [...CSV_SINGLE_CARD]),
@@ -36,4 +36,4 @@ export function buildCsvImportMocks(): CsvImportMocks {
 
   const service = new CsvImportService(data, dedup, categorization);
   return { data, dedup, categorization, service };
-}
+};

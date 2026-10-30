@@ -28,21 +28,25 @@ const SCANNED_EXTENSIONS = [".ts", ".js"];
 
 /**
  * Maximum prose lines per comment block. Only the description counts — tag
- * lines (@param, @returns, @example) and everything after the first tag are
- * exempt, as are blank dividers and the comment delimiters. Forces terse,
- * why-not-what comments without penalising wide, well-documented signatures.
+ * lines (@param, @returns) and everything after the first tag are exempt, as
+ * are blank lines and delimiters. An inline comment sits in the code path, so
+ * it gets less room than a JSDoc block above a signature.
  */
-const MAX_PROSE_LINES = 5;
+const MAX_PROSE_LINES = { jsdoc: 5, inline: 3 } as const;
+
+type CommentKind = keyof typeof MAX_PROSE_LINES;
 
 interface CommentBlock {
   startLine: number;
   proseLines: number;
+  kind: CommentKind;
 }
 
 interface Violation {
   filePath: string;
   line: number;
   proseLines: number;
+  kind: CommentKind;
 }
 
 /**
@@ -120,7 +124,7 @@ function extractComments(text: string): CommentBlock[] {
   let runProse = 0;
   const flushRun = () => {
     if (runStart !== -1) {
-      blocks.push({ startLine: runStart, proseLines: runProse });
+      blocks.push({ startLine: runStart, proseLines: runProse, kind: "inline" });
       runStart = -1;
       runLast = -1;
       runProse = 0;
@@ -143,7 +147,11 @@ function extractComments(text: string): CommentBlock[] {
       }
     } else if (token === typescript.SyntaxKind.MultiLineCommentTrivia) {
       flushRun();
-      blocks.push({ startLine, proseLines: countBlockProse(tokenText) });
+      blocks.push({
+        startLine,
+        proseLines: countBlockProse(tokenText),
+        kind: tokenText.startsWith("/**") ? "jsdoc" : "inline",
+      });
     } else if (
       token !== typescript.SyntaxKind.WhitespaceTrivia &&
       token !== typescript.SyntaxKind.NewLineTrivia
@@ -166,11 +174,12 @@ function main(): void {
   const violations: Violation[] = [];
   for (const filePath of files) {
     for (const block of extractComments(readFileSync(filePath, "utf8"))) {
-      if (block.proseLines > MAX_PROSE_LINES) {
+      if (block.proseLines > MAX_PROSE_LINES[block.kind]) {
         violations.push({
           filePath: relative(ROOT_DIR, filePath),
           line: block.startLine,
           proseLines: block.proseLines,
+          kind: block.kind,
         });
       }
     }
@@ -178,15 +187,16 @@ function main(): void {
 
   reportViolations(
     `Scanning ${files.length} source file(s) for over-long comments...`,
-    `No comment blocks exceed ${MAX_PROSE_LINES} prose lines.`,
+    `No comment blocks exceed ${MAX_PROSE_LINES.jsdoc} (JSDoc) or ` +
+      `${MAX_PROSE_LINES.inline} (inline) prose lines.`,
     violations.map(
       violation =>
-        `${violation.filePath}:${violation.line}  —  ` +
-        `${violation.proseLines} prose lines (cap ${MAX_PROSE_LINES})`,
+        `${violation.filePath}:${violation.line}  —  ${violation.proseLines} ` +
+        `prose lines (${violation.kind} cap ${MAX_PROSE_LINES[violation.kind]})`,
     ),
-    `\nFound ${violations.length} over-long comment block(s). Trim the ` +
-      `description to ${MAX_PROSE_LINES} lines or fewer — state why, not what. ` +
-      `@param/@returns/@example lines are exempt, so widen signatures freely.`,
+    `\nFound ${violations.length} over-long comment block(s). Trim to the ` +
+      `cap — state why, not what. @param/@returns lines are exempt, so widen ` +
+      `signatures freely.`,
   );
 }
 

@@ -1,7 +1,7 @@
 import type cds from "@sap/cds";
 
-import { logDefect } from "../../../../mcp/verbs/logDefect.js";
-import { startStage } from "../../../../mcp/verbs/startStage.js";
+import { LogDefectVerb } from "../../../../mcp/verbs/logDefect.js";
+import { StartStageVerb } from "../../../../mcp/verbs/startStage.js";
 import {
   ACTORS,
   BARE_STORY_REFERENCE,
@@ -30,6 +30,9 @@ import {
   expectSuccess,
 } from "../support/verbHarness.js";
 
+const logDefect = new LogDefectVerb();
+const startStage = new StartStageVerb();
+
 describe("addressing and identity", () => {
   let service: cds.Service;
   let world: SeededWorld;
@@ -49,7 +52,7 @@ describe("addressing and identity", () => {
     const context = buildVerbContext(service, ACTORS.IMPLEMENTER);
 
     const result = expectFailure(
-      await startStage(context, {
+      await startStage.run(context, {
         story: BARE_STORY_REFERENCE,
         stage: STAGE.CODE_QUALITY,
       }),
@@ -68,7 +71,7 @@ describe("addressing and identity", () => {
     const context = buildVerbContext(service, ACTORS.IMPLEMENTER);
 
     const result = expectSuccess(
-      await logDefect(context, { story: STORY_REFERENCE, ...DEFECT_INPUT }),
+      await logDefect.run(context, { story: STORY_REFERENCE, ...DEFECT_INPUT }),
     );
     const defect = await readDefectById(result.defectId as string);
     const events = await readActivityLog(world.workspaceId);
@@ -83,7 +86,7 @@ describe("addressing and identity", () => {
     const context = buildVerbContext(service, "");
 
     const result = expectFailure(
-      await startStage(context, {
+      await startStage.run(context, {
         story: STORY_REFERENCE,
         stage: STAGE.BUILD,
       }),
@@ -98,7 +101,7 @@ describe("addressing and identity", () => {
     const context = buildVerbContext(service, ACTORS.IMPLEMENTER);
 
     const result = expectFailure(
-      await startStage(context, {
+      await startStage.run(context, {
         story: STORY_REFERENCE,
         stage: UNRESOLVABLE.STAGE,
       }),
@@ -114,7 +117,7 @@ describe("addressing and identity", () => {
     const context = buildVerbContext(service, ACTORS.IMPLEMENTER);
 
     const result = expectFailure(
-      await startStage(context, {
+      await startStage.run(context, {
         story: UNRESOLVABLE.STORY,
         stage: STAGE.BUILD,
       }),
@@ -129,7 +132,7 @@ describe("addressing and identity", () => {
     const context = buildVerbContext(service, ACTORS.IMPLEMENTER);
 
     const result = expectFailure(
-      await startStage(context, {
+      await startStage.run(context, {
         story: UNRESOLVABLE.WORKSPACE,
         stage: STAGE.BUILD,
       }),

@@ -58,19 +58,19 @@ interface AlertRow {
 }
 
 /** A one-shot HTTP client returning a fixed sync response (and the plaintext URL on claim). */
-export function httpReturning(
+export const httpReturning = (
   response: SimpleFINResponse,
-): HttpClient {
+): HttpClient => {
   return {
     get: async () => ({ status: 200, data: response as never }),
     post: async () => ({ status: 200, data: ACCESS_URL_PLAINTEXT as never }),
   };
-}
+};
 
 /** The real sync engine wired to the in-memory DB + a stub HTTP client. */
-export function buildSimpleFinService(
+export const buildSimpleFinService = (
   http: HttpClient,
-): SimpleFINService {
+): SimpleFINService => {
   return new SimpleFINService(
     new SimpleFINDataService(),
     new DeduplicationService(new DeduplicationDataService()),
@@ -80,59 +80,59 @@ export function buildSimpleFinService(
       sleep: async () => undefined,
     },
   );
-}
+};
 
 /** Reads one provider connection by primary key (undefined when none matches). */
-export async function readConnection(id: string): Promise<ConnectionRow> {
+export const readConnection = async (id: string): Promise<ConnectionRow> => {
   return (await SELECT.one.from(CONNECTION).where({ ID: id })) as ConnectionRow;
-}
+};
 
 /** Reads every transaction that was ingested from SimpleFIN. */
-export async function readSimpleFinTransactions(): Promise<TransactionRow[]> {
+export const readSimpleFinTransactions = async (): Promise<TransactionRow[]> => {
   return (await SELECT.from(TRANSACTION).where({
     source: "simplefin",
   })) as TransactionRow[];
-}
+};
 
 /** Reads one provider account by its external (bank-side) account id. */
-export async function readAccountByExternalId(
+export const readAccountByExternalId = async (
   externalAccountId: string,
-): Promise<AccountRow> {
+): Promise<AccountRow> => {
   return (await SELECT.one
     .from(ACCOUNT)
     .where({ externalAccountId })) as AccountRow;
-}
+};
 
 /** Reads one transaction by its external (provider-side) id. */
-export async function readTransactionByExternalId(
+export const readTransactionByExternalId = async (
   externalId: string,
-): Promise<TransactionRow> {
+): Promise<TransactionRow> => {
   return (await SELECT.one
     .from(TRANSACTION)
     .where({ externalId })) as TransactionRow;
-}
+};
 
 /** Reads every alert raised against a given provider connection. */
-export async function readAlertsForConnection(
+export const readAlertsForConnection = async (
   connectionId: string,
-): Promise<AlertRow[]> {
+): Promise<AlertRow[]> => {
   return (await SELECT.from(ALERT).where({
     providerConnection_ID: connectionId,
   })) as AlertRow[];
-}
+};
 
 /** Links a provider account to a card instance, as the user would when mapping it. */
-export async function mapAccountToCard(
+export const mapAccountToCard = async (
   accountId: string,
   cardInstanceId: string,
-): Promise<void> {
+): Promise<void> => {
   await UPDATE(ACCOUNT)
     .set({ cardInstance_ID: cardInstanceId })
     .where({ ID: accountId });
-}
+};
 
 /** Seeds the card world plus one mapped SimpleFIN connection/account into SQLite. */
-export async function seedSimpleFin(): Promise<void> {
+export const seedSimpleFin = async (): Promise<void> => {
   const encryption = new EncryptionUtility();
   await INSERT.into("com.financialplanner.MarketCard").entries([AMEX_COBALT]);
   await INSERT.into("com.financialplanner.Offer").entries([
@@ -145,4 +145,4 @@ export async function seedSimpleFin(): Promise<void> {
     { ...CONNECTION_SEED, accessUrlEnc: encryption.encrypt(ACCESS_URL_PLAINTEXT) },
   ]);
   await INSERT.into(ACCOUNT).entries([{ ...ACCOUNT_MAPPED_SEED }]);
-}
+};

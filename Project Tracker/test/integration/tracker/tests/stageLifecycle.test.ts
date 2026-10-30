@@ -1,8 +1,8 @@
 import type cds from "@sap/cds";
 
-import { completeStage } from "../../../../mcp/verbs/completeStage.js";
-import { reopenStage } from "../../../../mcp/verbs/reopenStage.js";
-import { startStage } from "../../../../mcp/verbs/startStage.js";
+import { CompleteStageVerb } from "../../../../mcp/verbs/completeStage.js";
+import { ReopenStageVerb } from "../../../../mcp/verbs/reopenStage.js";
+import { StartStageVerb } from "../../../../mcp/verbs/startStage.js";
 import {
   ACTORS,
   STAGE_NOTES,
@@ -52,6 +52,10 @@ import {
   expectSuccess,
 } from "../support/verbHarness.js";
 
+const completeStage = new CompleteStageVerb();
+const reopenStage = new ReopenStageVerb();
+const startStage = new StartStageVerb();
+
 describe("stage lifecycle", () => {
   let service: cds.Service;
   let world: SeededWorld;
@@ -73,7 +77,7 @@ describe("stage lifecycle", () => {
     await setChainStates(world.milestoneId, CODE_QUALITY_IN_PROGRESS);
 
     const result = expectSuccess(
-      await completeStage(context, {
+      await completeStage.run(context, {
         story: STORY_REFERENCE,
         stage: STAGE.CODE_QUALITY,
       }),
@@ -95,7 +99,7 @@ describe("stage lifecycle", () => {
     await setChainStates(world.milestoneId, CODE_QUALITY_IN_PROGRESS);
 
     expectSuccess(
-      await completeStage(context, {
+      await completeStage.run(context, {
         story: STORY_REFERENCE,
         stage: STAGE.CODE_QUALITY,
         notes: STAGE_NOTES,
@@ -112,7 +116,7 @@ describe("stage lifecycle", () => {
     const before = await readTaskByCode(world.milestoneId, STAGE.COMMIT);
 
     const result = expectFailure(
-      await completeStage(context, {
+      await completeStage.run(context, {
         story: STORY_REFERENCE,
         stage: STAGE.COMMIT,
       }),
@@ -129,7 +133,7 @@ describe("stage lifecycle", () => {
     await setChainStates(world.milestoneId, CODE_QUALITY_COMPLETE);
 
     const result = expectFailure(
-      await completeStage(context, {
+      await completeStage.run(context, {
         story: STORY_REFERENCE,
         stage: STAGE.CODE_QUALITY,
       }),
@@ -151,7 +155,7 @@ describe("stage lifecycle", () => {
     }
 
     const result = expectSuccess(
-      await completeStage(context, {
+      await completeStage.run(context, {
         story: STORY_REFERENCE,
         stage: STAGE.BUILD,
       }),
@@ -171,7 +175,7 @@ describe("stage lifecycle", () => {
     const before = await readTaskByCode(world.milestoneId, STAGE.TEST_QUALITY);
 
     expectSuccess(
-      await reopenStage(context, {
+      await reopenStage.run(context, {
         story: STORY_REFERENCE,
         stage: STAGE.CODE_QUALITY,
         reason: REOPEN_REASON,
@@ -195,7 +199,7 @@ describe("stage lifecycle", () => {
     await setChainStates(world.milestoneId, WHOLE_CHAIN_COMPLETE);
 
     const result = expectFailure(
-      await reopenStage(context, {
+      await reopenStage.run(context, {
         story: STORY_REFERENCE,
         stage: STAGE.CODE_QUALITY,
         reason: EMPTY_REASON,
@@ -214,7 +218,7 @@ describe("stage lifecycle", () => {
     await setChainStates(world.milestoneId, HUMAN_REVIEW_OPEN);
 
     const result = expectFailure(
-      await reopenStage(context, {
+      await reopenStage.run(context, {
         story: STORY_REFERENCE,
         stage: STAGE.COMMIT,
         reason: REOPEN_REASON,
@@ -233,7 +237,7 @@ describe("stage lifecycle", () => {
     await setChainStates(world.milestoneId, HUMAN_REVIEW_OPEN);
 
     const result = expectFailure(
-      await completeStage(context, {
+      await completeStage.run(context, {
         story: STORY_REFERENCE,
         stage: STAGE.COMMIT,
       }),
@@ -252,11 +256,11 @@ describe("stage lifecycle", () => {
     await setChainStates(world.milestoneId, CODE_QUALITY_IN_PROGRESS);
 
     const results = await Promise.all([
-      completeStage(context, {
+      completeStage.run(context, {
         story: STORY_REFERENCE,
         stage: STAGE.CODE_QUALITY,
       }),
-      completeStage(context, {
+      completeStage.run(context, {
         story: STORY_REFERENCE,
         stage: STAGE.CODE_QUALITY,
       }),
@@ -277,11 +281,11 @@ describe("stage lifecycle", () => {
     await setChainStates(world.milestoneId, TWO_STAGES_STARTABLE);
 
     const results = await Promise.all([
-      startStage(context, {
+      startStage.run(context, {
         story: STORY_REFERENCE,
         stage: STAGE.DOCUMENTATION,
       }),
-      startStage(context, { story: STORY_REFERENCE, stage: STAGE.PM_UPDATE }),
+      startStage.run(context, { story: STORY_REFERENCE, stage: STAGE.PM_UPDATE }),
     ]);
     const events = await readActivityLog(world.workspaceId);
 
@@ -298,7 +302,7 @@ describe("stage lifecycle", () => {
     await setChainStates(world.milestoneId, BLOCKED_AND_COMPLETE);
 
     const result = expectFailure(
-      await completeStage(context, {
+      await completeStage.run(context, {
         story: STORY_REFERENCE,
         stage: STAGE.COMMIT,
       }),
@@ -314,7 +318,7 @@ describe("stage lifecycle", () => {
     await setChainStates(uiStoryId, COMMIT_LAST_OPEN);
 
     const result = expectFailure(
-      await completeStage(context, {
+      await completeStage.run(context, {
         story: UI_STORY_REFERENCE,
         stage: STAGE.COMMIT,
       }),
@@ -331,7 +335,7 @@ describe("stage lifecycle", () => {
     await setChainStates(world.milestoneId, COMMIT_LAST_OPEN);
 
     const result = expectSuccess(
-      await completeStage(context, {
+      await completeStage.run(context, {
         story: STORY_REFERENCE,
         stage: STAGE.COMMIT,
       }),

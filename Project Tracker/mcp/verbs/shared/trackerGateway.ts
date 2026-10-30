@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 
 import { CODES, ENTITIES } from "../../../srv/modules/shared/constants.js";
 
+import { QUEUE } from "./constants.js";
 import type {
   ActivityEvent,
   ChainRow,
@@ -12,13 +13,6 @@ import type {
   SubtaskRow,
   WorkspaceRow,
 } from "./types.js";
-
-/** The columns the queue is ordered by, outermost first. */
-const QUEUE_ORDER = [
-  "initiativePosition",
-  "milestonePosition",
-  "stepPosition",
-] as const;
 
 /**
  * Every statement the verb layer issues, in one place. It holds no rules: a
@@ -126,14 +120,23 @@ export class TrackerGateway {
   /**
    * Reads a workspace's activity register, newest first.
    * @param workspaceId The workspace to read.
-   * @returns The activity rows.
+   * @param limit How many rows to return at most. One more than this is read,
+   *   so the caller can tell a full page from a truncated one without a count
+   *   query.
+   * @returns The activity rows, at most `limit` of them, and whether the
+   *   register held more.
    */
-  async readActivities(workspaceId: string): Promise<Record<string, unknown>[]> {
-    return (await this.runner.run(
+  async readActivities(
+    workspaceId: string,
+    limit: number,
+  ): Promise<{ rows: Record<string, unknown>[]; truncated: boolean }> {
+    const read = (await this.runner.run(
       SELECT.from(ENTITIES.ACTIVITY)
         .where({ workspace_ID: workspaceId })
-        .orderBy("occurredAt desc"),
+        .orderBy("occurredAt desc")
+        .limit(limit + 1),
     )) as Record<string, unknown>[];
+    return { rows: read.slice(0, limit), truncated: read.length > limit };
   }
 
   /**
@@ -302,7 +305,7 @@ export class TrackerGateway {
       }),
     )) as Record<string, unknown>[];
     return rows.sort((left, right) => {
-      for (const key of QUEUE_ORDER) {
+      for (const key of QUEUE.ORDER) {
         const delta = Number(left[key]) - Number(right[key]);
         if (delta !== 0) return delta;
       }

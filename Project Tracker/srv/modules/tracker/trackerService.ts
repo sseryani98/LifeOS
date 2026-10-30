@@ -1,9 +1,9 @@
 import type cds from "@sap/cds";
 
 import { DERIVED_SCALARS, HANDLER_KEYS } from "../shared/constants.js";
-import { toPayloadList } from "../shared/payloadList.js";
+import { PayloadList } from "../shared/payloadList.js";
 
-import { deriveMilestoneStatus } from "./milestoneStatus.js";
+import { MilestoneStatus } from "./milestoneStatus.js";
 import { TrackerDataService } from "./trackerDataService.js";
 import { TrackerMapper } from "./trackerMapper.js";
 import { TrackerValidator } from "./trackerValidator.js";
@@ -14,36 +14,6 @@ import type {
   MilestoneRow,
   TestRunPayload,
 } from "./types.js";
-
-/**
- * Reports whether a payload says anything about which story or sprint a defect
- * belongs to.
- * @param data The payload being written.
- * @returns True when either link appears in it.
- */
-function _mentionsDefectScope(data: DefectPayload): boolean {
-  return "milestone_ID" in data || "initiative_ID" in data;
-}
-
-/**
- * Reports whether a payload touches either half of the pair an Initiative is
- * unique on, which is what makes the duplicate rule worth evaluating.
- * @param data The payload being written.
- * @returns True when the name or the Workspace appears in it.
- */
-function _mentionsInitiativeIdentity(data: InitiativePayload): boolean {
-  return "name" in data || "workspace_ID" in data;
-}
-
-/**
- * Reports whether a payload touches either half of the pair a Milestone is
- * unique on.
- * @param data The payload being written.
- * @returns True when the story ID or the Initiative appears in it.
- */
-function _mentionsMilestoneIdentity(data: MilestonePayload): boolean {
-  return "storyId" in data || "initiative_ID" in data;
-}
 
 /**
  * The handler-layer logic: the friendly named 409s in front of the store's two
@@ -69,7 +39,7 @@ export class TrackerService {
     const tasks = await this.data.readChainTasks(rows.map(row => row.ID));
     const byMilestone = TrackerMapper.groupTasksByMilestone(tasks);
     for (const row of rows) {
-      row.status = deriveMilestoneStatus(byMilestone.get(row.ID) ?? []);
+      row.status = MilestoneStatus.deriveFromChain(byMilestone.get(row.ID) ?? []);
     }
   }
 
@@ -98,10 +68,10 @@ export class TrackerService {
    * @param req Request carrying the Initiative payload.
    */
   async checkInitiativeWrite(req: cds.Request): Promise<void> {
-    for (const data of toPayloadList<InitiativePayload>(req.data)) {
+    for (const data of PayloadList.fromPayload<InitiativePayload>(req.data)) {
       const merged = await this._mergeStoredInitiative(req, data);
       this.validator.validateInitiativeCompletion(req, merged);
-      if (!_mentionsInitiativeIdentity(data)) continue;
+      if (!this._hasInitiativeIdentity(data)) continue;
       if (!merged.name || !merged.workspace_ID) continue;
       const duplicates = await this.data.countInitiativesNamed(
         merged.workspace_ID,
@@ -120,8 +90,8 @@ export class TrackerService {
    * @param req Request carrying the Milestone payload.
    */
   async checkMilestoneWrite(req: cds.Request): Promise<void> {
-    for (const data of toPayloadList<MilestonePayload>(req.data)) {
-      if (!_mentionsMilestoneIdentity(data)) continue;
+    for (const data of PayloadList.fromPayload<MilestonePayload>(req.data)) {
+      if (!this._hasMilestoneIdentity(data)) continue;
       const merged = await this._mergeStoredMilestone(req, data);
       if (!merged.storyId || !merged.initiative_ID) continue;
       const duplicates = await this.data.countMilestonesWithStoryId(
@@ -140,8 +110,8 @@ export class TrackerService {
    * @param req Request carrying the Defect payload.
    */
   checkDefectWrite(req: cds.Request): void {
-    for (const data of toPayloadList<DefectPayload>(req.data)) {
-      if (req.event === "UPDATE" && !_mentionsDefectScope(data)) continue;
+    for (const data of PayloadList.fromPayload<DefectPayload>(req.data)) {
+      if (req.event === "UPDATE" && !this._hasDefectScope(data)) continue;
       this.validator.validateDefectScope(req, data);
     }
   }
@@ -151,7 +121,7 @@ export class TrackerService {
    * @param req Request carrying the TestRun payload.
    */
   checkTestRunWrite(req: cds.Request): void {
-    for (const data of toPayloadList<TestRunPayload>(req.data)) {
+    for (const data of PayloadList.fromPayload<TestRunPayload>(req.data)) {
       this.validator.validateTestRunScope(req, data);
     }
   }
@@ -190,5 +160,35 @@ export class TrackerService {
     const stored = await this.data.readMilestoneRow(data.ID);
     if (!stored) return data;
     return { ...stored, ...data };
+  }
+
+  /**
+   * Reports whether a payload says anything about which story or sprint a defect
+   * belongs to.
+   * @param data The payload being written.
+   * @returns True when either link appears in it.
+   */
+  private _hasDefectScope(data: DefectPayload): boolean {
+    return "milestone_ID" in data || "initiative_ID" in data;
+  }
+
+  /**
+   * Reports whether a payload touches either half of the pair an Initiative is
+   * unique on, which is what makes the duplicate rule worth evaluating.
+   * @param data The payload being written.
+   * @returns True when the name or the Workspace appears in it.
+   */
+  private _hasInitiativeIdentity(data: InitiativePayload): boolean {
+    return "name" in data || "workspace_ID" in data;
+  }
+
+  /**
+   * Reports whether a payload touches either half of the pair a Milestone is
+   * unique on.
+   * @param data The payload being written.
+   * @returns True when the story ID or the Initiative appears in it.
+   */
+  private _hasMilestoneIdentity(data: MilestonePayload): boolean {
+    return "storyId" in data || "initiative_ID" in data;
   }
 }

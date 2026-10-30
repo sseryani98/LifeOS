@@ -158,3 +158,113 @@ export interface ActivityEvent {
   workspaceId: string;
   payload?: Record<string, unknown>;
 }
+
+/** The optional fields a rejection carries beside its status, key and message. */
+export interface VerbErrorDetail {
+  target?: string;
+  remediation?: string;
+  rule?: string;
+}
+
+/** What a verb body hands back for the envelope to carry. */
+export interface VerbOutcome {
+  nextAction?: NextAction | null;
+  warnings?: VerbWarning[];
+  extra?: Record<string, unknown>;
+}
+
+/** A stage of the composed project-view tree, with its steps nested on. */
+export interface ComposedStage extends ChainRow {
+  subtasks: SubtaskRow[];
+}
+
+/** A story of the composed tree, with its derived status and its chain. */
+export interface ComposedStory extends MilestoneRow {
+  status: string;
+  chain: ComposedStage[];
+}
+
+/** A sprint of the composed tree, with its stories nested on. */
+export interface ComposedInitiative extends InitiativeRow {
+  milestones: ComposedStory[];
+}
+
+/** complete_stage's arguments. */
+export interface CompleteStageInput {
+  story: string;
+  stage: string;
+  notes?: string;
+}
+
+/** complete_subtask's arguments. */
+export interface CompleteSubtaskInput {
+  story: string;
+  stage: string;
+  subtask: string;
+}
+
+/** log_defect's arguments. */
+export interface LogDefectInput {
+  story?: string;
+  workspace?: string;
+  severity: string;
+  title: string;
+  description: string;
+  references?: string;
+}
+
+/** next_action's arguments. */
+export interface NextActionInput {
+  story?: string;
+}
+
+/** plan_sprint's arguments. */
+export interface PlanSprintInput {
+  workspace: string;
+  name: string;
+  goal: string;
+  branch: string;
+  stories: PlannedStory[];
+}
+
+/** project_view's arguments. */
+export interface ProjectViewInput {
+  workspace?: string;
+}
+
+/** record_decision's arguments. */
+export interface RecordDecisionInput {
+  target: string;
+  context: string;
+  options?: string;
+  decision: string;
+  rationale: string;
+}
+
+/** record_test_run's arguments. */
+export interface RecordTestRunInput {
+  story?: string;
+  stage?: string;
+  workspace?: string;
+  metrics: TestRunMetrics;
+  executedAt: string;
+}
+
+/** reopen_stage's arguments. */
+export interface ReopenStageInput {
+  story: string;
+  stage: string;
+  reason: string;
+}
+
+/** resolve_defect's arguments. */
+export interface ResolveDefectInput {
+  defect: string;
+  resolution: string;
+}
+
+/** start_stage's arguments. */
+export interface StartStageInput {
+  story: string;
+  stage: string;
+}

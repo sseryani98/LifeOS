@@ -24,30 +24,30 @@ export interface SavedImportLogRow {
 }
 
 /** The real CSV save engine wired to the in-memory DB. */
-export function buildCsvImportSaveService(): CsvImportSaveService {
+export const buildCsvImportSaveService = (): CsvImportSaveService => {
   return new CsvImportSaveService(new CsvImportDataService());
-}
+};
 
 /** Seeds the CIBC card (for config resolution) plus the summary's vendor. */
-export async function seedCsvImportSave(): Promise<void> {
+export const seedCsvImportSave = async (): Promise<void> => {
   await seedCsvImport();
   await INSERT.into("com.financialplanner.Vendor").entries([SAVE_VENDOR]);
-}
+};
 
 /** Reads the CSV transactions persisted against a card. */
-export async function readCsvTransactionsByCard(
+export const readCsvTransactionsByCard = async (
   cardId: string,
-): Promise<SavedTransactionRow[]> {
+): Promise<SavedTransactionRow[]> => {
   return (await SELECT.from("com.financialplanner.Transaction")
     .columns("source", "amount", "categorizationStatus", "vendor_ID")
     .where({ cardInstance_ID: cardId })) as SavedTransactionRow[];
-}
+};
 
 /** Reads the import-log rows recorded against a card. */
-export async function readImportLogsByCard(
+export const readImportLogsByCard = async (
   cardId: string,
-): Promise<SavedImportLogRow[]> {
+): Promise<SavedImportLogRow[]> => {
   return (await SELECT.from("com.financialplanner.ImportLog")
     .columns("fileName", "transactionCount", "totalAmount", "skippedCount")
     .where({ cardInstance_ID: cardId })) as SavedImportLogRow[];
-}
+};

@@ -2,6 +2,7 @@
 export const VERB_KEYS = {
   CONNECTION_UNAVAILABLE: "verb.connection.unavailable",
   DEFECT_RESOLUTION_REQUIRED: "verb.defect.resolutionRequired",
+  INTERNAL_FAILURE: "verb.internal.failure",
   DEFECT_SCOPE_REQUIRED: "verb.defect.scopeRequired",
   IDENTITY_MISSING: "verb.identity.missing",
   REOPEN_REASON_REQUIRED: "verb.reopen.reasonRequired",
@@ -59,6 +60,16 @@ export const PLANNING = {
 } as const;
 
 /**
+ * Ceilings on the registers a read composes. Every write verb appends an
+ * activity row and nothing ever removes one, so an unbounded feed inside a
+ * result that is serialized whole only ever grows. The newest rows are the ones
+ * worth reading, and a truncated read says so rather than pretending otherwise.
+ */
+export const READ_LIMITS = {
+  ACTIVITIES: 50,
+} as const;
+
+/**
  * HTTP statuses the failure envelope carries. `SERVER_ERROR_CEILING` bounds
  * what counts as a status when one is read off a thrown value.
  */
@@ -66,6 +77,7 @@ export const HTTP = {
   BAD_REQUEST: 400,
   NOT_FOUND: 404,
   CONFLICT: 409,
+  INTERNAL_ERROR: 500,
   SERVICE_UNAVAILABLE: 503,
   SERVER_ERROR_CEILING: 599,
 } as const;
@@ -97,4 +109,14 @@ export const CONNECTION = {
 export const ADDRESSING = {
   STORY_SEPARATOR: "/",
   STAGE_SEPARATOR: "#",
+} as const;
+
+/** The length of an ISO timestamp up to and including its whole seconds. */
+export const TIMESTAMP = {
+  SECOND_PRECISION_LENGTH: 19,
+} as const;
+
+/** The columns the task queue is ordered by, outermost first. */
+export const QUEUE = {
+  ORDER: ["initiativePosition", "milestonePosition", "stepPosition"],
 } as const;

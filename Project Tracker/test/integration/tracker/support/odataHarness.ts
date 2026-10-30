@@ -14,10 +14,10 @@ export interface RejectedWrite {
  * @param write The pending write.
  * @returns The status and the key the service refused under.
  */
-async function _expectRejection(
+const _expectRejection = async (
   path: string,
   write: Promise<unknown>,
-): Promise<RejectedWrite> {
+): Promise<RejectedWrite> => {
   try {
     await write;
   } catch (error: unknown) {
@@ -36,7 +36,7 @@ async function _expectRejection(
     };
   }
   throw new Error(`Expected ${path} to refuse the write`);
-}
+};
 
 /**
  * Posts a payload expecting the service to refuse it.
@@ -44,12 +44,12 @@ async function _expectRejection(
  * @param payload The body to post.
  * @returns The status and the key the service refused under.
  */
-export async function postExpectingRejection(
+export const postExpectingRejection = async (
   path: string,
   payload: Record<string, unknown>,
-): Promise<RejectedWrite> {
+): Promise<RejectedWrite> => {
   return _expectRejection(path, trackerServer.POST(path, payload));
-}
+};
 
 /**
  * Patches a row expecting the service to refuse it.
@@ -57,12 +57,12 @@ export async function postExpectingRejection(
  * @param payload The fields to patch.
  * @returns The status and the key the service refused under.
  */
-export async function patchExpectingRejection(
+export const patchExpectingRejection = async (
   path: string,
   payload: Record<string, unknown>,
-): Promise<RejectedWrite> {
+): Promise<RejectedWrite> => {
   return _expectRejection(path, trackerServer.PATCH(path, payload));
-}
+};
 
 /**
  * Patches a row expecting it to be accepted.
@@ -70,13 +70,13 @@ export async function patchExpectingRejection(
  * @param payload The fields to patch.
  * @returns The updated row.
  */
-export async function patchExpectingSuccess(
+export const patchExpectingSuccess = async (
   path: string,
   payload: Record<string, unknown>,
-): Promise<Record<string, unknown>> {
+): Promise<Record<string, unknown>> => {
   const response = await trackerServer.PATCH(path, payload);
   return response.data as Record<string, unknown>;
-}
+};
 
 /**
  * Posts a payload expecting it to be accepted.
@@ -84,22 +84,22 @@ export async function patchExpectingSuccess(
  * @param payload The body to post.
  * @returns The created row.
  */
-export async function postExpectingSuccess(
+export const postExpectingSuccess = async (
   path: string,
   payload: Record<string, unknown>,
-): Promise<Record<string, unknown>> {
+): Promise<Record<string, unknown>> => {
   const response = await trackerServer.POST(path, payload);
   return response.data as Record<string, unknown>;
-}
+};
 
 /**
  * Reads a service path.
  * @param path The service path to read, query string included.
  * @returns The rows the service returned.
  */
-export async function readCollection(
+export const readCollection = async (
   path: string,
-): Promise<Record<string, unknown>[]> {
+): Promise<Record<string, unknown>[]> => {
   const response = await trackerServer.GET(path);
   return (response.data as { value: Record<string, unknown>[] }).value;
-}
+};

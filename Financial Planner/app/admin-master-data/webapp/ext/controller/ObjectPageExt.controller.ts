@@ -1,5 +1,5 @@
 import ControllerExtension from "sap/ui/core/mvc/ControllerExtension";
-import objectPageParser from "com/financialplanner/shared/util/ObjectPageParser";
+import ObjectPageParser from "com/financialplanner/shared/util/ObjectPageParser";
 import { OBJECT_PAGE } from "com/financialplanner/shared/constants";
 import type ObjectPageLayout from "sap/uxap/ObjectPageLayout";
 
@@ -16,7 +16,7 @@ export default class ObjectPageExt extends ControllerExtension {
      */
     onAfterRendering(this: ObjectPageExt): void {
       const objectPage = this.getView().getContent()[0] as ObjectPageLayout;
-      objectPageParser.setObjectPageFormLayoutColumns(
+      ObjectPageParser.setObjectPageFormLayoutColumns(
         objectPage,
         OBJECT_PAGE.FORM_COLUMNS,
       );

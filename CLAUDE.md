@@ -104,6 +104,12 @@ ESLint needs one extra hop. Flat-config `files` globs resolve against the config
 ESLint _loads_, not the one that authored the array — so a module's `eslint.config.mjs`
 re-exports the shared config to root `srv/**` and `app/**` at the module.
 
+**Every `.ts` file is linted.** A module's ESLint leg is `eslint .`, never a folder list,
+and the shared config ends in a catch-all that fails any `.ts` no `files:` glob covers.
+ESLint skips an uncovered file inside a passed folder _silently_ — that is how `mcp/` went
+unlinted from `SPEC-01` to 2026-10-30. A new source folder needs a `files:` glob and a
+catch-all `ignores` entry, or `no-restricted-syntax` fails the build.
+
 ## Adding a Module
 
 Run `/scaffold-module` — it executes these six steps and reconciles this file afterward.
@@ -113,9 +119,8 @@ Run `/scaffold-module` — it executes these six steps and reconciles this file 
    Financial Planner, then **audit it**: the 21 shared linters are module-relative, but
    the block also carries scripts that name a specific app folder (`lint:ui5` is
    `cd app/admin-master-data && ui5lint`). Those are planner text riding inside a block
-   that is otherwise portable — drop or rewrite them. Keep
-   `--no-error-on-unmatched-pattern` on the `eslint` leg; without it ESLint exits 2 on a
-   source folder that has nothing in it yet.
+   that is otherwise portable — drop or rewrite them. The `eslint` leg is `eslint .`, which
+   an empty scaffold passes without the old `--no-error-on-unmatched-pattern` flag.
 3. `eslint.config.mjs` — re-export the shared config:
    `import base from "../Standards (Technical + Linting)/eslint.config.mjs";`
 4. `tsconfig.json` — `"extends": "../Standards (Technical + Linting)/tsconfig.base.json"`.

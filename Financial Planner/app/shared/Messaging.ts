@@ -1,6 +1,6 @@
 import MessageToast from "sap/m/MessageToast";
 import MessageBox from "sap/m/MessageBox";
-import { getText as resolveText } from "com/financialplanner/shared/util/i18n";
+import I18n from "com/financialplanner/shared/util/i18n";
 import type { MessagingHost } from "com/financialplanner/shared/types";
 
 /**
@@ -34,8 +34,7 @@ export default class Messaging {
   public showConfirm(key: string): Promise<boolean> {
     return new Promise(resolve => {
       MessageBox.confirm(this._resolveText(key), {
-        onClose: (action: (typeof MessageBox.Action)[keyof typeof MessageBox.Action]) =>
-          resolve(action === MessageBox.Action.OK),
+        onClose: (action: string | null) => resolve(action === MessageBox.Action.OK),
       });
     });
   }
@@ -71,6 +70,6 @@ export default class Messaging {
    */
   private _resolveText(key: string): string {
     const view = this._host.getView();
-    return view ? resolveText(view, key) : "";
+    return view ? I18n.getText(view, key) : "";
   }
 }

@@ -1,9 +1,9 @@
 import type cds from "@sap/cds";
 
-import { logDefect } from "../../../../mcp/verbs/logDefect.js";
-import { nextAction } from "../../../../mcp/verbs/nextAction.js";
-import { projectView } from "../../../../mcp/verbs/projectView.js";
-import { recordDecision } from "../../../../mcp/verbs/recordDecision.js";
+import { LogDefectVerb } from "../../../../mcp/verbs/logDefect.js";
+import { NextActionVerb } from "../../../../mcp/verbs/nextAction.js";
+import { ProjectViewVerb } from "../../../../mcp/verbs/projectView.js";
+import { RecordDecisionVerb } from "../../../../mcp/verbs/recordDecision.js";
 import {
   ACTORS,
   DECISION_INPUT,
@@ -34,6 +34,11 @@ import {
   expectFailure,
   expectSuccess,
 } from "../support/verbHarness.js";
+
+const logDefect = new LogDefectVerb();
+const nextAction = new NextActionVerb();
+const projectView = new ProjectViewVerb();
+const recordDecision = new RecordDecisionVerb();
 
 /** The composed view, as the read verb hands it back. */
 interface ComposedView {
@@ -66,16 +71,16 @@ describe("the read verbs", () => {
   it("answers header, next action, queue, chain and all three registers in one call", async () => {
     await setChainStates(world.milestoneId, CODE_QUALITY_IN_PROGRESS);
     expectSuccess(
-      await logDefect(context, { story: STORY_REFERENCE, ...DEFECT_INPUT }),
+      await logDefect.run(context, { story: STORY_REFERENCE, ...DEFECT_INPUT }),
     );
     expectSuccess(
-      await recordDecision(context, {
+      await recordDecision.run(context, {
         target: WORLD.WORKSPACE.slug,
         ...DECISION_INPUT,
       }),
     );
 
-    const result = expectSuccess(await projectView(context, {}));
+    const result = expectSuccess(await projectView.run(context, {}));
     const view = result.view as ComposedView;
 
     expect(view.header.slug).toBe(WORLD.WORKSPACE.slug);
@@ -93,7 +98,7 @@ describe("the read verbs", () => {
     await setChainStates(world.milestoneId, WHOLE_CHAIN_COMPLETE);
 
     const result = expectSuccess(
-      await projectView(context, { workspace: WORLD.WORKSPACE.slug }),
+      await projectView.run(context, { workspace: WORLD.WORKSPACE.slug }),
     );
     const view = result.view as ComposedView;
 
@@ -104,7 +109,7 @@ describe("the read verbs", () => {
   /** A workspace that is not there must be refused, not answered with the first one found. */
   it("refuses a project view for a workspace that does not exist", async () => {
     const result = expectFailure(
-      await projectView(context, { workspace: UNRESOLVABLE.MISSING_WORKSPACE_SLUG }),
+      await projectView.run(context, { workspace: UNRESOLVABLE.MISSING_WORKSPACE_SLUG }),
     );
 
     expect(result.status).toBe(404);
@@ -115,7 +120,7 @@ describe("the read verbs", () => {
   it("refuses an unscoped project view when several workspaces exist", async () => {
     await seedSecondWorkspace();
 
-    const result = expectFailure(await projectView(context, {}));
+    const result = expectFailure(await projectView.run(context, {}));
 
     expect(result.status).toBe(400);
     expect(result.code).toBe("verb.workspace.ambiguous");
@@ -126,7 +131,7 @@ describe("the read verbs", () => {
   it("refuses a project view when the store holds no workspace at all", async () => {
     await clearWorld();
 
-    const result = expectFailure(await projectView(context, {}));
+    const result = expectFailure(await projectView.run(context, {}));
 
     expect(result.status).toBe(404);
     expect(result.code).toBe("verb.target.notFound");
@@ -137,9 +142,9 @@ describe("the read verbs", () => {
     await setChainStates(world.milestoneId, CODE_QUALITY_IN_PROGRESS);
 
     const scoped = expectSuccess(
-      await nextAction(context, { story: STORY_REFERENCE }),
+      await nextAction.run(context, { story: STORY_REFERENCE }),
     );
-    const overall = expectSuccess(await nextAction(context, {}));
+    const overall = expectSuccess(await nextAction.run(context, {}));
 
     expect(scoped.nextAction?.stepCode).toBe(STAGE.CODE_QUALITY);
     expect(scoped.nextAction?.driver).toBe("/code-quality");
@@ -148,8 +153,8 @@ describe("the read verbs", () => {
 
   /** A read verb records no state change, or every page render floods the register the timeline is drawn from. */
   it("writes no activity event for either read verb", async () => {
-    expectSuccess(await projectView(context, {}));
-    expectSuccess(await nextAction(context, {}));
+    expectSuccess(await projectView.run(context, {}));
+    expectSuccess(await nextAction.run(context, {}));
 
     expect(await readActivityLog(world.workspaceId)).toHaveLength(0);
   });
@@ -159,9 +164,9 @@ describe("the read verbs", () => {
     await setChainStates(world.milestoneId, WHOLE_CHAIN_COMPLETE);
 
     const scoped = expectSuccess(
-      await nextAction(context, { story: STORY_REFERENCE }),
+      await nextAction.run(context, { story: STORY_REFERENCE }),
     );
-    const overall = expectSuccess(await nextAction(context, {}));
+    const overall = expectSuccess(await nextAction.run(context, {}));
 
     expect(scoped.ok).toBe(true);
     expect(scoped.nextAction).toBeNull();

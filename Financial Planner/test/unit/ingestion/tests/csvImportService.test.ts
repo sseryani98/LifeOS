@@ -22,9 +22,9 @@ import {
 import { buildCsvImportMocks } from "../support/csvImportMocks.js";
 
 /** Wraps raw CSV text in a parse request for the selected primary card. */
-function requestFor(fileContent: string) {
+const requestFor = (fileContent: string) => {
   return { cardInstance_ID: CSV_CARD_ID, fileName: "import.csv", fileContent };
-}
+};
 
 describe("CsvImportService", () => {
   describe("Scotia — single amount + status filter", () => {

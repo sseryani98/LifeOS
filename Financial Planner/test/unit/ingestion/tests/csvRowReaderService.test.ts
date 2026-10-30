@@ -35,19 +35,19 @@ import {
 } from "../data/csvRowReader.js";
 
 /** Builds a reader for a headerless (index-column) config; no header rows needed. */
-function readerForIndexConfig(): CsvRowReaderService {
+const readerForIndexConfig = (): CsvRowReaderService => {
   return new CsvRowReaderService(TD_CONFIG, NO_ROWS, CSV_SINGLE_CARD, CSV_CARD_ID);
-}
+};
 
 /** Builds a reader for the Scotia (named-column, single-amount) config. */
-function readerForScotia(): CsvRowReaderService {
+const readerForScotia = (): CsvRowReaderService => {
   return new CsvRowReaderService(
     SCOTIA_CONFIG,
     SCOTIA_HEADER_ROWS,
     CSV_SINGLE_CARD,
     CSV_CARD_ID,
   );
-}
+};
 
 describe("CsvRowReaderService", () => {
   describe("decodeRow — single-column amount + sign", () => {
@@ -254,14 +254,14 @@ describe("CsvRowReaderService", () => {
 
   describe("decodeRow — cardmember attribution", () => {
     /** Builds an Amex reader (cardmember column + supp cards) resolving names to card ids. */
-    function readerForAmex(): CsvRowReaderService {
+    const readerForAmex = (): CsvRowReaderService => {
       return new CsvRowReaderService(
         AMEX_CONFIG,
         AMEX_READER_ROWS,
         CSV_ATTRIBUTION_CARDS,
         CSV_CARD_ID,
       );
-    }
+    };
 
     /** A primary-cardholder row must attribute to the selected card, matched case-insensitively against the cardholder name. */
     it("attributes a primary cardholder to the selected card", () => {

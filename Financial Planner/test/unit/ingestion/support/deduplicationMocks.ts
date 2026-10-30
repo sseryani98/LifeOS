@@ -13,7 +13,7 @@ export interface DedupMocks {
 }
 
 /** Builds a fresh DeduplicationService with its data layer fully mocked. */
-export function buildDedupMocks(): DedupMocks {
+export const buildDedupMocks = (): DedupMocks => {
   const findByExternalId = jest.fn();
   const findByNaturalKey = jest.fn();
   const dataService = {
@@ -22,4 +22,4 @@ export function buildDedupMocks(): DedupMocks {
   } as unknown as DeduplicationDataService;
   const service = new DeduplicationService(dataService);
   return { findByExternalId, findByNaturalKey, service };
-}
+};

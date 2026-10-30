@@ -1,7 +1,5 @@
 import BaseController from "com/financialplanner/shared/BaseController";
-import navConfig, {
-  HASH_TO_NAV_KEY,
-} from "com/financialplanner/shell/controller/NavConfig";
+import NavConfig from "com/financialplanner/shell/controller/NavConfig";
 import ComponentContainer, {
   type ComponentContainer$ComponentCreatedEvent,
 } from "sap/ui/core/ComponentContainer";
@@ -45,7 +43,7 @@ export default class App extends BaseController {
       "shellView",
     ) as JSONModel;
     const selectedKey = shellModel.getProperty("/selectedKey") as string;
-    const config = selectedKey ? navConfig[selectedKey] : null;
+    const config = selectedKey ? NavConfig.getEntry(selectedKey) : null;
     const component = config ? this._components[config.component] : null;
 
     if (config && component && this._isOnObjectPage()) {
@@ -117,7 +115,7 @@ export default class App extends BaseController {
    * @param key the NavConfig key
    */
   private _navigateToKey(key: string): void {
-    const config = navConfig[key];
+    const config = NavConfig.getEntry(key);
     if (!config) {
       return;
     }
@@ -142,7 +140,7 @@ export default class App extends BaseController {
     }
 
     const hashPart = hash.split("(")[0].split("/")[0];
-    const navKey = HASH_TO_NAV_KEY[hashPart];
+    const navKey = NavConfig.getNavKeyForHash(hashPart);
     if (navKey) {
       this._navigateToKey(navKey);
     }

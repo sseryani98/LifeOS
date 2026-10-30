@@ -1,7 +1,6 @@
-// Harness for the TransactionService unit test: wires the split/categorize
-// engine to a mocked data layer and a mocked categorization engine, using the
-// real validator and mapper. A helper wraps a payload as an action request with
-// a spy error() so specs stay arrange-act-assert.
+// Wires the TransactionService to a mocked data layer and categorization engine
+// with the real validator and mapper; the request helpers carry a spy error() so
+// specs stay arrange-act-assert.
 
 import { TransactionService } from "../../../../srv/modules/transaction/transactionService.js";
 
@@ -15,7 +14,7 @@ export interface TransactionMocks {
 }
 
 /** Builds a fresh TransactionService with its data and categorization layers mocked. */
-export function buildTransactionMocks(): TransactionMocks {
+export const buildTransactionMocks = (): TransactionMocks => {
   const data = {
     loadTransactionAmount: jest.fn(async () => null),
     findSplitByTransaction: jest.fn(async () => null),
@@ -35,17 +34,17 @@ export function buildTransactionMocks(): TransactionMocks {
 
   const service = new TransactionService(data, categorization);
   return { data, categorization, service };
-}
+};
 
 /** Wraps an action payload as a request with a spy error() collaborator. */
-export function requestOf(data: unknown): { data: unknown; error: jest.Mock } {
+export const requestOf = (data: unknown): { data: unknown; error: jest.Mock } => {
   return { data, error: jest.fn() };
-}
+};
 
 /** Wraps an UPDATE patch as a request with a keyed params entry (the row id). */
-export function requestWithKey(
+export const requestWithKey = (
   data: Record<string, unknown>,
   id: string,
-): { data: Record<string, unknown>; params: unknown[]; error: jest.Mock } {
+): { data: Record<string, unknown>; params: unknown[]; error: jest.Mock } => {
   return { data, params: [{ ID: id }], error: jest.fn() };
-}
+};

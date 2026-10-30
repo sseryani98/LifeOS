@@ -48,3 +48,10 @@ export const CREATE_DIALOG_FRAGMENT =
 
 /** Full-progress percentage for the clear-progress indicator. */
 export const PERCENT_MAX = 100;
+
+/** OData V4 operation and entity-set paths the CsvImportWizardService calls. */
+export const ODATA_PATH = {
+  PARSE_OPERATION: "/parseCsvImport(...)",
+  SAVE_OPERATION: "/saveCsvImport(...)",
+  TRANSACTIONS: "/Transactions",
+} as const;

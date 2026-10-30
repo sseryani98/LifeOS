@@ -1,7 +1,6 @@
-// Integration test for the categorization engine (cds.test + SQLite): the engine
-// + data layer run against the real in-memory DB, proving the pattern join, the
-// VendorCategoryStats view, and correction learning that the mocked units can't
-// exercise. Custom logic only. Fixtures in data/, harness in support/.
+// Runs the categorization engine against the real in-memory DB to prove what the
+// mocked units can't: the pattern join, the VendorCategoryStats view, and
+// correction learning. Custom logic only.
 
 import cds from "@sap/cds";
 

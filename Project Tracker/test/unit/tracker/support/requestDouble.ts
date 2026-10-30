@@ -14,10 +14,10 @@ export interface RequestDouble {
  * @param event The event name, for the guards that branch on it.
  * @returns The double and what it accumulated.
  */
-export function buildRequestDouble(
+export const buildRequestDouble = (
   data: unknown,
   event = "CREATE",
-): RequestDouble {
+): RequestDouble => {
   const errors: { code?: string; target?: string }[] = [];
   const rejections: { status: number; key: string }[] = [];
   const request = {
@@ -31,4 +31,4 @@ export function buildRequestDouble(
     },
   } as unknown as cds.Request;
   return { request, errors, rejections };
-}
+};

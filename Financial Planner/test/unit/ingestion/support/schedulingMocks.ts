@@ -14,7 +14,7 @@ export interface SchedulerHarness {
 }
 
 /** Builds a SchedulingService whose sync engine is fully mocked. */
-export function buildScheduler(syncTime: string): SchedulerHarness {
+export const buildScheduler = (syncTime: string): SchedulerHarness => {
   const getSyncTime = jest.fn(async () => syncTime);
   const syncAllActive = jest.fn(async () => undefined);
   const checkStaleConnections = jest.fn(async () => undefined);
@@ -29,4 +29,4 @@ export function buildScheduler(syncTime: string): SchedulerHarness {
     syncAllActive,
     checkStaleConnections,
   };
-}
+};

@@ -3,18 +3,6 @@ import cds from "@sap/cds";
 import { Logger } from "./logger.js";
 
 /**
- * Reports whether a thrown value is a CAP rejection rather than a programming
- * error, by the status or code every deliberate rejection carries.
- * @param error The value caught from a handler.
- * @returns True when the value already carries a status or a code.
- */
-function isRejection(error: unknown): boolean {
-  if (error === null || typeof error !== "object") return false;
-  const candidate = error as { code?: unknown; status?: unknown };
-  return candidate.status !== undefined || candidate.code !== undefined;
-}
-
-/**
  * Base class for Facade modules. A Facade registers CDS event handlers and
  * delegates; it holds no logic of its own.
  */
@@ -69,11 +57,23 @@ export class BaseFacade {
       } catch (error: unknown) {
         // A rejection the handler raised deliberately already carries its status
         // and its key; re-wrapping it as a 500 would throw both away.
-        if (isRejection(error)) throw error;
+        if (BaseFacade._isRejection(error)) throw error;
         const detail = error instanceof Error ? error.message : String(error);
         this.logger.logError(`${event} ${entity}`, detail);
         throw req.reject(500, errorKey);
       }
     };
+  }
+
+  /**
+   * Reports whether a thrown value is a CAP rejection rather than a programming
+   * error, by the status or code every deliberate rejection carries.
+   * @param error The value caught from a handler.
+   * @returns True when the value already carries a status or a code.
+   */
+  private static _isRejection(error: unknown): boolean {
+    if (error === null || typeof error !== "object") return false;
+    const candidate = error as { code?: unknown; status?: unknown };
+    return candidate.status !== undefined || candidate.code !== undefined;
   }
 }

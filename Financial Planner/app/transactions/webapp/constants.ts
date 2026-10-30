@@ -22,3 +22,10 @@ export const MESSAGE_KEY = {
   RECATEGORIZED: "msgRecategorized",
   SPLIT_SAVED: "msgSplitSaved",
 } as const;
+
+/** Bound OData V4 action paths the TransactionsService invokes. */
+export const ODATA_OPERATION = {
+  RECATEGORIZE: "/TransactionService.reCategorize(...)",
+  SPLIT: "/TransactionService.splitTransaction(...)",
+  BULK_CATEGORIZE: "/TransactionService.bulkCategorize(...)",
+} as const;

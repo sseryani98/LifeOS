@@ -1,8 +1,4 @@
-/** Canadian-dollar formatting parameters. */
-const CURRENCY = {
-  LOCALE: "en-CA",
-  CODE: "CAD",
-} as const;
+import { CURRENCY } from "./constants.js";
 
 /**
  * Currency formatting utility for Canadian dollar amounts.

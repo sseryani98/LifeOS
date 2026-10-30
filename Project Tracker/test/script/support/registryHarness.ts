@@ -35,18 +35,18 @@ export interface McpRegistry {
  * temporary directory so a case about a missing file has one.
  * @returns The path the installer will be pointed at.
  */
-export function makeRegistryPath(): string {
+export const makeRegistryPath = (): string => {
   return join(mkdtempSync(join(tmpdir(), REGISTRY_TMP_PREFIX)), ".mcp.json");
-}
+};
 
 /**
  * Writes a starting registry, for the cases where one already exists.
  * @param path Where to write it.
  * @param registry The registry to write.
  */
-export function seedRegistry(path: string, registry: unknown): void {
+export const seedRegistry = (path: string, registry: unknown): void => {
   writeFileSync(path, `${JSON.stringify(registry, null, 2)}\n`, "utf8");
-}
+};
 
 /**
  * Runs the installer against a registration file it is allowed to write.
@@ -54,7 +54,7 @@ export function seedRegistry(path: string, registry: unknown): void {
  * @param actor The identity the registration should declare, if any.
  * @returns Resolves once the process has exited cleanly.
  */
-export function runInstaller(path: string, actor?: string): Promise<void> {
+export const runInstaller = (path: string, actor?: string): Promise<void> => {
   const child = spawn(process.execPath, [INSTALLER_SCRIPT], {
     env: {
       ...process.env,
@@ -74,13 +74,13 @@ export function runInstaller(path: string, actor?: string): Promise<void> {
       else reject(new Error(`Installer exited ${code}: ${stderr}`));
     });
   });
-}
+};
 
 /**
  * Reads a registration file back.
  * @param path The file to read.
  * @returns The parsed registry.
  */
-export function readRegistry(path: string): McpRegistry {
+export const readRegistry = (path: string): McpRegistry => {
   return JSON.parse(readFileSync(path, "utf8")) as McpRegistry;
-}
+};

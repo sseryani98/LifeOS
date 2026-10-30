@@ -15,12 +15,12 @@ import type {
  * @param actor The identity the call declares.
  * @returns The verb context.
  */
-export function buildVerbContext(
+export const buildVerbContext = (
   service: cds.Service,
   actor: string,
-): VerbContext {
+): VerbContext => {
   return { service, actor };
-}
+};
 
 /**
  * Narrows a result to the success envelope, failing loudly with the rejection's
@@ -28,19 +28,19 @@ export function buildVerbContext(
  * @param result The verb result.
  * @returns The success envelope.
  */
-export function expectSuccess(result: VerbResult): VerbSuccess {
+export const expectSuccess = (result: VerbResult): VerbSuccess => {
   if (!result.ok) {
     throw new Error(`Expected success, got ${result.code}: ${result.message}`);
   }
   return result;
-}
+};
 
 /**
  * Narrows a result to the failure envelope.
  * @param result The verb result.
  * @returns The failure envelope.
  */
-export function expectFailure(result: VerbResult): VerbFailure {
+export const expectFailure = (result: VerbResult): VerbFailure => {
   if (result.ok) throw new Error("Expected a rejection, got a success");
   return result;
-}
+};

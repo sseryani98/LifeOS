@@ -1,8 +1,7 @@
 import type { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import type cds from "@sap/cds";
 
-import { createTrackerMcpServer } from "../../../mcp/server.js";
-import { FRICEW_TYPES } from "../../../mcp/verbs/shared/constants.js";
+import { TrackerMcpServer } from "../../../mcp/server.js";
 import {
   ACTORS,
   DEFECT_INPUT,
@@ -21,13 +20,22 @@ import {
   connectTrackerService,
   trackerServer,
 } from "../../shared/support/trackerHarness.js";
-import { buildSprintPlanInput } from "../../shared/support/verbInputs.js";
 import {
+  buildReopenStageInput,
+  buildSprintPlanInput,
+} from "../../shared/support/verbInputs.js";
+import {
+  CONCURRENT_READS,
+  DESCRIPTION_FLOOR,
+  ENUM_SCHEMA_PATHS,
+  EXPECTED_CODE_LISTS,
   EXPECTED_TOOL_NAMES,
   EXPECTED_TOOLS,
   FORBIDDEN_TOOLS,
-  FRICEW_SCHEMA_PATH,
+  INSTRUCTIONS_MARKERS,
+  MANIFEST_VERSION,
   RETRY_OUTCOME,
+  UNKNOWN_ARGUMENT,
   WRITE_TOOL_KINDS,
 } from "../data/toolSurface.js";
 import { arrangeHappyPath } from "../support/happyPath.js";
@@ -53,6 +61,13 @@ describe("the exposed tool surface", () => {
   beforeEach(async () => {
     await clearWorld();
     world = await seedCanonicalWorld();
+  });
+
+  // The SDK guide prescribes closing what a suite opened, client before server.
+  // Harmless while one suite runs; a leaked transport is what keeps a runner
+  // alive after the last assertion.
+  afterAll(async () => {
+    await client.close();
   });
 
   /** The list is the escape hatch's absence made visible; a twelfth tool is a second write path. */
@@ -118,22 +133,108 @@ describe("the exposed tool surface", () => {
     expect(envelope.view).toBeTruthy();
   });
 
-  /** The advertised schema is where the six codes are declared; drop the enum and any type is taken. */
-  it("declares the FRICEW code list on the sprint-planning tool", async () => {
-    const listed = await client.listTools();
-    const tool = listed.tools.find(
-      candidate => candidate.name === FRICEW_SCHEMA_PATH.TOOL,
-    );
+  /** The advertised schema is where the codes are declared; drop an enum and any value is taken. */
+  it.each(ENUM_SCHEMA_PATHS)(
+    "declares $TOOL's code list on the advertised schema",
+    async path => {
+      const listed = await client.listTools();
+      const tool = listed.tools.find(
+        candidate => candidate.name === path.TOOL,
+      );
 
+      const declared = readSchemaEnum(
+        tool,
+        path.PROPERTY,
+        "MEMBER" in path ? path.MEMBER : undefined,
+      );
+
+      expect(declared).toEqual(EXPECTED_CODE_LISTS[path.TOOL]);
+    },
+  );
+
+  /** Drop the enum and a story planned with an invented type is written rather than refused. */
+  it("refuses a planned story whose type is not a FRICEW code", async () => {
     const result = await client.callTool({
-      name: FRICEW_SCHEMA_PATH.TOOL,
+      name: "plan_sprint",
       arguments: buildSprintPlanInput([...SPRINT_PLAN_WITH_BAD_TYPE.stories]),
     });
 
-    expect(
-      readSchemaEnum(tool, FRICEW_SCHEMA_PATH.PROPERTY, FRICEW_SCHEMA_PATH.MEMBER),
-    ).toEqual([...FRICEW_TYPES]);
     expect(result.isError).toBe(true);
+  });
+
+  /** A misspelled argument was accepted in silence, so the caller's typo read as a success. */
+  it.each(EXPECTED_TOOL_NAMES)(
+    "refuses an argument %s never declared",
+    async tool => {
+      const result = await client.callTool({
+        name: tool,
+        arguments: { [UNKNOWN_ARGUMENT.key]: UNKNOWN_ARGUMENT.value },
+      });
+
+      expect(result.isError).toBe(true);
+    },
+  );
+
+  /** Registering a resource or a prompt tomorrow would otherwise break no test at all. */
+  it("advertises tools as its only primitive", () => {
+    const capabilities = client.getServerCapabilities() ?? {};
+
+    expect(capabilities.tools).toBeDefined();
+    expect(capabilities.resources).toBeUndefined();
+    expect(capabilities.prompts).toBeUndefined();
+  });
+
+  /** The one place a client is told the verbs are the only write path, rather than one tool's job. */
+  it("hands the client its operating instructions at initialize", () => {
+    const instructions = client.getInstructions() ?? "";
+
+    for (const marker of INSTRUCTIONS_MARKERS) {
+      expect(instructions.toLowerCase()).toContain(marker);
+    }
+  });
+
+  /** Emptied, stubbed or pasted from a sibling, a description is what picks the wrong tool. */
+  it("describes every tool distinctly and substantially", async () => {
+    const listed = await client.listTools();
+    const descriptions = listed.tools.map(tool => tool.description ?? "");
+
+    for (const description of descriptions) {
+      expect(description.length).toBeGreaterThanOrEqual(DESCRIPTION_FLOOR);
+    }
+    expect(new Set(descriptions).size).toBe(descriptions.length);
+  });
+
+  /** Two versions nobody compares drift apart indefinitely, and each looks right on its own. */
+  it("advertises the version the manifest declares", () => {
+    const advertised = client.getServerVersion();
+
+    expect(advertised?.version).toBe(MANIFEST_VERSION);
+  });
+
+  /** Optional in the type and unasserted, remediation could stop being populated unnoticed. */
+  it("carries remediation naming the verb to call first", async () => {
+    const result = await client.callTool({
+      name: "reopen_stage",
+      arguments: buildReopenStageInput(),
+    });
+    const envelope = readToolEnvelope(result);
+
+    expect(result.isError).toBe(true);
+    expect(envelope.remediation).toContain("start_stage");
+  });
+
+  /** reconnect reassigns the context's service, so overlapping calls share mutable state. */
+  it("answers every call when several overlap on one server", async () => {
+    const calls = Array.from({ length: CONCURRENT_READS }, () =>
+      client.callTool({ name: "next_action", arguments: {} }),
+    );
+
+    const results = await Promise.all(calls);
+
+    for (const result of results) {
+      expect(result.isError).toBeUndefined();
+      expect(readToolEnvelope(result).ok).toBe(true);
+    }
   });
 
   /** Invert the envelope mapping and every successful call reads to a client as an error. */
@@ -158,7 +259,7 @@ describe("the exposed tool surface", () => {
     const flaky = buildFlakyService(RETRY_OUTCOME);
     let reconnects = 0;
     const retryClient = await connectClientTo(
-      createTrackerMcpServer(
+      TrackerMcpServer.createServer(
         { service: flaky.service, actor: ACTORS.IMPLEMENTER },
         async () => {
           reconnects += 1;
@@ -175,13 +276,14 @@ describe("the exposed tool surface", () => {
     expect(flaky.attempts()).toBe(2);
     expect(result.isError).toBeUndefined();
     expect(readToolEnvelope(result).ok).toBe(true);
+    await retryClient.close();
   });
 
   /** Retrying a methodology answer runs the write twice; only a lost store may be retried. */
   it("does not reconnect when the failure is an answer rather than a fault", async () => {
     let reconnects = 0;
     const guardedClient = await connectClientTo(
-      createTrackerMcpServer({ service, actor: ACTORS.IMPLEMENTER }, async () => {
+      TrackerMcpServer.createServer({ service, actor: ACTORS.IMPLEMENTER }, async () => {
         reconnects += 1;
       }),
     );
@@ -193,5 +295,6 @@ describe("the exposed tool surface", () => {
 
     expect(result.isError).toBe(true);
     expect(reconnects).toBe(0);
+    await guardedClient.close();
   });
 });

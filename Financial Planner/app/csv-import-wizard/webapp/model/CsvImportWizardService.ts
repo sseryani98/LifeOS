@@ -7,10 +7,7 @@ import type {
   ParsedFile,
   SaveRow,
 } from "com/financialplanner/csvimportwizard/model/types";
-
-const PARSE_OPERATION = "/parseCsvImport(...)";
-const SAVE_OPERATION = "/saveCsvImport(...)";
-const TRANSACTIONS_PATH = "/Transactions";
+import { ODATA_PATH } from "com/financialplanner/csvimportwizard/model/constants";
 
 /**
  * CsvImportWizardService — owns every OData V4 call for the CSV Import Wizard:
@@ -109,7 +106,7 @@ export default class CsvImportWizardService {
     skippedCount: number,
     rows: SaveRow[],
   ): Promise<ImportSummary> {
-    const operation = this._model.bindContext(SAVE_OPERATION);
+    const operation = this._model.bindContext(ODATA_PATH.SAVE_OPERATION);
     operation.setParameter("cardInstance_ID", cardInstanceId);
     operation.setParameter("fileName", fileName);
     operation.setParameter("skippedCount", skippedCount);
@@ -159,7 +156,7 @@ export default class CsvImportWizardService {
     cardInstanceId: string,
     file: ParsedFile,
   ): Promise<ParseResult> {
-    const operation = this._model.bindContext(PARSE_OPERATION);
+    const operation = this._model.bindContext(ODATA_PATH.PARSE_OPERATION);
     operation.setParameter("cardInstance_ID", cardInstanceId);
     operation.setParameter("fileName", file.name);
     operation.setParameter("fileContent", file.content);
@@ -175,7 +172,7 @@ export default class CsvImportWizardService {
   private async _loadTransaction(
     id: string,
   ): Promise<MatchedTransaction | null> {
-    const context = this._model.bindContext(`${TRANSACTIONS_PATH}(${id})`);
+    const context = this._model.bindContext(`${ODATA_PATH.TRANSACTIONS}(${id})`);
     const object = (await context.requestObject()) as MatchedTransaction | null;
     return object ?? null;
   }

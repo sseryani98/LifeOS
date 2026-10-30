@@ -35,19 +35,19 @@ export interface SeededWorld {
  * this runs before anything else.
  * @returns Resolves once every list is populated.
  */
-export async function seedCodeLists(): Promise<void> {
+export const seedCodeLists = async (): Promise<void> => {
   for (const [list, rows] of Object.entries(CODE_LISTS)) {
     await INSERT.into(`com.lifeos.projecttracker.${list}`).entries(
       rows as unknown as Record<string, unknown>[],
     );
   }
-}
+};
 
 /**
  * Seeds the methodology library the chains are instantiated from.
  * @returns Resolves once the library is in place.
  */
-export async function seedMethodologyLibrary(): Promise<void> {
+export const seedMethodologyLibrary = async (): Promise<void> => {
   await INSERT.into(TABLE.METHODOLOGY).entries({ ...METHODOLOGY });
   await INSERT.into(TABLE.METHODOLOGY_STEP).entries(
     STAGE_STEPS.map(step => ({
@@ -77,7 +77,7 @@ export async function seedMethodologyLibrary(): Promise<void> {
       methodology_code: METHODOLOGY.code,
     })),
   );
-}
+};
 
 /**
  * Materialises a story's chain the way instantiation will once it exists: every
@@ -87,10 +87,10 @@ export async function seedMethodologyLibrary(): Promise<void> {
  * @param shipsUi The predicate the Conditional steps name.
  * @returns Resolves once the chain is in place.
  */
-export async function seedStoryChain(
+export const seedStoryChain = async (
   milestoneId: string,
   shipsUi: boolean,
-): Promise<void> {
+): Promise<void> => {
   for (const step of STAGE_STEPS) {
     if (step.conditional === "shipsUi" && !shipsUi) continue;
     const taskId = randomUUID();
@@ -111,14 +111,14 @@ export async function seedStoryChain(
       });
     }
   }
-}
+};
 
 /**
  * Seeds a second workspace under the already-seeded engagement, for suites
  * about multi-workspace ambiguity.
  * @returns The new workspace's identifier.
  */
-export async function seedSecondWorkspace(): Promise<string> {
+export const seedSecondWorkspace = async (): Promise<string> => {
   const engagements = (await SELECT.from(TABLE.ENGAGEMENT).columns(
     "ID",
   )) as Array<{ ID: string }>;
@@ -129,14 +129,14 @@ export async function seedSecondWorkspace(): Promise<string> {
     engagement_ID: engagements[0].ID,
   });
   return workspaceId;
-}
+};
 
 /**
  * Seeds the canonical world: one hierarchy, one active sprint, one story with
  * its chain.
  * @returns The identifiers the suite addresses the world by.
  */
-export async function seedCanonicalWorld(): Promise<SeededWorld> {
+export const seedCanonicalWorld = async (): Promise<SeededWorld> => {
   await seedCodeLists();
   await seedMethodologyLibrary();
   const areaId = randomUUID();
@@ -175,14 +175,14 @@ export async function seedCanonicalWorld(): Promise<SeededWorld> {
   });
   await seedStoryChain(milestoneId, WORLD.STORY.shipsUi);
   return { workspaceId, initiativeId, milestoneId };
-}
+};
 
 /**
  * Empties every table the suites write to, so one spec's world never leaks into
  * the next.
  * @returns Resolves once the tables are empty.
  */
-export async function clearWorld(): Promise<void> {
+export const clearWorld = async (): Promise<void> => {
   const ordered = [
     TABLE.ACTIVITY,
     TABLE.DEFECT,
@@ -202,7 +202,7 @@ export async function clearWorld(): Promise<void> {
   for (const list of Object.keys(CODE_LISTS).reverse()) {
     await DELETE.from(`com.lifeos.projecttracker.${list}`);
   }
-}
+};
 
 /**
  * Sets a story's stages to the states a fixture needs, addressed by step code.
@@ -210,10 +210,10 @@ export async function clearWorld(): Promise<void> {
  * @param states One entry per stage code that is not left Not Started.
  * @returns Resolves once every named stage carries its state.
  */
-export async function setChainStates(
+export const setChainStates = async (
   milestoneId: string,
   states: Record<string, { status: string; startedAt?: string; completedAt?: string }>,
-): Promise<void> {
+): Promise<void> => {
   for (const [code, state] of Object.entries(states)) {
     await UPDATE(TABLE.TASK)
       .set({
@@ -223,7 +223,7 @@ export async function setChainStates(
       })
       .where({ milestone_ID: milestoneId, step_code: code });
   }
-}
+};
 
 /**
  * Moves a sprint out of Active, for the fixtures about a workspace that has no
@@ -232,14 +232,14 @@ export async function setChainStates(
  * @param status The status code to set.
  * @returns Resolves once the sprint carries it.
  */
-export async function setInitiativeStatus(
+export const setInitiativeStatus = async (
   initiativeId: string,
   status: string,
-): Promise<void> {
+): Promise<void> => {
   await UPDATE(TABLE.INITIATIVE)
     .set({ status_code: status })
     .where({ ID: initiativeId });
-}
+};
 
 /**
  * Sets one workflow step's status directly, for fixtures about open steps.
@@ -248,12 +248,12 @@ export async function setInitiativeStatus(
  * @param status The status code to set.
  * @returns Resolves once the step carries it.
  */
-export async function setSubtaskStatus(
+export const setSubtaskStatus = async (
   taskId: string,
   stepCode: string,
   status: string,
-): Promise<void> {
+): Promise<void> => {
   await UPDATE(TABLE.SUBTASK)
     .set({ status_code: status })
     .where({ task_ID: taskId, step_code: stepCode });
-}
+};

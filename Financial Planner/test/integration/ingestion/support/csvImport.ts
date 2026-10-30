@@ -22,23 +22,23 @@ import {
 } from "../data/csvImport.js";
 
 /** The real CSV import engine wired to the in-memory DB. */
-export function buildCsvImportService(): CsvImportService {
+export const buildCsvImportService = (): CsvImportService => {
   return new CsvImportService(
     new CsvImportDataService(),
     new DeduplicationService(new DeduplicationDataService()),
     new CategorizationService(new CategorizationDataService()),
   );
-}
+};
 
 /** Persists one transaction so a CSV row can collide with it on the natural key. */
-export async function seedDuplicateTransaction(): Promise<void> {
+export const seedDuplicateTransaction = async (): Promise<void> => {
   await INSERT.into("com.financialplanner.Transaction").entries([
     { ...CIBC_DUP_TRANSACTION },
   ]);
-}
+};
 
 /** Seeds a CIBC card (issuer has a seeded CsvFormatConfig) into SQLite. */
-export async function seedCsvImport(): Promise<void> {
+export const seedCsvImport = async (): Promise<void> => {
   await INSERT.into("com.financialplanner.MarketCard").entries([
     CIBC_AEROPLAN_VISA_INFINITE,
   ]);
@@ -51,4 +51,4 @@ export async function seedCsvImport(): Promise<void> {
   await INSERT.into("com.financialplanner.CardInstance").entries([
     RBC_CARD_INSTANCE,
   ]);
-}
+};
