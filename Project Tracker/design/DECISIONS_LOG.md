@@ -1733,3 +1733,11 @@ Amendments are made in place — the superseded text is struck through and marke
 - **Decision:** **A.**
 - **Rationale:** With fixture copies, FUT-001, FUT-002 and FUT-019 would assert the fixture, not the seed, so a typo in the real CSV passes. A test support helper may still UPDATE a seeded row — FUT-008 step 3 changes `code-quality`'s driver.
 - **Consequences:** `SPEC-02`'s build removes both fixture copies and their inserts. **`SPEC-01`'s suite relies on them today**, so the build persona must move it onto the deployed CSVs in the same change. `TST-001` §11.1's Methodology and Code lists rows now name the CSVs as their source.
+
+## D-243: FUT-004 Builds CNV-002's Twelve Milestones Itself, Through ENH-001's Hook
+
+- **Context:** The `/build` briefer blocked `SPEC-02`: FUT-004's step 1 was "Run CNV-002's load", and CNV-002 is `SPEC-03`, built after `SPEC-02` (BP-001 §3). Only CNV-002 creates Done Milestones in slice 1 — `plan_sprint` and FRM-002 create Backlog (D-54) — so without it FUT-004 cannot reach the Done branch of BR-09 / BR-10.
+- **Options:** A) the test creates CNV-002's 12-Milestone set directly, through the Milestone creation path ENH-001 hooks; B) defer FUT-004 to `SPEC-03`'s build; C) raw database insert of the 12 rows.
+- **Decision:** **A.** Sandro, 2026-11-02.
+- **Rationale:** FUT-004 tests ENH-001's **rule**, not CNV-002's data — BA-001's CNV-004 row and `SPEC-03` §3.3 ("This is not SPEC-02 FUT-004/FUT-005 restated") already draw that line, and assert the real load's chain later. B leaves BR-09's Done branch untested through all of `SPEC-02`'s build. C proves nothing: an insert that bypasses the hook cannot fail.
+- **Consequences:** `SPEC-02` FUT-004's Preconditions and Steps rewritten; Expected Result unchanged. The 12 Milestone rows (11 Done, `financial-planner/CNV-001` Backlog, per `SPEC-03` §3.1) live in `test/data/` — they are not seeded rows, so D-242 does not apply. No rule, algorithm, count or schema change; `TST-001` and BP-001 need no re-count. §3.2's "CNV-002's load" Input row stands as a future caller.
