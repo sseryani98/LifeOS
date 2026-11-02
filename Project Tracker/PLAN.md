@@ -1225,7 +1225,7 @@ Settle before or during Scaffold.
   `:27-32`. That is what made D-153 cheap: the rejected option depended on a cascade position the
   shell actively takes back.
 - **The exemplar's numbers drifted five ways, which became the argument for a ruling (D-154).**
-  Measured: **44** custom properties in the file against **30** claimed in its Summary/D-314 and **35**
+  Measured: **44** custom properties in the file against **30** claimed in its Summary/D-317 and **35**
   listed in its §7.1; **12** targeted-selector blocks against "~5", **6** and **8** in three places;
   `--sapGroup_ContentBackground` documented as an override and **absent from the file**;
   `--sapFontFamily` filed under "Not Overridden" while overridden at `:34`; and **six "Horizon
@@ -1253,7 +1253,7 @@ Settle before or during Scaffold.
   placement rule both bind it. And one inferred-as-measured: `Required` "takes no icon", which
   `DS-001` §10 states by **having no row**, not by saying so.
 - **Corrections applied in-session.** `.claude/agents/ux-tester.md:21-23` told the UX agent Financial
-  Planner's theme is Warm Charcoal `#3D3A38`; that module's own D-314 superseded it with Obsidian
+  Planner's theme is Warm Charcoal `#3D3A38`; that module's own D-317 superseded it with Obsidian
   `#2A2725` and Amber `#C8973E`. **A live rubric, so it was fixed** rather than raised. Two
   documentation items were **raised and left owed** on Sandro's call — the exemplar's §6.3/D-312 load
   mechanism, and `Financial Planner/design/DESIGN_SYSTEM.md:17` and `:29`, which still name the
