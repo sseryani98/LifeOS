@@ -15,5 +15,10 @@ metadata:
 - **Large Bash heredocs carrying JSON/markdown failed** with `unexpected EOF while looking for
   matching '` even when quoted `<<'EOF'`. Reliable path: Write the replacement pairs to a JSON file in
   the scratchpad, apply with a small Python script that asserts each old string matches exactly once.
+  Even a short Python heredoc doing `str.index('\\n…')` failed (2026-11-02) — Write the script file
+  and fix it with Edit, never patch it via heredoc.
+- **Never exact-match a padded table row.** Trailing pad widths differ row to row (DM-001 §9's
+  `storyId` row failed on its spaces). Insert rows by line prefix (`startswith` → insert after), and
+  replace a cell by matching only up to its text, leaving the padding and `|` in place.
 
 Related: [[amendment-ripple-checks]].

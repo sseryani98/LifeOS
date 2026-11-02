@@ -18,6 +18,15 @@ workshop record will not list them. Grep before handing back.
   number plus a "— N since YYYY-MM-DD" annotation; Decisions Reference rows (TST-001 ~836/842, BP-001
   ~546/552) and `DECISIONS_LOG.md` stay as decided. Re-check derived *claims* too: +1 verb made
   TST-001 §14.2's "largest destination is the script tier" false (verb 60 > script 59).
+- **Removing an error key drifts derived counts:** `PLAN.md` ~174/~2025 say "nine `wfl.*` keys" and
+  "14 rejections"; `TST-001` §8 (~375) says "SPEC-02's 14 rejections" (§5 actually had 15 — the 14's
+  basis is unstated, so flag rather than re-count).
+- **A BR that borrows another object's constraint as its mechanism: check the scope agrees.** SPEC-02
+  BR-13 (D-245 draft) leaned on `verb.story.duplicate` "in the Workspace" (SPEC-06 BR-17), but DM-001
+  §4.5/§9 row 519, TST-001 ~374, D-232's `@assert.unique.storyId: [initiative, storyId]` and
+  `srv/modules/tracker/trackerService.ts` `checkMilestoneWrite` are all per-**Initiative**. Returned a gap;
+  Sandro ruled workspace-wide (D-246) and the code became a named build defect in SPEC-02 §2 am. 9.
+  Grep the constraint across DM-001 §9, the schema and the handler before writing the BR.
 - **Spec behaviour cited by DM-001:** `design/DATA_MODEL.md` §9's constraints table quotes specs'
   mechanisms (e.g. "SPEC-02 §3.1 rejects the _load_"). Changing a spec's mechanism breaks that row.
 

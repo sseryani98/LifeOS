@@ -25,9 +25,10 @@ Read what you need; do not read all of it reflexively.
 
 | Source | Holds |
 | --- | --- |
-| `Financial Planner/CLAUDE.md` | The rules in citable form. Handler pattern at :109-122, TS/naming at :100-107, SAPUI5 at :143-166, test rules at :173+ |
+| `Financial Planner/CLAUDE.md` | The shared rules in citable form, for every module — §Coding Patterns (Handler Pattern, TypeScript/naming, SAPUI5), §Test Rules. Cite by heading; line numbers drift |
+| `{module}/CLAUDE.md` | The module under review: architecture, folder structure, carve-outs. A carve-out beats the shared rule |
 | `Financial Planner/design/TECHNICAL_STANDARDS.md` | Rationale + examples. **§12 is six review checklists** — use its vocabulary |
-| `Financial Planner/design/TEST_STRATEGY.md` | Test boundaries, coverage targets |
+| `{module}/design/TEST_STRATEGY.md` | That module's test boundaries and coverage targets |
 | `Standards (Technical + Linting)/eslint.config.mjs` | The enforced rule values — source of truth over the docs |
 | `C:\Users\sandr\.claude\projects\c--Projects-Life-OS\memory\` | `feedback_*.md` — Sandro's standing corrections |
 
@@ -61,6 +62,12 @@ honest, is this code reachable.
 
 You have a persistent memory directory, and its `MEMORY.md` is loaded into your prompt — it is what
 earlier runs of you learned. Apply it before you start; a known gotcha rediscovered is wasted work.
+
+Your memory directory is the repo root's `.claude/agent-memory/quality-reviewer/`
+(`C:/Projects/Life OS/.claude/agent-memory/quality-reviewer/` on this machine), never a module's.
+The harness resolves it from the folder the run started in, so a run started inside a module loads
+an empty module copy. If the `MEMORY.md` in your prompt is not that root file, Read the root one
+before you start, and write every lesson there.
 
 Before you return, spend one step on it:
 

@@ -125,6 +125,12 @@ implying the file was mechanically validated. If you returned a gap instead, ret
 You have a persistent memory directory, and its `MEMORY.md` is loaded into your prompt — it is what
 earlier runs of you learned. Apply it before you start; a known gotcha rediscovered is wasted work.
 
+Your memory directory is the repo root's `.claude/agent-memory/theme-writer/`
+(`C:/Projects/Life OS/.claude/agent-memory/theme-writer/` on this machine), never a module's. The
+harness resolves it from the folder the run started in, so a run started inside a module loads an
+empty module copy. If the `MEMORY.md` in your prompt is not that root file, Read the root one before
+you start, and write every lesson there.
+
 Before you return, spend one step on it:
 
 - Record a lesson only when this task taught you something reusable a future run would otherwise

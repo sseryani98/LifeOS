@@ -2,7 +2,7 @@
 
 ## Amendments to Approved specs
 
-- [Amendment ripple checks](amendment_ripple_checks.md) — new FUT/BR drifts TST-001 §14.2, BP-001, PLAN.md totals; DM-001 §9 quotes spec mechanisms
+- [Amendment ripple checks](amendment_ripple_checks.md) — new FUT/BR drifts TST-001 §14.2, BP-001, PLAN.md totals; DM-001 §9 quotes spec mechanisms; borrowed-constraint scope
 
 ## Editing mechanics
 

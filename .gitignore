@@ -22,3 +22,6 @@ node_modules/
 Thumbs.db
 Desktop.ini
 .DS_Store
+
+# Agent memory lives only at the repo root. A run started in any subfolder writes a stray copy there.
+/*/**/.claude/agent-memory/
