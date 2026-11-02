@@ -1,7 +1,7 @@
 # Test Strategy
 
 **Document ID:** TST-001
-**Version:** 1.2
+**Version:** 1.3
 **Date:** 2026-11-02
 **Status:** Approved
 
@@ -11,6 +11,7 @@
 
 | Date       | Author          | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | ---------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-11-02 | Sandro & Claude | **v1.3 — amended at `SPEC-02`'s build (D-244, D-246).** §14: `SPEC-02` gains BR-37, so the contract is **181** FUTs across **370** business rules — `SPEC-02` now carries 19 FUTs and 37 rules. §9: `Milestone.storyId` is unique in **Workspace**, not Initiative (D-246). Status stays **Approved**.                                                                                                                                                                                                                                    |
 | 2026-11-02 | Sandro & Claude | **v1.2 — amended at `SPEC-02`'s build (D-239, D-242).** §10: the twelve code lists are seeded at `CNV-001`, not `CNV-002`, and `SPEC-02` FUT-019 joins the migration reconciliation as cover for a seed defect. §11.1: the Methodology and Code lists seed sets come from the `db/data/` CSVs, never a fixture copy. §2, §14: `SPEC-02` FUT-019 is classified **Verb (A)** (Sandro), so the contract is **181** FUTs (verb **60**) across **369** business rules — `SPEC-02` now carries 19 FUTs and 36 rules. Status stays **Approved**. |
 | 2026-08-15 | Sandro & Claude | **v1.1 — amended at the Project Planning stage.** §17.2's linter candidate is **answered rather than left open**: no new linter, and the `setupFiles` lever gets an in-module guard in story `SPEC-01`'s definition of done instead (BP-001 §11, D-208). No threshold, tier, folder or count changes.                                                                                                                                                                                                                                     |
 | 2026-08-15 | Sandro          | **Status → Approved.** All twelve Phase 5 coverage checks met; the approval gate at step 0 of Phase 6 was answered before the stage closed — the **third** stage running, after `DM-001` and `TS-001`.                                                                                                                                                                                                                                                                                                                                    |
@@ -371,7 +372,7 @@ written against a wrong standard passes while asserting nothing.
 | `Defect` has a Milestone **or** an Initiative             | **handler**                         | **Logic**              | Unit + Integration (A) |
 | `TestRun` has a Task **or** an Initiative                 | **handler**                         | **Logic**              | Unit + Integration (A) |
 | `Initiative.name` unique in Workspace                     | **handler** — 409, named key        | **Logic**              | Integration (B)        |
-| `Milestone.storyId` unique in Initiative                  | **handler** — 409, named key        | **Logic**              | Integration (B)        |
+| `Milestone.storyId` unique in Workspace                   | **handler** — 409, named key        | **Logic**              | Integration (B)        |
 | Guard precedence (SPEC-02's 14 rejections)                | **handler**                         | **Logic**              | Unit + Integration (A) |
 | Code-list referential integrity                           | **`assert_integrity: 'DB'`**        | **Unassertable** — §10 | —                      |
 
@@ -576,9 +577,9 @@ This is why question 13 of the standard asks for a **layer mapping** and not a n
 
 ## 14. The FUT Coverage Contract (D-194)
 
-The twelve specs carry **181 Functional Unit Tests** across **369 business rules** — measured this
+The twelve specs carry **181 Functional Unit Tests** across **370 business rules** — measured this
 session, per spec: 16, 19, 12, 16, 14, 15, 18, 12, 13, 16, 15, 15 (`SPEC-02` re-counted 2026-11-02 after
-D-239 … D-242 added FUT-019 and BR-34 … BR-36). That set is this stage's largest
+D-239 … D-242 added FUT-019 and BR-34 … BR-36, and D-244 added BR-37). That set is this stage's largest
 input, and until now no document has said how one of them becomes a file.
 
 ### 14.1 The rule
@@ -590,7 +591,7 @@ Three consequences, each deliberate:
 
 - **A FUT is never written twice.** A rule proven at the integration tier is not re-asserted at the
   protocol tier, and a rendering proven in the browser is not re-asserted over OData.
-- **The 369 business rules are the unit tier's input**, which is why §13's thresholds are meaningful
+- **The 370 business rules are the unit tier's input**, which is why §13's thresholds are meaningful
   at all: a 90% Service target is unreachable from 181 outcome-level tests.
 - **A FUT no tier can observe is not a test**, and §14.3 names those explicitly rather than letting
   them rot as untraceable coverage.

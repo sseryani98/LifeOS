@@ -171,7 +171,7 @@ order, so the sequence is simply `SPEC-01` → `SPEC-12`.
 FUTs, D-40 … D-46. `SPEC-02` (`design/specs/SPEC-02-METHODOLOGY-AND-STAGE-ENFORCEMENT.md`,
 **Approved** 2026-07-27) is 33 business
 rules, 18 FUTs, D-47 … D-57 — and it discharged all three things `SPEC-01` deferred to it: the guard
-table (14 rejections, nine new `wfl.*` keys), the twelfth-verb question (**not needed** — D-50), and
+table (14 rejections, nine new `wfl.*` keys — eight since D-245 withdrew `wfl.chain.alreadyInstantiated`), the twelfth-verb question (**not needed** — D-50), and
 the slug codes (16, with FUT-002 testing the contract rather than asserting it). `SPEC-03`
 (`design/specs/SPEC-03-FINANCIAL-PLANNER-MIGRATION-LOAD.md`, **Approved** 2026-07-28) is 34 business
 rules, 12 FUTs, eleven Data Model amendments, D-58 … D-65 — amended in-session at the `SPEC-04`
@@ -876,7 +876,7 @@ Settle before or during Scaffold.
   FUT-001 and FUT-012 cover all three of `INT-002`, `INT-003` and `INT-005` at once. A per-object cut
   leaves roughly **60 FUTs with no owner** and re-runs D-194. Re-measured against the specs themselves
   rather than carried: **180 FUTs and 366 business rules**, per-spec figures agreeing with `TST-001`
-  §14 exactly — **181 and 369** since `SPEC-02`'s 2026-11-02 amendment (D-239 … D-242). A story's **ID is its spec's ID**, so `build-briefer` resolves one straight to a file.
+  §14 exactly — **181 and 369** since `SPEC-02`'s 2026-11-02 amendment (D-239 … D-242), and **370** rules since D-244 added BR-37. A story's **ID is its spec's ID**, so `build-briefer` resolves one straight to a file.
 - **The second finding: no repo-wide dependency change can land during this build at all (D-206).** The
   deferred docket collects **eight** raised-and-owed items, and **four share one unblocking event** —
   Financial Planner's W1-S3 closing — which D-13 puts **downstream of `PT-W3`**, since cutover precedes
@@ -960,7 +960,7 @@ Settle before or during Scaffold.
   amended `plan_sprint` schema — which get a thin **protocol** tier.
 - **All 180 Functional Unit Tests were classified, and the classification is the deliverable (D-194).**
   Measured: **180 FUTs across 366 business rules** (16, 18, 12, 16, 14, 15, 18, 12, 13, 16, 15, 15) —
-  **181 across 369** since `SPEC-02`'s 2026-11-02 amendment added FUT-019 (Verb (A)), which also puts
+  **181 across 369** since `SPEC-02`'s 2026-11-02 amendment added FUT-019 (Verb (A)), and **370** rules since D-244 added BR-37. FUT-019 also puts
   verb (60) one ahead of script (59) and makes the OData share 41 of 181. The
   rule is that **a FUT is written at the outermost tier that can observe it, once**, and unit tests are
   driven by the 366 business rules rather than by the FUTs. Destinations: **59 script, 59 verb, 41 OData,
@@ -2022,7 +2022,7 @@ Settle before or during Scaffold.
   `story`, `stage`, `subtask`, `reason` and the caller identity `INT-001` already carries under D-41,
   so none needed a new or changed verb input and **D-37 stands unamended**. The seam held in a
   stronger form than §11.1 anticipated: `SPEC-01`'s `verb.stage.blocked` is the **envelope** and
-  `SPEC-02`'s nine `wfl.*` keys are the rules inside it. Recorded rather than left silent, because a
+  `SPEC-02`'s nine `wfl.*` keys (eight since D-245) are the rules inside it. Recorded rather than left silent, because a
   tested-and-held trigger is a finding.
 - **No twelfth verb, and D-40's eleven stand (D-50).** With conditionality resolved once at
   instantiation, a step that does not apply is **never created** — so there is nothing to cancel, and

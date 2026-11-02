@@ -21,6 +21,7 @@ SQLite only. Approved as a design; **not Approved-for-build until R1 clears**.
 | 2026-08-15 | Sandro & Claude | **Two amendments at the Data Model stage.** (a) **BR-17 gains an explicit empty-Task-set clause — the derivation returns `Done` (D-162).** Its first and last clauses are both vacuously true over an empty set, so the rule as written was not a total function; D-88 found the disagreement, noted it is live on **eleven of twelve** Milestones, and raised it here rather than settling it. `Done` is correct **by construction**: a Milestone is chainless if and only if it was created Done, since ENH-001 fires only on creation with status Backlog (BR-09, BR-10), a Backlog Milestone materialises at least eight Tasks in the same transaction, and no verb deletes a Task (D-50). **Nothing on screen changes** — four Approved specs decline to read this value. (b) **§2 amendment 6's stated form is superseded (D-166)**: "anything not `sandro` is an agent" is already false against [SPEC-09](SPEC-09-TEST-REPORT-TO-TESTRUN.md) §2 amendment 4's `test-report`. The requirement stands, met by an `Actor` code list carrying a `kind`. **No verb signature changes and no FUT changes**; D-37 §11.1's trigger does not fire. Status stays **Approved**. |
 | 2026-11-02 | Sandro & Claude | **Seed mechanism and subtask drivers settled** after the `/build` briefer blocked the spec on two holes: the code lists its rows FK to were seeded at `CNV-002` (built later) under `assert_integrity: 'DB'`, and §3.1's subtask table gave neither `driver` nor `requiresHuman`, both mandatory in `db/schema.cds`. Records **D-239 … D-242**. **BR-34 … BR-36 added**: CNV-001 also seeds all twelve DM-001 §8 code lists (D-239); the library and the lists are hand-written CSVs in `db/data/` loaded by `cds deploy`, with no load script (D-240); every subtask step carries `driver` = `/build`, `requiresHuman` = false (D-241). §3.1 names the seed form and path, its subtask table gains both columns, "Validation and rejection criteria" moves from a refused load to FUT-001 and FUT-003, and Reconciliation counts the code lists. **FUT-001 widened; FUT-019 added.** Tests read the deployed CSVs, not fixture copies (D-242). No schema change. Status stays **Approved** — an amendment to an Approved spec, on D-67 and D-72's precedent.                                                                                                                |
 | 2026-11-02 | Sandro & Claude | **FUT-004 no longer depends on CNV-002's load** (D-243). The `/build` briefer blocked it: its step 1 ran CNV-002's load, which is `SPEC-03`, built after this spec, and only CNV-002 creates Done Milestones in slice 1. FUT-004 now creates CNV-002's 12-Milestone set itself, from `test/data/`, through the creation path ENH-001 hooks — never a raw insert. Expected Result unchanged. FUT-004 tests ENH-001's rule; `SPEC-03` and CNV-004 still assert the real load. No rule, algorithm, count or schema change; 19 FUTs and 36 rules as before. Status stays **Approved**.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| 2026-11-02 | Sandro & Claude | **Creation status named and re-instantiation made structural** after the `/build` briefer blocked the spec a second time, on two holes: no document said how a caller of the Milestone create-handler states "created Done" — `db/schema.cds` has no status column and the service's `status` is read-only — and FUT-007's re-instantiation attempt had no reachable entry point, because BR-09 fires only on creation and a second create of the same `storyId` is refused first. Records **D-244 … D-246**. **BR-37 added**: creation status is carried by a create-only virtual `createdDone` on `TrackerService.Milestones`; §2 amendment 8, §3.2's Inputs row and Algorithm step 1 (D-244). **`wfl.chain.alreadyInstantiated` withdrawn**: BR-09, BR-13 and BR-31 amended, the Algorithm loses its step 2, §5 loses the row (D-245). **`storyId` is unique within the Workspace**, and the built per-Initiative check is a defect this spec's build fixes — §2 amendment 9 (D-246). **FUT-004 and FUT-007 amended.** 19 FUTs and 37 rules. Status stays **Approved**.                                                                                                   |
 
 ---
 
@@ -50,7 +51,7 @@ a requirement this spec places on the Data Model stage.
 | --------------------- | ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
 | **Methodology**       | The seeded library's root (CNV-001)                     | `code`, `name`                                                                                                                |
 | **MethodologyStep**   | Stage and subtask vocabulary; the whole chain's shape   | `code` (slug, the key), `name` (label), `kind`, `position`, `parent`, `conditional`, `requiresHuman`, `driver`, `description` |
-| **Milestone**         | The story a chain is instantiated for; status derived   | `storyId`, `status` (**derived**, BR-17), **`shipsUi`**                                                                       |
+| **Milestone**         | The story a chain is instantiated for; status derived   | `storyId`, `status` (**derived**, BR-17), **`shipsUi`**, **`createdDone`** (create-only, virtual — BR-37)                     |
 | **Task**              | A materialised stage step                               | `stepCode`, `status` ∈ {Not Started, In Progress, Complete}, `startedAt`, `completedAt` (nullable)                            |
 | **Subtask**           | A materialised subtask step                             | `stepCode`, `status` ∈ {Not Started, Complete}, `completedAt`                                                                 |
 | **Activity**          | Carries the reopen history the Task row no longer holds | `kind`, `actor`, `target`, `payload`, `occurredAt`                                                                            |
@@ -58,15 +59,17 @@ a requirement this spec places on the Data Model stage.
 
 **Amendments flagged for Data Model**
 
-| #   | Amendment                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | **`MethodologyStep.conditional` is a predicate name** (`shipsUi` or null), not a boolean. **Amends SPEC-01 §2**, which typed it as a boolean.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| 2   | New on `MethodologyStep`: **`requiresHuman`** (Boolean, D-35's rule as data), **`driver`** (String, the slash command; remediation is generated from it), **`description`** (String, one line).                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| 3   | New on `Milestone`: **`shipsUi`** (Boolean) — the only Conditional predicate in slice 1 (D-47).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| 4   | `MethodologyStep.position` is **gapped by 10** within each parent.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| 5   | `MethodologyStep.parent` — subtask steps hang off a stage step. Only `sprint-build` has children (BR-02).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| 6   | **The actor identity needs a kind.** BR-23 must distinguish human from agent. ~~Slice 1's form: identities are enumerated and `sandro` is the only human; anything else is an agent.~~ **The stated form is superseded by D-166** — it is already false against [SPEC-09](SPEC-09-TEST-REPORT-TO-TESTRUN.md) §2 amendment 4's `test-report`, which that spec says in terms is **not an agent**. The requirement stands and is met by an `Actor` code list of eight identities, each carrying a `kind` → `ActorKind` ∈ {`human`, `agent`, `system`} ([DM-001](../DATA_MODEL.md) §8.2). BR-23 becomes `actor.kind.code != 'human'`. |
-| 7   | `Task.completedAt` must be **clearable** — a legal reopen nulls it (BR-28, D-57).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| #   | Amendment                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **`MethodologyStep.conditional` is a predicate name** (`shipsUi` or null), not a boolean. **Amends SPEC-01 §2**, which typed it as a boolean.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| 2   | New on `MethodologyStep`: **`requiresHuman`** (Boolean, D-35's rule as data), **`driver`** (String, the slash command; remediation is generated from it), **`description`** (String, one line).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| 3   | New on `Milestone`: **`shipsUi`** (Boolean) — the only Conditional predicate in slice 1 (D-47).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| 4   | `MethodologyStep.position` is **gapped by 10** within each parent.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| 5   | `MethodologyStep.parent` — subtask steps hang off a stage step. Only `sprint-build` has children (BR-02).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| 6   | **The actor identity needs a kind.** BR-23 must distinguish human from agent. ~~Slice 1's form: identities are enumerated and `sandro` is the only human; anything else is an agent.~~ **The stated form is superseded by D-166** — it is already false against [SPEC-09](SPEC-09-TEST-REPORT-TO-TESTRUN.md) §2 amendment 4's `test-report`, which that spec says in terms is **not an agent**. The requirement stands and is met by an `Actor` code list of eight identities, each carrying a `kind` → `ActorKind` ∈ {`human`, `agent`, `system`} ([DM-001](../DATA_MODEL.md) §8.2). BR-23 becomes `actor.kind.code != 'human'`.                                                                                                                                                                    |
+| 7   | `Task.completedAt` must be **clearable** — a legal reopen nulls it (BR-28, D-57).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| 8   | New on the `TrackerService.Milestones` projection: **`createdDone`** (Boolean) — a create-only `virtual` element, `@UI.Hidden`, carrying creation status into ENH-001's create-handler and never stored (BR-37, D-244). **Not yet executed:** whether CAP keeps a virtual element in `req.data` on INSERT — OData marks virtual elements `@Core.Computed`, which input processing may strip — is the build's to confirm. If it is stripped, that is a build finding to raise, not a licence to switch carriers.                                                                                                                                                                                                                                                                                      |
+| 9   | **`Milestone.storyId` is unique within the Workspace**, across every Initiative (SPEC-06 BR-17, D-246); DM-001 §4.5 and §9 corrected. **Build defect for this spec's build:** `checkMilestoneWrite` in `srv/modules/tracker/trackerService.ts` counts per Initiative (`countMilestonesWithStoryId(initiative_ID, storyId)`) and `verb.story.duplicate`'s text reads `Story "{0}" already exists in this sprint.` The count becomes workspace-wide, through the Initiative's workspace, and the text becomes `Story "{0}" already exists.` D-232's `@assert.unique.storyId: [initiative, storyId]` **stays** as a narrower store backstop — `@assert.unique` cannot key through `initiative` to the Workspace — and the handler is the authority. FUT-007 fails against today's per-Initiative check. |
 
 ---
 
@@ -172,12 +175,12 @@ directions:
 
 #### Inputs
 
-| Input                                 | Source                                                                                                                                                                    |
-| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| The seeded library, in position order | CNV-001                                                                                                                                                                   |
-| The Milestone being created           | `plan_sprint` (INT-001), FRM-002, or CNV-002's load                                                                                                                       |
-| `Milestone.status` at creation        | Backlog or Done                                                                                                                                                           |
-| `Milestone.shipsUi`                   | Set by the creating caller — `plan_sprint`'s `stories[]` (SPEC-01 BR-21), FRM-002's story rows (SPEC-06 BR-14), or CNV-002 (SPEC-03 BR-16); the only predicate in slice 1 |
+| Input                                                              | Source                                                                                                                                                                    |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| The seeded library, in position order                              | CNV-001                                                                                                                                                                   |
+| The Milestone being created                                        | `plan_sprint` (INT-001), FRM-002, or CNV-002's load                                                                                                                       |
+| Creation status — **`createdDone`** on `TrackerService.Milestones` | Absent or false → Backlog; true → Done. Only CNV-002 sets it true; `plan_sprint` and FRM-002 never send it (BR-37, D-244)                                                 |
+| `Milestone.shipsUi`                                                | Set by the creating caller — `plan_sprint`'s `stories[]` (SPEC-01 BR-21), FRM-002's story rows (SPEC-06 BR-14), or CNV-002 (SPEC-03 BR-16); the only predicate in slice 1 |
 
 #### Outputs
 
@@ -187,16 +190,17 @@ Activity event beyond the creating verb's own.
 
 #### Algorithm
 
-1. Fire on **Milestone creation with status Backlog**, and at no other time. A Milestone created Done
-   receives no chain (BR-09, BR-10).
-2. If the Milestone already has a chain, reject `wfl.chain.alreadyInstantiated` (BR-13).
-3. Read the library in position order.
-4. Per stage step: **Required or Recommended** → materialise a Task. **Conditional** → evaluate its
+1. Fire on **Milestone creation with status Backlog** — `createdDone` absent or false — and at no
+   other time. A Milestone created with `createdDone` true is Done and receives no chain (BR-09,
+   BR-10, BR-37).
+2. Read the library in position order.
+3. Per stage step: **Required or Recommended** → materialise a Task. **Conditional** → evaluate its
    named predicate against the Milestone; true → materialise; false → **materialise nothing**, so no
    row exists to skip, cancel or display (BR-11, BR-12).
-5. Repeat step 4 over `sprint-build`'s subtask steps, materialising Subtasks under its Task.
-6. Every materialised row starts `Not Started` (BR-14).
-7. A later library change does not refresh an instantiated chain (BR-13, D-22).
+4. Repeat step 3 over `sprint-build`'s subtask steps, materialising Subtasks under its Task.
+5. Every materialised row starts `Not Started` (BR-14).
+6. A later library change does not refresh an instantiated chain, and no path re-instantiates one
+   (BR-13, D-22, D-245).
 
 #### Worked example — real numbers
 
@@ -280,12 +284,13 @@ because X" stays queryable in the Activity log, which is what makes clearing `co
 
 **Instantiation — ENH-001**
 
-- **BR-09** A chain is instantiated when a Milestone is created with status Backlog, and at no other time.
+- **BR-09** A chain is instantiated when a Milestone is created with status Backlog — `createdDone` absent or false (BR-37) — and at no other time.
 - **BR-10** A Milestone created Done receives no chain.
 - **BR-11** Instantiation materialises every Required and Recommended step, plus every Conditional step whose predicate holds, in library position order.
 - **BR-12** A Conditional step whose predicate fails is not materialised at all — no row exists for it.
-- **BR-13** A Milestone that already has a chain is never re-instantiated; a second attempt is rejected. A library change does not refresh an existing chain (D-22).
+- **BR-13** No path re-instantiates a chain: ENH-001 fires only on creation (BR-09), and a second create of the same `storyId` in the Workspace is refused `409 verb.story.duplicate` with the existing chain unchanged. A library change does not refresh an existing chain (D-22, D-245). The duplicate check is workspace-wide, across every Initiative — today's per-Initiative handler is a build defect (SPEC-06 BR-17, D-246; §2 amendment 9).
 - **BR-14** Materialised Tasks and Subtasks start Not Started.
+- **BR-37** A Milestone's creation status is carried by `createdDone : Boolean`, a create-only virtual element on `TrackerService.Milestones`. Absent or false → Backlog; true → Done. It is read only by ENH-001's create-handler, never stored, and `@UI.Hidden`. Only CNV-002 sets it true; `plan_sprint` and FRM-002 never send it (D-54, D-244).
 
 **Derived state — WFL-001**
 
@@ -308,7 +313,7 @@ because X" stays queryable in the Activity log, which is what makes clearing `co
 - **BR-28** A legal `reopen_stage` sets the Task to In Progress, sets `startedAt` to the reopen time and clears `completedAt`. Its Subtasks are unchanged.
 - **BR-29** `record_test_run` **in story mode** is rejected when its target Task is Not Started → `wfl.testrun.stageNotStarted`. **Workspace mode has no target Task and no stage, so this guard cannot fire against it** — the run links to an Initiative and records a fact about the sprint rather than about a stage (SPEC-01 BR-20a, [SPEC-09](SPEC-09-TEST-REPORT-TO-TESTRUN.md) BR-08, D-104). Scoped at the SPEC-09 workshop.
 - **BR-30** Guard precedence on `complete_stage`: **blocking predecessor → human-only → not started → already complete → open-subtask warning.** The first to fire is the response.
-- **BR-31** Every rejection above carries a remediation naming the blocking condition and the command that clears it (D-46, SPEC-01 BR-17). The command text is generated from the seeded `driver` column, and the remediation names the **whole** blocking set in position order. ENH-001's re-instantiation rejection → `wfl.chain.alreadyInstantiated`.
+- **BR-31** Every rejection above carries a remediation naming the blocking condition and the command that clears it (D-46, SPEC-01 BR-17). The command text is generated from the seeded `driver` column, and the remediation names the **whole** blocking set in position order.
 - **BR-32** `start_stage`'s success response returns the stage's materialised subtask list, in position order (D-56).
 - **BR-33** WFL-001 adds no input to any verb.
 
@@ -316,24 +321,23 @@ because X" stays queryable in the Activity log, which is what makes clearing `co
 
 ## 5. Error Handling
 
-| Condition                                                            | Response                                                  | i18n key                        |
-| -------------------------------------------------------------------- | --------------------------------------------------------- | ------------------------------- |
-| `start_stage` with a blocking Task earlier in position order open    | Reject 409 with remediation naming the whole blocking set | `wfl.stage.predecessorOpen`     |
-| `start_stage` on a Task already In Progress                          | Reject 409 **carrying `startedAt`**                       | `wfl.stage.alreadyStarted`      |
-| `start_stage` on a Complete Task                                     | Reject 409, remediation naming `reopen_stage`             | `verb.stage.alreadyComplete` ¹  |
-| `complete_stage` with a blocking Task earlier in position order open | Reject 409 with remediation                               | `wfl.stage.predecessorOpen`     |
-| `complete_stage` on a `requiresHuman` step by an agent identity      | Reject 409, remediation naming the step's driver          | `wfl.stage.humanOnly`           |
-| `complete_stage` on a Task that is Not Started                       | Reject 409, remediation naming `start_stage`              | `verb.stage.notStarted` ¹       |
-| `complete_stage` on a Complete Task                                  | Reject 409 with current status and `completedAt`          | `verb.stage.alreadyComplete` ¹  |
-| `complete_stage` with materialised Subtasks open                     | **Succeed**; `warnings[]` names each open Subtask         | `verb.stage.subtasksOpen` ¹     |
-| `complete_subtask` while the parent Task is Not Started              | Reject 409, remediation naming `start_stage`              | `wfl.subtask.stageNotStarted`   |
-| `complete_subtask` with an earlier blocking Subtask open             | Reject 409 with remediation                               | `wfl.subtask.predecessorOpen`   |
-| `complete_subtask` on a Complete Subtask                             | Reject 409 **carrying `completedAt`**                     | `wfl.subtask.alreadyComplete`   |
-| `reopen_stage` on a Task that is not Complete                        | Reject 409 with the Task's current status                 | `wfl.stage.notComplete`         |
-| `reopen_stage` with an empty reason                                  | Reject 400                                                | `verb.reopen.reasonRequired` ¹  |
-| `record_test_run` **in story mode** against a Not Started Task       | Reject 409, remediation naming `start_stage`              | `wfl.testrun.stageNotStarted`   |
-| Instantiating a chain for a Milestone that already has one           | Reject 409                                                | `wfl.chain.alreadyInstantiated` |
-| A stage or subtask code not in this story's chain                    | Reject 404, listing the chain's codes                     | `verb.target.notFound` ¹        |
+| Condition                                                            | Response                                                  | i18n key                       |
+| -------------------------------------------------------------------- | --------------------------------------------------------- | ------------------------------ |
+| `start_stage` with a blocking Task earlier in position order open    | Reject 409 with remediation naming the whole blocking set | `wfl.stage.predecessorOpen`    |
+| `start_stage` on a Task already In Progress                          | Reject 409 **carrying `startedAt`**                       | `wfl.stage.alreadyStarted`     |
+| `start_stage` on a Complete Task                                     | Reject 409, remediation naming `reopen_stage`             | `verb.stage.alreadyComplete` ¹ |
+| `complete_stage` with a blocking Task earlier in position order open | Reject 409 with remediation                               | `wfl.stage.predecessorOpen`    |
+| `complete_stage` on a `requiresHuman` step by an agent identity      | Reject 409, remediation naming the step's driver          | `wfl.stage.humanOnly`          |
+| `complete_stage` on a Task that is Not Started                       | Reject 409, remediation naming `start_stage`              | `verb.stage.notStarted` ¹      |
+| `complete_stage` on a Complete Task                                  | Reject 409 with current status and `completedAt`          | `verb.stage.alreadyComplete` ¹ |
+| `complete_stage` with materialised Subtasks open                     | **Succeed**; `warnings[]` names each open Subtask         | `verb.stage.subtasksOpen` ¹    |
+| `complete_subtask` while the parent Task is Not Started              | Reject 409, remediation naming `start_stage`              | `wfl.subtask.stageNotStarted`  |
+| `complete_subtask` with an earlier blocking Subtask open             | Reject 409 with remediation                               | `wfl.subtask.predecessorOpen`  |
+| `complete_subtask` on a Complete Subtask                             | Reject 409 **carrying `completedAt`**                     | `wfl.subtask.alreadyComplete`  |
+| `reopen_stage` on a Task that is not Complete                        | Reject 409 with the Task's current status                 | `wfl.stage.notComplete`        |
+| `reopen_stage` with an empty reason                                  | Reject 400                                                | `verb.reopen.reasonRequired` ¹ |
+| `record_test_run` **in story mode** against a Not Started Task       | Reject 409, remediation naming `start_stage`              | `wfl.testrun.stageNotStarted`  |
+| A stage or subtask code not in this story's chain                    | Reject 404, listing the chain's codes                     | `verb.target.notFound` ¹       |
 
 ¹ Existing SPEC-01 key, reused rather than duplicated.
 
@@ -438,7 +442,9 @@ Approved-for-build until R1 clears.**
    §3.1's twelve-Milestone table — 11 Done, `financial-planner/CNV-001` Backlog) through the
    Milestone creation path ENH-001 hooks, the path CNV-002's load will call. Not a raw insert: one
    that bypasses the hook cannot fail. The 12 rows live in `test/data/` — they are not seeded rows,
-   so D-242 does not apply (D-243).
+   so D-242 does not apply (D-243). The 11 Done rows carry `createdDone: true`; the
+   `financial-planner/CNV-001` Backlog row **omits** the flag, so the absent-means-Backlog default
+   is exercised (BR-37).
 2. Count Milestones having at least one Task.
 
 **Expected Result:**
@@ -479,17 +485,21 @@ Approved-for-build until R1 clears.**
 ### FUT-007: A chain is instantiated once and never refreshed
 
 **Covers:** ENH-001
-**Preconditions:** `financial-planner/CNV-001` has its chain.
+**Preconditions:** `financial-planner/CNV-001` has its chain; the `financial-planner` workspace has
+a second Initiative besides `CNV-001`'s own. The chain's row count, codes and kinds are read.
 **Steps:**
 
-1. Attempt to instantiate a chain for it again.
+1. Create a second Milestone with storyId `CNV-001` in that **second** Initiative, through the same
+   creation path.
 2. Change the library — add a step and change a step's `kind`.
 3. Re-read the story's chain.
 
 **Expected Result:**
 
-- The second attempt is rejected, key `wfl.chain.alreadyInstantiated`.
-- The chain's row count, codes and kinds are **identical** to step 1's reading.
+- Step 1 is refused **409**, key `verb.story.duplicate` — the check is workspace-wide (BR-13,
+  D-246), so a per-Initiative check fails this step.
+- Exactly **one** Milestone with storyId `CNV-001` exists in the workspace.
+- The chain's row count, codes and kinds are **identical** to the reading taken before step 1.
 
 ### FUT-008: The predecessor guard names the whole blocking set, from the seeded driver
 

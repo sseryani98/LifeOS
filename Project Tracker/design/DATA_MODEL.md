@@ -1,7 +1,7 @@
 # Data Model
 
 **Document ID:** DM-001
-**Version:** 1.1
+**Version:** 1.2
 **Date:** 2026-11-02
 **Status:** Approved
 
@@ -11,6 +11,7 @@
 
 | Date       | Author          | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-11-02 | Sandro & Claude | **v1.2 — amended at `SPEC-02`'s build (D-244, D-246).** §4.5: creation status is carried by **`createdDone`**, a create-only virtual element on `TrackerService.Milestones` (SPEC-02 BR-37), and §12 lists it as not stored. §4.5 and §9: `Milestone.storyId` is unique within its **Workspace**, not its Initiative — the per-Initiative scope was a drift from SPEC-06 BR-17; D-232's `[initiative, storyId]` annotation stays as a narrower backstop and the handler is the authority. No persisted entity or column changes. Status stays **Approved**. |
 | 2026-11-02 | Sandro & Claude | **v1.1 — amended at `SPEC-02`'s build (D-240).** §9's `MethodologyStep.conditional` row no longer says `SPEC-02` §3.1 rejects the load: CNV-001 is a hand-written CSV seed that cannot refuse a row, so a violating seed is caught by `SPEC-02` FUT-001 and FUT-003. No entity or attribute changes. Status stays **Approved**. |
 | 2026-08-15 | Sandro          | **Status → Approved.** All ten Phase 5 coverage checks met; the approval gate D-169 moved to step 0 of Phase 6 was answered before the stage closed.                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | 2026-08-15 | Sandro & Claude | Initial creation from the Data Model stage. **25 persisted entities** — 13 domain entities and 12 code lists — consolidated from the Data Model section of all **12** specs, of which **10** place requirements and **2** ([SPEC-10](specs/SPEC-10-CUTOVER-GUARDS.md), [SPEC-12](specs/SPEC-12-DECOMMISSION.md)) state they place none. **OI-05 resolved** — the last open item in the module. Records D-160 through D-175. **R1 executed and closed** — 20/20 checks against PostgreSQL 17.6, the first CDS model any Life OS module has deployed to Postgres, which changed four constraint mechanisms in §9. |
@@ -149,7 +150,7 @@ slice 1 reads it — no Report renders it, no verb writes it, no rule turns on i
 
 | Attribute     | Type                      | Required | Requiring spec                      | Notes                                                           |
 | ------------- | ------------------------- | -------- | ----------------------------------- | --------------------------------------------------------------- |
-| `storyId`     | String(30)                | yes      | SPEC-01 §2                          | Unique within its Initiative — **handler**, not annotation (§9) |
+| `storyId`     | String(30)                | yes      | SPEC-01 §2                          | Unique within its **Workspace** — **handler** (§9, D-246) |
 | `fricewType`  | Association to FricewType | yes      | SPEC-01 §2, SPEC-03 §2 am. 11       | Values singular — `Interface`, not `Interfaces` (D-60)          |
 | `description` | LargeString               | yes      | SPEC-01 §2, SPEC-07 BR-11           |                                                                 |
 | `shipsUi`     | Boolean                   | yes      | SPEC-02 §2 am. 3 (D-47)             | The **only** Conditional predicate in slice 1                   |
@@ -161,7 +162,9 @@ slice 1 reads it — no Report renders it, no verb writes it, no rule turns on i
 value is settled at **§5**.
 
 **Creation status is a transient input to the create operation, not an attribute** (D-64) — supplied
-by the caller, read by `ENH-001`, never persisted.
+by the caller, read by `ENH-001`, never persisted. It is carried by **`createdDone`** (Boolean), a
+create-only `virtual` element on `TrackerService.Milestones`, `@UI.Hidden`: absent or false →
+Backlog, true → Done. Only `CNV-002` sets it true (SPEC-02 BR-37, D-244).
 
 ### 4.6 Task
 
@@ -516,7 +519,7 @@ changed as a result.** The annotations this table originally assumed are not all
 | **`Defect` has at least one of `milestone` / `initiative`**           | **handler**                                       | Same measurement. An orphan Defect was written and accepted (SPEC-03 §2 am. 6, SPEC-08 §2 am. 2)                                                                                                               |
 | **`TestRun` has at least one of `task` / `initiative`**               | **handler**                                       | Same measurement (SPEC-03 §2 am. 7)                                                                                                                                                                            |
 | **`Initiative.name` unique within Workspace**                         | **handler** — the shared create-handler           | SPEC-06 §2 am. 2 rules this out of `@assert.unique` by name: it must reject 409 with a named key. **Measured: the handler path works on Postgres** — the equivalent `storyId` guard returned 409               |
-| **`Milestone.storyId` unique within Initiative**                      | **handler** — the shared create-handler           | SPEC-06 BR-19, same reason. D-79 gives both entities one shared create-handler. **Measured: returns 409 with the named key on Postgres**                                                                       |
+| **`Milestone.storyId` unique within Workspace**                       | **handler** — the shared create-handler           | SPEC-06 BR-17, BR-19, same reason. D-79 gives both entities one shared create-handler. **Measured: returns 409 with the named key on Postgres.** **Scope corrected by D-246**: the handler counts across the Workspace; D-232's `@assert.unique.storyId: [initiative, storyId]` stays as a narrower store backstop, since `@assert.unique` cannot key through `initiative` to the Workspace                                                                       |
 | **No format assertion on `Initiative.branch`**                        | **neither**                                       | SPEC-06 BR-11 rules it out; recorded so its absence reads as a decision                                                                                                                                        |
 | `MethodologyStep.conditional` names only `shipsUi`                    | **neither** — `CNV-001` seed check                | A CSV seed cannot refuse a row (D-240); a violating seed is caught by SPEC-02 FUT-001 and FUT-003. A model constraint over one legal value would be a second enforcement of a seed-time check                  |
 | `MethodologyStep.position` gapped by 10                               | **convention**                                    | SPEC-02 §2 am. 4. Nothing enforces the gap; it exists so a step can be inserted between two                                                                                                                    |
@@ -667,6 +670,7 @@ Values that look like columns and are not. Each is a stated "no column".
 | ------------------------- | -------------------------------------------------------- | ----------- | -------------------------- |
 | **Workspace health**      | Open Defects, stalled Tasks, the most recent TestRun     | `ENH-003`   | SPEC-05 §2 am. 4, BR-02    |
 | **`Milestone.status`**    | The Milestone's Tasks and their blocking kinds           | Derivation  | SPEC-02 BR-17; **§5** here |
+| **`Milestone.createdDone`** | Supplied on create by the caller — `CNV-002` only | Read by `ENH-001`'s create-handler | SPEC-02 BR-37, D-244; §4.5 |
 | **The next action**       | Initiative and Milestone `position`, then chain position | `ENH-002`   | SPEC-04                    |
 | **The task queue**        | Incomplete Tasks in the Workspace, in resolution order   | `ENH-002`   | SPEC-04; §11.1             |
 | **Defect `Scope`**        | Whichever of `milestone` / `initiative` is present       | `RPT-004`   | SPEC-07 BR-20              |
