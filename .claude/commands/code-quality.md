@@ -1,5 +1,5 @@
 ---
-description: Isolated-agent code quality review — lint gate, parallel reviewers, reviewer-vs-adversary debate, consensus table
+description: Isolated-agent code quality review — lint gate, parallel reviewers, one adversary triage pass, consensus table
 argument: Target — omit for the uncommitted diff, or "backend", "frontend", "all", or a module name (e.g. "transaction")
 ---
 
@@ -12,8 +12,9 @@ of the diff defeats it.
 
 ## 1. Resolve the target
 
-Default module is `Financial Planner` (the only workspace today). If a second module exists
-and the argument names it, use that instead.
+Default module is `Financial Planner`. `Project Tracker` is a workspace too — use it when the
+argument names it or the diff sits in it, and swap the module folder in the paths below. A diff
+spanning both modules is two runs, one per module.
 
 | "$ARGUMENTS" | Scope |
 | --- | --- |
@@ -43,9 +44,10 @@ with 60 files in context is the problem this workflow was built to avoid.
 
 ## 3. Confirm before spending
 
-Both sides of the debate run on Opus. Before invoking, tell Sandro in one line what he is
-about to spend: the file count, the domain count, and the resulting agent count —
-`2 × domains + 3 (+1 if backend) reviewers, then 1–2 agents per surviving finding`.
+Reviewers run on Opus (Sonnet for markup-only domains); triage is one agent per file with
+findings, Opus only where a `high` finding is at stake. Before invoking, tell Sandro in one line:
+the file count, the domain count, and `domains + 3 (+1 if backend) reviewers, then 1 triage agent
+per file with findings`.
 
 For `all`, or anything over ~40 files, **ask for confirmation first**. For diff mode and
 single modules, just report the shape and proceed — that is the common case and it is cheap.
@@ -89,12 +91,16 @@ use: table, then wait. **Apply nothing.** Sandro replies by index.
 
 Also report, in one line each:
 
-- `counts.dropped` and `counts.droppedByGround` — findings the reviewer conceded after
-  challenge, and on which ground (`over-engineering`, `readability`, `not-worth-a-row`).
-  **List the dropped items briefly, one line each** — the adversary is a severity gate and
-  Sandro may disagree with a concession. A silent drop reads as "nothing was there."
+- `counts.dropped` — findings the adversary dropped as `not-worth-a-row` (never a `high`; those
+  go to contested). There is no rebuttal round, so **list the dropped items briefly, one line
+  each** — Sandro is the only appeal. A silent drop reads as "nothing was there."
 - `counts.deduped` — how many findings two finders independently agreed on.
 - Whether the lint suite passed clean or halted, and where.
+- **Timings** — Sandro uses these to measure whether the workflow is optimized. The workflow
+  runtime makes `Date.now()` throw, so run
+  `node .claude/workflows/workflowTimings.mjs "<transcript dir>"` against the **Transcript dir**
+  the Workflow launch printed. Report the total, each phase, and the slowest agent in the
+  longest phase.
 
 If everything came back empty, say that plainly in one sentence. A clean review is a real
 result — do not pad it with the findings that were dropped or invent a "consider also"

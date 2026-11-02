@@ -1,14 +1,14 @@
 export const meta = {
   name: 'test-quality',
-  description: 'Isolated-agent test quality review: gate, per-module reviewers, one reviewer-vs-adversary debate per module, auto-implement consensus',
+  description: 'Isolated-agent test quality review. action "review": gate, per-module reviewers, one adversary triage pass per module, report. action "apply": write the findings Sandro picked, then verify.',
   whenToUse:
     'After a build (review the tests that cover the changeset), or ad hoc against a module or "all". Twin of code-quality, pointed at test/ instead of srv/. Re-checks the judgment of build\'s test-author, which nothing else does. Invoked by /test-quality.',
   phases: [
     { title: 'Gate', detail: 'run the suite so reviewers read real coverage numbers, not guesses' },
     { title: 'Review', detail: 'isolated reviewers: one per module, plus integration/mocks and functional-coverage lenses' },
-    { title: 'Debate', detail: 'one adversary per module challenges unproductive tests; reviewer rebuts; adversary closes', model: 'opus' },
-    { title: 'Implement', detail: 'one test-author per module writes the consensus items' },
-    { title: 'Verify', detail: 'gate reports, test-author repairs, gate confirms' },
+    { title: 'Triage', detail: 'one Sonnet adversary per module flags unproductive tests and folds duplicates. No rebuttal round. Review action stops here.' },
+    { title: 'Implement', detail: 'apply action only: one test-author per module writes the items Sandro picked' },
+    { title: 'Verify', detail: 'apply action only: gate reports, test-author repairs, gate confirms' },
   ],
 }
 
@@ -115,49 +115,6 @@ const CHALLENGE_SCHEMA = {
   additionalProperties: false,
 }
 
-const REBUTTAL_SCHEMA = {
-  type: 'object',
-  properties: {
-    responses: {
-      type: 'array',
-      items: {
-        type: 'object',
-        properties: {
-          id: { type: 'string', description: 'The finding id exactly as given to you' },
-          concedes: { type: 'boolean', description: 'True if the adversary is right and the finding should be dropped' },
-          argument: { type: 'string', description: 'Your single response to this challenge' },
-          revisedFix: { type: 'string', description: 'A smaller fix that answers the objection while still closing the gap, or empty if unchanged' },
-        },
-        required: ['id', 'concedes', 'argument', 'revisedFix'],
-        additionalProperties: false,
-      },
-    },
-  },
-  required: ['responses'],
-  additionalProperties: false,
-}
-
-const CLOSE_SCHEMA = {
-  type: 'object',
-  properties: {
-    closes: {
-      type: 'array',
-      items: {
-        type: 'object',
-        properties: {
-          id: { type: 'string', description: 'The finding id exactly as given to you' },
-          withdraws: { type: 'boolean', description: 'True if the rebuttal answered you. Restating your original challenge counts as withdrawing.' },
-          argument: { type: 'string', description: 'If maintaining, the NEW argument that engages the rebuttal. Not a restatement.' },
-        },
-        required: ['id', 'withdraws', 'argument'],
-        additionalProperties: false,
-      },
-    },
-  },
-  required: ['closes'],
-  additionalProperties: false,
-}
-
 const IMPLEMENT_SCHEMA = {
   type: 'object',
   properties: {
@@ -199,6 +156,10 @@ const lenses = scope.lenses ?? []
 const changedFiles = scope.changedFiles ?? []
 const mode = scope.mode ?? 'adhoc'
 const label = scope.label ?? 'target'
+// review (default) reports and writes nothing. apply writes scope.items — the findings Sandro picked
+// from a review's tables — reusing that review's gate result as scope.baseline so it is not re-run.
+const action = scope.action === 'apply' ? 'apply' : 'review'
+
 
 if (!lenses.length) {
   log('No lenses in scope — nothing to review.')
@@ -227,7 +188,8 @@ const diffFocus =
 // lenses under review, and clear the config threshold so unrun modules don't emit phantom
 // "coverage not met" failures (the gate agent flags real shortfalls from the table, not the exit
 // code). `all` runs every module, so scope is empty and it falls back to plain `npm test`.
-const ALL_MODULES = ['admin', 'categorization', 'ingestion', 'shared', 'transaction']
+// The caller passes the module's full lens list; the default is Financial Planner's.
+const ALL_MODULES = scope.allModules ?? ['admin', 'categorization', 'ingestion', 'shared', 'transaction']
 
 const jestCommandFor = names => {
   const modules = [...new Set(names)].filter(name => ALL_MODULES.includes(name))
@@ -244,7 +206,7 @@ const gateIsScoped = gateTestCommand !== 'npm test'
 
 phase('Gate')
 
-const gateResult = await agent(
+const gateResult = scope.baseline ?? (await agent(
   `Run the checks for \`${moduleDir}\` and report what happened, **plus the coverage table**.
 
 ## Run these
@@ -281,7 +243,7 @@ No test file hashing on this run — you were given no test list, so skip that s
 
 Put the **raw output** in \`detail\`, with \`file:line\`. Do not diagnose, do not suggest a fix.`,
   { label: 'gate', phase: 'Gate', model: 'haiku', effort: 'low', agentType: 'gate-runner', schema: GATE_SCHEMA },
-)
+))
 
 const gate = `## Machine-checked already — do NOT re-report any of this
 
@@ -303,19 +265,53 @@ Overall: ${gateResult?.overall ?? '(unavailable)'}
 
 ${gateResult?.coverageTable ?? '(no coverage table — say so in any finding that depends on coverage rather than inventing a number)'}`
 
-// -------------------------------------------------------------- Phase 2: Review
+// One grouping, used twice: it decides which adversary rules on a finding and which author writes
+// it. Both need the same answer — the module that owns the file.
+//
+// A finding may anchor to source rather than a spec, and legitimately so: "this branch is
+// uncovered" cites `srv/`, because the test that would cover it does not exist yet. Matching only
+// test paths would dump every one of those into `shared` — wrong adversary, wrong author, and the
+// sequential bucket swallowing work that should run in parallel.
+const OWNER_PATTERNS = [
+  /test[/\\](?:unit|integration)[/\\]([^/\\]+)[/\\]/, // test/unit/transaction/...
+  /srv[/\\]modules[/\\]([^/\\]+)[/\\]/, //               srv/modules/transaction/...
+  /srv[/\\]([^/\\]+)-service\.(?:ts|cds)$/, //           srv/admin-service.ts — the non-1:1 lens
+]
 
-phase('Review')
+const ownerOf = finding => {
+  for (const pattern of OWNER_PATTERNS) {
+    const owner = pattern.exec(finding.file)?.[1]
+    if (owner && owner !== 'scenarios' && lenses.some(lens => lens.name === owner)) return owner
+  }
+  return 'shared'
+}
 
-const reviewers = []
+const groupBy = items => {
+  const groups = new Map()
+  for (const item of items) {
+    const owner = ownerOf(item.finding ?? item)
+    if (!groups.has(owner)) groups.set(owner, [])
+    groups.get(owner).push(item)
+  }
+  return groups
+}
 
-for (const lens of lenses) {
-  const testFiles = (lens.testFiles ?? []).join('\n') || '(none — this module has no tests yet)'
-  const sourceFiles = (lens.sourceFiles ?? []).join('\n') || '(none resolved)'
+// Review and Triage run only for the review action; apply skips straight to Implement.
+if (action === 'review') {
 
-  reviewers.push(() =>
-    agent(
-      `You are the **test reviewer** for the \`${lens.name}\` module. You are the only agent looking at it — nobody else will catch what you miss.
+  // -------------------------------------------------------------- Phase 2: Review
+
+  phase('Review')
+
+  const reviewers = []
+
+  for (const lens of lenses) {
+    const testFiles = (lens.testFiles ?? []).join('\n') || '(none — this module has no tests yet)'
+    const sourceFiles = (lens.sourceFiles ?? []).join('\n') || '(none resolved)'
+
+    reviewers.push(() =>
+      agent(
+        `You are the **test reviewer** for the \`${lens.name}\` module. You are the only agent looking at it — nobody else will catch what you miss.
 
 ## Your scope — read these and nothing else
 
@@ -354,16 +350,16 @@ Then: **what test cases would you recommend?** Concrete ones. Name the \`data/\`
 Cite a real \`file:line\` — read the file, never infer a location. State the argument, not the label: name **the regression that would ship undetected**, not "insufficient coverage". One concrete fix each, the smallest that closes the gap.
 
 **Zero findings is a valid, respectable result.** A short list you are sure of beats a long list you are not. Every finding you invent costs an adversary's time and may get written into a suite that runs forever.`,
-      { label: `review:${lens.name}`, phase: 'Review', agentType: 'quality-reviewer', schema: FINDINGS_SCHEMA },
-    ),
-  )
-}
+        { label: `review:${lens.name}`, phase: 'Review', agentType: 'quality-reviewer', schema: FINDINGS_SCHEMA },
+      ),
+    )
+  }
 
-reviewers.push(() =>
-  agent(
-    `You are the **integration and mocking reviewer**, working holistically across the whole target (${label}). The per-module reviewers each see one tree; you see the seams between them.
+  reviewers.push(() =>
+    agent(
+      `You are the **integration and mocking reviewer**, working across the target (${label}). The per-module reviewers each see one tree; you see the seams between them.
 
-Integration tests live under \`${moduleDir}/test/integration/{module}/\`. Unit mocks live in \`${moduleDir}/test/unit/{module}/support/*Mocks.ts\`. Read across all of them. Use Grep aggressively — that is your role.
+**Your scope is the modules under review: ${lenses.map(lens => lens.name).join(', ')}.** Read their integration tests (\`${moduleDir}/test/integration/{module}/\`) and their unit mocks (\`${moduleDir}/test/unit/{module}/support/*Mocks.ts\`) — not every module's. Leave that tree only to check a mock against the real class it stands in for, or to confirm whether another module's test already covers a seam. Reading unreviewed modules is the slowest thing in this workflow and finds gaps that are not this run's job.
 
 ${diffFocus}
 ${gate}
@@ -383,13 +379,13 @@ ${standards}
    - A mock that has **drifted from the real collaborator's signature** is the worst case — the test passes, the production call fails. Check the \`buildXxxMocks\` builders against the real classes.
 
 Read the mock builders before judging their callers. Use category \`integration\` or \`mocking\`.`,
-    { label: 'holistic:integration-and-mocks', phase: 'Review', agentType: 'quality-reviewer', schema: FINDINGS_SCHEMA },
-  ),
-)
+      { label: 'holistic:integration-and-mocks', phase: 'Review', agentType: 'quality-reviewer', schema: FINDINGS_SCHEMA },
+    ),
+  )
 
-reviewers.push(() =>
-  agent(
-    `You are the **functional coverage reviewer**, working holistically across the whole target (${label}). You answer one question: **are the core functional unit tests covered?**
+  reviewers.push(() =>
+    agent(
+      `You are the **functional coverage reviewer**, working holistically across the whole target (${label}). You answer one question: **are the core functional unit tests covered?**
 
 This is a spec-to-test mapping job, and you are the only agent doing it.
 
@@ -417,101 +413,72 @@ Rank by consequence. An untested business rule that **silently produces wrong mo
 The four unbuilt scenarios are a known, deliberate backlog: one finding each is honest; "no functional tests exist" as a single finding is not useful. If the specs are thin or absent for a module, **say so plainly rather than inventing rules to test against** — a test traced to a rule you made up is worse than the gap.
 
 Use category \`functional-coverage\`.`,
-    { label: 'holistic:functional-coverage', phase: 'Review', agentType: 'quality-reviewer', schema: FINDINGS_SCHEMA },
-  ),
-)
+      { label: 'holistic:functional-coverage', phase: 'Review', agentType: 'quality-reviewer', schema: FINDINGS_SCHEMA },
+    ),
+  )
 
-// Barrier: the holistic lenses independently surface what a module reviewer found, and debating one
-// gap twice costs two adversaries and can write the same test twice. Dedup needs every lens in.
-const reviewResults = await parallel(reviewers)
+  // Barrier: the holistic lenses independently surface what a module reviewer found, and triaging one
+  // gap twice costs two adversaries and can write the same test twice. Dedup needs every lens in.
+  const reviewResults = await parallel(reviewers)
 
-const merged = new Map()
-for (const result of reviewResults.filter(Boolean)) {
-  for (const finding of result.findings ?? []) {
-    const key = `${finding.file}:${finding.line}:${finding.category}`
-    const seen = merged.get(key)
-    if (!seen) {
-      merged.set(key, { ...finding, foundBy: 1 })
-      continue
+  const merged = new Map()
+  for (const result of reviewResults.filter(Boolean)) {
+    for (const finding of result.findings ?? []) {
+      const key = `${finding.file}:${finding.line}:${finding.category}`
+      const seen = merged.get(key)
+      if (!seen) {
+        merged.set(key, { ...finding, foundBy: 1 })
+        continue
+      }
+      // Two lenses agreeing is signal. Keep the longer argument, raise severity to the higher.
+      seen.foundBy += 1
+      if (finding.argument.length > seen.argument.length) seen.argument = finding.argument
+      const rank = { low: 0, medium: 1, high: 2 }
+      if (rank[finding.severity] > rank[seen.severity]) seen.severity = finding.severity
     }
-    // Two lenses agreeing is signal. Keep the longer argument, raise severity to the higher.
-    seen.foundBy += 1
-    if (finding.argument.length > seen.argument.length) seen.argument = finding.argument
-    const rank = { low: 0, medium: 1, high: 2 }
-    if (rank[finding.severity] > rank[seen.severity]) seen.severity = finding.severity
   }
-}
 
-const findings = [...merged.values()].map((finding, index) => ({ ...finding, id: `F${index + 1}` }))
-const proposed = reviewResults.filter(Boolean).reduce((sum, result) => sum + (result.findings?.length ?? 0), 0)
-const duplicatesCollapsed = proposed - findings.length
+  const findings = [...merged.values()].map((finding, index) => ({ ...finding, id: `F${index + 1}` }))
+  const proposed = reviewResults.filter(Boolean).reduce((sum, result) => sum + (result.findings?.length ?? 0), 0)
+  const duplicatesCollapsed = proposed - findings.length
 
-// One grouping, used twice: it decides which adversary rules on a finding and which author writes
-// it. Both need the same answer — the module that owns the file.
-//
-// A finding may anchor to source rather than a spec, and legitimately so: "this branch is
-// uncovered" cites `srv/`, because the test that would cover it does not exist yet. Matching only
-// test paths would dump every one of those into `shared` — wrong adversary, wrong author, and the
-// sequential bucket swallowing work that should run in parallel.
-const OWNER_PATTERNS = [
-  /test[/\\](?:unit|integration)[/\\]([^/\\]+)[/\\]/, // test/unit/transaction/...
-  /srv[/\\]modules[/\\]([^/\\]+)[/\\]/, //               srv/modules/transaction/...
-  /srv[/\\]([^/\\]+)-service\.(?:ts|cds)$/, //           srv/admin-service.ts — the non-1:1 lens
-]
+  log(`${findings.length} distinct findings after dedup (${duplicatesCollapsed} collapsed). Entering triage.`)
+  // The journal is the only thing that survives a killed run — put the findings in it now.
+  log(`Findings: ${JSON.stringify(findings.map(finding => ({ id: finding.id, file: finding.file, line: finding.line, severity: finding.severity, category: finding.category, summary: finding.summary })))}`)
 
-const ownerOf = finding => {
-  for (const pattern of OWNER_PATTERNS) {
-    const owner = pattern.exec(finding.file)?.[1]
-    if (owner && owner !== 'scenarios' && lenses.some(lens => lens.name === owner)) return owner
+  if (!findings.length) {
+    return {
+      scope: label,
+      gate: gateResult,
+      consensus: [],
+      contested: [],
+      dropped: [],
+      implemented: [],
+      counts: { proposed, deduped: duplicatesCollapsed, consensus: 0, contested: 0, dropped: 0 },
+      note: 'Reviewers found no test-quality gaps.',
+    }
   }
-  return 'shared'
-}
 
-const groupBy = items => {
-  const groups = new Map()
-  for (const item of items) {
-    const owner = ownerOf(item.finding ?? item)
-    if (!groups.has(owner)) groups.set(owner, [])
-    groups.get(owner).push(item)
-  }
-  return groups
-}
+  // -------------------------------------------------------------- Phase 3: Triage
 
-log(`${findings.length} distinct findings after dedup (${duplicatesCollapsed} collapsed). Entering debate.`)
+  phase('Triage')
 
-if (!findings.length) {
-  return {
-    scope: label,
-    gate: gateResult,
-    consensus: [],
-    contested: [],
-    dropped: [],
-    implemented: [],
-    counts: { proposed, deduped: duplicatesCollapsed, consensus: 0, contested: 0, dropped: 0 },
-    note: 'Reviewers found no test-quality gaps.',
-  }
-}
+  const renderFindings = items =>
+    items
+      .map(
+        finding =>
+          `### ${finding.id} — ${finding.file}:${finding.line} (${finding.category}, claimed ${finding.severity}${finding.foundBy > 1 ? `, found independently by ${finding.foundBy} reviewers` : ''})\n\n**Gap:** ${finding.summary}\n\n**Reviewer's argument:** ${finding.argument}\n\n**Proposed fix:** ${finding.fix}`,
+      )
+      .join('\n\n')
 
-// -------------------------------------------------------------- Phase 3: Debate
+  // One adversary per module, not per finding: it reads the tree once, and holding every finding at
+  // once is what lets it see that two of them are the same gap.
+  const triaged = await pipeline(
+    [...groupBy(findings).entries()],
 
-phase('Debate')
-
-const renderFindings = items =>
-  items
-    .map(
-      finding =>
-        `### ${finding.id} — ${finding.file}:${finding.line} (${finding.category}, claimed ${finding.severity}${finding.foundBy > 1 ? `, found independently by ${finding.foundBy} reviewers` : ''})\n\n**Gap:** ${finding.summary}\n\n**Reviewer's argument:** ${finding.argument}\n\n**Proposed fix:** ${finding.fix}`,
-    )
-    .join('\n\n')
-
-// One adversary per module, not per finding: it reads the tree once, and holding every finding at
-// once is what lets it see that two of them are the same gap.
-const debated = await pipeline(
-  [...groupBy(findings).entries()],
-
-  ([owner, items]) =>
-    agent(
-      `You are the **adversary** for the \`${owner}\` module. Reviewers want to add or change ${items.length} test(s). Your job is to stop the ones that are not worth having.
+    ([owner, items]) =>
+      agent(
+        `You are the **adversary** for the \`${owner}\` module. Reviewers want to add or change ${items.length} test(s). Your job is to stop the ones that are not worth having.
 
 A bad test is not free. It runs forever, it is maintained forever, and it fails for reasons unrelated to the bug it was meant to catch. A suite full of tests nobody trusts is worse than a smaller suite that is believed.
 
@@ -546,167 +513,82 @@ Read the actual test and the source it covers first. Name the ground in \`ground
 
 ## Default to not challenging
 
-**Anything you do not challenge is written to disk automatically.** That cuts both ways: do not rubber-stamp, but do not challenge what you cannot argue. Most findings are fine. A finding found by more than one reviewer is not proven, but it should raise your bar.
+Nothing is written on this run. **Unchallenged findings go to Sandro as recommended; challenged ones go to him as contested, with your argument beside the reviewer's.** There is no rebuttal round, so state your case completely. That cuts both ways: do not rubber-stamp, but do not challenge what you cannot argue. Most findings are fine. A finding found by more than one reviewer is not proven, but it should raise your bar.
 
 ${gate}
 
 ${standards}`,
-      { label: `adversary:${owner}`, phase: 'Debate', agentType: 'quality-reviewer', schema: CHALLENGE_SCHEMA },
-    ).then(challenge => ({ owner, items, challenge })),
+        { label: `adversary:${owner}`, phase: 'Triage', model: 'sonnet', agentType: 'quality-reviewer', schema: CHALLENGE_SCHEMA },
+      ).then(challenge => ({ owner, items, challenge })),
 
-  async ({ owner, items, challenge }) => {
-    // Batching made silence dangerous. Per finding, a dead adversary cost one finding; per module
-    // it would auto-write every finding nobody ruled on. Unreviewed goes to Sandro, never to disk.
-    if (!challenge) return items.map(finding => ({ finding, verdict: 'contested', ground: 'none', adversary: '(adversary failed — nothing reviewed this module, so nothing was auto-written)', rebuttal: '' }))
+    async ({ owner, items, challenge }) => {
+      // Batching made silence dangerous. Per finding, a dead adversary cost one finding; per module
+      // it would auto-write every finding nobody ruled on. Unreviewed goes to Sandro, never to disk.
+      if (!challenge) return items.map(finding => ({ finding, verdict: 'contested', ground: 'none', adversary: '(adversary failed — nothing triaged this module)' }))
 
-    const verdictOf = new Map((challenge.verdicts ?? []).map(verdict => [verdict.id, verdict]))
+      const verdictOf = new Map((challenge.verdicts ?? []).map(verdict => [verdict.id, verdict]))
 
-    // Only fold into a survivor. A→B and B→A would otherwise fold both and write neither.
-    const foldedInto = new Map(
-      (challenge.duplicates ?? [])
-        .filter(dupe => dupe.id !== dupe.duplicateOf)
-        .filter((dupe, _index, all) => !all.some(other => other.id === dupe.duplicateOf))
-        .map(dupe => [dupe.id, dupe]),
-    )
+      // Only fold into a survivor. A→B and B→A would otherwise fold both and write neither.
+      const foldedInto = new Map(
+        (challenge.duplicates ?? [])
+          .filter(dupe => dupe.id !== dupe.duplicateOf)
+          .filter((dupe, _index, all) => !all.some(other => other.id === dupe.duplicateOf))
+          .map(dupe => [dupe.id, dupe]),
+      )
 
-    const folded = items
-      .filter(finding => foldedInto.has(finding.id))
-      .map(finding => ({ finding, verdict: 'folded', adversary: foldedInto.get(finding.id).argument, duplicateOf: foldedInto.get(finding.id).duplicateOf }))
+      const folded = items
+        .filter(finding => foldedInto.has(finding.id))
+        .map(finding => ({ finding, verdict: 'folded', adversary: foldedInto.get(finding.id).argument, duplicateOf: foldedInto.get(finding.id).duplicateOf }))
 
-    const live = items.filter(finding => !foldedInto.has(finding.id))
+      const live = items.filter(finding => !foldedInto.has(finding.id))
 
-    // An omitted id is not an endorsement. Consensus requires an actual verdict.
-    const unruled = live
-      .filter(finding => !verdictOf.has(finding.id))
-      .map(finding => ({ finding, verdict: 'contested', ground: 'none', adversary: '(adversary returned no verdict on this finding — not auto-written)', rebuttal: '' }))
+      // An omitted id is not an endorsement. Consensus requires an actual verdict.
+      const unruled = live
+        .filter(finding => !verdictOf.has(finding.id))
+        .map(finding => ({ finding, verdict: 'contested', ground: 'none', adversary: '(adversary returned no verdict on this finding)' }))
 
-    const ruled = live.filter(finding => verdictOf.has(finding.id))
-    const contestedItems = ruled.filter(finding => verdictOf.get(finding.id).challenged)
-    const unchallenged = ruled
-      .filter(finding => !verdictOf.get(finding.id).challenged)
-      .map(finding => ({ finding, verdict: 'consensus', adversary: verdictOf.get(finding.id).argument }))
+      const ruled = live.filter(finding => verdictOf.has(finding.id))
+      const contestedItems = ruled
+        .filter(finding => verdictOf.get(finding.id).challenged)
+        .map(finding => ({ finding, verdict: 'contested', ground: verdictOf.get(finding.id).ground, adversary: verdictOf.get(finding.id).argument }))
+      const unchallenged = ruled
+        .filter(finding => !verdictOf.get(finding.id).challenged)
+        .map(finding => ({ finding, verdict: 'consensus', adversary: verdictOf.get(finding.id).argument }))
 
-    if (!contestedItems.length) return [...unchallenged, ...folded, ...unruled]
+      return [...unchallenged, ...contestedItems, ...folded, ...unruled]
+    },
+  )
 
-    const rebuttal = await agent(
-      `You are the **reviewer** for the \`${owner}\` module. The adversary challenged ${contestedItems.length} of your findings as unproductive. You get **one response each** — this is your only reply, so make it count.
+  const settled = triaged.filter(Boolean).flat()
+  const rank = { high: 0, medium: 1, low: 2 }
+  const bySeverity = (left, right) => rank[left.finding.severity] - rank[right.finding.severity] || right.finding.foundBy - left.finding.foundBy
 
-## The challenges
+  const consensus = settled.filter(item => item.verdict === 'consensus').sort(bySeverity)
+  const contested = settled.filter(item => item.verdict === 'contested').sort(bySeverity)
+  const dropped = settled.filter(item => item.verdict === 'dropped')
+  const folded = settled.filter(item => item.verdict === 'folded')
 
-${contestedItems
-  .map(finding => {
-    const verdict = verdictOf.get(finding.id)
-    return `### ${finding.id} — ${finding.file}:${finding.line}\n\n**Your gap:** ${finding.summary}\n\n**Your argument:** ${finding.argument}\n\n**Your proposed fix:** ${finding.fix}\n\n**Adversary's ground:** ${verdict.ground}\n\n**Adversary says:** ${verdict.argument}`
-  })
-  .join('\n\n')}
+  log(`${consensus.length} consensus · ${contested.length} contested · ${dropped.length} dropped · ${folded.length} folded as duplicates.`)
 
-## Respond to each
+  const report = {
+    scope: label,
+    gate: gateResult,
+    counts: { proposed, deduped: duplicatesCollapsed, folded: folded.length, consensus: consensus.length, contested: contested.length, dropped: dropped.length },
+    contested: contested.map(item => ({ ...item.finding, ground: item.ground, adversary: item.adversary })),
+    dropped: dropped.map(item => ({ file: item.finding.file, line: item.finding.line, summary: item.finding.summary, ground: item.ground, why: item.adversary })),
+    folded: folded.map(item => ({ id: item.finding.id, duplicateOf: item.duplicateOf, summary: item.finding.summary, why: item.adversary })),
+  }
 
-Read the code again before answering — the adversary may be right, and you are not obliged to defend your own findings.
-
-- If the adversary is **right**, return \`concedes: true\`. The finding is dropped. **Conceding a bad finding is a win** — it keeps a worthless test out of a suite that has to run forever. Especially on \`framework-test\` and \`already-covered\`: if they grepped and named the existing test, concede.
-- If the adversary is **wrong**, \`concedes: false\` plus your single strongest case. Address their **specific ground**. Cite the code. Name the regression that ships if this test is not written.
-- If a **smaller fix** answers the objection while still closing the gap, put it in \`revisedFix\`. A test that survives review beats a test that is rejected — this is the right move against \`fixture-cost\` and \`wrong-tier\`.
-
-Do not repeat your original argument verbatim. The adversary read it. Add something.
-
-${standards}`,
-      { label: `rebuttal:${owner}`, phase: 'Debate', agentType: 'quality-reviewer', schema: REBUTTAL_SCHEMA },
-    )
-
-    if (!rebuttal) {
-      return [...unchallenged, ...folded, ...unruled, ...contestedItems.map(finding => ({ finding, verdict: 'contested', ground: verdictOf.get(finding.id).ground, adversary: verdictOf.get(finding.id).argument, rebuttal: '(reviewer failed to respond)' }))]
-    }
-
-    const responseOf = new Map((rebuttal.responses ?? []).map(response => [response.id, response]))
-    const conceded = contestedItems
-      .filter(finding => responseOf.get(finding.id)?.concedes)
-      .map(finding => ({ finding, verdict: 'dropped', ground: verdictOf.get(finding.id).ground, adversary: verdictOf.get(finding.id).argument, rebuttal: responseOf.get(finding.id).argument }))
-
-    const held = contestedItems
-      .filter(finding => responseOf.has(finding.id) && !responseOf.get(finding.id).concedes)
-      .map(finding => {
-        const response = responseOf.get(finding.id)
-        return response.revisedFix ? { ...finding, fix: response.revisedFix, revised: true } : finding
-      })
-
-    // A challenged finding whose rebuttal never arrived cannot be auto-written on silence.
-    const unanswered = contestedItems
-      .filter(finding => !responseOf.has(finding.id))
-      .map(finding => ({ finding, verdict: 'contested', ground: verdictOf.get(finding.id).ground, adversary: verdictOf.get(finding.id).argument, rebuttal: '(no response returned)' }))
-
-    if (!held.length) return [...unchallenged, ...folded, ...unruled, ...conceded, ...unanswered]
-
-    const close = await agent(
-      `You are the **adversary** for the \`${owner}\` module. You challenged these findings; the reviewer has answered. You get **one close each** — then the matter is settled.
-
-## The exchanges
-
-${held
-  .map(finding => {
-    const verdict = verdictOf.get(finding.id)
-    const response = responseOf.get(finding.id)
-    return `### ${finding.id} — ${finding.file}:${finding.line}\n\n**Gap:** ${finding.summary}\n\n**Fix now proposed:** ${finding.fix}${finding.revised ? '  ← revised in response to you' : ''}\n\n**Your challenge (${verdict.ground}):** ${verdict.argument}\n\n**Reviewer's response:** ${response.argument}`
-  })
-  .join('\n\n')}
-
-## Decide each
-
-- **\`withdraws: true\`** — the rebuttal answered you, or the revised fix resolves your objection. The finding gets implemented. **Withdrawing is the normal outcome of a good rebuttal, not a loss.**
-- **\`withdraws: false\`** — you maintain. Then you **must give a NEW argument that engages what the reviewer actually said.** Restating your challenge in different words is not maintaining — it is withdrawing, and it will be scored as a withdrawal. If you cannot say something new, withdraw.
-
-## Know the stakes — they are asymmetric
-
-Maintaining does **not** drop the finding. It goes to Sandro as **contested**, and he rules. So maintaining is cheap for you and costs him a row of reading. **Do not maintain to win.** Maintain only where you genuinely believe writing this test makes the suite worse and a human should look.
-
-${standards}`,
-      { label: `close:${owner}`, phase: 'Debate', agentType: 'quality-reviewer', schema: CLOSE_SCHEMA },
-    )
-
-    const closeOf = new Map((close?.closes ?? []).map(item => [item.id, item]))
-    const settled = held.map(finding => {
-      const verdict = verdictOf.get(finding.id)
-      const response = responseOf.get(finding.id)
-      const closed = closeOf.get(finding.id)
-      if (closed?.withdraws) {
-        return { finding, verdict: 'consensus', ground: verdict.ground, adversary: `Challenged (${verdict.ground}), withdrew: ${closed.argument}`, rebuttal: response.argument }
-      }
-      return {
-        finding,
-        verdict: 'contested',
-        ground: verdict.ground,
-        adversary: closed ? `${verdict.argument}\n\nMaintained: ${closed.argument}` : verdict.argument,
-        rebuttal: response.argument,
-      }
-    })
-
-    return [...unchallenged, ...folded, ...unruled, ...conceded, ...unanswered, ...settled]
-  },
-)
-
-const settled = debated.filter(Boolean).flat()
-const rank = { high: 0, medium: 1, low: 2 }
-const bySeverity = (left, right) => rank[left.finding.severity] - rank[right.finding.severity] || right.finding.foundBy - left.finding.foundBy
-
-const consensus = settled.filter(item => item.verdict === 'consensus').sort(bySeverity)
-const contested = settled.filter(item => item.verdict === 'contested').sort(bySeverity)
-const dropped = settled.filter(item => item.verdict === 'dropped')
-const folded = settled.filter(item => item.verdict === 'folded')
-
-log(`${consensus.length} consensus · ${contested.length} contested · ${dropped.length} dropped · ${folded.length} folded as duplicates.`)
-
-const report = {
-  scope: label,
-  gate: gateResult,
-  counts: { proposed, deduped: duplicatesCollapsed, folded: folded.length, consensus: consensus.length, contested: contested.length, dropped: dropped.length },
-  contested: contested.map(item => ({ ...item.finding, ground: item.ground, adversary: item.adversary, rebuttal: item.rebuttal })),
-  dropped: dropped.map(item => ({ file: item.finding.file, line: item.finding.line, summary: item.finding.summary, ground: item.ground, why: item.adversary })),
-  folded: folded.map(item => ({ id: item.finding.id, duplicateOf: item.duplicateOf, summary: item.finding.summary, why: item.adversary })),
+  return { ...report, consensus: consensus.map(item => ({ ...item.finding, adversary: item.adversary })) }
 }
 
+// ------------------------------------------------- apply: write what Sandro picked
+
+const consensus = (scope.items ?? []).map(finding => ({ finding }))
 if (!consensus.length) {
-  return { ...report, consensus: [], implemented: [], verification: null, note: 'Nothing reached consensus — nothing was written.' }
+  return { scope: label, implemented: [], verification: null, note: 'No items selected — nothing was written.' }
 }
+const report = { scope: label, gate: gateResult, counts: { selected: consensus.length } }
 
 // ----------------------------------------------------------- Phase 4: Implement
 
@@ -717,7 +599,7 @@ const buckets = groupBy(consensus)
 const implementPrompt = (owner, items) =>
   `You are writing tests for the \`${owner}\` module in the **test-quality** workflow — not the build workflow.
 
-**Your usual rule does not apply here.** You normally write from a brief's business rules and FUTs, and refuse anything you cannot trace to a BR-nn or FUT-nnn. There is no brief on this run. **Each finding below IS your justification** — it was proposed by a reviewer and survived an adversary who tried to kill it as unproductive. The argument is over. Write them.
+**Your usual rule does not apply here.** You normally write from a brief's business rules and FUTs, and refuse anything you cannot trace to a BR-nn or FUT-nnn. There is no brief on this run. **Each finding below IS your justification** — it was proposed by a reviewer, triaged by an adversary, and Sandro selected it. The argument is over. Write them.
 
 If an item turns out to be wrong once you read the code, return it \`deferred\` with the reason — do not relitigate it, and do not write a test you do not believe in.
 
@@ -737,7 +619,7 @@ Other authors are writing other modules **right now**. A write outside those two
 
 ## The items
 
-${items.map(item => item.finding).map(finding => `### ${finding.id} — ${finding.file}:${finding.line} (${finding.category})${finding.revised ? ' — fix revised during debate' : ''}\n\n**Gap:** ${finding.summary}\n\n**Why it matters:** ${finding.argument}\n\n**Write this:** ${finding.fix}`).join('\n\n')}
+${items.map(item => item.finding).map(finding => `### ${finding.id} — ${finding.file}:${finding.line} (${finding.category})\n\n**Gap:** ${finding.summary}\n\n**Why it matters:** ${finding.argument}\n\n**Write this:** ${finding.fix}`).join('\n\n')}
 
 ${gate}
 
@@ -755,7 +637,7 @@ Write **all** the tests first, then run the suite **once** at the end to confirm
 
 Report each item as \`implemented\`, \`deferred\`, or \`sourceBug\`. **Deferred is respectable.** Do not invent a passing test to close a row — a test that cannot fail is worse than the gap it replaced, and it will outlive both of us in the suite.`
 
-log(`Implementing ${consensus.length} consensus items across ${buckets.size} bucket(s): ${[...buckets.keys()].join(', ')}.`)
+log(`Implementing ${consensus.length} selected items across ${buckets.size} bucket(s): ${[...buckets.keys()].join(', ')}.`)
 
 const moduleBuckets = [...buckets.entries()].filter(([owner]) => owner !== 'shared')
 
@@ -803,9 +685,22 @@ const postGate = await agent(verifyPrompt, { label: 'verify:gate', phase: 'Verif
 let repair = null
 let finalGate = postGate
 
+// Red only because of the sourceBug tests the authors left failing on purpose? Then there is
+// nothing to repair, and a repair pass plus a confirm run is ~2-3 minutes spent re-proving it.
+// Every failure must be a `logic` failure naming a file a sourceBug item touched — anything else
+// (lint, tsc, coverage, or a red test in another file) still goes to repair.
+const sourceBugFiles = authorSourceBugs.flatMap(item => item.filesTouched ?? []).map(path => path.split(/[/\\]/).pop()).filter(Boolean)
+const onlyKnownRed =
+  Boolean(postGate) &&
+  !postGate.passed &&
+  sourceBugFiles.length > 0 &&
+  (postGate.failures ?? []).length > 0 &&
+  postGate.failures.every(failure => failure.kind === 'logic' && sourceBugFiles.some(name => failure.detail.includes(name)))
+if (onlyKnownRed) log('Only the planted sourceBug tests are red — skipping repair and confirm.')
+
 // The gate reports and the author repairs — never the same agent. An agent that grades its own
 // repair work has every incentive to call a red tree green, and Sandro merges on that word.
-if (postGate && !postGate.passed) {
+if (postGate && !postGate.passed && !onlyKnownRed) {
   repair = await agent(
     `New tests were just written into \`${moduleDir}\` and the suite is not clean. Repair it.
 

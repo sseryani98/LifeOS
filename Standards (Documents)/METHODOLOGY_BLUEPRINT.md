@@ -157,7 +157,7 @@ Notes:
 | --------------- | --------------------------------- | -------------------------------- | ------- | ------------------------------------------------ |
 | Sprint Build    | Green, reviewed story             | `/build` → `build.js` workflow   | Have    | build-briefer → test-author → implementer → gate-runner → test-author → smoke-tester |
 | Code Quality    | Consensus findings, applied       | `/code-quality` workflow         | Have    | gate-runner → quality-reviewer ×N → adversary ×N |
-| Test Quality    | Consensus test gaps, implemented  | `/test-quality` workflow         | Have    | gate-runner → quality-reviewer ×N → adversary → test-author → gate-runner |
+| Test Quality    | Test gaps; the picked ones implemented | `/test-quality` workflow (review, then apply) | Have    | gate-runner → quality-reviewer ×N → adversary; apply: test-author → gate-runner |
 | Functional Test | Pass/fail over story's FUTs        | `functional-tester` agent      | **Built** | functional-tester             |
 | UX Test         | Holistic UX/theme/consistency report | `ux-tester` agent             | **Built** | ux-tester                                      |
 | Human Review    | Feedback → durable prevention     | `/human-review-loop` skill       | Have    | —                                                |

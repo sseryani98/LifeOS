@@ -1,5 +1,5 @@
 ---
-description: Isolated-agent test quality review — lint+coverage gate, per-module reviewers, reviewer-vs-adversary debate, auto-implements consensus
+description: Isolated-agent test quality review — lint+coverage gate, per-module reviewers, one adversary triage pass, report. Writes only the findings you pick, by index.
 argument: Target — omit for the uncommitted diff, or "all", or a module name (e.g. "transaction")
 ---
 
@@ -10,13 +10,16 @@ isolated subagents inside the workflow — you never read the tests yourself. Ke
 clean is the entire point of this command; a summary you write from your own reading of the suite
 defeats it.
 
-This is the twin of `/code-quality`, pointed at `test/` instead of `srv/`. **One difference matters
-and you must not blur it: this workflow writes code.** Consensus items are implemented
-automatically. Contested ones are not.
+This is the twin of `/code-quality`, pointed at `test/` instead of `srv/`. It runs in two
+invocations: **review** writes nothing and returns tables; **apply** writes only the indices
+Sandro names. Never call apply without his indices.
 
 ## 1. Resolve the target
 
-Default module is `Financial Planner` (the only workspace today).
+Default module is `Financial Planner`. `Project Tracker` is a workspace too — use it when the
+argument names it or the diff sits in it. The lens table below is Financial Planner's; for another
+module, build one lens per folder under its `test/unit/` and `test/integration/`, map each to the
+source it covers, and pass the full lens-name list as `allModules`.
 
 | "$ARGUMENTS" | Scope |
 | --- | --- |
@@ -66,51 +69,28 @@ gives a reviewer an empty source list and a useless review.
 Exclude from every mode: `gen/`, `@cds-models/`, `node_modules/`, `coverage/`, `logs/`, `db/seed/`,
 `*.log`, lockfiles, `design/`, `project/`.
 
-In diff mode, if `git status` is clean, say so and stop. There is nothing to review.
-
-**In diff mode, a diff touching only `srv/` still has lenses** — that is the whole point. Map each
-changed source file to the module that owns it and review that module's tests. A build that changed
-`srv/modules/transaction/` and wrote no tests is exactly the case this mode exists for.
-
 ## 2. Confirm before spending
 
-Every review, debate, and authoring agent runs on Opus; the gate runs on Haiku. **The agent count
-scales with modules, not findings** — one adversary per module rules on all of that module's
-findings at once. Before invoking, tell Sandro in one line what he is about to spend: `lenses + 2
-reviewers, then 1–3 debate agents per module, then 1 author per module + up to 3 verify agents`.
+The review is reviewers on Opus, one Sonnet triage agent per module, and a Haiku gate. Before
+invoking, tell Sandro the shape in one line: `lenses + 2 reviewers, then 1 triage agent per module`.
+Nothing is written, so diff mode and single modules just proceed.
 
-Agent count is not the ceiling — **tokens and wall-clock are.** The Opus author phase dominates both.
-The single-module baseline below was measured; the "tuned" column is the target after three
-optimizations now in the workflow (scoped gate/verify jest runs, a batched author self-check, a
-spec-scoped functional reviewer) and should be re-measured on the next full run:
+The expensive part is apply — Opus authors writing tests, then a gate and possibly a repair loop —
+and it now runs only on the items he picks. For `all`, say plainly that the review covers every
+module and ask first.
 
-| Target | Agents | Tokens (baseline → tuned) | Wall time (baseline → tuned) |
-| --- | --- | --- | --- |
-| single module | ~7 Opus + 2 Haiku | ~500k → **~400k** | ~30 min → **~18 min** |
-| `all` | ~28 Opus + 2 Haiku | **~2M+** (no scope savings — every module in play) | hours |
-
-The gate/verify scoping only helps when fewer than all modules are under review, so `all` sees none
-of it — another reason to run modules one at a time rather than `all` in a single shot.
-
-A single module measured at ~500k tokens and ~33 minutes, and the verify gate hit the session limit
-mid-run. **`all` will not complete in one invocation on a 5× plan** — it will exhaust the session
-partway and hand back a half-written tree. Prefer running one module at a time, or diff mode, which
-scopes to what changed. **For `all`, say this plainly and ask first.** For diff mode and single
-modules, report the shape and proceed.
-
-A run that plants a sourceBug ends with a **red suite by design** — the failing test documents a real
-bug for you to fix. That is a successful run (`verification.status: red-known`), not a broken one.
-
-## 3. Invoke
+## 3. Invoke the review
 
 ```
 Workflow({
   name: 'test-quality',
   args: {
+    action: 'review',
     label: '<human-readable scope, e.g. "uncommitted diff (12 files)">',
     moduleDir: 'Financial Planner',
     mode: 'diff' | 'adhoc',
     changedFiles: [ /* diff mode only — repo-relative paths */ ],
+    allModules: [ /* every lens name the module has — scopes jest */ ],
     lenses: [
       { name: 'transaction',
         testFiles: [ /* repo-relative */ ],
@@ -120,64 +100,80 @@ Workflow({
 })
 ```
 
-## 4. Render the result, then stop
+Keep the returned object — apply needs its findings and its `gate`.
 
-The workflow returns `{consensus, contested, dropped, folded, implemented, sourceBugs, verification, counts, gate, buckets}`.
+## 4. Render the review, then stop
 
-Render two numbered tables. **Number them in one continuous sequence across both** so Sandro can
-say "do #7" without ambiguity.
+The review returns `{consensus, contested, dropped, folded, counts, gate}`. Render two
+numbered tables, **one continuous sequence across both**, so Sandro can say "do #2 #5".
 
 ```
-## Implemented — reviewer and adversary agreed, and it is now written
-# | file:line | gap | what was written | severity
+## Recommended — the adversary did not object
+# | file:line | gap | proposed test | severity
 
-## Contested — the adversary held out. Nothing was written. You decide.
+## Contested — the adversary objected. You decide.
 # | file:line | gap | reviewer says | adversary says (ground)
 ```
 
-The two tables mean different things and the difference is the point of the workflow: **the first
-is done, the second is not.** Do not blur them into one list.
+**Nothing has been written.** Say so in one line under the tables.
 
-Then report, in one line each:
+Then, one line each: `counts.folded` (same gap said twice), `counts.deduped` (two lenses found it),
+whether the **gate** was already red before this run, and the **timings** (§Timings).
 
-- **`sourceBugs`** — a new test caught a real bug in `srv/`. **Lead with this if it is non-empty.**
-  It is the most valuable thing the run can produce and it is a bug report, not a footnote. Nothing
-  was fixed — by design; the authors and the verifier are both forbidden from editing `srv/`.
-- **`verification.status`** — the tree's state after the run. Four values, and they mean different
-  things — do not collapse them to pass/fail:
-  - `clean` — `tsc`, `lint`, `test` all green. Say so in one line.
-  - `red-known` — red, but the only failures are the sourceBug tests, left failing on purpose to
-    document a real bug. **This is a successful run, not a broken one.** Report it as such, and point
-    at `sourceBugs`.
-  - `red-unexpected` — red for a reason that is not a sourceBug: a lint failure the verifier could
-    not fix, a coverage drop, an assertion that should not fail. **Lead with this** — it outranks
-    every finding in the tables. Show `verification.unfixed`.
-  - `unverified` — the gate never completed (crash, session limit). **Nothing checked the tree.**
-    Say plainly that the writes are unconfirmed and offer to re-run `npm test && npm run lint`
-    yourself. Do not imply green. `verification.ranRepair` tells you whether repair got as far as
-    running before the confirm gate died.
-  Show `verification.repaired` (what the verifier fixed, usually lint) whenever it is non-empty.
-- Any **`deferred`** item — an author declined to write it. Name it and why; he may disagree.
-- `counts.dropped` — findings the reviewer conceded after challenge. Name them briefly.
-- `counts.folded` — gaps the adversary spotted as the same finding said twice.
-- `counts.deduped` — how many gaps two lenses independently found before the debate.
-- Whether the suite was already clean at the **gate**, before anything was written. If it was
-  already red, say so — those failures are not this run's doing.
+If both tables are empty, say that in one sentence. A suite with no gaps worth writing is a real
+result — do not pad it.
 
-Finally: `git diff --stat "Financial Planner/test/"` and show it. He is about to review written
-code, and the table is a claim about what changed — the diffstat is the evidence.
+## 5. Apply what he picks
 
-If everything came back empty, say that plainly in one sentence. A suite with no gaps worth writing
-is a real result — do not pad it with the dropped findings or invent a "consider also" section.
+Only after Sandro names indices. Map each index back to its finding object and invoke:
 
-## 5. After he reads it
+```
+Workflow({
+  name: 'test-quality',
+  args: {
+    action: 'apply',
+    label: '<same label>',
+    moduleDir: '<same>',
+    allModules: [ /* same */ ],
+    lenses: [ /* same */ ],
+    baseline: /* the review's `gate` — so the gate is not re-run */,
+    items: [ /* the selected finding objects, unchanged, ids included */ ]
+  }
+})
+```
 
-Apply contested items only by index, in a fresh turn, and only the ones he names.
+It returns `{implemented, sourceBugs, verification, counts}`. Report, leading with
+whichever applies:
 
-If he rejects something that was **already implemented**, revert it — `git checkout` the file or
-the hunk. It reached consensus, not approval; consensus is two agents agreeing, and he outranks
-both. Do not defend it.
+- **`sourceBugs`** — a new test caught a real bug in `srv/`. Lead with it. Nothing was fixed — the
+  authors and the verifier are forbidden from editing `srv/`.
+- **`verification.status`** — do not collapse it to pass/fail:
+  - `clean` — `tsc`, `lint`, `test` all green.
+  - `red-known` — the only failures are sourceBug tests, left red on purpose. A successful run.
+  - `red-unexpected` — red for another reason. **Lead with this** and show `verification.unfixed`.
+  - `unverified` — the gate never completed. Say the writes are unconfirmed and offer to run
+    `npm test && npm run lint` yourself.
+  Show `verification.repaired` when non-empty.
+- Any **`deferred`** item — an author declined it. Name it and why.
+- The **timings** (§Timings).
+
+Finally `git diff --stat "<moduleDir>/test/"` — the table is a claim, the diffstat is the evidence.
+
+## Timings
+
+The timings are how Sandro measures whether the workflow is optimized, so never skip them. They
+cannot come from the script: the workflow runtime makes `Date.now()` throw. After every review or
+apply, run the reader against the **Transcript dir** the Workflow launch printed:
+
+```bash
+node .claude/workflows/workflowTimings.mjs "<transcript dir>"
+```
+
+Report the total, each phase's seconds, and the slowest agent in the longest phase.
+
+If he then rejects something that was written, revert it — `git checkout` the file or hunk. Do not
+defend it.
 
 If he rejects a *category* of finding rather than an instance — "stop proposing X" — that is a
-standing correction, and `human-review-loop` turns it into a durable mechanism instead of a
-correction he has to repeat next run. Offer it; do not run it unprompted.
+standing correction, and `human-review-loop` turns it into a durable mechanism. Offer it; do not
+run it unprompted.
