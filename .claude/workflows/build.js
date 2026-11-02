@@ -2,7 +2,7 @@ export const meta = {
   name: 'build',
   description: 'Build one story end-to-end with isolated agents: brief, TDD red, implement, gate, coverage, smoke, handoff',
   whenToUse:
-    'To build a single FRICEW story (e.g. FRM-001) from its spec and BUILD_PLAN prompt. Leaves a green, uncommitted tree for Sandro to review — it never commits. Invoked by /build.',
+    "To build a single story in any Life OS module from its spec and the module's BUILD_PLAN — a FRICEW ID in Financial Planner (FRM-001), a spec ID in Project Tracker (SPEC-02). Leaves a green, uncommitted tree for Sandro to review — it never commits. Invoked by /build.",
   phases: [
     { title: 'Brief', detail: 'resolve the story to a structured brief so no later agent re-reads the design docs' },
     { title: 'Red', detail: 'write the failing tests from the spec business rules and FUTs', model: 'opus' },
@@ -10,7 +10,7 @@ export const meta = {
     { title: 'Gate', detail: 'tsc, lint, test, cds build — classify failures, hash the tests' },
     { title: 'Coverage', detail: 'raise coverage to the TEST_STRATEGY thresholds' },
     { title: 'Smoke', detail: 'drive the UI in a real browser (frontend stories only)' },
-    { title: 'Handoff', detail: 'mark the board Build Done, Awaiting Review — the commit is Sandro\'s' },
+    { title: 'Handoff', detail: 'mark the board Build Done, Awaiting Review (modules with a board only) — the commit is Sandro\'s' },
   ],
 }
 
@@ -19,7 +19,7 @@ const MAX_REPAIR_ROUNDS = 3
 const BRIEF_SCHEMA = {
   type: 'object',
   properties: {
-    storyId: { type: 'string', description: 'The FRICEW ID, e.g. FRM-001' },
+    storyId: { type: 'string', description: "The story ID as the module's BUILD_PLAN defines it — FRM-001, SPEC-02" },
     storyName: { type: 'string' },
     specFile: { type: 'string', description: 'Repo-relative path to the owning spec' },
     summary: { type: 'string', description: 'What this story delivers, in two sentences' },
@@ -53,11 +53,11 @@ const BRIEF_SCHEMA = {
         additionalProperties: false,
       },
     },
-    filesToCreate: { type: 'array', items: { type: 'string' }, description: 'Repo-relative source paths from the BUILD_PLAN Backend block' },
+    filesToCreate: { type: 'array', items: { type: 'string' }, description: 'Repo-relative source paths a design doc names — the BUILD_PLAN prompt block, or the spec / TECH_STACK folder structure when the plan has none' },
     filesToModify: { type: 'array', items: { type: 'string' } },
     testPlan: {
       type: 'array',
-      description: "BUILD_PLAN's numbered TDD list — what must fail first",
+      description: "What must fail first — BUILD_PLAN's numbered TDD list, or TEST_STRATEGY's per-FUT tier assignment when the plan has none",
       items: {
         type: 'object',
         properties: {
@@ -68,12 +68,12 @@ const BRIEF_SCHEMA = {
         additionalProperties: false,
       },
     },
-    modules: { type: 'array', items: { type: 'string' }, description: 'srv/modules/ names the story touches, e.g. transaction' },
+    modules: { type: 'array', items: { type: 'string' }, description: 'Source domains the story touches, e.g. srv/modules/transaction, mcp/verbs' },
     hasBackend: { type: 'boolean' },
-    hasFrontend: { type: 'boolean', description: 'True only if the story ships UI under app/ — this gates a browser' },
+    hasFrontend: { type: 'boolean', description: "True only if the story ships UI under app/ — this gates a browser. A BUILD_PLAN 'Ships UI' column, where one exists, decides it" },
     pages: { type: 'array', items: { type: 'string' }, description: 'App routes/pages the story touches; empty when hasFrontend is false' },
-    bundledWith: { type: 'array', items: { type: 'string' }, description: "Other FRICEW IDs sharing this story's BUILD_PLAN prompt, if any. Their scope is NOT yours to build" },
-    boardRow: { type: 'string', description: "The story's SPRINT_BOARD.md row, character-for-character" },
+    bundledWith: { type: 'array', items: { type: 'string' }, description: "Other STORY IDs sharing this story's BUILD_PLAN prompt, if any. Their scope is NOT yours to build. A story's own FRICEW objects are never listed here — they are all in scope" },
+    boardRow: { type: 'string', description: "The story's sprint-board row, character-for-character. Empty string when the module has no board" },
     blockers: {
       type: 'array',
       description: 'Questions the implementer must answer that the spec does not. Non-empty stops the build.',
@@ -209,14 +209,23 @@ const HANDOFF_SCHEMA = {
 // silently builds the wrong story — parse rather than guess.
 const input = (typeof args === 'string' ? JSON.parse(args) : args) ?? {}
 const storyId = input.storyId ?? ''
-const moduleDir = input.moduleDir ?? 'Financial Planner'
+const moduleDir = input.moduleDir ?? ''
+// Module-relative; empty means the module tracks no board (Project Tracker, BP-001 §13 / D-207).
+// A workflow script has no filesystem, so /build checks the file exists and passes the answer in.
+const boardFile = input.boardFile ?? ''
 
 if (!storyId) {
   log('No storyId given — nothing to build.')
   return { storyId: '', built: false, note: 'no storyId in args' }
 }
 
-const standards = `Standards live in \`${moduleDir}/CLAUDE.md\` (handler pattern :109-122, TS/naming :100-107, SAPUI5 :143-166, test rules :173-184) and \`${moduleDir}/design/TECHNICAL_STANDARDS.md\`. Test boundaries and coverage thresholds are in \`${moduleDir}/design/TEST_STRATEGY.md\`. Sandro's standing corrections are \`feedback_*.md\` files in C:\\Users\\sandr\\.claude\\projects\\c--Projects-Life-OS\\memory\\.`
+// No default: a silent fallback to one module is how a story gets built into the wrong one.
+if (!moduleDir) {
+  log('No moduleDir given — refusing to guess which module owns the story.')
+  return { storyId, built: false, note: 'no moduleDir in args' }
+}
+
+const standards = `Module architecture, folder structure and carve-outs are in \`${moduleDir}/CLAUDE.md\` — a carve-out there beats the shared standard. The shared standards (handler pattern, TS/naming, i18n, SAPUI5, test rules) live in \`Financial Planner/CLAUDE.md\` for every module until they move (root \`CLAUDE.md\` §Standards); rationale in \`Financial Planner/design/TECHNICAL_STANDARDS.md\`. Test tiers and boundaries are in \`${moduleDir}/design/TEST_STRATEGY.md\`; the enforced coverage thresholds are \`coverageThreshold\` in \`${moduleDir}/jest.config.ts\`. Sandro's standing corrections are \`feedback_*.md\` files in C:\\Users\\sandr\\.claude\\projects\\c--Projects-Life-OS\\memory\\.`
 
 const hashesOf = gate => new Map((gate.testHashes ?? []).map(entry => [entry.file, entry.hash]))
 
@@ -235,19 +244,25 @@ const findTestDrift = (baseline, current) => {
 phase('Brief')
 
 const brief = await agent(
-  `Resolve story **${storyId}** into a structured brief for the build workflow.
+  `Resolve story **${storyId}** in module **${moduleDir}** into a structured brief for the build workflow.
 
 Every agent after you works from your output instead of re-reading the design docs, so what you
 omit, they never learn.
 
 ## Where to look
 
-- \`${moduleDir}/design/BUILD_PLAN.md\` §6 — the story's verbatim prompt block: files to create and the numbered TDD list. §7 is the sprint → prompt → stories table if you need to locate it. W1-S3 is §6.3.
-- \`${moduleDir}/design/specs/SPEC-nn-*.md\` — the owning spec. Find it by grepping \`${storyId}\` (§2.2 FRICEW Objects lists it) . You need §4 (functional description), §5 (business rules), §8 (functional unit tests).
-- \`${moduleDir}/design/DATA_MODEL.md\` — entities and fields the story touches.
-- \`${moduleDir}/project/SPRINT_BOARD.md\` — the story's row, and whether its dependencies are Done.
+Modules shape their plans differently, so read **\`${moduleDir}/design/BUILD_PLAN.md\` first** for
+what a story is there: its story list, how a story ID maps to a spec, whether it carries per-story
+prompt blocks, and its Ships UI column if it has one. Then:
 
-Read what ${storyId} touches. Do not read all 21 specs.
+- **The owning spec** in \`${moduleDir}/design/specs/\`. If the story ID is a spec ID (\`SPEC-02\`), it is that spec file and **every FRICEW object it lists is in scope**. If it is a FRICEW ID, grep for it — the spec's FRICEW Objects header lists it. You need the functional description, the business rules (BR-nn) and the functional unit tests (FUT-nnn); section numbers differ by module.
+- **The story's prompt block** in BUILD_PLAN, if the plan has them — files to create and the numbered TDD list. If it has none, take files from the spec and \`${moduleDir}/design/TECH_STACK.md\`'s folder structure, and the TDD list from \`${moduleDir}/design/TEST_STRATEGY.md\`'s FUT tier assignment. Cite; do not invent.
+- \`${moduleDir}/design/DATA_MODEL.md\` — entities and fields the story touches.
+${boardFile
+  ? `- \`${moduleDir}/${boardFile}\` — the story's row, and whether its dependencies are Done.`
+  : `- **This module has no sprint board** — leave \`boardRow\` empty. Judge whether dependency stories are Done from the progress record BUILD_PLAN names (its Progress Tracking section), and from what exists on disk.`}
+
+Read what ${storyId} touches. Do not read every spec.
 
 ## What matters most
 
@@ -255,16 +270,18 @@ Read what ${storyId} touches. Do not read all 21 specs.
 \`futs\` text alone — it never opens the spec. A paraphrased expected-result becomes a wrong test,
 and a wrong test becomes wrong code that passes.
 
-**\`bundledWith\`** — a BUILD_PLAN prompt sometimes covers several stories (§6.3 Prompt 2 is
-ENH-009 **and** FRM-001). We are building **${storyId} alone**. List the other IDs so the
-implementer knows their scope is not his, and make sure \`filesToCreate\`, \`testPlan\` and the rules
-you quote cover **only ${storyId}**. Check the board: a bundled sibling may already be Done, in
-which case its files exist and must not be rebuilt.
+**\`bundledWith\`** — a BUILD_PLAN prompt sometimes covers several *stories* (Financial Planner's
+§6.3 Prompt 2 is ENH-009 **and** FRM-001). We are building **${storyId} alone**. List the other
+story IDs so the implementer knows their scope is not his, and make sure \`filesToCreate\`,
+\`testPlan\` and the rules you quote cover **only ${storyId}**. A sibling may already be Done, in
+which case its files exist and must not be rebuilt. This is about sibling stories, never about the
+several FRICEW objects one story owns — those are all in scope and all quoted.
 
-**\`boardRow\`** — the row character-for-character, so the Handoff phase can find and move it.
-Ignore BUILD_PLAN's commit block entirely — this workflow does not commit.
+${boardFile ? `**\`boardRow\`** — the row character-for-character, so the Handoff phase can find and move it.` : '**`boardRow`** — empty string; there is no board to hand off to.'}
+Ignore any commit block in BUILD_PLAN — this workflow does not commit.
 
-**\`hasFrontend\`** gates a browser. True only if the story ships UI under \`app/\`.
+**\`hasFrontend\`** gates a browser. True only if the story ships UI under \`app/\`. Where BUILD_PLAN
+has a Ships UI column, it decides.
 
 ## Blockers stop the build
 
@@ -274,7 +291,10 @@ define, a dependency story that is not Done, an \`## Open Items\` entry this sto
 
 "The spec is thin and I would build it this way" is a blocker — say so rather than deciding.
 "The spec does not restate the handler pattern" is not; that is in CLAUDE.md and the implementer
-already has it.`,
+already has it.
+
+A spec marked provisional on a risk is a blocker only if that risk is still open — check the
+module's risk register or progress record before reporting it.`,
   { label: `brief:${storyId}`, phase: 'Brief', model: 'sonnet', effort: 'medium', agentType: 'build-briefer', schema: BRIEF_SCHEMA },
 )
 
@@ -309,12 +329,12 @@ ${brief.businessRules.map(rule => `- **${rule.id}** — ${rule.text}`).join('\n'
 
 ${brief.futs.map(fut => `### ${fut.id}: ${fut.title}\n**Covers:** ${fut.covers}\n**Preconditions:** ${fut.preconditions}\n**Steps:** ${fut.steps}\n**Expected:** ${fut.expected}`).join('\n\n')}
 
-## Files the BUILD_PLAN calls for
+## Files the design docs call for
 
 Create: ${brief.filesToCreate.join(', ') || '(none listed)'}
 Modify: ${brief.filesToModify.join(', ') || '(none listed)'}
 
-## The TDD list from BUILD_PLAN
+## The TDD list
 
 ${brief.testPlan.map(item => `- \`${item.file}\` — ${item.purpose}`).join('\n') || '(none listed)'}`
 
@@ -379,7 +399,7 @@ per round and the loop runs out of budget.
 \`npm run lint\` is ESLint plus 21 \`lint:*\` scripts chained with \`&&\`, so it halts at the first
 failing linter. Expected. Report what you got; do not run the rest by hand.
 
-\`npm test\` has \`--coverage\` baked in and a \`posttest\` report generator that always fires. Both normal.
+\`npm test\` has \`--coverage\` baked in, and a module may add a \`posttest\` report generator that always fires. Both normal.
 
 ## Hash these test files
 
@@ -455,7 +475,8 @@ workflow exists to prevent.
 
 Facade (pure wiring) → Service (logic, no CQL) → DataService (all CQL, no logic) → Validator
 (accumulates \`req.error\`) → Mapper (only if foreign-shape translation exists). Prefer a CAP
-annotation to a hand-written check wherever the model can state it.
+annotation to a hand-written check wherever the model can state it. Source folders outside \`srv/\`
+(Project Tracker's \`mcp/\`) follow whatever \`${moduleDir}/CLAUDE.md\` rules for them.
 
 Run \`cd "${moduleDir}" && npm run lint\` before you report done — a violation you could have caught
 costs a full gate round.
@@ -609,10 +630,11 @@ ${briefContext}
 
 ${shortfall}
 
-## Thresholds (TEST_STRATEGY §8.1)
+## Thresholds
 
-Validators and Utilities 100% lines / 100% branches. Services (including ENH engines) 90% / 85%.
-Overall 85% / 80%. Facades are excluded — they hold no logic by design.
+Read \`coverageThreshold\` in \`${moduleDir}/jest.config.ts\` — that is what the gate enforces, per
+path glob. \`${moduleDir}/design/TEST_STRATEGY.md\` explains why each number is what it is.
+Facades are excluded — they hold no logic by design.
 
 Read the uncovered branches from the coverage report and write tests that reach them **through
 behavior that matters**. A test written to paint a line green, asserting nothing a reader would
@@ -724,6 +746,29 @@ false green here means nobody looks again.`,
 
 // ------------------------------------------------------------- Phase 8: Handoff
 
+// A board-less module has nothing to hand off to, and spawning an agent to edit a file that
+// does not exist invites it to edit the wrong module's board instead.
+if (!boardFile) {
+  log(`${brief.storyId} built green and left uncommitted for review. ${moduleDir} tracks no board — nothing to mark.`)
+  return {
+    storyId: brief.storyId,
+    storyName: brief.storyName,
+    moduleDir,
+    built: true,
+    committed: false,
+    boardUpdated: false,
+    boardless: true,
+    repairRounds: round,
+    gate: gate.summary,
+    summary: implement.summary,
+    filesChanged: [...changedFiles],
+    testFiles: [...red.testFiles, ...(coverage?.testFiles ?? [])],
+    coverage: coverage?.summary ?? 'thresholds met without a coverage phase',
+    unreachable: coverage?.unreachable ?? [],
+    smoke: smoke ? { works: smoke.works, observations: smoke.observations, issues: smoke.issues } : null,
+  }
+}
+
 phase('Handoff')
 
 const handoff = await agent(
@@ -731,7 +776,7 @@ const handoff = await agent(
 
 ## Update the sprint board — that is the whole job
 
-In \`${moduleDir}/project/SPRINT_BOARD.md\`, move this row out of the **Backlog** table into the
+In \`${moduleDir}/${boardFile}\`, move this row out of the **Backlog** table into the
 **In Progress** table, and set its \`Status\` to \`Build Done, Awaiting Review\`. Do not reword the
 description.
 
@@ -761,9 +806,11 @@ log(`${brief.storyId} built green and left uncommitted for review.${handoff?.boa
 return {
   storyId: brief.storyId,
   storyName: brief.storyName,
+  moduleDir,
   built: true,
   committed: false,
   boardUpdated: handoff?.boardUpdated ?? false,
+  boardless: false,
   repairRounds: round,
   gate: gate.summary,
   summary: implement.summary,

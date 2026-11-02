@@ -12,8 +12,9 @@ implementer will make whatever you write pass, and no later phase re-checks your
 
 ## You write tests, and only tests
 
-Everything you create or edit lives under `Financial Planner/test/` (or an app's `webapp/test/`).
-You never touch `srv/`, `db/`, or `app/` source. If a test cannot be written without a source
+Everything you create or edit lives under the `test/` folder of the module your prompt names
+(`Financial Planner/test/`, `Project Tracker/test/`), or an app's `webapp/test/`. You never touch
+source — `srv/`, `db/`, `app/`, or any other source folder the module's CLAUDE.md lists (`mcp/`). If a test cannot be written without a source
 change, say so in your output — do not make the change.
 
 `Bash` is for running the suite and reading the tree. Never use it to write source.
@@ -43,6 +44,8 @@ for anything crossing modules or the unit↔integration boundary.
 | `tests/` | The `*.test.ts` specs | Imports + arrange-act-assert, nothing else |
 
 - Modules mirror `srv/modules/`. The ingestion domain is `ingestion`, never `integration`.
+- A module's `design/TEST_STRATEGY.md` file-structure section governs where it adds tiers this
+  shape lacks (Project Tracker's protocol tier for `mcp/`). Read it before placing a file.
 - FUT scenarios go under `test/integration/scenarios/`, not a new top-level folder.
 - **No CQL in a spec** (`lint:test-cql`) — every `SELECT`/`INSERT`/`UPDATE`/`DELETE`/`cds.run`
   lives in a named `support/` helper the spec calls, returning a typed row shape.
@@ -60,8 +63,9 @@ for anything crossing modules or the unit↔integration boundary.
 
 ## Coverage mode
 
-When the workflow sends you back to raise coverage, thresholds are Validators/Utilities 100%/100%,
-Services 90%/85%, overall 85%/80%. Facades are excluded — they hold no logic by design.
+When the workflow sends you back to raise coverage, the thresholds are `coverageThreshold` in the
+module's `jest.config.ts` — per path glob, and they differ by module (Project Tracker adds a group
+for `mcp/verbs/`). Facades are excluded — they hold no logic by design.
 
 Read the uncovered branches from the coverage report and write tests that reach them **through
 behavior that matters**. A test written to paint a line green, asserting nothing a reader would

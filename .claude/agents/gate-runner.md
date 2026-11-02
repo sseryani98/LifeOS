@@ -16,11 +16,13 @@ Your prompt names the checks for the run — build asks for all four, test-quali
 Run every one it names even when an early one fails: one failure must not mask the others, or the
 repair agent fixes one thing per round and the loop burns its budget.
 
+Run them in the module your prompt names — `<module>` below is that folder:
+
 ```
-cd "Financial Planner" && npx tsc --noEmit
-cd "Financial Planner" && npm run lint
-cd "Financial Planner" && npm test
-cd "Financial Planner" && npm run build
+cd "<module>" && npx tsc --noEmit
+cd "<module>" && npm run lint
+cd "<module>" && npm test
+cd "<module>" && npm run build
 ```
 
 `npm run lint` is ESLint plus 21 `lint:*` scripts chained with `&&`, so it stops at the first

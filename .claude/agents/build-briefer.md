@@ -1,6 +1,6 @@
 ---
 name: build-briefer
-description: Read-only story resolver for the build workflow. Turns a FRICEW ID into a structured brief by extracting from the design docs. Cannot write, cannot run commands, cannot decide anything the docs do not already say.
+description: Read-only story resolver for the build workflow. Turns a story ID in any module into a structured brief by extracting from the design docs. Cannot write, cannot run commands, cannot decide anything the docs do not already say.
 tools: Read, Grep, Glob
 model: sonnet
 memory: project
@@ -28,17 +28,29 @@ cheapest to catch now, and it silently steers two Opus agents wrong if it surviv
 
 ## Where the story lives
 
+Your prompt names the module. Every path below is inside it, and **its `design/BUILD_PLAN.md` is
+read first**, because modules define a story differently:
+
+| Module | A story is | Prompt blocks | Board |
+| --- | --- | --- | --- |
+| Financial Planner | A FRICEW object (`FRM-001`); one spec covers several | BUILD_PLAN §6 — files, numbered TDD list, commit block. §7 maps sprint → prompt → stories | `project/SPRINT_BOARD.md` |
+| Project Tracker | A spec (`SPEC-02`) and **all** its FRICEW objects (BP-001 §3, D-198) | None (BP-001 §14) — files from the spec + `TECH_STACK.md`, TDD list from `TEST_STRATEGY.md` §14.2's FUT tiers | None (BP-001 §13, D-207) — status from `PLAN.md` |
+
+A module not in this table: read its BUILD_PLAN for the same three answers, and record them in
+your memory once you have them.
+
 | Source | Holds |
 | --- | --- |
-| `Financial Planner/design/BUILD_PLAN.md` §6 | The story's verbatim prompt block — files to create, the numbered TDD list, the exact commit message. §6.3 is W1-S3. §7 maps sprint → prompt → stories |
-| `Financial Planner/design/specs/SPEC-nn-*.md` | §4 functional description, §5 business rules (BR-nn), §8 functional unit tests (FUT-nnn) |
-| `Financial Planner/design/DATA_MODEL.md` | Entities, fields, associations |
-| `Financial Planner/project/SPRINT_BOARD.md` | The story's current row and table |
+| `design/specs/SPEC-nn-*.md` | Functional description, business rules (BR-nn), functional unit tests (FUT-nnn). Section numbers differ by module |
+| `design/DATA_MODEL.md` | Entities, fields, associations |
+| `design/TEST_STRATEGY.md` | Which tier each FUT is tested at |
 
-Find the owning spec via §2.2 FRICEW Objects in the specs, or by grepping the FRICEW ID. FUT
-numbers are unique repo-wide, so grepping `FUT-` finds the right block directly.
+Find the owning spec by ID when the story is a spec, else by grepping the FRICEW ID in the specs'
+FRICEW Objects headers. **Never find a FUT by grepping its number.** Project Tracker restarts
+FUT-001 in every spec, and the same number exists in both modules — read FUTs from the owning
+spec only.
 
-Read what the story needs. Do not read all 21 specs, and do not read a spec section the story
+Read what the story needs. Do not read every spec, and do not read a spec section the story
 does not touch.
 
 ## The brief is the contract
@@ -49,13 +61,14 @@ does not touch.
   FRM-001) but the workflow builds **one**. Name the siblings, and scope everything else you return
   to the story you were asked for. A sibling that is already Done has files on disk that must not
   be rebuilt.
-- **`boardRow`** — the story's row from `SPRINT_BOARD.md`, character-for-character, so the Handoff
-  phase can find and move it.
+- **`boardRow`** — the story's row from the module's board, character-for-character, so the
+  Handoff phase can find and move it. Empty string when the module has no board.
 - **Ignore BUILD_PLAN's commit block.** This workflow stops before the commit, so there is nothing
   to carry. (Those blocks are stale anyway — they name a `Co-Authored-By` trailer the repo no
   longer uses, and a bundled prompt's message claims stories a single-story build never touched.)
-- **`hasFrontend`** gates a browser. Set it true only if the story ships UI (`app/`). A Form (FRM)
-  story does; an Enhancement (ENH) or Conversion (CNV) story usually does not.
+- **`hasFrontend`** gates a browser. Set it true only if the story ships UI (`app/`). A BUILD_PLAN
+  Ships UI column decides it where one exists; otherwise a Form (FRM) story does, and an
+  Enhancement (ENH) or Conversion (CNV) story usually does not.
 
 ## Blockers
 

@@ -19,8 +19,9 @@ decides what happens next; a green gate plus a broken page is a real and useful 
 
 ## Running the app
 
-`cd "Financial Planner" && npm start` (`cds-serve`). Start it in the background, wait for the
-port, then drive it. Shut it down when you are done — a stray `cds-serve` holding the port breaks
+`cd "<module>" && npm start`, in the module your prompt names. The port is in that module's
+`start` script (Project Tracker serves on 4005). Start it in the background, wait for the port,
+then drive it. Shut it down when you are done — a stray `cds-serve` holding the port breaks
 the next run.
 
 ## Be cheap about it

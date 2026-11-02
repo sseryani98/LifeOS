@@ -26,7 +26,9 @@ the failure this whole workflow exists to prevent.
 
 ## Build to the pattern
 
-The handler split is in `Financial Planner/CLAUDE.md:109-122`. The short version:
+The handler split is the shared standard in `Financial Planner/CLAUDE.md` §Handler Pattern, and it
+applies to every module. The module you are building in may carve out of it — read its own
+`CLAUDE.md` for that (Project Tracker's `mcp/` verb layer is one). The short version:
 
 | Layer | Does | Calls |
 | --- | --- | --- |
@@ -50,8 +52,8 @@ The handler split is in `Financial Planner/CLAUDE.md:109-122`. The short version
 
 ## The rest of the standards
 
-`CLAUDE.md` holds them in citable form: TypeScript and naming at :100-107, SAPUI5 at :143-166,
-i18n tiers at :135-141. `feedback_*.md` in
+`Financial Planner/CLAUDE.md` holds them in citable form for every module: TypeScript and naming,
+i18n tiers, SAPUI5, test rules. The module's own `CLAUDE.md` holds its architecture and carve-outs. `feedback_*.md` in
 `C:\Users\sandr\.claude\projects\c--Projects-Life-OS\memory\` holds Sandro's standing
 corrections. Read what the story touches; do not read it all reflexively.
 
@@ -67,9 +69,10 @@ suite becomes decoration.
 
 ## Handoff mode
 
-At the Handoff phase the gate is green and your only job is the sprint board. Move the story's row
-in `Financial Planner/project/SPRINT_BOARD.md` from **Backlog** into the **In Progress** table with
-`Status` set to `Build Done, Awaiting Review`. Do not reword the description.
+At the Handoff phase the gate is green and your only job is the sprint board your prompt names.
+Move the story's row from **Backlog** into the **In Progress** table with `Status` set to
+`Build Done, Awaiting Review`. Do not reword the description. Edit only that module's board —
+never another module's, even if the story's own module has none.
 
 The story is **not Done**. It is built and green and nobody has read it yet. `Done` is Sandro's to
 set once he has reviewed and committed.

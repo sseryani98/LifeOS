@@ -1,6 +1,6 @@
 ---
 description: Build one story end-to-end — brief, TDD red, implement, gate, coverage, smoke. Stops before the commit.
-argument: FRICEW story ID (e.g. FRM-001). Omit to take the next Backlog story from the sprint board.
+argument: Story ID in any module (FRM-001, SPEC-02), optionally prefixed with the module (Project Tracker/SPEC-02). Omit to take Financial Planner's next Backlog story.
 ---
 
 Your job here is **story resolution and rendering**. The workflow does the building — you do not
@@ -10,22 +10,38 @@ one story ID, confirm the spend, invoke, render what came back.
 The workflow **never commits**. It stops one step short, leaving a green working tree for Sandro
 to review. Do not commit on its behalf when it returns.
 
-## 1. Resolve the story
+## 1. Resolve the module and the story
+
+**Every module defines what a story ID is in its own `design/BUILD_PLAN.md`**, so an ID is only
+meaningful inside a module. Financial Planner's stories are FRICEW IDs (`FRM-001`); Project
+Tracker's are spec IDs (`SPEC-02`, plus `S-00`) — BP-001 §3, D-198. The same string can exist in
+both (`SPEC-02` is a spec in each, `CNV-001` an object in each), so resolve against each module's
+**story list**, not a bare grep.
 
 | `$ARGUMENTS` | Do |
 | --- | --- |
-| A FRICEW ID (`FRM-001`, `CNV-001`) | Use it |
+| `<Module>/<ID>` | Use that module; confirm the ID is a story in its BUILD_PLAN |
+| A bare ID | Check it against the story list of every module with a `design/BUILD_PLAN.md`. Exactly one match → use it. More than one → ask which module |
 | Empty | Read `Financial Planner/project/SPRINT_BOARD.md` and take the **first row of the Backlog table** under Current Sprint |
-| Anything else | Grep `SPRINT_BOARD.md` for it. If it resolves to exactly one Backlog story, use that; otherwise ask |
+| Anything else | Grep the module boards and story lists. Exactly one Backlog story → use it; otherwise ask |
 
-Check the board before invoking, and stop rather than build if:
+**Find the module's board.** If `<Module>/project/SPRINT_BOARD.md` exists, it is the board —
+pass `boardFile: 'project/SPRINT_BOARD.md'`. If not, the module tracks no board (Project Tracker,
+BP-001 §13 / D-207) — pass `boardFile: ''` and read story status from the record its BUILD_PLAN's
+Progress Tracking section names instead (Project Tracker: `PLAN.md`'s stage table and §8 log).
 
-- The story is already in **Done** — say so and ask whether he means to rebuild it.
+Check status before invoking, and stop rather than build if:
+
+- The story is already **Done** — say so and ask whether he means to rebuild it.
 - The story is **Build Done, Awaiting Review** — a previous run already built it and it is sitting
   in the tree unreviewed. Building again would bury the diff he has not read yet. Ask.
-- The working tree has uncommitted changes in `srv/`, `app/`, or `db/`. Everything the workflow
+- The working tree has uncommitted changes in the module's source folders (`srv/`, `app/`, `db/`,
+  plus any its CLAUDE.md lists, such as Project Tracker's `mcp/`). Everything the workflow
   produces stays uncommitted, so pre-existing changes will be tangled with the story's diff and
   the review cannot tell them apart. Show `git status --short` and ask.
+
+A story ID is not a build blocker because it once read "provisional" on a risk — check whether
+that risk is still open before saying so.
 
 One story per invocation. If he names two, build the first and say the second needs its own run.
 
@@ -37,17 +53,25 @@ State the shape before you invoke — this is the expensive command in the repo:
 > 5 if the gate needs repair rounds. Frontend story, so Playwright runs. Ends green and
 > uncommitted, board marked Build Done, Awaiting Review.
 
-Read `hasFrontend` off the story type to say whether smoke runs — FRM ships UI, ENH and CNV
-usually do not. Get a yes before invoking.
+Say whether smoke runs: use the BUILD_PLAN's Ships UI column where it has one (Project Tracker),
+else the story type — FRM ships UI, ENH and CNV usually do not. For a board-less module, say the
+handoff marks nothing. Get a yes before invoking.
 
 ## 3. Invoke
 
 ```
 Workflow({
   name: 'build',
-  args: { storyId: 'FRM-001', moduleDir: 'Financial Planner' }
+  args: { storyId: 'FRM-001', moduleDir: 'Financial Planner', boardFile: 'project/SPRINT_BOARD.md' }
+})
+
+Workflow({
+  name: 'build',
+  args: { storyId: 'SPEC-02', moduleDir: 'Project Tracker', boardFile: '' }
 })
 ```
+
+`moduleDir` is required — the workflow refuses to guess.
 
 ## 4. Render the result, then stop
 
@@ -75,6 +99,8 @@ Then:
 - `smoke.observations` for a frontend story, plus any `cosmetic` issues — those did not block the
   build but Sandro should see them.
 - If `boardUpdated` is false, say so — the board still reads Backlog and he will want to know.
+  If `boardless` is true, the module has no board: say so in one line, and that its progress
+  record (Project Tracker: a `PLAN.md` §8 entry) is written at commit, not by this workflow.
 
 ## 5. Then stop
 
