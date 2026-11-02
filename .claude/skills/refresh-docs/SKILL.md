@@ -9,21 +9,31 @@ something shipped, a link to a file that was renamed, a decision one doc still s
 doc reversed, a count that no longer matches. It fixes what it finds in one pass and shows you the
 diff. It corrects facts; it never rewrites meaning.
 
-Paths are relative to `Life OS/`. The corpus:
+Paths are relative to `Life OS/`. **Resolve the module first:** the one Sandro names, else the one
+the working-tree diff (or the latest commits) touches. If that is ambiguous, ask. Sweep every module
+only when he asks for "all" — each module is its own pass, run one after another.
 
-- `Financial Planner/design/*.md` (~4,500 lines) and `design/specs/*.md` (~14,000 lines).
-- `CLAUDE.md` (root) and `Financial Planner/CLAUDE.md`.
-- `Standards (Documents)/` and `Standards (Technical + Linting)/`.
-- Ground truth when a doc's claim is checkable: the actual tree (`srv/`, `app/`, `db/`), the sprint
-  board, and git history.
+The corpus for one module `{module}`:
+
+- `{module}/design/*.md` and `{module}/design/specs/*.md` (Financial Planner ~8,300 lines of
+  design docs; Project Tracker ~13,600).
+- `{module}/CLAUDE.md`, plus `{module}/PLAN.md` where the module has one.
+- Root `CLAUDE.md` and both `Standards` folders — the cross-module layer. Check these in every pass,
+  but correct only facts about **this** module; drift about another module goes in the
+  left-alone list for its own pass.
+- `Financial Planner/CLAUDE.md` is also the shared standards file for every module — when it is not
+  the module under sweep, check it only for statements about the module that is.
+- Ground truth when a doc's claim is checkable: the module's actual tree (`srv/`, `app/`, `db/`,
+  and any other source folder its `CLAUDE.md` lists), its tracking artifacts (the sprint board, or
+  `PLAN.md`), and git history.
 
 ## Why this delegates its reading
 
-The corpus is ~19,000 lines — far too much for the main thread. Fan out **scout subagents**, one
+One module's corpus runs to 10,000–20,000 lines — far too much for the main thread. Fan out **scout subagents**, one
 per doc cluster (design docs; specs; CLAUDE.md + standards), each returning a structured drift list,
 not the prose. Scouts return `file:line`, the stale text, why it is stale, and the corrected value
-with its source. You reconcile the lists; the writing happens against citations, not against 19,000
-lines held in context.
+with its source. You reconcile the lists; the writing happens against citations, not against the whole corpus held
+in context.
 
 ## What counts as drift (fix these)
 
@@ -50,7 +60,7 @@ knowable correct value; it does not make design choices.
 2. **Fix** — apply every entry with `Edit`, preserving each file's format. Where a doc has a
    Change History table, add a row noting the refresh. One pass, no approval gate — this is a
    fact-truing sweep, and the diff is the review surface.
-3. **Verify** — run `npm run lint:doc-claims` (from the module) and re-scan the touched files to
+3. **Verify** — run `npm run lint:doc-claims` (from `{module}`) and re-scan the touched files to
    confirm no new contradiction was introduced. Then show `git diff --stat` and the full diff of
    changed docs.
 

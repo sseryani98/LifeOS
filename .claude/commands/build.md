@@ -1,6 +1,6 @@
 ---
 description: Build one story end-to-end — brief, TDD red, implement, gate, coverage, smoke. Stops before the commit.
-argument: Story ID in any module (FRM-001, SPEC-02), optionally prefixed with the module (Project Tracker/SPEC-02). Omit to take Financial Planner's next Backlog story.
+argument: Story ID in any module (FRM-001, SPEC-02), optionally prefixed with the module (Project Tracker/SPEC-02). Omit to take the next story, asking which module when more than one has one.
 ---
 
 Your job here is **story resolution and rendering**. The workflow does the building — you do not
@@ -22,7 +22,7 @@ both (`SPEC-02` is a spec in each, `CNV-001` an object in each), so resolve agai
 | --- | --- |
 | `<Module>/<ID>` | Use that module; confirm the ID is a story in its BUILD_PLAN |
 | A bare ID | Check it against the story list of every module with a `design/BUILD_PLAN.md`. Exactly one match → use it. More than one → ask which module |
-| Empty | Read `Financial Planner/project/SPRINT_BOARD.md` and take the **first row of the Backlog table** under Current Sprint |
+| Empty | Find each module's next story: the first Backlog row under Current Sprint on its board, or — for a module with no board — the first not-Done story in the record its BUILD_PLAN names. Exactly one module has one → use it. Several → list them, one per module, and ask |
 | Anything else | Grep the module boards and story lists. Exactly one Backlog story → use it; otherwise ask |
 
 **Find the module's board.** If `<Module>/project/SPRINT_BOARD.md` exists, it is the board —
