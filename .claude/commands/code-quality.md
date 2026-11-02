@@ -12,17 +12,20 @@ of the diff defeats it.
 
 ## 1. Resolve the target
 
-Default module is `Financial Planner`. `Project Tracker` is a workspace too — use it when the
-argument names it or the diff sits in it, and swap the module folder in the paths below. A diff
-spanning both modules is two runs, one per module.
+Resolve the module first. It is the workspace folder the diff sits in, or the one the argument
+names (`Project Tracker backend`). If neither settles it, ask — there is no default module. A diff
+spanning two modules is two runs, one per module. `{module}` below is that folder.
+
+Backend source is `srv/` plus any other server-side source folder the module's `CLAUDE.md`
+§Folder Structure lists (Project Tracker: `mcp/`).
 
 | "$ARGUMENTS" | Scope |
 | --- | --- |
 | *(empty)* | **Diff mode.** `git status --porcelain` — every modified and untracked file. This is the post-build case. |
-| `backend` | `Financial Planner/srv/**/*.{ts,cds}` |
-| `frontend` | `Financial Planner/app/**/*.{ts,xml,json}` |
+| `backend` | `{module}/srv/**/*.{ts,cds}` and the other backend folders |
+| `frontend` | `{module}/app/**/*.{ts,xml,json}` — if the module has no `app/`, say so and stop |
 | `all` | both of the above |
-| anything else | Treat as a **module/domain name**. Glob `Financial Planner/srv/modules/{name}/**` and `Financial Planner/test/{unit,integration}/{name}/**`. If that matches nothing, list the real domain folders under `srv/modules/` and ask which one — do not guess. |
+| anything else | Treat as a **module/domain name**. Glob `{module}/srv/modules/{name}/**`, `{module}/{other backend folder}/{name}/**` and `{module}/test/{unit,integration}/{name}/**`. If that matches nothing, list the real domain folders under `srv/modules/` and ask which one — do not guess. |
 
 Exclude from every mode: `gen/`, `@cds-models/`, `node_modules/`, `coverage/`, `logs/`,
 `db/seed/`, `*.log`, lockfiles, and anything under `design/` or `project/` (docs are not
@@ -37,6 +40,7 @@ files by domain:
 
 - `srv/modules/{domain}/**` → domain `{domain}`
 - `app/{appName}/**` → domain `{appName}`
+- `{other backend folder}/{sub}/**` (e.g. `mcp/verbs/**`) → domain `{sub}`
 - everything else (`srv/shared`, root `.cds`, `test/shared`) → domain `shared`
 
 Drop empty buckets. If a single domain exceeds ~25 files, split it by subfolder — a reviewer
@@ -59,7 +63,7 @@ Workflow({
   name: 'code-quality',
   args: {
     label: '<human-readable scope, e.g. "uncommitted diff (24 files)">',
-    moduleDir: 'Financial Planner',
+    moduleDir: '<the resolved module folder>',
     files: [ /* repo-relative paths */ ],
     domains: [ { name: 'transaction', files: [ /* ... */ ] } ],
     hasBackend: true,

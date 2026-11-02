@@ -16,8 +16,8 @@ Sandro names. Never call apply without his indices.
 
 ## 1. Resolve the target
 
-Default module is `Financial Planner`. `Project Tracker` is a workspace too — use it when the
-argument names it or the diff sits in it. The lens table below is Financial Planner's; for another
+Resolve the module first: the workspace folder the diff sits in, or the one the argument names. If
+neither settles it, ask — there is no default module. The lens table below is Financial Planner's; for another
 module, build one lens per folder under its `test/unit/` and `test/integration/`, map each to the
 source it covers, and pass the full lens-name list as `allModules`.
 
@@ -87,7 +87,7 @@ Workflow({
   args: {
     action: 'review',
     label: '<human-readable scope, e.g. "uncommitted diff (12 files)">',
-    moduleDir: 'Financial Planner',
+    moduleDir: '<the resolved module folder>',
     mode: 'diff' | 'adhoc',
     changedFiles: [ /* diff mode only — repo-relative paths */ ],
     allModules: [ /* every lens name the module has — scopes jest */ ],
@@ -100,11 +100,15 @@ Workflow({
 })
 ```
 
-Keep the returned object — apply needs its findings and its `gate`.
+Keep the returned object — apply needs its findings, its `gate` and its `rules`.
+
+The review reads the module's own test rules (`design/TEST_STRATEGY.md`, `CLAUDE.md`) — nothing
+about Financial Planner is assumed for another module. If the module has no TEST_STRATEGY.md, say so
+before invoking: the reviewers will have only the shared rules.
 
 ## 4. Render the review, then stop
 
-The review returns `{consensus, contested, dropped, folded, counts, gate}`. Render two
+The review returns `{consensus, contested, dropped, folded, defects, counts, gate}`. Render two
 numbered tables, **one continuous sequence across both**, so Sandro can say "do #2 #5".
 
 ```
@@ -114,6 +118,18 @@ numbered tables, **one continuous sequence across both**, so Sandro can say "do 
 ## Contested — the adversary objected. You decide.
 # | file:line | gap | reviewer says | adversary says (ground)
 ```
+
+Then `defects` — findings whose fix needs code in `srv/`, `app/` or `db/` before any test can be
+written. They skip triage and apply refuses them, so number them `D1, D2…`, never in the main
+sequence:
+
+```
+## Defects — need a source change, not a test
+D# | file:line | bug | proposed fix | severity
+```
+
+Offer to fix a defect directly (TDD: the test goes in with the fix), or to log it in
+`project/DEFECT_LOG.md`. Never pass one to apply.
 
 **Nothing has been written.** Say so in one line under the tables.
 
@@ -137,6 +153,7 @@ Workflow({
     allModules: [ /* same */ ],
     lenses: [ /* same */ ],
     baseline: /* the review's `gate` — so the gate is not re-run */,
+    baselineRules: /* the review's `rules` — so they are not re-read */,
     items: [ /* the selected finding objects, unchanged, ids included */ ]
   }
 })

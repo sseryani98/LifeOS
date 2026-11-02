@@ -68,7 +68,8 @@ const CHALLENGE_BATCH_SCHEMA = {
 // args should arrive as an object, but a stringified payload is an easy caller mistake and
 // silently yields an empty scope — parse rather than review nothing.
 const scope = (typeof args === 'string' ? JSON.parse(args) : args) ?? {}
-const moduleDir = scope.moduleDir ?? 'Financial Planner'
+const moduleDir = scope.moduleDir
+if (!moduleDir) throw new Error('code-quality needs args.moduleDir — the command resolves it; nothing defaults to a module')
 const files = scope.files ?? []
 const domains = scope.domains ?? []
 const label = scope.label ?? 'target'
@@ -80,7 +81,7 @@ if (!files.length) {
 }
 
 const fileList = files.join('\n')
-const standards = `Standards live in \`${moduleDir}/CLAUDE.md\` (handler pattern :109-122, TS/naming :100-107, SAPUI5 :143-166) and \`${moduleDir}/design/TECHNICAL_STANDARDS.md\` (§12 = six review checklists). Sandro's standing corrections are \`feedback_*.md\` files in C:\\Users\\sandr\\.claude\\projects\\c--Projects-Life-OS\\memory\\.`
+const standards = `The shared standards live in \`Financial Planner/CLAUDE.md\` (§Coding Patterns — Handler Pattern, TypeScript/naming, SAPUI5) and \`Financial Planner/design/TECHNICAL_STANDARDS.md\` (§12 = six review checklists); they apply to every module. \`${moduleDir}/CLAUDE.md\` holds this module's architecture and carve-outs — a carve-out there beats the shared rule. Cite rules by section heading, not line number. Sandro's standing corrections are \`feedback_*.md\` files in C:\\Users\\sandr\\.claude\\projects\\c--Projects-Life-OS\\memory\\.`
 
 // ---------------------------------------------------------------- Phase 1: Lint
 
@@ -144,13 +145,13 @@ Report findings in two categories; report only where the answer is genuinely bad
 
 1. **Is this module doing too much?** Does it have more than one reason to change? Name the distinct responsibilities you found.
 2. **Is any class too big / doing too much?** Note: there is deliberately NO line-count rule in this repo — no \`max-lines\`, no \`max-classes-per-file\`, and neither CLAUDE.md nor TECHNICAL_STANDARDS.md states a class cap. So you cannot cite a rule. Argue from cohesion: what are the class's distinct reasons to change, and would splitting it make the code easier or harder to follow? A 400-line class with one job is fine. A 90-line class with three jobs is not.
-3. **Is the Facade/Service/DataService/Validator/Mapper split honored in spirit?** \`lint:facades\` and \`lint:mapper-methods\` check the letter — you check the intent. Business logic hiding in a DataService, a Validator that queries, a Service that shape-translates below the mapper threshold, a "Mapper" doing scalar conversion (that's a utility per CLAUDE.md:121).
+3. **Is the Facade/Service/DataService/Validator/Mapper split honored in spirit?** \`lint:facades\` and \`lint:mapper-methods\` check the letter — you check the intent. Business logic hiding in a DataService, a Validator that queries, a Service that shape-translates below the mapper threshold, a "Mapper" doing scalar conversion (that's a utility per the shared Handler Pattern).
 
 ## Comments (category \`comments\`)
 
 \`lint:comment-length\` already caps comment prose at 5 lines. Length is handled. **You review substance.**
 
-The rule (CLAUDE.md:107, \`feedback_comment_why_not_what\`): a comment explains **why** — rationale, gotchas, invariants, constraints the code cannot show. It never restates **what** the code says, never explains an obvious language feature, never narrates the pattern being used, and never talks to the reviewer ("this change is correct because…").
+The rule (shared CLAUDE.md §Coding Patterns, \`feedback_comment_why_not_what\`): a comment explains **why** — rationale, gotchas, invariants, constraints the code cannot show. It never restates **what** the code says, never explains an obvious language feature, never narrates the pattern being used, and never talks to the reviewer ("this change is correct because…").
 
 Flag:
 - Comments that restate the line below them.
@@ -203,8 +204,8 @@ ${standards}
 
 Flag:
 - **Names that lie or mislead** — \`accounts\` holding transactions, \`isValid\` returning a list, a \`get*\` that mutates. Highest value; report every one.
-- **Method names that are not verb + object** (CLAUDE.md:104, \`feedback_no_single_verb_methods\`) — \`_fetch\` not \`_fetchAccounts\`. Exempt: framework lifecycle (\`init\`, \`onInit\`, \`render\`) and interface methods named for the class (\`DedupService.evaluate\`).
-- **Method ordering** (CLAUDE.md:105): visibility (public → \`_\`private at bottom) → importance → alphabetical. No section-divider comments.
+- **Method names that are not verb + object** (shared CLAUDE.md §Coding Patterns, \`feedback_no_single_verb_methods\`) — \`_fetch\` not \`_fetchAccounts\`. Exempt: framework lifecycle (\`init\`, \`onInit\`, \`render\`) and interface methods named for the class (\`DedupService.evaluate\`).
+- **Method ordering** (shared CLAUDE.md §Coding Patterns): visibility (public → \`_\`private at bottom) → importance → alphabetical. No section-divider comments.
 - **Readability** — a function whose control flow you had to re-read, a boolean parameter that makes the call site unreadable, nesting that a guard clause would flatten.
 
 Do not propose a rename that is merely a synonym of the current name. The bar is: a reader is actively misled today.

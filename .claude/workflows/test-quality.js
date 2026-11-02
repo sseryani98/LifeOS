@@ -67,8 +67,13 @@ const FINDINGS_SCHEMA = {
           argument: { type: 'string', description: 'Why this matters, argued from the code — name the regression that would ship undetected' },
           fix: { type: 'string', description: 'The smallest concrete change: the test to write, or the assertion to strengthen. Name the data/ constants it needs.' },
           severity: { type: 'string', enum: ['high', 'medium', 'low'] },
+          needsSourceChange: {
+            type: 'boolean',
+            description:
+              'True when the fix cannot be written under test/ alone — it needs new or changed code in srv/, app/ or db/ first. False for a test that is merely red today because the source is wrong: that test is still writable.',
+          },
         },
-        required: ['file', 'line', 'category', 'summary', 'argument', 'fix', 'severity'],
+        required: ['file', 'line', 'category', 'summary', 'argument', 'fix', 'severity', 'needsSourceChange'],
         additionalProperties: false,
       },
     },
@@ -151,7 +156,8 @@ const REPAIR_SCHEMA = {
 // args should arrive as an object, but a stringified payload is an easy caller mistake and
 // silently yields an empty scope — parse rather than review nothing.
 const scope = (typeof args === 'string' ? JSON.parse(args) : args) ?? {}
-const moduleDir = scope.moduleDir ?? 'Financial Planner'
+const moduleDir = scope.moduleDir
+if (!moduleDir) throw new Error('test-quality needs args.moduleDir — the command resolves it; nothing defaults to a module')
 const lenses = scope.lenses ?? []
 const changedFiles = scope.changedFiles ?? []
 const mode = scope.mode ?? 'adhoc'
@@ -166,17 +172,12 @@ if (!lenses.length) {
   return { consensus: [], contested: [], dropped: [], implemented: [], scope: label, note: 'empty scope' }
 }
 
-const standards = `## The rules you review against
-
-\`${moduleDir}/CLAUDE.md:173-184\` holds the test rules in citable form. \`${moduleDir}/design/TEST_STRATEGY.md\` holds the rationale — §4 boundaries, §5 unit standards, §6 integration, §8 coverage. Sandro's standing corrections are \`feedback_*.md\` in C:\\\\Users\\\\sandr\\\\.claude\\\\projects\\\\c--Projects-Life-OS\\\\memory\\\\.
-
-The load-bearing ones:
-
-- **Unit:** no DB, mocked CDS. Validators mock nothing (\`req\` is a plain object with an \`error()\` spy), 100% coverage. Services: **the Validator is NOT mocked** — called through for free integration. Mock CDS queries, other Services, \`EncryptionUtility\`, \`DateTimeUtility\`. **Facades are not unit tested** — zero logic by design, ESLint-enforced.
-- **Integration:** \`cds.test("serve","--with-mocks","--in-memory")\` + SQLite, **Chai \`expect\`, not Jest**. One file per CDS service. External APIs always mocked (SimpleFIN, cheerio, node-cron). Tests share seed data but must not depend on execution order.
-- **Never test CAP CRUD/draft machinery or \`@readonly\` enforcement.** Framework behavior is banned outright (§4/§6). Annotation constraints (\`@assert.unique\`, \`@mandatory\`, \`@assert.range\`) ARE fair game as contract documentation.
-- **Coverage targets:** Validators/Utilities 100/100, Services (incl. ENH engines) 90/85, Overall 85/80. Facades excluded.
-- A \`*.test.ts\` is imports + AAA. Payloads/UUIDs are named UPPER_SNAKE constants from \`data/\`. Assertions may hold inline expected values. No CQL in specs — it lives in \`support/\` helpers.`
+// The ingestion review proposed an app/ model class and a server re-decode method as test findings.
+// Apply authors may write only under test/, so those rows could never land — they are defects, and
+// they reach Sandro on their own list instead of competing with writable tests.
+const testScope = `## A finding is a test you can write today
+This workflow writes under \`test/\` and nothing else. If closing a gap needs new or changed code in \`srv/\`, \`app/\` or \`db/\` first — a method that does not exist, a redesign, a new model class — set \`needsSourceChange: true\`. It goes to Sandro as a **defect**, not a test. Keep the argument; that bug report is still valuable.
+A test that is simply **red today because the source is wrong** is \`needsSourceChange: false\` — it can be written now, and it is the best evidence of the bug.`
 
 const diffFocus =
   mode === 'diff' && changedFiles.length
@@ -188,8 +189,9 @@ const diffFocus =
 // lenses under review, and clear the config threshold so unrun modules don't emit phantom
 // "coverage not met" failures (the gate agent flags real shortfalls from the table, not the exit
 // code). `all` runs every module, so scope is empty and it falls back to plain `npm test`.
-// The caller passes the module's full lens list; the default is Financial Planner's.
-const ALL_MODULES = scope.allModules ?? ['admin', 'categorization', 'ingestion', 'shared', 'transaction']
+// The caller passes the module's full lens list. Without it, assume this run's lenses are all of
+// them — jest then runs the whole suite, which is slower but never under-scoped.
+const ALL_MODULES = scope.allModules ?? lenses.map(lens => lens.name)
 
 const jestCommandFor = names => {
   const modules = [...new Set(names)].filter(name => ALL_MODULES.includes(name))
@@ -206,7 +208,37 @@ const gateIsScoped = gateTestCommand !== 'npm test'
 
 phase('Gate')
 
-const gateResult = scope.baseline ?? (await agent(
+const RULES_SCHEMA = {
+  type: 'object',
+  properties: { rules: { type: 'string', description: 'The digest, as markdown bullets, each citing its source section' } },
+  required: ['rules'],
+  additionalProperties: false,
+}
+
+const extractRules = () =>
+  agent(
+    `Read the test rules for the \`${moduleDir}\` module and return a digest other agents will review tests against.
+
+Read: \`${moduleDir}/design/TEST_STRATEGY.md\` (skip its change history) and \`${moduleDir}/CLAUDE.md\` (its standards, carve-outs and any test section). The shared rules in \`Financial Planner/CLAUDE.md\` §Test Rules are already given to the reviewers — include only where this module **differs** from them.
+
+Return at most 40 bullets, each ending with its source as \`(FILE §heading)\`. Cover, where the documents say:
+
+1. Tiers and their runner / assertion library / harness (how a service or entry point is loaded under test).
+2. Unit mocking policy — what is mocked, what is deliberately called through, what is never unit tested.
+3. Integration standards — what each integration test must cover, isolation and seeding rules.
+4. Collaborators and external systems that must always be mocked (clock, network, schedulers, named APIs).
+5. Sensitive data — fields that must never be returned or committed.
+6. Coverage targets per layer, and what is excluded.
+7. Planned-but-unbuilt tests or scenarios, and known gaps the documents admit.
+8. The spec(s) the documents name as the house pattern to imitate.
+9. What a test may assert as contract versus must not assert.
+
+Quote values exactly. Write "not stated" for an item the documents do not cover — never fill it from another module.`,
+    { label: 'rules', phase: 'Gate', model: 'sonnet', agentType: 'quality-reviewer', schema: RULES_SCHEMA },
+  ).then(result => result?.rules ?? null)
+
+const [gateResult, moduleRules] = await Promise.all([
+  scope.baseline ? Promise.resolve(scope.baseline) : agent(
   `Run the checks for \`${moduleDir}\` and report what happened, **plus the coverage table**.
 
 ## Run these
@@ -243,7 +275,26 @@ No test file hashing on this run — you were given no test list, so skip that s
 
 Put the **raw output** in \`detail\`, with \`file:line\`. Do not diagnose, do not suggest a fix.`,
   { label: 'gate', phase: 'Gate', model: 'haiku', effort: 'low', agentType: 'gate-runner', schema: GATE_SCHEMA },
-))
+  ),
+  scope.baselineRules ? Promise.resolve(scope.baselineRules) : extractRules(),
+])
+
+// Shared rules (Financial Planner/CLAUDE.md §Test Rules applies to every module) stay inline. What
+// differs per module — runner, harness, mocking policy, coverage targets, sensitive data, planned
+// scenarios, the exemplar spec — comes from the extractor that read the module's own documents.
+const standards = `## The rules you review against
+
+**Shared, every module** (\`Financial Planner/CLAUDE.md\` §Test Rules; \`${moduleDir}/CLAUDE.md\` carve-outs win):
+
+- **Never test CAP CRUD/draft machinery or \`@readonly\` enforcement.** Framework behaviour is banned outright. Annotation constraints (\`@assert.unique\`, \`@mandatory\`, \`@assert.range\`) ARE fair game as contract documentation. There is no cross-field \`@assert\` at the pinned CAP version — a cross-field rule is a handler, tested as logic.
+- Test tree is \`{test-type}/{module}/{data,support,tests}\`. A \`*.test.ts\` is imports + AAA. Payloads/UUIDs are named UPPER_SNAKE constants from \`data/\`. Assertions may hold inline expected values. No CQL in specs — it lives in \`support/\` helpers. No FRICEW IDs under \`test/\` outside \`integration/scenarios/\` data.
+- No real secrets, card or account numbers, or PII in committed fixtures — semantic placeholders only.
+
+Sandro's standing corrections are \`feedback_*.md\` in C:\\\\Users\\\\sandr\\\\.claude\\\\projects\\\\c--Projects-Life-OS\\\\memory\\\\.
+
+**This module — \`${moduleDir}\`** (extracted from its TEST_STRATEGY.md and CLAUDE.md; cite those, not this digest):
+
+${moduleRules ?? `(The rules digest is unavailable. Read \`${moduleDir}/design/TEST_STRATEGY.md\` — boundaries, unit and integration standards, test data, coverage targets — before judging, and do not assume another module's rules.)`}`
 
 const gate = `## Machine-checked already — do NOT re-report any of this
 
@@ -326,6 +377,8 @@ ${gate}
 
 ${standards}
 
+${testScope}
+
 ## Six questions. Report a finding only where the answer is genuinely bad.
 
 1. **Are the tests meaningful?** Do not answer this in the abstract. For each test, answer the concrete form: **name a change I could make to the source that this test would not catch.** If you can name an obvious one — flip a comparison, drop a branch, return the input unchanged — the test is not protecting the behavior it claims to. The classic failure: a test that asserts the mock returned what the mock was told to return. That passes forever and protects nothing. If you cannot name any surviving mutation, the test is good — say nothing.
@@ -333,15 +386,15 @@ ${standards}
 2. **Are the assertions any good?** Three distinct failure modes, all worth a finding:
    - **Weak** — \`expect(result).toBeTruthy()\`, \`expect(fn).not.toThrow()\`, asserting a call happened but not with what. Passes for the wrong reasons.
    - **Brittle** — \`toEqual\` on a whole object including \`createdAt\`/\`ID\`/computed fields, so an unrelated change reddens it. **Brittle tests get deleted, not fixed** — that is why this matters.
-   - **Undiagnosable** — fails with "expected true, received false" and tells you nothing. The house standard is the opposite: \`expect(errors[0].messageKey).toBe("transaction.split.enterOneInput")\` names the defect in the failure message. Read \`test/unit/transaction/tests/transactionValidator.test.ts\` for the bar.
+   - **Undiagnosable** — fails with "expected true, received false" and tells you nothing. The house standard is the opposite: an assertion on a specific key or value that names the defect in the failure message. Read the exemplar spec the module rules name for the bar, or the strongest neighbouring spec if none is named.
 
-3. **Do they test behavior, not the framework?** TEST_STRATEGY §4/§6 bans testing CAP CRUD/draft machinery and \`@readonly\` — if you find one, the finding is to **delete** it, not strengthen it. Annotation constraints (\`@assert.unique\`, \`@mandatory\`, \`@assert.range\`) are the deliberate exception: those ARE tested, as contract documentation. Know the difference before reporting.
+3. **Do they test behavior, not the framework?** The shared rules ban testing CAP CRUD/draft machinery and \`@readonly\` — if you find one, the finding is to **delete** it, not strengthen it. Annotation constraints (\`@assert.unique\`, \`@mandatory\`, \`@assert.range\`) are the deliberate exception: those ARE tested, as contract documentation. Know the difference before reporting.
 
 4. **Are the edge cases covered?** Read the **source**, not the tests, to find them — the tests cannot tell you what they forgot. Boundaries (zero, negative, empty array, single element), the error paths, the branches the coverage table above says are cold.
 
-5. **Will these tests still pass next Tuesday?** Flakiness is a slow poison: it trains the reader to re-run rather than believe. Flag a spec that depends on **the real clock** (\`new Date()\`, \`Date.now()\`, real timers — \`DateTimeUtility\` exists to be mocked for exactly this reason, and this module may touch scheduling or \`node-cron\`), **real randomness**, **the network** (every external API is mocked — SimpleFIN, cheerio — so a test reaching out is a finding whether or not it passes today), or **execution order** (§6.3 — tests share seed data but must not depend on position; a test that only passes in place is a latent flake).
+5. **Will these tests still pass next Tuesday?** Flakiness is a slow poison: it trains the reader to re-run rather than believe. Flag a spec that depends on **the real clock** (\`new Date()\`, \`Date.now()\`, real timers — check the module rules for the utility meant to be mocked instead), **real randomness**, **the network** (any external system the module rules say is always mocked — a test reaching out is a finding whether or not it passes today), or **execution order** (tests that share seed data must not depend on position; a test that only passes in place is a latent flake).
 
-6. **Is anything in \`data/\` unsafe?** Scan the module's fixtures. **No real card numbers, account numbers, or PII** — TEST_STRATEGY says semantic names only, and the real seed data is gitignored precisely because this repo holds live card data. A real PAN in a committed fixture is a **git leak, not a test smell**: report it \`high\`, always. UUIDs should be semantic placeholders (\`ca5e0001-…\`), never real values.
+6. **Is anything in \`data/\` unsafe?** Scan the module's fixtures. **No real secrets, card or account numbers, or PII** — semantic names only, and the module rules may name further sensitive fields. A real secret or PAN in a committed fixture is a **git leak, not a test smell**: report it \`high\`, always. UUIDs should be semantic placeholders (\`ca5e0001-…\`), never real values.
 
 Then: **what test cases would you recommend?** Concrete ones. Name the \`data/\` constants each needs and whether it extends an existing spec or needs a new one. "More coverage" is not a recommendation.
 
@@ -366,15 +419,15 @@ ${gate}
 
 ${standards}
 
+${testScope}
+
 ## Two questions
 
-1. **Are the integrations tested well?** One file per CDS service is the rule. Per TEST_STRATEGY §6.2 an integration test should cover the custom actions, the query options that matter (\`$filter\`/\`$expand\`), the error responses (400/404/409), and **sensitive-field exclusion — a \`GET\` list must never return \`_enc\` fields**. That last one is a security property; if no test asserts it, that is a \`high\` finding. Also §6.3: tests share seed data but must not depend on execution order.
+1. **Are the integrations tested well?** Judge against the module rules' integration standards: what each integration test must cover (custom actions, the query options that matter, the error responses), and **sensitive-field exclusion** for any field the module rules name — that is a security property; if no test asserts it, that is a \`high\` finding. Tests that share seed data must not depend on execution order.
 
-2. **Are mocks and stubs used correctly?** The policy is specific and easy to get backwards:
-   - Service tests **do not mock the Validator** — it is called through on purpose, for free integration coverage. **A mocked Validator in a Service test is a finding**, and a common one.
-   - Mock: CDS queries, other Services, \`EncryptionUtility\`, \`DateTimeUtility\`.
-   - Validator tests mock **nothing** — \`req\` is a plain object with an \`error()\` spy.
-   - External APIs are **always** mocked (SimpleFIN, cheerio, node-cron). A test reaching the network is a finding regardless of whether it passes today.
+2. **Are mocks and stubs used correctly?** The module rules state the mocking policy — what is mocked, what is deliberately called through, what is never unit tested. It is specific and easy to get backwards:
+   - Mocking something the policy says is **called through on purpose** is a finding, and a common one.
+   - External systems the policy says are **always** mocked must be. A test reaching the network is a finding regardless of whether it passes today.
    - **Over-mocking is the quieter failure**: a test where every collaborator is a stub asserts only that you wired your own stubs together. It is indistinguishable from a passing test and it protects nothing. Name those.
    - A mock that has **drifted from the real collaborator's signature** is the worst case — the test passes, the production call fails. Check the \`buildXxxMocks\` builders against the real classes.
 
@@ -397,18 +450,20 @@ This is a spec-to-test mapping job, and you are the only agent doing it.
 
 ## Known gaps — confirm before reporting, they may have moved
 
-- \`${moduleDir}/test/integration/scenarios/\` is an empty \`.gitkeep\`. TEST_STRATEGY §6.4 names four planned scenarios: **WFL-001 weekly review, WFL-004 card onboarding, FRM-003 CSV import, WFL-002 card lifecycle**. None are built. Multi-step FUT scenarios nest there — not a new top-level folder.
-- \`${moduleDir}/test/shared/data/factories.ts\` is 8 lines. TEST_STRATEGY documents "hybrid factories + named constants"; in practice it is nearly all named constants. Report this only if a *specific* missing test needs a factory — "adopt factories" is a refactor, not a coverage gap.
+- The module rules list planned-but-unbuilt tests and scenarios, and gaps the documents admit. Check whether each is still unbuilt before reporting it. Multi-step FUT scenarios nest under \`${moduleDir}/test/integration/scenarios/\` — not a new top-level folder.
+- A documented pattern the suite does not follow (factories, a helper style) is reportable only when a *specific* missing test needs it — "adopt the pattern" is a refactor, not a coverage gap.
 
 ${gate}
 
 ${standards}
 
+${testScope}
+
 ## Constraints
 
 **Never write a FRICEW ID into a test file** — \`lint:tracking-ids\` bans them from \`test/\`; they belong in design docs and commit bodies. Cite the ID in your *finding*; the fix must name the behavior instead.
 
-Rank by consequence. An untested business rule that **silently produces wrong money** is high — this is a financial planner, and a rule that fails loudly is far cheaper than one that quietly miscategorises. An untested rule whose breakage is immediate and obvious is not high.
+Rank by consequence. An untested business rule that **silently produces wrong data** — a wrong amount, a wrong status, a lost record — is high: a rule that fails loudly is far cheaper than one that quietly corrupts. An untested rule whose breakage is immediate and obvious is not high.
 
 The four unbuilt scenarios are a known, deliberate backlog: one finding each is honest; "no functional tests exist" as a single finding is not useful. If the specs are thin or absent for a module, **say so plainly rather than inventing rules to test against** — a test traced to a rule you made up is worse than the gap.
 
@@ -432,19 +487,23 @@ Use category \`functional-coverage\`.`,
       }
       // Two lenses agreeing is signal. Keep the longer argument, raise severity to the higher.
       seen.foundBy += 1
+      seen.needsSourceChange = seen.needsSourceChange || finding.needsSourceChange
       if (finding.argument.length > seen.argument.length) seen.argument = finding.argument
       const rank = { low: 0, medium: 1, high: 2 }
       if (rank[finding.severity] > rank[seen.severity]) seen.severity = finding.severity
     }
   }
 
-  const findings = [...merged.values()].map((finding, index) => ({ ...finding, id: `F${index + 1}` }))
+  const allFindings = [...merged.values()].map((finding, index) => ({ ...finding, id: `F${index + 1}` }))
   const proposed = reviewResults.filter(Boolean).reduce((sum, result) => sum + (result.findings?.length ?? 0), 0)
-  const duplicatesCollapsed = proposed - findings.length
+  const duplicatesCollapsed = proposed - allFindings.length
+  // Defects skip triage: the adversary judges whether a test is worth having, and these are not tests.
+  const defects = allFindings.filter(finding => finding.needsSourceChange)
+  const findings = allFindings.filter(finding => !finding.needsSourceChange)
 
-  log(`${findings.length} distinct findings after dedup (${duplicatesCollapsed} collapsed). Entering triage.`)
+  log(`${allFindings.length} distinct findings after dedup (${duplicatesCollapsed} collapsed), ${defects.length} routed to defects. Entering triage.`)
   // The journal is the only thing that survives a killed run — put the findings in it now.
-  log(`Findings: ${JSON.stringify(findings.map(finding => ({ id: finding.id, file: finding.file, line: finding.line, severity: finding.severity, category: finding.category, summary: finding.summary })))}`)
+  log(`Findings: ${JSON.stringify(allFindings.map(finding => ({ id: finding.id, file: finding.file, line: finding.line, severity: finding.severity, category: finding.category, summary: finding.summary, needsSourceChange: finding.needsSourceChange })))}`)
 
   if (!findings.length) {
     return {
@@ -453,9 +512,10 @@ Use category \`functional-coverage\`.`,
       consensus: [],
       contested: [],
       dropped: [],
+      defects,
       implemented: [],
-      counts: { proposed, deduped: duplicatesCollapsed, consensus: 0, contested: 0, dropped: 0 },
-      note: 'Reviewers found no test-quality gaps.',
+      counts: { proposed, deduped: duplicatesCollapsed, consensus: 0, contested: 0, dropped: 0, defects: defects.length },
+      note: defects.length ? 'Every finding needs a source change first — see defects.' : 'Reviewers found no test-quality gaps.',
     }
   }
 
@@ -497,7 +557,7 @@ You hold all ${items.length} at once, which no other agent in this workflow does
 
 Read the actual test and the source it covers first. Name the ground in \`ground\`:
 
-1. \`framework-test\` — it tests CAP CRUD/draft machinery or \`@readonly\`. TEST_STRATEGY §4/§6 bans this outright, so this ground is decisive. **But check the exception:** annotation constraints (\`@assert.unique\`, \`@mandatory\`, \`@assert.range\`) are tested deliberately as contract documentation. That is not a framework test.
+1. \`framework-test\` — it tests CAP CRUD/draft machinery or \`@readonly\`. The shared rules ban this outright, so this ground is decisive. **But check the exception:** annotation constraints (\`@assert.unique\`, \`@mandatory\`, \`@assert.range\`) are tested deliberately as contract documentation. That is not a framework test.
 2. \`coverage-theatre\` — the test cannot fail for a real reason. It asserts a mock returned what the mock was told to return, or restates the implementation. It moves a number and protects nothing.
 3. \`already-covered\` — an existing test already fails when this breaks. **Grep and name it.** "Probably covered somewhere" is not a challenge.
 4. \`wrong-tier\` — an integration test for logic that is pure (belongs in unit), or a unit test for wiring only integration can prove. The fix here is usually to **move** it, not drop it — say so.
@@ -573,22 +633,26 @@ ${standards}`,
   const report = {
     scope: label,
     gate: gateResult,
-    counts: { proposed, deduped: duplicatesCollapsed, folded: folded.length, consensus: consensus.length, contested: contested.length, dropped: dropped.length },
+    counts: { proposed, deduped: duplicatesCollapsed, folded: folded.length, consensus: consensus.length, contested: contested.length, dropped: dropped.length, defects: defects.length },
     contested: contested.map(item => ({ ...item.finding, ground: item.ground, adversary: item.adversary })),
+    defects,
     dropped: dropped.map(item => ({ file: item.finding.file, line: item.finding.line, summary: item.finding.summary, ground: item.ground, why: item.adversary })),
     folded: folded.map(item => ({ id: item.finding.id, duplicateOf: item.duplicateOf, summary: item.finding.summary, why: item.adversary })),
   }
 
-  return { ...report, consensus: consensus.map(item => ({ ...item.finding, adversary: item.adversary })) }
+  return { ...report, rules: moduleRules, consensus: consensus.map(item => ({ ...item.finding, adversary: item.adversary })) }
 }
 
 // ------------------------------------------------- apply: write what Sandro picked
 
-const consensus = (scope.items ?? []).map(finding => ({ finding }))
+// A defect that reaches apply would be deferred by an author after a full read of the tree — refuse
+// it here for free and hand it back.
+const refusedDefects = (scope.items ?? []).filter(finding => finding.needsSourceChange)
+const consensus = (scope.items ?? []).filter(finding => !finding.needsSourceChange).map(finding => ({ finding }))
 if (!consensus.length) {
-  return { scope: label, implemented: [], verification: null, note: 'No items selected — nothing was written.' }
+  return { scope: label, implemented: [], refusedDefects, verification: null, note: 'No writable items selected — nothing was written.' }
 }
-const report = { scope: label, gate: gateResult, counts: { selected: consensus.length } }
+const report = { scope: label, gate: gateResult, refusedDefects, counts: { selected: consensus.length, refusedDefects: refusedDefects.length } }
 
 // ----------------------------------------------------------- Phase 4: Implement
 
@@ -627,7 +691,7 @@ ${standards}
 
 ## Before you write
 
-**Read a neighbouring spec and its \`data/\` file first.** \`test/unit/transaction/tests/transactionValidator.test.ts\` and \`data/splits.ts\` are the house pattern — 23 named imports, zero inline literals, a one-line why-JSDoc over every \`it\`. Match the files you are extending, not this description of them.
+**Read a neighbouring spec and its \`data/\` file first** — the exemplar the module rules name, or the spec you are extending. The house pattern is named imports from \`data/\`, zero inline literals, and a one-line why-JSDoc over every \`it\`. Match the files you are extending, not this description of them.
 
 Prefer extending over creating: a new constant beside the existing ones beats a new file; a new \`it\` in the right \`describe\` beats a new spec. **Reuse the canonical constant when one exists** — re-declaring it is itself a \`lint:test-data\` violation.
 
