@@ -12,6 +12,8 @@ gen/
 
 # Personal seed data (card portfolio, financial details)
 db/seed/
+# Real bank CSV exports — live transaction history; fixtures use semantic placeholders
+design/actual-csvs/
 
 # Runtime logs
 logs/
