@@ -1,8 +1,8 @@
 # Data Model
 
 **Document ID:** DM-001
-**Version:** 1.0
-**Date:** 2026-08-15
+**Version:** 1.1
+**Date:** 2026-11-02
 **Status:** Approved
 
 ---
@@ -11,6 +11,7 @@
 
 | Date       | Author          | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-11-02 | Sandro & Claude | **v1.1 — amended at `SPEC-02`'s build (D-240).** §9's `MethodologyStep.conditional` row no longer says `SPEC-02` §3.1 rejects the load: CNV-001 is a hand-written CSV seed that cannot refuse a row, so a violating seed is caught by `SPEC-02` FUT-001 and FUT-003. No entity or attribute changes. Status stays **Approved**. |
 | 2026-08-15 | Sandro          | **Status → Approved.** All ten Phase 5 coverage checks met; the approval gate D-169 moved to step 0 of Phase 6 was answered before the stage closed.                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | 2026-08-15 | Sandro & Claude | Initial creation from the Data Model stage. **25 persisted entities** — 13 domain entities and 12 code lists — consolidated from the Data Model section of all **12** specs, of which **10** place requirements and **2** ([SPEC-10](specs/SPEC-10-CUTOVER-GUARDS.md), [SPEC-12](specs/SPEC-12-DECOMMISSION.md)) state they place none. **OI-05 resolved** — the last open item in the module. Records D-160 through D-175. **R1 executed and closed** — 20/20 checks against PostgreSQL 17.6, the first CDS model any Life OS module has deployed to Postgres, which changed four constraint mechanisms in §9. |
 
@@ -517,7 +518,7 @@ changed as a result.** The annotations this table originally assumed are not all
 | **`Initiative.name` unique within Workspace**                         | **handler** — the shared create-handler           | SPEC-06 §2 am. 2 rules this out of `@assert.unique` by name: it must reject 409 with a named key. **Measured: the handler path works on Postgres** — the equivalent `storyId` guard returned 409               |
 | **`Milestone.storyId` unique within Initiative**                      | **handler** — the shared create-handler           | SPEC-06 BR-19, same reason. D-79 gives both entities one shared create-handler. **Measured: returns 409 with the named key on Postgres**                                                                       |
 | **No format assertion on `Initiative.branch`**                        | **neither**                                       | SPEC-06 BR-11 rules it out; recorded so its absence reads as a decision                                                                                                                                        |
-| `MethodologyStep.conditional` names only `shipsUi`                    | **neither** — `CNV-001` load validation           | SPEC-02 §3.1 rejects the _load_, tested by FUT-001 and FUT-003. A model constraint over one legal value would be a second enforcement of a seed-time check                                                     |
+| `MethodologyStep.conditional` names only `shipsUi`                    | **neither** — `CNV-001` seed check                | A CSV seed cannot refuse a row (D-240); a violating seed is caught by SPEC-02 FUT-001 and FUT-003. A model constraint over one legal value would be a second enforcement of a seed-time check                  |
 | `MethodologyStep.position` gapped by 10                               | **convention**                                    | SPEC-02 §2 am. 4. Nothing enforces the gap; it exists so a step can be inserted between two                                                                                                                    |
 
 ### 9.1 What CAP 9.8.4 actually supports (D-171)

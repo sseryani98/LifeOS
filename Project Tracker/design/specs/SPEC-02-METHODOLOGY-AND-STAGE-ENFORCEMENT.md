@@ -19,13 +19,14 @@ SQLite only. Approved as a design; **not Approved-for-build until R1 clears**.
 | 2026-07-30 | Sandro & Claude | Citation sharpening at the SPEC-06 workshop. §3.2's Inputs table now names **which** callers set `Milestone.shipsUi` — `plan_sprint`'s `stories[]` (SPEC-01 BR-21, amended there by D-76), FRM-002's story rows (SPEC-06 BR-14), and CNV-002 (SPEC-03 BR-16). No rule, algorithm or FUT changed; status stays **Approved**.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | 2026-07-30 | Sandro & Claude | **BR-29 scoped to story mode** at the SPEC-09 workshop (D-104). SPEC-01's eleventh amendment gives `record_test_run` a `workspace` mode with no `stage` and no target Task, so the guard has nothing to read against it — left unscoped, BR-29 would read as refusing a call it cannot evaluate. §3.1's guard table splits the verb into its two modes and §5's row names story mode. **No guard is weakened**: story mode is unchanged, and workspace mode was unreachable before this amendment existed. `wfl.testrun.stageNotStarted` keeps its meaning and FUT-017 is unaffected — it exercises story mode. Status stays **Approved**; this is the third amendment made to an Approved spec (D-67, D-72's precedent).                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | 2026-08-15 | Sandro & Claude | **Two amendments at the Data Model stage.** (a) **BR-17 gains an explicit empty-Task-set clause — the derivation returns `Done` (D-162).** Its first and last clauses are both vacuously true over an empty set, so the rule as written was not a total function; D-88 found the disagreement, noted it is live on **eleven of twelve** Milestones, and raised it here rather than settling it. `Done` is correct **by construction**: a Milestone is chainless if and only if it was created Done, since ENH-001 fires only on creation with status Backlog (BR-09, BR-10), a Backlog Milestone materialises at least eight Tasks in the same transaction, and no verb deletes a Task (D-50). **Nothing on screen changes** — four Approved specs decline to read this value. (b) **§2 amendment 6's stated form is superseded (D-166)**: "anything not `sandro` is an agent" is already false against [SPEC-09](SPEC-09-TEST-REPORT-TO-TESTRUN.md) §2 amendment 4's `test-report`. The requirement stands, met by an `Actor` code list carrying a `kind`. **No verb signature changes and no FUT changes**; D-37 §11.1's trigger does not fire. Status stays **Approved**. |
+| 2026-11-02 | Sandro & Claude | **Seed mechanism and subtask drivers settled** after the `/build` briefer blocked the spec on two holes: the code lists its rows FK to were seeded at `CNV-002` (built later) under `assert_integrity: 'DB'`, and §3.1's subtask table gave neither `driver` nor `requiresHuman`, both mandatory in `db/schema.cds`. Records **D-239 … D-242**. **BR-34 … BR-36 added**: CNV-001 also seeds all twelve DM-001 §8 code lists (D-239); the library and the lists are hand-written CSVs in `db/data/` loaded by `cds deploy`, with no load script (D-240); every subtask step carries `driver` = `/build`, `requiresHuman` = false (D-241). §3.1 names the seed form and path, its subtask table gains both columns, "Validation and rejection criteria" moves from a refused load to FUT-001 and FUT-003, and Reconciliation counts the code lists. **FUT-001 widened; FUT-019 added.** Tests read the deployed CSVs, not fixture copies (D-242). No schema change. Status stays **Approved** — an amendment to an Approved spec, on D-67 and D-72's precedent.                                                                                                                |
 
 ---
 
 ## 1. Overview
 
 The methodology as data and the enforcement over it: CNV-001 seeds the Sprint Build library — nine
-ordered stage steps and Sprint Build's seven subtasks — ENH-001 materialises a story's chain from
+ordered stage steps and Sprint Build's seven subtasks — and the twelve code lists (D-239), ENH-001 materialises a story's chain from
 that library when a Milestone is created in Backlog, and WFL-001 is the guard set that decides which
 stage may start, which may complete, and what each rejection tells the caller. Conditionality is
 resolved once at instantiation rather than at every transition (D-47), which is why a step that does
@@ -44,14 +45,15 @@ repeat, together with standing up a binding neither Life OS module has, to the D
 **input to** the data model rather than a reference to it (D-43). Every entity and attribute below is
 a requirement this spec places on the Data Model stage.
 
-| Entity              | Role in this spec                                       | Attributes this spec requires                                                                                                 |
-| ------------------- | ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| **Methodology**     | The seeded library's root (CNV-001)                     | `code`, `name`                                                                                                                |
-| **MethodologyStep** | Stage and subtask vocabulary; the whole chain's shape   | `code` (slug, the key), `name` (label), `kind`, `position`, `parent`, `conditional`, `requiresHuman`, `driver`, `description` |
-| **Milestone**       | The story a chain is instantiated for; status derived   | `storyId`, `status` (**derived**, BR-17), **`shipsUi`**                                                                       |
-| **Task**            | A materialised stage step                               | `stepCode`, `status` ∈ {Not Started, In Progress, Complete}, `startedAt`, `completedAt` (nullable)                            |
-| **Subtask**         | A materialised subtask step                             | `stepCode`, `status` ∈ {Not Started, Complete}, `completedAt`                                                                 |
-| **Activity**        | Carries the reopen history the Task row no longer holds | `kind`, `actor`, `target`, `payload`, `occurredAt`                                                                            |
+| Entity                | Role in this spec                                       | Attributes this spec requires                                                                                                 |
+| --------------------- | ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| **Methodology**       | The seeded library's root (CNV-001)                     | `code`, `name`                                                                                                                |
+| **MethodologyStep**   | Stage and subtask vocabulary; the whole chain's shape   | `code` (slug, the key), `name` (label), `kind`, `position`, `parent`, `conditional`, `requiresHuman`, `driver`, `description` |
+| **Milestone**         | The story a chain is instantiated for; status derived   | `storyId`, `status` (**derived**, BR-17), **`shipsUi`**                                                                       |
+| **Task**              | A materialised stage step                               | `stepCode`, `status` ∈ {Not Started, In Progress, Complete}, `startedAt`, `completedAt` (nullable)                            |
+| **Subtask**           | A materialised subtask step                             | `stepCode`, `status` ∈ {Not Started, Complete}, `completedAt`                                                                 |
+| **Activity**          | Carries the reopen history the Task row no longer holds | `kind`, `actor`, `target`, `payload`, `occurredAt`                                                                            |
+| **The 12 code lists** | DM-001 §8 vocabularies, seeded by CNV-001 (D-239)       | `code`, `name`; `Actor` also `kind` → `ActorKind` (DM-001 §8.2)                                                               |
 
 **Amendments flagged for Data Model**
 
@@ -84,6 +86,15 @@ below, and one is a cross-spec correction in §6.
 
 #### Transformation — the seeded library
 
+**Form (D-240).** Every row this section seeds is a hand-written CSV in `db/data/`, one file per
+entity under CAP's `{namespace}-{Entity}.csv` convention, deployed by `cds deploy`. There is no load
+script. Keys are natural codes, so a redeploy UPSERTs a row rather than duplicating it. Hand-written
+seed files were rejected for _project state_ (D-31); this is reference data, the case D-120 already
+carves out.
+
+**Code lists (D-239).** CNV-001 seeds all twelve DM-001 §8 code lists — every row §8 lists, `code`
+and `name` as given there — with each `Actor` row's `kind` per §8.2. That is 55 rows.
+
 One **Methodology**: `code` = `sprint-build`, `name` = "Sprint Build". Its code equals stage 1's code
 and that is harmless — separate entities, and no verb addresses a Methodology by code.
 
@@ -103,17 +114,20 @@ SPEC-01 already relies on with `sprint-build` (driver `/build`) and `human-revie
 | 80       | `pm-update`       | PM Update       | Required    | —           | —             | `/pm-update`         |
 | 90       | `commit`          | Commit          | Required    | —           | —             | `/commit-diff`       |
 
-Seven **subtask steps**, parent `sprint-build`:
+Seven **subtask steps**, parent `sprint-build`. Every one carries `driver` = `/build`, the only
+command a person types to clear a subtask (D-241):
 
-| position | code        | name      | kind        | conditional |
-| -------- | ----------- | --------- | ----------- | ----------- |
-| 10       | `brief`     | Brief     | Required    | —           |
-| 20       | `red`       | Red       | Required    | —           |
-| 30       | `implement` | Implement | Required    | —           |
-| 40       | `gate`      | Gate      | Required    | —           |
-| 50       | `coverage`  | Coverage  | Required    | —           |
-| 60       | `smoke`     | Smoke     | Conditional | `shipsUi`   |
-| 70       | `handoff`   | Handoff   | Required    | —           |
+| position | code        | name      | kind        | conditional | requiresHuman | driver   |
+| -------- | ----------- | --------- | ----------- | ----------- | ------------- | -------- |
+| 10       | `brief`     | Brief     | Required    | —           | —             | `/build` |
+| 20       | `red`       | Red       | Required    | —           | —             | `/build` |
+| 30       | `implement` | Implement | Required    | —           | —             | `/build` |
+| 40       | `gate`      | Gate      | Required    | —           | —             | `/build` |
+| 50       | `coverage`  | Coverage  | Required    | —           | —             | `/build` |
+| 60       | `smoke`     | Smoke     | Conditional | `shipsUi`   | —             | `/build` |
+| 70       | `handoff`   | Handoff   | Required    | —           | —             | `/build` |
+
+In both tables `—` under `requiresHuman` is `false`.
 
 Three seeding notes:
 
@@ -130,10 +144,11 @@ are not fixed by this spec.
 
 #### Validation and rejection criteria
 
-The load is rejected if any of **BR-01 … BR-08** does not hold of the seeded rows — wrong step
-counts, a `kind` outside the enum, a Conditional step naming a predicate other than `shipsUi`, a
-second `requiresHuman` step, or children under a stage other than `sprint-build`. FUT-001 and FUT-003
-are the checks.
+A CSV cannot refuse a row, so nothing is rejected at load (D-240). A seed that breaks any of
+**BR-01 … BR-08** — wrong step counts, a `kind` outside the enum, a Conditional step naming a
+predicate other than `shipsUi`, a second `requiresHuman` step, or children under a stage other than
+`sprint-build` — is **caught by FUT-001 and FUT-003**. A code-list seed that breaks BR-34 is caught by
+FUT-019.
 
 #### Execution order
 
@@ -150,7 +165,7 @@ directions:
 | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Seed → verbs          | Every one of the 16 seeded codes is addressable by INT-001's verbs; none returns `verb.target.notFound`                                                              |
 | SPEC-01's FUTs → seed | All seven codes SPEC-01's FUTs already freeze resolve to a seeded step: `sprint-build`, `code-quality`, `test-quality`, `human-review`, `commit`, `smoke`, `handoff` |
-| Counts                | 9 stage steps, 7 subtask steps, 1 Methodology                                                                                                                        |
+| Counts                | 9 stage steps, 7 subtask steps, 1 Methodology (FUT-001); 12 code lists holding DM-001 §8's 55 rows (FUT-019)                                                         |
 
 ### 3.2 ENH-001 — Methodology Chain Instantiation [Enhancement]
 
@@ -258,6 +273,9 @@ because X" stays queryable in the Activity log, which is what makes clearing `co
 - **BR-06** `ux-test` and `smoke` are the only Conditional steps; both name `shipsUi`.
 - **BR-07** `documentation` is the only Recommended step.
 - **BR-08** `human-review` is the only step with `requiresHuman`.
+- **BR-34** CNV-001 also seeds all twelve DM-001 §8 code lists, every row DM-001 lists. It is the first load in the chain, so every later object's code-list association resolves (D-239).
+- **BR-35** The library and the code lists are hand-written CSV files in `db/data/`, loaded by `cds deploy`; there is no load script. A seed that breaks BR-01 … BR-08 is caught by FUT-001 and FUT-003, not refused at load (D-240).
+- **BR-36** Every subtask step carries `driver` = `/build` and `requiresHuman` = false (D-241).
 
 **Instantiation — ENH-001**
 
@@ -363,7 +381,7 @@ Approved-for-build until R1 clears.**
 ### FUT-001: The seeded library is exactly nine stages and seven subtasks
 
 **Covers:** CNV-001
-**Preconditions:** CNV-001 has run; no other conversion has.
+**Preconditions:** CNV-001 has run — the `db/data/` CSVs are deployed; no other conversion has.
 **Steps:**
 
 1. Read all Methodology rows.
@@ -376,7 +394,8 @@ Approved-for-build until R1 clears.**
 - Exactly **9** stage steps, matching §3.1's codes, names, kinds and drivers at positions 10…90.
 - Exactly **7** subtask steps under `sprint-build` at positions 10…70.
 - **No stage step other than `sprint-build` has children.**
-- Every step carries a non-empty one-line `description`; every stage step carries a `driver`.
+- Every one of the 16 steps carries a non-empty `description` and a non-empty `driver`; all 7
+  subtask steps carry `driver` = `/build` and `requiresHuman` = false.
 
 ### FUT-002: Every seeded code resolves, and every code SPEC-01 froze is seeded
 
@@ -644,6 +663,19 @@ Approved-for-build until R1 clears.**
   the named stage (SPEC-01 BR-13, BR-28).
 - Step 3 succeeds with **no** open-subtask warning; `verb.stage.subtasksOpen` does not appear in
   `warnings[]`.
+
+### FUT-019: All twelve code lists are seeded in full
+
+**Covers:** CNV-001
+**Preconditions:** CNV-001 has run — the `db/data/` CSVs are deployed; no other conversion has.
+**Steps:**
+
+1. Read every row of each of the twelve DM-001 §8 code-list entities.
+
+**Expected Result:**
+
+- Each list holds exactly the codes DM-001 §8 lists for it — no missing, no extra; 55 rows in all.
+- Every `Actor` row carries a `kind` resolving to an `ActorKind` row.
 
 ---
 

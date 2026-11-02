@@ -27,7 +27,7 @@ is the cutover window.
 defer to this stage by name across **4** files — and, more usefully, resolves the **8 things three
 documents assigned to "the first build story"**, a story that did not exist. **A story is a spec**
 (D-198): **13 stories**, `S-00 Module Bootstrap` plus `SPEC-01` … `SPEC-12`, because `TST-001` §14.2
-attributes all 180 FUTs per spec and four specs carry FUTs spanning their objects. **Three sprints,
+attributes all 181 FUTs per spec and four specs carry FUTs spanning their objects. **Three sprints,
 one per wave, with no branch, merge or tag of their own** — D-13 puts cutover before Financial
 Planner's `CNV-001`, so all three run inside its open `sprint/W1-S3` (D-202). Decisions run
 **D-01 … D-209**.
@@ -45,9 +45,10 @@ closing, which D-13 puts **downstream of `PT-W3`** (D-206).
 the design documents defer to this stage by name across **2** files, in **21** sections. It **executes the
 harness question** D-180 handed it and **reverses the exemplar's belief**: `cds.test` **can** load a
 TypeScript service implementation, given one `setupFiles` entry setting `CDS_TYPESCRIPT` — and the
-failure mode when the lever is missing is a **silent pass**, not an error (D-187). It classifies all
-**180** Functional Unit Tests onto tiers and finds the largest destination is a **script tier the
-exemplar does not have** (D-194). Decisions run **D-01 … D-197**.
+failure mode when the lever is missing is a **silent pass**, not an error (D-187). It classified all
+**180** Functional Unit Tests onto tiers and found the largest destination to be a **script tier the
+exemplar does not have** (D-194); since `SPEC-02`'s 2026-11-02 amendment the count is **181** and
+verb leads script 60 to 59. Decisions run **D-01 … D-197**.
 
 **Tech Stack is complete.** `design/TECH_STACK.md` (TS-001, **Approved**) settles the **5** questions
 the design documents defer to this stage by name across **14** files, in **18** sections. It **executes
@@ -597,6 +598,21 @@ Settle before or during Scaffold.
 
 ## 8. Session log
 
+### 2026-11-02 — `SPEC-02` workshop re-opened: `/build`'s two blockers, settled as data
+
+- **`/build`'s briefer blocked `SPEC-02` on two holes, and both were the spec's.** The code lists its
+  rows FK to were seeded at `CNV-002` — `SPEC-03`, built later — under `assert_integrity: 'DB'`, and
+  §3.1's subtask table gave neither `driver` nor `requiresHuman`, both `not null` in `db/schema.cds`.
+- **Sandro ruled D-239 … D-242.** `CNV-001` seeds all twelve code lists (D-239); the lists and the
+  library are hand-written CSVs in `db/data/`, loaded by `cds deploy`, with no load script (D-240);
+  every subtask step carries `driver` = `/build`, `requiresHuman` = false (D-241); tests read the
+  deployed CSVs, and `SPEC-02`'s build removes the fixture copies `SPEC-01`'s suite uses today (D-242).
+- **`SPEC-02` gains BR-34 … BR-36 and FUT-019**, classified **Verb (A)**; FUT-001 widened. Status stays
+  **Approved**. Counts re-stated in `TST-001` §2, §14 and `BP-001`: **181 FUTs, 369 business rules**.
+  `TST-001` §10–11, `TS-001` §12 and `DM-001` §9 corrected to match.
+- **Noted, not worked:** `SPEC-11`'s restore drill (BR-10, BR-19) copies `state/*.csv` into `db/data/`,
+  which now holds the tracked hand-written seeds, so a restore would overwrite them with exported copies.
+
 ### 2026-10-30 — `SPEC-01` QA chain, stage 6 Human Review: five findings mechanised, and a server no client could start
 
 - **Stage 6 closed, and it was Sandro's.** He raised five findings over the uncommitted tree; each
@@ -860,7 +876,7 @@ Settle before or during Scaffold.
   FUT-001 and FUT-012 cover all three of `INT-002`, `INT-003` and `INT-005` at once. A per-object cut
   leaves roughly **60 FUTs with no owner** and re-runs D-194. Re-measured against the specs themselves
   rather than carried: **180 FUTs and 366 business rules**, per-spec figures agreeing with `TST-001`
-  §14 exactly. A story's **ID is its spec's ID**, so `build-briefer` resolves one straight to a file.
+  §14 exactly — **181 and 369** since `SPEC-02`'s 2026-11-02 amendment (D-239 … D-242). A story's **ID is its spec's ID**, so `build-briefer` resolves one straight to a file.
 - **The second finding: no repo-wide dependency change can land during this build at all (D-206).** The
   deferred docket collects **eight** raised-and-owed items, and **four share one unblocking event** —
   Financial Planner's W1-S3 closing — which D-13 puts **downstream of `PT-W3`**, since cutover precedes
@@ -943,7 +959,9 @@ Settle before or during Scaffold.
   **four** FUTs genuinely need a client — the tool list, the stdout guard, the `zod` boundary and the
   amended `plan_sprint` schema — which get a thin **protocol** tier.
 - **All 180 Functional Unit Tests were classified, and the classification is the deliverable (D-194).**
-  Measured: **180 FUTs across 366 business rules** (16, 18, 12, 16, 14, 15, 18, 12, 13, 16, 15, 15). The
+  Measured: **180 FUTs across 366 business rules** (16, 18, 12, 16, 14, 15, 18, 12, 13, 16, 15, 15) —
+  **181 across 369** since `SPEC-02`'s 2026-11-02 amendment added FUT-019 (Verb (A)), which also puts
+  verb (60) one ahead of script (59) and makes the OData share 41 of 181. The
   rule is that **a FUT is written at the outermost tier that can observe it, once**, and unit tests are
   driven by the 366 business rules rather than by the FUTs. Destinations: **59 script, 59 verb, 41 OData,
   10 browser, 7 one-time, 4 protocol.** Two things fall out that no summary would have predicted. **The
@@ -2249,7 +2267,7 @@ stores them under the user's home directory, which the bridge cannot access.
 | `Project Tracker/design/TECH_STACK.md` §11.1             | The reverse-proxy execution record — `$batch` POST and an OData write, in a real browser, under `NODE_ENV=production`, with zero CORS headers.                                                                                                                    |
 | `Project Tracker/design/TEST_STRATEGY.md`                | TST-001 — tooling, harness loading, the tier list, per-tier standards, the assertable surface, the test profile's blind spot, test data, file structure, coverage targets and their layer mapping, the FUT contract, run recording and enforcement. **Approved.** |
 | `Project Tracker/design/TEST_STRATEGY.md` §4             | The harness execution record — `cds.test` **can** load a `.ts` service impl, and omitting the lever is a silent pass rather than an error.                                                                                                                        |
-| `Project Tracker/design/TEST_STRATEGY.md` §14            | The FUT coverage contract — all 180 Functional Unit Tests classified onto six destinations.                                                                                                                                                                       |
+| `Project Tracker/design/TEST_STRATEGY.md` §14            | The FUT coverage contract — all 181 Functional Unit Tests classified onto six destinations.                                                                                                                                                                       |
 | `Project Tracker/design/BUILD_PLAN.md`                   | BP-001 — the story list, story zero, the sprint plan, the definition of done, per-story test obligations, cross-story contracts, the deferred change docket, progress tracking and enforcement. **Approved.**                                                     |
 | `Project Tracker/design/BUILD_PLAN.md` §4                | Story zero — the eight things three documents assigned to "the first build story", each resolved to `S-00` or to a named human prerequisite.                                                                                                                      |
 | `Project Tracker/design/BUILD_PLAN.md` §12               | The deferred change docket — eight owed changes, four of them sharing one unblocking event that is downstream of this plan.                                                                                                                                       |

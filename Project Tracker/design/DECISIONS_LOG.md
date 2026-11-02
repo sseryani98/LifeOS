@@ -1701,3 +1701,35 @@ Amendments are made in place — the superseded text is struck through and marke
 - **Decision:** **B.** `test/integration/scenarios/` is now live, holding one spec per functional unit of `SPEC-01`, each named by its own identifier.
 - **Rationale:** A throwaway driver makes the stage's evidence unreproducible, which is the same failure as a matrix - it proves something ran once, on a tree nobody can re-run. A tier is re-runnable by anyone, on any commit, and it makes the stage's question answerable by `npm test` rather than by an agent's report. `TST-001` §12 had already reserved `integration/scenarios/` for "Multi-step FUT workflows", so the home was named before it was needed; this is the first tier to occupy it. Every unit is driven through a real MCP client over `InMemoryTransport`, except the stdout guard, which spawns the server as its own process because nothing else reproduces a log line inside a live frame stream.
 - **Consequences:** **16 of 16 pass**, executed. Suite **143 -> 159 tests in 19 suites**; root **445**. The tier costs about 6.5 seconds, four of which are the spawned process. Three notes worth carrying. **(1)** `lint:tracking-ids` bans a design identifier everywhere under `test/` except a `data/` folder, so the sixteen identifiers live in `scenarios/data/functionalUnits.ts` and the specs interpolate them into their titles - which is what makes a run of this tier answer the traceability question in its own output. **(2)** This tier **deliberately re-asserts** what the verb and protocol tiers already cover, which is a real exception to `TST-001` §14's rule that a FUT is written at the outermost tier that can observe it, **once**. The tiers own regression; this tier owns the stage. Thinning the overlap is a judgement for whoever next reads §14, not a defect to fix silently. **(3)** The composed view answers under `initiatives[].milestones[]`, not `stories[]` - the only assertion in the sixteen that failed on first run, and a naming mismatch between the spec's vocabulary and the payload's.
+
+## D-239: CNV-001 Seeds All Twelve Code Lists, Not CNV-002
+
+- **Context:** The `/build` briefer blocked `SPEC-02`. `TST-001` §10 and `TS-001` §12 placed the twelve DM-001 §8 code-list seeds at `CNV-002` — which is `SPEC-03`, built after `SPEC-02`. `.cdsrc.json` sets `assert_integrity: "db"`, so Postgres rejects the `StepKind`, `TaskStatus`, `SubtaskStatus` and `Actor` / `ActorKind` foreign keys `SPEC-02`'s rows carry until those lists exist. `db/` held only `schema.cds`, and `SPEC-02` §3.1 named no seed mechanism or path.
+- **Options:** A) CNV-001 seeds all twelve; B) CNV-001 seeds only the four it needs, CNV-002 the other eight; C) leave them at CNV-002 — `SPEC-02` testable, but not runnable on Postgres until `SPEC-03`.
+- **Decision:** **A.** Sandro, 2026-11-02.
+- **Rationale:** CNV-001 is first in BA-001 §5's strict chain `CNV-001 → … → CNV-005`, and every later load FKs to the lists. They are vocabulary, not Financial Planner migration data. B splits one twelve-list set across two specs so that neither owns it; C ships a spec that cannot run on its own database.
+- **Consequences:** `SPEC-02` BR-34 and FUT-019; §3.1 names the code lists. `TST-001` §10 and `TS-001` §12 corrected in place. `SPEC-03`'s CNV-002 Milestone load is untouched.
+
+## D-240: Seeds Are Hand-Written CSVs in `db/data/`, Loaded by `cds deploy`
+
+- **Context:** D-239 gives CNV-001 the twelve code lists on top of the library — one `Methodology` and sixteen `MethodologyStep` rows. `SPEC-02` §3.1 named no seed form, and its "Validation and rejection criteria" said "the load is rejected", which presumes a loader that can refuse.
+- **Options:** A) CSV files in `db/data/`; B) a load script that validates BR-01 … BR-08 before inserting; C) the code lists as CSV, the library by script.
+- **Decision:** **A**, for both the code lists and the library. No load script.
+- **Rationale:** `TS-001` §12 already reserves `db/data/` for code-list seeds, and D-120 already says `db/data/` holds the module's hand-written code-list seeds. CSV is CAP-native and needs no code. Every key is a natural code (`MethodologyStep.code`, a code list's `code`), so `schema_evolution`'s UPSERT on redeploy updates a row rather than duplicating it. D-31 rejected hand-maintained seed files for the durability of _project state_; this is reference data, which is the case D-120 already carves out.
+- **Consequences:** A CSV cannot refuse a bad row, so `SPEC-02` §3.1's criterion changes from "the load is rejected" to "a seed violating BR-01 … BR-08 is caught by FUT-001 and FUT-003" (BR-35). DM-001 §9's `MethodologyStep.conditional` row, which cited `SPEC-02` §3.1 as rejecting the load, is corrected to match.
+
+## D-241: All Seven Subtask Steps Carry `driver` = `/build` and `requiresHuman` = false
+
+- **Context:** `db/schema.cds` makes `MethodologyStep.driver` (`String(30) not null`) and `requiresHuman` (`Boolean not null`) mandatory on all sixteen rows (DM-001 §6.2), but `SPEC-02` §3.1's subtask table gave neither, and FUT-001 required a driver only on stage steps. `test/shared/data/methodology.ts` uses `/build` for the subtasks — a fixture guess, not a ruling.
+- **Options:** A) `/build` for all seven; B) the per-phase agent name (`build-briefer`, `test-author`, `implementer`, `gate-runner`, smoke tester …); C) make `driver` nullable for subtasks — a schema change.
+- **Decision:** **A.**
+- **Rationale:** BR-31 generates the remediation's command text from `driver`, and `/build` is the only command a person types to clear a subtask. Agent names are not commands, so B would print a wrong remediation; C changes DM-001 for no gain. `requiresHuman = false` is already forced by BR-08.
+- **Consequences:** `SPEC-02` BR-36; §3.1's subtask table gains both columns; FUT-001 widened. No schema change.
+
+## D-242: Tests Load the Real `db/data/` CSVs, and No Fixture Duplicates a Seeded Row
+
+- **Context:** `SPEC-01`'s suite seeds the code lists and the library from fixture copies — `test/shared/data/codeLists.ts` and `test/shared/data/methodology.ts`, inserted by `seedCodeLists` and `seedMethodologyLibrary` in `test/shared/support/seedWorld.ts`. Once D-240's CSVs exist, the same rows live in two places.
+- **Options:** A) tests use the deployed CSVs; B) keep the fixture copies and their inserts.
+- **Decision:** **A.**
+- **Rationale:** With fixture copies, FUT-001, FUT-002 and FUT-019 would assert the fixture, not the seed, so a typo in the real CSV passes. A test support helper may still UPDATE a seeded row — FUT-008 step 3 changes `code-quality`'s driver.
+- **Consequences:** `SPEC-02`'s build removes both fixture copies and their inserts. **`SPEC-01`'s suite relies on them today**, so the build persona must move it onto the deployed CSVs in the same change. `TST-001` §11.1's Methodology and Code lists rows now name the CSVs as their source.

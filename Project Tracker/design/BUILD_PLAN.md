@@ -1,8 +1,8 @@
 # Build Plan
 
 **Document ID:** BP-001
-**Version:** 1.0
-**Date:** 2026-08-15
+**Version:** 1.1
+**Date:** 2026-11-02
 **Status:** Approved
 
 ---
@@ -11,6 +11,7 @@
 
 | Date       | Author          | Description                                                                                                                                                                                                                                                              |
 | ---------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 2026-11-02 | Sandro & Claude | **v1.1 — FUT and rule counts re-stated after the `SPEC-02` amendment (D-239 … D-242).** `SPEC-02` gains FUT-019, classified **Verb (A)** by Sandro, and BR-34 … BR-36, so it carries **19** FUTs and **36** rules and the plan **181** FUTs across **369** rules. §2, §3, §3.1, §8.3 and §9 (story table, re-measurement note, §9.1) updated; Jest now runs **164 of 181** (60 verb). No story, sprint or ruling changes. Status stays **Approved**. |
 | 2026-08-15 | Sandro          | **Status → Approved.** All eleven Phase 5 coverage checks met; the approval gate at step 0 of Phase 6 was answered before the stage closed — the **fourth** stage running, after `DM-001`, `TS-001` and `TST-001`. **Plan + Design is complete; Build opens on `S-00`.** |
 | 2026-08-15 | Sandro & Claude | Initial creation from the Project Planning stage. 13 stories, 3 sprints, one story zero, an eight-item deferred docket. Records D-198 … D-209. Story zero resolves the eight things three documents assigned to "the first build story".                                 |
 
@@ -27,7 +28,7 @@
 | **Branch and tag**     | **None of its own.** All three sprints run inside Financial Planner's already-open `sprint/W1-S3`, because D-13 puts cutover before that sprint's last story (D-202)              |
 | **Prerequisite**       | **One, and it is human** — creating the `project_tracker` Postgres role, before `S-00` (D-200)                                                                                    |
 | **Definition of done** | The baseline gate, the nine-stage chain, and the story's Functional Unit Tests **by ID** at the tier [TST-001](TEST_STRATEGY.md) §14.2 assigns (D-204)                            |
-| **FUTs**               | **180**, each claimed by exactly one story. `S-00` claims none and carries **one** test of its own, which is what lets the `test` script land without `--passWithNoTests` (D-199) |
+| **FUTs**               | **181**, each claimed by exactly one story. `S-00` claims none and carries **one** test of its own, which is what lets the `test` script land without `--passWithNoTests` (D-199) |
 | **Shared surfaces**    | Two. `db/schema.cds` + `TrackerService` are created by `SPEC-01`; `app/project-view/` is created by `SPEC-04` and extended by three later stories (D-205)                         |
 | **Non-story work**     | **One item** — the Postgres role. Everything else is a story or is docketed                                                                                                       |
 | **Deferred docket**    | **Eight items.** Four share one unblocking event, and it is **downstream of `PT-W3`** (D-206)                                                                                     |
@@ -40,10 +41,10 @@
 ## 3. The Story List (D-198)
 
 **A story is a spec.** The reason is mechanical rather than aesthetic: [TST-001](TEST_STRATEGY.md)
-§14.2 attributes all 180 Functional Unit Tests **per spec and never per object**, and several are
+§14.2 attributes all 181 Functional Unit Tests **per spec and never per object**, and several are
 not attributable to one object at all — `SPEC-08` FUT-001 ("no rewired file mentions a retired
 markdown path") and FUT-012 span all three of its objects at once. A one-story-per-object cut would
-have to re-cut those 180 FUTs, which is re-opening D-194.
+have to re-cut those 181 FUTs, which is re-opening D-194.
 
 **A story's ID is its spec's ID.** The mapping is 1:1 by construction, so a second identifier would
 be a second thing to keep in sync. `build-briefer` resolves a story ID straight to a spec file.
@@ -77,7 +78,7 @@ board — whether a Milestone materialises 9 Tasks or 8. **Four of thirteen ship
 ### 3.1 What a per-object cut would have cost — stated, not implied
 
 Recorded because the option was live and rejected for a measurable reason rather than a preference.
-`SPEC-02` carries three objects and 18 FUTs; `SPEC-03` carries three and 12; `SPEC-07` two and 18;
+`SPEC-02` carries three objects and 19 FUTs; `SPEC-03` carries three and 12; `SPEC-07` two and 18;
 `SPEC-08` three and 12. Cutting those four specs into objects produces 22 stories and **60 FUTs with
 no owner**, because those specs' §7 sections name outcomes that cross their objects. That is not a
 tidy-up; it is a re-run of D-194's classification.
@@ -262,7 +263,7 @@ re-assign tiers and must not.
 
 ### 8.3 What "done" means for the tests that are not runner tests
 
-**163 of 180 run under Jest** (59 verb, 59 script, 41 OData, 4 protocol) and are covered by Part A.
+**164 of 181 run under Jest** (60 verb, 59 script, 41 OData, 4 protocol) and are covered by Part A.
 The other 17 need an explicit completion condition or the stories carrying them cannot be finished.
 
 | Class                     | Count | Whose stories                         | Done when                                                                                                                                                                                                                                           |
@@ -285,7 +286,7 @@ one story and the columns total that table exactly.**
 | --------- | ----------------- | ------- | -------- | --------- | -------- | ------ | ------- | -------- |
 | `S-00`    | **none**          | **0**   | —        | —         | —        | —      | —       | —        |
 | `SPEC-01` | FUT-001 … FUT-016 | 16      | 13       | —         | **3**    | —      | —       | —        |
-| `SPEC-02` | FUT-001 … FUT-018 | 18      | 18       | —         | —        | —      | —       | —        |
+| `SPEC-02` | FUT-001 … FUT-019 | 19      | 19       | —         | —        | —      | —       | —        |
 | `SPEC-03` | FUT-001 … FUT-012 | 12      | 12       | —         | —        | —      | —       | —        |
 | `SPEC-04` | FUT-001 … FUT-016 | 16      | 10       | 6         | —        | —      | —       | —        |
 | `SPEC-05` | FUT-001 … FUT-014 | 14      | —        | 13        | —        | —      | 1       | —        |
@@ -296,12 +297,12 @@ one story and the columns total that table exactly.**
 | `SPEC-10` | FUT-001 … FUT-016 | 16      | —        | —         | —        | **16** | —       | —        |
 | `SPEC-11` | FUT-001 … FUT-015 | 15      | —        | —         | —        | **15** | —       | —        |
 | `SPEC-12` | FUT-001 … FUT-015 | 15      | 2        | —         | —        | **7**  | —       | **6**    |
-| **Total** |                   | **180** | **59**   | **41**    | **4**    | **59** | **10**  | **7**    |
+| **Total** |                   | **181** | **60**   | **41**    | **4**    | **59** | **10**  | **7**    |
 
 **Re-measured against the specs themselves this session** rather than carried from `TST-001`: the
-per-spec FUT counts are 16, 18, 12, 16, 14, 15, 18, 12, 13, 16, 15, 15 = **180**, and the business
-rules are 33, 33, 38, 34, 37, 31, 36, 33, 23, 29, 21, 18 = **366**. Both agree with `TST-001` §14
-exactly.
+per-spec FUT counts are 16, 19, 12, 16, 14, 15, 18, 12, 13, 16, 15, 15 = **181**, and the business
+rules are 33, 36, 38, 34, 37, 31, 36, 33, 23, 29, 21, 18 = **369**. Both agree with `TST-001` §14
+exactly. (`SPEC-02` re-counted 2026-11-02: 18 → 19 FUTs, 33 → 36 rules, D-239 … D-242.)
 
 **`S-00` claims no FUT, and that is a stated none, not an omission.** It implements design-document
 rulings rather than a spec, and no spec carries the proxy or the runner config. Its one test (§4.3)
@@ -312,7 +313,7 @@ FUTs.
 ### 9.1 Unit tests are not in this table, by construction
 
 The `Unit` column of `TST-001` §14.2 is empty, and so is this one. Unit tests are driven by the
-**366 business rules and the coverage thresholds**, not by the 180 FUTs (D-194). A story's unit
+**369 business rules and the coverage thresholds**, not by the 181 FUTs (D-194). A story's unit
 tests are therefore bounded by Part A of the definition of done, not by Part B.
 
 ---

@@ -1,8 +1,8 @@
 # Tech Stack
 
 **Document ID:** TS-001
-**Version:** 1.0
-**Date:** 2026-08-15
+**Version:** 1.1
+**Date:** 2026-11-02
 **Status:** Approved
 
 ---
@@ -11,6 +11,7 @@
 
 | Date       | Author          | Description                                                                                                                                                                                                                                                                                                                                                                                                           |
 | ---------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-11-02 | Sandro & Claude | **v1.1 — amended at `SPEC-02`'s build (D-239, D-240).** §12: `db/data/` holds the code-list **and** methodology library seeds, as hand-written CSVs loaded by `cds deploy`, and they belong to `CNV-001`, not `CNV-002`. Status stays **Approved**. |
 | 2026-08-15 | Sandro          | **Status → Approved.** All twelve Phase 5 coverage checks met; the approval gate at step 0 of Phase 6 was answered before the stage closed — the second stage running, after `DM-001`.                                                                                                                                                                                                                                |
 | 2026-08-15 | Sandro & Claude | Initial creation from the Tech Stack stage. Settles the **5** questions the design documents defer here by name across **14** files. Records D-176 through D-185. **D-141's reverse proxy is EXECUTED and closed** — `$batch` POST and an OData write both green in a real browser under `NODE_ENV=production`, with no CORS header of any kind. Mints **R11**. Two measured defects found, one of them cross-module. |
 
@@ -456,7 +457,7 @@ Project Tracker/
   eslint.config.mjs
   db/
     schema.cds                          The 25 persisted entities (DM-001)
-    data/                               Code-list seeds (CNV-002)
+    data/                               Code-list + methodology library seeds (CNV-001)
   srv/
     tracker-service.cds                 TrackerService (§5)
     tracker-service.ts                  Entry point

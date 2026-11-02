@@ -1,19 +1,20 @@
 # Test Strategy
 
 **Document ID:** TST-001
-**Version:** 1.1
-**Date:** 2026-08-15
+**Version:** 1.2
+**Date:** 2026-11-02
 **Status:** Approved
 
 ---
 
 ## 1. Change History
 
-| Date       | Author          | Description                                                                                                                                                                                                                                                                                                                                                              |
-| ---------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 2026-08-15 | Sandro & Claude | **v1.1 — amended at the Project Planning stage.** §17.2's linter candidate is **answered rather than left open**: no new linter, and the `setupFiles` lever gets an in-module guard in story `SPEC-01`'s definition of done instead (BP-001 §11, D-208). No threshold, tier, folder or count changes.                                                                    |
-| 2026-08-15 | Sandro          | **Status → Approved.** All twelve Phase 5 coverage checks met; the approval gate at step 0 of Phase 6 was answered before the stage closed — the **third** stage running, after `DM-001` and `TS-001`.                                                                                                                                                                   |
-| 2026-08-15 | Sandro & Claude | Initial creation from the Test Strategy stage. Settles the **4** questions the design documents defer here by name across **2** files. Records D-186 through D-197. **The harness question is EXECUTED** — `cds.test` **can** load a TypeScript service implementation, reversing the exemplar's stated belief. Classifies all **180** Functional Unit Tests onto tiers. |
+| Date       | Author          | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| ---------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-11-02 | Sandro & Claude | **v1.2 — amended at `SPEC-02`'s build (D-239, D-242).** §10: the twelve code lists are seeded at `CNV-001`, not `CNV-002`, and `SPEC-02` FUT-019 joins the migration reconciliation as cover for a seed defect. §11.1: the Methodology and Code lists seed sets come from the `db/data/` CSVs, never a fixture copy. §2, §14: `SPEC-02` FUT-019 is classified **Verb (A)** (Sandro), so the contract is **181** FUTs (verb **60**) across **369** business rules — `SPEC-02` now carries 19 FUTs and 36 rules. Status stays **Approved**. |
+| 2026-08-15 | Sandro & Claude | **v1.1 — amended at the Project Planning stage.** §17.2's linter candidate is **answered rather than left open**: no new linter, and the `setupFiles` lever gets an in-module guard in story `SPEC-01`'s definition of done instead (BP-001 §11, D-208). No threshold, tier, folder or count changes.                                                                                                                                                                                                                                     |
+| 2026-08-15 | Sandro          | **Status → Approved.** All twelve Phase 5 coverage checks met; the approval gate at step 0 of Phase 6 was answered before the stage closed — the **third** stage running, after `DM-001` and `TS-001`.                                                                                                                                                                                                                                                                                                                                    |
+| 2026-08-15 | Sandro & Claude | Initial creation from the Test Strategy stage. Settles the **4** questions the design documents defer here by name across **2** files. Records D-186 through D-197. **The harness question is EXECUTED** — `cds.test` **can** load a TypeScript service implementation, reversing the exemplar's stated belief. Classifies all **180** Functional Unit Tests onto tiers.                                                                                                                                                                  |
 
 **The document ID is `TST-001`, not `TS-002`.** `TS-001` is this module's **Tech Stack**
 ([TECH_STACK.md](TECH_STACK.md)). Financial Planner numbers its Test Strategy `TS-003`; that is that
@@ -36,7 +37,7 @@ module's sequence and not this one's.
 | **File structure**     | Inherited wholesale — `{unit\|integration}/{module}/{data,support,tests}` + `test/shared/` (D-192)                                                              |
 | **Coverage**           | Numbers **inherited**, layers **re-mapped**: Validators 100/100, Services + verbs + scripts 90/85, Overall 85/80, Facades excluded (D-193)                      |
 | **Utilities**          | **None** — this module encrypts nothing and schedules nothing, so the exemplar's 100/100 Utilities band has no target here (D-193)                              |
-| **FUT contract**       | All **180** FUTs classified: **59** script, **59** verb, **41** OData, **10** browser, **7** one-time, **4** protocol (D-194)                                   |
+| **FUT contract**       | All **181** FUTs classified: **59** script, **60** verb, **41** OData, **10** browser, **7** one-time, **4** protocol (D-194)                                   |
 | **Frontend**           | **No in-repo suite.** `/functional-test` and `/ux-test` are the tier (D-195)                                                                                    |
 | **Recording a run**    | Destination **and** transition. The `posttest` hook **cannot record a failing run**, so both gate sites call it explicitly (D-196)                              |
 | **Enforcement**        | **3** live test `lint:*` scripts (of **5** enforced rules). Coverage mapping, tier boundaries, the FUT contract and the lever are enforced by **nothing** (§17) |
@@ -417,10 +418,10 @@ alternative — running the integration tier against Postgres — was rejected b
 suite depend on a running server, a role and a credential (TS-001 §8), which trades a named blind spot
 for an unnamed flakiness.
 
-**The blind spot is bounded by design.** D-166 made `Actor` a code list and DM-001 seeds twelve code
-lists at `CNV-002`; an unseeded code is therefore a **seed defect**, caught by the migration
-reconciliation (`CNV-004`, SPEC-03 FUT-012) rather than by a unit of application logic. That is the
-covering mechanism, and it is a load-time check rather than a test.
+**The blind spot is bounded by design.** D-166 made `Actor` a code list and DM-001's twelve code
+lists are seeded at `CNV-001` (D-239); an unseeded code is therefore a **seed defect**, caught by
+SPEC-02 FUT-019's full-list check and by the migration reconciliation (`CNV-004`, SPEC-03 FUT-012)
+rather than by a unit of application logic. Those are the covering mechanisms.
 
 ---
 
@@ -444,14 +445,14 @@ This module's canonical world is **the migrated Financial Planner workspace**, b
 exists to hold it and `CNV-002`'s load is already specified row by row (SPEC-03 §3.1). Seeding it in
 tests reuses a shape three Approved specs already fix, rather than inventing a parallel fiction:
 
-| Seed set    | Contents                                                                 | Source          |
-| ----------- | ------------------------------------------------------------------------ | --------------- |
-| Hierarchy   | One Area → Engagement → Workspace `financial-planner`                    | SPEC-03 BR-01…  |
-| Initiatives | Three — two Complete with their real git facts, one Active               | SPEC-03 §3.1    |
-| Milestones  | Twelve, `shipsUi` set on all twelve, exactly one in Backlog with a chain | SPEC-03 FUT-002 |
-| Methodology | Nine stages, seven subtasks                                              | SPEC-02 FUT-001 |
-| Registers   | Four Defects, five Decisions, two Activity rows, one TestRun             | SPEC-03 §3.2    |
-| Code lists  | All twelve, fully seeded                                                 | DM-001 §7       |
+| Seed set    | Contents                                                                 | Source                                                  |
+| ----------- | ------------------------------------------------------------------------ | ------------------------------------------------------- |
+| Hierarchy   | One Area → Engagement → Workspace `financial-planner`                    | SPEC-03 BR-01…                                          |
+| Initiatives | Three — two Complete with their real git facts, one Active               | SPEC-03 §3.1                                            |
+| Milestones  | Twelve, `shipsUi` set on all twelve, exactly one in Backlog with a chain | SPEC-03 FUT-002                                         |
+| Methodology | Nine stages, seven subtasks                                              | `db/data/` CSVs (CNV-001), never a fixture copy (D-242) |
+| Registers   | Four Defects, five Decisions, two Activity rows, one TestRun             | SPEC-03 §3.2                                            |
+| Code lists  | All twelve, fully seeded (DM-001 §8)                                     | `db/data/` CSVs (CNV-001), never a fixture copy (D-242) |
 
 **No sensitive-data rules are needed, and that is a stated "none".** This module holds sprint state.
 It has no card numbers, no credentials and no encrypted fields — the exemplar's §7.3 has no analogue
@@ -575,8 +576,9 @@ This is why question 13 of the standard asks for a **layer mapping** and not a n
 
 ## 14. The FUT Coverage Contract (D-194)
 
-The twelve specs carry **180 Functional Unit Tests** across **366 business rules** — measured this
-session, per spec: 16, 18, 12, 16, 14, 15, 18, 12, 13, 16, 15, 15. That set is this stage's largest
+The twelve specs carry **181 Functional Unit Tests** across **369 business rules** — measured this
+session, per spec: 16, 19, 12, 16, 14, 15, 18, 12, 13, 16, 15, 15 (`SPEC-02` re-counted 2026-11-02 after
+D-239 … D-242 added FUT-019 and BR-34 … BR-36). That set is this stage's largest
 input, and until now no document has said how one of them becomes a file.
 
 ### 14.1 The rule
@@ -588,17 +590,17 @@ Three consequences, each deliberate:
 
 - **A FUT is never written twice.** A rule proven at the integration tier is not re-asserted at the
   protocol tier, and a rendering proven in the browser is not re-asserted over OData.
-- **The 366 business rules are the unit tier's input**, which is why §13's thresholds are meaningful
-  at all: a 90% Service target is unreachable from 180 outcome-level tests.
+- **The 369 business rules are the unit tier's input**, which is why §13's thresholds are meaningful
+  at all: a 90% Service target is unreachable from 181 outcome-level tests.
 - **A FUT no tier can observe is not a test**, and §14.3 names those explicitly rather than letting
   them rot as untraceable coverage.
 
-### 14.2 All 180, classified
+### 14.2 All 181, classified
 
 | Spec                              | FUTs    | Unit | Verb (A) | OData (B) | Protocol | Script | Browser | One-time |
 | --------------------------------- | ------- | ---- | -------- | --------- | -------- | ------ | ------- | -------- |
 | SPEC-01 — INT-001                 | 16      | —    | 13       | —         | **3**    | —      | —       | —        |
-| SPEC-02 — CNV-001/ENH-001/WFL-001 | 18      | —    | 18       | —         | —        | —      | —       | —        |
+| SPEC-02 — CNV-001/ENH-001/WFL-001 | 19      | —    | 19       | —         | —        | —      | —       | —        |
 | SPEC-03 — CNV-002/003/004         | 12      | —    | 12       | —         | —        | —      | —       | —        |
 | SPEC-04 — ENH-002/RPT-002         | 16      | —    | 10       | 6         | —        | —      | —       | —        |
 | SPEC-05 — ENH-003/RPT-001/FRM-001 | 14      | —    | —        | 13        | —        | —      | 1       | —        |
@@ -609,7 +611,7 @@ Three consequences, each deliberate:
 | SPEC-10 — INT-006                 | 16      | —    | —        | —         | —        | **16** | —       | —        |
 | SPEC-11 — INT-007                 | 15      | —    | —        | —         | —        | **15** | —       | —        |
 | SPEC-12 — CNV-005                 | 15      | —    | 2        | —         | —        | **7**  | —       | **6**    |
-| **Total**                         | **180** | —    | **59**   | **41**    | **4**    | **59** | **10**  | **7**    |
+| **Total**                         | **181** | —    | **60**   | **41**    | **4**    | **59** | **10**  | **7**    |
 
 > **Amended 2026-08-26 at `SPEC-01`'s Functional Test stage (D-238).** The columns above classify
 > where each FUT's **assertions** live, and they still do. What is new is that the FUTs are now also
@@ -629,12 +631,12 @@ Three consequences, each deliberate:
 
 **Two findings the table makes unavoidable.**
 
-**The largest single destination is the script tier — 59 of 180 — and the exemplar has no such tier
-at all.** `INT-004`, `INT-006`, `INT-007` and `CNV-005` are Node entry points, a `PreToolUse` hook and
+**The script tier holds 59 of 181 — the largest single destination until `SPEC-02` FUT-019 put verb
+one ahead — and the exemplar has no such tier at all.** `INT-004`, `INT-006`, `INT-007` and `CNV-005` are Node entry points, a `PreToolUse` hook and
 a linter; none of them is reachable from an OData request. A strategy inherited unchanged would have
 left a third of this module's specified behaviour with nowhere to go.
 
-**Only 41 of 180 are OData integration tests.** The exemplar's "one test file per CDS service" shape
+**Only 41 of 181 are OData integration tests.** The exemplar's "one test file per CDS service" shape
 covers under a quarter of this module's outcome surface. It is inherited (§7.2) and it is not the
 centre of gravity anyone would guess from reading it.
 
