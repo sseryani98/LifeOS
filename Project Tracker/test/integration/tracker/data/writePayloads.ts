@@ -2,6 +2,7 @@ import { WORLD } from "../../../shared/data/world.js";
 
 /** The service paths the read-path suite writes to and reads from. */
 export const PATHS = {
+  DECISIONS: "/service/trackerSvcs/Decisions",
   DEFECTS: "/service/trackerSvcs/Defects",
   INITIATIVES: "/service/trackerSvcs/Initiatives",
   MILESTONES: "/service/trackerSvcs/Milestones",
@@ -90,4 +91,49 @@ export const ORPHAN_TEST_RUN = {
 export const DUPLICATE_SLUG_WORKSPACE = {
   slug: "financial-planner",
   name: "A second workspace with the first one's slug",
+} as const;
+
+/** A patch that clears the sprint link, which a story-scoped defect never had. */
+export const CLEAR_SPRINT_LINK_PATCH = { initiative_ID: null } as const;
+
+/** A patch that clears the sprint link a sprint-scoped test run hangs off. */
+export const ORPHANING_TEST_RUN_PATCH = { initiative_ID: null } as const;
+
+/** A new goal for a sprint, sent beside its own unchanged name. */
+export const UNCHANGED_NAME_GOAL_EDIT = "Points valuation, rescoped";
+
+/** A new description for a story, sent beside its own unchanged identifier. */
+export const UNCHANGED_STORY_ID_DESCRIPTION_EDIT = "Categorization rules, rescoped";
+
+/** A sprint claiming the position the canonical sprint already holds. */
+export const POSITION_CLASH_INITIATIVE = {
+  ...SECOND_INITIATIVE,
+  position: WORLD.INITIATIVE.position,
+} as const;
+
+/** A story claiming the position the canonical story already holds. */
+export const POSITION_CLASH_STORY = {
+  ...SECOND_STORY,
+  position: WORLD.STORY.position,
+} as const;
+
+/** A sprint with every mandatory field but its branch. */
+export const INITIATIVE_WITHOUT_BRANCH = {
+  name: "W1-S5",
+  goal: "Rewards ledger",
+  position: 50,
+  status_code: "Active",
+} as const;
+
+/** A test run scoped to a sprint, but with no time it ran at. */
+export const TEST_RUN_WITHOUT_EXECUTED_AT = {
+  total: 1,
+  passed: 1,
+  failed: 0,
+} as const;
+
+/** A decision against the workspace, but with no time it was taken. */
+export const DECISION_WITHOUT_DECIDED_AT = {
+  decision: "Copy on write",
+  rationale: "The read path is on the dashboard's critical path",
 } as const;

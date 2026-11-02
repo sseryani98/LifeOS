@@ -2,8 +2,10 @@ import { ENTITIES } from "../shared/constants.js";
 
 import type {
   ChainTaskRow,
+  DefectPayload,
   InitiativePayload,
   MilestonePayload,
+  TestRunPayload,
 } from "./types.js";
 
 /** Every query the handler layer issues. No logic lives here. */
@@ -74,6 +76,35 @@ export class TrackerDataService {
     const rows = (await SELECT.from(ENTITIES.MILESTONE)
       .columns("storyId", "initiative_ID")
       .where({ ID: milestoneId })) as MilestonePayload[];
+    return rows[0];
+  }
+
+  /**
+   * Reads the two links a Defect is scoped by, so a patch nulling one is judged
+   * against the other as stored.
+   * @param defectId The Defect being written.
+   * @returns The stored links, or undefined when no row exists.
+   */
+  async readDefectScopeRow(
+    defectId: string,
+  ): Promise<DefectPayload | undefined> {
+    const rows = (await SELECT.from(ENTITIES.DEFECT)
+      .columns("milestone_ID", "initiative_ID")
+      .where({ ID: defectId })) as DefectPayload[];
+    return rows[0];
+  }
+
+  /**
+   * Reads the two links a TestRun is scoped by. Same shape as the Defect read.
+   * @param testRunId The TestRun being written.
+   * @returns The stored links, or undefined when no row exists.
+   */
+  async readTestRunScopeRow(
+    testRunId: string,
+  ): Promise<TestRunPayload | undefined> {
+    const rows = (await SELECT.from(ENTITIES.TEST_RUN)
+      .columns("task_ID", "initiative_ID")
+      .where({ ID: testRunId })) as TestRunPayload[];
     return rows[0];
   }
 

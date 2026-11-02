@@ -4,12 +4,14 @@ import {
   INITIATIVE_ROWS,
   MILESTONE_ORDER,
   MILESTONE_ROWS,
+  PATCH_KEYS,
   QUEUE_ROWS,
   WORKSPACE_ROWS,
 } from "../data/verbFixtures.js";
 import {
   buildRecordingRunner,
   readInsertedEntries,
+  readUpdateWhere,
 } from "../support/fakeRunner.js";
 
 const ACTOR = "implementer";
@@ -113,14 +115,28 @@ describe("the verb layer's data access", () => {
     const runner = buildRecordingRunner();
     const gateway = new TrackerGateway(runner);
 
-    await gateway.updateTask("task-1", { status_code: "complete" });
-    await gateway.updateSubtask("sub-1", { status_code: "complete" });
-    await gateway.updateDefect("defect-1", { status_code: "Closed" });
+    await gateway.updateTask(PATCH_KEYS.TASK, { status_code: "complete" });
+    await gateway.updateSubtask(PATCH_KEYS.SUBTASK, { status_code: "complete" });
+    await gateway.updateDefect(PATCH_KEYS.DEFECT, { status_code: "Closed" });
 
     expect(runner.statements).toHaveLength(3);
     for (const statement of runner.statements) {
       expect(JSON.stringify(statement)).toContain("status_code");
-      expect(JSON.stringify(statement)).toContain("where");
     }
+    expect(readUpdateWhere(runner.statements[0])).toEqual([
+      { ref: ["ID"] },
+      "=",
+      { val: PATCH_KEYS.TASK },
+    ]);
+    expect(readUpdateWhere(runner.statements[1])).toEqual([
+      { ref: ["ID"] },
+      "=",
+      { val: PATCH_KEYS.SUBTASK },
+    ]);
+    expect(readUpdateWhere(runner.statements[2])).toEqual([
+      { ref: ["ID"] },
+      "=",
+      { val: PATCH_KEYS.DEFECT },
+    ]);
   });
 });

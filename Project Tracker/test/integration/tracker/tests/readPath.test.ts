@@ -3,25 +3,36 @@ import { WORLD } from "../../../shared/data/world.js";
 import {
   clearWorld,
   seedCanonicalWorld,
+  seedSecondWorkspace,
   setChainStates,
   type SeededWorld,
 } from "../../../shared/support/seedWorld.js";
 import { trackerServer } from "../../../shared/support/trackerHarness.js";
 import {
   CODE_QUALITY_IN_PROGRESS,
+  STAGE,
   WHOLE_CHAIN_COMPLETE,
 } from "../data/chainStates.js";
 import {
+  CLEAR_SPRINT_LINK_PATCH,
   COMPLETE_INITIATIVE_MISSING_FACTS,
   COMPLETE_INITIATIVE_WITH_FACTS,
   COMPLETION_FACTS_PATCH,
+  DECISION_WITHOUT_DECIDED_AT,
   DUPLICATE_SLUG_WORKSPACE,
+  INITIATIVE_WITHOUT_BRANCH,
   ORPHAN_DEFECT,
   ORPHAN_TEST_RUN,
+  ORPHANING_TEST_RUN_PATCH,
   PATHS,
+  POSITION_CLASH_INITIATIVE,
+  POSITION_CLASH_STORY,
   PROJECT_VIEW_EXPAND,
   SECOND_INITIATIVE,
   SECOND_STORY,
+  TEST_RUN_WITHOUT_EXECUTED_AT,
+  UNCHANGED_NAME_GOAL_EDIT,
+  UNCHANGED_STORY_ID_DESCRIPTION_EDIT,
 } from "../data/writePayloads.js";
 import {
   patchExpectingRejection,
@@ -29,7 +40,10 @@ import {
   postExpectingRejection,
   postExpectingSuccess,
   readCollection,
+  readEntity,
 } from "../support/odataHarness.js";
+import { countStagesOf } from "../support/readChain.js";
+import { seedExtraStory } from "../support/seedExtraStory.js";
 
 /** The read projection, as the browser read path returns it. */
 interface ProjectViewRow {
@@ -39,7 +53,7 @@ interface ProjectViewRow {
   gateTotal: number | null;
   initiatives: { milestones: { status: string }[] }[];
   defects: unknown[];
-  taskQueue: unknown[];
+  taskQueue: { stepCode: string }[];
 }
 
 describe("the browser read path", () => {
@@ -61,11 +75,15 @@ describe("the browser read path", () => {
     const rows = (await readCollection(
       `${PATHS.PROJECT_VIEW}${PROJECT_VIEW_EXPAND}`,
     )) as unknown as ProjectViewRow[];
+    const queued = rows[0].taskQueue.map(item => item.stepCode);
+    const chainLength = await countStagesOf(world.milestoneId);
 
     expect(rows).toHaveLength(1);
     expect(rows[0].slug).toBe(WORLD.WORKSPACE.slug);
     expect(rows[0].initiatives[0].milestones).toHaveLength(1);
-    expect(rows[0].taskQueue.length).toBeGreaterThan(0);
+    expect(queued).not.toContain(STAGE.BUILD);
+    expect(queued).toContain(STAGE.CODE_QUALITY);
+    expect(queued).toHaveLength(chainLength - 1);
     expect(rows[0].defects).toHaveLength(0);
   });
 
@@ -92,6 +110,33 @@ describe("the browser read path", () => {
     expect(expanded[0].initiatives[0].milestones[0].status).toBe("done");
   });
 
+  /** A by-key read hands the handler one object, not a list, and the object page reads that way. */
+  it("fills the derived values on a read by key as well as on a collection", async () => {
+    await setChainStates(world.milestoneId, WHOLE_CHAIN_COMPLETE);
+
+    const story = await readEntity(`${PATHS.MILESTONES}(${world.milestoneId})`);
+    const view = (await readEntity(
+      `${PATHS.PROJECT_VIEW}(${world.workspaceId})${PROJECT_VIEW_EXPAND}`,
+    )) as unknown as ProjectViewRow;
+
+    expect(story.status).toBe("done");
+    expect(view.initiatives[0].milestones[0].status).toBe("done");
+    expect(view.health).toBeNull();
+  });
+
+  /** Each story derives from its own chain, or one finished story paints its neighbours done. */
+  it("derives each story's status from that story's chain alone", async () => {
+    const secondId = await seedExtraStory(world.initiativeId, SECOND_STORY);
+    await setChainStates(world.milestoneId, WHOLE_CHAIN_COMPLETE);
+
+    const rows = await readCollection(PATHS.MILESTONES);
+    const finished = rows.find(row => row.ID === world.milestoneId);
+    const untouched = rows.find(row => row.ID === secondId);
+
+    expect(finished?.status).toBe("done");
+    expect(untouched?.status).toBe("backlog");
+  });
+
   /** A duplicate sprint name inside one workspace has to reject with a named key, not a driver error. */
   it("refuses a second sprint with the same name in one workspace", async () => {
     const accepted = await postExpectingSuccess(PATHS.INITIATIVES, {
@@ -107,6 +152,19 @@ describe("the browser read path", () => {
     expect(accepted.name).toBe(SECOND_INITIATIVE.name);
     expect(rejected.status).toBe(409);
     expect(rejected.code).toBe("verb.initiative.duplicate");
+  });
+
+  /** Sprint names are unique per workspace, so a second board may reuse one the first already holds. */
+  it("accepts a sprint name another workspace already uses", async () => {
+    const secondWorkspaceId = await seedSecondWorkspace();
+
+    const accepted = await postExpectingSuccess(PATHS.INITIATIVES, {
+      ...SECOND_INITIATIVE,
+      name: WORLD.INITIATIVE.name,
+      workspace_ID: secondWorkspaceId,
+    });
+
+    expect(accepted.name).toBe(WORLD.INITIATIVE.name);
   });
 
   /** A duplicate story ID inside one sprint has to reject with the key the verb layer already names. */
@@ -204,6 +262,39 @@ describe("the browser read path", () => {
     expect(rejected.code).toBe("verb.story.duplicate");
   });
 
+  /** A row is not its own sibling, or a full-row save of an unchanged name is refused as a duplicate. */
+  it("accepts a sprint edit that re-sends its own unchanged name", async () => {
+    const created = await postExpectingSuccess(PATHS.INITIATIVES, {
+      ...SECOND_INITIATIVE,
+      workspace_ID: world.workspaceId,
+    });
+
+    const updated = await patchExpectingSuccess(
+      `${PATHS.INITIATIVES}(${created.ID as string})`,
+      { name: SECOND_INITIATIVE.name, goal: UNCHANGED_NAME_GOAL_EDIT },
+    );
+
+    expect(updated.goal).toBe(UNCHANGED_NAME_GOAL_EDIT);
+  });
+
+  /** The same self-exclusion on a story, or re-saving a story's unchanged identifier is a 409. */
+  it("accepts a story edit that re-sends its own unchanged identifier", async () => {
+    const created = await postExpectingSuccess(PATHS.MILESTONES, {
+      ...SECOND_STORY,
+      initiative_ID: world.initiativeId,
+    });
+
+    const updated = await patchExpectingSuccess(
+      `${PATHS.MILESTONES}(${created.ID as string})`,
+      {
+        storyId: SECOND_STORY.storyId,
+        description: UNCHANGED_STORY_ID_DESCRIPTION_EDIT,
+      },
+    );
+
+    expect(updated.description).toBe(UNCHANGED_STORY_ID_DESCRIPTION_EDIT);
+  });
+
   /** A move carries the sprint half only, so the guard has to read the story's identifier off the stored row. */
   it("refuses moving a story into a sprint that already holds its identifier", async () => {
     const secondSprint = await postExpectingSuccess(PATHS.INITIATIVES, {
@@ -253,12 +344,45 @@ describe("the browser read path", () => {
     expect(rejected.code).toBe("tracker.defect.scopeRequired");
   });
 
+  /** The scope rule judges the row a patch leaves, so clearing a link the defect never used leaves it scoped. */
+  it("accepts clearing the unused link of a defect still scoped by the other", async () => {
+    const created = await postExpectingSuccess(PATHS.DEFECTS, {
+      ...ORPHAN_DEFECT,
+      milestone_ID: world.milestoneId,
+      workspace_ID: world.workspaceId,
+    });
+
+    const updated = await patchExpectingSuccess(
+      `${PATHS.DEFECTS}(${created.ID as string})`,
+      { ...CLEAR_SPRINT_LINK_PATCH },
+    );
+
+    expect(updated.milestone_ID).toBe(world.milestoneId);
+  });
+
   /** A test run linked to nothing is a fact about no sprint and no stage. */
   it("refuses a test run that links to neither a stage nor a sprint", async () => {
     const rejected = await postExpectingRejection(PATHS.TEST_RUNS, {
       ...ORPHAN_TEST_RUN,
       workspace_ID: world.workspaceId,
     });
+
+    expect(rejected.status).toBe(400);
+    expect(rejected.code).toBe("tracker.testrun.scopeRequired");
+  });
+
+  /** A patch can orphan a run as surely as a create can, and the rule is about the row, not the verb. */
+  it("refuses a patch that nulls the only link a test run is scoped by", async () => {
+    const created = await postExpectingSuccess(PATHS.TEST_RUNS, {
+      ...ORPHAN_TEST_RUN,
+      initiative_ID: world.initiativeId,
+      workspace_ID: world.workspaceId,
+    });
+
+    const rejected = await patchExpectingRejection(
+      `${PATHS.TEST_RUNS}(${created.ID as string})`,
+      { ...ORPHANING_TEST_RUN_PATCH },
+    );
 
     expect(rejected.status).toBe(400);
     expect(rejected.code).toBe("tracker.testrun.scopeRequired");
@@ -278,5 +402,66 @@ describe("the browser read path", () => {
     expect(rejected.status).toBe(500);
     expect(rejected.code).toBe("SQLITE_CONSTRAINT_UNIQUE");
     expect(rejected.message).toContain("Workspace.slug");
+  });
+
+  /** The sort key orders sprints by position, so two sprints on one position make the board's order ambiguous. */
+  it("refuses a second sprint on a position the workspace already holds", async () => {
+    const rejected = await postExpectingRejection(PATHS.INITIATIVES, {
+      ...POSITION_CLASH_INITIATIVE,
+      workspace_ID: world.workspaceId,
+    });
+
+    expect(rejected.status).toBe(500);
+    expect(rejected.code).toBe("SQLITE_CONSTRAINT_UNIQUE");
+    expect(rejected.message).toContain("Initiative.position");
+  });
+
+  /** The same ordering contract inside a sprint, where story order is the order the board draws. */
+  it("refuses a second story on a position the sprint already holds", async () => {
+    const rejected = await postExpectingRejection(PATHS.MILESTONES, {
+      ...POSITION_CLASH_STORY,
+      initiative_ID: world.initiativeId,
+    });
+
+    expect(rejected.status).toBe(500);
+    expect(rejected.code).toBe("SQLITE_CONSTRAINT_UNIQUE");
+    expect(rejected.message).toContain("Milestone.position");
+  });
+
+  /** The verbs always fill the branch, so only the model stops an OData client writing a sprint without one. */
+  it("refuses a sprint that names no branch", async () => {
+    const rejected = await postExpectingRejection(PATHS.INITIATIVES, {
+      ...INITIATIVE_WITHOUT_BRANCH,
+      workspace_ID: world.workspaceId,
+    });
+
+    expect(rejected.status).toBe(400);
+    expect(rejected.code).toBe("ASSERT_MANDATORY");
+    expect(rejected.target).toBe("branch");
+  });
+
+  /** A run with no time cannot be ordered on its register, which is sorted by when it ran. */
+  it("refuses a test run that records no time it ran at", async () => {
+    const rejected = await postExpectingRejection(PATHS.TEST_RUNS, {
+      ...TEST_RUN_WITHOUT_EXECUTED_AT,
+      initiative_ID: world.initiativeId,
+      workspace_ID: world.workspaceId,
+    });
+
+    expect(rejected.status).toBe(400);
+    expect(rejected.code).toBe("ASSERT_MANDATORY");
+    expect(rejected.target).toBe("executedAt");
+  });
+
+  /** A decision with no time has no place in its register, which is sorted by when it was taken. */
+  it("refuses a decision that records no time it was taken", async () => {
+    const rejected = await postExpectingRejection(PATHS.DECISIONS, {
+      ...DECISION_WITHOUT_DECIDED_AT,
+      workspace_ID: world.workspaceId,
+    });
+
+    expect(rejected.status).toBe(400);
+    expect(rejected.code).toBe("ASSERT_MANDATORY");
+    expect(rejected.target).toBe("decidedAt");
   });
 });

@@ -198,8 +198,8 @@ describe("the intent-verb layer's functional units", () => {
     expect(envelope.ok).toBe(true);
     expect(reopened.completedAt).toBeNull();
     expect(later.completedAt).toBe(before.completedAt);
-    expect(await readDerivedMilestoneStatus(service, world.milestoneId)).not.toBe(
-      CODES.MILESTONE_STATUS.DONE,
+    expect(await readDerivedMilestoneStatus(service, world.milestoneId)).toBe(
+      CODES.MILESTONE_STATUS.IN_PROGRESS,
     );
   });
 

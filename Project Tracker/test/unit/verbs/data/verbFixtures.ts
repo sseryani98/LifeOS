@@ -143,6 +143,13 @@ export const CAP_REJECTION_BY_KEY = {
 /** The code a refused socket carries. */
 export const SOCKET_ERROR_CODE = "ECONNREFUSED";
 
+/** Distinct row keys, one per patchable entity, so a where keyed on the wrong one shows. */
+export const PATCH_KEYS = {
+  TASK: "task-1",
+  SUBTASK: "sub-1",
+  DEFECT: "defect-1",
+} as const;
+
 /** An activity event with no payload, and one with. */
 export const ACTIVITY_EVENTS = {
   BARE: {

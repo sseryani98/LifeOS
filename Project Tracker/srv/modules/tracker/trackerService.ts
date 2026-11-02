@@ -106,23 +106,29 @@ export class TrackerService {
   /**
    * Guards a Defect write: it is scoped to a story or to a sprint. A patch that
    * names neither link is not an orphan — it is a patch of something else, and
-   * rejecting it would make closing a defect impossible.
+   * rejecting it would make closing a defect impossible. The rule judges the
+   * merged row, so nulling one link while the other stays stored is allowed.
    * @param req Request carrying the Defect payload.
    */
-  checkDefectWrite(req: cds.Request): void {
+  async checkDefectWrite(req: cds.Request): Promise<void> {
     for (const data of PayloadList.fromPayload<DefectPayload>(req.data)) {
       if (req.event === "UPDATE" && !this._hasDefectScope(data)) continue;
-      this.validator.validateDefectScope(req, data);
+      const merged = await this._mergeStoredDefect(req, data);
+      this.validator.validateDefectScope(req, merged);
     }
   }
 
   /**
-   * Guards a TestRun write: it hangs off a stage or off a sprint.
+   * Guards a TestRun write: it hangs off a stage or off a sprint. Updates are
+   * guarded too, or a patch nulling the only link would orphan the run; the
+   * same no-link-named skip as Defect keeps unrelated patches through.
    * @param req Request carrying the TestRun payload.
    */
-  checkTestRunWrite(req: cds.Request): void {
+  async checkTestRunWrite(req: cds.Request): Promise<void> {
     for (const data of PayloadList.fromPayload<TestRunPayload>(req.data)) {
-      this.validator.validateTestRunScope(req, data);
+      if (req.event === "UPDATE" && !this._hasTestRunScope(data)) continue;
+      const merged = await this._mergeStoredTestRun(req, data);
+      this.validator.validateTestRunScope(req, merged);
     }
   }
 
@@ -163,6 +169,40 @@ export class TrackerService {
   }
 
   /**
+   * Overlays an update's payload on the stored Defect links, so the scope rule
+   * sees the links the write leaves behind. Same shape as the Initiative merge.
+   * @param req Request carrying the Defect payload.
+   * @param data One payload row of the write.
+   * @returns The merged view of the row being written.
+   */
+  private async _mergeStoredDefect(
+    req: cds.Request,
+    data: DefectPayload,
+  ): Promise<DefectPayload> {
+    if (req.event !== "UPDATE" || !data.ID) return data;
+    const stored = await this.data.readDefectScopeRow(data.ID);
+    if (!stored) return data;
+    return { ...stored, ...data };
+  }
+
+  /**
+   * Overlays an update's payload on the stored TestRun links. Same shape as the
+   * Defect merge.
+   * @param req Request carrying the TestRun payload.
+   * @param data One payload row of the write.
+   * @returns The merged view of the row being written.
+   */
+  private async _mergeStoredTestRun(
+    req: cds.Request,
+    data: TestRunPayload,
+  ): Promise<TestRunPayload> {
+    if (req.event !== "UPDATE" || !data.ID) return data;
+    const stored = await this.data.readTestRunScopeRow(data.ID);
+    if (!stored) return data;
+    return { ...stored, ...data };
+  }
+
+  /**
    * Reports whether a payload says anything about which story or sprint a defect
    * belongs to.
    * @param data The payload being written.
@@ -170,6 +210,16 @@ export class TrackerService {
    */
   private _hasDefectScope(data: DefectPayload): boolean {
     return "milestone_ID" in data || "initiative_ID" in data;
+  }
+
+  /**
+   * Reports whether a payload says anything about which stage or sprint a test
+   * run belongs to.
+   * @param data The payload being written.
+   * @returns True when either link appears in it.
+   */
+  private _hasTestRunScope(data: TestRunPayload): boolean {
+    return "task_ID" in data || "initiative_ID" in data;
   }
 
   /**

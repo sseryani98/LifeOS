@@ -29,6 +29,7 @@ import {
   STAGE,
   WHOLE_CHAIN_COMPLETE,
 } from "../data/chainStates.js";
+import { countStagesOf } from "../support/readChain.js";
 import {
   buildVerbContext,
   expectFailure,
@@ -44,7 +45,7 @@ const recordDecision = new RecordDecisionVerb();
 interface ComposedView {
   header: { slug: string; health: null };
   nextAction: { stepCode: string } | null;
-  taskQueue: unknown[];
+  taskQueue: { stepCode: string }[];
   initiatives: { milestones: { status: string; chain: unknown[] }[] }[];
   defects: unknown[];
   decisions: unknown[];
@@ -82,11 +83,15 @@ describe("the read verbs", () => {
 
     const result = expectSuccess(await projectView.run(context, {}));
     const view = result.view as ComposedView;
+    const queued = view.taskQueue.map(item => item.stepCode);
+    const chainLength = await countStagesOf(world.milestoneId);
 
     expect(view.header.slug).toBe(WORLD.WORKSPACE.slug);
     expect(view.header.health).toBeNull();
     expect(view.nextAction?.stepCode).toBe(STAGE.CODE_QUALITY);
-    expect(view.taskQueue.length).toBeGreaterThan(0);
+    expect(queued).not.toContain(STAGE.BUILD);
+    expect(queued).toContain(STAGE.CODE_QUALITY);
+    expect(queued).toHaveLength(chainLength - 1);
     expect(view.initiatives[0].milestones[0].chain.length).toBeGreaterThan(0);
     expect(view.defects).toHaveLength(1);
     expect(view.decisions).toHaveLength(1);

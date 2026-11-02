@@ -8,6 +8,7 @@ export interface ChainTaskRow {
 
 /** The payload a Defect create or update carries. */
 export interface DefectPayload {
+  ID?: string;
   milestone_ID?: string | null;
   initiative_ID?: string | null;
 }
@@ -35,8 +36,9 @@ export interface MilestoneRow {
   status?: string | null;
 }
 
-/** The payload a TestRun create carries. */
+/** The payload a TestRun create or update carries. */
 export interface TestRunPayload {
+  ID?: string;
   task_ID?: string | null;
   initiative_ID?: string | null;
 }

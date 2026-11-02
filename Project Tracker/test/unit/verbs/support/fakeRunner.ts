@@ -26,6 +26,14 @@ export const buildRecordingRunner = (results: unknown[] = []): RecordingRunner =
 };
 
 /**
+ * Reads back the filter an UPDATE statement was keyed on.
+ * @param statement The recorded statement.
+ * @returns The where clause as CXN tokens, or undefined when it has none.
+ */
+export const readUpdateWhere = (statement: unknown): unknown[] | undefined =>
+  (statement as { UPDATE?: { where?: unknown[] } }).UPDATE?.where;
+
+/**
  * Reads back the rows an INSERT statement carried.
  * @param statement The recorded statement.
  * @returns The entries it would have written.

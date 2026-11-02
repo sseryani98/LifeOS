@@ -191,7 +191,7 @@ describe("stage lifecycle", () => {
     expect(events[0].kind_code).toBe("stageReopened");
     expect(
       await readDerivedMilestoneStatus(service, world.milestoneId),
-    ).not.toBe("done");
+    ).toBe("inProgress");
   });
 
   /** A reopen with no reason records why nothing, which is the state the register exists to prevent. */

@@ -5,6 +5,7 @@ export interface RejectedWrite {
   status: number;
   code: string;
   message: string;
+  target: string;
 }
 
 /**
@@ -25,7 +26,9 @@ const _expectRejection = async (
       error as {
         response?: {
           status: number;
-          data?: { error?: { code?: string; message?: string } };
+          data?: {
+            error?: { code?: string; message?: string; target?: string };
+          };
         };
       }
     ).response;
@@ -33,6 +36,7 @@ const _expectRejection = async (
       status: response?.status ?? 0,
       code: response?.data?.error?.code ?? "",
       message: response?.data?.error?.message ?? "",
+      target: response?.data?.error?.target ?? "",
     };
   }
   throw new Error(`Expected ${path} to refuse the write`);
@@ -102,4 +106,17 @@ export const readCollection = async (
 ): Promise<Record<string, unknown>[]> => {
   const response = await trackerServer.GET(path);
   return (response.data as { value: Record<string, unknown>[] }).value;
+};
+
+/**
+ * Reads one entity by key. A by-key read answers the entity itself rather than
+ * a `value` collection, which is the shape the after-READ handlers must cope with.
+ * @param path The service path of the entity, key and query string included.
+ * @returns The entity the service returned.
+ */
+export const readEntity = async (
+  path: string,
+): Promise<Record<string, unknown>> => {
+  const response = await trackerServer.GET(path);
+  return response.data as Record<string, unknown>;
 };

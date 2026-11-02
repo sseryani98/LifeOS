@@ -42,6 +42,13 @@ describe("the status derivation", () => {
     ).toBe("backlog");
   });
 
+  /** "Nothing started" spans every stage, so a story whose only activity is a recommended one has left Backlog. */
+  it("derives In Progress when only a recommended stage has started", () => {
+    expect(
+      MilestoneStatus.deriveFromChain([...DERIVATION_CHAINS.RECOMMENDED_STARTED_FIRST]),
+    ).toBe("inProgress");
+  });
+
   /** A conditional stage blocks like a required one, or a UI story reads Done without its UX test. */
   it("holds a story open while a conditional stage is unfinished", () => {
     expect(MilestoneStatus.deriveFromChain([...DERIVATION_CHAINS.CONDITIONAL_OPEN])).toBe(

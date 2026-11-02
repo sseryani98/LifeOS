@@ -83,11 +83,11 @@ export class TrackerFacade extends BaseFacade {
       ),
     );
     this.srv.before(
-      "CREATE",
+      ["CREATE", "UPDATE"],
       ENTITIES.TEST_RUN,
       this.wrapHandler(
-        this._handleCreateTestRun,
-        "before-CREATE",
+        this._handleWriteTestRun,
+        "before-write",
         "TestRuns",
         "tracker.handler.failed",
       ),
@@ -97,9 +97,9 @@ export class TrackerFacade extends BaseFacade {
   /**
    * Applies the TestRun scope rule.
    * @param req Request carrying the TestRun payload.
-   * @returns Nothing; the guard accumulates its error on the request.
+   * @returns Resolves once the guard has accumulated any error on the request.
    */
-  private _handleCreateTestRun = (req: cds.Request): void =>
+  private _handleWriteTestRun = (req: cds.Request): Promise<void> =>
     this.service.checkTestRunWrite(req);
 
   /**
@@ -125,9 +125,9 @@ export class TrackerFacade extends BaseFacade {
   /**
    * Applies the Defect scope rule.
    * @param req Request carrying the Defect payload.
-   * @returns Nothing; the guard accumulates its error on the request.
+   * @returns Resolves once the guard has accumulated any error on the request.
    */
-  private _handleWriteDefect = (req: cds.Request): void =>
+  private _handleWriteDefect = (req: cds.Request): Promise<void> =>
     this.service.checkDefectWrite(req);
 
   /**
