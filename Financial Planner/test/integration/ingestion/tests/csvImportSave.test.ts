@@ -1,23 +1,35 @@
-// Runs CSV save against the real in-memory DB to prove the new Transaction FKs,
-// derived categorization status, and Import Log entity round-trip through the
-// schema. Custom logic only.
+// Runs CSV save against the real in-memory DB: Transaction FKs, derived status and
+// the Import Log round-trip the schema, and the saveCsvImport action binds. Each
+// spec reads back only its own file name / descriptions. Custom logic only.
 
 import cds from "@sap/cds";
 
 import { CsvImportDataService } from "../../../../srv/modules/ingestion/csvImportDataService.js";
 
-import { TO_CANCEL_CARD_INSTANCE } from "../../../shared/data/cards.js";
 import { MISSING_ID } from "../../../shared/data/ingestion/simplefin.js";
-import { SAVE_REQUEST_INTEGRATION } from "../data/csvImportSave.js";
+import {
+  SAVE_ODATA_NO_ROWS,
+  SAVE_ODATA_PAYLOAD,
+  SAVE_REQUEST_INTEGRATION,
+  SAVE_REQUEST_LOG,
+  SAVE_REQUEST_PERSIST,
+  SAVE_REQUEST_PERSIST_DESCRIPTIONS,
+} from "../data/csvImportSave.js";
+import {
+  buildCsvImportActions,
+  registerCsvImportHandlers,
+} from "../support/csvImport.js";
 import {
   buildCsvImportSaveService,
-  readCsvTransactionsByCard,
-  readImportLogsByCard,
+  readCsvTransactionsByDescriptions,
+  readImportLogsByFileName,
   seedCsvImportSave,
 } from "../support/csvImportSave.js";
 
-const { expect } = cds.test("serve", "--with-mocks", "--in-memory");
+const { POST, expect } = cds.test("serve", "--with-mocks", "--in-memory");
+const { postSaveCsvImport } = buildCsvImportActions(POST);
 
+beforeAll(registerCsvImportHandlers);
 beforeAll(seedCsvImportSave);
 
 describe("CSV save against SQLite", () => {
@@ -25,9 +37,11 @@ describe("CSV save against SQLite", () => {
   it("persists reviewed rows as csv transactions with derived status", async () => {
     const service = buildCsvImportSaveService();
 
-    await service.writeImport(SAVE_REQUEST_INTEGRATION);
+    await service.writeImport(SAVE_REQUEST_PERSIST);
 
-    const rows = await readCsvTransactionsByCard(TO_CANCEL_CARD_INSTANCE.ID);
+    const rows = await readCsvTransactionsByDescriptions(
+      SAVE_REQUEST_PERSIST_DESCRIPTIONS,
+    );
     expect(rows).to.have.length(2);
     expect(rows.every(row => row.source === "csv")).to.equal(true);
     const statuses = rows.map(row => row.categorizationStatus);
@@ -37,10 +51,12 @@ describe("CSV save against SQLite", () => {
 
   /** One import-log row must capture the file, count, total, and skipped count so the history reconciles with what was imported. */
   it("records one import-log row with the run totals", async () => {
-    const logs = await readImportLogsByCard(TO_CANCEL_CARD_INSTANCE.ID);
+    const service = buildCsvImportSaveService();
 
+    await service.writeImport(SAVE_REQUEST_LOG);
+
+    const logs = await readImportLogsByFileName(SAVE_REQUEST_LOG.fileName as string);
     expect(logs).to.have.length(1);
-    expect(logs[0].fileName).to.equal("cibc.csv");
     expect(logs[0].transactionCount).to.equal(2);
     expect(Number(logs[0].totalAmount)).to.equal(-24.99);
     expect(logs[0].skippedCount).to.equal(2);
@@ -64,5 +80,29 @@ describe("CSV save against SQLite", () => {
     const data = new CsvImportDataService();
 
     expect(await data.getVendorName(MISSING_ID)).to.equal(null);
+  });
+
+  describe("saveCsvImport over OData", () => {
+    /** The wizard's Save posts this action; a renamed parameter or a broken `many CsvSaveRow` mapping would fail every real save while the engine tests stay green. */
+    it("saves the reviewed rows through the action signature", async () => {
+      const response = await postSaveCsvImport({ ...SAVE_ODATA_PAYLOAD });
+
+      expect(response.status).to.equal(200);
+      expect(response.data.transactionCount).to.equal(2);
+      expect(response.data.topVendorName).to.equal("Amazon");
+      const logs = await readImportLogsByFileName(SAVE_ODATA_PAYLOAD.fileName as string);
+      expect(logs).to.have.length(1);
+    });
+
+    /** An empty batch must come back a 400 the wizard can show, and write no import log. */
+    it("rejects a save with no rows with a 400", async () => {
+      const response = await postSaveCsvImport({ ...SAVE_ODATA_NO_ROWS }).catch(
+        (error: { status: number }) => error,
+      );
+
+      expect(response.status).to.equal(400);
+      const logs = await readImportLogsByFileName(SAVE_ODATA_NO_ROWS.fileName);
+      expect(logs).to.have.length(0);
+    });
   });
 });

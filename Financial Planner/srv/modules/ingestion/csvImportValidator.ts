@@ -1,4 +1,8 @@
-import type { CsvParseRequest, CsvValidationError } from "./types.js";
+import type {
+  CsvParseRequest,
+  CsvReclassifyRequest,
+  CsvValidationError,
+} from "./types.js";
 
 /**
  * Validates CSV import requests before parsing. 
@@ -20,6 +24,23 @@ export class CsvImportValidator {
     }
     if (!request.fileContent || request.fileContent.trim() === "") {
       errors.push({ field: "fileContent", messageKey: "csv.fileEmpty" });
+    }
+    return errors;
+  }
+
+  /**
+   * Validates a reclassify request: everything a parse needs, plus the row to
+   * re-decode and a non-empty correction for it.
+   * @param request Reclassify request carrying the file, row number, and correction.
+   * @returns Validation errors, empty when the request is valid.
+   */
+  static validateReclassifyRequest(request: CsvReclassifyRequest): CsvValidationError[] {
+    const errors = CsvImportValidator.validateParseRequest(request);
+    if (!Number.isInteger(request.rowNumber) || (request.rowNumber as number) < 1) {
+      errors.push({ field: "rowNumber", messageKey: "csv.rowNumberInvalid" });
+    }
+    if (!request.correctedValue || request.correctedValue.trim() === "") {
+      errors.push({ field: "correctedValue", messageKey: "csv.correctionRequired" });
     }
     return errors;
   }

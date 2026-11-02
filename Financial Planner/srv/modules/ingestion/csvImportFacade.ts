@@ -4,7 +4,11 @@ import { BaseFacade } from "../shared/baseFacade.js";
 
 import type { CsvImportSaveService } from "./csvImportSaveService.js";
 import type { CsvImportService } from "./csvImportService.js";
-import type { CsvImportSummary, CsvParseResult } from "./types.js";
+import type {
+  CsvClassifiedRow,
+  CsvImportSummary,
+  CsvParseResult,
+} from "./types.js";
 
 /**
  * Facade wiring for the CSV import engine: the parse (review) and save (persist)
@@ -42,6 +46,15 @@ export class CsvImportFacade extends BaseFacade {
       ),
     );
     this.srv.on(
+      "reclassifyCsvRow",
+      this.wrapHandler(
+        this._handleReclassifyCsvRow,
+        "action-reclassifyCsvRow",
+        "Transactions",
+        "ingestion.csv.parseFailed",
+      ),
+    );
+    this.srv.on(
       "saveCsvImport",
       this.wrapHandler(
         this._handleSaveCsvImport,
@@ -60,6 +73,15 @@ export class CsvImportFacade extends BaseFacade {
   private _handleParseCsvImport = (
     req: cds.Request,
   ): Promise<CsvParseResult | undefined> => this.service.parse(req);
+
+  /**
+   * Re-decode one corrected Excluded row.
+   * @param req Request carrying the parse inputs plus rowNumber and correctedValue.
+   * @returns The classified row, or undefined on validation or decode failure.
+   */
+  private _handleReclassifyCsvRow = (
+    req: cds.Request,
+  ): Promise<CsvClassifiedRow | undefined> => this.service.reclassify(req);
 
   /**
    * Persist the reviewed rows for the selected card.

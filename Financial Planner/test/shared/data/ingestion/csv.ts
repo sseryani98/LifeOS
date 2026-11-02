@@ -127,8 +127,8 @@ export const TD_CSV = [
 
 /** CIBC: one credit (payment), one debit (interest), headerless. */
 export const CIBC_CSV = [
-  "2025-11-20,PAYMENT THANK YOU,,1.00,4500********7927",
-  "2025-07-24,PURCHASE INTEREST,1.12,,4500********7927",
+  "2025-11-20,PAYMENT THANK YOU,,1.00,4500********0000",
+  "2025-07-24,PURCHASE INTEREST,1.12,,4500********0000",
 ].join("\n");
 
 /** Amex: 11 preamble rows, a header, then rows for three cardmembers. */

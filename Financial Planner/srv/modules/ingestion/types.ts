@@ -1,4 +1,7 @@
+import type { CategorizationContext } from "../categorization/categorizationContextService.js";
 import type { EncryptionFactory, HttpClient, SleepFn } from "../shared/types.js";
+
+import type { CsvRowReaderService } from "./csvRowReaderService.js";
 
 /** Deduplication outcomes for the two-tier strategy. */
 export type DedupOutcome = "new" | "duplicate" | "potential_duplicate";
@@ -10,6 +13,8 @@ export type DedupOutcome = "new" | "duplicate" | "potential_duplicate";
 export interface IncomingTransaction {
   /** SimpleFIN stable id; null/undefined for CSV and manual sources. */
   externalId?: string | null;
+  /** Provider account a SimpleFIN row came from — the scope of its external id, which survives a card remap. */
+  providerAccount_ID?: string | null;
   /** Mapped card instance id; null for unmapped provider accounts. */
   cardInstance_ID?: string | null;
   /** Signed amount — negative = charge, positive = credit/refund. */
@@ -175,6 +180,22 @@ export interface CsvParseRequest {
   cardInstance_ID?: string | null;
   fileName?: string | null;
   fileContent?: string | null;
+}
+
+/** Re-decode one Excluded row once the user corrects the value that failed to parse. */
+export interface CsvReclassifyRequest extends CsvParseRequest {
+  /** 1-based line of the row within fileContent, as the parse reported it. */
+  rowNumber?: number | null;
+  correctedValue?: string | null;
+}
+
+/** One file opened for decoding: its rows, the reader for its config, and suggestions. */
+export interface CsvFileSession {
+  rows: string[][];
+  reader: CsvRowReaderService;
+  categorization: CategorizationContext;
+  configName: string;
+  headerRowsSkip: number;
 }
 
 /** Scalar fields extracted from one CSV row before classification. */

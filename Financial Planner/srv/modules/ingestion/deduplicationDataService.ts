@@ -6,19 +6,20 @@ import type { MatchedTransaction } from "./types.js";
  */
 export class DeduplicationDataService {
   /**
-   * Finds an existing transaction with the same SimpleFIN external id on the same card.
+   * Finds an existing transaction with the same SimpleFIN external id from the same provider account.
+   * Scoped by account, not card: a remapped account keeps its ids, so a card scope re-inserts history.
    * @param externalId SimpleFIN-assigned identifier of the incoming transaction.
-   * @param cardInstanceId Card the transaction belongs to; null matches uncarded rows.
+   * @param providerAccountId Provider account the transaction came from.
    * @returns The matching transaction's ID projection, or null when none exists.
    */
   async findByExternalId(
     externalId: string,
-    cardInstanceId: string | null | undefined,
+    providerAccountId: string | null,
   ): Promise<MatchedTransaction | null> {
     const match = await SELECT.one
       .from(ENTITIES.TRANSACTION)
       .columns("ID")
-      .where({ externalId, cardInstance_ID: cardInstanceId ?? null });
+      .where({ externalId, providerAccount_ID: providerAccountId });
     return (match as MatchedTransaction | undefined) ?? null;
   }
 
@@ -34,7 +35,7 @@ export class DeduplicationDataService {
     rawDescription: string,
     postedAt: string,
     amount: number,
-    cardInstanceId: string | null | undefined,
+    cardInstanceId: string | null,
   ): Promise<MatchedTransaction | null> {
     const match = await SELECT.one
       .from(ENTITIES.TRANSACTION)
@@ -43,7 +44,7 @@ export class DeduplicationDataService {
         rawDescription,
         postedAt,
         amount,
-        cardInstance_ID: cardInstanceId ?? null,
+        cardInstance_ID: cardInstanceId,
       });
     return (match as MatchedTransaction | undefined) ?? null;
   }

@@ -1,11 +1,10 @@
-import { SimpleFINService } from "../../../../srv/modules/ingestion/simpleFinService.js";
+import { MessagingUtility } from "../../../../srv/modules/shared/messagingUtility.js";
 
 import {
   ACCESS_URL_PLAINTEXT,
   ACCOUNT_MAPPED,
   ACCOUNT_MAPPED_ID,
   ACCOUNT_UNMAPPED,
-  ALERT_TYPE_ID,
   CARD_INSTANCE_ID,
   CONNECTION_ACTIVE,
   CONNECTION_FRESH,
@@ -21,6 +20,13 @@ import {
   TX_AMAZON,
   TX_POSTED,
 } from "../../../shared/data/ingestion/simplefin.js";
+import {
+  ALERT_SEVERITY_IDS,
+  ALERT_TYPE_IDS,
+  CONFIG_LOOKBACK_FIVE_DAYS,
+  RESPONSE_PENDING_FLAG_ONLY,
+  RESPONSE_UNPOSTED_ONLY,
+} from "../data/simplefin.js";
 import { buildSimpleFinMocks } from "../support/simplefinMocks.js";
 
 describe("SimpleFINService", () => {
@@ -66,6 +72,30 @@ describe("SimpleFINService", () => {
         expect.stringContaining(`${ACCESS_URL_PLAINTEXT}/accounts?start-date=`),
       );
     });
+
+    /** The sync window starts 7 days before now; a shorter or zero window silently drops charges made while the machine was off. */
+    it("requests the configured 7-day lookback window", async () => {
+      const mocks = buildSimpleFinMocks();
+      mocks.httpGet.mockResolvedValue({ status: 200, data: RESPONSE_TWO_NEW });
+
+      await mocks.service.syncConnection(CONNECTION_ID);
+
+      expect(mocks.httpGet).toHaveBeenCalledWith(
+        `${ACCESS_URL_PLAINTEXT}/accounts?start-date=1782129600`,
+      );
+    });
+
+    /** The lookback is tunable in SystemConfig; an engine that ignores the stored value (or reads the stale-days key) fetches the wrong window. */
+    it("honours a configured lookback override", async () => {
+      const mocks = buildSimpleFinMocks(CONFIG_LOOKBACK_FIVE_DAYS);
+      mocks.httpGet.mockResolvedValue({ status: 200, data: RESPONSE_TWO_NEW });
+
+      await mocks.service.syncConnection(CONNECTION_ID);
+
+      expect(mocks.httpGet).toHaveBeenCalledWith(
+        `${ACCESS_URL_PLAINTEXT}/accounts?start-date=1782302400`,
+      );
+    });
   });
 
   describe("deduplication", () => {
@@ -99,6 +129,28 @@ describe("SimpleFINService", () => {
       const incoming = mocks.dedup.evaluate.mock.calls[0][0];
       expect(incoming.externalId).toBe(TX_POSTED);
     });
+
+    /** pending=true alone must discard: a provisional non-zero posted stamp would otherwise import the charge, then duplicate it when it settles under its final id. */
+    it("discards a pending row that already carries a posted stamp", async () => {
+      const mocks = buildSimpleFinMocks();
+      mocks.httpGet.mockResolvedValue({ status: 200, data: RESPONSE_PENDING_FLAG_ONLY });
+
+      const result = await mocks.service.syncConnection(CONNECTION_ID);
+
+      expect(result.created).toBe(0);
+      expect(mocks.dedup.evaluate).not.toHaveBeenCalled();
+    });
+
+    /** posted=0 alone must discard: the pending key is opt-in, so a bank that omits it marks an unposted row only by the zero stamp. */
+    it("discards an unposted row that omits the pending flag", async () => {
+      const mocks = buildSimpleFinMocks();
+      mocks.httpGet.mockResolvedValue({ status: 200, data: RESPONSE_UNPOSTED_ONLY });
+
+      const result = await mocks.service.syncConnection(CONNECTION_ID);
+
+      expect(result.created).toBe(0);
+      expect(mocks.dedup.evaluate).not.toHaveBeenCalled();
+    });
   });
 
   describe("unmapped account", () => {
@@ -121,7 +173,10 @@ describe("SimpleFINService", () => {
       );
       expect(result.unmapped).toBe(1);
       expect(mocks.data.createAlert).toHaveBeenCalledWith(
-        expect.objectContaining({ alertType_ID: ALERT_TYPE_ID }),
+        expect.objectContaining({
+          alertType_ID: ALERT_TYPE_IDS["Unmapped Account"],
+          alertSeverity_ID: ALERT_SEVERITY_IDS["Info"],
+        }),
       );
       const insert = mocks.data.insertTransaction.mock.calls[0][0] as Record<
         string,
@@ -141,10 +196,18 @@ describe("SimpleFINService", () => {
 
       expect(result.status).toBe("error");
       expect(result.created).toBe(1);
-      expect(mocks.data.createAlert).toHaveBeenCalled();
+      expect(mocks.data.createAlert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          alertType_ID: ALERT_TYPE_IDS["Connection Error"],
+          alertSeverity_ID: ALERT_SEVERITY_IDS["Critical"],
+        }),
+      );
       expect(mocks.data.updateConnectionSync).toHaveBeenCalledWith(
         CONNECTION_ID,
-        expect.objectContaining({ lastSyncStatus: "error" }),
+        expect.objectContaining({
+          lastSyncStatus: "error",
+          lastErrorMessage: "You must reauthenticate.",
+        }),
       );
     });
   });
@@ -163,10 +226,19 @@ describe("SimpleFINService", () => {
         2000, 4000, 8000,
       ]);
       expect(result.status).toBe("error");
-      expect(mocks.data.createAlert).toHaveBeenCalled();
+      expect(mocks.data.createAlert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          alertType_ID: ALERT_TYPE_IDS["Connection Error"],
+          alertSeverity_ID: ALERT_SEVERITY_IDS["Critical"],
+        }),
+      );
       expect(mocks.data.updateConnectionSync).toHaveBeenCalledWith(
         CONNECTION_ID,
-        expect.objectContaining({ lastSyncStatus: "error" }),
+        expect.objectContaining({
+          lastSyncAt: CONNECTION_ACTIVE.lastSyncAt,
+          lastSyncStatus: "error",
+          lastErrorMessage: "HTTP 500",
+        }),
       );
     });
   });
@@ -186,6 +258,8 @@ describe("SimpleFINService", () => {
       expect(mocks.data.createAlert).toHaveBeenCalledWith(
         expect.objectContaining({
           providerConnection_ID: CONNECTION_STALE.ID,
+          alertType_ID: ALERT_TYPE_IDS["Stale Data"],
+          alertSeverity_ID: ALERT_SEVERITY_IDS["Warning"],
         }),
       );
     });
@@ -273,12 +347,23 @@ describe("SimpleFINService", () => {
     /** The scheduled run must iterate every active connection; skipping one means its account silently stops importing. */
     it("syncs each active connection", async () => {
       const mocks = buildSimpleFinMocks();
+      mocks.data.getActiveConnections.mockResolvedValue([
+        { ...CONNECTION_ACTIVE },
+        { ...CONNECTION_STALE },
+      ]);
       mocks.httpGet.mockResolvedValue({ status: 200, data: RESPONSE_TWO_NEW });
 
       await mocks.service.syncAllActive();
 
-      expect(mocks.data.getActiveConnections).toHaveBeenCalled();
-      expect(mocks.httpGet).toHaveBeenCalled();
+      expect(mocks.httpGet).toHaveBeenCalledTimes(2);
+      expect(mocks.data.updateConnectionSync).toHaveBeenCalledWith(
+        CONNECTION_ID,
+        expect.anything(),
+      );
+      expect(mocks.data.updateConnectionSync).toHaveBeenCalledWith(
+        CONNECTION_STALE.ID,
+        expect.anything(),
+      );
     });
   });
 
@@ -318,6 +403,9 @@ describe("SimpleFINService", () => {
       const result = await mocks.service.syncConnection(CONNECTION_ID);
 
       expect(result.created).toBe(2);
+      expect(mocks.httpGet).toHaveBeenCalledWith(
+        `${ACCESS_URL_PLAINTEXT}/accounts?start-date=1782129600`,
+      );
     });
   });
 
@@ -350,17 +438,6 @@ describe("SimpleFINService", () => {
     });
   });
 
-  describe("construction defaults", () => {
-    /** Constructed without test seams, the engine must fall back to the real HTTP client, sleep, clock, and encryption factory — the path the running server actually takes. */
-    it("falls back to real collaborators when no options are given", () => {
-      const service = new SimpleFINService(
-        buildSimpleFinMocks().data,
-        buildSimpleFinMocks().dedup,
-      );
-      expect(service).toBeInstanceOf(SimpleFINService);
-    });
-  });
-
   describe("facade entry points", () => {
     /** The manual-sync action must resolve the bound connection param and hand back a user-facing summary the UI can display. */
     it("runManualSync returns a summary string", async () => {
@@ -371,7 +448,9 @@ describe("SimpleFINService", () => {
         params: [{ ID: CONNECTION_ID }],
       } as never);
 
-      expect(typeof summary).toBe("string");
+      expect(summary).toBe(
+        MessagingUtility.getText("ingestion.simplefin.syncResult", ["2", "0"]),
+      );
       expect(mocks.data.getConnection).toHaveBeenCalledWith(CONNECTION_ID);
     });
 
@@ -402,6 +481,13 @@ describe("SimpleFINService", () => {
 
       expect(id).toBeUndefined();
       expect(error).toHaveBeenCalledTimes(2);
+      expect(error).toHaveBeenCalledWith(
+        expect.objectContaining({
+          code: "simplefin.setupTokenRequired",
+          target: "setupToken",
+          status: 400,
+        }),
+      );
       expect(mocks.httpPost).not.toHaveBeenCalled();
     });
 

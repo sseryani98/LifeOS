@@ -1,4 +1,5 @@
 import BaseController from "com/financialplanner/shared/BaseController";
+import ClearPropagation from "com/financialplanner/csvimportwizard/model/ClearPropagation";
 import CsvImportWizardService from "com/financialplanner/csvimportwizard/model/CsvImportWizardService";
 import DialogManager from "com/financialplanner/shared/DialogManager";
 import Messaging from "com/financialplanner/shared/Messaging";
@@ -41,6 +42,7 @@ import type {
 export default class CsvImportWizard extends BaseController {
   private _service!: CsvImportWizardService;
   private _createEntitySet = "";
+  private readonly _clearing = new ClearPropagation();
   private readonly _dialogs = new DialogManager(this);
   private readonly _messages = new Messaging(this);
 
@@ -88,18 +90,18 @@ export default class CsvImportWizard extends BaseController {
    */
   public onButtonClearRowPress(event: Button$PressEvent): void {
     const row = this._getRowContext(event).getObject() as NewRow;
-    this._applyCategorization(row);
-    row.cleared = true;
+    this._clearing.clearRow(row, this._getState().getProperty("/newRows") as NewRow[]);
     this._refreshNewRows();
   }
 
   /**
-   * Reverts a cleared New-tab row back to editable.
+   * Reverts a cleared New-tab row back to editable, restoring the rows its
+   * Clear propagated to.
    * @param event the press event from the row's Undo button
    */
   public onButtonUndoRowPress(event: Button$PressEvent): void {
     const row = this._getRowContext(event).getObject() as NewRow;
-    row.cleared = false;
+    this._clearing.restoreRow(row);
     this._refreshNewRows();
   }
 
@@ -114,7 +116,7 @@ export default class CsvImportWizard extends BaseController {
       .filter(
         candidate =>
           candidate.rawDescription === row.rawDescription &&
-          this._isCategorized(candidate),
+          this._clearing.isCategorized(candidate),
       )
       .forEach(candidate => {
         candidate.cleared = true;
@@ -217,7 +219,7 @@ export default class CsvImportWizard extends BaseController {
       this._messages.showWarning("msgCorrectionRequired");
       return;
     }
-    this._moveExcludedRow(excluded);
+    void this._moveExcludedRow(excluded);
   }
 
   /**
@@ -352,6 +354,7 @@ export default class CsvImportWizard extends BaseController {
       result.potentialDuplicates,
     );
     const excludedRows = result.excludedRows.map(row => this._toExcludedRow(row));
+    this._clearing.reset();
     state.setProperty("/newRows", newRows);
     state.setProperty("/duplicateRows", duplicateRows);
     state.setProperty("/excludedRows", excludedRows);
@@ -387,62 +390,52 @@ export default class CsvImportWizard extends BaseController {
   }
 
   /**
-   * Promotes a corrected Excluded row into the New tab, placing the edited value
-   * into the field that had failed to parse.
+   * Re-decodes a corrected Excluded row on the server and routes it like any
+   * parsed row — New tab, or Potential Duplicates when it matches an existing one.
+   * A correction that still fails to parse stays in the Excluded tab.
    * @param excluded the corrected excluded row
    */
-  private _moveExcludedRow(excluded: ExcludedEditRow): void {
+  private async _moveExcludedRow(excluded: ExcludedEditRow): Promise<void> {
     const state = this._getState();
     const card = state.getProperty("/selectedCard") as string;
-    const newRow = this._toNewRow({
-      rowNumber: excluded.rowNumber,
-      postedAt: excluded.errorField === "date" ? excluded.editedValue : "",
-      amount:
-        excluded.errorField === "amount" ? Number(excluded.editedValue) : 0,
-      rawDescription: excluded.rawJoined,
-      cardInstance_ID: card,
-      cardholderName: null,
-      dedupOutcome: DEDUP_OUTCOME.NEW,
-      matchedTransactionId: null,
-      suggestedVendor_ID: null,
-      suggestedVendorName: null,
-      suggestedPurchaseType_ID: null,
-      suggestedEarningCategory_ID: null,
-      suggestionConfidence: null,
-    });
-    const remaining = (state.getProperty("/excludedRows") as ExcludedEditRow[]).filter(
-      row => row.rowNumber !== excluded.rowNumber,
+    const file = (state.getProperty("/files") as ParsedFile[]).find(
+      candidate => candidate.name === excluded.fileName,
     );
-    state.setProperty("/newRows", [
-      ...(state.getProperty("/newRows") as NewRow[]),
-      newRow,
-    ]);
-    state.setProperty("/excludedRows", remaining);
-    this._refreshNewRows();
-  }
-
-  /**
-   * Propagates a row's categorization to still-uncleared rows with the same
-   * description, matching the Clear-propagation behaviour.
-   * @param source the row whose categorization is propagated
-   */
-  private _applyCategorization(source: NewRow): void {
-    if (!this._isCategorized(source)) {
+    if (!file || excluded.sourceRowNumber === undefined) {
+      this._messages.showError("msgCorrectionFailed");
       return;
     }
-    (this._getState().getProperty("/newRows") as NewRow[])
-      .filter(
-        row =>
-          !row.cleared &&
-          row !== source &&
-          row.rawDescription === source.rawDescription &&
-          !this._isCategorized(row),
-      )
-      .forEach(row => {
-        row.vendor_ID = source.vendor_ID;
-        row.purchaseType_ID = source.purchaseType_ID;
-        row.earningCategory_ID = source.earningCategory_ID;
-      });
+    let classified: ClassifiedRow;
+    try {
+      const row = await this._service.reclassifyRow(
+        card,
+        file,
+        excluded.sourceRowNumber,
+        excluded.editedValue,
+      );
+      classified = { ...row, rowNumber: excluded.rowNumber };
+    } catch {
+      this._messages.showError("msgCorrectionFailed");
+      return;
+    }
+    if (classified.dedupOutcome === DEDUP_OUTCOME.POTENTIAL_DUPLICATE) {
+      state.setProperty("/duplicateRows", [
+        ...(state.getProperty("/duplicateRows") as DuplicateRow[]),
+        ...(await this._buildDuplicateRows([classified])),
+      ]);
+    } else {
+      state.setProperty("/newRows", [
+        ...(state.getProperty("/newRows") as NewRow[]),
+        this._toNewRow(classified),
+      ]);
+    }
+    state.setProperty(
+      "/excludedRows",
+      (state.getProperty("/excludedRows") as ExcludedEditRow[]).filter(
+        row => row.rowNumber !== excluded.rowNumber,
+      ),
+    );
+    this._refreshNewRows();
   }
 
   /**
@@ -553,14 +546,6 @@ export default class CsvImportWizard extends BaseController {
     };
   }
 
-  /**
-   * True when the row carries any vendor or category assignment.
-   * @param row the New-tab row
-   * @returns whether the row has been categorized
-   */
-  private _isCategorized(row: NewRow): boolean {
-    return Boolean(row.vendor_ID || row.purchaseType_ID || row.earningCategory_ID);
-  }
 
   /**
    * Resolves the "ui" model binding context of the row under an event.

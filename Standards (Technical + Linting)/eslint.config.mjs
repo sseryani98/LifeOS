@@ -37,6 +37,7 @@ const VERB_PREFIXES = [
   "spawn", "schedule", "sync", "claim", "dedupe", "ingest", "process",
   "transform", "merge", "split", "group", "filter", "sort",
   "restore", "evaluate", "backfill", "raise", "write", "categorize", "correct",
+  "classify", "reclassify",
   "to", "from", "with", "navigate", "nav", "emit", "dispatch", "notify",
   "log", "throw", "reject", "attach", "detach", "enable", "disable",
   "select", "submit", "cancel", "confirm", "copy", "move", "import", "export",

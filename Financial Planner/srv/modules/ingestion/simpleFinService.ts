@@ -364,7 +364,7 @@ export class SimpleFINService extends BaseService {
       if (this._isPending(sfTx)) {
         continue;
       }
-      const incoming = SimpleFINMapper.toIncoming(sfTx, account.cardInstance_ID);
+      const incoming = SimpleFINMapper.toIncoming(sfTx, account);
       const dedup = await this.dedupService.evaluate(incoming);
       if (dedup.outcome === "duplicate") {
         duplicates++;

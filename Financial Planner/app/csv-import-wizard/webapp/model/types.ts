@@ -28,6 +28,10 @@ export interface ExcludedRow {
   errorField: string;
   errorMessageKey: string;
   errorValue: string;
+  /** Stamped by the client merge: the file the row came from, for its re-decode. */
+  fileName?: string;
+  /** Stamped by the client merge: the row number within its own file, before renumbering. */
+  sourceRowNumber?: number;
 }
 
 /** The parseCsvImport action result, merged across all uploaded files. */
@@ -79,6 +83,14 @@ export interface NewRow extends ClassifiedRow {
   purchaseType_ID: string | null;
   earningCategory_ID: string | null;
   cleared: boolean;
+}
+
+/** A row a Clear filled, with the categorization it held before — what Undo restores. */
+export interface PropagatedFill {
+  row: NewRow;
+  vendor_ID: string | null;
+  purchaseType_ID: string | null;
+  earningCategory_ID: string | null;
 }
 
 /** A Potential-Duplicates row pairing the CSV row with the matched existing one. */

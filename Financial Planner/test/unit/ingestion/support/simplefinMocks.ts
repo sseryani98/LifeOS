@@ -7,11 +7,10 @@ import { SimpleFINService } from "../../../../srv/modules/ingestion/simpleFinSer
 import {
   ACCESS_URL_PLAINTEXT,
   ACCOUNT_MAPPED,
-  ALERT_SEVERITY_ID,
-  ALERT_TYPE_ID,
   CONNECTION_ACTIVE,
   CONNECTION_ID,
 } from "../../../shared/data/ingestion/simplefin.js";
+import { ALERT_SEVERITY_IDS, ALERT_TYPE_IDS } from "../data/simplefin.js";
 
 import type { SimpleFINDataService } from "../../../../srv/modules/ingestion/simpleFinDataService.js";
 import type { DeduplicationService } from "../../../../srv/modules/ingestion/deduplicationService.js";
@@ -36,12 +35,21 @@ export interface SimpleFinMocks {
   service: SimpleFINService;
 }
 
-/** Builds a fresh SimpleFINService with every collaborator mocked. */
-export const buildSimpleFinMocks = (): SimpleFinMocks => {
+/**
+ * Builds a fresh SimpleFINService with every collaborator mocked.
+ * @param configOverrides SystemConfig values layered over the defaults.
+ * @returns The service plus every mock it was wired to.
+ */
+export const buildSimpleFinMocks = (
+  configOverrides: Record<string, string> = {},
+): SimpleFinMocks => {
+  const config: Record<string, string> = { ...CONFIG, ...configOverrides };
+  const getConfig = jest.fn(async (key: string): Promise<string | null> => config[key] ?? null);
   const data = {
-    getConfig: jest.fn(async (key: string) => CONFIG[key] ?? null),
+    getConfig,
+    // Reads through getConfig so a spec that nulls the config really feeds null.
     getNumericConfig: jest.fn(async (key: string, fallback: number) => {
-      const raw = CONFIG[key] ?? null;
+      const raw = await getConfig(key);
       const parsed = raw === null ? Number.NaN : Number.parseInt(raw, 10);
       return Number.isNaN(parsed) ? fallback : parsed;
     }),
@@ -54,8 +62,10 @@ export const buildSimpleFinMocks = (): SimpleFinMocks => {
     getProviderAccountById: jest.fn(async () => ({ ...ACCOUNT_MAPPED })),
     insertTransaction: jest.fn(async () => undefined),
     backfillTransactions: jest.fn(async () => 0),
-    getAlertTypeId: jest.fn(async () => ALERT_TYPE_ID),
-    getAlertSeverityId: jest.fn(async () => ALERT_SEVERITY_ID),
+    getAlertTypeId: jest.fn(async (name: string) => ALERT_TYPE_IDS[name] ?? null),
+    getAlertSeverityId: jest.fn(
+      async (name: string) => ALERT_SEVERITY_IDS[name] ?? null,
+    ),
     findActiveAlert: jest.fn(async () => null),
     createAlert: jest.fn(async () => undefined),
     createConnection: jest.fn(async () => CONNECTION_ID),

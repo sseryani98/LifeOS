@@ -12,8 +12,14 @@ import { CsvRowReaderService } from "./csvRowReaderService.js";
 import type { CsvImportDataService } from "./csvImportDataService.js";
 import type { DeduplicationService } from "./deduplicationService.js";
 import type {
+  CsvClassifiedRow,
+  CsvFileSession,
   CsvParseRequest,
   CsvParseResult,
+  CsvReclassifyRequest,
+  CsvRowDecodeResult,
+  CsvValidationError,
+  ParsedCsvFields,
   RowBuckets,
 } from "./types.js";
 
@@ -59,14 +65,7 @@ export class CsvImportService extends BaseService {
     };
     const errors = CsvImportValidator.validateParseRequest(request);
     if (errors.length > 0) {
-      for (const error of errors) {
-        req.error({
-          code: error.messageKey,
-          message: MessagingUtility.getText(error.messageKey),
-          target: error.field,
-          status: 400,
-        });
-      }
+      this._raiseErrors(req, errors);
       return undefined;
     }
     return this.parseFile(request);
@@ -78,12 +77,8 @@ export class CsvImportService extends BaseService {
    * @returns Classified rows plus counts; `configResolved:false` blocks the import.
    */
   async parseFile(request: CsvParseRequest): Promise<CsvParseResult> {
-    const cardInstanceId = request.cardInstance_ID as string;
-    const config = await this.dataService.getFormatConfigForCard(cardInstanceId);
-    if (!config) {
-      this.logger.warn("STATE_CHANGE", "No CSV format config for card", {
-        cardInstanceId,
-      });
+    const session = await this._openFile(request);
+    if (!session) {
       return {
         configResolved: false,
         configName: null,
@@ -92,6 +87,110 @@ export class CsvImportService extends BaseService {
         excludedRows: [],
         skippedCount: 0,
       };
+    }
+    const buckets = await this._processRows(session);
+    return {
+      configResolved: true,
+      configName: session.configName,
+      ...buckets,
+    };
+  }
+
+  /**
+   * Action entry point — re-decodes one Excluded row with the user's correction
+   * in the cell that failed, then dedups and categorizes it like any parsed row.
+   * The client cannot do this itself: only the config knows the columns and sign.
+   * @param req Request carrying the parse inputs plus rowNumber and correctedValue.
+   * @returns The classified row, or undefined when validation or the re-decode fails.
+   */
+  async reclassify(req: cds.Request): Promise<CsvClassifiedRow | undefined> {
+    const request = CsvImportMapper.toReclassifyRequest(req.data);
+    const errors = CsvImportValidator.validateReclassifyRequest(request);
+    if (errors.length > 0) {
+      this._raiseErrors(req, errors);
+      return undefined;
+    }
+    const session = await this._openFile(request);
+    const decoded = session ? this._decodeCorrectedRow(session, request) : null;
+    if (!session || !decoded) {
+      this._raiseErrors(req, [{ field: "rowNumber", messageKey: "csv.rowNumberInvalid" }]);
+      return undefined;
+    }
+    if (!decoded.ok) {
+      const messageKey = this._resolveParseErrorKey(decoded.field);
+      req.error({
+        code: messageKey,
+        message: MessagingUtility.getText(messageKey, [decoded.rawValue]),
+        target: "correctedValue",
+        status: 400,
+      });
+      return undefined;
+    }
+    return this._classifyRow(request.rowNumber as number, decoded.fields, session.categorization);
+  }
+
+  /**
+   * Dedups and categorizes one decoded row into a review row.
+   * @param rowNumber 1-based source line number.
+   * @param fields Scalar fields decoded from the row.
+   * @param categorization Loaded categorization context for suggestions.
+   * @returns The classified row, carrying its dedup outcome.
+   */
+  private async _classifyRow(
+    rowNumber: number,
+    fields: ParsedCsvFields,
+    categorization: CategorizationContext,
+  ): Promise<CsvClassifiedRow> {
+    const dedup = await this.dedupService.evaluate(
+      CsvImportMapper.toCandidate(fields),
+    );
+    const suggestion = categorization.categorize(
+      fields.rawDescription,
+      fields.amount,
+    );
+    return CsvImportMapper.toClassifiedRow(rowNumber, fields, dedup, suggestion);
+  }
+
+  /**
+   * Decodes the requested row, retrying once with the correction in the failed cell.
+   * A row that already parses is returned as it stands — there is no failed cell to fix.
+   * @param session The opened file.
+   * @param request Validated reclassify request.
+   * @returns The decode result, or null when the row number is past the file's end.
+   */
+  private _decodeCorrectedRow(
+    session: CsvFileSession,
+    request: CsvReclassifyRequest,
+  ): CsvRowDecodeResult | null {
+    const cells = session.rows[(request.rowNumber as number) - 1];
+    if (!cells) {
+      return null;
+    }
+    const firstPass = session.reader.decodeRow(cells);
+    if (firstPass.ok) {
+      return firstPass;
+    }
+    const corrected = session.reader.correctFailedCell(
+      cells,
+      firstPass.field,
+      request.correctedValue as string,
+    );
+    return session.reader.decodeRow(corrected);
+  }
+
+  /**
+   * Resolves the card's format config and builds everything needed to decode the file.
+   * @param request Validated request carrying the card and file content.
+   * @returns The open file, or null when no format config resolves for the card.
+   */
+  private async _openFile(request: CsvParseRequest): Promise<CsvFileSession | null> {
+    const cardInstanceId = request.cardInstance_ID as string;
+    const config = await this.dataService.getFormatConfigForCard(cardInstanceId);
+    if (!config) {
+      this.logger.warn("STATE_CHANGE", "No CSV format config for card", {
+        cardInstanceId,
+      });
+      return null;
     }
     const attributionCards = await this.dataService.getAttributionCards(
       cardInstanceId,
@@ -107,41 +206,30 @@ export class CsvImportService extends BaseService {
       attributionCards,
       cardInstanceId,
     );
-    const buckets = await this._processRows(
+    return {
       rows,
-      config.headerRowsSkip,
       reader,
       categorization,
-    );
-    return {
-      configResolved: true,
       configName: config.configName,
-      ...buckets,
+      headerRowsSkip: config.headerRowsSkip,
     };
   }
 
   /**
    * Processes every data row (after the skipped header/preamble) into the new,
    * potential-duplicate, or excluded buckets, discarding status-filtered rows.
-   * @param rows All parsed rows of the file.
-   * @param headerRowsSkip Number of leading rows to skip before the data begins.
-   * @param reader Decoder for the resolved format config.
-   * @param categorization Loaded categorization context for suggestions.
+   * @param session The opened file: rows, reader, and categorization context.
    * @returns The accumulated row buckets and skipped count.
    */
-  private async _processRows(
-    rows: string[][],
-    headerRowsSkip: number,
-    reader: CsvRowReaderService,
-    categorization: CategorizationContext,
-  ): Promise<RowBuckets> {
+  private async _processRows(session: CsvFileSession): Promise<RowBuckets> {
+    const { rows, reader, categorization } = session;
     const buckets: RowBuckets = {
       newRows: [],
       potentialDuplicates: [],
       excludedRows: [],
       skippedCount: 0,
     };
-    for (let index = headerRowsSkip; index < rows.length; index++) {
+    for (let index = session.headerRowsSkip; index < rows.length; index++) {
       const cells = rows[index];
       if (reader.isEmptyRow(cells)) {
         continue;
@@ -182,22 +270,9 @@ export class CsvImportService extends BaseService {
       );
       return;
     }
-    const { fields } = decoded;
-    const dedup = await this.dedupService.evaluate(
-      CsvImportMapper.toCandidate(fields),
-    );
-    const suggestion = categorization.categorize(
-      fields.rawDescription,
-      fields.amount,
-    );
-    const row = CsvImportMapper.toClassifiedRow(
-      rowNumber,
-      fields,
-      dedup,
-      suggestion,
-    );
+    const row = await this._classifyRow(rowNumber, decoded.fields, categorization);
     const bucket =
-      dedup.outcome === "potential_duplicate"
+      row.dedupOutcome === "potential_duplicate"
         ? buckets.potentialDuplicates
         : buckets.newRows;
     bucket.push(row);
@@ -219,12 +294,36 @@ export class CsvImportService extends BaseService {
     field: "date" | "amount",
     rawValue: string,
   ): void {
-    const messageKey =
-      field === "date"
-        ? "ingestion.csv.parseErrorDate"
-        : "ingestion.csv.parseErrorAmount";
+    const messageKey = this._resolveParseErrorKey(field);
     buckets.excludedRows.push(
       CsvImportMapper.toExcludedRow(rowNumber, cells, field, messageKey, rawValue),
     );
+  }
+
+  /**
+   * Raises each validation error on the request as a 400.
+   * @param req Request to raise the errors on.
+   * @param errors Validation errors to raise.
+   */
+  private _raiseErrors(req: cds.Request, errors: CsvValidationError[]): void {
+    for (const error of errors) {
+      req.error({
+        code: error.messageKey,
+        message: MessagingUtility.getText(error.messageKey),
+        target: error.field,
+        status: 400,
+      });
+    }
+  }
+
+  /**
+   * Maps the decoder's failed field to the user-facing parse-error message key.
+   * @param field Field whose parse failed.
+   * @returns The i18n key for that field's parse error.
+   */
+  private _resolveParseErrorKey(field: "date" | "amount"): string {
+    return field === "date"
+      ? "ingestion.csv.parseErrorDate"
+      : "ingestion.csv.parseErrorAmount";
   }
 }

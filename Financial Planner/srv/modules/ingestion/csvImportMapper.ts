@@ -4,6 +4,7 @@ import { CSV } from "./constants.js";
 import type {
   CsvClassifiedRow,
   CsvExcludedRow,
+  CsvReclassifyRequest,
   DedupResult,
   IncomingTransaction,
   ParsedCsvFields,
@@ -28,6 +29,23 @@ export class CsvImportMapper {
       postedAt: fields.postedAt,
       rawDescription: fields.rawDescription,
       source: CSV.SOURCE,
+    };
+  }
+
+  /**
+   * Maps a reclassifyCsvRow action body to a request, coercing absent fields to
+   * null so validation rejects them rather than reading undefined.
+   * @param data The action's req.data, possibly absent.
+   * @returns The reclassify request.
+   */
+  static toReclassifyRequest(data: Record<string, unknown> | undefined): CsvReclassifyRequest {
+    const read = (key: string): unknown => data?.[key] ?? null;
+    return {
+      cardInstance_ID: read("cardInstance_ID") as string | null,
+      fileName: read("fileName") as string | null,
+      fileContent: read("fileContent") as string | null,
+      rowNumber: read("rowNumber") as number | null,
+      correctedValue: read("correctedValue") as string | null,
     };
   }
 

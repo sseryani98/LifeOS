@@ -113,6 +113,12 @@ service TransactionService @(path: '/service/transactionSvcs') {
                         fileName: String,
                         fileContent: LargeString) returns CsvParseResult;
 
+  action reclassifyCsvRow(cardInstance_ID: UUID,
+                          fileName: String,
+                          fileContent: LargeString,
+                          rowNumber: Integer,
+                          correctedValue: String) returns CsvClassifiedRow;
+
   action saveCsvImport(cardInstance_ID: UUID,
                        fileName: String,
                        skippedCount: Integer,

@@ -2,9 +2,9 @@ import {
   SAVE_ACTION_DATA,
   SAVE_ACTION_DATA_EMPTY,
   SAVE_REQUEST_ALL_UNCATEGORIZED,
-  SAVE_REQUEST_TOP_AMAZON,
   VENDOR_AMAZON_ID,
 } from "../../../shared/data/ingestion/csv.js";
+import { SAVE_REQUEST_TOP_VENDOR_CONTESTED } from "../data/csvImportSave.js";
 import {
   buildCsvImportSaveMocks,
   saveRequestOf,
@@ -51,7 +51,7 @@ describe("CsvImportSaveService", () => {
     const mocks = buildCsvImportSaveMocks("Amazon");
 
     const summary = await mocks.service.save(
-      saveRequestOf(SAVE_REQUEST_TOP_AMAZON) as never,
+      saveRequestOf(SAVE_REQUEST_TOP_VENDOR_CONTESTED) as never,
     );
 
     expect(mocks.data.getVendorName).toHaveBeenCalledWith(VENDOR_AMAZON_ID);
@@ -81,7 +81,27 @@ describe("CsvImportSaveService", () => {
     const summary = await mocks.service.save(request as never);
 
     expect(summary).toBeUndefined();
-    expect(request.error).toHaveBeenCalled();
+    expect(request.error).toHaveBeenCalledWith(
+      expect.objectContaining({
+        code: "csv.noRowsToSave",
+        target: "rows",
+        status: 400,
+      }),
+    );
+    expect(mocks.data.insertTransactions).not.toHaveBeenCalled();
+  });
+
+  /** A save posted with no body must still reach the validator as an empty batch and come back a 400, not crash on a missing data block as a 500. */
+  it("coerces an absent request body to an empty batch and rejects it", async () => {
+    const mocks = buildCsvImportSaveMocks();
+    const error = jest.fn();
+
+    const summary = await mocks.service.save({ error } as never);
+
+    expect(summary).toBeUndefined();
+    expect(error).toHaveBeenCalledWith(
+      expect.objectContaining({ code: "csv.noRowsToSave" }),
+    );
     expect(mocks.data.insertTransactions).not.toHaveBeenCalled();
   });
 });

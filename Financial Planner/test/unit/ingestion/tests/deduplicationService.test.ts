@@ -1,7 +1,10 @@
 import {
   INCOMING_SIMPLEFIN_NEW,
+  INCOMING_SIMPLEFIN_UNSCOPED,
   INCOMING_CSV_NEW,
+  INCOMING_CSV_UNCARDED,
   EXISTING_TXN_ID,
+  PROVIDER_ACCOUNT_AMEX,
 } from "../data/transactions.js";
 import { buildDedupMocks } from "../support/deduplicationMocks.js";
 
@@ -18,6 +21,32 @@ describe("DeduplicationService", () => {
       matchedTransactionId: EXISTING_TXN_ID,
     });
     expect(mocks.findByNaturalKey).not.toHaveBeenCalled();
+  });
+
+  /** External ids are scoped by provider account, not card — a card scope re-inserts an account's whole history after a remap. */
+  it("looks up the external id within the provider account", async () => {
+    const mocks = buildDedupMocks();
+    mocks.findByExternalId.mockResolvedValue(null);
+
+    await mocks.service.evaluate(INCOMING_SIMPLEFIN_NEW);
+
+    expect(mocks.findByExternalId).toHaveBeenCalledWith(
+      INCOMING_SIMPLEFIN_NEW.externalId,
+      PROVIDER_ACCOUNT_AMEX,
+    );
+  });
+
+  /** A candidate with no provider account must look up null, never undefined — CQL drops an undefined key and would match the id on any account. */
+  it("looks up a null provider account when the candidate has none", async () => {
+    const mocks = buildDedupMocks();
+    mocks.findByExternalId.mockResolvedValue(null);
+
+    await mocks.service.evaluate(INCOMING_SIMPLEFIN_UNSCOPED);
+
+    expect(mocks.findByExternalId).toHaveBeenCalledWith(
+      INCOMING_SIMPLEFIN_UNSCOPED.externalId,
+      null,
+    );
   });
 
   /** An unseen external id is definitively new — SimpleFIN must not fall back to the fuzzy natural-key check and risk a false collision. */
@@ -53,6 +82,21 @@ describe("DeduplicationService", () => {
     const result = await mocks.service.evaluate(INCOMING_CSV_NEW);
 
     expect(result).toEqual({ outcome: "new" });
+  });
+
+  /** An uncarded candidate must look up a null card, never undefined — CQL drops an undefined key and would match the charge on every card. */
+  it("looks up a null card when the CSV candidate has none", async () => {
+    const mocks = buildDedupMocks();
+    mocks.findByNaturalKey.mockResolvedValue(null);
+
+    await mocks.service.evaluate(INCOMING_CSV_UNCARDED);
+
+    expect(mocks.findByNaturalKey).toHaveBeenCalledWith(
+      INCOMING_CSV_UNCARDED.rawDescription,
+      INCOMING_CSV_UNCARDED.postedAt,
+      INCOMING_CSV_UNCARDED.amount,
+      null,
+    );
   });
 
   /** Normalising whitespace before the lookup lets "NETFLIX.COM " and "NETFLIX.COM" match — otherwise stray spaces would defeat dedup. */

@@ -1,5 +1,6 @@
 import type ODataModel from "sap/ui/model/odata/v4/ODataModel";
 import type {
+  ClassifiedRow,
   CreatedEntity,
   ImportSummary,
   MatchedTransaction,
@@ -50,7 +51,7 @@ export default class CsvImportWizardService {
         return { ...result, configResolved: false };
       }
       merged.configName = result.configName;
-      this._mergeResult(merged, result, offset);
+      this._mergeResult(merged, result, offset, file.name);
       offset += this._countRows(result);
     }
     return merged;
@@ -93,6 +94,31 @@ export default class CsvImportWizardService {
   }
 
   /**
+   * Re-decodes one corrected Excluded row on the server, which alone knows the
+   * file's columns and sign convention, and classifies it like a parsed row.
+   * @param cardInstanceId the selected card instance id
+   * @param file the file the row came from
+   * @param rowNumber the row number within that file
+   * @param correctedValue the user's correction for the failed field
+   * @returns the classified row
+   */
+  public async reclassifyRow(
+    cardInstanceId: string,
+    file: ParsedFile,
+    rowNumber: number,
+    correctedValue: string,
+  ): Promise<ClassifiedRow> {
+    const operation = this._model.bindContext(ODATA_PATH.RECLASSIFY_OPERATION);
+    operation.setParameter("cardInstance_ID", cardInstanceId);
+    operation.setParameter("fileName", file.name);
+    operation.setParameter("fileContent", file.content);
+    operation.setParameter("rowNumber", rowNumber);
+    operation.setParameter("correctedValue", correctedValue);
+    await operation.invoke();
+    return operation.getBoundContext().getObject() as ClassifiedRow;
+  }
+
+  /**
    * Persists the reviewed rows and records the import, returning the summary.
    * @param cardInstanceId the selected card instance id
    * @param fileName the combined file-name label for the import history
@@ -122,11 +148,13 @@ export default class CsvImportWizardService {
    * @param merged the accumulating merged result
    * @param result one file's parse result
    * @param offset the row-number offset for this file
+   * @param fileName the file the result came from, stamped on excluded rows
    */
   private _mergeResult(
     merged: ParseResult,
     result: ParseResult,
     offset: number,
+    fileName: string,
   ): void {
     merged.newRows.push(
       ...result.newRows.map(row => ({ ...row, rowNumber: row.rowNumber + offset })),
@@ -141,6 +169,8 @@ export default class CsvImportWizardService {
       ...result.excludedRows.map(row => ({
         ...row,
         rowNumber: row.rowNumber + offset,
+        fileName,
+        sourceRowNumber: row.rowNumber,
       })),
     );
     merged.skippedCount += result.skippedCount;

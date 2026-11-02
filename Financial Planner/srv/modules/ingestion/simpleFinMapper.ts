@@ -14,16 +14,17 @@ export class SimpleFINMapper {
   /**
    * Maps a SimpleFIN transaction to a dedup candidate.
    * @param sfTx Source transaction from the SimpleFIN response.
-   * @param cardInstanceId Mapped card, or null for an unmapped account.
+   * @param account Resolved provider account supplying the dedup scope and card.
    * @returns The candidate handed to the deduplication engine.
    */
   static toIncoming(
     sfTx: SimpleFINTransaction,
-    cardInstanceId: string | null,
+    account: AccountRecord,
   ): IncomingTransaction {
     return {
       externalId: sfTx.id,
-      cardInstance_ID: cardInstanceId,
+      providerAccount_ID: account.ID,
+      cardInstance_ID: account.cardInstance_ID,
       amount: Number.parseFloat(sfTx.amount),
       postedAt: this._toDate(sfTx.posted),
       rawDescription: sfTx.description,

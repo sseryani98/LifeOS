@@ -34,20 +34,20 @@ export const seedCsvImportSave = async (): Promise<void> => {
   await INSERT.into("com.financialplanner.Vendor").entries([SAVE_VENDOR]);
 };
 
-/** Reads the CSV transactions persisted against a card. */
-export const readCsvTransactionsByCard = async (
-  cardId: string,
+/** Reads the CSV transactions persisted with any of the given raw descriptions. */
+export const readCsvTransactionsByDescriptions = async (
+  descriptions: string[],
 ): Promise<SavedTransactionRow[]> => {
   return (await SELECT.from("com.financialplanner.Transaction")
     .columns("source", "amount", "categorizationStatus", "vendor_ID")
-    .where({ cardInstance_ID: cardId })) as SavedTransactionRow[];
+    .where({ rawDescription: { in: descriptions } })) as SavedTransactionRow[];
 };
 
-/** Reads the import-log rows recorded against a card. */
-export const readImportLogsByCard = async (
-  cardId: string,
+/** Reads the import-log rows recorded for one uploaded file name. */
+export const readImportLogsByFileName = async (
+  fileName: string,
 ): Promise<SavedImportLogRow[]> => {
   return (await SELECT.from("com.financialplanner.ImportLog")
     .columns("fileName", "transactionCount", "totalAmount", "skippedCount")
-    .where({ cardInstance_ID: cardId })) as SavedImportLogRow[];
+    .where({ fileName })) as SavedImportLogRow[];
 };

@@ -9,14 +9,33 @@ export const EXISTING_TXN_ID = "aaaaaaaa-0000-0000-0000-000000000001";
 /** A mapped card instance id (Amex Cobalt) reused across incoming samples. */
 export const CARD_INSTANCE_AMEX = "11111111-1111-1111-1111-111111111111";
 
+/** Provider account the SimpleFIN sample came from — the external-id dedup scope. */
+export const PROVIDER_ACCOUNT_AMEX = "dddddddd-0000-0000-0000-000000000002";
+
 /** Valid SimpleFIN transaction — carries a stable external id (tier-1 dedup). */
 export const INCOMING_SIMPLEFIN_NEW: IncomingTransaction = {
   externalId: "sf-tx-1001",
+  providerAccount_ID: PROVIDER_ACCOUNT_AMEX,
   cardInstance_ID: CARD_INSTANCE_AMEX,
   amount: -42.5,
   postedAt: "2026-06-01",
   rawDescription: "AMZN MKTP CA",
   source: "simplefin",
+};
+
+/** A SimpleFIN candidate built without its provider account — the scope must resolve to null. */
+export const INCOMING_SIMPLEFIN_UNSCOPED: IncomingTransaction = {
+  ...INCOMING_SIMPLEFIN_NEW,
+  providerAccount_ID: undefined,
+};
+
+/** A CSV candidate with no card — uncarded rows must match only other uncarded rows. */
+export const INCOMING_CSV_UNCARDED: IncomingTransaction = {
+  externalId: null,
+  amount: -19.99,
+  postedAt: "2026-06-02",
+  rawDescription: "NETFLIX.COM",
+  source: "csv",
 };
 
 /** Valid CSV transaction — no external id, padded description (tier-2 dedup). */

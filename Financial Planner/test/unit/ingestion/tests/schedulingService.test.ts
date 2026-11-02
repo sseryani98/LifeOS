@@ -17,6 +17,16 @@ describe("SchedulingService.buildCronExpression", () => {
     expect(SchedulingService.buildCronExpression("07:35")).toBe("35 7 * * *");
   });
 
+  /** 23:59 is the last valid time; an off-by-one upper bound would silently reschedule a late-evening sync to the 20:00 default. */
+  it("accepts the upper boundary 23:59", () => {
+    expect(SchedulingService.buildCronExpression("23:59")).toBe("59 23 * * *");
+  });
+
+  /** 00:00 is the first valid time; a `> 0` lower bound would treat midnight as invalid and fall back to 20:00. */
+  it("accepts the lower boundary 00:00", () => {
+    expect(SchedulingService.buildCronExpression("00:00")).toBe("0 0 * * *");
+  });
+
   /** Malformed config must degrade to the default rather than emit an invalid cron string that node-cron would reject, killing the sync. */
   it("falls back to the default time on malformed input", () => {
     expect(SchedulingService.buildCronExpression("not-a-time")).toBe(

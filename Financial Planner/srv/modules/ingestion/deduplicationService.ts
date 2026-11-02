@@ -32,7 +32,7 @@ export class DeduplicationService extends BaseService {
     if (incoming.externalId) {
       const match = await this.dataService.findByExternalId(
         incoming.externalId,
-        incoming.cardInstance_ID,
+        incoming.providerAccount_ID ?? null,
       );
       if (match) {
         return { outcome: "duplicate", matchedTransactionId: match.ID };
@@ -44,7 +44,7 @@ export class DeduplicationService extends BaseService {
       incoming.rawDescription.trim(),
       incoming.postedAt,
       incoming.amount,
-      incoming.cardInstance_ID,
+      incoming.cardInstance_ID ?? null,
     );
     if (naturalMatch) {
       return {

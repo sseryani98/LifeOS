@@ -6,6 +6,12 @@ import {
   REQUEST_MISSING_FILE,
   VALID_PARSE_REQUEST,
 } from "../../../shared/data/ingestion/csv.js";
+import {
+  BLANK_CORRECTION,
+  DATE_CORRECTION,
+  FRACTIONAL_ROW_CORRECTION,
+  ZERO_ROW_CORRECTION,
+} from "../data/csvReclassify.js";
 
 describe("CsvImportValidator", () => {
   /** A complete request must pass so the wizard can proceed to review — over-strict validation would block a legitimate import. */
@@ -44,5 +50,40 @@ describe("CsvImportValidator", () => {
       fileContent: null,
     });
     expect(errors).toHaveLength(3);
+  });
+
+  describe("validateReclassifyRequest", () => {
+    /** A complete correction must pass, or a fixed Excluded row can never reach the New tab. */
+    it("accepts a complete reclassify request", () => {
+      expect(CsvImportValidator.validateReclassifyRequest(DATE_CORRECTION)).toEqual([]);
+    });
+
+    /** Row numbers are 1-based lines; zero would read the header as data. */
+    it("flags a zero row number", () => {
+      expect(
+        CsvImportValidator.validateReclassifyRequest(ZERO_ROW_CORRECTION),
+      ).toContainEqual({ field: "rowNumber", messageKey: "csv.rowNumberInvalid" });
+    });
+
+    /** A fractional row number points at no line and would index undefined cells. */
+    it("flags a non-integer row number", () => {
+      expect(
+        CsvImportValidator.validateReclassifyRequest(FRACTIONAL_ROW_CORRECTION),
+      ).toContainEqual({ field: "rowNumber", messageKey: "csv.rowNumberInvalid" });
+    });
+
+    /** A blank correction cannot fix the failed cell; re-decoding it would just fail again. */
+    it("flags a blank correction", () => {
+      expect(
+        CsvImportValidator.validateReclassifyRequest(BLANK_CORRECTION),
+      ).toContainEqual({ field: "correctedValue", messageKey: "csv.correctionRequired" });
+    });
+
+    /** The parse-request rules still apply, so a correction without its file is refused too. */
+    it("keeps the parse-request rules", () => {
+      expect(
+        CsvImportValidator.validateReclassifyRequest({ ...DATE_CORRECTION, fileContent: "" }),
+      ).toContainEqual({ field: "fileContent", messageKey: "csv.fileEmpty" });
+    });
   });
 });

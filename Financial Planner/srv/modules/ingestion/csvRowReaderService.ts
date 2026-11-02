@@ -74,6 +74,23 @@ export class CsvRowReaderService {
   }
 
   /**
+   * Places a user's correction into the cell whose value failed to parse, so the
+   * row can be decoded again under the same config — sign rules included.
+   * @param cells Raw cells of the row.
+   * @param field Field that failed to parse.
+   * @param value The corrected value.
+   * @returns A copy of the cells with the correction applied.
+   */
+  correctFailedCell(cells: string[], field: "date" | "amount", value: string): string[] {
+    const corrected = [...cells];
+    const index = this._resolveColumnIndex(this._resolveFailedColumn(cells, field));
+    if (index !== undefined) {
+      corrected[index] = value;
+    }
+    return corrected;
+  }
+
+  /**
    * True when every cell in a row is blank — a preamble/spacer line to skip.
    * @param cells Raw cells of the row.
    * @returns True when the row carries no data.
@@ -191,16 +208,42 @@ export class CsvRowReaderService {
    * @returns The cell text, or "" when the column is absent.
    */
   private _readColumn(cells: string[], columnId: string): string {
-    if (columnId === "") {
-      return "";
-    }
-    const index = /^\d+$/.test(columnId)
-      ? Number(columnId)
-      : this.headerMap.get(columnId);
+    const index = this._resolveColumnIndex(columnId);
     if (index === undefined) {
       return "";
     }
     return cells[index] ?? "";
+  }
+
+  /**
+   * Resolves the cell index a config column id points at.
+   * @param columnId Numeric index or header name from the config.
+   * @returns The index, or undefined when the column is unset or not in the header.
+   */
+  private _resolveColumnIndex(columnId: string): number | undefined {
+    if (columnId === "") {
+      return undefined;
+    }
+    return /^\d+$/.test(columnId) ? Number(columnId) : this.headerMap.get(columnId);
+  }
+
+  /**
+   * Resolves which config column a failed field was read from.
+   * @param cells Raw cells of the row.
+   * @param field Field that failed to parse.
+   * @returns The config column id holding the failed value.
+   */
+  private _resolveFailedColumn(cells: string[], field: "date" | "amount"): string {
+    const { config } = this;
+    if (field === "date") {
+      return config.dateColumn;
+    }
+    if (config.debitColumn && config.creditColumn) {
+      // The split column carries the sign: a row with an empty credit cell was a charge.
+      const credit = this._readColumn(cells, config.creditColumn).trim();
+      return credit === "" ? config.debitColumn : config.creditColumn;
+    }
+    return config.amountColumn ?? "";
   }
 
   /**

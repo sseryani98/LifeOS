@@ -19,6 +19,15 @@ import {
   TD_CSV,
   TD_NO_AMOUNT_CSV,
 } from "../../../shared/data/ingestion/csv.js";
+import {
+  AMOUNT_CORRECTION,
+  BLANK_CORRECTION,
+  CLEAN_ROW_CORRECTION,
+  DATE_CORRECTION,
+  MISSING_ROW_CORRECTION,
+  SPLIT_AMOUNT_CORRECTION,
+  STILL_BAD_DATE_CORRECTION,
+} from "../data/csvReclassify.js";
 import { buildCsvImportMocks } from "../support/csvImportMocks.js";
 
 /** Wraps raw CSV text in a parse request for the selected primary card. */
@@ -128,6 +137,11 @@ describe("CsvImportService", () => {
       expect(result.newRows).toHaveLength(0);
       expect(result.excludedRows).toHaveLength(1);
       expect(result.excludedRows[0].errorField).toBe("date");
+      expect(result.excludedRows[0]).toMatchObject({
+        rowNumber: 2,
+        errorMessageKey: "ingestion.csv.parseErrorDate",
+        errorValue: "not-a-date",
+      });
     });
 
     /** A non-numeric amount can't be trusted as zero or guessed; the row must be Excluded with the amount field flagged so the user corrects it. */
@@ -139,6 +153,11 @@ describe("CsvImportService", () => {
       expect(result.newRows).toHaveLength(0);
       expect(result.excludedRows).toHaveLength(1);
       expect(result.excludedRows[0].errorField).toBe("amount");
+      expect(result.excludedRows[0]).toMatchObject({
+        rowNumber: 2,
+        errorMessageKey: "ingestion.csv.parseErrorAmount",
+        errorValue: "N/A",
+      });
     });
 
     /** A split row with neither debit nor credit populated has no amount at all and must be Excluded, not imported as zero. */
@@ -254,7 +273,13 @@ describe("CsvImportService", () => {
       const result = await mocks.service.parse({ error } as never);
 
       expect(result).toBeUndefined();
-      expect(error).toHaveBeenCalled();
+      expect(error).toHaveBeenCalledWith(
+        expect.objectContaining({
+          code: "csv.cardRequired",
+          target: "cardInstance_ID",
+          status: 400,
+        }),
+      );
       expect(mocks.data.getFormatConfigForCard).not.toHaveBeenCalled();
     });
 
@@ -269,8 +294,138 @@ describe("CsvImportService", () => {
       } as never);
 
       expect(result).toBeUndefined();
-      expect(error).toHaveBeenCalled();
+      expect(error).toHaveBeenCalledWith(
+        expect.objectContaining({
+          code: "csv.cardRequired",
+          target: "cardInstance_ID",
+          status: 400,
+        }),
+      );
       expect(mocks.data.getFormatConfigForCard).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("reclassify — corrected Excluded row", () => {
+    /** Fixing a bad date must import the row with its real amount and description from the file; the old client rebuild saved it as $0 with every cell joined as the description. */
+    it("re-decodes a date-corrected row with the file's amount and description", async () => {
+      const mocks = buildCsvImportMocks();
+      const error = jest.fn();
+
+      const row = await mocks.service.reclassify({ data: DATE_CORRECTION, error } as never);
+
+      expect(error).not.toHaveBeenCalled();
+      expect(row).toMatchObject({
+        rowNumber: 2,
+        postedAt: "2026-02-14",
+        amount: -9.99,
+        rawDescription: "broken row",
+        dedupOutcome: "new",
+      });
+    });
+
+    /** A corrected amount must still go through the config's sign rule; Scotia is positive-is-debit, so a typed "12.50" charge lands negative. */
+    it("applies the config's sign convention to a corrected amount", async () => {
+      const mocks = buildCsvImportMocks();
+
+      const row = await mocks.service.reclassify({ data: AMOUNT_CORRECTION, error: jest.fn() } as never);
+
+      expect(row?.amount).toBe(-12.5);
+    });
+
+    /** On split debit/credit files the correction must land in the column the row was using; an empty credit means it was a charge. */
+    it("places a split-file amount correction in the debit column", async () => {
+      const mocks = buildCsvImportMocks();
+      mocks.data.getFormatConfigForCard.mockResolvedValue({ ...TD_CONFIG });
+
+      const row = await mocks.service.reclassify({ data: SPLIT_AMOUNT_CORRECTION, error: jest.fn() } as never);
+
+      expect(row).toMatchObject({ amount: -42, postedAt: "2025-09-02", rawDescription: "MYSTERY ROW" });
+    });
+
+    /** The corrected row was never dedup-checked; it must be, or a fixed row silently re-imports a charge already on file. */
+    it("dedups the corrected row like any parsed row", async () => {
+      const mocks = buildCsvImportMocks();
+      mocks.dedup.evaluate.mockResolvedValue({ outcome: "potential_duplicate", matchedTransactionId: CSV_CARD_ID });
+
+      const row = await mocks.service.reclassify({ data: DATE_CORRECTION, error: jest.fn() } as never);
+
+      expect(mocks.dedup.evaluate).toHaveBeenCalledWith(
+        expect.objectContaining({ postedAt: "2026-02-14", amount: -9.99 }),
+      );
+      expect(row?.dedupOutcome).toBe("potential_duplicate");
+    });
+
+    /** A correction that still does not parse must stay out of the import with the parse error, never fall through as a zero row. */
+    it("rejects a correction that still fails to parse", async () => {
+      const mocks = buildCsvImportMocks();
+      const error = jest.fn();
+
+      const row = await mocks.service.reclassify({ data: STILL_BAD_DATE_CORRECTION, error } as never);
+
+      expect(row).toBeUndefined();
+      expect(error).toHaveBeenCalledWith(
+        expect.objectContaining({ code: "ingestion.csv.parseErrorDate", target: "correctedValue", status: 400 }),
+      );
+      expect(mocks.dedup.evaluate).not.toHaveBeenCalled();
+    });
+
+    /** A row number past the file's end points at nothing; reading undefined cells would crash the decoder. */
+    it("rejects a row number outside the file", async () => {
+      const mocks = buildCsvImportMocks();
+      const error = jest.fn();
+
+      const row = await mocks.service.reclassify({ data: MISSING_ROW_CORRECTION, error } as never);
+
+      expect(row).toBeUndefined();
+      expect(error).toHaveBeenCalledWith(
+        expect.objectContaining({ code: "csv.rowNumberInvalid", target: "rowNumber", status: 400 }),
+      );
+    });
+
+    /** Without a format config there is nothing to decode against; the request must fail rather than return an empty row. */
+    it("rejects the request when no format config resolves", async () => {
+      const mocks = buildCsvImportMocks();
+      mocks.data.getFormatConfigForCard.mockResolvedValue(null);
+      const error = jest.fn();
+
+      const row = await mocks.service.reclassify({ data: DATE_CORRECTION, error } as never);
+
+      expect(row).toBeUndefined();
+      expect(error).toHaveBeenCalledWith(expect.objectContaining({ code: "csv.rowNumberInvalid" }));
+    });
+
+    /** A row that already parses must be classified as it stands; the correction targets a failed cell, and there is none. */
+    it("classifies an already-clean row without applying the correction", async () => {
+      const mocks = buildCsvImportMocks();
+
+      const row = await mocks.service.reclassify({ data: CLEAN_ROW_CORRECTION, error: jest.fn() } as never);
+
+      expect(row?.postedAt).toBe("2026-02-15");
+    });
+
+    /** An empty correction must be refused before the file is even opened. */
+    it("reports validation errors and never opens the file", async () => {
+      const mocks = buildCsvImportMocks();
+      const error = jest.fn();
+
+      const row = await mocks.service.reclassify({ data: BLANK_CORRECTION, error } as never);
+
+      expect(row).toBeUndefined();
+      expect(error).toHaveBeenCalledWith(
+        expect.objectContaining({ code: "csv.correctionRequired", target: "correctedValue", status: 400 }),
+      );
+      expect(mocks.data.getFormatConfigForCard).not.toHaveBeenCalled();
+    });
+
+    /** An absent body must coerce to nulls and fail validation, never read undefined off a missing data block. */
+    it("coerces an absent request body to null fields and rejects it", async () => {
+      const mocks = buildCsvImportMocks();
+      const error = jest.fn();
+
+      const row = await mocks.service.reclassify({ error } as never);
+
+      expect(row).toBeUndefined();
+      expect(error).toHaveBeenCalledWith(expect.objectContaining({ code: "csv.rowNumberInvalid" }));
     });
   });
 });

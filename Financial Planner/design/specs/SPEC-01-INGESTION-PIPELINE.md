@@ -193,7 +193,7 @@ Actual CSV samples: `design/actual-csvs/`
 
 | Scenario                    | Match Key                                                                                            | Result              | User Action                           |
 | --------------------------- | ---------------------------------------------------------------------------------------------------- | ------------------- | ------------------------------------- |
-| SimpleFIN → SimpleFIN       | `external_id` exact on same card                                                                     | Auto-skip           | None (silent)                         |
+| SimpleFIN → SimpleFIN       | `external_id` exact on same provider account (survives a card remap)                                 | Auto-skip           | None (silent)                         |
 | CSV → existing (any source) | `raw_description` (exact, trimmed) + `posted_at` (date only) + `amount` (exact) + `card_instance_id` | Potential duplicate | Side-by-side review, skip or override |
 | No match                    | —                                                                                                    | New                 | Imported                              |
 
@@ -304,7 +304,7 @@ Three tabs with badge counts: **New** | **Potential Duplicates** | **Excluded**
 | BR-06 | Unrecognized accounts: auto-create Provider Account with null card, store transactions with null card, `unmapped_account` alert. |
 | BR-07 | Card mapping set on Provider Account → backfill all null-card transactions.                                                      |
 | BR-08 | `posted = 0` (pending) transactions discarded (D-42).                                                                            |
-| BR-09 | Dedup via `external_id`: exact match on same card = auto-skip, silent.                                                           |
+| BR-09 | Dedup via `external_id`: exact match on same provider account = auto-skip, silent. Not card-scoped: a remap keeps its ids.        |
 
 ### INT-002 — CSV Import
 
