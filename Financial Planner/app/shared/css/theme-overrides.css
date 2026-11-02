@@ -13,10 +13,11 @@
  *
  * Brand Palette — "Obsidian & Amber":
  *   Shell/Primary (Obsidian):     #2A2725
- *   Accent (Amber):               #C8973E
- *   Accent Hover (Dark Amber):    #A67C2E
- *   Accent Active (Burnt Gold):   #8E6A24
- *   Link Text (Deep Gold):        #8B6B1F
+ *   Accent (Amber):               #C8973E  (non-text accents only)
+ *   Focus / Borders (Dark Amber): #A67C2E
+ *   Emphasized Fill (Burnt Gold): #8E6A24
+ *   Link / Hover (Deep Gold):     #7A5E1B
+ *   Emphasized Active (Umber):    #654B1D
  *   Page Background (Warm Stone): #F0EDEA
  *   Surface (Parchment):          #FAFAF8
  *   Side Nav (Soft Ash):          #E8E5E2
@@ -32,19 +33,54 @@
 :root {
   /* --- Typography --- */
   --sapFontFamily: "DM Sans", "72", "72full", Arial, Helvetica, sans-serif;
+  /* Horizon names a separate "72" face per weight. Pointing every weight family at
+     DM Sans stops buttons, titles and wizard steps falling back to "72". */
+  --sapFontLightFamily: var(--sapFontFamily);
+  --sapFontBoldFamily: var(--sapFontFamily);
+  --sapFontSemiboldFamily: var(--sapFontFamily);
+  --sapFontSemiboldDuplexFamily: var(--sapFontFamily);
+  --sapFontHeaderFamily: var(--sapFontFamily);
+  --sapFontBlackFamily: var(--sapFontFamily);
+  --sapObjectHeader_Title_FontFamily: var(--sapFontFamily);
+  --sapButton_FontFamily: var(--sapFontFamily);
+  --sapButton_Emphasized_FontFamily: var(--sapFontFamily);
 
   /* --- Brand & Selection --- */
   --sapBrandColor: #c8973e;
-  --sapHighlightColor: #c8973e;
+  /* Selection and highlight sit on every surface and under white wizard and
+     time-picker text. Burnt Gold clears 3:1 on Soft Ash and 4.5:1 under white;
+     Amber clears neither. */
+  --sapHighlightColor: #8e6a24;
   --sapActiveColor: #8e6a24;
-  --sapSelectedColor: #c8973e;
-  --sapContent_FocusColor: #c8973e;
+  --sapSelectedColor: #8e6a24;
+  /* Amber is 2.3:1 on Warm Stone — under the 3:1 a focus ring needs.
+     Dark Amber is the lightest palette value that clears 3:1 on every surface. */
+  --sapContent_FocusColor: #a67c2e;
+  /* Selected text (active wizard step) and the check mark share this token, so it
+     takes the text bar: Deep Gold. */
+  --sapContent_Selected_TextColor: #7a5e1b;
+  --sapContent_Selected_ForegroundColor: #7a5e1b;
+  --sapContent_Selected_Hover_Background: #f5edd8;
+  --sapField_Selector_Hover_Background: #f5edd8;
 
   /* --- Links --- */
-  --sapLinkColor: #8b6b1f;
+  /* Darkened so link text clears 4.5:1 on Warm Stone and Gold Mist, not just white. */
+  --sapLinkColor: #7a5e1b;
+  --sapLink_Hover_Color: #7a5e1b;
+  --sapLink_Active_Color: #7a5e1b;
+  --sapLink_Visited_Color: #7a5e1b;
 
-  /* --- Page Background --- */
+  /* --- Page Background & Surfaces --- */
   --sapBackgroundColor: #f0edea;
+  /* Every white surface that sits on Warm Stone. Fields stay white so an
+     editable input still reads as a fill against its Parchment card. */
+  --sapGroup_ContentBackground: #fafaf8;
+  --sapTile_Background: #fafaf8;
+  --sapList_Background: #fafaf8;
+  --sapList_HeaderBackground: #fafaf8;
+  --sapObjectHeader_Background: #fafaf8;
+  --sapPageHeader_Background: #fafaf8;
+  --sapToolbar_Background: #fafaf8;
 
   /* --- Shell --- */
   --sapShellColor: #2a2725;
@@ -53,13 +89,18 @@
   --sapShell_Hover_Background: #3d3a37;
 
   /* --- Buttons: Emphasized --- */
-  --sapButton_Emphasized_Background: #c8973e;
-  --sapButton_Emphasized_BorderColor: #c8973e;
+  /* White on Amber is 2.6:1. The fill steps down the amber hue instead, so white
+     text clears 4.5:1 at rest and only gains contrast on hover and press. Horizon's
+     active text is blue (#0064D9), which would sit at 1.1:1 on our fill. */
+  --sapButton_Emphasized_Background: #8e6a24;
+  --sapButton_Emphasized_BorderColor: #8e6a24;
   --sapButton_Emphasized_TextColor: #ffffff;
-  --sapButton_Emphasized_Hover_Background: #a67c2e;
-  --sapButton_Emphasized_Hover_BorderColor: #a67c2e;
-  --sapButton_Emphasized_Active_Background: #8e6a24;
-  --sapButton_Emphasized_Active_BorderColor: #8e6a24;
+  --sapButton_Emphasized_Hover_Background: #7a5e1b;
+  --sapButton_Emphasized_Hover_BorderColor: #7a5e1b;
+  --sapButton_Emphasized_Hover_TextColor: #ffffff;
+  --sapButton_Emphasized_Active_Background: #654b1d;
+  --sapButton_Emphasized_Active_BorderColor: #654b1d;
+  --sapButton_Emphasized_Active_TextColor: #ffffff;
 
   /* --- Buttons: Default --- */
   --sapButton_TextColor: #2a2725;
@@ -70,6 +111,16 @@
   --sapButton_Active_BorderColor: #8e6a24;
   --sapButton_Active_TextColor: #2a2725;
   --sapButton_IconColor: #2a2725;
+  /* Horizon turns default and transparent labels blue (#0064D9) on hover. */
+  --sapButton_Hover_TextColor: #2a2725;
+  --sapButton_Lite_Hover_TextColor: #2a2725;
+
+  /* --- Buttons: Toggled (header pin, segmented) --- */
+  --sapButton_Selected_Background: #f5edd8;
+  --sapButton_Selected_BorderColor: #8e6a24;
+  --sapButton_Selected_TextColor: #7a5e1b;
+  --sapButton_Selected_Hover_Background: #f5edd8;
+  --sapButton_Selected_Hover_BorderColor: #7a5e1b;
 
   /* --- Buttons: Transparent (Lite) --- */
   --sapButton_Lite_TextColor: #2a2725;
@@ -79,18 +130,54 @@
   --sapButton_Lite_Active_BorderColor: #8e6a24;
 
   /* --- Input Fields --- */
-  --sapField_Focus_BorderColor: #c8973e;
+  /* Focus border is a focus indicator, so it takes the focus ring's Dark Amber.
+     Hover is not required to reach 3:1 and keeps the brand Amber. */
+  --sapField_Focus_BorderColor: #a67c2e;
   --sapField_Hover_BorderColor: #c8973e;
+  --sapField_Hover_BackgroundStyle: 0 100% / 100% 0.0625rem no-repeat linear-gradient(0deg, #c8973e, #c8973e) border-box;
   --sapField_Active_BorderColor: #a67c2e;
 
   /* --- Lists & Tables --- */
   --sapList_Hover_Background: #f5edd8;
   --sapList_SelectionBackgroundColor: #f5edd8;
+  --sapList_SelectionBorderColor: #8e6a24;
   --sapList_Active_Background: #2a2725;
   --sapList_Active_TextColor: #ffffff;
+  /* Header, group and footer rules are Horizon grey-blue #A8B3BD. Taupe sits on the
+     Warm Stone hue and keeps the line's weight: 2.17:1 on Parchment against 2.04:1. */
+  --sapList_HeaderBorderColor: #b3aba3;
+  --sapList_GroupHeaderBorderColor: #b3aba3;
+  --sapList_TableGroupHeaderBorderColor: #b3aba3;
+  --sapList_TableFooterBorder: #b3aba3;
+  --sapGroup_TitleBorderColor: #b3aba3;
+
+  /* --- Illustrations (empty states) --- */
+  /* Every IllustratedMessage scene paints from these tokens. Blues move to an amber
+     ramp light to dark, navy outlines to Obsidian, cool greys to Taupe.
+     Skin, hair, red, green, teal and magenta are not SAP blue and stay. */
+  --sapContent_Illustrative_Color2: #d4ac5e;
+  --sapContent_Illustrative_Color4: #2a2725;
+  --sapContent_Illustrative_Color5: #b3aba3;
+  --sapContent_Illustrative_Color6: #dcd7d1;
+  --sapContent_Illustrative_Color7: #f5edd8;
+  --sapContent_Illustrative_Color10: #f5edd8;
+  --sapContent_Illustrative_Color13: #a67c2e;
+  --sapContent_Illustrative_Color14: #7a5e1b;
+  --sapContent_Illustrative_Color18: #eedfbb;
+  --sapContent_Illustrative_Color19: #e8d3a2;
+  --sapContent_Illustrative_Color20: #e2c88a;
+  --sapContent_Illustrative_Color21: #c8973e;
+  --sapContent_Illustrative_Color22: #2a2725;
+
+  /* --- Tabs --- */
+  --sapTab_ForegroundColor: #8e6a24;
+  --sapTab_IconColor: #8e6a24;
+  --sapTab_Selected_TextColor: #7a5e1b;
+  --sapTab_Selected_Background: #8e6a24;
 
   /* --- Border Radius: 0 on all containers/interactive controls --- */
   --sapButton_BorderCornerRadius: 0;
+  --sapButton_Segment_BorderCornerRadius: 0;
   --sapField_BorderCornerRadius: 0;
   --sapElement_BorderCornerRadius: 0;
   --sapPopover_BorderCornerRadius: 0;
@@ -121,17 +208,38 @@
   font-family: var(--sapFontFamily);
 }
 
+/* Wizard step titles — Horizon got their weight from the "72-Bold" face, not from
+   font-weight, so DM Sans needs the weight stated.  (SAPUI5 1.136.16) */
+.sapMWizardProgressNavStepTitle {
+  font-weight: bold;
+}
+
+/* Page title — same cause: the "72Black" face carried its weight, and .sapMTitle
+   resets font-weight to normal. The ObjectPage's stuck header also hardcodes
+   "72Black", so its selector is copied to match specificity.  (SAPUI5 1.136.16) */
+.sapFDynamicPageTitleMainHeadingInner .sapMTitle {
+  font-weight: bold;
+}
+
+.sapUxAPObjectPageHeaderStickied .sapFDynamicPageTitleMain>.sapFDynamicPageTitleMainInner .sapFDynamicPageTitleMainHeading .sapFDynamicPageTitleMainHeadingInner .sapMTitle {
+  font-family: var(--sapFontFamily);
+}
+
 /* ToolHeader — sapContrast/sapContrastPlus no longer applies --sapShellColor
-   as background in 1.136.16. Four-class selector to beat CDN specificity.  (SAPUI5 1.136.16) */
+   as background in 1.136.16. Four-class selector to beat CDN specificity. The
+   shadow is the bar's bottom separator; z-index lifts it over the page below.  (SAPUI5 1.136.16) */
 .sapMIBar.sapMTB.sapMOTB.sapTntToolHeader {
   background-color: var(--sapShellColor);
   color: var(--sapShell_TextColor);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+  position: relative;
+  z-index: 5;
 }
 
 /* ToolHeader title & icon — Title and Icon controls default to --sapTextColor
    (dark), must inherit shell text color on the dark header bar.  (SAPUI5 1.136.16) */
 .sapTntToolHeader .sapMTitle,
-.sapTntToolHeader > .sapUiIcon {
+.sapTntToolHeader>.sapUiIcon {
   color: var(--sapShell_TextColor);
 }
 
@@ -163,20 +271,102 @@
   background-color: var(--sapBackgroundColor);
 }
 
+/* DynamicPage content — the list report's content area hardcodes the same cool
+   grey. Selector copied from Horizon to match its specificity.  (SAPUI5 1.136.16) */
+.sapFDynamicPage .sapFDynamicPageContentWrapperStandard>.sapFDynamicPageContent {
+  background: var(--sapBackgroundColor);
+}
+
+/* DynamicPage header — the filter bar's band hardcodes white instead of reading
+   the object-header token, so it would sit apart from the Parchment title above.  (SAPUI5 1.136.16) */
+.sapFDynamicPageHeader,
+.sapFDynamicPageTitleWrapper.sapFDynamicPageTitleSnapped+.sapFDynamicPageContentWrapper>.sapFDynamicPageHeaderWrapper {
+  background: var(--sapObjectHeader_Background);
+}
+
+/* DynamicPage header collapse and pin buttons, and the split button's outer
+   frame — hardcoded 8px corners that the button radius token never reaches.  (SAPUI5 1.136.16) */
+.sapFDynamicPageToggleHeaderIndicator.sapMBtn .sapMBtnInner,
+.sapFDynamicPageHeaderPinButton.sapMBtn .sapMBtnInner,
+.sapMSB .sapMSBText {
+  border-radius: 0;
+}
+
+/* ObjectPage section blocks — hardcoded white and 12px corners. Four-class
+   selector matches Horizon's, so its transparent-background variants still win.  (SAPUI5 1.136.16) */
+.sapUxAPObjectPageSection .sapUxAPObjectPageSectionContainer .sapUxAPObjectPageSubSection .sapUxAPBlockContainer {
+  background: var(--sapGroup_ContentBackground);
+  border-radius: 0;
+}
+
+/* Floating draft footers — both page types hardcode 12px corners on the bar.  (SAPUI5 1.136.16) */
+.sapUxAPObjectPageLayout .sapUxAPObjectPageFooter .sapUxAPObjectPageFloatingFooter,
+.sapFDynamicPageFooter .sapFDynamicPageActualFooterControl.sapMIBar {
+  border-radius: 0;
+}
+
+/* Input focus ring — drawn as a ::before with hardcoded 4px corners, so a square
+   field would carry a rounded ring.  (SAPUI5 1.136.16) */
+.sapMFocus.sapMInputBase .sapMInputBaseContentWrapper:not(.sapMInputBaseDisabledWrapper)::before {
+  border-radius: 0;
+}
+
+/* Wizard step — the focused step's container hardcodes 8px corners. The step
+   circles keep 50%: like the radio button, the circle is the affordance.  (SAPUI5 1.136.16) */
+.sapMWizardProgressNavStep:focus .sapMWizardProgressNavStepContainer {
+  border-radius: 0;
+}
+
+/* FileUploader — sap.ui.unified hardcodes its button's hover grey, pressed blue and
+   a dotted blue focus outline instead of reading the button tokens. Selectors copied
+   from Horizon to match specificity.  (SAPUI5 1.136.16) */
+.sapUiFup .sapMBtnHoverable:hover {
+  background-color: var(--sapButton_Hover_Background);
+}
+
+.sapUiFup .sapMBtnInner:active {
+  background-color: var(--sapButton_Active_Background);
+  border-color: var(--sapButton_Active_BorderColor);
+  color: var(--sapButton_Active_TextColor);
+}
+
+html.sap-desktop .sapUiFup .sapMFocusable:focus,
+html.sap-desktop .sapUiFup .sapMFocusable:active {
+  outline-color: var(--sapContent_FocusColor);
+}
+
 /* Side Navigation — give the aside panel a tinted background to create
    three-column depth: dark shell > warm sidebar > light content.  (SAPUI5 1.136.16) */
 .sapTntToolPageAsideContent {
   background-color: #e8e5e2;
 }
 
+/* The nav and its items hardcode white over the aside, which hid the Soft Ash
+   entirely. Transparent lets the aside show through; hover rules outrank this.  (SAPUI5 1.136.16) */
+.sapTntSideNavigation {
+  background: transparent;
+}
+
+.sapTntNLI,
+.sapTntNLGroup {
+  background-color: transparent;
+  border-radius: 0;
+}
+
+/* Hover is a hardcoded grey; selector copied from Horizon to match specificity.  (SAPUI5 1.136.16) */
+.sapTntNLI:not(.sapTntNLIDisabled,
+  .sapTntNLIFirstLevel.sapTntNLIInPopover.sapTntNLIUnselectable):hover {
+  background-color: var(--sapList_Hover_Background);
+}
+
 /* Navigation List selected item — Horizon 1.136.16 bakes a blue gradient
    indicator (3px left bar) and blue-tinted background directly into compiled
-   CSS rather than referencing --sapSelectedColor. Override both layers of the
-   composite background shorthand.  (SAPUI5 1.136.16) */
-.sapTntNLI.sapTntNLISelected {
+   CSS rather than referencing --sapSelectedColor. Second-level items carry a
+   three-class blue rule, so that selector is matched too.  (SAPUI5 1.136.16) */
+.sapTntNLI.sapTntNLISelected,
+.sapTntNLISelected.sapTntNLISecondLevel.sapTntNLI {
   background:
-    linear-gradient(0deg, var(--sapSelectedColor), var(--sapSelectedColor))
-      no-repeat 0px 100% / 3px 100%,
+    linear-gradient(0deg, var(--sapSelectedColor), var(--sapSelectedColor)) no-repeat 0px 100% / 3px 100%,
     #f5edd8;
 }
 
@@ -184,4 +374,12 @@
    blue tint background that must be overridden to match.  (SAPUI5 1.136.16) */
 .sapTntNLI.sapTntNLISelected a {
   background-color: #f5edd8;
+}
+
+/* Navigation List focus ring — drawn as a hardcoded blue ::after border, not from
+   --sapContent_FocusColor. Selector copied from Horizon to match its specificity.  (SAPUI5 1.136.16) */
+.sapTntNL .sapTntNLI:not(.sapTntNLIFirstLevel.sapTntNLIInPopover.sapTntNLIUnselectable)[tabindex]:focus::after,
+.sapTntNL .sapTntNLI:not(.sapTntNLIFirstLevel.sapTntNLIInPopover.sapTntNLIUnselectable) [tabindex]:focus::after {
+  border-color: var(--sapContent_FocusColor);
+  border-radius: 0;
 }
