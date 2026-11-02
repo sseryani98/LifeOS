@@ -22,4 +22,5 @@ export const BULK_MESSAGE = {
 export const CORRECT_MESSAGE = {
   TRANSACTION_REQUIRED: "transaction.correct.transactionRequired",
   VENDOR_REQUIRED: "transaction.correct.vendorRequired",
+  TRANSACTION_NOT_FOUND: "transaction.correct.transactionNotFound",
 } as const;

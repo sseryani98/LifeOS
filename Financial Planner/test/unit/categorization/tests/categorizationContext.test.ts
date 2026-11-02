@@ -17,8 +17,13 @@ import {
   SHOPPING_PT,
   SPA_FIRST_PATTERN,
   SPA_SECOND_PATTERN,
+  STATLESS_VENDOR_ID,
+  STATLESS_VENDOR_PATTERN,
   STREAMING_EC,
   SUBSCRIPTIONS_PT,
+  UBER_CONTAINS_PATTERN,
+  UBER_EXACT_PATTERN,
+  UBER_RIDES_VENDOR_ID,
   UNKNOWN_MATCHTYPE_PATTERN,
   YOUTUBE_AMOUNT_PATTERN,
   YOUTUBE_VENDOR_ID,
@@ -36,7 +41,7 @@ describe("CategorizationContext", () => {
     expect(result.purchaseType_ID).toBe(SUBSCRIPTIONS_PT);
     expect(result.earningCategory_ID).toBe(STREAMING_EC);
     expect(result.status).toBe("auto");
-    expect(result.confidence).toBe("high");
+    expect(result.confidence).toBe("High");
   });
 
   /** Matching is case- and whitespace-insensitive so bank-cased, padded descriptions still resolve to the vendor. */
@@ -91,6 +96,51 @@ describe("CategorizationContext", () => {
     const result = context.categorize("SHELL STATION 123", -50);
 
     expect(result.vendorName).toBe("Shell");
+  });
+
+  /** An exact pattern must not match a longer description containing it — a short exact seed like "UBER" would otherwise claim "UBER EATS ..." at the top tier. */
+  it("does not match an exact pattern against a longer description", () => {
+    const context = buildCategorizationContext([UBER_EXACT_PATTERN]);
+
+    const result = context.categorize("UBER EATS TORONTO", -24.5);
+
+    expect(result.vendor_ID).toBeNull();
+    expect(result.status).toBe("uncategorized");
+  });
+
+  /** A starts_with pattern must anchor at the start — matching mid-description would silently turn it into a contains pattern ranked a tier too high. */
+  it("does not match a starts_with pattern in the middle of a description", () => {
+    const context = buildCategorizationContext([SHELL_STARTS_WITH_PATTERN]);
+
+    const result = context.categorize("GAS SHELL 123", -50);
+
+    expect(result.vendor_ID).toBeNull();
+    expect(result.status).toBe("uncategorized");
+  });
+
+  /** Exact must outrank contains even when the contains pattern has higher confidence — tier is the first key of the match priority. */
+  it("prefers an exact match over a higher-confidence contains match", () => {
+    const context = buildCategorizationContext([
+      UBER_CONTAINS_PATTERN,
+      UBER_EXACT_PATTERN,
+    ]);
+
+    const result = context.categorize("UBER", -15);
+
+    expect(result.vendor_ID).toBe(UBER_RIDES_VENDOR_ID);
+  });
+
+  /** Ruled behaviour: a matched vendor with no usage stats is still auto with null taxonomy — pins the decision so a change to it is deliberate. */
+  it("returns auto with null categories when the matched vendor has no stats", () => {
+    const context = buildCategorizationContext([STATLESS_VENDOR_PATTERN]);
+
+    const result = context.categorize("BRAND NEW VENDOR", -40);
+
+    expect(result.vendor_ID).toBe(STATLESS_VENDOR_ID);
+    expect(result.status).toBe("auto");
+    expect(result.purchaseType_ID).toBeNull();
+    expect(result.earningCategory_ID).toBeNull();
+    expect(result.alternatives).toHaveLength(0);
   });
 
   /** No matching pattern must leave the row uncategorized with no vendor — the engine never guesses. */

@@ -4,7 +4,12 @@
 
 import { CategorizationContext } from "../../../../srv/modules/categorization/categorizationContextService.js";
 import { CategorizationService } from "../../../../srv/modules/categorization/categorizationService.js";
-import { STATS_BY_VENDOR, VENDOR_COUNTS } from "../data/patterns.js";
+import {
+  LEARNED_SOURCE_ID,
+  MEDIUM_CONFIDENCE_ID,
+  STATS_BY_VENDOR,
+  VENDOR_COUNTS,
+} from "../data/patterns.js";
 
 import type { CategorizationDataService } from "../../../../srv/modules/categorization/categorizationDataService.js";
 import type { MerchantPatternRecord } from "../../../../srv/modules/categorization/types.js";
@@ -41,8 +46,8 @@ export const buildCategorizationMocks = (): CategorizationMocks => {
   const loadTransactionsForRecategorization = jest.fn().mockResolvedValue([]);
   const updateTransactionCategorization = jest.fn().mockResolvedValue(undefined);
   const insertMerchantPattern = jest.fn().mockResolvedValue(undefined);
-  const resolvePatternSourceId = jest.fn().mockResolvedValue("source-learned");
-  const resolveConfidenceLevelId = jest.fn().mockResolvedValue("confidence-medium");
+  const resolvePatternSourceId = jest.fn().mockResolvedValue(LEARNED_SOURCE_ID);
+  const resolveConfidenceLevelId = jest.fn().mockResolvedValue(MEDIUM_CONFIDENCE_ID);
   const dataService = {
     loadActivePatterns,
     loadVendorCounts,

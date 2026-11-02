@@ -6,7 +6,7 @@ import { MessagingUtility } from "../shared/messagingUtility.js";
 import { CATEGORIZATION_STATUS } from "../categorization/constants.js";
 import type { CategorizationService } from "../categorization/categorizationService.js";
 
-import { SPLIT_MESSAGE } from "./constants.js";
+import { CORRECT_MESSAGE, SPLIT_MESSAGE } from "./constants.js";
 import { TransactionMapper } from "./transactionMapper.js";
 import { TransactionValidator } from "./transactionValidator.js";
 import type { TransactionDataService } from "./transactionDataService.js";
@@ -83,7 +83,7 @@ export class TransactionService extends BaseService {
    * Applies a single categorization correction, delegating the write and the
    * pattern learning to the categorization engine.
    * @param req Request carrying the transaction and the assignments.
-   * @returns Resolves once the correction completes, undefined on validation error.
+   * @returns Resolves once the correction completes, undefined on validation or not-found error.
    */
   async correctCategorization(req: cds.Request): Promise<void> {
     const command = TransactionMapper.toCorrectionCommand(req.data);
@@ -93,12 +93,20 @@ export class TransactionService extends BaseService {
       return;
     }
     // validateCorrection guarantees a transaction and vendor above.
-    await this.categorizationService.correctCategorization({
+    const written = await this.categorizationService.correctCategorization({
       transactionId: command.transactionId,
       vendor_ID: command.vendor_ID as string,
       purchaseType_ID: command.purchaseType_ID,
       earningCategory_ID: command.earningCategory_ID,
     });
+    if (!written) {
+      req.error({
+        code: CORRECT_MESSAGE.TRANSACTION_NOT_FOUND,
+        message: MessagingUtility.getText(CORRECT_MESSAGE.TRANSACTION_NOT_FOUND),
+        target: "transactionId",
+        status: 404,
+      });
+    }
   }
 
   /**

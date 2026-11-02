@@ -14,6 +14,7 @@ import {
   RESTAURANT_TXN_ID,
   TXN_A_ID,
   TXN_B_ID,
+  VALID_CORRECTION,
   VENDOR_ID,
 } from "../data/splits.js";
 import {
@@ -218,6 +219,23 @@ describe("TransactionService", () => {
 
       expect(request.error).toHaveBeenCalled();
       expect(mocks.categorization.correctCategorization).not.toHaveBeenCalled();
+    });
+
+    /** A correction that writes nothing must surface a 404 like split does, not a silent success the UI reads as saved. */
+    it("reports not-found when the engine finds no transaction to correct", async () => {
+      const mocks = buildTransactionMocks();
+      mocks.categorization.correctCategorization.mockResolvedValue(false);
+      const request = requestOf(VALID_CORRECTION);
+
+      await mocks.service.correctCategorization(request as never);
+
+      expect(request.error).toHaveBeenCalledWith(
+        expect.objectContaining({
+          code: "transaction.correct.transactionNotFound",
+          target: "transactionId",
+          status: 404,
+        }),
+      );
     });
   });
 

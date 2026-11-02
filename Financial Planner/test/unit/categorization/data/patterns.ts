@@ -1,5 +1,8 @@
 // Named test data for the categorization engine.
 // UPPER_SNAKE_CASE constants — no inline payloads in tests.
+// Confidence names use the seeded Title Case values so the matcher's case-folding runs.
+
+import { CONFIDENCE } from "../../../../srv/modules/categorization/constants.js";
 
 import type {
   CategoryCombo,
@@ -32,7 +35,7 @@ export const NETFLIX_EXACT_PATTERN: MerchantPatternRecord = {
   vendorName: "Netflix",
   pattern: "NETFLIX.COM",
   matchType: "exact",
-  confidenceName: "high",
+  confidenceName: CONFIDENCE.HIGH,
   amount: null,
 };
 
@@ -43,7 +46,7 @@ export const AMAZON_CONTAINS_PATTERN: MerchantPatternRecord = {
   vendorName: "Amazon",
   pattern: "AMZN MKTP",
   matchType: "contains",
-  confidenceName: "high",
+  confidenceName: CONFIDENCE.HIGH,
   amount: null,
 };
 
@@ -54,7 +57,7 @@ export const APPLE_GENERIC_PATTERN: MerchantPatternRecord = {
   vendorName: "Apple",
   pattern: "APPLE.COM/BILL",
   matchType: "contains",
-  confidenceName: "medium",
+  confidenceName: CONFIDENCE.MEDIUM,
   amount: null,
 };
 
@@ -65,7 +68,7 @@ export const YOUTUBE_AMOUNT_PATTERN: MerchantPatternRecord = {
   vendorName: "YouTube Premium",
   pattern: "APPLE.COM/BILL",
   matchType: "contains",
-  confidenceName: "medium",
+  confidenceName: CONFIDENCE.MEDIUM,
   amount: 13.99,
 };
 
@@ -76,7 +79,7 @@ export const ICLOUD_AMOUNT_PATTERN: MerchantPatternRecord = {
   vendorName: "iCloud",
   pattern: "APPLE.COM/BILL",
   matchType: "contains",
-  confidenceName: "medium",
+  confidenceName: CONFIDENCE.MEDIUM,
   amount: 3.99,
 };
 
@@ -87,7 +90,7 @@ export const SHELL_STARTS_WITH_PATTERN: MerchantPatternRecord = {
   vendorName: "Shell",
   pattern: "SHELL",
   matchType: "starts_with",
-  confidenceName: "high",
+  confidenceName: CONFIDENCE.HIGH,
   amount: null,
 };
 
@@ -98,7 +101,7 @@ export const GENERIC_STATION_CONTAINS_PATTERN: MerchantPatternRecord = {
   vendorName: "Generic Station",
   pattern: "STATION",
   matchType: "contains",
-  confidenceName: "high",
+  confidenceName: CONFIDENCE.HIGH,
   amount: null,
 };
 
@@ -110,7 +113,7 @@ export const COFFEE_HIGH_PATTERN: MerchantPatternRecord = {
   vendorName: "Coffee High",
   pattern: "COFFEE",
   matchType: "contains",
-  confidenceName: "high",
+  confidenceName: CONFIDENCE.HIGH,
   amount: null,
 };
 
@@ -121,7 +124,7 @@ export const COFFEE_LOW_PATTERN: MerchantPatternRecord = {
   vendorName: "Coffee Low",
   pattern: "COFFEE",
   matchType: "contains",
-  confidenceName: "low",
+  confidenceName: CONFIDENCE.LOW,
   amount: null,
 };
 
@@ -132,7 +135,7 @@ export const BOOK_SHORT_PATTERN: MerchantPatternRecord = {
   vendorName: "Book Short",
   pattern: "BOOK",
   matchType: "contains",
-  confidenceName: "medium",
+  confidenceName: CONFIDENCE.MEDIUM,
   amount: null,
 };
 
@@ -143,7 +146,7 @@ export const BOOK_LONG_PATTERN: MerchantPatternRecord = {
   vendorName: "Book Long",
   pattern: "BOOKSTORE",
   matchType: "contains",
-  confidenceName: "medium",
+  confidenceName: CONFIDENCE.MEDIUM,
   amount: null,
 };
 
@@ -154,7 +157,7 @@ export const GYM_BUSY_PATTERN: MerchantPatternRecord = {
   vendorName: "Gym Busy",
   pattern: "GYM",
   matchType: "contains",
-  confidenceName: "medium",
+  confidenceName: CONFIDENCE.MEDIUM,
   amount: null,
 };
 
@@ -165,7 +168,7 @@ export const GYM_QUIET_PATTERN: MerchantPatternRecord = {
   vendorName: "Gym Quiet",
   pattern: "GYM",
   matchType: "contains",
-  confidenceName: "medium",
+  confidenceName: CONFIDENCE.MEDIUM,
   amount: null,
 };
 
@@ -187,7 +190,7 @@ export const SPA_FIRST_PATTERN: MerchantPatternRecord = {
   vendorName: "Spa First",
   pattern: "SPA",
   matchType: "contains",
-  confidenceName: "medium",
+  confidenceName: CONFIDENCE.MEDIUM,
   amount: null,
 };
 
@@ -198,7 +201,7 @@ export const SPA_SECOND_PATTERN: MerchantPatternRecord = {
   vendorName: "Spa Second",
   pattern: "SPA",
   matchType: "contains",
-  confidenceName: "medium",
+  confidenceName: CONFIDENCE.MEDIUM,
   amount: null,
 };
 
@@ -209,7 +212,44 @@ export const UNKNOWN_MATCHTYPE_PATTERN: MerchantPatternRecord = {
   vendorName: "Unknown",
   pattern: "REGEXVENDOR",
   matchType: "regex",
-  confidenceName: "high",
+  confidenceName: CONFIDENCE.HIGH,
+  amount: null,
+};
+
+// ─── Tier-boundary patterns (a pattern must not match outside its own tier) ───
+export const UBER_RIDES_VENDOR_ID = "beef0001-0000-0000-0000-000000000014";
+export const STATLESS_VENDOR_ID = "beef0001-0000-0000-0000-000000000015";
+
+/** Short exact "UBER" pattern, low confidence — must never match a longer description. */
+export const UBER_EXACT_PATTERN: MerchantPatternRecord = {
+  ID: "beefaaaa-0000-0000-0000-000000000014",
+  vendor_ID: UBER_RIDES_VENDOR_ID,
+  vendorName: "Uber",
+  pattern: "UBER",
+  matchType: "exact",
+  confidenceName: CONFIDENCE.LOW,
+  amount: null,
+};
+
+/** High-confidence "UBER" contains pattern — would beat the exact one on confidence alone. */
+export const UBER_CONTAINS_PATTERN: MerchantPatternRecord = {
+  ID: "beefaaaa-0000-0000-0000-000000000015",
+  vendor_ID: UBER_EATS_VENDOR_ID,
+  vendorName: "Uber Eats",
+  pattern: "UBER",
+  matchType: "contains",
+  confidenceName: CONFIDENCE.HIGH,
+  amount: null,
+};
+
+/** Pattern for a vendor with no categorized transactions yet — absent from STATS_BY_VENDOR. */
+export const STATLESS_VENDOR_PATTERN: MerchantPatternRecord = {
+  ID: "beefaaaa-0000-0000-0000-000000000016",
+  vendor_ID: STATLESS_VENDOR_ID,
+  vendorName: "Brand New Vendor",
+  pattern: "BRAND NEW VENDOR",
+  matchType: "exact",
+  confidenceName: CONFIDENCE.MEDIUM,
   amount: null,
 };
 

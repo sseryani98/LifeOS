@@ -13,6 +13,7 @@ import cds from "@sap/cds";
 import { LEARNED_PATTERN_SOURCE } from "../../../shared/data/reference.js";
 import {
   BULK_TRANSACTIONS,
+  CORRECTION_TRANSACTION,
   EXISTING_SPLIT,
   INLINE_EDIT_TRANSACTION,
   RECAT_CORRECTED_TRANSACTIONS,
@@ -69,6 +70,17 @@ export interface BulkActionResponse {
   data: { updatedCount: number };
 }
 
+/** The correctCategorization action's OData response — a void action. */
+export interface CorrectActionResponse {
+  status: number;
+}
+
+/** The reCategorize action's OData response. */
+export interface ReCategorizeActionResponse {
+  status: number;
+  data: { recategorizedCount: number; skippedCount: number };
+}
+
 type PostFn = <TResponse>(
   url: string,
   data: Record<string, unknown>,
@@ -87,6 +99,12 @@ export interface TransactionActions {
   postBulkCategorize: (
     payload: Record<string, unknown>,
   ) => Promise<BulkActionResponse>;
+  postCorrectCategorization: (
+    payload: Record<string, unknown>,
+  ) => Promise<CorrectActionResponse>;
+  postReCategorize: (
+    payload: Record<string, unknown>,
+  ) => Promise<ReCategorizeActionResponse>;
 }
 
 /**
@@ -111,7 +129,32 @@ export const buildTransactionActions = (post: PostFn): TransactionActions => {
     return post<BulkActionResponse>(`${SERVICE_PATH}/bulkCategorize`, payload);
   };
 
-  return { postSplitTransaction, postBulkCategorize };
+  /** Invokes correctCategorization over OData. */
+  const postCorrectCategorization = async (
+    payload: Record<string, unknown>,
+  ): Promise<CorrectActionResponse> => {
+    return post<CorrectActionResponse>(
+      `${SERVICE_PATH}/correctCategorization`,
+      payload,
+    );
+  };
+
+  /** Invokes reCategorize over OData. */
+  const postReCategorize = async (
+    payload: Record<string, unknown>,
+  ): Promise<ReCategorizeActionResponse> => {
+    return post<ReCategorizeActionResponse>(
+      `${SERVICE_PATH}/reCategorize`,
+      payload,
+    );
+  };
+
+  return {
+    postSplitTransaction,
+    postBulkCategorize,
+    postCorrectCategorization,
+    postReCategorize,
+  };
 };
 
 /** The real transaction engine wired to the in-memory DB and categorization. */
@@ -129,7 +172,7 @@ export const actionRequest = (data: unknown): { data: unknown; error: () => void
 
 /**
  * Seeds the bulk vendor, the split transaction, the bulk transactions, and the
- * re-split + inline-edit rows that own their own state.
+ * re-split, inline-edit and correction rows that own their own state.
  */
 export const seedTransactionProcessing = async (): Promise<void> => {
   await INSERT.into(VENDOR).entries(STARBUCKS_VENDOR);
@@ -137,6 +180,7 @@ export const seedTransactionProcessing = async (): Promise<void> => {
   await INSERT.into(TRANSACTION).entries(BULK_TRANSACTIONS);
   await INSERT.into(TRANSACTION).entries(RESPLIT_TRANSACTION);
   await INSERT.into(TRANSACTION).entries(INLINE_EDIT_TRANSACTION);
+  await INSERT.into(TRANSACTION).entries(CORRECTION_TRANSACTION);
   await INSERT.into(TRANSACTION_SPLIT).entries(EXISTING_SPLIT);
 };
 

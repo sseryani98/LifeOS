@@ -16,6 +16,8 @@ export const PADEL_HAUS_VENDOR_ID = "d00d0001-0000-0000-0000-000000000002";
 export const ICLOUD_VENDOR_ID = "d00d0001-0000-0000-0000-000000000003";
 export const UBER_PATTERN_ID = "d00d0002-0000-0000-0000-000000000001";
 export const ICLOUD_PATTERN_ID = "d00d0002-0000-0000-0000-000000000002";
+export const RETIRED_PATTERN_ID = "d00d0002-0000-0000-0000-000000000003";
+export const RETIRED_VENDOR_ID = "d00d0001-0000-0000-0000-000000000004";
 export const PADEL_TXN_ID = "d00d0003-0000-0000-0000-000000000009";
 export const MISSING_TXN_ID = "d00d0003-0000-0000-0000-0000000000ff";
 
@@ -24,6 +26,7 @@ export const CATEGORIZATION_VENDORS = [
   { ID: UBER_EATS_VENDOR_ID, name: "Uber Eats" },
   { ID: PADEL_HAUS_VENDOR_ID, name: "Padel Haus" },
   { ID: ICLOUD_VENDOR_ID, name: "iCloud" },
+  { ID: RETIRED_VENDOR_ID, name: "Uber Eats Legacy" },
 ];
 
 /** Amount-discriminated pattern: APPLE.COM/BILL at $3.99 resolves to iCloud. */
@@ -36,6 +39,21 @@ export const ICLOUD_PATTERN = {
   confidenceLevel_ID: HIGH_CONFIDENCE.ID,
   amount: 3.99,
   isActive: true,
+};
+
+/**
+ * A deactivated exact pattern for "UBER EATS TORONTO" — it would outrank the active
+ * contains pattern on tier, so it wins only if inactive patterns leak into matching.
+ */
+export const RETIRED_UBER_EATS_PATTERN = {
+  ID: RETIRED_PATTERN_ID,
+  vendor_ID: RETIRED_VENDOR_ID,
+  pattern: "UBER EATS TORONTO",
+  matchType: "exact",
+  patternSource_ID: SEED_PATTERN_SOURCE.ID,
+  confidenceLevel_ID: HIGH_CONFIDENCE.ID,
+  amount: null,
+  isActive: false,
 };
 
 /** One categorized iCloud transaction so the matched vendor has a stats combo. */
@@ -64,7 +82,11 @@ export const UBER_EATS_PATTERN = {
   isActive: true,
 };
 
-/** Two already-categorized Uber Eats transactions — feed stats + vendor count. */
+/**
+ * Uber Eats history: two Fast Food/Groceries rows and one Restaurants/Dining row.
+ * The majority combo has the higher-sorting key, so only the usage-count ordering
+ * — not GROUP BY key order — can rank it first.
+ */
 export const UBER_EATS_TRANSACTIONS = [
   {
     ID: "d00d0003-0000-0000-0000-000000000001",
@@ -73,8 +95,8 @@ export const UBER_EATS_TRANSACTIONS = [
     postedAt: "2026-01-05",
     rawDescription: "UBER EATS CA 1",
     vendor_ID: UBER_EATS_VENDOR_ID,
-    purchaseType_ID: RESTAURANTS_PURCHASE_TYPE.ID,
-    earningCategory_ID: DINING_EARNING_CATEGORY.ID,
+    purchaseType_ID: FAST_FOOD_PURCHASE_TYPE.ID,
+    earningCategory_ID: GROCERIES_EARNING_CATEGORY.ID,
     categorizationStatus: "auto",
     isExcluded: false,
   },
@@ -85,22 +107,21 @@ export const UBER_EATS_TRANSACTIONS = [
     postedAt: "2026-01-12",
     rawDescription: "UBER EATS CA 2",
     vendor_ID: UBER_EATS_VENDOR_ID,
-    purchaseType_ID: RESTAURANTS_PURCHASE_TYPE.ID,
-    earningCategory_ID: DINING_EARNING_CATEGORY.ID,
+    purchaseType_ID: FAST_FOOD_PURCHASE_TYPE.ID,
+    earningCategory_ID: GROCERIES_EARNING_CATEGORY.ID,
     categorizationStatus: "auto",
     isExcluded: false,
   },
   {
-    // A second, less-common combo for Uber Eats — makes the stats view rank two
-    // combinations, exercising the alternatives path.
+    // The less-common combo — the single runner-up returned as an alternative.
     ID: "d00d0003-0000-0000-0000-000000000004",
     source: "csv",
     amount: -12.0,
     postedAt: "2026-01-18",
     rawDescription: "UBER EATS CA 3",
     vendor_ID: UBER_EATS_VENDOR_ID,
-    purchaseType_ID: FAST_FOOD_PURCHASE_TYPE.ID,
-    earningCategory_ID: GROCERIES_EARNING_CATEGORY.ID,
+    purchaseType_ID: RESTAURANTS_PURCHASE_TYPE.ID,
+    earningCategory_ID: DINING_EARNING_CATEGORY.ID,
     categorizationStatus: "auto",
     isExcluded: false,
   },
@@ -115,6 +136,14 @@ export const PADEL_UNCATEGORIZED_TRANSACTION = {
   rawDescription: "PADEL HAUS TORONTO",
   categorizationStatus: "uncategorized",
   isExcluded: false,
+};
+
+/** Correction against a transaction id that was never seeded. */
+export const MISSING_TXN_CORRECTION = {
+  transactionId: MISSING_TXN_ID,
+  vendor_ID: UBER_EATS_VENDOR_ID,
+  purchaseType_ID: null,
+  earningCategory_ID: null,
 };
 
 /** Correction assigning the Padel transaction to the Padel Haus vendor. */

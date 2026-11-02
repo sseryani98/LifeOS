@@ -18,6 +18,8 @@ export const INLINE_EDIT_TXN_ID = "ab1e0003-0000-0000-0000-000000000006";
 export const EXISTING_SPLIT_ID = "ab1e0006-0000-0000-0000-000000000001";
 export const STARBUCKS_VENDOR_ID = "ab1e0001-0000-0000-0000-000000000001";
 export const MISSING_SPLIT_TXN_ID = "ab1e0003-0000-0000-0000-0000000000ff";
+export const CORRECTION_TXN_ID = "ab1e0003-0000-0000-0000-000000000007";
+export const MISSING_CORRECTION_TXN_ID = "ab1e0003-0000-0000-0000-0000000000fe";
 
 /** The vendor the bulk-categorize action assigns to the selection. */
 export const STARBUCKS_VENDOR = {
@@ -153,6 +155,36 @@ export const DOLLAR_SPLIT_ACTION_PAYLOAD = {
   transactionId: SPLIT_TXN_ID,
   myShareAmount: 40,
   isRecurring: false,
+};
+
+/** The raw description the correctCategorization action must learn a pattern for. */
+export const CORRECTION_DESCRIPTION = "SBUX MOBILE ORDER #3310";
+
+/** An uncategorized row owned by the correction action — no other test reads its state. */
+export const CORRECTION_TRANSACTION = {
+  ID: CORRECTION_TXN_ID,
+  source: "csv",
+  amount: -5.95,
+  postedAt: "2026-03-07",
+  rawDescription: CORRECTION_DESCRIPTION,
+  categorizationStatus: "uncategorized",
+  isExcluded: false,
+};
+
+/** The correctCategorization action payload posted over OData for the seeded row. */
+export const CORRECT_ACTION_PAYLOAD = {
+  transactionId: CORRECTION_TXN_ID,
+  vendor_ID: STARBUCKS_VENDOR_ID,
+  purchaseType_ID: BULK_PURCHASE_TYPE_ID,
+  earningCategory_ID: BULK_EARNING_CATEGORY_ID,
+};
+
+/** A correction aimed at a transaction that does not exist — must be a 404, as split is. */
+export const MISSING_CORRECTION_PAYLOAD = {
+  transactionId: MISSING_CORRECTION_TXN_ID,
+  vendor_ID: STARBUCKS_VENDOR_ID,
+  purchaseType_ID: BULK_PURCHASE_TYPE_ID,
+  earningCategory_ID: BULK_EARNING_CATEGORY_ID,
 };
 
 // ─── Re-categorize scenario ────────────────────────────────────────

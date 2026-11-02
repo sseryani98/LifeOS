@@ -11,9 +11,13 @@ import {
   BULK_TXN_2_ID,
   BULK_TXN_3_ID,
   BULK_WITH_MISSING_PAYLOAD,
+  CORRECT_ACTION_PAYLOAD,
+  CORRECTION_DESCRIPTION,
+  CORRECTION_TXN_ID,
   DOLLAR_SPLIT_ACTION_PAYLOAD,
   INLINE_EDIT_DESCRIPTION,
   INLINE_EDIT_TXN_ID,
+  MISSING_CORRECTION_PAYLOAD,
   MISSING_SPLIT_TXN_ID,
   OUT_OF_RANGE_SPLIT_PAYLOAD,
   RECAT_CORRECTED_1_ID,
@@ -42,12 +46,17 @@ import {
 } from "../support/transaction.js";
 
 const { PATCH, POST, expect } = cds.test("serve", "--with-mocks", "--in-memory");
-const { postBulkCategorize, postSplitTransaction } =
-  buildTransactionActions(POST);
+const {
+  postBulkCategorize,
+  postCorrectCategorization,
+  postReCategorize,
+  postSplitTransaction,
+} = buildTransactionActions(POST);
 const assignVendorViaDraft = buildInlineEditFlow(POST, PATCH);
 
 beforeAll(registerTransactionHandlers);
 beforeAll(seedTransactionProcessing);
+beforeAll(seedReCategorizeScenario);
 
 describe("Transaction actions against SQLite", () => {
   /** A percentage split must round-trip the schema — myShareAmount is amount × pct, computed and persisted for the budget engine. */
@@ -149,7 +158,6 @@ describe("Transaction actions against SQLite", () => {
 
   /** Re-categorize must apply a newly-added pattern to the uncategorized rows while leaving user-corrected rows untouched — proving the re-run against the real matcher. */
   it("re-runs matching on the selection and skips user-corrected rows", async () => {
-    await seedReCategorizeScenario();
     const service = buildTransactionService();
 
     const result = await service.runReCategorization(
@@ -182,6 +190,36 @@ describe("Transaction actions against SQLite", () => {
 
     expect(response.status).to.equal(200);
     expect(response.data.updatedCount).to.equal(3);
+  });
+
+  /** correctCategorization is a void action bound by string literal — only an OData call proves the binding and @mandatory params let a valid correction through, write the row, and learn its pattern. */
+  it("corrects a transaction and learns its pattern through the OData action", async () => {
+    const response = await postCorrectCategorization(CORRECT_ACTION_PAYLOAD);
+
+    expect(response.status).to.equal(204);
+    const state = await readTransactionState(CORRECTION_TXN_ID);
+    expect(state?.vendor_ID).to.equal(STARBUCKS_VENDOR_ID);
+    expect(state?.categorizationStatus).to.equal("user_corrected");
+    const learned = await readLearnedPatternTextsForVendor(STARBUCKS_VENDOR_ID);
+    expect(learned).to.include(CORRECTION_DESCRIPTION);
+  });
+
+  /** The engine reports a missing row by returning false; dropping that answer turns a correction that wrote nothing into a silent 2xx, where split 404s the same case. */
+  it("returns 404 when correcting a transaction that does not exist", async () => {
+    const response = await postCorrectCategorization(
+      MISSING_CORRECTION_PAYLOAD,
+    ).catch((error: { status: number }) => error);
+
+    expect(response.status).to.equal(404);
+  });
+
+  /** reCategorize is the toolbar's action — its string binding, `many UUID` param and result type only reach a client over OData; skippedCount counts user_corrected rows, so it holds on any re-run. */
+  it("re-categorizes a selection through the OData action", async () => {
+    const response = await postReCategorize(RECATEGORIZE_PAYLOAD);
+
+    expect(response.status).to.equal(200);
+    expect(response.data.skippedCount).to.equal(2);
+    expect(response.data.recategorizedCount).to.equal(3);
   });
 
   /** Pattern learning's only production entry is the before-SAVE hook on draft activation — if the vendor-change comparison or the key resolution misses, the save still works, nothing errors, and the system silently never learns again. */

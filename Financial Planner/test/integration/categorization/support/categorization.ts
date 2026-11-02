@@ -10,6 +10,7 @@ import {
   ICLOUD_PATTERN,
   ICLOUD_TRANSACTION,
   PADEL_UNCATEGORIZED_TRANSACTION,
+  RETIRED_UBER_EATS_PATTERN,
   UBER_EATS_PATTERN,
   UBER_EATS_TRANSACTIONS,
 } from "../data/categorization.js";
@@ -29,6 +30,8 @@ export interface LearnedPatternRow {
 /** A transaction's categorization state, in the shape the spec asserts on. */
 export interface TransactionStateRow {
   vendor_ID: string | null;
+  purchaseType_ID: string | null;
+  earningCategory_ID: string | null;
   categorizationStatus: string;
 }
 
@@ -37,10 +40,14 @@ export const buildCategorizationService = (): CategorizationService => {
   return new CategorizationService(new CategorizationDataService());
 };
 
-/** Seeds vendors, contains + amount patterns, and categorized/uncategorized rows. */
+/** Seeds vendors, contains + amount + one inactive pattern, and categorized/uncategorized rows. */
 export const seedCategorization = async (): Promise<void> => {
   await INSERT.into(VENDOR).entries(CATEGORIZATION_VENDORS);
-  await INSERT.into(MERCHANT_PATTERN).entries([UBER_EATS_PATTERN, ICLOUD_PATTERN]);
+  await INSERT.into(MERCHANT_PATTERN).entries([
+    UBER_EATS_PATTERN,
+    ICLOUD_PATTERN,
+    RETIRED_UBER_EATS_PATTERN,
+  ]);
   await INSERT.into(TRANSACTION).entries(UBER_EATS_TRANSACTIONS);
   await INSERT.into(TRANSACTION).entries([
     ICLOUD_TRANSACTION,
@@ -54,7 +61,7 @@ export const readTransactionState = async (
 ): Promise<TransactionStateRow | null> => {
   const row = (await SELECT.one
     .from(TRANSACTION)
-    .columns("vendor_ID", "categorizationStatus")
+    .columns("vendor_ID", "purchaseType_ID", "earningCategory_ID", "categorizationStatus")
     .where({ ID: transactionId })) as TransactionStateRow | undefined;
   return row ?? null;
 };
