@@ -11,8 +11,8 @@ a1b2c3d4-0012-4000-8000-000000000009,SCRAPER_ENABLED,true,Enable or disable week
 a1b2c3d4-0012-4000-8000-00000000000a,SCRAPER_DAY_OF_WEEK,0,Day of week for scheduled scrape (0=Sunday)
 a1b2c3d4-0012-4000-8000-00000000000b,SCRAPER_DELAY_MS,1500,Milliseconds delay between page fetches
 a1b2c3d4-0012-4000-8000-00000000000c,SCRAPER_RETRY_ATTEMPTS,3,HTTP retry count per card page
-a1b2c3d4-0012-4000-8000-00000000000d,AF_ALERT_DAYS,30,Days before AF date to create af_approaching alert
-a1b2c3d4-0012-4000-8000-00000000000e,CANCEL_REMINDER_DAYS,2,Days before tentative cancel date to create cancel_reminder alert
+a1b2c3d4-0012-4000-8000-00000000000d,AF_ALERT_DAYS,30,Days before the annual fee date to create an Annual Fee Approaching alert
+a1b2c3d4-0012-4000-8000-00000000000e,CANCEL_REMINDER_DAYS,2,Days before the tentative cancel date to create a Cancel Reminder alert
 a1b2c3d4-0012-4000-8000-00000000000f,ELIGIBILITY_ALERT_DAYS,30,Days before eligibility window opens to fire alert
 a1b2c3d4-0012-4000-8000-000000000010,LAST_REVIEW_DATE,,Datetime of last completed weekly review session
 a1b2c3d4-0012-4000-8000-000000000011,REVIEW_REMINDER_DAYS,7,Days threshold for review overdue alert

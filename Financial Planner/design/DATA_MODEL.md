@@ -227,8 +227,8 @@ TVARVC-style runtime parameters (D-87). Maintained via FRM-009. Initial paramete
 | SCRAPER_DAY_OF_WEEK          | 0       | Day of week for scheduled scrape — 0=Sunday (D-181, SPEC-13)                       |
 | SCRAPER_DELAY_MS             | 1500    | Milliseconds delay between page fetches (D-181, SPEC-13)                           |
 | SCRAPER_RETRY_ATTEMPTS       | 3       | HTTP retry count per card page (D-181, SPEC-13)                                    |
-| AF_ALERT_DAYS                | 30      | Days before AF date to create af_approaching alert (D-195, SPEC-03)                |
-| CANCEL_REMINDER_DAYS         | 2       | Days before tentative cancel date to create cancel_reminder alert (D-196, SPEC-03) |
+| AF_ALERT_DAYS                | 30      | Days before the annual fee date to create an Annual Fee Approaching alert (D-195, SPEC-03) |
+| CANCEL_REMINDER_DAYS         | 2       | Days before the tentative cancel date to create a Cancel Reminder alert (D-196, SPEC-03) |
 | ELIGIBILITY_ALERT_DAYS       | 30      | Days before eligibility window opens to fire alert (D-239, SPEC-16)                |
 | LAST_REVIEW_DATE             | null    | Datetime of last completed weekly review session (D-247, SPEC-15)                  |
 | REVIEW_REMINDER_DAYS         | 7       | Days threshold for review_overdue alert (D-249, SPEC-15)                           |

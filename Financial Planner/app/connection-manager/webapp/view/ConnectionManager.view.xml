@@ -69,8 +69,8 @@
 
             <macros:Table
                 id="idAccountsTable"
-                contextPath="/ProviderConnections/accounts"
-                metaPath="@com.sap.vocabularies.UI.v1.LineItem"
+                contextPath="/ProviderConnections"
+                metaPath="accounts/@com.sap.vocabularies.UI.v1.LineItem"
                 selectionMode="None"
                 header="{i18n>accountsTitle}"
                 visible="{ui>/hasSelection}"

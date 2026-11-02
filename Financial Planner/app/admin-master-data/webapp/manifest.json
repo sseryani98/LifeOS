@@ -212,7 +212,7 @@
           "options": {
             "settings": {
               "contextPath": "/Issuers",
-              "variantManagement": "None",
+              "variantManagement": "Page",
               "initialLoad": "Enabled",
               "navigation": {
                 "Issuers": {
@@ -242,7 +242,7 @@
           "options": {
             "settings": {
               "contextPath": "/RewardsPrograms",
-              "variantManagement": "None",
+              "variantManagement": "Page",
               "initialLoad": "Enabled",
               "navigation": {
                 "RewardsPrograms": {
@@ -272,7 +272,7 @@
           "options": {
             "settings": {
               "contextPath": "/PurchaseCategories",
-              "variantManagement": "None",
+              "variantManagement": "Page",
               "initialLoad": "Enabled",
               "navigation": {
                 "PurchaseCategories": {
@@ -302,7 +302,7 @@
           "options": {
             "settings": {
               "contextPath": "/EarningCategories",
-              "variantManagement": "None",
+              "variantManagement": "Page",
               "initialLoad": "Enabled",
               "navigation": {
                 "EarningCategories": {
@@ -332,7 +332,7 @@
           "options": {
             "settings": {
               "contextPath": "/IssuerApplicationRules",
-              "variantManagement": "None",
+              "variantManagement": "Page",
               "initialLoad": "Enabled",
               "navigation": {
                 "IssuerApplicationRules": {
@@ -362,7 +362,7 @@
           "options": {
             "settings": {
               "contextPath": "/CsvFormatConfigs",
-              "variantManagement": "None",
+              "variantManagement": "Page",
               "initialLoad": "Enabled",
               "navigation": {
                 "CsvFormatConfigs": {
@@ -392,7 +392,7 @@
           "options": {
             "settings": {
               "contextPath": "/SystemConfigs",
-              "variantManagement": "None",
+              "variantManagement": "Page",
               "initialLoad": "Enabled",
               "navigation": {
                 "SystemConfigs": {
@@ -422,7 +422,7 @@
           "options": {
             "settings": {
               "contextPath": "/BudgetAllocations",
-              "variantManagement": "None",
+              "variantManagement": "Page",
               "initialLoad": "Enabled",
               "navigation": {
                 "BudgetAllocations": {
@@ -452,7 +452,7 @@
           "options": {
             "settings": {
               "contextPath": "/RecurrentExpenses",
-              "variantManagement": "None",
+              "variantManagement": "Page",
               "initialLoad": "Enabled",
               "navigation": {
                 "RecurrentExpenses": {
@@ -482,7 +482,7 @@
           "options": {
             "settings": {
               "contextPath": "/FinancialAccountTypes",
-              "variantManagement": "None",
+              "variantManagement": "Page",
               "initialLoad": "Enabled",
               "navigation": {
                 "FinancialAccountTypes": {
@@ -512,7 +512,7 @@
           "options": {
             "settings": {
               "contextPath": "/IncomeSourceTypes",
-              "variantManagement": "None",
+              "variantManagement": "Page",
               "initialLoad": "Enabled",
               "navigation": {
                 "IncomeSourceTypes": {
@@ -542,7 +542,7 @@
           "options": {
             "settings": {
               "contextPath": "/PerkTypes",
-              "variantManagement": "None",
+              "variantManagement": "Page",
               "initialLoad": "Enabled",
               "navigation": {
                 "PerkTypes": {
@@ -572,7 +572,7 @@
           "options": {
             "settings": {
               "contextPath": "/AdjustmentTypes",
-              "variantManagement": "None",
+              "variantManagement": "Page",
               "initialLoad": "Enabled",
               "navigation": {
                 "AdjustmentTypes": {
@@ -602,7 +602,7 @@
           "options": {
             "settings": {
               "contextPath": "/RedemptionTypes",
-              "variantManagement": "None",
+              "variantManagement": "Page",
               "initialLoad": "Enabled",
               "navigation": {
                 "RedemptionTypes": {
@@ -632,7 +632,7 @@
           "options": {
             "settings": {
               "contextPath": "/ScrapeMappings",
-              "variantManagement": "None",
+              "variantManagement": "Page",
               "initialLoad": "Enabled",
               "navigation": {
                 "ScrapeMappings": {

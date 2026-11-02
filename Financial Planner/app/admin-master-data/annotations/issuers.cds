@@ -4,18 +4,19 @@ annotate svc.Issuers with @UI: {
   HeaderInfo         : {
     TypeName      : '{i18n>Issuer}',
     TypeNamePlural: '{i18n>Issuers}',
-    Title         : {Value: '{i18n>Issuer}'}
+    Title         : {Value: '{i18n>Issuer}'},
+    Description   : {Value: name}
   },
   PresentationVariant: {
     SortOrder     : [{
-      Property  : shortName,
+      Property  : name,
       Descending: false
     }],
     Visualizations: ['@UI.LineItem']
   },
   SelectionFields    : [name],
   LineItem           : [{
-    Value                : shortName,
+    Value                : name,
     Label                : '{i18n>Issuer.name}',
     ![@HTML5.CssDefaults]: {width: '100%'}
   }],
@@ -37,11 +38,11 @@ annotate svc.Issuers with {
   createdBy  @UI.Hidden;
   modifiedAt @UI.Hidden;
   modifiedBy @UI.Hidden;
-  name       @title: '{i18n>Issuer.name}';
-  shortName  @title : '{i18n>Issuer.shortName}'
-             @UI.HiddenFilter
+  name       @title : '{i18n>Issuer.name}'
              @Common: {
-    Text           : name,
-    TextArrangement: #TextLast
+    Text           : shortName,
+    TextArrangement: #TextFirst
   };
+  shortName  @title : '{i18n>Issuer.shortName}'
+             @UI.HiddenFilter;
 };

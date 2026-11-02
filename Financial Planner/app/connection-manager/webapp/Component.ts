@@ -1,21 +1,14 @@
-import UIComponent from "sap/ui/core/UIComponent";
+import AppComponent from "sap/fe/core/AppComponent";
 
 /**
- * SimpleFIN Connection Manager (freestyle component).
- * Manages SimpleFIN connections, health status, and account→card mapping.
+ * SimpleFIN Connection Manager — an FPM custom page, so the root must be an FE
+ * AppComponent: it supplies the routing config (controlAggregation) and the
+ * owner the sap.fe.macros building blocks resolve, and starts the router itself.
  *
  * @namespace com.financialplanner.connectionmanager
  */
-export default class Component extends UIComponent {
+export default class Component extends AppComponent {
   public static metadata = {
     manifest: "json",
   };
-
-  /**
-   * Initialises the component and its router.
-   */
-  public init(): void {
-    super.init();
-    this.getRouter().initialize();
-  }
 }
