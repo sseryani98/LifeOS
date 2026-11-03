@@ -169,7 +169,7 @@ const action = scope.action === 'apply' ? 'apply' : 'review'
 
 if (!lenses.length) {
   log('No lenses in scope — nothing to review.')
-  return { consensus: [], contested: [], dropped: [], implemented: [], scope: label, note: 'empty scope' }
+  return { consensus: [], contested: [], dropped: [], defects: [], implemented: [], scope: label, note: 'empty scope' }
 }
 
 // The ingestion review proposed an app/ model class and a server re-decode method as test findings.
@@ -465,7 +465,7 @@ ${testScope}
 
 Rank by consequence. An untested business rule that **silently produces wrong data** — a wrong amount, a wrong status, a lost record — is high: a rule that fails loudly is far cheaper than one that quietly corrupts. An untested rule whose breakage is immediate and obvious is not high.
 
-The four unbuilt scenarios are a known, deliberate backlog: one finding each is honest; "no functional tests exist" as a single finding is not useful. If the specs are thin or absent for a module, **say so plainly rather than inventing rules to test against** — a test traced to a rule you made up is worse than the gap.
+The planned-but-unbuilt scenarios the module rules list are a known, deliberate backlog: one finding each is honest; "no functional tests exist" as a single finding is not useful. If the specs are thin or absent for a module, **say so plainly rather than inventing rules to test against** — a test traced to a rule you made up is worse than the gap.
 
 Use category \`functional-coverage\`.`,
       { label: 'holistic:functional-coverage', phase: 'Review', agentType: 'quality-reviewer', schema: FINDINGS_SCHEMA },
@@ -486,8 +486,9 @@ Use category \`functional-coverage\`.`,
         continue
       }
       // Two lenses agreeing is signal. Keep the longer argument, raise severity to the higher.
+      // A defect skips triage, so it takes both lenses agreeing; a disputed one stays for the adversary.
       seen.foundBy += 1
-      seen.needsSourceChange = seen.needsSourceChange || finding.needsSourceChange
+      seen.needsSourceChange = seen.needsSourceChange && finding.needsSourceChange
       if (finding.argument.length > seen.argument.length) seen.argument = finding.argument
       const rank = { low: 0, medium: 1, high: 2 }
       if (rank[finding.severity] > rank[seen.severity]) seen.severity = finding.severity
@@ -509,6 +510,7 @@ Use category \`functional-coverage\`.`,
     return {
       scope: label,
       gate: gateResult,
+      rules: moduleRules,
       consensus: [],
       contested: [],
       dropped: [],

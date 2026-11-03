@@ -128,8 +128,15 @@ sequence:
 D# | file:line | bug | proposed fix | severity
 ```
 
-Offer to fix a defect directly (TDD: the test goes in with the fix), or to log it in
-`project/DEFECT_LOG.md`. Never pass one to apply.
+Offer to fix a defect directly (TDD: the test goes in with the fix), or to log it in the module's
+defect record. Never pass one to apply.
+
+| Module | Defect record |
+| --- | --- |
+| `Financial Planner` | `project/DEFECT_LOG.md` |
+| `Project Tracker` | `PLAN.md` §7, under a `### Defects` subsection (create it if absent). One item per defect, continuing §7's numbering: bug, `file:line`, proposed fix, severity, date found. D-207 makes `PLAN.md` this module's only record — never a new log file, never `log_defect` (the store holds Financial Planner's Workspace only) |
+
+A module not in this table has no defect record. Say so and offer the fix only.
 
 **Nothing has been written.** Say so in one line under the tables.
 
