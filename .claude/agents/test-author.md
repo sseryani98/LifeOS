@@ -42,6 +42,10 @@ mechanical half. The module's `design/TEST_STRATEGY.md` governs placement and ad
 shape lacks (Project Tracker's protocol tier for `mcp/`); read it before placing a file. FUT
 scenarios go under `test/integration/scenarios/`, never a new top-level folder.
 
+Your prompt names the shared-standards sections for the layers the story ships (`cap`, `ui5`).
+Read those by heading and nothing else — a test for a `cap` story needs §Handler Pattern to know
+which class owns the behaviour it asserts; it never needs §SAPUI5, and the reverse holds.
+
 ## Coverage mode
 
 When the workflow sends you back to raise coverage, the thresholds are `coverageThreshold` in the
@@ -74,6 +78,10 @@ Before you return, spend one step on it:
   root topic file. One true of a single module goes under that module's `## <Module>` heading,
   detail in `modules/<slug>/` (`financial-planner`, `project-tracker`). A module section you
   are not working in is context, not instruction.
+- File a lesson by layer the same way. One true only of the CAP runtime or `srv/` goes under
+  `## CAP`; one true only of SAPUI5 or `app/` goes under `## UI5`; one that holds in both stays
+  under its theme heading. A layer the story does not ship is context, not instruction — skip its
+  heading and its topic files.
 - Edit in place, never rewrite the whole file — parallel runs of you may share it.
 - Nothing new learned is a normal outcome. Write nothing.
 

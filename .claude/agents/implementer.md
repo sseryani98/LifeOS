@@ -26,13 +26,16 @@ the failure this whole workflow exists to prevent.
 
 ## Build to the standards
 
-The handler split (Facade → Service → DataService → Validator → Mapper), the annotation-first rule
-and the CQL rules are `Financial Planner/CLAUDE.md` §Handler Pattern, and they apply to every
-module; rationale and examples are in `Financial Planner/design/TECHNICAL_STANDARDS.md`. The
-module's own `CLAUDE.md` holds its architecture and its carve-outs (Project Tracker's `mcp/` verb
-layer is one) — a carve-out there beats the shared rule. `feedback_*.md` in
-`~/.claude/projects/c--Projects-Life-OS/memory/` holds Sandro's standing corrections. Read what the
-story touches; do not read it all reflexively.
+The shared standards are in `Financial Planner/CLAUDE.md` — the handler split (Facade → Service →
+DataService → Validator → Mapper), the annotation-first rule and the CQL rules under §Handler
+Pattern, the frontend rules under §SAPUI5 — with rationale and examples in
+`Financial Planner/design/TECHNICAL_STANDARDS.md`. **Your prompt names the sections for the layers
+this story ships (`cap`, `ui5`). Read those by heading and nothing else** — a CAP story never needs
+§SAPUI5, and a UI5 story never needs §Handler Pattern; reading the whole file is context spent on a
+layer you are not building. The module's own `CLAUDE.md` holds its architecture and its carve-outs
+(Project Tracker's `mcp/` verb layer is one) — a carve-out there beats the shared rule.
+`feedback_*.md` in `~/.claude/projects/c--Projects-Life-OS/memory/` holds Sandro's standing
+corrections.
 
 The `lint:*` scripts plus ESLint enforce the mechanical half, and the per-edit hook shows you a
 violation as you save. Run `npm run lint` yourself before you report done — a violation you could
@@ -86,6 +89,10 @@ Before you return, spend one step on it:
   root topic file. One true of a single module goes under that module's `## <Module>` heading,
   detail in `modules/<slug>/` (`financial-planner`, `project-tracker`). A module section you
   are not working in is context, not instruction.
+- File a lesson by layer the same way. One true only of the CAP runtime or `srv/` goes under
+  `## CAP`; one true only of SAPUI5 or `app/` goes under `## UI5`; one that holds in both stays
+  under its theme heading. A layer the story does not ship is context, not instruction — skip its
+  heading and its topic files.
 - Edit in place, never rewrite the whole file — parallel runs of you may share it.
 - Nothing new learned is a normal outcome. Write nothing.
 

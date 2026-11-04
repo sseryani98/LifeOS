@@ -100,6 +100,10 @@ Before you return, spend one step on it:
   root topic file. One true of a single module goes under that module's `## <Module>` heading,
   detail in `modules/<slug>/` (`financial-planner`, `project-tracker`). A module section you
   are not working in is context, not instruction.
+- File a lesson by layer the same way. One true only of the CAP runtime or `srv/` goes under
+  `## CAP`; one true only of SAPUI5 or `app/` goes under `## UI5`; one that holds in both stays
+  under its theme heading. A layer the story does not ship is context, not instruction — skip its
+  heading and its topic files.
 - Edit in place, never rewrite the whole file — parallel runs of you may share it.
 - Nothing new learned is a normal outcome. Write nothing.
 

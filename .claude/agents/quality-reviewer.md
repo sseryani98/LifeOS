@@ -25,8 +25,9 @@ Your prompt carries the pointer: the shared rules in `Financial Planner/CLAUDE.m
 line numbers drift), the module's own `CLAUDE.md` whose carve-outs beat the shared rule, the review
 checklists in `Financial Planner/design/TECHNICAL_STANDARDS.md` §12, the enforced rule values in
 `Standards (Technical + Linting)/eslint.config.mjs`, and Sandro's standing corrections in
-`~/.claude/projects/c--Projects-Life-OS/memory/`. Read what you need; do not read all of it
-reflexively.
+`~/.claude/projects/c--Projects-Life-OS/memory/`. The prompt also names the layers in scope
+(`cap`, `ui5`) and the standards sections that go with each — read those by heading, not the
+files end to end. A finding cites the section it rests on.
 
 ## Do not report what a linter already catches
 
@@ -75,6 +76,10 @@ Before you return, spend one step on it:
   root topic file. One true of a single module goes under that module's `## <Module>` heading,
   detail in `modules/<slug>/` (`financial-planner`, `project-tracker`). A module section you
   are not working in is context, not instruction.
+- File a lesson by layer the same way. One true only of the CAP runtime or `srv/` goes under
+  `## CAP`; one true only of SAPUI5 or `app/` goes under `## UI5`; one that holds in both stays
+  under its theme heading. A layer the story does not ship is context, not instruction — skip its
+  heading and its topic files.
 - Edit in place, never rewrite the whole file — parallel runs of you may share it.
 - Nothing new learned is a normal outcome. Write nothing.
 

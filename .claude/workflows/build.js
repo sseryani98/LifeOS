@@ -70,9 +70,14 @@ const BRIEF_SCHEMA = {
       },
     },
     modules: { type: 'array', items: { type: 'string' }, description: 'Source domains the story touches, e.g. srv/modules/transaction, mcp/verbs' },
-    hasBackend: { type: 'boolean' },
-    hasFrontend: { type: 'boolean', description: "True only if the story ships UI under app/ — this gates a browser. A BUILD_PLAN 'Ships UI' column, where one exists, decides it" },
-    pages: { type: 'array', items: { type: 'string' }, description: 'App routes/pages the story touches; empty when hasFrontend is false' },
+    layers: {
+      type: 'array',
+      description: "The technology layers the story ships code in. 'cap' for srv/, db/ and any CAP-hosted folder the module's CLAUDE.md names (mcp/); 'ui5' only if the story ships UI under app/ — a BUILD_PLAN 'Ships UI' column, where one exists, decides it. Every later agent reads only the standards for the layers named here, and 'ui5' gates a browser",
+      items: { type: 'string', enum: ['cap', 'ui5'] },
+      minItems: 1,
+      uniqueItems: true,
+    },
+    pages: { type: 'array', items: { type: 'string' }, description: "App routes/pages the story touches; empty unless layers includes 'ui5'" },
     bundledWith: { type: 'array', items: { type: 'string' }, description: "Other STORY IDs sharing this story's BUILD_PLAN prompt, if any. Their scope is NOT yours to build. A story's own FRICEW objects are never listed here — they are all in scope" },
     boardRow: { type: 'string', description: "The story's sprint-board row, character-for-character. Empty string when the module has no board" },
     blockers: {
@@ -91,7 +96,7 @@ const BRIEF_SCHEMA = {
   },
   required: [
     'storyId', 'storyName', 'specFile', 'summary', 'businessRules', 'futs', 'filesToCreate',
-    'filesToModify', 'testPlan', 'modules', 'hasBackend', 'hasFrontend', 'pages',
+    'filesToModify', 'testPlan', 'modules', 'layers', 'pages',
     'bundledWith', 'boardRow', 'blockers',
   ],
   additionalProperties: false,
@@ -250,7 +255,32 @@ if (!moduleDir) {
   return { storyId, built: false, note: 'no moduleDir in args' }
 }
 
-const standards = `Module architecture, folder structure and carve-outs are in \`${moduleDir}/CLAUDE.md\` — a carve-out there beats the shared standard. The shared standards (handler pattern, TS/naming, i18n, SAPUI5, test rules) live in \`Financial Planner/CLAUDE.md\` for every module until they move (root \`CLAUDE.md\` §Standards); rationale in \`Financial Planner/design/TECHNICAL_STANDARDS.md\`. Test tiers and boundaries are in \`${moduleDir}/design/TEST_STRATEGY.md\`; the enforced coverage thresholds are \`coverageThreshold\` in \`${moduleDir}/jest.config.ts\`. Sandro's standing corrections are \`feedback_*.md\` files in \`~/.claude/projects/c--Projects-Life-OS/memory/\`.`
+// The shared standards are one file per concern, but a story lives in one or two layers, and an
+// agent that reads the whole file pays for every layer it is not building. Each layer names the
+// sections that apply to it; an agent reads those by heading and nothing else. Citations keep the
+// `path` §Heading form so lintAgentPrompts.ts can check every heading still exists.
+const STANDARDS_SECTIONS = {
+  cap: [
+    '`Financial Planner/CLAUDE.md` §CDS, §TypeScript, §Handler Pattern, §Error Handling, §Logging, §i18n, §Encryption',
+    '`Financial Planner/design/TECHNICAL_STANDARDS.md` §3, §4, §5, §6, §7, §8, §9 (rationale and worked examples)',
+  ],
+  ui5: [
+    '`Financial Planner/CLAUDE.md` §SAPUI5, §i18n, §Frontend Validation',
+    '`Financial Planner/design/TECHNICAL_STANDARDS.md` §8, §11 (rationale and worked examples)',
+  ],
+  every: [
+    '`Financial Planner/CLAUDE.md` §Test Rules, §Do NOT',
+    '`Financial Planner/design/TECHNICAL_STANDARDS.md` §13 (the TDD workflow)',
+  ],
+}
+
+const standardsFor = layers => `## Standards for this story (layers: ${layers.join(', ')})
+
+Module architecture, folder structure and carve-outs are in \`${moduleDir}/CLAUDE.md\` — a carve-out there beats the shared standard. The shared standards live in \`Financial Planner/CLAUDE.md\` for every module until they move (root \`CLAUDE.md\` §Standards). **Read only the sections below, by heading** — Grep the heading, then Read that range. Do not read either file end to end; the sections for a layer this story does not ship are context you are paying for and not using.
+
+${[...layers, 'every'].flatMap(layer => STANDARDS_SECTIONS[layer].map(line => `- ${line}`)).join('\n')}
+
+Test tiers and boundaries are in \`${moduleDir}/design/TEST_STRATEGY.md\`; the enforced coverage thresholds are \`coverageThreshold\` in \`${moduleDir}/jest.config.ts\`. Sandro's standing corrections are \`feedback_*.md\` files in \`~/.claude/projects/c--Projects-Life-OS/memory/\`.`
 
 // The full suite runs with --coverage and a posttest report, minutes per pass on a large module.
 // Agents iterate on their own files and leave the full run to the gate, which runs it anyway.
@@ -314,8 +344,10 @@ several FRICEW objects one story owns — those are all in scope and all quoted.
 ${boardFile ? `**\`boardRow\`** — the row character-for-character, so the Handoff phase can find and move it.` : '**`boardRow`** — empty string; there is no board to hand off to.'}
 Ignore any commit block in BUILD_PLAN — this workflow does not commit.
 
-**\`hasFrontend\`** gates a browser. True only if the story ships UI under \`app/\`. Where BUILD_PLAN
-has a Ships UI column, it decides.
+**\`layers\`** decides what every later agent reads and whether a browser runs. \`cap\` for anything
+under \`srv/\`, \`db/\` or a CAP-hosted folder the module's CLAUDE.md names (\`mcp/\`); \`ui5\` only if the
+story ships UI under \`app/\`. Where BUILD_PLAN has a Ships UI column, it decides \`ui5\`; otherwise a
+Form (FRM) story ships UI and an Enhancement (ENH) or Conversion (CNV) story usually does not.
 
 ## Blockers stop the build
 
@@ -345,7 +377,7 @@ if (brief.blockers.length) {
   }
 }
 
-log(`${brief.storyId} — ${brief.storyName}. ${brief.businessRules.length} business rules, ${brief.futs.length} FUTs. ${brief.hasFrontend ? 'Frontend story: smoke will run.' : 'Backend-only: skipping smoke.'}`)
+log(`${brief.storyId} — ${brief.storyName}. ${brief.businessRules.length} business rules, ${brief.futs.length} FUTs. Layers: ${brief.layers.join(', ')}${brief.layers.includes('ui5') ? ' — smoke will run.' : ' — skipping smoke.'}`)
 
 const contextFor = (rules, futs) => `## Story
 
@@ -411,7 +443,7 @@ defect. Set \`confirmedFailing\` only if you actually saw this.
 
 ${redLock}
 
-${standards}`,
+${standardsFor(brief.layers)}`,
     { label: `red:${brief.storyId}`, phase: 'Red', model: 'opus', effort: 'high', agentType: 'test-author', schema: RED_SCHEMA },
   )
 
@@ -448,7 +480,7 @@ here is ${objects.length} failed authors. Existing suites you changed may now fa
 implementation; that is expected. Return every file you created or modified in \`sharedFiles\`, and
 name any you deleted in \`notes\` — a deleted file cannot be hashed.
 
-${standards}`,
+${standardsFor(brief.layers)}`,
     { label: `red:foundation:${brief.storyId}`, phase: 'Red', model: 'opus', effort: 'high', agentType: 'test-author', schema: FOUNDATION_SCHEMA },
   )
 
@@ -496,7 +528,7 @@ fixture that does not compile. Set \`confirmedFailing\` only if you saw this.
 
 ${redLock}
 
-${standards}`,
+${standardsFor(brief.layers)}`,
       { label: `red:${object}:${brief.storyId}`, phase: 'Red', model: 'opus', effort: 'high', agentType: 'test-author', schema: RED_SCHEMA },
     )
   })
@@ -623,7 +655,7 @@ ${focusedRuns}
 Run \`cd "${moduleDir}" && npm run lint\` before you report done — a violation you could have caught
 costs a full gate round.
 
-${standards}`,
+${standardsFor(brief.layers)}`,
   { label: `implement:${brief.storyId}`, phase: 'Implement', model: 'opus', effort: 'high', agentType: 'implementer', schema: IMPLEMENT_SCHEMA },
 )
 
@@ -698,7 +730,7 @@ Hashed and checked every round. If a test is genuinely wrong, set \`hasDispute\`
 
 ${focusedRuns}
 
-${standards}`,
+${standardsFor(brief.layers)}`,
     {
       label: `repair:round-${round}:${brief.storyId}`,
       phase: 'Implement',
@@ -788,7 +820,7 @@ ${lockedTests()}
 While you work, measure only what you are raising: \`npx jest <test files> --coverage
 --collectCoverageFrom=<the source file>\`. One full \`npm test\` at the end — the gate runs it again.
 
-${standards}`,
+${standardsFor(brief.layers)}`,
     { label: `coverage:${brief.storyId}`, phase: 'Coverage', model: 'sonnet', effort: 'medium', agentType: 'test-author', schema: COVERAGE_SCHEMA },
   )
 
@@ -826,7 +858,7 @@ ${standards}`,
 
 let smoke = null
 
-if (brief.hasFrontend) {
+if (brief.layers.includes('ui5')) {
   phase('Smoke')
 
   smoke = await agent(
@@ -911,7 +943,7 @@ if (!boardFile) {
 phase('Handoff')
 
 const handoff = await agent(
-  `Hand off **${brief.storyId}**. The gate is green${brief.hasFrontend ? ' and the UI smoke-tested clean' : ''}.
+  `Hand off **${brief.storyId}**. The gate is green${brief.layers.includes('ui5') ? ' and the UI smoke-tested clean' : ''}.
 
 ## Update the sprint board — that is the whole job
 

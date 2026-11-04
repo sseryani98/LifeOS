@@ -73,6 +73,9 @@ if (!moduleDir) throw new Error('code-quality needs args.moduleDir — the comma
 const files = scope.files ?? []
 const domains = scope.domains ?? []
 const label = scope.label ?? 'target'
+// Layers the scope ships code in — the same vocabulary as the build brief ('cap', 'ui5'). The
+// command derives it from the files; a missing value means the caller predates the field.
+const layers = scope.layers ?? []
 
 
 if (!files.length) {
@@ -81,7 +84,7 @@ if (!files.length) {
 }
 
 const fileList = files.join('\n')
-const standards = `The shared standards live in \`Financial Planner/CLAUDE.md\` (§Coding Patterns — Handler Pattern, TypeScript/naming, SAPUI5) and \`Financial Planner/design/TECHNICAL_STANDARDS.md\` (§12 = six review checklists); they apply to every module. \`${moduleDir}/CLAUDE.md\` holds this module's architecture and carve-outs — a carve-out there beats the shared rule. Cite rules by section heading, not line number. Sandro's standing corrections are \`feedback_*.md\` files in \`~/.claude/projects/c--Projects-Life-OS/memory/\`.`
+const standards = `The shared standards live in \`Financial Planner/CLAUDE.md\` §Coding Patterns and \`Financial Planner/design/TECHNICAL_STANDARDS.md\` §12 (six review checklists); they apply to every module. Read only the subsections for the layers in scope (${layers.join(', ') || 'not stated — judge from the files'}): \`cap\` is \`Financial Planner/CLAUDE.md\` §CDS, §TypeScript, §Handler Pattern, §Error Handling, §Logging, §i18n; \`ui5\` is \`Financial Planner/CLAUDE.md\` §SAPUI5, §i18n. \`Financial Planner/CLAUDE.md\` §Do NOT applies to both. \`${moduleDir}/CLAUDE.md\` holds this module's architecture and carve-outs — a carve-out there beats the shared rule. Cite rules by section heading, not line number. Sandro's standing corrections are \`feedback_*.md\` files in \`~/.claude/projects/c--Projects-Life-OS/memory/\`.`
 
 phase('Lint')
 
@@ -231,7 +234,7 @@ Return only findings the skill actually produced. If it found nothing, return an
   ),
 )
 
-if (scope.hasBackend) {
+if (layers.includes('cap')) {
   reviewers.push(() =>
     agent(
       `You are running the \`cap-annotation-hunter\` skill on a fresh context, against the backend in scope.

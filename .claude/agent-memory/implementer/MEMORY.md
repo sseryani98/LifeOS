@@ -1,6 +1,6 @@
 # Implementer memory
 
-## CAP runtime
+## CAP
 - [CAP runtime gotchas](cap_runtime_gotchas.md) — virtual input, CSV seed, req.reject args, stamps, autoexpose naming, boot order, CDS_TYPESCRIPT timing, draft SAVE, params; the source no longer comments these
 
 ## Lint and coverage traps

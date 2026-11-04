@@ -113,8 +113,12 @@ catch-all `ignores` entry, or `no-restricted-syntax` fails the build.
 **The harness is linted too.** `npm run lint:harness` at the root runs `lintAgentPrompts.ts`, which
 roots at the repo rather than a module: every `.claude/agents/*.md` must carry the memory block in
 `Standards (Technical + Linting)/agentMemoryBlock.md` verbatim (`--write` restamps all of them), no
-harness file may name a drive-letter path, and every prose count of the linters must equal the
-`lint*.ts` files on disk. Rules about the codebase live in CLAUDE.md files only; an agent file is role,
+harness file may name a drive-letter path, every prose count of the linters must equal the
+`lint*.ts` files on disk, and every `` `path.md` §Heading `` citation must name a heading that file
+has. That last rule is what lets the build brief carry `layers` (`cap`, `ui5`) and every agent read
+only the standards sections for the layers a story ships — the layer → section map in
+`.claude/workflows/build.js` is checked against the headings, so a renamed section fails the build
+rather than sending an agent to read the whole file. Rules about the codebase live in CLAUDE.md files only; an agent file is role,
 prohibitions and memory, and a workflow prompt carries run-specific context plus a pointer.
 
 ## Adding a Module

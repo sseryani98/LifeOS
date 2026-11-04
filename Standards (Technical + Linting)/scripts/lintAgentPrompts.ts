@@ -28,6 +28,16 @@ const LINTER_COUNT_CLAIM =
 const MACHINE_PATH = /\b[A-Z]:[\\/]/;
 
 /**
+ * A section citation that names its file: a backticked `.md` path followed by one or more
+ * `§Heading` or `§12` references. Prompts tell agents to read standards by heading, so a heading
+ * that no longer exists sends an agent to read nothing — or the whole file. A bare `§8` with no
+ * path beside it cannot be resolved and is left alone.
+ */
+const SECTION_CITATION = /`([^`\n]+\.md)`\s+(§[^`\n]*)/g;
+const SECTION_REF = /§(\d+|[A-Za-z][A-Za-z0-9 ]*?)(?=\s*[,;:)`'"]|\s+[—(]|\.(?:\s|$)|\s*$)/gm;
+const HEADING = /^#{1,6}\s+(.+?)\s*$/;
+
+/**
  * Where linter-count claims live: the harness, and the CLAUDE.md files that describe the suite.
  */
 const CLAIM_FILES = [
@@ -139,6 +149,64 @@ function checkMachinePaths(filePath: string, violations: Violation[]): void {
 }
 
 /**
+ * Headings of a markdown file, with the markdown stripped, cached per path.
+ */
+const headingCache = new Map<string, string[]>();
+function headingsOf(filePath: string): string[] {
+  let headings = headingCache.get(filePath);
+  if (!headings) {
+    headings = readFileSync(filePath, "utf8")
+      .split(/\r?\n/)
+      .map(line => HEADING.exec(line)?.[1].replaceAll(/[`*]/g, "").trim())
+      .filter((text): text is string => Boolean(text));
+    headingCache.set(filePath, headings);
+  }
+  return headings;
+}
+
+/**
+ * Whether a citation names a heading: either is a whole-word prefix of the other, so `§Handler
+ * Pattern` finds "Handler Pattern — 4 Files" and `§Test Rules holds them` finds "Test Rules",
+ * while `§1` does not find "12. Code Review Checklists".
+ */
+function headingMatches(reference: string, heading: string): boolean {
+  const [shorter, longer] = reference.length <= heading.length ? [reference, heading] : [heading, reference];
+  if (!longer.startsWith(shorter)) return false;
+  return longer.length === shorter.length || !/[A-Za-z0-9]/.test(longer[shorter.length]);
+}
+
+/**
+ * The files a cited path can mean. A bare `CLAUDE.md` is "a CLAUDE.md" — prose says "the
+ * module's `CLAUDE.md` §Folder Structure" — so it resolves to the root one and every module's.
+ * A path that does not resolve from the repo root (a `${moduleDir}/CLAUDE.md` template, a
+ * module-relative spec) resolves to nothing — only a file on disk can be checked.
+ */
+function citedFiles(cited: string): string[] {
+  if (cited.includes("$")) return [];
+  if (cited === "CLAUDE.md") return [join(ROOT_DIR, cited), ...moduleClaudeFiles()].filter(existsSync);
+  const target = join(ROOT_DIR, cited);
+  return existsSync(target) ? [target] : [];
+}
+
+/**
+ * Checks every `path` §Heading citation in a harness file against the headings of that file.
+ */
+function checkSectionCitations(filePath: string, violations: Violation[]): void {
+  const source = readFileSync(filePath, "utf8");
+  for (const citation of source.matchAll(SECTION_CITATION)) {
+    const targets = citedFiles(citation[1]);
+    if (!targets.length) continue;
+    const headings = targets.flatMap(headingsOf);
+    const line = source.slice(0, citation.index).split("\n").length;
+    for (const reference of citation[2].matchAll(SECTION_REF)) {
+      const text = reference[1].trim();
+      if (headings.some(heading => headingMatches(text, heading))) continue;
+      violations.push({ filePath, message: `line ${line} cites \`${citation[1]}\` §${text}, which has no such heading` });
+    }
+  }
+}
+
+/**
  * Compiles a workflow script the way the runtime does — as an async function body with the
  * runtime's globals — so a backtick inside a prompt template breaks here, not on the next /build.
  * `node --check` cannot do this: the scripts use top-level `return`.
@@ -155,8 +223,8 @@ function checkWorkflowSyntax(filePath: string, violations: Violation[]): void {
 
 /**
  * Lints the shared harness under .claude/: every agent carries the canonical memory block, no
- * prose misstates the linter count, nothing names one machine's path, and every workflow script
- * compiles as the runtime would run it.
+ * prose misstates the linter count, nothing names one machine's path, every workflow script
+ * compiles as the runtime would run it, and every `path` §Heading citation names a real heading.
  * Exits with code 1 if violations found.
  */
 function main(): void {
@@ -175,6 +243,7 @@ function main(): void {
     checkMachinePaths(file, violations);
   }
   for (const file of workflows) checkWorkflowSyntax(file, violations);
+  for (const file of CLAIM_FILES) checkSectionCitations(file, violations);
 
   console.log(`Checked ${agents.length} agent(s), ${CLAIM_FILES.length} file(s) for linter-count claims (${count} on disk)...`);
 

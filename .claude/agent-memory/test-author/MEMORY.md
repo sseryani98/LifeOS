@@ -1,6 +1,6 @@
 # Test-author memory
 
-## CAP behaviour
+## CAP
 - [CAP rejection shapes](cap_rejection_shapes.md) — cds 9.8.4: @mandatory = 400 ASSERT_MANDATORY + target; @assert.unique = 500 SQLITE_CONSTRAINT_UNIQUE
 - [CAP test facts](cap_test_facts.md) — facades not auto-registered under cds.test; req.params is `{ID}`; projection `virtual` stripped on INSERT unless `@Core.Computed: false`
 

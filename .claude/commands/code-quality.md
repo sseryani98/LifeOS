@@ -79,15 +79,15 @@ Workflow({
     lintLog: '<absolute path, when lintPassed is false>',
     files: [ /* repo-relative paths */ ],
     domains: [ { name: 'transaction', files: [ /* ... */ ] } ],
-    hasBackend: true,
-    backendFiles: [ /* srv/ subset — cap-annotation-hunter's scope */ ],
-    hasFrontend: false
+    layers: [ 'cap' ],            // 'cap' when any file is under srv/, db/ or a CAP-hosted folder the module's CLAUDE.md names (mcp/); 'ui5' when any is under app/
+    backendFiles: [ /* srv/ subset — cap-annotation-hunter's scope */ ]
   }
 })
 ```
 
-`hasBackend: false` skips the `cap-annotation-hunter` agent entirely — it has nothing to say
-about `app/`.
+`layers` is the build brief's vocabulary. Without `cap` in it the `cap-annotation-hunter` agent is
+skipped entirely — it has nothing to say about `app/`. Reviewers read only the standards sections
+for the layers named, so a `ui5`-only diff never loads the handler pattern.
 
 ## 6. Render the result, then stop
 

@@ -66,9 +66,12 @@ does not touch.
 - **Ignore BUILD_PLAN's commit block.** This workflow stops before the commit, so there is nothing
   to carry. (Those blocks are stale anyway — they name a `Co-Authored-By` trailer the repo no
   longer uses, and a bundled prompt's message claims stories a single-story build never touched.)
-- **`hasFrontend`** gates a browser. Set it true only if the story ships UI (`app/`). A BUILD_PLAN
-  Ships UI column decides it where one exists; otherwise a Form (FRM) story does, and an
-  Enhancement (ENH) or Conversion (CNV) story usually does not.
+- **`layers`** names the technology layers the story ships code in, and every agent after you
+  reads only the standards for those layers. `cap` for anything under `srv/`, `db/` or a
+  CAP-hosted folder the module's CLAUDE.md names (`mcp/`). `ui5` only if the story ships UI
+  (`app/`) — it also gates a browser. A BUILD_PLAN Ships UI column decides `ui5` where one
+  exists; otherwise a Form (FRM) story ships UI, and an Enhancement (ENH) or Conversion (CNV)
+  story usually does not. Name the layer the files prove, not the one the story type suggests.
 
 ## Blockers
 
@@ -103,6 +106,10 @@ Before you return, spend one step on it:
   root topic file. One true of a single module goes under that module's `## <Module>` heading,
   detail in `modules/<slug>/` (`financial-planner`, `project-tracker`). A module section you
   are not working in is context, not instruction.
+- File a lesson by layer the same way. One true only of the CAP runtime or `srv/` goes under
+  `## CAP`; one true only of SAPUI5 or `app/` goes under `## UI5`; one that holds in both stays
+  under its theme heading. A layer the story does not ship is context, not instruction — skip its
+  heading and its topic files.
 - Edit in place, never rewrite the whole file — parallel runs of you may share it.
 - Nothing new learned is a normal outcome. Write nothing.
 
