@@ -1,14 +1,8 @@
 namespace com.financialplanner;
 
-using {
-    cuid,
-    managed
-} from '@sap/cds/common';
-using {com.financialplanner.AlertStatus} from '../enums';
-using {
-    com.financialplanner.AlertType,
-    com.financialplanner.AlertSeverity
-} from '../reference/schema';
+using {cuid, managed} from '@sap/cds/common';
+using {com.financialplanner.AlertStatus} from '../common/enums';
+using {com.financialplanner.AlertType, com.financialplanner.AlertSeverity} from '../reference/schema';
 using {
     com.financialplanner.CardInstance,
     com.financialplanner.OfferTranche,

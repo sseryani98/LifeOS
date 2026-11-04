@@ -1,14 +1,11 @@
 namespace com.financialplanner;
 
-using {
-    cuid,
-    managed
-} from '@sap/cds/common';
+using {cuid, managed} from '@sap/cds/common';
 using {
     com.financialplanner.CategorizationStatus,
     com.financialplanner.TransactionSource,
     com.financialplanner.MatchType
-} from '../enums';
+} from '../common/enums';
 using {com.financialplanner.CardInstance} from '../cards/schema';
 using {com.financialplanner.ProviderAccount} from '../ingestion/schema';
 using {

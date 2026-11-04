@@ -45,7 +45,6 @@ export const RBC_CARD_INSTANCE = {
   lifecycleState: "active",
 } as const;
 
-// ─── Per-spec CIBC cards ────────────────────────────────────────────────────
 // Dedup is keyed on the card, so each natural-key spec parses against its own
 // card and the rows it persists can never reach another spec's parse (§6.3).
 
@@ -131,8 +130,6 @@ export const CIBC_CARD_VARIANT_TRANSACTION = {
   cardInstance_ID: CIBC_CARD_VARIANT_SIBLING_INSTANCE.ID,
 } as const;
 
-// ─── Amex supplementary attribution ─────────────────────────────────────────
-
 /** Person 1's supplementary card under the Amex Cobalt primary. */
 export const AMEX_SUPP_PERSON_1_INSTANCE = {
   ...AMEX_COBALT_INSTANCE,
@@ -155,8 +152,6 @@ export const AMEX_PARSE_REQUEST = {
   fileName: "amex.csv",
   fileContent: AMEX_CSV,
 } as const;
-
-// ─── OData action payloads ──────────────────────────────────────────────────
 
 /** The parseCsvImport body the wizard posts for a CIBC upload. */
 export const PARSE_CSV_ODATA_PAYLOAD = {

@@ -47,7 +47,7 @@ export class TransactionDataService {
   }
 
   /**
-   * Inserts a new split for a transaction — the ID is filled by the cuid aspect.
+   * Inserts a new split for a transaction.
    * @param transactionId The parent transaction.
    * @param values The computed split values.
    * @returns Resolves once the insert completes.

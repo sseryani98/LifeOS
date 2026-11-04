@@ -187,7 +187,6 @@ export const MISSING_CORRECTION_PAYLOAD = {
   earningCategory_ID: BULK_EARNING_CATEGORY_ID,
 };
 
-// ─── Re-categorize scenario ────────────────────────────────────────
 export const UBER_EATS_VENDOR_ID = "ab1e0001-0000-0000-0000-000000000002";
 export const UBER_EATS_PATTERN_ID = "ab1e0004-0000-0000-0000-000000000001";
 export const RECAT_UNCAT_1_ID = "ab1e0005-0000-0000-0000-000000000001";

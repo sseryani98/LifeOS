@@ -62,18 +62,6 @@
     "cds-plugin-ui5": "^0.17.4",
     "ui5-tooling-transpile": "^3.11.3"
   },
-  "ui5": {
-    "ui5linter": {
-      "idNamingPattern": "",
-      "eventNamingPattern": "",
-      "usage": {
-        "WrongNamespaceLinter": false
-      },
-      "xmlClassExceptions": [
-        "com.financialplanner.connectionmanager.view.ConnectionManager"
-      ]
-    }
-  },
   "cds": {
     "requires": {
       "db": {

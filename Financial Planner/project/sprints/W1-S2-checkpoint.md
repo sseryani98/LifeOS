@@ -19,7 +19,7 @@
 | FRM-010 | Form | Connection Manager — freestyle health page with status ObjectStatus colours, manual Sync Now, Add Connection (claim setup token), Re-authenticate, and account→card mapping. | Done |
 | FRM-003 | Form | CSV Import Wizard — 3-step freestyle `sap.m.Wizard` (TypeScript) on TransactionService: drag-drop/picker multi-file upload with non-closed card selector, tabbed review (New / Potential Duplicates / Excluded) with per-row edit + categorization value helps and running totals, confirm + save with post-import summary. Backend: `saveCsvImport` action (4-file handler + mapper, TDD), Import Log entity, Vendor entity + Transaction categorization FKs. Playwright-verified end-to-end. | Done |
 
-**Sprint scope note:** INT-001 and INT-002 arrived in the earlier integration commits; FRM-003 landed last (`b8e6ead`) and folded in pre-existing branch work — the `db/integration` → `db/ingestion` folder rename, a shared `formatAmount` extraction, and companion edits to CLAUDE.md / TECHNICAL_STANDARDS.md / TECH_STACK.md / `package.json` / `admin-service.cds` / `db/alerts/schema.cds` / lint scripts. Everything is green as a whole; the entanglement was left as-is by design.
+**Sprint scope note:** INT-001 and INT-002 arrived in the earlier integration commits; FRM-003 landed last (`5fc1877`) and folded in pre-existing branch work — the `db/integration` → `db/ingestion` folder rename, a shared `formatAmount` extraction, and companion edits to CLAUDE.md / TECHNICAL_STANDARDS.md / TECH_STACK.md / `package.json` / `admin-service.cds` / `db/alerts/schema.cds` / lint scripts. Everything is green as a whole; the entanglement was left as-is by design.
 
 ### FRM-003 scope decisions (Sandro)
 
@@ -73,7 +73,7 @@ Validators and utilities meet their 100% line / 100% branch gates; services clea
 
 | ID | Severity | Summary | Status |
 | --- | --- | --- | --- |
-| D-001 | High | Coverage harness never ran — glob-vs-regex `coveragePathIgnorePatterns`, mispointed `coverageThreshold` globs, and wrong Jest JSON shape in the report script crashed `npm test`. Root cause: W1-S1 config authored but never exercised with coverage. | Closed (`e691978`) |
+| D-001 | High | Coverage harness never ran — glob-vs-regex `coveragePathIgnorePatterns`, mispointed `coverageThreshold` globs, and wrong Jest JSON shape in the report script crashed `npm test`. Root cause: W1-S1 config authored but never exercised with coverage. | Closed (`d5c2b5a`) |
 | D-002 | Medium | `tsc` / `cds build` failed with `TS2688: Cannot find type definition file for 'sap__cds'` — the `@cap-js/cds-types` postinstall junction had not run in the resumed session. | Closed |
 | D-003 | High | Seed `CsvFormatConfig` for TD and CIBC had off-by-one column indices vs the actual headerless bank exports — every TD/CIBC import would have parsed the wrong columns. | Closed |
 

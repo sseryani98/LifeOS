@@ -26,8 +26,6 @@ import {
 
 import { GROCERIES_ALLOCATION_CURRENT } from "../../../shared/data/budget.js";
 
-// ─── BudgetAllocation: cross-field rules ──────────────────────────────────────
-
 /** Allocation referencing an excluded-from-budget category — should be rejected */
 export const ALLOCATION_EXCLUDED_CATEGORY = {
   purchaseCategory_ID: REIMBURSABLE_CATEGORY.ID,
@@ -83,8 +81,6 @@ export const ALLOCATION_MISSING_RATIO = {
   effectiveTo: "9999-12-31",
 } as const;
 
-// ─── IssuerApplicationRule: cross-field rules ─────────────────────────────────
-
 /** Rule with neither issuer nor rewards program — should be rejected */
 export const ISSUER_RULE_ORPHAN = {
   ruleType: "MAX_CONCURRENT",
@@ -101,8 +97,6 @@ export const ISSUER_RULE_ISSUER_ONLY = {
   parameterCount: 4,
   description: "Max 4 concurrent applications for issuer",
 } as const;
-
-// ─── CsvFormatConfig: cross-field rules ───────────────────────────────────────
 
 /** Config with both amount styles set — should be rejected (XOR violation) */
 export const CSV_CONFIG_XOR_BOTH = {
@@ -149,8 +143,6 @@ export const CSV_CONFIG_DUPLICATE_NAME = {
   amountSign: "NEGATIVE_IS_DEBIT",
 } as const;
 
-// ─── ScrapeMapping: composite uniqueness ──────────────────────────────────────
-
 /** First mapping — created to set up the duplicate test */
 export const SCRAPE_MAPPING_FIRST = {
   entityType: "Issuer",
@@ -164,8 +156,6 @@ export const SCRAPE_MAPPING_DUPLICATE = {
   sourceText: "Duplicate Source",
   targetId: AMEX_ISSUER.ID,
 } as const;
-
-// ─── Simple uniqueness: duplicate payloads ────────────────────────────────────
 
 export const ISSUER_DUPLICATE_NAME = {
   name: TD_ISSUER.name,
@@ -207,8 +197,6 @@ export const ADJUSTMENT_TYPE_DUPLICATE_NAME = {
 export const REDEMPTION_TYPE_DUPLICATE_NAME = {
   name: FLIGHT_REDEMPTION.name,
 } as const;
-
-// ─── Mandatory fields: missing-field payloads ─────────────────────────────────
 
 export const ISSUER_MISSING_NAME = {
   shortName: "X",

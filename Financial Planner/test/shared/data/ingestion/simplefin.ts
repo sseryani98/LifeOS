@@ -8,8 +8,6 @@ import type {
 } from "../../../../srv/modules/ingestion/types.js";
 import { AMEX_COBALT_INSTANCE } from "../cards.js";
 
-// ─── Identifiers ────────────────────────────────────────────────────────────
-
 /** A Provider Connection under test — shared by the unit mocks and the integration DB seed. */
 export const CONNECTION_ID = "cccccccc-0000-0000-0000-000000000001";
 
@@ -38,8 +36,6 @@ export const ALERT_SEVERITY_ID = "a1b2c3d4-0004-4000-8000-000000000003";
  */
 export const ACCESS_URL_PLAINTEXT = "https://user:pass@example.simplefin.org";
 
-// ─── SimpleFIN transaction ids ──────────────────────────────────────────────
-
 export const TX_AMAZON = "sf-tx-1";
 export const TX_NETFLIX = "sf-tx-2";
 export const TX_NEW = "sf-tx-3";
@@ -49,7 +45,6 @@ export const TX_POSTED = "sf-tx-posted";
 export const TX_PENDING = "sf-tx-pending";
 export const TX_AFTER_ERROR = "sf-tx-after-error";
 
-// ─── Posted timestamps ──────────────────────────────────────────────────────
 // SimpleFIN reports timestamps as Unix *seconds*. These fixtures care only about
 // ordering, so express them in human time and keep before/after relationships clear.
 
@@ -61,8 +56,6 @@ const POSTED_DAY_3 = unixSeconds("2026-05-31T12:00:00Z");
 
 /** The day-2 charge is authorized before it settles — transacted_at precedes posted. */
 const TRANSACTED_DAY_2 = unixSeconds("2026-05-30T09:00:00Z");
-
-// ─── Connection records (as returned by the data layer) ─────────────────────
 
 /** Active, previously-synced connection. */
 export const CONNECTION_ACTIVE = {
@@ -94,8 +87,6 @@ export const CONNECTION_FRESH = {
   lastSyncStatus: "success",
 } as const;
 
-// ─── Provider Account records ───────────────────────────────────────────────
-
 /** A mapped Provider Account record (as returned by the data layer). */
 export const ACCOUNT_MAPPED = {
   ID: ACCOUNT_MAPPED_ID,
@@ -111,8 +102,6 @@ export const ACCOUNT_UNMAPPED = {
   externalAccountId: EXTERNAL_ACCOUNT_UNKNOWN,
   isActive: true,
 } as const;
-
-// ─── Integration DB seed rows ───────────────────────────────────────────────
 
 /** Static columns of the seeded connection; the harness adds the encrypted access URL at runtime. */
 export const CONNECTION_SEED = {
@@ -131,8 +120,6 @@ export const ACCOUNT_MAPPED_SEED = {
   externalAccountId: EXTERNAL_ACCOUNT_MAPPED,
   isActive: true,
 } as const;
-
-// ─── SimpleFIN API responses ────────────────────────────────────────────────
 
 /** Two posted transactions on a known, mapped account. */
 export const RESPONSE_TWO_NEW: SimpleFINResponse = {
@@ -270,8 +257,6 @@ export const RESPONSE_BANK_ERROR: SimpleFINResponse = {
 
 /** Empty pull — no accounts, no transactions (backfill / claim tests). */
 export const EMPTY_RESPONSE: SimpleFINResponse = { errors: [], accounts: [] };
-
-// ─── Claim requests ─────────────────────────────────────────────────────────
 
 /** Base64 of a claim URL — Buffer.from(token,'base64') → the claim URL. */
 export const SETUP_TOKEN = Buffer.from(

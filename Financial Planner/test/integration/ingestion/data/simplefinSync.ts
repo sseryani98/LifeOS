@@ -13,8 +13,6 @@ import {
 /** SimpleFIN stamps are Unix seconds; fixtures are written in human time. */
 const unixSeconds = (iso: string): number => Math.floor(Date.parse(iso) / 1000);
 
-// ─── Stale check ────────────────────────────────────────────────────────────
-
 /** Fixed clock for the stale check: 10 days after the stale seeds last synced. */
 export const STALE_CHECK_NOW = Date.parse("2026-06-29T12:00:00.000Z");
 
@@ -36,16 +34,12 @@ export const CONNECTION_INACTIVE_SEED = {
   isActive: false,
 } as const;
 
-// ─── Transaction rows (common columns) ──────────────────────────────────────
-
 /** Columns every seeded SimpleFIN transaction shares. */
 const SIMPLEFIN_ROW = {
   source: "simplefin",
   categorizationStatus: "uncategorized",
   isExcluded: false,
 } as const;
-
-// ─── Re-sync dedup ──────────────────────────────────────────────────────────
 
 export const TX_RESYNC_EXISTING = "sf-tx-resync-existing";
 export const TX_RESYNC_NEW = "sf-tx-resync-new";
@@ -86,8 +80,6 @@ export const RESPONSE_RESYNC: SimpleFINResponse = {
     },
   ],
 };
-
-// ─── Backfill ───────────────────────────────────────────────────────────────
 
 export const TX_BACKFILL = "sf-tx-backfill";
 
@@ -140,8 +132,6 @@ export const MAP_TO_COBALT_PAYLOAD = {
   cardInstance_ID: AMEX_COBALT_INSTANCE.ID,
 } as const;
 
-// ─── Natural-key lookup ─────────────────────────────────────────────────────
-
 export const TX_NATURAL_KEY = "sf-tx-natural-key";
 
 /** A stored row the natural-key lookup is aimed at. */
@@ -155,8 +145,6 @@ export const NATURAL_KEY_TRANSACTION = {
   postedAt: "2026-05-21",
   rawDescription: "NATURAL KEY CHARGE",
 } as const;
-
-// ─── Facade (OData) sync ────────────────────────────────────────────────────
 
 /** What the facade-registered engine's stub returns: two charges no other spec uses. */
 export const RESPONSE_FACADE_SYNC: SimpleFINResponse = {
@@ -182,8 +170,6 @@ export const RESPONSE_FACADE_SYNC: SimpleFINResponse = {
     },
   ],
 };
-
-// ─── Remap ──────────────────────────────────────────────────────────────────
 
 export const TX_REMAP = "sf-tx-remap";
 

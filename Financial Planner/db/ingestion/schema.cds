@@ -1,13 +1,7 @@
 namespace com.financialplanner;
 
-using {
-    cuid,
-    managed
-} from '@sap/cds/common';
-using {
-    com.financialplanner.ProviderType,
-    com.financialplanner.LastSyncStatus
-} from '../enums';
+using {cuid, managed} from '@sap/cds/common';
+using {com.financialplanner.ProviderType, com.financialplanner.LastSyncStatus} from '../common/enums';
 using {com.financialplanner.CardInstance} from '../cards/schema';
 
 // SimpleFIN Bridge connection health and account mapping.

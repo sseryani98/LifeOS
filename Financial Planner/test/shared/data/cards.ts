@@ -24,7 +24,6 @@ import {
   TRAVEL_CREDIT_PERK,
 } from "./reference.js";
 
-// ─── Market Cards ──────────────────────────────────────────────────────────────
 export const TD_AEROPLAN_VISA_INFINITE = {
   ID: "a1b2c3d4-0020-4000-8000-000000000001",
   name: "TD Aeroplan Visa Infinite",
@@ -95,7 +94,6 @@ export const DISCONTINUED_CARD = {
   status: "discontinued",
 } as const;
 
-// ─── Offers ────────────────────────────────────────────────────────────────────
 export const TD_AEROPLAN_JAN2026_OFFER = {
   ID: "a1b2c3d4-0021-4000-8000-000000000001",
   marketCard_ID: TD_AEROPLAN_VISA_INFINITE.ID,
@@ -167,7 +165,6 @@ export const CIBC_AEROPLAN_OFFER = {
   notes: null,
 } as const;
 
-// ─── Offer Tranches ────────────────────────────────────────────────────────────
 export const TD_AEROPLAN_TRANCHE_1 = {
   ID: "a1b2c3d4-0022-4000-8000-000000000001",
   offer_ID: TD_AEROPLAN_JAN2026_OFFER.ID,
@@ -235,7 +232,6 @@ export const CIBC_AEROPLAN_TRANCHE_1 = {
   unlockMonth: null,
 } as const;
 
-// ─── Card Instances ────────────────────────────────────────────────────────────
 export const TD_AEROPLAN_INSTANCE_ACTIVE = {
   ID: "a1b2c3d4-0023-4000-8000-000000000001",
   marketCard_ID: TD_AEROPLAN_VISA_INFINITE.ID,
@@ -332,7 +328,6 @@ export const TO_CANCEL_CARD_INSTANCE = {
   notes: null,
 } as const;
 
-// ─── Earning Multipliers ───────────────────────────────────────────────────────
 export const AMEX_COBALT_GROCERIES_5X = {
   ID: "a1b2c3d4-0024-4000-8000-000000000001",
   marketCard_ID: AMEX_COBALT.ID,
@@ -415,7 +410,6 @@ export const AMEX_COBALT_GROCERIES_OLD = {
   effectiveTo: "2024-12-31",
 } as const;
 
-// ─── Soft Perk Definitions ─────────────────────────────────────────────────────
 export const AMEX_PLATINUM_LOUNGE_PASS = {
   ID: "a1b2c3d4-0025-4000-8000-000000000001",
   marketCard_ID: AMEX_PLATINUM.ID,
@@ -459,7 +453,6 @@ export const AMEX_PLATINUM_LOUNGE_INSTANCE_OVERRIDE = {
   notes: "Special promo for this card year",
 } as const;
 
-// ─── Card Perks ────────────────────────────────────────────────────────────────
 export const AMEX_PLAT_LOUNGE_PERK_YEAR1 = {
   ID: "a1b2c3d4-0026-4000-8000-000000000001",
   cardInstance_ID: AMEX_PLATINUM_INSTANCE.ID,

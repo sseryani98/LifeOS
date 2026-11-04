@@ -1144,6 +1144,10 @@ Co-Authored-By: Claude Code <noreply@anthropic.com>`
 **Goal:** Transactions categorized, splits supported, historical data backfilled
 **Stories:** ENH-001, ENH-009, FRM-001, CNV-001
 
+> **Historical.** Prompts 1–2 were executed as written and predate the as-built design. Where they
+> differ (fuzzy matching, `needs_review`, 100% split sums, file names, `app/transaction-list/`),
+> [SPEC-02](specs/SPEC-02-TRANSACTION-PROCESSING.md) and the code are the source of truth.
+
 #### Prompt 1: ENH-001 — Categorization Engine
 
 ```

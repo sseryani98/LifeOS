@@ -106,7 +106,7 @@ For each card:
      a. ENH-001 rules (vendor matching → Purchase Type + Earning Category)
      b. Claude reasoning for unmatched (propose categories)
      c. Sandro review for remaining ambiguous
-  9. Create Vendor records as needed (ENH-009 normalization)
+  9. Create Vendor records as needed (ENH-001 normalization)
   10. Bulk insert Transaction records (all-or-nothing per file)
   11. Create Import Log entry
   12. Reconcile (BR-11)
@@ -159,7 +159,7 @@ Tier 2 and 3 corrections feed back into ENH-001 as learned patterns (Merchant Pa
 | BR-06 | Execution dependency: CNV-002 and CNV-003 must complete before CNV-001. Script validates pre-requisites before starting.                                                        |
 | BR-07 | Halt on parse errors. Script stops on any unparseable row, logs file name and line number, waits for investigation before continuing.                                           |
 | BR-08 | Categorization is mandatory. No transaction saved without Purchase Type + Earning Category. Three-tier: ENH-001 → Claude → Sandro (D-110).                                      |
-| BR-09 | New vendors auto-created following ENH-009 normalization rules. Existing vendors matched, no duplicates.                                                                        |
+| BR-09 | New vendors auto-created following ENH-001 normalization rules. Existing vendors matched, no duplicates.                                                                        |
 | BR-10 | One Import Log entry per file: source filename, card, imported count, skipped count, total amount, date range.                                                                  |
 | BR-11 | Reconciliation checks run after each card's batch: row counts, date range, field completeness, amount total.                                                                    |
 | BR-12 | Sandro downloads full-history CSVs from all 4 issuers before SimpleFIN goes live. Pre-requisite action item.                                                                    |
@@ -482,7 +482,7 @@ None. All questions resolved during workshop.
 
 ### FUT-15: Vendor auto-creation with normalization
 
-**Covers:** CNV-001, ENH-009
+**Covers:** CNV-001, ENH-001
 
 **Preconditions:**
 

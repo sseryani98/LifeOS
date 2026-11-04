@@ -163,11 +163,10 @@ Financial Planner/
 │   ├── app.log                              ← All entries at configured level
 │   └── error.log                            ← ERROR entries only
 ├── db/
-│   ├── enums.cds                            ← All enum type definitions
-│   ├── common/                              ← Shared aspects
-│   ├── reference/schema.cds                 ← 16 reference data entities
+│   ├── common/                              ← Shared aspects + enums.cds (all enum types)
+│   ├── reference/schema.cds                 ← 24 reference data entities
 │   ├── cards/schema.cds                     ← MarketCard, Offer, OfferTranche, CardInstance, EarningMultiplier, SoftPerkDefinition, CardPerk
-│   ├── transactions/schema.cds              ← Transaction, TransactionSplit, Vendor, MerchantPattern, VendorCategoryStats
+│   ├── transactions/schema.cds              ← Transaction, TransactionSplit, MerchantPattern, VendorCategoryStats (view)
 │   ├── points/schema.cds                    ← PointsAdjustment, Redemption
 │   ├── budget/schema.cds                    ← BudgetAllocation, RecurrentExpense, Goal, IncomeEntry
 │   ├── financial/schema.cds                 ← FinancialAccount, FinancialSnapshot
@@ -194,13 +193,16 @@ Financial Planner/
 │   │   │   ├── Logger.ts                    ← Structured logging with file output
 │   │   │   └── MessagingUtility.ts          ← i18n message helper for req.error/reject
 │   │   ├── transaction/
-│   │   │   ├── TransactionFacade.ts
-│   │   │   ├── TransactionService.ts
-│   │   │   └── TransactionValidator.ts
+│   │   │   ├── transactionFacade.ts
+│   │   │   ├── transactionService.ts
+│   │   │   ├── transactionDataService.ts
+│   │   │   ├── transactionValidator.ts
+│   │   │   └── transactionMapper.ts
 │   │   ├── categorization/                  ← ENH-001
-│   │   │   ├── CategorizationFacade.ts
-│   │   │   ├── CategorizationService.ts
-│   │   │   └── CategorizationValidator.ts
+│   │   │   ├── categorizationService.ts
+│   │   │   ├── categorizationContextService.ts
+│   │   │   ├── categorizationDataService.ts
+│   │   │   └── categorizationMapper.ts
 │   │   ├── churning/                        ← ENH-003, ENH-005, ENH-006
 │   │   │   ├── ChurningFacade.ts
 │   │   │   ├── ChurningService.ts

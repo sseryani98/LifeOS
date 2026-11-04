@@ -206,8 +206,8 @@ Co-Authored-By: Claude Code <noreply@anthropic.com>
 ```
 feat(categorization): add merchant pattern matching engine
 
-Implements ENH-001 two-pass categorization — exact match then fuzzy.
-VendorCategoryStats updated on each correction.
+Implements ENH-001 three-pass categorization — exact, starts_with, contains.
+User corrections create MerchantPatterns; VendorCategoryStats is a view.
 
 Co-Authored-By: Claude Code <noreply@anthropic.com>
 ```
@@ -231,7 +231,7 @@ Co-Authored-By: Claude Code <noreply@anthropic.com>
 ```
 
 ```
-docs: complete SPEC-03 categorization engine workshop
+docs: complete SPEC-02 categorization engine workshop
 
 Covers ENH-001, ENH-009. Resolves OI-01 (categorization taxonomy).
 ```

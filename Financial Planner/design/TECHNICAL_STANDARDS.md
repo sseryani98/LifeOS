@@ -68,7 +68,7 @@ One `schema.cds` per domain folder under `db/`:
 | Folder                       | Entities                                                                                       | Count |
 | ---------------------------- | ---------------------------------------------------------------------------------------------- | ----- |
 | `db/common/`                 | Enum imports, shared aspects                                                                   | —     |
-| `db/reference/schema.cds`    | All 16 reference data entities                                                                 | 16    |
+| `db/reference/schema.cds`    | All 24 reference data entities                                                                 | 24    |
 | `db/cards/schema.cds`        | MarketCard, Offer, OfferTranche, CardInstance, EarningMultiplier, SoftPerkDefinition, CardPerk | 7     |
 | `db/transactions/schema.cds` | Transaction, TransactionSplit, Vendor, MerchantPattern, VendorCategoryStats                    | 5     |
 | `db/points/schema.cds`       | PointsAdjustment, Redemption                                                                   | 2     |
@@ -76,7 +76,7 @@ One `schema.cds` per domain folder under `db/`:
 | `db/financial/schema.cds`    | FinancialAccount, FinancialSnapshot                                                            | 2     |
 | `db/ingestion/schema.cds`    | ProviderConnection, ProviderAccount, ImportLog                                                 | 3     |
 | `db/alerts/schema.cds`       | Alert                                                                                          | 1     |
-| `db/enums.cds`               | All enum type definitions                                                                      | —     |
+| `db/common/enums.cds`        | All enum type definitions                                                                      | —     |
 
 ### 3.4 Annotation Files
 

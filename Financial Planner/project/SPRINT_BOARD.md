@@ -3,7 +3,7 @@
 ## Current Sprint: W1-S3 — Transaction Processing
 
 **Branch:** sprint/W1-S3
-**Goal:** Transactions categorized, splits supported, historical data backfilled.
+**Goal:** Transactions categorized, splits supported, historical data backfilled, weekly review surface functional.
 **Sync point:** #4 — Categorization engine trained
 
 ### Backlog
@@ -22,11 +22,11 @@ _None_
 | --- | --- | --- | --- |
 | ENH-001 | Enhancement | Categorization engine: three-pass matching pipeline (exact → starts-with → contains) returning vendor + dual taxonomy; user correction auto-creates MerchantPattern (learning). MerchantPattern entity + VendorCategoryStats CDS view. Wires FRM-003 pre-fill. | Done |
 | ENH-009 | Enhancement | Split logic: TransactionSplit with mySharePct/myShareAmount (either/or, share ≤ total, reimbursed = 0). splitTransaction / bulkCategorize / correctCategorization actions on TransactionService; bulk learning dedupes per description. 4-file transaction module + Mapper, unit + SQLite integration tests. | Done |
-| FRM-001 | Form | Transaction List: Fiori Elements List Report + Object Page — inline edit (vendor/PT/EC/notes), Split dialog, Apply Categories bulk, Re-categorize action, splits section, filters. | Done |
+| FRM-001 | Form | Transaction List: Fiori Elements List Report + Object Page — inline edit (vendor/PT/EC/notes), Split dialog, Apply Categories bulk, Re-categorize action, splits section, filters. Spec gaps carried as D-021 … D-027. | Done |
 
 ---
 
-## Previous Sprint: W1-S2 — Ingestion Pipeline (merged 9bbe826, tagged v1.2)
+## Previous Sprint: W1-S2 — Ingestion Pipeline (merged a4535fc, tagged v1.2)
 
 | Story | Type | Description | Status |
 | --- | --- | --- | --- |
@@ -38,7 +38,7 @@ _None_
 
 ---
 
-## W1-S1 — Foundation & Seed Data (merged 0a9804f, tagged v1.1)
+## W1-S1 — Foundation & Seed Data (merged 513170a, tagged v1.1; checkpoint waived)
 
 | Story | Type | Description | Status |
 | --- | --- | --- | --- |

@@ -9,7 +9,6 @@ import type {
   TransactionAmountRow,
 } from "../../../../srv/modules/transaction/types.js";
 
-// ─── Transaction ids + amounts (amount negative = charge) ─────────────────────
 export const PADEL_TXN_ID = "ca5e0001-0000-0000-0000-000000000001";
 export const RESTAURANT_TXN_ID = "ca5e0001-0000-0000-0000-000000000002";
 export const FRIEND_TXN_ID = "ca5e0001-0000-0000-0000-000000000003";
@@ -18,7 +17,6 @@ export const PADEL_ABS_AMOUNT = 110;
 export const RESTAURANT_ABS_AMOUNT = 85;
 export const FRIEND_ABS_AMOUNT = 200;
 
-// ─── Pre-computed shares (validateSplit takes the share, not the command) ─────
 /** 20% of $110 = $22.00 — the share PERCENTAGE_SPLIT resolves to. */
 export const PADEL_PCT_SHARE = 22;
 /** $42.50 flat — DOLLAR_SPLIT's own share, within the $85 total. */
@@ -40,7 +38,6 @@ export const PADEL_TRANSACTION_ROW: TransactionAmountRow = {
   amount: -110,
 };
 
-// ─── Split commands ───────────────────────────────────────────────────────────
 /** 20% of a $110 charge — expects myShareAmount $22.00, recurring. */
 export const PERCENTAGE_SPLIT: SplitCommand = {
   transactionId: PADEL_TXN_ID,
@@ -131,7 +128,6 @@ export const DRIFTING_PCT_SPLIT: SplitCommand = {
   isRecurring: false,
 };
 
-// ─── Raw action payloads (pre-mapper — untyped, as CAP delivers them) ─────────
 /** A cleared percentage field: the UI sends "", which must map to null, not 0. */
 export const EMPTY_STRING_PCT_PAYLOAD: Record<string, unknown> = {
   transactionId: PADEL_TXN_ID,
@@ -148,7 +144,6 @@ export const MINIMAL_SPLIT_PAYLOAD: Record<string, unknown> = {
 /** A bulk payload with no selection at all — CAP omits an empty `many` param. */
 export const EMPTY_BULK_PAYLOAD: Record<string, unknown> = {};
 
-// ─── Bulk categorize + correction ids ────────────────────────────────────────
 export const TXN_A_ID = "ca5e0002-0000-0000-0000-000000000001";
 export const TXN_B_ID = "ca5e0002-0000-0000-0000-000000000002";
 export const VENDOR_ID = "ca5e0003-0000-0000-0000-000000000001";

@@ -5,8 +5,6 @@
 import type { CsvFormatConfigRecord } from "../../../../srv/modules/ingestion/types.js";
 import { SCOTIA_CONFIG } from "../../../shared/data/ingestion/csv.js";
 
-// ─── Scotia — named columns, single amount (POSITIVE_IS_DEBIT), status filter ──
-
 /** The Scotia header row — the reader builds its name→index map from this. */
 export const SCOTIA_HEADER_CELLS: string[] = [
   "Filter",
@@ -120,8 +118,6 @@ export const SCOTIA_HEADER_NO_AMOUNT_ROWS: string[][] = [
 /** Empty construction rows — the header row is absent for a named config. */
 export const NO_ROWS: string[][] = [];
 
-// ─── TD — headerless (index columns), split debit/credit ─────────────────────
-
 /** A debit row — the split rule must flip 13.50 to -13.50. */
 export const TD_DEBIT_CELLS: string[] = ["09/02/2025", "AIRALO", "13.50", "", "5109.12"];
 
@@ -145,8 +141,6 @@ export const SCOTIA_NO_AMOUNT_COL_CONFIG: CsvFormatConfigRecord = {
   ...SCOTIA_CONFIG,
   amountColumn: null,
 };
-
-// ─── Amex — named columns, cardmember attribution, 11-row preamble ────────────
 
 /** The Amex header row (sits at index 11 in the file). */
 export const AMEX_HEADER_CELLS: string[] = [

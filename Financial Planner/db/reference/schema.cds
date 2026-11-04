@@ -10,7 +10,7 @@ using {
   com.financialplanner.RuleType,
   com.financialplanner.ReferenceDate,
   com.financialplanner.ScrapeMappingEntityType
-} from '../enums';
+} from '../common/enums';
 
 @cds.autoexpose
 entity RewardsCurrencyType : CodeList {

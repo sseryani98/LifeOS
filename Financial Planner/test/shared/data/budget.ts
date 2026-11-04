@@ -15,7 +15,6 @@ import {
 
 import { AMEX_COBALT_INSTANCE } from "./cards.js";
 
-// ─── Budget Allocations ────────────────────────────────────────────────────────
 export const GROCERIES_ALLOCATION_CURRENT = {
   ID: "a1b2c3d4-0030-4000-8000-000000000001",
   purchaseCategory_ID: GROCERIES_CATEGORY.ID,
@@ -49,7 +48,6 @@ export const GROCERIES_ALLOCATION_HISTORICAL = {
   effectiveTo: "2025-12-31",
 } as const;
 
-// ─── Recurrent Expenses ────────────────────────────────────────────────────────
 export const NETFLIX_EXPENSE = {
   ID: "a1b2c3d4-0031-4000-8000-000000000001",
   name: "Netflix",

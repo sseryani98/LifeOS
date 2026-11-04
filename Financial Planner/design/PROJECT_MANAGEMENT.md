@@ -13,6 +13,7 @@
 | ---------- | --------------- | --------------------------------------------------------------------------------------- |
 | 2026-02-13 | Sandro & Claude | Initial creation — sprint methodology, persona operations, sprint plan, meeting format. |
 | 2026-02-20 | Claude          | Status → Approved. Step 12 complete — all 21 specs approved.                            |
+| 2026-11-04 | Claude          | `/pm-update`: Sprint Board, Defect Log and checkpoint templates aligned to the files as kept (tables, no Review lane, 6-column log, `-checkpoint.md`). |
 
 ---
 
@@ -148,7 +149,7 @@ PM outlines the next sprint's goal and candidate stories. Flags any dependency r
 
 ### Sprint Report Template
 
-Each meeting produces a report at `project/sprints/{wave}-{sprint}-report.md`:
+Each meeting produces a checkpoint at `project/sprints/{wave}-{sprint}-checkpoint.md`:
 
 ```markdown
 # Sprint {Wave}-{Sprint} Report
@@ -205,26 +206,32 @@ Each meeting produces a report at `project/sprints/{wave}-{sprint}-report.md`:
 Kanban-style tracking of all FRICEW objects across sprints:
 
 ```markdown
-## Current Sprint: {Wave}-{Sprint}
+## Current Sprint: {Wave}-{Sprint} — {Name}
 
-**Sprint Goal:** {goal}
+**Branch:** sprint/{Wave}-{Sprint}
+**Goal:** {goal}
 
 ### Backlog
 
-- [ ] {FRICEW-ID} — {Name}
+| Story | Type | Description | Status |
+| --- | --- | --- | --- |
+| {FRICEW-ID} | {Type} | {Description} | Backlog |
 
 ### In Progress
 
-- [ ] {FRICEW-ID} — {Name} — @{persona}
-
-### Review
-
-- [ ] {FRICEW-ID} — {Name}
+| Story | Type | Description | Status |
+| --- | --- | --- | --- |
+| {FRICEW-ID} | {Type} | {Description} | In Progress |
 
 ### Done
 
-- [x] {FRICEW-ID} — {Name}
+| Story | Type | Description | Status |
+| --- | --- | --- | --- |
+| {FRICEW-ID} | {Type} | {Description} | Done |
 ```
+
+There is no Review lane: a built story stays in **In Progress** with Status `Build Done, Awaiting
+Review` (set by `/build`'s handoff) until Sandro's review moves it to Done.
 
 ### Defect Log
 
@@ -233,10 +240,13 @@ Kanban-style tracking of all FRICEW objects across sprints:
 Running log maintained by the Defect Tracker persona:
 
 ```markdown
-| #     | Severity | Summary | Found In | FRICEW  | Status | Fixed In | Root Cause |
-| ----- | -------- | ------- | -------- | ------- | ------ | -------- | ---------- |
-| D-001 | High     | ...     | W1-S2    | INT-001 | Open   | —        | —          |
+| ID    | Sprint | Severity | Description | Status | Resolution |
+| ----- | ------ | -------- | ----------- | ------ | ---------- |
+| D-001 | W1-S2  | High     | ...         | Open   | —          |
 ```
+
+The Description names the FRICEW object and where it was found; the Resolution names the fix commit
+and root cause once Closed.
 
 Severities: **Critical** (blocks sprint), **High** (must fix next sprint), **Medium** (fix within wave), **Low** (backlog).
 
@@ -269,10 +279,9 @@ project/
 ├── SPRINT_BOARD.md              ← Current sprint status (Kanban)
 ├── DEFECT_LOG.md                ← Running defect log across all sprints
 └── sprints/
-    ├── W1-S1-report.md          ← Sprint checkpoint meeting output
-    ├── W1-S2-report.md
+    ├── W1-S2-checkpoint.md      ← Sprint checkpoint meeting output
     ├── ...
-    └── W4-S1-report.md
+    └── W4-S1-checkpoint.md
 ```
 
 ---

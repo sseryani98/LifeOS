@@ -13,8 +13,6 @@ import type {
   ParsedCsvFields,
 } from "../../../../srv/modules/ingestion/types.js";
 
-// ─── Card instances ─────────────────────────────────────────────────────────
-
 /** Selected (primary) card the CSV is imported against. */
 export const CSV_CARD_ID = "a1b2c3d4-0023-4000-8000-0000000000c1";
 
@@ -33,8 +31,6 @@ export const CSV_ATTRIBUTION_CARDS: AttributionCard[] = [
   { ID: P1_SUPP_ID, cardholderName: "Person 1" },
   { ID: P2_SUPP_ID, cardholderName: "Person 2" },
 ];
-
-// ─── Format configs (corrected — match design/actual-csvs/) ─────────────────
 
 /** Scotiabank: header, single amount (positive = debit), status column. */
 export const SCOTIA_CONFIG: CsvFormatConfigRecord = {
@@ -108,8 +104,6 @@ export const AMEX_CONFIG: CsvFormatConfigRecord = {
   delimiter: ",",
 };
 
-// ─── CSV file samples ───────────────────────────────────────────────────────
-
 /** Scotia: two charges, one credit, one pending (status-filtered out). */
 export const SCOTIA_CSV = [
   "Filter,Date,Description,Sub-description,Status,Type of Transaction,Amount",
@@ -176,8 +170,6 @@ export const AMEX_FALLBACK_CSV = [
   "09 Feb. 2026,09 Feb. 2026,NO NAME CHARGE,,$30.00,,,,,,NO NAME CHARGE",
 ].join("\n");
 
-// ─── Parse requests (validator) ─────────────────────────────────────────────
-
 export const VALID_PARSE_REQUEST: CsvParseRequest = {
   cardInstance_ID: CSV_CARD_ID,
   fileName: "scotia.csv",
@@ -201,8 +193,6 @@ export const REQUEST_EMPTY_CONTENT: CsvParseRequest = {
   fileName: "scotia.csv",
   fileContent: "   ",
 };
-
-// ─── Mapper fixtures ────────────────────────────────────────────────────────
 
 /** Parsed scalar fields for a new (non-duplicate) row. */
 export const PARSED_FIELDS_NEW: ParsedCsvFields = {
@@ -234,8 +224,6 @@ export const SUGGESTION_NONE: CategorizationResult = {
   status: "uncategorized",
 };
 
-// ─── Action-request payloads (parse entry point) ────────────────────────────
-
 /** The `data` block of a valid parseCsvImport action request. */
 export const PARSE_ACTION_DATA = {
   cardInstance_ID: CSV_CARD_ID,
@@ -249,8 +237,6 @@ export const PARSE_ACTION_DATA_EMPTY = {
   fileName: "",
   fileContent: "",
 };
-
-// ─── Save requests + rows (step 3 → persist) ────────────────────────────────
 
 /** Vendor ids referenced by categorized save rows. */
 export const VENDOR_AMAZON_ID = "d1d1d1d1-0000-4000-8000-00000000000a";

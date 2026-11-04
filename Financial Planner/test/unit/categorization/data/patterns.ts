@@ -10,7 +10,6 @@ import type {
   MerchantPatternRecord,
 } from "../../../../srv/modules/categorization/types.js";
 
-// ─── Vendor ids ──────────────────────────────────────────────────────────────
 export const NETFLIX_VENDOR_ID = "beef0001-0000-0000-0000-000000000001";
 export const AMAZON_VENDOR_ID = "beef0001-0000-0000-0000-000000000002";
 export const APPLE_VENDOR_ID = "beef0001-0000-0000-0000-000000000003";
@@ -18,7 +17,6 @@ export const YOUTUBE_VENDOR_ID = "beef0001-0000-0000-0000-000000000004";
 export const ICLOUD_VENDOR_ID = "beef0001-0000-0000-0000-000000000005";
 export const UBER_EATS_VENDOR_ID = "beef0001-0000-0000-0000-000000000006";
 
-// ─── Category ids (PT = budget taxonomy, EC = churning taxonomy) ──────────────
 export const SUBSCRIPTIONS_PT = "beef0002-0000-0000-0000-000000000001";
 export const STREAMING_EC = "beef0003-0000-0000-0000-000000000001";
 export const SHOPPING_PT = "beef0002-0000-0000-0000-000000000002";
@@ -27,7 +25,6 @@ export const RECURRING_BILLS_PT = "beef0002-0000-0000-0000-000000000003";
 export const DINING_PT = "beef0002-0000-0000-0000-000000000004";
 export const DINING_EC = "beef0003-0000-0000-0000-000000000003";
 
-// ─── Merchant patterns ────────────────────────────────────────────────────────
 /** Exact, high-confidence Netflix pattern. */
 export const NETFLIX_EXACT_PATTERN: MerchantPatternRecord = {
   ID: "beefaaaa-0000-0000-0000-000000000001",
@@ -105,7 +102,6 @@ export const GENERIC_STATION_CONTAINS_PATTERN: MerchantPatternRecord = {
   amount: null,
 };
 
-// ─── Tie-break patterns (chain: confidence → pattern length → vendor count) ───
 /** High-confidence "COFFEE" contains pattern — beats the low one on confidence. */
 export const COFFEE_HIGH_PATTERN: MerchantPatternRecord = {
   ID: "beefaaaa-0000-0000-0000-000000000008",
@@ -216,7 +212,6 @@ export const UNKNOWN_MATCHTYPE_PATTERN: MerchantPatternRecord = {
   amount: null,
 };
 
-// ─── Tier-boundary patterns (a pattern must not match outside its own tier) ───
 export const UBER_RIDES_VENDOR_ID = "beef0001-0000-0000-0000-000000000014";
 export const STATLESS_VENDOR_ID = "beef0001-0000-0000-0000-000000000015";
 
@@ -253,7 +248,6 @@ export const STATLESS_VENDOR_PATTERN: MerchantPatternRecord = {
   amount: null,
 };
 
-// ─── Category stats (ranked by usage count desc) ──────────────────────────────
 export const NETFLIX_COMBOS: CategoryCombo[] = [
   { purchaseType_ID: SUBSCRIPTIONS_PT, earningCategory_ID: STREAMING_EC, usageCount: 12 },
 ];
@@ -283,7 +277,6 @@ export const VENDOR_COUNTS = new Map<string, number>([
   ["beef0001-0000-0000-0000-00000000000e", 2],
 ]);
 
-// ─── Learned-pattern params (mapper inputs) ───────────────────────────────────
 export const LEARNED_SOURCE_ID = "source-learned";
 export const MEDIUM_CONFIDENCE_ID = "confidence-medium";
 

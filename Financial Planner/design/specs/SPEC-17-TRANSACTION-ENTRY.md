@@ -48,7 +48,7 @@ Fiori Elements Object Page for creating manual transactions and editing any tran
 | --------------------------------------- | ------------------------------------------------------------------- |
 | SPEC-02 ENH-001 (Categorization Engine) | Auto-fills PT + EC on vendor selection; learning on edits           |
 | SPEC-07 ENH-002 (Card Recommendation)   | Single-category mode — advisory card ranking with point calculation |
-| SPEC-02 ENH-009 (Expense Splitting)     | Transaction Split entity exposed on form                            |
+| SPEC-02 ENH-009 (Split Transaction Logic) | Transaction Split entity exposed on form                            |
 
 ---
 

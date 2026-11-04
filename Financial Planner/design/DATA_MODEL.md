@@ -880,7 +880,7 @@ Decisions made during data model design (Step 5):
 | D-40  | Time-Bound vs Update-in-Place       | Multipliers, allocations, perks, recurrents are time-bound; CPP, rules, configs update in place |
 | D-41  | FYF on Offer                        | Moved from Card Instance to Offer (amends D-27)                                                 |
 | D-42  | Ignore Pending Transactions         | Only posted transactions ingested (resolves OI-08)                                              |
-| D-43  | Count-Based Categorization          | Vendor Category Stats + usage_count for ranked suggestions                                      |
+| D-43  | Count-Based Categorization          | Vendor Category Stats for ranked suggestions (usage_count dropped, now a CDS view — D-117)    |
 | D-44  | Alert Explicit Nullable FKs         | DB-enforced references instead of polymorphic                                                   |
 | D-45  | Config Tables vs Enums              | Config tables for user-extendable vocabulary; enums for logic-dependent values                  |
 | D-87  | System Config Table                 | TVARVC-style key/value runtime parameters maintained via FRM-009                                |

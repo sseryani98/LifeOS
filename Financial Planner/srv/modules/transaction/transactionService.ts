@@ -110,11 +110,9 @@ export class TransactionService extends BaseService {
   }
 
   /**
-   * Learns a MerchantPattern when a draft save changes a transaction's vendor.
-   * Runs as a before-SAVE hook: the activated draft carries the full row, so a
-   * real change is detected by comparing the incoming vendor against the stored
-   * one — then the row is stamped `user_corrected` and pattern learning fires. A
-   * save that leaves the vendor unchanged is left untouched.
+   * Learns a MerchantPattern when a draft save changes a transaction's vendor:
+   * the row is stamped `user_corrected` and pattern learning fires. A save that
+   * leaves the vendor unchanged is left untouched.
    * @param req The SAVE request carrying the activated row.
    * @returns Resolves once any pattern is learned.
    */
@@ -251,9 +249,7 @@ export class TransactionService extends BaseService {
   }
 
   /**
-   * Pulls the transaction id from an UPDATE request's key — CAP exposes the
-   * keyed entity as the last entry of req.params, either as an id string or a
-   * `{ ID }` object.
+   * Pulls the transaction id from an UPDATE request's key.
    * @param req The UPDATE request.
    * @returns The transaction id, or null when it cannot be resolved.
    */

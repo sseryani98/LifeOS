@@ -1,15 +1,12 @@
 namespace com.financialplanner;
 
-using {
-  cuid,
-  managed
-} from '@sap/cds/common';
+using {cuid, managed} from '@sap/cds/common';
 using {
   com.financialplanner.FeeStructure,
   com.financialplanner.MsrWindowType,
   com.financialplanner.LifecycleState,
   com.financialplanner.MarketCardStatus
-} from '../enums';
+} from '../common/enums';
 using {
   com.financialplanner.Issuer,
   com.financialplanner.RewardsProgram,

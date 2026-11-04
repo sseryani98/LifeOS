@@ -15,6 +15,7 @@
 | Date       | Author          | Description                                                       |
 | ---------- | --------------- | ----------------------------------------------------------------- |
 | 2026-02-17 | Sandro & Claude | Initial creation — workshop complete. D-114 through D-122 logged. |
+| 2026-11-04 | Claude          | Doc refresh: DM-001 amendments marked applied; ENH-007 notes retargeted SPEC-09 → SPEC-05; FRM-001 Goal field points at D-152 (SPEC-09's PT-picker amendment). No rule changed. |
 
 ---
 
@@ -32,11 +33,11 @@ Key decisions: D-05 (two taxonomies), D-08 (splits), D-32 (in-house categorizati
 | --------------------- | ------------------------------------------------------------- | ---------- | -------------------------------------- |
 | Transaction           | Categorized by ENH-001, split by ENH-009, reviewed in FRM-001 | §5.1       | —                                      |
 | Transaction Split     | "My share" record for shared expenses                         | §5.2       | —                                      |
-| Vendor                | Matched from raw merchant descriptions                        | §4.8       | Remove `usage_count`                   |
-| Merchant Pattern      | Pattern rules for vendor matching                             | §4.9       | Add `amount` (decimal, optional)       |
-| Vendor Category Stats | Suggestion ranking for PT + EC combos                         | §4.15      | Convert from stored entity to CDS view |
-| Purchase Type         | Budget category, one of two taxonomies                        | §3.3       | Remove `usage_count`                   |
-| Earning Category      | Churning category, one of two taxonomies                      | §3.4       | Remove `usage_count`                   |
+| Vendor                | Matched from raw merchant descriptions                        | §4.8       | Remove `usage_count` — applied           |
+| Merchant Pattern      | Pattern rules for vendor matching                             | §4.9       | Add `amount` (decimal, optional) — applied |
+| Vendor Category Stats | Suggestion ranking for PT + EC combos                         | §4.15      | Convert to CDS view — applied          |
+| Purchase Type         | Budget category, one of two taxonomies                        | §3.3       | Remove `usage_count` — applied         |
+| Earning Category      | Churning category, one of two taxonomies                      | §3.4       | Remove `usage_count` — applied         |
 | Card Instance         | Transaction attribution, supp card reassignment               | §4.4       | —                                      |
 | Goal                  | Optional transaction linking for spending goals               | §4.11      | —                                      |
 
@@ -267,7 +268,7 @@ A fully reimbursed transaction is a split with `my_share_pct = 0`, `my_share_amo
 | Transaction Date | No       | If available from source                                  |
 | Card             | Yes      | Dropdown — for supp card reassignment                     |
 | Source           | No       | simplefin / csv                                           |
-| Goal             | Yes      | Optional link to spending Goal                            |
+| Goal             | Yes      | Via the Purchase Type picker's Goals group (D-152)        |
 | Notes            | Yes      | Free text                                                 |
 | Excluded         | Yes      | Toggle — exclude from all computation                     |
 
@@ -702,8 +703,8 @@ Helps the user understand why the system suggested what it did and pick alternat
 | SPEC-01 (Ingestion Pipeline)    | ENH-001 called by FRM-003 (BR-20 in SPEC-01) to pre-populate vendor/category suggestions during CSV review.                                          |
 | SPEC-06 (Reference Data & Seed) | Amendment: add "Merge Into..." action on FRM-009 Vendor object page (D-122). Vendor merge reassigns transactions and consolidates Merchant Patterns. |
 | SPEC-06 (Reference Data & Seed) | Corrects D-105 reference: vendor merge is SPEC-02's domain, not "SPEC-04."                                                                           |
-| SPEC-09 (Budget Engine)         | ENH-007 must handle split transactions: use `my_share_amount` for budget, attribute remainder to Reimbursable.                                       |
-| SPEC-09 (Budget Engine)         | Vendor Category Stats is a CDS view, not a stored entity. Budget engine and dropdown ranking query it directly.                                      |
+| SPEC-05 (Budget Pipeline)       | ENH-007 must handle split transactions: use `my_share_amount` for budget, attribute remainder to Reimbursable.                                       |
+| SPEC-05 (Budget Pipeline)       | Vendor Category Stats is a CDS view, not a stored entity. Budget engine and dropdown ranking query it directly.                                      |
 | SPEC-14 (Historical Backfill)   | ENH-001 is tier 1 of three-tier backfill categorization. Patterns bootstrapped by CNV-001 corrections feed into learned patterns.                    |
 | SPEC-03 (Card Lifecycle)        | Card reassignment dropdown on FRM-001 object page — needs card lifecycle states for filtering (exclude Closed).                                      |
 

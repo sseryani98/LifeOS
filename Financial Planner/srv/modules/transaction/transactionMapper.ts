@@ -70,8 +70,8 @@ export class TransactionMapper {
   }
 
   /**
-   * Coerces an action param to a number or null — CAP omits absent optional
-   * params, and a null share must stay null (not become 0) for the either/or rule.
+   * Coerces an action param to a number or null; a null share must stay null
+   * (not become 0) for the either/or rule.
    * @param value The raw param value.
    * @returns The numeric value, or null when absent.
    */

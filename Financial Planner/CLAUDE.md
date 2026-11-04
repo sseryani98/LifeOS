@@ -35,9 +35,9 @@ Personal financial management system for a Canadian credit card churner. TypeScr
     scripts/                 The shared lint scripts + generateTestReport.ts, called by path
 db/                          CDS entity models (9 domain folders)
   common/                    Shared aspects + enums.cds (all enum types)
-  reference/schema.cds       16 reference entities
+  reference/schema.cds       24 reference entities
   cards/schema.cds           7 card entities
-  transactions/schema.cds    5 transaction entities
+  transactions/schema.cds    3 transaction entities + 1 view
   points/schema.cds          2 points entities
   budget/schema.cds          4 budget entities
   financial/schema.cds       2 financial entities
