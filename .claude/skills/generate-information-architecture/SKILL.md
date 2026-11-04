@@ -1,6 +1,6 @@
 ---
 name: generate-information-architecture
-description: Run the Information Architecture stage for a Life OS module — scout the UI-bearing specs and the shell as it actually is on disk via subagents, settle page decomposition, build technology, navigation and shell placement with Sandro one question at a time, execute or re-own any risk assigned to this stage, then hand an IA record to the ia-writer agent that writes design/INFORMATION_ARCHITECTURE.md. Use whenever Sandro wants to run the IA stage for a module, decide how its screens compose and connect, or says "run information architecture", "generate the IA", "how do these pages fit together", "where does this screen live", "Fiori Elements or freestyle"; or when Design System, Theme or a build is blocked because nobody has decided how the module's surfaces decompose into pages and how a user reaches them.
+description: Run the Information Architecture stage for a Life OS module — scout the UI-bearing specs and the shell as it actually is on disk via subagents, settle page decomposition, build technology, navigation and shell placement with Sandro one question at a time, execute or re-own any risk assigned to this stage, then hand an IA record to the doc-writer agent that writes design/INFORMATION_ARCHITECTURE.md. Use whenever Sandro wants to run the IA stage for a module, decide how its screens compose and connect, or says "run information architecture", "generate the IA", "how do these pages fit together", "where does this screen live", "Fiori Elements or freestyle"; or when Design System, Theme or a build is blocked because nobody has decided how the module's surfaces decompose into pages and how a user reaches them.
 ---
 
 The Workshops stage settles **what each surface holds**. This stage settles **how those surfaces
@@ -61,7 +61,7 @@ Know the consumers before you bend a rule:
 
 ## The document standard
 
-This section is the template. `ia-writer` reads it verbatim — do not paraphrase it into the record.
+This section is the template. `doc-writer` reads it verbatim — do not paraphrase it into the record.
 
 ### The document answers questions, not a fixed section list
 
@@ -219,9 +219,59 @@ question, not a silent fix.
 - Every falsifiable check in the vision doc that measures a journey has a task flow.
 - Every risk assigned to this stage is executed or re-owned.
 
-## Phase 6: Production (delegated to ia-writer)
+## Writer brief
 
-The interview is done. The writing happens in an isolated **ia-writer** agent so producing the
+`doc-writer` reads this brief verbatim, with the template it names, before writing a line. It holds what is specific to this stage; the generic contract — Draft status, Change History, Summary matching the body, decisions-log writes, amendments, footer, the gap protocol — is the agent's own.
+
+- **Artifact:** `design/INFORMATION_ARCHITECTURE.md` · **Document ID:** `IA-001`
+- **Template:** the **document standard** section of this skill.
+- **Also read, in the module:** `design/BUSINESS_ARCHITECTURE.md` for the object IDs and names you will cite, and any spec the record names as amended. You cite these; you do not restate them. 
+
+**Record fields** — the record must carry all of these; a missing one is a gap:
+
+- The module, its decisions-log path, and the next free `D-nn`.
+- The **surface inventory** — every UI-bearing object and what it contributes.
+- The **route decomposition** — what is a route, what is in-page disclosure.
+- The **build-technology ruling** per object, with its reason and its stated consequence.
+- **Entry points** and the **navigation map** — source, target, trigger, addressing value.
+- **Shell placement and origin**, and the wave-gating ruling.
+- The **task flows** tied to the vision doc's falsifiable checks.
+- The **risk outcomes** — executed (with what happened and the new grade) or re-owned (owner,
+  deadline, why).
+- The **spec amendments** this stage causes.
+- The **coverage-check** result.
+- Every **decision**: context, options, ruling, rationale, consequences.
+
+**Stage rules:**
+
+- Every navigation entry names **source, target, trigger and the addressing value** — and cites the
+  spec or decision that produces that value.
+
+**Lean is the standard.** The document tells a build persona how the module's surfaces decompose and connect. **Never restate a
+spec's content, never restate the data model, never specify colour, typography or controls** — those
+are Workshops, Data Model, and Design System / Theme. If a sentence does not help someone build a
+page, reach a page, or review one against the structure, cut it.
+
+**Gap triggers** — stop and return a gap when:
+
+- A UI-bearing object in the catalogue has no surface in the record.
+- A surface has no reachable path.
+- A navigation link names an addressing value the record does not tie to a spec.
+- An object has no build-technology ruling.
+
+A returned gap is a correct outcome. **A page or a link invented to fill a hole is the failure this split exists to prevent** — it becomes a build task nobody specified and a review rubric nothing satisfies.
+
+**Validation checks** — each reported pass/fail, and each procedural unless a named linter covers it:
+
+- Every UI-bearing object in the catalogue appears in the surface inventory.
+- Every surface has at least one named reachable path.
+- Every navigation link names source, target, trigger and a spec-produced addressing value.
+- Every object has a build-technology ruling with a reason.
+- Every spec amendment names the spec, the change and the decision.
+
+## Phase 6: Production (delegated to doc-writer)
+
+The interview is done. The writing happens in an isolated **doc-writer** agent so producing the
 document never competes for context with the conversation you just held.
 
 1. Assemble the **IA record** — the handoff artifact. It contains: the module, its decisions-log
@@ -231,7 +281,7 @@ document never competes for context with the conversation you just held.
    spec amendments this stage causes; the coverage-check result; and every decision taken (context,
    options, ruling, rationale, consequences). **It must be complete — the writer cannot ask Sandro
    anything.**
-2. Invoke `ia-writer` with that record. It reads this skill's **document standard** section itself,
+2. Invoke `doc-writer` with that record. It reads this skill's **document standard** section and **writer brief** itself,
    writes `design/INFORMATION_ARCHITECTURE.md` at status **Draft**, logs the decisions in the
    module's log at the path the record names, and returns its validation check.
 3. If it returns a **gap** instead of a file, the interview left a hole. Ask Sandro that one
@@ -282,5 +332,5 @@ makes every ruling citable by ID.
 - Log decisions into the module's own log, continuing that module's `D-nn` sequence.
 - Follow the module's document status and Change History conventions.
 - **This stage has no linter.** Nothing mechanically validates reachability, link targets or count
-  accuracy — Phase 5 and `ia-writer`'s check are procedural. Say that plainly rather than implying
+  accuracy — Phase 5 and `doc-writer`'s check are procedural. Say that plainly rather than implying
   enforcement that does not exist.

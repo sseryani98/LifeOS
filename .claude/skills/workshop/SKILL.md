@@ -1,6 +1,6 @@
 ---
 name: workshop
-description: Run a functional spec workshop for a Life OS module's FRICEW spec group — resolve the module, scout its design docs via subagents, interview Sandro one question at a time, extract business rules and functional unit tests, then hand a workshop record to the spec-writer agent that writes SPEC-nn. Use whenever Sandro wants to spec, design, or workshop a feature; says "let's spec out X", "workshop the goals module", "run a workshop on INT-001", "I want to design the budget pipeline"; names a spec by number, name, or FRICEW ID; or asks to amend, re-open, or extend an existing spec in a module's design/specs/. Also use when a build is blocked because a spec is missing, thin, or ambiguous and the fix is a design conversation rather than code.
+description: Run a functional spec workshop for a Life OS module's FRICEW spec group — resolve the module, scout its design docs via subagents, interview Sandro one question at a time, extract business rules and functional unit tests, then hand a workshop record to the doc-writer agent that writes SPEC-nn. Use whenever Sandro wants to spec, design, or workshop a feature; says "let's spec out X", "workshop the goals module", "run a workshop on INT-001", "I want to design the budget pipeline"; names a spec by number, name, or FRICEW ID; or asks to amend, re-open, or extend an existing spec in a module's design/specs/. Also use when a build is blocked because a spec is missing, thin, or ambiguous and the fix is a design conversation rather than code.
 ---
 
 A spec workshop is an **interview**, not a document review. Sandro holds the domain knowledge; the
@@ -130,9 +130,56 @@ Draft FUT-xxx scenarios from the rules and edge cases. Each has: Covers (FRICEW 
 Preconditions, Steps, Expected Result. Cover the happy path plus the key error and edge paths.
 Present for validation.
 
-## Phase 6: Spec Production (delegated to spec-writer)
+## Writer brief
 
-The interview is done; the writing happens in an isolated **spec-writer** agent so producing the
+`doc-writer` reads this brief verbatim, with the template it names, before writing a line. It holds what is specific to this stage; the generic contract — Draft status, Change History, Summary matching the body, decisions-log writes, amendments, footer, the gap protocol — is the agent's own.
+
+- **Artifact:** `design/specs/SPEC-{nn}-{NAME}.md` · **Document ID:** SPEC-nn, module-local sequence
+- **Template:** `Financial Planner/design/DESIGN_WORKSHOP.md` §4 (spec template), §6 (Definition of Done) and §9 (file naming) — cross-module in substance; its §3, §7, §8 and §10 are the planner's own answers and do not apply.
+
+**Record fields** — the record must carry all of these; a missing one is a gap:
+
+- The **module folder**, the path to that module's decisions log, and the next free `D-nn` in its
+  sequence.
+- The spec number — from that module's own `SPEC-nn` sequence — its name, and its FRICEW IDs.
+- Confirmed **scope** — the FRICEW objects in.
+- **Business rules** (BR-xx) as Sandro approved them.
+- **Functional unit tests** (FUT-xxx): Covers, Preconditions, Steps, Expected Result.
+- **Decisions** taken in the workshop (context, options, ruling, rationale).
+- **Data-model amendments** confirmed (new attributes, relationship changes) — DM-001 on the planner.
+- **UX/QoL choices** Sandro picked.
+- **Cross-spec notes** raised but not designed here.
+
+**Stage rules:**
+
+- Write `{module}/design/specs/SPEC-{nn}-{NAME}.md` per §9 naming, following the §4 template
+  exactly — every section in order, nothing extra. Create `design/specs/` if the module has none;
+  the number is the record's, from that module's sequence, and a module's first spec is `01`.
+- Log each new decision in **the decisions log at the path the record names** — Decision ID,
+  Context, Options, Decision, Rationale. The path differs by module and that is deliberate:
+  Financial Planner's is `design/user-profile/DECISIONS_LOG.md`, Project Tracker's is
+  `design/DECISIONS_LOG.md` (D-17 — `user-profile/` was a planner naming accident). Each module
+  runs its **own** `D-nn` sequence; never continue another module's numbering, and never write a
+  decision into a module other than the one you were given.
+- Record any OI-xx the spec resolves in its Open Items section.
+
+**Lean is the standard.** Follow the template — no extra sections, no filler, no restating Business Architecture, Data Model,
+or the decisions log. Tables over paragraphs. Business rules as terse, testable, numbered
+assertions. FUTs as concrete steps. If a sentence does not help a build persona implement or a
+review persona validate, cut it. The bar: **if a build persona would need a clarifying question,
+the spec is not done.**
+
+**Gap triggers** — stop and return a gap when:
+
+You are not allowed to invent an answer to a question the workshop should have settled. If a BR is untestable, a FUT references no FRICEW object, a placeholder survived, the record names no module or no decisions-log path, or the record is silent on something the template requires, **stop and return a `gap`** — name the section, the missing input, and the question it raises. That routes back to the workshop host to ask Sandro. A returned gap is a correct outcome; a plausible guess baked into a spec is the failure this split exists to prevent.
+
+**Validation checks** — each reported pass/fail, and each procedural unless a named linter covers it:
+
+- (the Definition of Done the template names)
+
+## Phase 6: Spec Production (delegated to doc-writer)
+
+The interview is done; the writing happens in an isolated **doc-writer** agent so producing the
 document never competes for context with the conversation you just held.
 
 1. **Before handing off**, offer UX/QoL suggestions: "I have some UX suggestions before I write this
@@ -145,11 +192,11 @@ document never competes for context with the conversation you just held.
    (Covers, Preconditions, Steps, Expected Result); the decisions taken (context, options, ruling,
    rationale); the confirmed data-model amendments; the UX picks; and any cross-spec notes. It must
    be complete — the writer cannot ask Sandro anything.
-4. Invoke the **spec-writer** agent with that record. It reads the §4 template / §6 DoD / §9 naming
+4. Invoke the **doc-writer** agent with that record. It reads the §4 template / §6 DoD / §9 naming
    itself, writes `{module}/design/specs/SPEC-{nn}-{NAME}.md`, logs decisions in the module's
    decisions log at the path the record names, records resolved OIs, and returns its
    Definition-of-Done check — all at status **Draft**.
-5. If spec-writer returns a **gap** instead of a file, the interview left a hole. Ask Sandro that
+5. If doc-writer returns a **gap** instead of a file, the interview left a hole. Ask Sandro that
    one question, add his answer to the record, and re-invoke. Do not fill the hole yourself.
 6. Review the returned DoD check against §6. Show Sandro the spec path and the one-line summary and
    ask for explicit approval. On approval, flip status Draft → Approved and update `MEMORY.md`.

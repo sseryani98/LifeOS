@@ -15,6 +15,7 @@ workflows). Also specifies the **Project Tracker** (PMO) module that visualizes 
 | Date       | Author          | Description                                                                 |
 | ---------- | --------------- | -------------------------------------------------------------------------- |
 | 2026-07-15 | Sandro & Claude | Initial draft. Methodology→tooling map, gap analysis, PMO module design.    |
+| 2026-11-04 | Sandro & Claude | One `doc-writer` agent replaces the per-stage writers (D-247); hooks installed per clone (HARNESS_BACKLOG H-01). |
 
 ---
 
@@ -103,8 +104,8 @@ for reuse across modules; **New** = must be authored; **Built** = authored this 
 
 | Stage    | Artifact                        | Tooling (proposed)                     | Status | Context-isolated agents |
 | -------- | ------------------------------- | -------------------------------------- | ------ | ----------------------- |
-| Ideate   | `PROBLEM_STATEMENT_AND_VISION`  | `/generate-problem-statement-vision`   | New    | interviewer, writer     |
-| Scope    | `BUSINESS_ARCHITECTURE` (FRICEW) | `/generate-business-architecture`      | New    | domain-scout, writer    |
+| Ideate   | `PROBLEM_STATEMENT_AND_VISION`  | `/generate-problem-statement-vision`   | New    | interviewer, doc-writer     |
+| Scope    | `BUSINESS_ARCHITECTURE` (FRICEW) | `/generate-business-architecture`      | New    | domain-scout, doc-writer    |
 | Research | `research/` pack                | `/gather-research` (+ `research-scout` agent) | New | research-scout (×N, parallel) |
 | Scaffold | Module skeleton                 | `/scaffold-module`                     | New    | scaffolder              |
 
@@ -125,20 +126,20 @@ Notes:
 
 | Stage             | Artifact                    | Tooling (proposed)                   | Status  | Context-isolated agents            |
 | ----------------- | --------------------------- | ------------------------------------ | ------- | ---------------------------------- |
-| Workshops         | `specs/SPEC-nn` (Lean Spec) | `/workshop` (interview) → `spec-writer` | **Built** | `/workshop` scout(s) + interview → **spec-writer** agent |
-| Information Arch.  | `INFORMATION_ARCHITECTURE`  | `/generate-information-architecture` | New     | ia-scout, writer                   |
-| Design System      | `DESIGN_SYSTEM`             | `/generate-design-system`            | New     | writer                             |
-| Theme             | `THEME`                     | `/generate-theme`                    | New     | writer                             |
-| Data Model         | `DATA_MODEL`                | `/generate-data-model`               | New     | model-scout, writer                |
-| Tech Stack         | `TECH_STACK`                | `/generate-tech-stack` (copy-forward) | New    | writer                             |
-| Test Strategy      | `TEST_STRATEGY`             | `/generate-test-strategy` (copy-forward) | New | writer                             |
-| Project Planning   | `BUILD_PLAN` + `PROJECT_MANAGEMENT` | `/generate-build-plan`       | New     | plan-scout, writer                 |
+| Workshops         | `specs/SPEC-nn` (Lean Spec) | `/workshop` (interview) → `doc-writer` | **Built** | `/workshop` scout(s) + interview → **doc-writer** agent |
+| Information Arch.  | `INFORMATION_ARCHITECTURE`  | `/generate-information-architecture` | New     | ia-scout, doc-writer                   |
+| Design System      | `DESIGN_SYSTEM`             | `/generate-design-system`            | New     | doc-writer                             |
+| Theme             | `THEME`                     | `/generate-theme`                    | New     | doc-writer                             |
+| Data Model         | `DATA_MODEL`                | `/generate-data-model`               | New     | model-scout, doc-writer                |
+| Tech Stack         | `TECH_STACK`                | `/generate-tech-stack` (copy-forward) | New    | doc-writer                             |
+| Test Strategy      | `TEST_STRATEGY`             | `/generate-test-strategy` (copy-forward) | New | doc-writer                             |
+| Project Planning   | `BUILD_PLAN` + `PROJECT_MANAGEMENT` | `/generate-build-plan`       | New     | plan-scout, doc-writer                 |
 
 Notes:
 
 - **Workshops — the one explicit refactor.** Today `/workshop` scouts, interviews, *and*
   writes the spec in one skill. Sandro's target splits it: **one agent runs the workshop**
-  (`/workshop` — scouts + interview) and **a separate `spec-writer` agent writes the Lean
+  (`/workshop` — scouts + interview) and **a separate writer agent — `spec-writer`, since 2026-11-04 the shared `doc-writer` (D-247) — writes the Lean
   Spec** from the interview transcript, for context isolation. Formalize this as a
   `design-workshop` **workflow** with two phases: `Workshop` (existing skill) → `Write Spec`
   (new `spec-writer` agent). "Lean Spec" is the evolution of the planner's SPEC-nn — same

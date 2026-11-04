@@ -1,6 +1,6 @@
 ---
 name: generate-data-model
-description: Run the Data Model stage for a Life OS module — turn the requirements its specs placed on the model into one entity contract, resolving every attribute, relationship, code list, constraint, sort key and read projection. Scout the specs' Data Model sections, the exemplar model as it actually is on disk and the module's decisions log via subagents, settle the deliverable boundary, the entity surface, the code lists, the constraints, drafts, sort keys and the read path with Sandro one question at a time, execute or re-own any risk assigned to this stage, then hand a model record to the data-model-writer agent that writes design/DATA_MODEL.md. Use whenever Sandro wants to run the Data Model stage for a module, decide its entities and attributes, or says "run data model", "generate the data model", "what entities do we need", "what does the schema look like", "is that a code list or an enum", "settle the sort key"; or when Tech Stack, Test Strategy, the Build Plan or a build is blocked because a module's specs describe attributes no document has ever consolidated.
+description: Run the Data Model stage for a Life OS module — turn the requirements its specs placed on the model into one entity contract, resolving every attribute, relationship, code list, constraint, sort key and read projection. Scout the specs' Data Model sections, the exemplar model as it actually is on disk and the module's decisions log via subagents, settle the deliverable boundary, the entity surface, the code lists, the constraints, drafts, sort keys and the read path with Sandro one question at a time, execute or re-own any risk assigned to this stage, then hand a model record to the doc-writer agent that writes design/DATA_MODEL.md. Use whenever Sandro wants to run the Data Model stage for a module, decide its entities and attributes, or says "run data model", "generate the data model", "what entities do we need", "what does the schema look like", "is that a code list or an enum", "settle the sort key"; or when Tech Stack, Test Strategy, the Build Plan or a build is blocked because a module's specs describe attributes no document has ever consolidated.
 ---
 
 The Workshops stage settles **what each object does**. Every spec's §2 states what that object needs
@@ -77,7 +77,7 @@ Know the consumers before you bend a rule:
 
 ## The document standard
 
-This section is the template. `data-model-writer` reads it verbatim — do not paraphrase it into the
+This section is the template. `doc-writer` reads it verbatim — do not paraphrase it into the
 record.
 
 ### The document answers questions, not a fixed section list
@@ -252,7 +252,75 @@ question, not a silent fix.
 - Every risk assigned to this stage is executed or re-owned, or the absence is stated.
 - Every open item this stage owns has a ruling.
 
-## Phase 6: Production (delegated to data-model-writer)
+## Writer brief
+
+`doc-writer` reads this brief verbatim, with the template it names, before writing a line. It holds what is specific to this stage; the generic contract — Draft status, Change History, Summary matching the body, decisions-log writes, amendments, footer, the gap protocol — is the agent's own.
+
+- **Artifact:** `design/DATA_MODEL.md` · **Document ID:** `DM-001`
+- **Template:** the **document standard** section of this skill.
+- **Also read, in the module:** every spec's Data Model section, for the attribute requirements you are consolidating and the IDs that required them; and the module's Design System and Information Architecture for anything they handed down by name. You cite these; you do not restate them. 
+
+**Record fields** — the record must carry all of these; a missing one is a gap:
+
+- The module, its decisions-log path, and the next free `D-nn`.
+- The **deliverable-boundary ruling** — document only, or document plus CDS files — with its reason.
+- The **entity surface**: every entity, its classification, and every attribute with type,
+  nullability, default, note, and **the spec that required it**.
+- The **relationships** — cardinality, optionality, self-references, and any hub entity.
+- The **code lists** — which exist, their seeded values, and the casing rule with its exceptions and
+  the reason each exception was not renamed.
+- The **constraints**, each classified annotation or handler, with the reason.
+- The **draft ruling**, or the inherited ruling that settled it.
+- The **sort keys** per entity and the mechanism that declares them.
+- The **read projection** — the CAP construct, its root, its navigation properties, its virtual
+  elements, and what it deliberately does not expose.
+- The **managed-versus-domain-time ruling** and the entities it affects.
+- The **computed-at-runtime** list — values that look like columns and are not.
+- The **risk outcomes** — executed (with what happened and the new grade), re-owned (owner, deadline,
+  why), or a stated "none assigned, register checked".
+- The **open items** this stage owns, each with a ruling.
+- The **amendments** this stage causes, upstream or to Approved documents.
+- The **coverage-check** result.
+- Every **decision**: context, options, ruling, rationale, consequences.
+
+**Stage rules:**
+
+- **Every attribute row names the spec that required it.** An attribute with no requiring spec is a
+  gap, not a row you may write.
+- **A stated "no column" belongs under its entity.** Where a value is computed and never persisted,
+  or an attribute deliberately does not exist, say so where a reader looks for it.
+- **Every code-list value carries its casing and the thing that froze it.** Never normalise a value
+  an Approved spec's FUT or seed already asserts.
+
+**Lean is the standard.** The document gives a build persona the entity contract to implement and a migration the columns to
+load. **Never restate a spec's business rules, never restate the routes, never restate the semantic
+role map, never write the CDS file itself unless the record's deliverable-boundary ruling says this
+stage ships one** — those are Workshops, Information Architecture, the Design System and the Build.
+If a sentence does not help someone declare an entity, load a row, or bind a field, cut it.
+
+**Gap triggers** — stop and return a gap when:
+
+- An entity in a spec's data section has no section here.
+- An attribute has no type, no nullability, or no requiring spec.
+- Two specs require contradictory things of one attribute and the record does not settle it.
+- A code-list value has no source that froze its casing.
+- A constraint is not classified annotation or handler.
+- An entity has no sort key, or the declaring mechanism is unnamed.
+- A UI read path is named with no CAP construct behind it.
+
+A returned gap is a correct outcome. **An entity, attribute or type invented to fill a hole is the failure this split exists to prevent** — it becomes a column a build persona creates and a migration loads that nobody ever specified.
+
+**Validation checks** — each reported pass/fail, and each procedural unless a named linter covers it:
+
+- Every entity named in any spec's data section has a section here.
+- Every attribute required by any spec appears on its entity, with the requiring spec cited.
+- Every spec that requires nothing is recorded as requiring nothing.
+- Every code-list value names what froze its casing.
+- Every constraint is classified annotation or handler, with a reason.
+- Every entity has a sort key and a named declaring mechanism.
+- No entity, attribute or type appears that no spec required.
+
+## Phase 6: Production (delegated to doc-writer)
 
 **The approval gate comes first in this list because it has been skipped three stages running.** Read
 it before you read the rest.
@@ -269,7 +337,7 @@ it before you read the rest.
    list; the risk outcomes; the open items resolved; the amendments this stage causes; the
    coverage-check result; and every decision taken (context, options, ruling, rationale,
    consequences). **It must be complete — the writer cannot ask Sandro anything.**
-2. Invoke `data-model-writer` with that record. It reads this skill's **document standard** section
+2. Invoke `doc-writer` with that record. It reads this skill's **document standard** section
    itself, writes `design/DATA_MODEL.md` at status **Draft**, logs the decisions in the module's log
    at the path the record names, and returns its validation check.
 3. If it returns a **gap** instead of a file, the interview left a hole. Ask Sandro that one question,
@@ -317,5 +385,5 @@ decisions table that makes every ruling citable by ID.
 - Log decisions into the module's own log, continuing that module's `D-nn` sequence.
 - Follow the module's document status and Change History conventions.
 - **This stage has no linter.** Nothing mechanically validates an entity list, an attribute type or a
-  sort key — Phase 5 and `data-model-writer`'s check are procedural. Say that plainly rather than
+  sort key — Phase 5 and `doc-writer`'s check are procedural. Say that plainly rather than
   implying enforcement that does not exist.

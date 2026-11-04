@@ -1,6 +1,6 @@
 ---
 name: generate-tech-stack
-description: Run the Tech Stack stage for a Life OS module — settle the runtime, the serving topology and the configuration every prior stage deferred, measured against the toolchain actually installed rather than quoted from another module's document. Scout the design docs' deferrals, the installed runtime on disk, the exemplar stack as its config files actually are, and the module's decisions log via subagents, settle versions and pins, process topology, the CDS service split, libraries, the TypeScript-impl loader, the database binding and where its credential lives, runtime feature flags, profiles and run modes, the origin, the folder structure, the frontend toolchain and the local run story with Sandro one question at a time, execute or re-own any risk assigned to this stage, then hand a stack record to the tech-stack-writer agent that writes design/TECH_STACK.md. Use whenever Sandro wants to run the Tech Stack stage for a module, decide what it runs on or how it is served, or says "run tech stack", "generate the tech stack", "what versions are we on", "where does the password live", "how does the TypeScript service load", "one origin or two", "what starts the server"; or when Test Strategy, the Build Plan or a build is blocked because nothing specifies the processes, the profiles, the pins or the configuration a module runs under.
+description: Run the Tech Stack stage for a Life OS module — settle the runtime, the serving topology and the configuration every prior stage deferred, measured against the toolchain actually installed rather than quoted from another module's document. Scout the design docs' deferrals, the installed runtime on disk, the exemplar stack as its config files actually are, and the module's decisions log via subagents, settle versions and pins, process topology, the CDS service split, libraries, the TypeScript-impl loader, the database binding and where its credential lives, runtime feature flags, profiles and run modes, the origin, the folder structure, the frontend toolchain and the local run story with Sandro one question at a time, execute or re-own any risk assigned to this stage, then hand a stack record to the doc-writer agent that writes design/TECH_STACK.md. Use whenever Sandro wants to run the Tech Stack stage for a module, decide what it runs on or how it is served, or says "run tech stack", "generate the tech stack", "what versions are we on", "where does the password live", "how does the TypeScript service load", "one origin or two", "what starts the server"; or when Test Strategy, the Build Plan or a build is blocked because nothing specifies the processes, the profiles, the pins or the configuration a module runs under.
 ---
 
 The Data Model stage settles **what the module stores**. This stage settles **what runs it** — the
@@ -82,7 +82,7 @@ Know the consumers before you bend a rule:
 
 ## The document standard
 
-This section is the template. `tech-stack-writer` reads it verbatim — do not paraphrase it into the
+This section is the template. `doc-writer` reads it verbatim — do not paraphrase it into the
 record.
 
 ### The document answers questions, not a fixed section list
@@ -280,7 +280,84 @@ question, not a silent fix.
 - Every risk assigned to this stage is executed or re-owned, or the absence is stated.
 - Every open item this stage owns has a ruling.
 
-## Phase 6: Production (delegated to tech-stack-writer)
+## Writer brief
+
+`doc-writer` reads this brief verbatim, with the template it names, before writing a line. It holds what is specific to this stage; the generic contract — Draft status, Change History, Summary matching the body, decisions-log writes, amendments, footer, the gap protocol — is the agent's own.
+
+- **Artifact:** `design/TECH_STACK.md` · **Document ID:** `TS-001`
+- **Template:** the **document standard** section of this skill.
+- **Also read, in the module:** its Data Model, Design System and Information Architecture for the requirements they handed **down** by name, and its `CLAUDE.md` for what it already claims about the stack. You cite these; you do not restate them. 
+
+**Record fields** — the record must carry all of these; a missing one is a gap:
+
+- The module, its decisions-log path, and the next free `D-nn`.
+- The **deliverable-boundary ruling** — document only, or document plus named config edits — with its
+  reason.
+- Every **version**, with what pins it, how it was measured, and whether declared and resolved agree.
+- The **process topology** — each process, what it serves, what it shares, and the concurrency ruling.
+- The **service split** — how many, each one's name and mount path.
+- The **libraries**, each with the object that needs it, plus the stated non-inheritances.
+- The **implementation-loading ruling** — the levers, the file that wires each, and every invocation
+  path they must cover.
+- The **database binding**, the **credential ruling** (file, mechanism, role) and the **ignore rule**
+  protecting it.
+- Every **runtime flag** the model requires, with the file that carries it.
+- The **profiles and run modes**, and what each therefore never exercises.
+- The **origin ruling** and whatever fronts it.
+- The **folder structure** and the **local run story**.
+- The **frontend toolchain** and its pins.
+- The **risk outcomes** — executed (with what happened and the new grade), re-owned (owner, deadline,
+  why), or a stated "none assigned, register checked".
+- The **open items** this stage owns, each with a ruling.
+- The **amendments** this stage causes, upstream or to Approved documents.
+- The **coverage-check** result.
+- Every **decision**: context, options, ruling, rationale, consequences.
+
+**Stage rules:**
+
+- **Every version row names what pins it.** A version with no pin is written as **unpinned**, not
+  left blank — an empty cell reads as an omission and an unpinned version is a finding.
+- **Every process row names what it serves and what it shares.** A layer diagram is not a process
+  list; if the record supplies one, it decorates the section and does not answer it.
+- **The credential ruling names a file, a mechanism and the ignore rule.** If the record gives two of
+  the three, that is a gap, not a row you may complete.
+- **Every runtime flag names the file that carries it.** A flag with no file is a gap.
+- **Every run mode names the profile it resolves and what it does not exercise.** The second half is
+  the reason the section exists.
+
+**Lean is the standard.** The document tells a build persona what to install, where to put it, what to start and what to
+configure. **Never restate a spec's business rules, never restate the entity model, never restate the
+routes or the semantic role map, and never write a config file's full contents unless the record's
+deliverable-boundary ruling says this stage ships one** — those are Workshops, the Data Model,
+Information Architecture, the Design System and the Build. If a sentence does not help someone install
+something, start something, or configure something, cut it.
+
+**Gap triggers** — stop and return a gap when:
+
+- A version has no pin and is not explicitly stated unpinned.
+- A process has no stated purpose, or two processes share a resource with no concurrency ruling.
+- A service has no name or no mount path.
+- A library has no requiring object.
+- The implementation-loading ruling names a mechanism but no file, or leaves an invocation path
+  unaddressed.
+- The credential ruling is missing its file, its mechanism, or its ignore rule.
+- A runtime flag the model requires has no file.
+- A run mode has no profile, or a profile has no statement of what it does not exercise.
+- An origin is named with no mechanism behind it.
+
+A returned gap is a correct outcome. **A version, path, library or flag invented to fill a hole is the failure this split exists to prevent** — it becomes a dependency someone installs and a file someone edits that nobody ever ruled for.
+
+**Validation checks** — each reported pass/fail, and each procedural unless a named linter covers it:
+
+- Every version names what pins it, or is stated unpinned.
+- Every process names what it serves and what it shares.
+- Every service is named and mounted.
+- Every library names the object that needs it.
+- Every runtime flag names its file.
+- Every run mode names its profile and what it does not exercise.
+- The credential ruling names a file, a mechanism and an ignore rule.
+
+## Phase 6: Production (delegated to doc-writer)
 
 **The approval gate comes first in this list because it was skipped three stages running.** Read it
 before you read the rest.
@@ -299,7 +376,7 @@ before you read the rest.
    items resolved; the amendments this stage causes; the coverage-check result; and every decision
    taken (context, options, ruling, rationale, consequences). **It must be complete — the writer
    cannot ask Sandro anything.**
-2. Invoke `tech-stack-writer` with that record. It reads this skill's **document standard** section
+2. Invoke `doc-writer` with that record. It reads this skill's **document standard** section
    itself, writes `design/TECH_STACK.md` at status **Draft**, logs the decisions in the module's log at
    the path the record names, and returns its validation check.
 3. If it returns a **gap** instead of a file, the interview left a hole. Ask Sandro that one question,
@@ -315,7 +392,7 @@ before you read the rest.
 7. Name the next stage — Test Strategy — and stop. Do not start it.
 
 **One mechanical note that has cost three stages a delegation.** Claude Code resolves its agent
-registry at session start, so a `tech-stack-writer` authored in this session is **not invocable in
+registry at session start, so a `doc-writer` authored in this session is **not invocable in
 it**. If the agent is new, write the document in the main thread against this same standard and say
 that is what happened; do not report a delegation that did not occur.
 
@@ -353,5 +430,5 @@ by ID.
 - Log decisions into the module's own log, continuing that module's `D-nn` sequence.
 - Follow the module's document status and Change History conventions.
 - **This stage has no linter.** Nothing mechanically validates a version, a pin, a process list or a
-  credential ruling — Phase 5 and `tech-stack-writer`'s check are procedural. Say that plainly rather
+  credential ruling — Phase 5 and `doc-writer`'s check are procedural. Say that plainly rather
   than implying enforcement that does not exist.

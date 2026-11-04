@@ -1,6 +1,6 @@
 ---
 name: generate-business-architecture
-description: Produce a module's BUSINESS_ARCHITECTURE.md — the FRICEW catalogue that becomes its user-story backlog. Scout the upstream vision and source docs via a domain-scout subagent, settle the scope boundary with Sandro one question at a time, then hand a catalogue record to the ba-writer agent. Use whenever Sandro wants to run the Scope stage for a module, catalogue its FRICEW objects, or build its story backlog; says "generate the business architecture", "let's do the FRICEW catalogue", "scope the module", "what are the objects for Project Tracker"; or asks to amend, extend, or re-cut an existing BUSINESS_ARCHITECTURE.md — including cutting a first slice out of a large PRD.
+description: Produce a module's BUSINESS_ARCHITECTURE.md — the FRICEW catalogue that becomes its user-story backlog. Scout the upstream vision and source docs via a domain-scout subagent, settle the scope boundary with Sandro one question at a time, then hand a catalogue record to the doc-writer agent. Use whenever Sandro wants to run the Scope stage for a module, catalogue its FRICEW objects, or build its story backlog; says "generate the business architecture", "let's do the FRICEW catalogue", "scope the module", "what are the objects for Project Tracker"; or asks to amend, extend, or re-cut an existing BUSINESS_ARCHITECTURE.md — including cutting a first slice out of a large PRD.
 ---
 
 The Scope stage turns a vision into a **backlog**. Every object you catalogue here becomes a user
@@ -38,7 +38,7 @@ records. You may add, you may mark an object absorbed or dropped, you may never 
 
 ## The catalogue standard
 
-This section is the template. `ba-writer` reads it verbatim — do not paraphrase it into the record.
+This section is the template. `doc-writer` reads it verbatim — do not paraphrase it into the record.
 
 ### Document shape
 
@@ -220,9 +220,66 @@ question, not a silent fix.
 - On an amendment: no existing ID changed meaning, no ID was reused, no row was deleted.
 - IDs are contiguous within each type, zero-padded to three digits, prefix in the fixed six.
 
-## Phase 6: Production (delegated to ba-writer)
+## Writer brief
 
-The interview is done. The writing happens in an isolated **ba-writer** agent so producing a
+`doc-writer` reads this brief verbatim, with the template it names, before writing a line. It holds what is specific to this stage; the generic contract — Draft status, Change History, Summary matching the body, decisions-log writes, amendments, footer, the gap protocol — is the agent's own.
+
+- **Artifact:** `design/BUSINESS_ARCHITECTURE.md` · **Document ID:** `BA-001`
+- **Template:** the **Catalogue standard** section of this skill.
+
+**Record fields** — the record must carry all of these; a missing one is a gap:
+
+- The module, and the artifact path.
+- The confirmed **scope boundary** paragraph — what this catalogue covers and what it was cut from.
+- The **deferred table** — item, source anchor, why deferred, where it goes.
+- Every **object**: final ID, name, type, wave, description, Traces To.
+- The **wave grouping** and any dependency notes.
+- The **coverage-check** result from the interview.
+- On an amendment: the existing IDs, frozen, and what changed.
+
+**Stage rules:**
+
+- Write `design/BUSINESS_ARCHITECTURE.md` following the template exactly — sections in order,
+  nothing extra. Document ID `BA-001`, status **Draft**, opening Change History row.
+- **Summary table first, catalogue after.** Counts and ID ranges per type, plus a total. A type
+  with zero objects is a zero in the Summary and **no section at all**.
+- **§3 Scope Boundary only when scope was cut.** The boundary paragraph, then the deferred table.
+  Where the upstream vision artifact already carries an Out of Scope section, link it rather than
+  copying it, and record only what this stage cut beyond it.
+- Type sections in dependency order — Interfaces, Conversions, Enhancements, Forms, Reports,
+  Workflows — unless the record specifies otherwise and says why.
+- The Build Plan section last: waves as testable increments, per-wave contents, and the dependency
+  notes the record carries. One wave is a valid answer; do not manufacture more.
+
+**Lean is the standard.** One row per object, one to four dense sentences per description. Tables over paragraphs. **Never
+restate the data model, never specify UI layout, never explain rationale that belongs to the vision
+doc.** The carve-out sentences — what an object explicitly does *not* do — are the ones that earn
+their place; keep those and cut the rest. If a sentence does not help a workshop host scope a spec
+or a build persona locate a story, cut it.
+
+**Gap triggers** — stop and return a gap when:
+
+- An object has no ID, no wave, or an empty Traces To.
+- A description cross-references an ID that is not in the record.
+- An ID collides with, reuses, or renumbers an existing one on an amendment.
+- A prefix falls outside {FRM, INT, ENH, CNV, RPT, WFL}.
+- An item is marked deferred but is missing from the deferred table.
+
+A returned gap is a correct outcome. **An object invented to fill a hole is the failure this split exists to prevent** — it becomes a story, a spec, and a sprint of work nobody asked for.
+
+**Validation checks** — each reported pass/fail, and each procedural unless a named linter covers it:
+
+- IDs contiguous within type, zero-padded to three digits, prefixes within the fixed six.
+- No ID reused, renumbered, or deleted (amendments).
+- Every object has a name, wave, description and non-empty Traces To.
+- Every cross-referenced ID resolves within the catalogue.
+- Every deferred item appears in §3.
+- Every wave in the object table appears in the Build Plan, and vice versa.
+- Summary counts equal the actual row counts.
+
+## Phase 6: Production (delegated to doc-writer)
+
+The interview is done. The writing happens in an isolated **doc-writer** agent so producing a
 forty-row document never competes for context with the conversation you just held.
 
 1. Assemble the **catalogue record** — the handoff artifact. It contains: the module and artifact
@@ -230,7 +287,7 @@ forty-row document never competes for context with the conversation you just hel
    name, type, wave, description and Traces To; the wave grouping and dependency notes; the
    coverage-check result; and, on an amendment, the frozen existing IDs. **It must be complete —
    the writer cannot ask Sandro anything.**
-2. Invoke `ba-writer` with that record. It reads this skill's **Catalogue standard** section itself,
+2. Invoke `doc-writer` with that record. It reads this skill's **Catalogue standard** section and **writer brief** itself,
    writes `design/BUSINESS_ARCHITECTURE.md` at status **Draft**, and returns its validation check.
 3. If it returns a **gap** instead of a file, the interview left a hole. Ask Sandro that one
    question, add the answer to the record, re-invoke. Do not fill the hole yourself.
@@ -266,11 +323,11 @@ one row per object, absorbed-not-deleted, and the rule that everything traces to
 - **No object without an ID; no ID without a description that could seed a workshop.**
 - One line per object. If you are writing three paragraphs, you are doing the Workshops stage early.
 - Log decisions taken during scoping into the module's decisions log if it has one; if it does not,
-  return them in the record so `ba-writer` can seat them somewhere durable.
+  return them in the record so `doc-writer` can seat them somewhere durable.
 - Follow the module's document status and Change History conventions.
 - **This stage has no linter.** `/pm-update` check 3 validates the board against the catalogue, but
   nothing validates the catalogue's own ID sequence, prefix enum, or trace completeness — Phase 5
-  and `ba-writer`'s check are procedural, not mechanical. Say that plainly rather than implying
+  and `doc-writer`'s check are procedural, not mechanical. Say that plainly rather than implying
   enforcement that does not exist; a shared `lint:fricew-catalogue` in
   `Standards (Technical + Linting)/scripts/` is the obvious follow-up once a second module has
   proved the rules.

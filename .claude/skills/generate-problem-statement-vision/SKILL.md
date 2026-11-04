@@ -1,6 +1,6 @@
 ---
 name: generate-problem-statement-vision
-description: Run the Ideate stage for a Life OS module — scout whatever prior material already exists via subagents, map it against the Problem Statement & Vision template, interview Sandro one question at a time on the gaps only, settle scope and the in/out boundary, then hand an ideate record to the vision-writer agent that writes design/PROBLEM_STATEMENT_AND_VISION.md. Use whenever Sandro wants to start a new module, kick off the Plan phase, or says "let's ideate", "start the Project Tracker module", "write the problem statement", "run Ideate for X", "we need a vision doc"; or when a downstream stage (Scope, Business Architecture, a workshop) is blocked because the module has no problem statement to trace back to.
+description: Run the Ideate stage for a Life OS module — scout whatever prior material already exists via subagents, map it against the Problem Statement & Vision template, interview Sandro one question at a time on the gaps only, settle scope and the in/out boundary, then hand an ideate record to the doc-writer agent that writes design/PROBLEM_STATEMENT_AND_VISION.md. Use whenever Sandro wants to start a new module, kick off the Plan phase, or says "let's ideate", "start the Project Tracker module", "write the problem statement", "run Ideate for X", "we need a vision doc"; or when a downstream stage (Scope, Business Architecture, a workshop) is blocked because the module has no problem statement to trace back to.
 ---
 
 Ideate is **stage one of the Plan phase** and the first artifact a module ever gets. Everything
@@ -133,9 +133,73 @@ The highest-value output of this stage and the hardest, so it gets its own phase
   raises and when it must be settled. A question you noticed and dropped is the failure mode here.
   Anything the repo lists as cross-module undecided that this module now forces belongs on this list.
 
-## Phase 6: Production (delegated to vision-writer)
+## Writer brief
 
-The interview is done; the writing happens in an isolated **vision-writer** agent so producing the
+`doc-writer` reads this brief verbatim, with the template it names, before writing a line. It holds what is specific to this stage; the generic contract — Draft status, Change History, Summary matching the body, decisions-log writes, amendments, footer, the gap protocol — is the agent's own.
+
+- **Artifact:** `design/PROBLEM_STATEMENT_AND_VISION.md` · **Document ID:** per the sibling module's convention
+- **Template:** the ten-section template this skill describes, with conventions matched from the sibling module's `design/PROBLEM_STATEMENT_AND_VISION.md` named in the record (document ID scheme, version, date, status, Change History shape, closing traceability line — conventions only, never content).
+
+**Record fields** — the record must carry all of these; a missing one is a gap:
+
+- The resolved module folder and name, and the sibling module to match conventions against.
+- The **source precedence** ruling — which prior document wins where they overlap, and which are
+  superseded or unratified.
+- Confirmed answers for each of the ten sections.
+- **Ranked problems**, each with a priority and its one-line why.
+- The **in-scope** list, and — kept separate — the **deferred** list and the **not-a-goal** list.
+- Approved **decisions** (D-nn): context, options, ruling, rationale.
+- **Open items** (OI-nn), each phrased as the decision it raises.
+- Forward notes for later stages, and any domain-inventory section the host confirmed.
+
+**Stage rules:**
+
+- Write `{module}/design/PROBLEM_STATEMENT_AND_VISION.md` — the ten sections in template order:
+  `Who` · `Core Problem` · `Vision` · `The Question It Answers` · `Problems to Solve` ·
+  `What "Solved" Looks Like` · `Design Decisions` · `Scope` · `Out of Scope` · `Open Items`.
+  Include the doc header and Change History per the conventions you read. Add the confirmed
+  domain-inventory section only if the record contains one. Nothing else extra.
+  - **Out of Scope carries two labelled groups** — deferred versus not-a-goal. Never merge them.
+  - **The Question It Answers** is one question set off as a blockquote, followed by the unpacking
+     of its loaded terms.
+  - **What "Solved" Looks Like** is concrete and falsifiable — a flow, a table, or a described
+     routine. Not adjectives.
+- Seed or append the module's decisions log at the path the record names, with each D-nn as
+  ID / Context / Options / Decision / Rationale. If the module has no log, create it and start the
+  numbering the record specifies. §Design Decisions in the artifact **points at that log and lists
+  only the decisions that most shape the system** — it does not restate them.
+- Set status **Draft** and add the opening Change History row. This artifact is amended by every
+  later Plan and Design stage; it reaches Approved only when the design phase closes. You do not
+  flip it, you do not touch `MEMORY.md`, and you do not delete any prior source file. Those are the
+  host's, in the main thread.
+
+**Lean is the standard.** Template exactly — no extra sections, no filler. Tables over paragraphs. Problems as terse ranked
+statements with a priority. Every sentence earns its place by helping the Scope stage build a FRICEW
+catalogue or a workshop trace a rule back to a problem. If it does neither, cut it.
+
+**Problem-space only.** No entities, no screens, no framework choices, no wave plans. If the record
+hands you solution detail that Sandro has genuinely ruled on, render it as a decision — not as
+design. Anything else in that register is a later stage's job; leave it to the forward notes.
+
+**Gap triggers** — stop and return a gap when:
+
+You are not allowed to invent an answer to a question the interview should have settled. If a section is empty, a problem is unranked, the boundary does not distinguish deferred from not-a-goal, an `[IDEATE]` placeholder survived, or a decision has a ruling with no rationale, **stop and return a `gap`** — name the section, the missing input, and the question it raises. That routes back to the host to ask Sandro. A returned gap is a correct outcome; a plausible guess baked into the traceability root of an entire module is the failure this split exists to prevent.
+
+Two specific traps: do not invent a "Who" from a solution document, and do not manufacture non-goals from a deferral list. Both are gaps.
+
+**Validation checks** — each reported pass/fail, and each procedural unless a named linter covers it:
+
+- All ten sections present, in order, none empty.
+- No `[IDEATE]` placeholder anywhere.
+- Every problem carries a priority; the foundation problem is identified.
+- Out of Scope separates deferred from not-a-goal.
+- Every decision in the record appears in the decisions log with a rationale.
+- Every open item names the decision it raises.
+- No solution-space content outside a recorded decision.
+
+## Phase 6: Production (delegated to doc-writer)
+
+The interview is done; the writing happens in an isolated **doc-writer** agent so producing the
 document never competes for context with the conversation you just held.
 
 1. Assemble the **ideate record** — the handoff artifact. It carries: the resolved module folder and
@@ -143,10 +207,10 @@ document never competes for context with the conversation you just held.
    priorities; the in-scope list; the deferred list and the not-a-goal list, kept separate; the
    approved D-nn; the OI-nn; the doc conventions the precedent scout returned; and any forward notes
    for later stages. It must be complete — **the writer cannot ask Sandro anything.**
-2. Invoke **vision-writer** with that record. It writes
+2. Invoke **doc-writer** with that record. It writes
    `{module}/design/PROBLEM_STATEMENT_AND_VISION.md` at status **Draft**, seeds or appends the
    module's decisions log, and returns its Definition-of-Done check.
-3. If vision-writer returns a **gap** instead of a file, the interview left a hole. Ask Sandro that
+3. If doc-writer returns a **gap** instead of a file, the interview left a hole. Ask Sandro that
    one question, add his answer to the record, and re-invoke. Do not fill the hole yourself.
 4. Review the returned DoD check. Show Sandro the file path and a one-line summary and ask for
    explicit approval **to proceed to the Scope stage**. The status field stays `Draft` — this

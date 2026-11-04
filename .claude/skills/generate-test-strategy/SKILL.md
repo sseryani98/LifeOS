@@ -1,6 +1,6 @@
 ---
 name: generate-test-strategy
-description: Run the Test Strategy stage for a Life OS module — settle what a test may assert, which tier asserts it, where tests live, what runs them and what coverage means, measured against the harness actually installed rather than quoted from another module's document. Scout the design docs' deferrals, every spec's Functional Unit Test section, the exemplar's test strategy as its jest config and test tree actually are, and the module's decisions log via subagents, then execute the harness question — can this module's implementation be loaded by the runner at all — before ruling on it. Settle tooling, harness loading, the tier list, per-tier standards, the assertable surface, the test profile's blind spot, test data, file structure, coverage targets and their layer mapping, the FUT coverage contract, frontend testing, how a run is recorded and what is mechanically enforced with Sandro one question at a time, execute or re-own any risk assigned to this stage, then hand a test record to the test-strategy-writer agent that writes design/TEST_STRATEGY.md. Use whenever Sandro wants to run the Test Strategy stage for a module, decide how it is tested or what coverage means, or says "run test strategy", "generate the test strategy", "what are our coverage targets", "what tier tests this", "can cds.test load our service", "how do we test the MCP verbs", "where do test files go"; or when the Build Plan or a build is blocked because nothing specifies what a test must be.
+description: Run the Test Strategy stage for a Life OS module — settle what a test may assert, which tier asserts it, where tests live, what runs them and what coverage means, measured against the harness actually installed rather than quoted from another module's document. Scout the design docs' deferrals, every spec's Functional Unit Test section, the exemplar's test strategy as its jest config and test tree actually are, and the module's decisions log via subagents, then execute the harness question — can this module's implementation be loaded by the runner at all — before ruling on it. Settle tooling, harness loading, the tier list, per-tier standards, the assertable surface, the test profile's blind spot, test data, file structure, coverage targets and their layer mapping, the FUT coverage contract, frontend testing, how a run is recorded and what is mechanically enforced with Sandro one question at a time, execute or re-own any risk assigned to this stage, then hand a test record to the doc-writer agent that writes design/TEST_STRATEGY.md. Use whenever Sandro wants to run the Test Strategy stage for a module, decide how it is tested or what coverage means, or says "run test strategy", "generate the test strategy", "what are our coverage targets", "what tier tests this", "can cds.test load our service", "how do we test the MCP verbs", "where do test files go"; or when the Build Plan or a build is blocked because nothing specifies what a test must be.
 ---
 
 The Tech Stack stage settles **what runs the module**. This stage settles **what proves it works** —
@@ -86,7 +86,7 @@ Know the consumers before you bend a rule:
 
 ## The document standard
 
-This section is the template. `test-strategy-writer` reads it verbatim — do not paraphrase it into
+This section is the template. `doc-writer` reads it verbatim — do not paraphrase it into
 the record.
 
 ### The document answers questions, not a fixed section list
@@ -290,7 +290,88 @@ question, not a silent fix.
 - Every risk assigned to this stage is executed or re-owned, or the absence is stated.
 - Every open item this stage owns has a ruling.
 
-## Phase 6: Production (delegated to test-strategy-writer)
+## Writer brief
+
+`doc-writer` reads this brief verbatim, with the template it names, before writing a line. It holds what is specific to this stage; the generic contract — Draft status, Change History, Summary matching the body, decisions-log writes, amendments, footer, the gap protocol — is the agent's own.
+
+- **Artifact:** `design/TEST_STRATEGY.md` · **Document ID:** the module's own document ID convention
+- **Template:** the **document standard** section of this skill.
+- **Also read, in the module:** its Tech Stack for the profiles and what each run mode does not exercise, its Data Model for which constraints are annotations and which are handlers, and its `CLAUDE.md` for what it already claims about tests and scripts. You cite these; you do not restate them. 
+
+**Record fields** — the record must carry all of these; a missing one is a gap:
+
+- The module, its decisions-log path, and the next free `D-nn`.
+- The **deliverable-boundary ruling** — document only, or document plus named script edits — with its
+  reason.
+- The **harness measurement**: what was run, what the success looked like, and **what the failure mode
+  looked like** — in particular whether a missing lever fails loudly or passes silently.
+- The **runner** and every configuration setting, each with the file that carries it.
+- The **tier list** — each tier, what it touches, and what it may not do.
+- The **per-tier standards**, including the setup pattern for any tier that boots a server.
+- The **assertable surface** — every constraint classified contract-or-logic, with the mechanism.
+- The **test profile's blind spot** — what it cannot assert, and what covers those constraints instead.
+- The **test data rules** and the **file structure**, each with the linter that enforces it or a
+  statement that none does.
+- Every **coverage target** with the layer and the real folder it maps to, and every exclusion.
+- The **FUT coverage contract** — the measured counts, and how a FUT reaches a named test at a tier.
+- The **frontend ruling**.
+- The **run-recording ruling**, including whether the recording hook can record a failing run.
+- The **enforcement inventory** — live `lint:*` scripts by name, and what nothing checks.
+- The **risk outcomes** — executed (with what happened and the new grade), re-owned (owner, deadline,
+  why), or a stated "none assigned, register checked".
+- The **open items** this stage owns, each with a ruling.
+- The **amendments** this stage causes, upstream or to Approved documents.
+- The **coverage-check** result.
+- Every **decision**: context, options, ruling, rationale, consequences.
+
+**Stage rules:**
+
+- **The harness section states the failure mode, not only the fix.** If a missing lever produces a
+  passing test that asserts the framework instead of the code, that sentence is the most important
+  one in the document — write it plainly and say where the lever lives so it cannot be forgotten.
+- **Every tier names what it touches and what it may not.** A tier with no stated ceiling is a gap.
+- **Every coverage target names a layer and a folder that exists in this module's destination tree.**
+  A threshold pointing at a folder no section places is a gap, not a row you may correct.
+- **Every constraint is classified contract-or-logic.** A constraint the record leaves unclassified
+  is a gap. Never write an assertion about an annotation the record does not say exists.
+- **The blind-spot section names what covers each unassertable constraint instead.** "It cannot be
+  tested here" without a destination is half a ruling.
+- **The FUT contract states measured counts and a path.** A count you cannot trace to the record's
+    measurement is a gap.
+- **The enforcement section names live `lint:*` scripts and then names what nothing enforces.**
+    Never imply a mechanical check the record does not name.
+
+**Lean is the standard.** The document tells a test author what to write, where to put it, what it may assert and when it is
+enough. **Never restate a spec's business rules, never restate the entity model, never restate the
+routes or the semantic role map, never restate the stack's process topology, and never write a test
+file's full contents** — those are Workshops, the Data Model, Information Architecture, the Design
+System, the Tech Stack and the Build. A short illustrative snippet showing a _pattern_ is fine; a
+fixture is not. If a sentence does not help someone decide what to write or where to put it, cut it.
+
+**Gap triggers** — stop and return a gap when:
+
+- The harness measurement is missing, or gives a success without a failure mode.
+- A tier has no stated scope, or no stated ceiling.
+- A coverage target has no layer mapping, or maps to a folder no section places.
+- A constraint from the Data Model is neither classified as contract nor as logic.
+- The test profile's blind spot names an unassertable constraint with no stated alternative cover.
+- The FUT contract has no measured count, or a FUT class with no tier.
+- A test-file rule claims enforcement without a named `lint:*` script.
+- A run-recording ruling does not say whether a failing run is recorded.
+
+A returned gap is a correct outcome. **A tier, threshold, folder or lever invented to fill a hole is the failure this split exists to prevent** — it becomes a rule someone follows and a gate someone trusts that nobody ever ruled for.
+
+**Validation checks** — each reported pass/fail, and each procedural unless a named linter covers it:
+
+- The harness measurement records both the success and the failure mode.
+- Every tier names what it touches and what it may not.
+- Every coverage target names a layer and a folder placed by a section.
+- Every Data Model constraint is classified contract-or-logic.
+- Everything the test profile cannot assert names what covers it instead.
+- Every FUT count is the record's measured figure, and every FUT class has a tier.
+- Every enforcement claim names a live `lint:*` script; everything else is stated unenforced.
+
+## Phase 6: Production (delegated to doc-writer)
 
 **The approval gate comes first in this list because it was skipped three stages running.** Read it
 before you read the rest.
@@ -310,7 +391,7 @@ before you read the rest.
    amendments this stage causes; the coverage-check result; and every decision taken (context,
    options, ruling, rationale, consequences). **It must be complete — the writer cannot ask Sandro
    anything.**
-2. Invoke `test-strategy-writer` with that record. It reads this skill's **document standard** section
+2. Invoke `doc-writer` with that record. It reads this skill's **document standard** section
    itself, writes `design/TEST_STRATEGY.md` at status **Draft**, logs the decisions in the module's log
    at the path the record names, and returns its validation check.
 3. If it returns a **gap** instead of a file, the interview left a hole. Ask Sandro that one question,
@@ -330,7 +411,7 @@ before you read the rest.
 7. Name the next stage — the Build Plan — and stop. Do not start it.
 
 **One mechanical note that has cost five stages a delegation.** Claude Code resolves its agent
-registry at session start, so a `test-strategy-writer` authored in this session is **not invocable in
+registry at session start, so a `doc-writer` authored in this session is **not invocable in
 it**. If the agent is new, write the document in the main thread against this same standard and say
 that is what happened; do not report a delegation that did not occur.
 

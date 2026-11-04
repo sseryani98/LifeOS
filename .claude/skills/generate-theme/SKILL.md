@@ -1,6 +1,6 @@
 ---
 name: generate-theme
-description: Run the Theme stage for a Life OS module — resolve the semantic roles its Design System declared into concrete visual values, measured against the pinned UI5 runtime rather than quoted from another module's document. Scout the module's design system, the exemplar theme and the CSS actually on disk via subagents, settle theme ownership, palette, token resolution, border radius, component overrides, contrast and the CSS contract with Sandro one question at a time, then hand a theme record to the theme-writer agent that writes design/THEME.md. Use whenever Sandro wants to run the Theme stage for a module, decide its concrete visual contract, or says "run theme", "generate the theme", "what colour is health", "what's our brand palette", "does this module get its own accent", "check the contrast"; or when a build or /ux-test is blocked because a module has semantic roles with no values behind them.
+description: Run the Theme stage for a Life OS module — resolve the semantic roles its Design System declared into concrete visual values, measured against the pinned UI5 runtime rather than quoted from another module's document. Scout the module's design system, the exemplar theme and the CSS actually on disk via subagents, settle theme ownership, palette, token resolution, border radius, component overrides, contrast and the CSS contract with Sandro one question at a time, then hand a theme record to the doc-writer agent that writes design/THEME.md. Use whenever Sandro wants to run the Theme stage for a module, decide its concrete visual contract, or says "run theme", "generate the theme", "what colour is health", "what's our brand palette", "does this module get its own accent", "check the contrast"; or when a build or /ux-test is blocked because a module has semantic roles with no values behind them.
 ---
 
 The Design System stage settles **what each surface is built with and which semantic role every domain
@@ -74,7 +74,7 @@ Know the consumers before you bend a rule:
 
 ## The document standard
 
-This section is the template. `theme-writer` reads it verbatim — do not paraphrase it into the record.
+This section is the template. `doc-writer` reads it verbatim — do not paraphrase it into the record.
 
 ### The document answers questions, not a fixed section list
 
@@ -238,9 +238,74 @@ question, not a silent fix.
 - Every risk assigned to this stage is executed or re-owned, or the absence is stated.
 - No question in the standard is missing a section, including those answered "none".
 
-## Phase 6: Production (delegated to theme-writer)
+## Writer brief
 
-The interview is done. The writing happens in an isolated **theme-writer** agent so producing the
+`doc-writer` reads this brief verbatim, with the template it names, before writing a line. It holds what is specific to this stage; the generic contract — Draft status, Change History, Summary matching the body, decisions-log writes, amendments, footer, the gap protocol — is the agent's own.
+
+- **Artifact:** `design/THEME.md` · **Document ID:** `TH-001`
+- **Template:** the **document standard** section of this skill.
+- **Also read, in the module:** `design/DESIGN_SYSTEM.md` for the semantic roles and status renderings you are resolving and their IDs, and `design/INFORMATION_ARCHITECTURE.md` for the surfaces you will cite. You cite these; you do not restate them. 
+
+**Record fields** — the record must carry all of these; a missing one is a gap:
+
+- The module, its decisions-log path, and the next free `D-nn`.
+- The **ownership ruling** — own, inherit or scope — with its consequence and what it gives up.
+- The **palette**, or the stated inheritance of one, with its design intent.
+- The **token resolution** — every semantic role mapped to a CSS custom property, its measured value,
+  and the measurement method and runtime version.
+- The **programmatic-colour ruling** — colours applied in code rather than CSS, or "none" with its
+  reason.
+- The **border-radius rule** and its exceptions.
+- The **component overrides**, for components the module actually renders.
+- The **contrast table** — every pairing, the surface it lands on, the measured ratio, the AA verdict,
+  and any rule a failure produced.
+- The **CSS contract** — file, load mechanism as verified against the repo, layering, specificity,
+  and **who owns the file**.
+- The **shared-shell boundary** — what this module writes, what it only reads, who owns relocation.
+- The **risk outcomes** — executed (with what happened and the new grade), re-owned (owner, deadline,
+  why), or a stated "none assigned, register checked".
+- The **amendments** this stage causes, upstream or to Approved documents.
+- The **coverage-check** result.
+- Every **decision**: context, options, ruling, rationale, consequences.
+
+**Stage rules:**
+
+- **Every value carries its measurement.** Name the CSS custom property, its value, and the runtime
+  version and source the value was read from. **Never copy a value or a "default" column from
+  another module's Theme document** — the record's measurement is the only authority.
+- **Every contrast figure names its background** and its AA verdict. A ratio with no surface behind
+  it is not a finding.
+- Where the module **inherits** rather than owns, say what it inherits, from which file, at which
+  measured values, and **who owns that file**. "Inherits" alone is not an answer.
+
+**Lean is the standard.** The document gives a build persona the concrete visual contract to implement and `ux-tester` a rubric
+to measure computed styles against. **Never restate the semantic role map, never restate a spec's
+content, never restate the routes, never write the CSS file itself** — those are the Design System,
+Workshops, Information Architecture and the first UI story. If a sentence does not help someone
+implement a value, or measure one, cut it.
+
+**Gap triggers** — stop and return a gap when:
+
+- A semantic role in the Design System has no token or no value.
+- A status rendering in the Design System has no resolved appearance.
+- A value is stated in the record with no measurement behind it.
+- A contrast figure has no background surface named.
+- The CSS contract has no file, no load mechanism, or no owner.
+
+A returned gap is a correct outcome. **A colour, token or contrast figure invented to fill a hole is the failure this split exists to prevent** — it becomes a build instruction nobody specified and a review rubric that measures against fiction.
+
+**Validation checks** — each reported pass/fail, and each procedural unless a named linter covers it:
+
+- Every semantic role in the Design System has a token and a measured value.
+- Every status rendering in the Design System has a resolved appearance.
+- Every value in the document carries its measurement source and runtime version.
+- Every contrast figure names its background surface and its AA verdict.
+- The CSS contract names a file, a load mechanism, and an owner.
+- No value was carried from another module's document rather than measured.
+
+## Phase 6: Production (delegated to doc-writer)
+
+The interview is done. The writing happens in an isolated **doc-writer** agent so producing the
 document never competes for context with the conversation you just held.
 
 1. Assemble the **theme record** — the handoff artifact. It contains: the module, its decisions-log
@@ -251,7 +316,7 @@ document never competes for context with the conversation you just held.
    risk outcomes; the amendments this stage causes; the coverage-check result; and every decision
    taken (context, options, ruling, rationale, consequences). **It must be complete — the writer
    cannot ask Sandro anything.**
-2. Invoke `theme-writer` with that record. It reads this skill's **document standard** section
+2. Invoke `doc-writer` with that record. It reads this skill's **document standard** section
    itself, writes `design/THEME.md` at status **Draft**, logs the decisions in the module's log at
    the path the record names, and returns its validation check.
 3. If it returns a **gap** instead of a file, the interview left a hole. Ask Sandro that one
@@ -304,5 +369,5 @@ every ruling citable by ID.
 - Log decisions into the module's own log, continuing that module's `D-nn` sequence.
 - Follow the module's document status and Change History conventions.
 - **This stage has no linter.** Nothing mechanically validates a palette, a token resolution or a
-  contrast figure — Phase 5 and `theme-writer`'s check are procedural. Say that plainly rather than
+  contrast figure — Phase 5 and `doc-writer`'s check are procedural. Say that plainly rather than
   implying enforcement that does not exist.

@@ -1,6 +1,6 @@
 ---
 name: generate-build-plan
-description: Run the Project Planning stage for a Life OS module — turn an approved design set into the sequence that builds it. Settle what a story is, what must be true before story one, how stories group into sprints, what a boundary runs, what a story's definition of done is, what each story hands the next, what work is real but is not a story, and what must not happen inside a sprint. Scout the design docs' deferrals, the wave plan and spec grouping that already exist, the exemplar's build plan as its files actually are, and the module's decisions log via subagents, settle each fork with Sandro one question at a time, schedule or re-own every risk the register still carries, then hand a build record to the build-plan-writer agent that writes design/BUILD_PLAN.md. Use whenever Sandro wants to run the Project Planning stage for a module, plan its build, decide its story cut or sprint shape, or says "run project planning", "generate the build plan", "what are the stories", "how many sprints", "what is the definition of done", "what has to be true before we start building", "when do we do the cutover"; or when Build is blocked because nothing says which object is built first, what finishing one means, or who does the setup work every design document assigned to "the first build story".
+description: Run the Project Planning stage for a Life OS module — turn an approved design set into the sequence that builds it. Settle what a story is, what must be true before story one, how stories group into sprints, what a boundary runs, what a story's definition of done is, what each story hands the next, what work is real but is not a story, and what must not happen inside a sprint. Scout the design docs' deferrals, the wave plan and spec grouping that already exist, the exemplar's build plan as its files actually are, and the module's decisions log via subagents, settle each fork with Sandro one question at a time, schedule or re-own every risk the register still carries, then hand a build record to the doc-writer agent that writes design/BUILD_PLAN.md. Use whenever Sandro wants to run the Project Planning stage for a module, plan its build, decide its story cut or sprint shape, or says "run project planning", "generate the build plan", "what are the stories", "how many sprints", "what is the definition of done", "what has to be true before we start building", "when do we do the cutover"; or when Build is blocked because nothing says which object is built first, what finishing one means, or who does the setup work every design document assigned to "the first build story".
 ---
 
 The Test Strategy stage settles **what proves a module works**. This stage settles **the order in which
@@ -89,7 +89,7 @@ Know the consumers before you bend a rule:
 
 ## The document standard
 
-This section is the template. `build-plan-writer` reads it verbatim — do not paraphrase it into the
+This section is the template. `doc-writer` reads it verbatim — do not paraphrase it into the
 record.
 
 ### The document answers questions, not a fixed section list
@@ -291,7 +291,99 @@ question, not a silent fix.
 - Every question in the standard has a section, including those answered "none".
 - No story, sprint, ceremony or gate appears that no design document, decision or measurement required.
 
-## Phase 6: Production (delegated to build-plan-writer)
+## Writer brief
+
+`doc-writer` reads this brief verbatim, with the template it names, before writing a line. It holds what is specific to this stage; the generic contract — Draft status, Change History, Summary matching the body, decisions-log writes, amendments, footer, the gap protocol — is the agent's own.
+
+- **Artifact:** `design/BUILD_PLAN.md` · **Document ID:** the module's own document ID convention
+- **Template:** the **document standard** section of this skill.
+- **Also read, in the module:** its Business Architecture for the wave plan and the spec grouping, its Test Strategy for the FUT coverage contract and the coverage targets, its Tech Stack for the destination folder tree and the local run story, and its `CLAUDE.md` for what it already claims about scripts and folders. You cite these; you do not restate them. 
+
+**Record fields** — the record must carry all of these; a missing one is a gap:
+
+- The module, its decisions-log path, and the next free `D-nn`.
+- The **deliverable-boundary ruling** — document only, or document plus something named — with its
+  reason.
+- The **story definition** with its reason, and the **full story list**: each story's ID, name, the
+  objects it carries, its spec, and its wave.
+- **Story zero**: every item the design documents assigned to "the first build story", each resolved
+  to that story or to a named human prerequisite, with `file:line` provenance.
+- The **build-order ruling**, and **which document owns the order**.
+- The **sprint grouping**, and **what fires on each boundary**.
+- The **definition of done** — the baseline gate and the per-story part.
+- The **per-story test obligations**: measured FUT counts and tier destinations, per story.
+- The **cross-story contracts**, including every shared surface and the story that creates it.
+- The **non-story work**.
+- The **deferred change docket**: every raised-and-owed amendment and pinned-dependency raise, each
+  with its unblocking event.
+- The **build-chain ruling** — what actually drives a story.
+- The **progress-tracking ruling**.
+- The **enforcement inventory** — live `lint:*` scripts and gate commands by name, and what nothing
+  checks.
+- The **risk outcomes** — executed (with the new grade), scheduled (story, sprint, FUT — and whose it
+  stays), docked (with the unblocking event), re-owned, or a stated "none assigned, register checked".
+- The **open items** this stage owns, each with a ruling.
+- The **amendments** this stage causes, upstream or to Approved documents.
+- The **coverage-check** result.
+- Every **decision**: context, options, ruling, rationale, consequences.
+
+**Stage rules:**
+
+- **Do not restate the wave plan, the critical path, the fan-in or the fan-out** if the record says a
+  Scope-phase document already carries them. Cite that document, name it as the owner of the order,
+  and say in one line that you are deliberately not restating it.
+- **Every story names its objects, its spec, its wave and its definition of done.** A story with no
+  stated done is a gap.
+- **Every Functional Unit Test is claimed by exactly one story.** The per-story figures must total the
+  Test Strategy's own contract table. A total that does not reconcile is a gap, not a number you may
+  adjust.
+- **Tests that are not runner tests get an explicit meaning of "done".** A browser test, a one-time
+  verification or a manual check with no stated completion condition is a gap.
+- **Every shared surface names the story that creates it**, and every story that extends it says so.
+- **Every sprint boundary states what runs on it.** A boundary with nothing on it is a gap; say so
+    rather than writing a ceremony.
+- **Every docket item names its unblocking event.** "Deferred" with no event is half a ruling.
+- **The enforcement section names live `lint:*` scripts and gate commands, then names what nothing
+    enforces.** Never imply a mechanical check the record does not name. This stage has the least
+    enforcement of any — write that plainly.
+
+**Lean is the standard.** The document tells a build persona which story to build, in what order, with what already existing,
+and when it is finished. **Never restate a spec's business rules, never restate the entity model,
+never restate the routes or the semantic role map, never restate the stack's process topology, never
+restate the tier list or the coverage numbers, and never write a prompt, a `CLAUDE.md` draft or a
+scaffold script** — those are Workshops, the Data Model, Information Architecture, the Design System,
+the Tech Stack, the Test Strategy, the `/build` chain and the Scaffold stage. If a sentence does not
+help someone decide what to build next or whether they are done, cut it.
+
+**Gap triggers** — stop and return a gap when:
+
+- A story has no objects, no spec, or no definition of done.
+- An item the record lists under "the first build story" resolves to no story and no named human
+  prerequisite.
+- The per-story FUT figures do not total the Test Strategy's contract table.
+- A FUT class that is not a runner test has no stated meaning of done.
+- A story depends on a shared surface no story is recorded as creating.
+- A sprint boundary has nothing recorded as firing on it.
+- A docket item has no unblocking event.
+- An enforcement claim names no live `lint:*` script or gate command.
+- A live risk has neither an execution result, a schedule, a dock nor a re-owner.
+
+A returned gap is a correct outcome. **A story, sprint, ceremony or gate invented to fill a hole is the failure this split exists to prevent** — it becomes work someone does and a bar someone trusts that nobody ever ruled for.
+
+**Validation checks** — each reported pass/fail, and each procedural unless a named linter covers it:
+
+- Every FRICEW object appears in exactly one story.
+- Every story names its objects, its spec, its wave and its definition of done.
+- Every FUT is claimed by exactly one story, and the totals match the Test Strategy's contract table.
+- Every non-runner test class has a stated meaning of done.
+- Every shared surface names its creating story.
+- Every sprint boundary states what runs on it.
+- Every docket item names its unblocking event.
+- Every enforcement claim names a live `lint:*` script or gate command; everything else is stated
+  unenforced.
+- Every live risk is executed, scheduled, docked, re-owned or stated absent.
+
+## Phase 6: Production (delegated to doc-writer)
 
 **The approval gate comes first in this list because it was skipped three stages running.** Read it
 before you read the rest.
@@ -311,7 +403,7 @@ before you read the rest.
    outcomes; the open items resolved; the amendments this stage causes; the coverage-check result; and
    every decision taken (context, options, ruling, rationale, consequences). **It must be complete —
    the writer cannot ask Sandro anything.**
-2. Invoke `build-plan-writer` with that record. It reads this skill's **document standard** section
+2. Invoke `doc-writer` with that record. It reads this skill's **document standard** section
    itself, writes `design/BUILD_PLAN.md` at status **Draft**, logs the decisions in the module's log at
    the path the record names, and returns its validation check.
 3. If it returns a **gap** instead of a file, the interview left a hole. Ask Sandro that one question,
@@ -334,7 +426,7 @@ before you read the rest.
 7. Name the next stage — Build — and stop. Do not start it.
 
 **One mechanical note that has cost six stages a delegation.** Claude Code resolves its agent registry
-at session start, so a `build-plan-writer` authored in this session is **not invocable in it**. If the
+at session start, so a `doc-writer` authored in this session is **not invocable in it**. If the
 agent is new, write the document in the main thread against this same standard and say that is what
 happened; do not report a delegation that did not occur.
 

@@ -1,6 +1,6 @@
 ---
 name: generate-design-system
-description: Run the Design System stage for a Life OS module — scout the UI-bearing specs and the exemplar design system as it actually is on disk via subagents, settle theme, density, build technology, page layout, controls, semantic roles, status indicators and state conventions with Sandro one question at a time, draw the boundary with the Theme stage, then hand a design record to the design-system-writer agent that writes design/DESIGN_SYSTEM.md. Use whenever Sandro wants to run the Design System stage for a module, decide what its surfaces are built with or how they look, or says "run design system", "generate the design system", "Fiori Elements or freestyle", "what controls do we use", "what does health look like on screen", "compact or cozy"; or when Theme, Data Model or a build is blocked because nothing specifies a module's density, layout, controls, colour roles or empty states.
+description: Run the Design System stage for a Life OS module — scout the UI-bearing specs and the exemplar design system as it actually is on disk via subagents, settle theme, density, build technology, page layout, controls, semantic roles, status indicators and state conventions with Sandro one question at a time, draw the boundary with the Theme stage, then hand a design record to the doc-writer agent that writes design/DESIGN_SYSTEM.md. Use whenever Sandro wants to run the Design System stage for a module, decide what its surfaces are built with or how they look, or says "run design system", "generate the design system", "Fiori Elements or freestyle", "what controls do we use", "what does health look like on screen", "compact or cozy"; or when Theme, Data Model or a build is blocked because nothing specifies a module's density, layout, controls, colour roles or empty states.
 ---
 
 The Information Architecture stage settles **how surfaces become pages and how a user reaches each
@@ -70,7 +70,7 @@ Know the consumers before you bend a rule:
 
 ## The document standard
 
-This section is the template. `design-system-writer` reads it verbatim — do not paraphrase it into
+This section is the template. `doc-writer` reads it verbatim — do not paraphrase it into
 the record.
 
 ### The document answers questions, not a fixed section list
@@ -249,9 +249,68 @@ question, not a silent fix.
 - Every risk assigned to this stage is executed or re-owned, or the absence is stated.
 - The Theme boundary names what stage 8 still owns, and this document names no concrete value.
 
-## Phase 6: Production (delegated to design-system-writer)
+## Writer brief
 
-The interview is done. The writing happens in an isolated **design-system-writer** agent so producing
+`doc-writer` reads this brief verbatim, with the template it names, before writing a line. It holds what is specific to this stage; the generic contract — Draft status, Change History, Summary matching the body, decisions-log writes, amendments, footer, the gap protocol — is the agent's own.
+
+- **Artifact:** `design/DESIGN_SYSTEM.md` · **Document ID:** `DS-001`
+- **Template:** the **document standard** section of this skill.
+- **Also read, in the module:** `design/INFORMATION_ARCHITECTURE.md` for the surfaces and their IDs, `design/BUSINESS_ARCHITECTURE.md` for the object names you will cite, and any spec the record names as amended. You cite these; you do not restate them. 
+
+**Record fields** — the record must carry all of these; a missing one is a gap:
+
+- The module, its decisions-log path, and the next free `D-nn`.
+- The **surface inventory** — every UI-bearing object and what it renders.
+- The **build-technology ruling** per object, with its reason and its **draft consequence**.
+- **Theme family and density**, with the rationale.
+- The **page layout** — regions, order, grid, responsive behaviour.
+- The **control conventions** — which control renders which element, plus table/list standards.
+- The **semantic role map** — every domain value a surface displays, mapped to a semantic state.
+- The **status-indicator map** — component, state, icon per value.
+- The **chart ruling** — conventions, or "none" with its reason.
+- The **state conventions** — empty, loading, error; and which states are unreachable.
+- The **Theme boundary** — what stage 8 still owns.
+- The **risk outcomes** — executed (with what happened and the new grade), re-owned (owner,
+  deadline, why), or a stated "none assigned, register checked".
+- The **spec amendments** this stage causes.
+- The **coverage-check** result.
+- Every **decision**: context, options, ruling, rationale, consequences.
+
+**Stage rules:**
+
+- Every styling entry names **the element and the rendering** — the control, its state, its icon
+  where one applies — and cites the spec or decision the domain value comes from.
+- **Never write a concrete colour, hex value, border radius, font, or CSS declaration.** Semantic
+  state names only. That boundary is a section of this document; violating it makes that section
+  false.
+
+**Lean is the standard.** The document tells a build persona what to build each surface with and how it should look, and gives
+`ux-tester` a rubric to review against. **Never restate a spec's content, never restate the data
+model, never restate the routes or navigation, never specify a concrete visual value** — those are
+Workshops, Data Model, Information Architecture and Theme. If a sentence does not help someone build
+a surface, style one, or review one against a rule, cut it.
+
+**Gap triggers** — stop and return a gap when:
+
+- A UI-bearing object in the IA document has no build-technology ruling.
+- A build-technology ruling has no stated draft consequence.
+- A domain value a surface displays has no semantic role, or a role has no rendering.
+- An element named in a spec's §3 has neither a control nor a covering convention.
+- A state the specs call reachable has no convention.
+
+A returned gap is a correct outcome. **A control, colour role or convention invented to fill a hole is the failure this split exists to prevent** — it becomes a build instruction nobody specified and a review rubric nothing satisfies.
+
+**Validation checks** — each reported pass/fail, and each procedural unless a named linter covers it:
+
+- Every UI-bearing object has a build-technology ruling with a reason and a draft consequence.
+- Every domain value displayed by a surface has a semantic role and a rendering.
+- Every element named in a spec's §3 has a control or a covering convention.
+- No concrete colour, radius, font or CSS value appears anywhere in the document.
+- Every spec amendment names the spec, the change and the decision.
+
+## Phase 6: Production (delegated to doc-writer)
+
+The interview is done. The writing happens in an isolated **doc-writer** agent so producing
 the document never competes for context with the conversation you just held.
 
 1. Assemble the **design record** — the handoff artifact. It contains: the module, its
@@ -261,7 +320,7 @@ the document never competes for context with the conversation you just held.
    ruling; the state conventions; the Theme boundary; the risk outcomes; the spec amendments this
    stage causes; the coverage-check result; and every decision taken (context, options, ruling,
    rationale, consequences). **It must be complete — the writer cannot ask Sandro anything.**
-2. Invoke `design-system-writer` with that record. It reads this skill's **document standard**
+2. Invoke `doc-writer` with that record. It reads this skill's **document standard**
    section itself, writes `design/DESIGN_SYSTEM.md` at status **Draft**, logs the decisions in the
    module's log at the path the record names, and returns its validation check.
 3. If it returns a **gap** instead of a file, the interview left a hole. Ask Sandro that one
@@ -314,5 +373,5 @@ a decisions table that makes every ruling citable by ID.
 - Log decisions into the module's own log, continuing that module's `D-nn` sequence.
 - Follow the module's document status and Change History conventions.
 - **This stage has no linter.** Nothing mechanically validates a control choice, a role map or count
-  accuracy — Phase 5 and `design-system-writer`'s check are procedural. Say that plainly rather than
+  accuracy — Phase 5 and `doc-writer`'s check are procedural. Say that plainly rather than
   implying enforcement that does not exist.

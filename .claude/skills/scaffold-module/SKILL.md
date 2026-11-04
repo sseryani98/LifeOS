@@ -1,6 +1,6 @@
 ---
 name: scaffold-module
-description: Run the Scaffold stage for a Life OS module — create the module folder and its workspace wiring per the root CLAUDE.md "Adding a Module" steps, reconcile whatever the new module forces the root to decide, and hand a scaffold record to the scaffold-writer agent that writes the module's CLAUDE.md. Use whenever Sandro wants to stand up a new module, scaffold or bootstrap one, wire a module into the npm workspace, or says "run Scaffold", "scaffold Project Tracker", "create the module folder", "add the module to the workspace"; or when a Design or Build stage is blocked because the module has no folder, no package.json, and no place to put code. Also use to re-run Scaffold when the workspace wiring has drifted.
+description: Run the Scaffold stage for a Life OS module — create the module folder and its workspace wiring per the root CLAUDE.md "Adding a Module" steps, reconcile whatever the new module forces the root to decide, and hand a scaffold record to the doc-writer agent that writes the module's CLAUDE.md. Use whenever Sandro wants to stand up a new module, scaffold or bootstrap one, wire a module into the npm workspace, or says "run Scaffold", "scaffold Project Tracker", "create the module folder", "add the module to the workspace"; or when a Design or Build stage is blocked because the module has no folder, no package.json, and no place to put code. Also use to re-run Scaffold when the workspace wiring has drifted.
 ---
 
 Scaffold is the stage where a module stops being documents and becomes a folder npm knows about. It
@@ -161,14 +161,98 @@ At minimum:
 tree, or stubbing an entity so `cds build` succeeds, converts an honest red into a false green that
 nobody will re-examine.
 
-## Phase 4: The module CLAUDE.md (delegated to scaffold-writer)
+## Writer brief
+
+`doc-writer` reads this brief verbatim, with the template it names, before writing a line. It holds what is specific to this stage; the generic contract — Draft status, Change History, Summary matching the body, decisions-log writes, amendments, footer, the gap protocol — is the agent's own.
+
+- **Artifact:** `CLAUDE.md in the module folder`
+- **Template:** root `CLAUDE.md` §Shared vs Module, §Standards and §Do NOT, plus the shared standards file the record names — read so you know what must **not** be repeated.
+
+**Record fields** — the record must carry all of these; a missing one is a gap:
+
+- The module, its package name, and the artifact path.
+- The **constraining decisions** table — every ruling the scaffold obeyed, with its `D-nn`.
+- The **folder skeleton** as actually built.
+- The **`package.json` shape** — runtime deps, cds config, and the audited `lint:*` block.
+- Every **carve-out** from the shared standards, with the reason it exists.
+- The **open risks** the scaffold declined to assume away.
+- The **verification results**, per check, classified green / inert / red-expected / red-unexpected.
+- The path to the **standards file** to reference rather than restate.
+
+**Stage rules:**
+
+Write `CLAUDE.md` in the module folder. Shape it to the module, but these sections earn their place in almost every one:
+
+| Section | Holds | Never holds |
+|---|---|---|
+| What This Is | Two or three sentences: what the module does, and its stack in one line | Product rationale — that is the vision doc |
+| Status | The stage the module is actually at, and what does not work yet | Aspiration |
+| Standards | A pointer to the shared standards file, stating plainly that they apply here | Any restatement of them |
+| Architecture | The decisions that shape code in *this* module — namespace, database, services, frontend approach — each citing its `D-nn` | Rules that hold for every module |
+| Folder Structure | The tree as built, annotated with what fills each folder and **which stage fills it** | Folders that do not exist |
+| Carve-outs | Where this module deviates from the shared standards, and why | A deviation with no reason |
+| Open Risks | Risks live against this module, graded, with what would settle each | Risks the module does not carry |
+| Do NOT | Module-specific prohibitions only | Anything already in the shared Do NOT list |
+
+Where the module's other design artifacts carry a status field and Change History, match them.
+
+**The three failure modes, in order of likelihood.**
+
+**1. Restating the shared standards.** The most likely and most damaging. Every rule you copy is a
+rule that will drift out of sync with its source, and the module file is the copy nobody updates. The
+test for any line: *could this sentence be true of a different module?* If yes, it belongs at the
+root and you reference it. Write `See [the shared standards](path) — they apply here in full` and
+move on.
+
+**2. Documenting what does not exist yet.** A scaffolded module is nearly empty. Writing a folder
+tree full of files nobody has created, or an architecture section describing services that have not
+been specced, produces a file that reads as authoritative and is fiction. Describe the skeleton as a
+skeleton, and name the stage that fills each part.
+
+**3. Phantom enforcement claims.** Any sentence asserting that something is enforced — the phrases
+`lint-enforced`, `enforced by`, `enforced via`, `(ESLint)` — must name a live `lint:*` script in
+**this module's** `package.json` or a real ESLint rule id. `lint:doc-claims` checks exactly this
+against the module's own `package.json`, so an unbacked claim fails the module's own lint run.
+
+**Be honest about what does not work.**
+
+A scaffolded module has red checks, and they belong in the file. State what does not build, what
+cannot run, and what stage fixes it. A `CLAUDE.md` that describes a working module when the module is
+an empty skeleton misleads the next agent at exactly the moment it is trusted most.
+
+The same applies to risks. A risk the record hands you as `Inferred` is written as `Inferred` — do
+not promote it, and do not silently drop it because it is inconvenient in a file about architecture.
+
+**Gap triggers** — stop and return a gap when:
+
+- An architecture element has no decision backing it and is not marked as deferred to a later stage.
+- The record names a carve-out with no reason.
+- The folder skeleton in the record contradicts what is on disk.
+- An enforcement claim the record asks for names a `lint:*` script absent from the module's
+  `package.json`.
+
+A returned gap is a correct outcome. **A convention invented to fill a hole is the failure this split exists to prevent** — it becomes the rule every future agent in this module follows, sourced from nothing.
+
+**Validation checks** — each reported pass/fail, and each procedural unless a named linter covers it:
+
+- No shared standard is restated; the standards file is referenced by path.
+- Every architecture claim cites a `D-nn` or is explicitly marked as a later stage's decision.
+- The folder tree matches what is on disk — no invented files.
+- Every enforcement claim names a live `lint:*` script in this module's `package.json`, or a rule id.
+- Every carve-out carries a reason.
+- Every open risk from the record appears, at the grade the record gave it.
+- What does not work yet is stated, not implied.
+
+`lint:doc-claims` covers the enforcement-claim line mechanically; the rest are procedural. Say which is which rather than implying the file was mechanically validated. If you returned a gap instead, return that and no file.
+
+## Phase 4: The module CLAUDE.md (delegated to doc-writer)
 
 Everything above is mechanical. The module's `CLAUDE.md` is not — it is the file every future agent
 reads before writing a line of code in this module, and its hardest constraint is what it **leaves
 out**. Root `CLAUDE.md` §Do NOT: do not duplicate the shared standards into a module's CLAUDE.md,
 reference them.
 
-Write it in an isolated `scaffold-writer` agent so producing it does not compete for context with
+Write it in an isolated `doc-writer` agent so producing it does not compete for context with
 the wiring you just did.
 
 1. Assemble the **scaffold record**: the module and its package name; the constraining decisions
@@ -177,7 +261,7 @@ the wiring you just did.
    reason; the open risks Scaffold refused to assume away; the Phase 3 verification results; and the
    path to the standards file being referenced rather than restated. **It must be complete — the
    writer cannot ask Sandro anything.**
-2. Invoke `scaffold-writer` with the record. It writes `CLAUDE.md` in the module folder and returns
+2. Invoke `doc-writer` with the record. It writes `CLAUDE.md` in the module folder and returns
    its validation check.
 3. If it returns a **gap**, the wiring left a hole. Answer that one question, extend the record,
    re-invoke. Do not fill the hole yourself.
