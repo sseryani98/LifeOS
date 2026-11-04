@@ -1,17 +1,19 @@
 # Theme
 
 **Document ID:** TH-001
-**Version:** 1.0
-**Date:** 2026-08-06
+**Version:** 1.1
+**Date:** 2026-11-04
 **Status:** Approved
 
 ---
 
 ## 1. Change History
 
-| Date       | Author          | Description                                                                                                                                                                                                                                                                                                                                                      |
-| ---------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-08-06 | Sandro & Claude | Initial creation from the Theme stage. Theme ruled **inherited wholesale** from Financial Planner — this module writes **no CSS**. [DS-001](DESIGN_SYSTEM.md) §9's **17** role mappings resolved onto **5** Horizon custom properties, measured against the pinned runtime. Contrast verified on the surface each pairing lands on. Records D-153 through D-159. |
+| Date       | Author          | Description                                                                                                                                                                                                                                                                                                                                                                                                 |
+| ---------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-06 | Sandro & Claude | Initial creation from the Theme stage. Theme ruled **inherited wholesale** from Financial Planner — this module writes **no CSS**. [DS-001](DESIGN_SYSTEM.md) §9's **17** role mappings resolved onto **5** Horizon custom properties, measured against the pinned runtime. Contrast verified on the surface each pairing lands on. Records D-153 through D-159.                                            |
+| 2026-11-04 | Claude          | Refresh against the inherited file after Financial Planner's D-316 to D-320 (commit `6abcd76`): 391 lines, 102 properties, 29 rule blocks, 6 radius properties; Deep Gold is `#7A5E1B` and clears the canvas; most surfaces are Parchment `#FAFAF8`; every `:line` citation re-measured. §9's Link finding lapses, the Warning finding stands. The exemplar's §6.3 and §9.4 findings are resolved upstream. |
+| 2026-11-04 | Sandro          | Re-approved after the refresh. Status stays Approved.                                                                                                                                                                                                                                                                                                                                                       |
 
 ---
 
@@ -21,24 +23,24 @@ This document is the concrete visual contract for the project view. It resolves 
 [DS-001](DESIGN_SYSTEM.md) §9 declares into named CSS custom properties with measured values, and
 decides no role, no control and no layout.
 
-| Aspect                     | Decision                                                                                                                                                                |
-| -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Theme ownership**        | **Inherited wholesale** from Financial Planner. This module defines no palette and **writes no CSS file** (D-153)                                                       |
-| **Base theme**             | `sap_horizon` — inherited page-globally, not chosen (Financial Planner's DS-001 §3; Project Tracker D-146)                                                              |
-| **Brand palette**          | Financial Planner's "Obsidian & Amber" — Obsidian `#2A2725`, Amber `#C8973E`. **Not this module's to set** (D-153)                                                      |
-| **Semantic tokens**        | **5** Horizon custom properties, **none of them overridden** by the inherited CSS — measured: **0** semantic overrides in its `:root` block (D-154)                     |
-| **Role resolution**        | All **17** [DS-001](DESIGN_SYSTEM.md) §9 mappings resolve through those 5 properties. `ObjectStatus` and `NumericContent` resolve to the **same** token family (D-154)  |
-| **Horizon default tables** | **Not restated here.** The exemplar's is wrong in **6** rows against the pinned runtime; this document names the token and the measurement instead (D-154)              |
-| **Border radius**          | **0** on buttons, fields, elements, popovers and tiles — inherited, not decided. **5** radius properties set in the shared `:root` (D-153)                              |
-| **Component overrides**    | **None written by this module.** **12** targeted selectors are inherited, of which **1** governs this module's page canvas (D-153)                                      |
-| **Programmatic colours**   | **None.** No chart, no code-applied palette — follows D-150                                                                                                             |
-| **Contrast**               | All **7** pairings pass WCAG AA on the surface each actually lands on. **2** fail on the page canvas, which is why D-155 is a rule and not a footnote                   |
-| **The rule this produced** | A semantic `ObjectStatus` or `sap.m.Link` **may not render directly on the ObjectPage canvas** — Warning drops to **4.44:1** and Link to **4.27:1** there (D-155)       |
-| **CSS contract**           | `Financial Planner/app/shared/css/theme-overrides.css`, **187** lines, injected by `app/shell/Component.ts:20`. **Not** the `<link>` its own document describes (D-156) |
-| **Write access**           | **Read-only.** This module may not edit that file. Owner is D-143's owner, unchanged                                                                                    |
-| **Amendments to DS-001**   | **None** — a stated "none", and the point of D-152 having been written first (D-157)                                                                                    |
-| **Risks assigned here**    | **None** — register checked, not assumed                                                                                                                                |
-| **Decisions logged**       | **D-153 through D-159** (7 decisions)                                                                                                                                   |
+| Aspect                     | Decision                                                                                                                                                                 |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Theme ownership**        | **Inherited wholesale** from Financial Planner. This module defines no palette and **writes no CSS file** (D-153)                                                        |
+| **Base theme**             | `sap_horizon` — inherited page-globally, not chosen (Financial Planner's DS-001 §3; Project Tracker D-146)                                                               |
+| **Brand palette**          | Financial Planner's "Obsidian & Amber" — Obsidian `#2A2725`, Amber `#C8973E`. **Not this module's to set** (D-153)                                                       |
+| **Semantic tokens**        | **5** Horizon custom properties, **none of them overridden** by the inherited CSS — measured: **0** semantic overrides in its `:root` block (D-154)                      |
+| **Role resolution**        | All **17** [DS-001](DESIGN_SYSTEM.md) §9 mappings resolve through those 5 properties. `ObjectStatus` and `NumericContent` resolve to the **same** token family (D-154)   |
+| **Horizon default tables** | **Not restated here.** The exemplar's is wrong in **6** rows against the pinned runtime; this document names the token and the measurement instead (D-154)               |
+| **Border radius**          | **0** on buttons, segments, fields, elements, popovers and tiles — inherited, not decided. **6** radius properties set in the shared `:root` (D-153)                     |
+| **Component overrides**    | **None written by this module.** **29** targeted rule blocks are inherited; several reach this module's page, the ObjectPage wrapper first among them (D-153)            |
+| **Programmatic colours**   | **None.** No chart, no code-applied palette — follows D-150                                                                                                              |
+| **Contrast**               | All **7** pairings pass WCAG AA on the surface each actually lands on. **1** fails on the page canvas, which is why D-155 is a rule and not a footnote                   |
+| **The rule this produced** | A semantic `ObjectStatus` **may not render directly on the ObjectPage canvas** — Warning drops to **4.44:1** there (D-155). Link cleared it when Deep Gold darkened (§9) |
+| **CSS contract**           | `Financial Planner/app/shared/css/theme-overrides.css`, **391** lines, injected by `app/shell/Component.ts:20` — which its own document now also says (D-156)            |
+| **Write access**           | **Read-only.** This module may not edit that file. Owner is D-143's owner, unchanged                                                                                     |
+| **Amendments to DS-001**   | **None** — a stated "none", and the point of D-152 having been written first (D-157)                                                                                     |
+| **Risks assigned here**    | **None** — register checked, not assumed                                                                                                                                 |
+| **Decisions logged**       | **D-153 through D-159** (7 decisions)                                                                                                                                    |
 
 ---
 
@@ -84,17 +86,20 @@ whatever this document names.
 Measured this session in `Financial Planner/app/shared/css/theme-overrides.css` — **the file, not its
 document**, because the two disagree (§11.1):
 
-| Role            | Name       | Value     | Where it reaches this module                                     |
-| --------------- | ---------- | --------- | ---------------------------------------------------------------- |
-| Shell / primary | Obsidian   | `#2A2725` | The ShellBar above the page; pressed list items (`:50`, `:89`)   |
-| Accent          | Amber      | `#C8973E` | Emphasized buttons, focus outlines, field focus/hover (`:37-41`) |
-| Accent hover    | Dark Amber | `#A67C2E` | Button and field hover (`:59-60`, `:68`, `:84`)                  |
-| Accent active   | Burnt Gold | `#8E6A24` | Pressed states (`:39`, `:61-62`, `:70`)                          |
-| Link text       | Deep Gold  | `#8B6B1F` | **`sap.m.Link`** — DS-001 §8.1 and §8.5's in-page links (`:44`)  |
-| Page background | Warm Stone | `#F0EDEA` | **The ObjectPage canvas** — see §10.3 and §9 (`:47`)             |
-| Selection       | Gold Mist  | `#F5EDD8` | Table row hover and selection (`:87-88`)                         |
-| Shell hover     | Warm Smoke | `#3D3A37` | ShellBar hover only (`:53`) — **not** the brand colour           |
-| Typography      | DM Sans    | —         | `--sapFontFamily`, overridden at `:34` (`:105-122` force it)     |
+| Role              | Name       | Value     | Where it reaches this module                                                                                 |
+| ----------------- | ---------- | --------- | ------------------------------------------------------------------------------------------------------------ |
+| Shell / primary   | Obsidian   | `#2A2725` | The ShellBar above the page; pressed list items; default-button text and border (`:92`, `:150`, `:112-122`)  |
+| Accent            | Amber      | `#C8973E` | `--sapBrandColor` and field hover only — non-text accents (`:50`, `:142-143`)                                |
+| Focus / borders   | Dark Amber | `#A67C2E` | Focus outlines, field focus and active borders, button hover borders (`:59`, `:115`, `:134`, `:141`, `:144`) |
+| Emphasized fill   | Burnt Gold | `#8E6A24` | Emphasized buttons, selection, active borders, tabs (`:54-56`, `:101-102`, `:117`, `:179-182`)               |
+| Emphasized active | Umber      | `#654B1D` | Emphasized button pressed (`:107-109`)                                                                       |
+| Link text         | Deep Gold  | `#7A5E1B` | **`sap.m.Link`** — DS-001 §8.1 and §8.5's in-page links (`:69-72`)                                           |
+| Page background   | Warm Stone | `#F0EDEA` | **The ObjectPage canvas** — see §10.3 and §9 (`:80`)                                                         |
+| Surface           | Parchment  | `#FAFAF8` | Page header, table body and header, tiles, panels, sub-section blocks (`:83-89`, `:288-291`, `:303-306`)     |
+| Selection         | Gold Mist  | `#F5EDD8` | Table row hover and selection (`:147-148`)                                                                   |
+| Label text        | Driftwood  | `#6B6259` | Field, dialog and table labels (`:77`)                                                                       |
+| Shell hover       | Warm Smoke | `#3D3A37` | ShellBar hover only (`:95`) — **not** the brand colour                                                       |
+| Typography        | DM Sans    | —         | `--sapFontFamily`, overridden at `:36` (`:198-215` force it)                                                 |
 
 **`#3D3A38` is not in this palette and is not in the file.** Financial Planner's TH-001 §3.2 records
 that its own D-317 superseded that value; the nearest live value is Warm Smoke `#3D3A37`, a ShellBar
@@ -126,7 +131,7 @@ same version `Financial Planner/app/index.html:16` bootstraps:
 
 **None of these five is overridden by the inherited CSS.** Measured: a grep for
 `--sapPositive|--sapNegative|--sapCritical|--sapInformative|--sapNeutral` across
-`theme-overrides.css`'s 187 lines returns **0** hits. So this module renders **stock Horizon
+`theme-overrides.css`'s 391 lines returns **0** hits. So this module renders **stock Horizon
 semantics**, and the Obsidian & Amber brand deliberately avoids the semantic range rather than
 colliding with it.
 
@@ -210,24 +215,26 @@ oversight; a stated "none" reads as a ruling.
 
 **0 on all containers and interactive controls — inherited, not decided.**
 
-Measured in the shared `:root` block (`theme-overrides.css:93-97`), against the pinned runtime's
+Measured in the shared `:root` block (`theme-overrides.css:184-190`), against the pinned runtime's
 defaults:
 
-| Property                          | Horizon 1.136.16 default | Inherited value | Reaches                                               |
-| --------------------------------- | ------------------------ | --------------- | ----------------------------------------------------- |
-| `--sapButton_BorderCornerRadius`  | `.5rem`                  | `0`             | Every button on RPT-001, FRM-001 and FRM-002          |
-| `--sapField_BorderCornerRadius`   | `.25rem`                 | `0`             | Every `sap.fe.macros.Field`, `Select`, `CheckBox`     |
-| `--sapElement_BorderCornerRadius` | `.75rem`                 | `0`             | `sap.m.Panel`, `MessageStrip`, generic containers     |
-| `--sapPopover_BorderCornerRadius` | `.5rem`                  | `0`             | FRM-002's dialog, FRM-001's two dialogs               |
-| `--sapTile_BorderCornerRadius`    | `1rem`                   | `0`             | The gate tile's `GenericTile`, RPT-002's `sap.f.Card` |
+| Property                                 | Horizon 1.136.16 default | Inherited value | Reaches                                               |
+| ---------------------------------------- | ------------------------ | --------------- | ----------------------------------------------------- |
+| `--sapButton_BorderCornerRadius`         | `.5rem`                  | `0`             | Every button on RPT-001, FRM-001 and FRM-002          |
+| `--sapButton_Segment_BorderCornerRadius` | `.5rem`                  | `0`             | Segmented and split buttons                           |
+| `--sapField_BorderCornerRadius`          | `.25rem`                 | `0`             | Every `sap.fe.macros.Field`, `Select`, `CheckBox`     |
+| `--sapElement_BorderCornerRadius`        | `.75rem`                 | `0`             | `sap.m.Panel`, `MessageStrip`, generic containers     |
+| `--sapPopover_BorderCornerRadius`        | `.5rem`                  | `0`             | FRM-002's dialog, FRM-001's two dialogs               |
+| `--sapTile_BorderCornerRadius`           | `1rem`                   | `0`             | The gate tile's `GenericTile`, RPT-002's `sap.f.Card` |
 
 **This module makes no radius decision and cannot make a different one** — the properties are set on
 the shared `:root`, so an alternative would require overriding them page-globally, which §3 rules out.
 Financial Planner's TH-001 §4.3 exceptions (radio buttons, avatars, switch tracks, progress
 indicators, busy indicators) hold here unchanged, and this module renders none of them today.
 
-**All five Horizon defaults above were re-measured, not copied.** Three of the five are wrong in the
-exemplar's own default column — see §11.1.
+**All six Horizon defaults above were re-measured, not copied.** Three of them were wrong in the
+exemplar's default column when this was first written; its 2026-10-30 re-read from the runtime fixed
+that, and the two documents now agree — see §11.1.
 
 ---
 
@@ -236,17 +243,19 @@ exemplar's own default column — see §11.1.
 **None written by this module.** It renders no control needing a treatment the inherited CSS does not
 already give it.
 
-The inherited file carries **12** targeted-selector rule blocks (measured, `theme-overrides.css:100-187`).
-Of those, **one governs this module's page directly**, and it is worth naming because it was written
-for a different module's dashboards and silently became this module's page background:
+The inherited file carries **29** targeted-selector rule blocks (measured, `theme-overrides.css:193-391`).
+Several govern this module's page directly, and they are worth naming because they were written for a
+different module's dashboards and silently became this module's page chrome:
 
-| Inherited selector                                                                          | Effect here                                                                                                                                                                                                             |
-| ------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`.sapUxAPObjectPageWrapper`** (`:162-164`)                                                | **This module's entire page sits inside this element** (D-148). `sap.uxap` hardcodes `#f5f6f7`; the override sets it to `var(--sapBackgroundColor)` = Warm Stone `#F0EDEA`. This is what §9's contrast finding turns on |
-| `.sapUiBody` and a 12-selector list (`:105-122`) — **2** of the 12 blocks, **13** selectors | Forces DM Sans onto text, labels, titles, links, buttons, inputs, list cells and table cells                                                                                                                            |
-| `.sapMIBar.sapMTB.sapMOTB.sapTntToolHeader` and its four descendants (`:126-152`)           | The ShellBar above the page. **Shared chrome — not this module's surface**                                                                                                                                              |
-| `.sapTntToolPageMain` (`:156-158`)                                                          | The ToolPage content area this module's component mounts into                                                                                                                                                           |
-| `.sapTntToolPageAsideContent`, `.sapTntNLI.sapTntNLISelected`, and its anchor (`:168-187`)  | The side nav, including the entry that selects this module. **Shared chrome**                                                                                                                                           |
+| Inherited selector                                                                                                             | Effect here                                                                                                                                                                                                             |
+| ------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`.sapUxAPObjectPageWrapper`** (`:276-278`)                                                                                   | **This module's entire page sits inside this element** (D-148). `sap.uxap` hardcodes `#f5f6f7`; the override sets it to `var(--sapBackgroundColor)` = Warm Stone `#F0EDEA`. This is what §9's contrast finding turns on |
+| `.sapFDynamicPageHeader` and the snapped wrapper (`:288-291`); header collapse and pin buttons (`:295-299`)                    | The ObjectPage header band renders Parchment `#FAFAF8` instead of hardcoded white; its buttons lose their 8px radius                                                                                                    |
+| `.sapUxAPObjectPageSection … .sapUxAPBlockContainer` (`:303-306`); floating footer (`:309-312`); input focus ring (`:316-318`) | Sub-section block containers render Parchment with 0 radius — the reason §9.1's canvas exposure shrank to the gutters; footers and focus rings lose their hardcoded radii                                               |
+| `.sapUiBody` and a 12-selector list (`:198-215`) — **2** of the 29 blocks, **13** selectors                                    | Forces DM Sans onto text, labels, titles, links, buttons, inputs, list cells and table cells                                                                                                                            |
+| `.sapMIBar.sapMTB.sapMOTB.sapTntToolHeader` and its four descendants (`:237-266`)                                              | The ShellBar above the page. **Shared chrome — not this module's surface**                                                                                                                                              |
+| `.sapTntToolPageMain` (`:270-272`)                                                                                             | The ToolPage content area this module's component mounts into                                                                                                                                                           |
+| `.sapTntToolPageAsideContent`, `.sapTntSideNavigation`, `.sapTntNLI` and its selected, hover and focus states (`:346-391`)     | The side nav, including the entry that selects this module. **Shared chrome**                                                                                                                                           |
 
 **No `sap.fe.macros` control is overridden by anything in that file**, so every macro table, field and
 the FPM page chrome render at Horizon defaults under the inherited custom properties. Recorded because
@@ -257,8 +266,9 @@ for it.
 
 ## 9. Contrast Verification (D-155)
 
-**Every pairing passes WCAG AA on the surface it actually lands on. Two fail on the page canvas, and
-that near-miss is why this section produces a rule rather than a tick.**
+**Every pairing passes WCAG AA on the surface it actually lands on. One fails on the page canvas, and
+that near-miss is why this section produces a rule rather than a tick.** (Two failed when this was
+first measured; Deep Gold's darkening to `#7A5E1B` under Financial Planner's D-316 cleared the Link.)
 
 `ObjectStatus` renders at `.875rem` — **14px**, measured at `.sapMObjStatus{font-size:.875rem}` in
 `sap/m/themes/sap_horizon/library.css`. That is **not** WCAG large text (which needs ≥24px, or ≥18.66px
@@ -266,49 +276,56 @@ bold), so the **4.5:1** body threshold applies to every row below, not the 3:1 l
 
 ### 9.1 Which surface each element lands on — resolved, not assumed
 
-| Surface                                                                                                     | Background    | Measured at                                                                                                                                                                 |
-| ----------------------------------------------------------------------------------------------------------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ObjectPage dynamic header (RPT-001, FRM-001)                                                                | `#FFFFFF`     | `.sapFDynamicPageHeader{background:#fff}` — hardcoded in `sap.f`, **not overridden**                                                                                        |
-| Tables and lists (RPT-002, RPT-003, RPT-004)                                                                | `#FFFFFF`     | `--sapList_Background` = `#fff`, **not overridden**                                                                                                                         |
-| The gate tile (RPT-001 §4)                                                                                  | `#FFFFFF`     | `--sapTile_Background` = `#fff`, **not overridden**                                                                                                                         |
-| `sap.m.Panel` (RPT-003 chain header, the two expandable regions)                                            | `#FFFFFF`     | Default `backgroundDesign` is Translucent → `--sapGroup_ContentBackground` = `#fff`, **not overridden**                                                                     |
-| `sap.f.Card` (RPT-002 §1)                                                                                   | `#FFFFFF`     | `.sapFCardHeader{background:#fff}` — hardcoded in `sap.f`                                                                                                                   |
-| **The ObjectPage canvas** — section gutters, anchor-bar strip, and any content placed bare in a sub-section | **`#F0EDEA`** | `.sapUxAPObjectPageWrapper`, overridden to `var(--sapBackgroundColor)` (§8). **`ObjectPageSubSection` carries no background rule of its own**, so it is transparent to this |
+| Surface                                                              | Background    | Measured at                                                                                                                                                                  |
+| -------------------------------------------------------------------- | ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ObjectPage dynamic header (RPT-001, FRM-001)                         | `#FAFAF8`     | `.sapFDynamicPageHeader` hardcodes `#fff` in `sap.f`; **overridden** to `var(--sapObjectHeader_Background)` = Parchment (`:87`, `:288-291`)                                  |
+| Tables and lists (RPT-002, RPT-003, RPT-004)                         | `#FAFAF8`     | `--sapList_Background` **overridden** to Parchment (`:85`)                                                                                                                   |
+| The gate tile (RPT-001 §4)                                           | `#FAFAF8`     | `--sapTile_Background` **overridden** to Parchment (`:84`)                                                                                                                   |
+| `sap.m.Panel` (RPT-003 chain header, the two expandable regions)     | `#FAFAF8`     | Default `backgroundDesign` is Translucent → `--sapGroup_ContentBackground`, **overridden** to Parchment (`:83`)                                                              |
+| `sap.f.Card` (RPT-002 §1)                                            | `#FFFFFF`     | `.sapFCardHeader{background:#fff}` — hardcoded in `sap.f`, not overridden                                                                                                    |
+| Sub-section block containers                                         | `#FAFAF8`     | `.sapUxAPObjectPageSection … .sapUxAPBlockContainer`, **overridden** to `var(--sapGroup_ContentBackground)` (`:303-306`)                                                     |
+| **The ObjectPage canvas** — section gutters and the anchor-bar strip | **`#F0EDEA`** | `.sapUxAPObjectPageWrapper`, overridden to `var(--sapBackgroundColor)` (§8). Whether any content still lands bare on it depends on DOM nesting — a live computed-style check |
 
 ### 9.2 The measured ratios
 
-| Foreground                                 | Value     | On `#FFFFFF` (where it renders) | On `#F0EDEA` (the canvas) |
-| ------------------------------------------ | --------- | ------------------------------- | ------------------------- |
-| Success `--sapPositiveTextColor`           | `#256F3A` | **6.15:1** — AA                 | 5.28:1 — AA               |
-| Error `--sapNegativeTextColor`             | `#AA0808` | **7.64:1** — AA                 | 6.55:1 — AA               |
-| Warning `--sapCriticalTextColor`           | `#B44F00` | **5.17:1** — AA                 | **4.44:1 — FAILS AA**     |
-| Information `--sapInformativeTextColor`    | `#0064D9` | **5.49:1** — AA                 | 4.71:1 — AA               |
-| None `--sapNeutralTextColor`               | `#131E29` | **16.86:1** — AA                | 14.46:1 — AA              |
-| Link `--sapLinkColor` (inherited override) | `#8B6B1F` | **4.98:1** — AA                 | **4.27:1 — FAILS AA**     |
-| Label `--sapContent_LabelColor`            | `#556B82` | **5.51:1** — AA                 | 4.72:1 — AA               |
+| Foreground                                  | Value     | On `#FAFAF8` (where most render) | On `#FFFFFF` (card header) | On `#F0EDEA` (the canvas) |
+| ------------------------------------------- | --------- | -------------------------------- | -------------------------- | ------------------------- |
+| Success `--sapPositiveTextColor`            | `#256F3A` | **5.89:1** — AA                  | 6.15:1 — AA                | 5.28:1 — AA               |
+| Error `--sapNegativeTextColor`              | `#AA0808` | **7.31:1** — AA                  | 7.64:1 — AA                | 6.55:1 — AA               |
+| Warning `--sapCriticalTextColor`            | `#B44F00` | **4.95:1** — AA                  | 5.17:1 — AA                | **4.44:1 — FAILS AA**     |
+| Information `--sapInformativeTextColor`     | `#0064D9` | **5.25:1** — AA                  | 5.49:1 — AA                | 4.71:1 — AA               |
+| None `--sapNeutralTextColor`                | `#131E29` | **16.13:1** — AA                 | 16.86:1 — AA               | 14.46:1 — AA              |
+| Link `--sapLinkColor` (inherited override)  | `#7A5E1B` | **5.83:1** — AA                  | 6.10:1 — AA                | 5.23:1 — AA               |
+| Label `--sapContent_LabelColor` (inherited) | `#6B6259` | **5.71:1** — AA                  | 5.97:1 — AA                | 5.12:1 — AA               |
 
-**Every element this module renders today lands on `#FFFFFF`, so nothing fails as designed.** That
-conclusion is measured (§9.1), not assumed — and it is the opposite of what the ratios alone suggest.
+**Every element this module renders today lands on Parchment or white, so nothing fails as designed.**
+That conclusion is measured (§9.1), not assumed. When first measured (2026-08-06) the Link was
+`#8B6B1F` at 4.27:1 on the canvas and the label was Horizon slate `#556B82`; Financial Planner's D-316
+and D-320 changed both.
 
 ### 9.3 The rule this produces
 
 > **A semantic `ObjectStatus` or a `sap.m.Link` may not be placed directly in an
 > `ObjectPageSubSection` without a background-bearing container** — a `Panel`, a `Card`, a list or a
-> table. On the bare canvas, Warning falls to **4.44:1** and Link to **4.27:1**, both below AA at
-> 14px.
+> table. On the bare canvas, Warning falls to **4.44:1**, below AA at 14px.
+
+As ruled (D-155) the rule named the Link too, at 4.27:1. Re-measured 2026-11-04, Deep Gold `#7A5E1B`
+clears the canvas at 5.23:1, so the Link half has lapsed on the figures; the Warning half stands, and
+the rule is kept as written because a lighter link colour would bring it back.
 
 This is checkable: `ux-tester` reads the computed `background-color` of the status's offset parent and
-the two figures above. It is a real constraint on the build rather than a note, because
+the figures above. It is a real constraint on the build rather than a note, because
 [DS-001](DESIGN_SYSTEM.md) §8.4 §2 places an `ObjectStatus` inside a sub-section and §8.5 §1 places a
 `sap.m.Link` inside one — and both are safe **only** because the macro table they sit in supplies a
 white background. Move either out of its table and the rule fires.
 
-### 9.4 One figure in the exemplar is wrong, and it matters here
+### 9.4 One figure in the exemplar was wrong, and it mattered here — resolved upstream
 
-Financial Planner's TH-001 §3.4 states Deep Gold `#8B6B1F` against white is "~5.6:1, meeting WCAG AA".
-**Measured: 4.98:1.** Still AA, so the conclusion holds and the figure does not. It is recorded because
-the margin is 0.48 rather than 1.1, and because `sap.m.Link` is how DS-001 §8.1 and §8.5 render
-in-page navigation — the most-clicked text on the page.
+When first measured, Financial Planner's TH-001 §3.4 stated Deep Gold `#8B6B1F` against white as
+"~5.6:1"; the measured figure was 4.98:1, a margin of 0.48. Its D-316 (2026-10-30) darkened Deep Gold
+to `#7A5E1B` — 6.10:1 on white, 5.23:1 on the canvas — and its §3.4 now states the corrected figures
+and names the old error itself. Kept because `sap.m.Link` is how DS-001 §8.1 and §8.5 render in-page
+navigation, the most-clicked text on the page, and because the margin is now 1.60 rather than 0.48.
 
 ---
 
@@ -322,12 +339,12 @@ a build persona needs to know where the values come from and what they may not t
 | Fact    | Value                                                                               |
 | ------- | ----------------------------------------------------------------------------------- |
 | Path    | `Financial Planner/app/shared/css/theme-overrides.css`                              |
-| Size    | **187** lines, measured this session                                                |
-| Layer 1 | **44** CSS custom properties in one `:root` block (`:32-98`)                        |
-| Layer 2 | **12** targeted-selector rule blocks (`:100-187`)                                   |
+| Size    | **391** lines, measured 2026-11-04                                                  |
+| Layer 1 | **102** CSS custom properties in one `:root` block (`:34-191`)                      |
+| Layer 2 | **29** targeted-selector rule blocks (`:193-391`)                                   |
 | Owner   | Financial Planner. **Project Tracker reads it and may not write into it** — see §12 |
 
-### 10.2 The load mechanism — measured, and it is not what the exemplar's document says
+### 10.2 The load mechanism — measured, and until 2026-11-04 not what the exemplar's document said
 
 | Fact                                              | Evidence                                                                                                                                                       |
 | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -335,15 +352,16 @@ a build persona needs to know where the values come from and what they may not t
 | **Re-appended to `<head>` after every rendering** | `app/shell/Component.ts:27-32` — `onAfterRendering` moves the `<link>` to the end of `<head>` so it wins the cascade over late-loaded SAPUI5 library CSS       |
 | **There is no `<link>` in the host page**         | `Financial Planner/app/index.html` carries exactly **1** `rel="stylesheet"` element — the DM Sans font at `:12-14` — and **0** references to `theme-overrides` |
 
-**Financial Planner's TH-001 §6.3 and its D-312 both describe a `<link>` tag in `index.html` placed
-after the SAPUI5 bootstrap. That is not how the repo loads it.** The distinction is not cosmetic: the
+**Financial Planner's TH-001 §6.3 and its D-312 both described a `<link>` tag in `index.html` placed
+after the SAPUI5 bootstrap. That was never how the repo loaded it.** The distinction is not cosmetic: the
 real mechanism means the stylesheet is owned by **the shell Component's lifecycle**, so anything a
 second module loaded would be re-overtaken on the shell's next rendering. **That is the single fact
 that made §3's inherit-wholesale ruling cheap** — the alternative depended on a cascade position the
 shell actively reclaims.
 
-**Raised, not fixed.** Correcting another module's Approved Theme document and its decisions log is
-outside this stage; it is recorded in §13.2 as owed.
+**Raised here, applied upstream on 2026-11-04.** The exemplar's TH-001 §6.3 and its §9 D-312 summary
+now describe `includeStylesheet`; its Decisions Log entry for D-312 still carries the original `<link>`
+wording as the decision made at the time. See §13.2.
 
 ### 10.3 What the contract gives this module for free
 
@@ -358,16 +376,20 @@ adds no selector that could need one.
 
 **This document does not restate the exemplar's property table, and that is a ruling.**
 
-The **44** properties in the shared `:root` are Financial Planner's contract, maintained in that
+The **102** properties in the shared `:root` are Financial Planner's contract, maintained in that
 module's TH-001 §7. Copying them here creates a second source of truth for values this module does not
 own — which is exactly the failure mode measured below.
 
-What this module **needs** named is §5's five semantic properties and §7's five radius properties.
+What this module **needs** named is §5's five semantic properties and §7's six radius properties.
 Those are here, measured. Everything else is cited, not copied.
 
-### 11.1 Why — the exemplar's own table went stale in five distinct ways
+### 11.1 Why — the exemplar's own table had gone stale in five distinct ways
 
-Measured this session against the file and against the pinned runtime:
+Measured on 2026-08-06 against the file and against the pinned runtime. **Re-measured 2026-11-04: all
+five were resolved by the exemplar's 2026-10-30 rebuild of its §7 from the file** (its Summary and §7.1
+say 102 properties and 29 rules, which the file has; `--sapGroup_ContentBackground` is present at `:83`;
+`--sapFontFamily` is listed as overridden; the default column was re-read from the runtime). The table
+stays as the record of why D-154 ruled as it did:
 
 | Drift                                                                                                                                   | Measured                                                                                                                                                                                                                                                                                                        |
 | --------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -393,7 +415,7 @@ property. The pinned version is `Financial Planner/app/index.html:16`.
 | Question                                     | Answer                                                                                                                                                                                         |
 | -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | What does this module **write** to the page? | **Nothing visual.** No stylesheet, no custom property, no selector                                                                                                                             |
-| What does it **read**?                       | The 44 inherited custom properties and the 12 inherited rule blocks, one of which (`.sapUxAPObjectPageWrapper`) governs its page canvas                                                        |
+| What does it **read**?                       | The 102 inherited custom properties and the 29 inherited rule blocks, several of which (`.sapUxAPObjectPageWrapper` first) govern its page chrome                                              |
 | What does it **not** control?                | The ShellBar, the side nav, the page background, the font, the radius, the accent — all shared chrome or page-global properties                                                                |
 | Who owns the file?                           | Financial Planner. **This module has read-only standing.** Editing it would make Project Tracker a _writer_ into the other module's tree, which is a larger claim than D-143's read dependency |
 | When does this have to change?               | When a module needs a value the shared sheet does not supply. **Owner: D-143's owner, unchanged** — whoever builds the third module's UI, or the first cross-module shell navigation           |
@@ -433,10 +455,10 @@ boundary was drawn correctly, not evidence the stage found nothing.**
 | Document                                               | Finding                                                                                                                               | Disposition                                                                                   |
 | ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
 | `.claude/agents/ux-tester.md:21-23`                    | Told the agent Financial Planner's theme is "Warm Charcoal (`#3D3A38`)". Superseded by that module's own D-317                        | **Applied this session.** It is a live rubric — a wrong palette there produces wrong findings |
-| `Financial Planner/design/THEME.md` §6.3 and its D-312 | Both describe a `<link>` in `index.html`; the repo injects via `Component.ts:20` (§10.2)                                              | **Owed.** Raised, not applied — another module's Approved document                            |
+| `Financial Planner/design/THEME.md` §6.3 and its D-312 | Both described a `<link>` in `index.html`; the repo injects via `Component.ts:20` (§10.2)                                             | **Applied 2026-11-04** by `/refresh-docs`. The Decisions Log entry keeps its original wording |
 | `Financial Planner/design/DESIGN_SYSTEM.md:17`, `:29`  | Change History and Summary still name Warm Charcoal `#3D3A38` as the brand, which that module's own TH-001 §3.2 records as superseded | **Owed.** Raised, not applied                                                                 |
 
-The two owed items are Financial Planner's to fix and belong to a `/refresh-docs` sweep of that
+The remaining owed item is Financial Planner's to fix and belongs to a `/refresh-docs` sweep of that
 module. They are named here because §4 and §10 of this document are the reason they were found.
 
 ---
@@ -446,7 +468,7 @@ module. They are named here because §4 and §10 of this document are the reason
 **None — and the register was checked rather than assumed.**
 
 Verified this session: `research/README.md` §7's routing table routes **Information Architecture /
-Design System / Theme → RSH-003** (`research/README.md:148`). RSH-003's only live risk was **R9**,
+Design System / Theme → RSH-003** (`research/README.md:174`). RSH-003's only live risk was **R9**,
 **executed and closed** at the Information Architecture stage (D-140), regraded `Inferred` →
 `Verified`. No other row in `research/README.md` §5 names this stage.
 

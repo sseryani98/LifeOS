@@ -1,21 +1,24 @@
 # Theme
 
 **Document ID:** TH-001
-**Version:** 1.3
-**Date:** 2026-10-30
+**Version:** 1.4
+**Date:** 2026-11-04
 **Status:** Approved
 
 ---
 
 ## 1. Change History
 
-| Date       | Author          | Description                                                                                                                                                                                                      |
-| ---------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-02-21 | Sandro & Claude | Initial creation — Step 14 complete. D-308 through D-313 logged.                                                                                                                                                 |
-| 2026-02-21 | Sandro          | Approved. Status Draft → Approved.                                                                                                                                                                               |
-| 2026-10-30 | Claude          | D-316: contrast fix. Emphasized fill, Deep Gold and focus ring darkened. §3 contrast claims corrected.                                                                                                           |
-| 2026-10-30 | Claude          | D-318: selection → Burnt Gold, field focus → Dark Amber. Side nav, surfaces, radii, ShellBar shadow, blue leaks and 72 font fixed. §7 rebuilt from the file; Horizon defaults re-read from the 1.136.16 runtime. |
-| 2026-10-30 | Claude          | D-319: §3.1 covers decorative illustrations. Illustration blues → amber ramp, table rules → Taupe `#B3ABA3`. Default-button hover text and FileUploader states fixed (D-006, D-012). §7 recounted.               |
+| Date       | Author          | Description                                                                                                                                                                                                           |
+| ---------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-02-21 | Sandro & Claude | Initial creation — Step 14 complete. D-308 through D-313 logged.                                                                                                                                                      |
+| 2026-02-21 | Sandro          | Approved. Status Draft → Approved.                                                                                                                                                                                    |
+| 2026-10-30 | Claude          | D-316: contrast fix. Emphasized fill, Deep Gold and focus ring darkened. §3 contrast claims corrected.                                                                                                                |
+| 2026-10-30 | Claude          | D-318: selection → Burnt Gold, field focus → Dark Amber. Side nav, surfaces, radii, ShellBar shadow, blue leaks and 72 font fixed. §7 rebuilt from the file; Horizon defaults re-read from the 1.136.16 runtime.      |
+| 2026-10-30 | Claude          | D-319: §3.1 covers decorative illustrations. Illustration blues → amber ramp, table rules → Taupe `#B3ABA3`. Default-button hover text and FileUploader states fixed (D-006, D-012). §7 recounted.                    |
+| 2026-11-03 | Claude          | D-320: label text → Driftwood `#6B6259`, replacing Horizon slate `#556B82` (D-018). §7.1 recounted.                                                                                                                   |
+| 2026-11-04 | Claude          | Refresh against the file: §6.3 load mechanism re-read from `Component.ts`; §3.7 and §8 gain the D-320 rows; Summary and §7.3 counts, §6.4 examples, two stale body-text hexes and the ghost-button borders corrected. |
+| 2026-11-04 | Sandro          | Re-approved after the refresh. Status stays Approved.                                                                                                                                                                 |
 
 ---
 
@@ -40,7 +43,7 @@ Custom visual identity layered on top of `sap_horizon` (Horizon Light). Targeted
 | **Side Nav**        | Soft Ash `#E8E5E2` — tinted for three-column depth (D-317)    |
 | **Override Method** | Single CSS file after Horizon, CSS custom properties (D-312)  |
 | **Illustrations**   | Amber ramp, Obsidian outlines, Taupe greys (D-319)            |
-| **Total Overrides** | 101 custom properties + 29 targeted rules, 49 selectors (§7)  |
+| **Total Overrides** | 102 custom properties + 29 targeted rules, 49 selectors (§7)  |
 | **Amends**          | D-60, D-308, D-309, D-313 (replaced by D-317 palette)         |
 
 ---
@@ -71,6 +74,7 @@ This amends D-60 ("standard Horizon semantic colors only, no custom accent") and
 | **Selected Background** | Gold Mist  | `#F5EDD8` | Selected table rows, hover backgrounds, active list items                                              |
 | **Shell Hover**         | Warm Smoke | `#3D3A37` | Hover on ShellBar elements (lighter than obsidian on dark surface)                                     |
 | **Structural Rule**     | Taupe      | `#B3ABA3` | Table header, group and footer rules; illustration layering grey. Replaces Horizon grey-blue `#A8B3BD` |
+| **Label Text**          | Driftwood  | `#6B6259` | Field, dialog and table labels; object-page subtitle. Replaces Horizon slate `#556B82`                 |
 
 All values share a warm undertone (amber-brown family, not cool/blue). Amber, Dark Amber, Burnt Gold, Deep Gold and Umber are steps of one hue (38–42°), so the darker steps still read as amber.
 
@@ -90,7 +94,7 @@ The five semantic states defined in DS-001 §6 remain at Horizon defaults. No ov
 
 ### 3.4 Link Color — Deep Gold
 
-Text links use Deep Gold (`#7A5E1B`) instead of Horizon blue. This eliminates the last SAP-blue fingerprint from interactive elements. Links sit on Warm Stone, Parchment, Gold Mist and white, not only on white, so the value is chosen to clear 4.5:1 on the darkest of them: 4.86:1 on Soft Ash, 5.23:1 on Warm Stone, 6.10:1 on white (D-316). The original `#8B6B1F` fell to 4.27:1 on Warm Stone and 4.26:1 on Gold Mist. The FE variant title also inherits `--sapLinkColor`. Links remain visually distinct from body text (`#1D2D3E`) through both color difference and underline convention.
+Text links use Deep Gold (`#7A5E1B`) instead of Horizon blue. This eliminates the last SAP-blue fingerprint from interactive elements. Links sit on Warm Stone, Parchment, Gold Mist and white, not only on white, so the value is chosen to clear 4.5:1 on the darkest of them: 4.86:1 on Soft Ash, 5.23:1 on Warm Stone, 6.10:1 on white (D-316). The original `#8B6B1F` fell to 4.27:1 on Warm Stone and 4.26:1 on Gold Mist. The FE variant title also inherits `--sapLinkColor`. Links remain visually distinct from body text (`#131E29`) through both color difference and underline convention.
 
 ### 3.5 Domain Chart Colors — Reference
 
@@ -120,7 +124,7 @@ CPP coloring in RPT-004 (Trophy Case) defined in SPEC-21 BR-06. Uses standard Ho
 
 ### 3.7 Contrast Verification (D-316, D-318)
 
-Bar: WCAG 2.2 AA. Text needs 4.5:1, because button labels are 14px (400 at rest, 700 pressed) and dialog labels are 13px bold, both under the 18.5px-bold large-text line. Focus indicators need 3:1 against adjacent colors (SC 1.4.11). Ratios are not rounded. Research, sources and the scored alternatives are in [reference/accent-contrast-research.md](reference/accent-contrast-research.md).
+Bar: WCAG 2.2 AA. Text needs 4.5:1, because button labels are 14px (400 at rest, 700 pressed) and dialog labels are 13px bold, both under the 18.5px-bold large-text line. Focus indicators need 3:1 against adjacent colors (SC 1.4.11). Ratios are shown to two decimals; no rounding crosses a bar. Research, sources and the scored alternatives are in [reference/accent-contrast-research.md](reference/accent-contrast-research.md).
 
 | Pair                                  | Before | After  | Bar   |
 | ------------------------------------- | ------ | ------ | ----- |
@@ -150,6 +154,14 @@ Bar: WCAG 2.2 AA. Text needs 4.5:1, because button labels are 14px (400 at rest,
 | Selected tab / current wizard step text (Deep Gold) | n/a    | 5.83:1 | 4.5:1 |
 | Check mark on white field (Deep Gold)               | n/a    | 6.10:1 | 3:1   |
 
+**D-320 rows.** Horizon's slate label text fell under the bar on Soft Ash. Driftwood `#6B6259` replaces it:
+
+| Pair                     | Before | After  | Bar   |
+| ------------------------ | ------ | ------ | ----- |
+| Label text on Soft Ash   | 4.39:1 | 4.76:1 | 4.5:1 |
+| Label text on Warm Stone | 4.72:1 | 5.12:1 | 4.5:1 |
+| Label text on Parchment  | 5.27:1 | 5.71:1 | 4.5:1 |
+
 "n/a" rows were Horizon blue before. The step-number row is why selection is Burnt Gold and not Dark Amber: white on Dark Amber is 3.79:1, under the text bar.
 
 The pressed label before the fix was Horizon's blue `--sapButton_Emphasized_Active_TextColor` (`#0064D9`) on Burnt Gold. D-316 pins it to white.
@@ -166,7 +178,7 @@ The pressed label before the fix was Horizon's blue `--sapButton_Emphasized_Acti
 
 ### 4.1 Rule
 
-All container and interactive control border radii set to `0`. Sharp edges throughout. This gives the app a clean, architectural feel that pairs with the understated charcoal palette.
+All container and interactive control border radii set to `0`. Sharp edges throughout. This gives the app a clean, architectural feel that pairs with the Obsidian & Amber palette.
 
 ### 4.2 Components Set to 0
 
@@ -219,7 +231,7 @@ The tokens do not reach every corner. Horizon 1.136.16 hardcodes radii on Object
 | Property         | Horizon Default   | Override                                                                                                               |
 | ---------------- | ----------------- | ---------------------------------------------------------------------------------------------------------------------- |
 | Background       | White (`#FFFFFF`) | Obsidian (`#2A2725`)                                                                                                   |
-| Text / app title | Dark (`#1D2D3E`)  | White (`#FFFFFF`)                                                                                                      |
+| Text / app title | Dark (`#131E29`)  | White (`#FFFFFF`)                                                                                                      |
 | Icons            | Dark              | White                                                                                                                  |
 | Hover            | Light grey        | Warm Smoke (`#3D3A37`)                                                                                                 |
 | Bottom separator | 1px border        | Subtle `box-shadow: 0 1px 4px rgba(0,0,0,0.15)` — soft drop shadow anchors the dark bar against the warm stone content |
@@ -249,7 +261,7 @@ The fill gets darker at each state, and the white label gets more contrast with 
 | Hover border     | Darker blue      | Dark Amber (`#A67C2E`)   |
 | Hover text       | Blue (`#0064D9`) | Obsidian (`#2A2725`)     |
 
-Ghost/transparent buttons follow the same pattern — obsidian text, no border, Gold Mist hover.
+Ghost/transparent buttons follow the same pattern — obsidian text, no border at rest, Gold Mist hover with a Dark Amber border, Burnt Gold border when pressed.
 
 The CSV Import upload control is `sap.ui.unified.FileUploader`. Its button is a `sap.m.Button` and takes this treatment, but `sap.ui.unified` hardcodes the button's hover grey, pressed blue and dotted blue outline, so three targeted rules route them back to the tokens (§7.2). The native `<input type="file">` inside it is a 0.01-opacity click target: its Arial computed font is never painted.
 
@@ -317,7 +329,7 @@ Dialogs retain their box-shadow (unlike the flat page content) because they floa
 
 ### 5.9 Message Strips
 
-No overrides beyond 0 border radius. Semantic colors (green, red, orange, blue) drive Message Strip appearance. The charcoal palette does not interfere.
+No overrides beyond 0 border radius. Semantic colors (green, red, orange, blue) drive Message Strip appearance. The Obsidian & Amber palette does not interfere.
 
 ### 5.10 Tabs & Wizard
 
@@ -376,31 +388,25 @@ app/
 
 ### 6.3 Load Mechanism
 
-The app has a single shell entry point (`index.html`) wrapping all pages via side navigation. The override stylesheet is loaded via a `<link>` tag placed **after** the SAPUI5 bootstrap:
+The app has a single shell entry point (`index.html`) wrapping all pages via side navigation. `index.html` carries the SAPUI5 bootstrap (`https://ui5.sap.com/1.136.16/resources/sap-ui-core.js`, `data-sap-ui-theme="sap_horizon"`) and no override `<link>`. The override stylesheet is injected at runtime by the shell component:
 
-```html
-<!-- SAPUI5 bootstrap — loads sap_horizon from CDN -->
-<script
-  id="sap-ui-bootstrap"
-  src="https://ui5.sap.com/1.136.16/resources/sap-ui-core.js"
-  data-sap-ui-theme="sap_horizon"
-  ...
-></script>
-
-<!-- Theme overrides — loaded after Horizon, wins by cascade order -->
-<link rel="stylesheet" href="shared/css/theme-overrides.css" />
+```ts
+// app/shell/Component.ts — init()
+void includeStylesheet("shared/css/theme-overrides.css");
 ```
 
-One `<link>`, one file, applied to all apps. No per-app references needed.
+`onAfterRendering()` then re-appends that `<link>` to the end of `<head>`, so it stays after library CSS that loads late (`sap.ui.unified`, for one) and wins by cascade order.
+
+One injection, one file, applied to all apps. No per-app references needed.
 
 ### 6.4 Override Layers
 
 The CSS file contains two layers:
 
-| Layer                     | Mechanism                                 | Purpose                                                                                                                                         |
-| ------------------------- | ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| **1. Custom properties**  | `:root { --sapBrandColor: #3D3A38; ... }` | Colors, border radii — covers ~90% of overrides. All components referencing these properties update automatically.                              |
-| **2. Targeted selectors** | `.sapMBtnEmphasized { ... }`              | Component-specific tweaks where custom properties alone don't achieve the desired result (e.g., ShellBar dark mode, specific hover treatments). |
+| Layer                     | Mechanism                                           | Purpose                                                                                                                                                     |
+| ------------------------- | --------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **1. Custom properties**  | `:root { --sapBrandColor: #C8973E; ... }`           | Colors, fonts, border radii — 102 of the file's 131 blocks. All components referencing these properties update automatically.                               |
+| **2. Targeted selectors** | `.sapMIBar.sapMTB.sapMOTB.sapTntToolHeader { ... }` | Component-specific tweaks where Horizon hardcodes a value instead of reading a token (the ToolHeader ignores `--sapShellColor`; hardcoded radii and greys). |
 
 Layer 1 always comes first. Layer 2 is the escape hatch — used sparingly and only when needed.
 
@@ -431,7 +437,7 @@ Layer 1 always comes first. Layer 2 is the escape hatch — used sparingly and o
 
 ### 7.1 Layer 1 — CSS Custom Properties
 
-All values set via `:root { }` block — **101 properties**, grouped as in the file. The Horizon Default column was re-read on 2026-10-30 from the `:root` block of `sap/ui/core/themes/sap_horizon/library.css` at 1.136.16.
+All values set via `:root { }` block — **102 properties**, grouped as in the file. The Horizon Default column was re-read on 2026-10-30 from the `:root` block of `sap/ui/core/themes/sap_horizon/library.css` at 1.136.16.
 
 #### Typography
 
@@ -473,6 +479,12 @@ Every family token points at `var(--sapFontFamily)`, so one line carries the bra
 | `--sapLink_Active_Color`  | `#0064D9`       | `#7A5E1B` | Deep Gold                                |
 | `--sapLink_Visited_Color` | `#0064D9`       | `#7A5E1B` | Deep Gold — visited is not a new colour  |
 
+#### Labels
+
+| CSS Custom Property       | Horizon Default | Override  | Notes                                                            |
+| ------------------------- | --------------- | --------- | ---------------------------------------------------------------- |
+| `--sapContent_LabelColor` | `#556B82`       | `#6B6259` | Driftwood — ≥ 4.76:1 on every surface, Soft Ash included (D-320) |
+
 #### Page Background & Surfaces
 
 | CSS Custom Property            | Horizon Default | Override  | Notes                                       |
@@ -499,17 +511,17 @@ Every family token points at `var(--sapFontFamily)`, so one line carries the bra
 
 #### Buttons — Emphasized
 
-| CSS Custom Property                         | Horizon Default | Override  | Notes                                        |
-| ------------------------------------------- | --------------- | --------- | -------------------------------------------- |
-| `--sapButton_Emphasized_Background`         | `#0070F2`       | `#8E6A24` | Burnt Gold                                   |
-| `--sapButton_Emphasized_BorderColor`        | `#0070F2`       | `#8E6A24` | Burnt Gold                                   |
-| `--sapButton_Emphasized_TextColor`          | `#FFFFFF`       | `#FFFFFF` | Pinned                                       |
-| `--sapButton_Emphasized_Hover_Background`   | `#0064D9`       | `#7A5E1B` | Deep Gold                                    |
-| `--sapButton_Emphasized_Hover_BorderColor`  | `#0064D9`       | `#7A5E1B` | Deep Gold                                    |
-| `--sapButton_Emphasized_Hover_TextColor`    | `#FFFFFF`       | `#FFFFFF` | Pinned                                       |
-| `--sapButton_Emphasized_Active_Background`  | `#FFFFFF`       | `#654B1D` | Umber                                        |
-| `--sapButton_Emphasized_Active_BorderColor` | `#0064D9`       | `#654B1D` | Umber                                        |
-| `--sapButton_Emphasized_Active_TextColor`   | `#0064D9`       | `#FFFFFF` | White — Horizon's blue is 1.11:1 on the fill |
+| CSS Custom Property                         | Horizon Default | Override  | Notes                                                    |
+| ------------------------------------------- | --------------- | --------- | -------------------------------------------------------- |
+| `--sapButton_Emphasized_Background`         | `#0070F2`       | `#8E6A24` | Burnt Gold                                               |
+| `--sapButton_Emphasized_BorderColor`        | `#0070F2`       | `#8E6A24` | Burnt Gold                                               |
+| `--sapButton_Emphasized_TextColor`          | `#FFFFFF`       | `#FFFFFF` | Pinned                                                   |
+| `--sapButton_Emphasized_Hover_Background`   | `#0064D9`       | `#7A5E1B` | Deep Gold                                                |
+| `--sapButton_Emphasized_Hover_BorderColor`  | `#0064D9`       | `#7A5E1B` | Deep Gold                                                |
+| `--sapButton_Emphasized_Hover_TextColor`    | `#FFFFFF`       | `#FFFFFF` | Pinned                                                   |
+| `--sapButton_Emphasized_Active_Background`  | `#FFFFFF`       | `#654B1D` | Umber                                                    |
+| `--sapButton_Emphasized_Active_BorderColor` | `#0064D9`       | `#654B1D` | Umber                                                    |
+| `--sapButton_Emphasized_Active_TextColor`   | `#0064D9`       | `#FFFFFF` | White — Horizon's blue would be 1.48:1 on the Umber fill |
 
 #### Buttons — Default
 
@@ -644,7 +656,7 @@ Thirteen `--sapContent_Illustrative_ColorN` tokens, listed with their Horizon va
 
 Horizon default values listed above were read from the `sap_horizon` 1.136.16 `:root` parameter block on the CDN on 2026-10-30. Before that pass several were wrong, among them `--sapBackgroundColor` (`#F5F6F7`, not `#FAFAFA`), `--sapActiveColor`, `--sapShell_TextColor`, `--sapShell_Hover_Background`, `--sapButton_Emphasized_Active_Background` and three radius tokens. The override values are final — Horizon defaults are documented here for reference, not as contractual values.
 
-The two counts — 101 properties in §7.1, 29 rules in §7.2 — are counts of the file as it stands. Recount them whenever the file changes, rather than adjusting the number by hand.
+The two counts — 102 properties in §7.1, 29 rules in §7.2 — are counts of the file as it stands. Recount them whenever the file changes, rather than adjusting the number by hand.
 
 ---
 
@@ -655,10 +667,11 @@ The two counts — 101 properties in §7.1, 29 rules in §7.2 — are counts of 
 | DS-001 §6 (D-60)                         | "Standard Horizon semantic colors only, no custom accent" replaced with Obsidian & Amber palette. Semantic colors unchanged.                                              | D-317    |
 | TH-001 §3.2 (D-308)                      | Warm Charcoal palette replaced by Obsidian & Amber 10-value palette.                                                                                                      | D-317    |
 | TH-001 §5.1 (D-309)                      | ShellBar color changed from `#3D3A38` to `#2A2725` (Obsidian).                                                                                                            | D-317    |
-| TH-001 §3.4                              | Link color changed from Horizon blue to Deep Gold (`#8B6B1F`).                                                                                                            | D-317    |
+| TH-001 §3.4                              | Link color changed from Horizon blue to Deep Gold (`#8B6B1F`, darkened to `#7A5E1B` by D-316).                                                                            | D-317    |
 | TH-001 §3, §5.2, §7                      | Emphasized fill Amber → Burnt Gold, with hover and pressed fills darker. Deep Gold `#8B6B1F` → `#7A5E1B`. Focus ring Amber → Dark Amber. False contrast claims corrected. | D-316    |
 | TH-001 §3.2, §5.5–§5.7, §7               | Selection color, nav indicator and tab bar Amber → Burnt Gold. Field focus border Amber → Dark Amber. Selected text and check mark → Deep Gold.                           | D-318    |
 | TH-001 §3.1, §3.2, §5.3, §5.7, §5.12, §7 | "Zero SAP blue" covers decorative illustrations. Illustration blues → amber ramp; table rules → Taupe; default-button hover text → Obsidian.                              | D-319    |
+| TH-001 §3.2, §3.7, §7.1                  | `--sapContent_LabelColor` → Driftwood `#6B6259`, replacing Horizon slate `#556B82`, which fell to 4.39:1 on Soft Ash.                                                     | D-320    |
 
 ---
 
@@ -670,12 +683,13 @@ The two counts — 101 properties in §7.1, 29 rules in §7.2 — are counts of 
 | D-309 | ~~Dark ShellBar~~                  | Superseded by D-317. Was: Charcoal background (`#3D3A38`).                                                                                                                                                                                                                                                                          |
 | D-310 | Zero border radius                 | All containers and interactive controls set to `0`. Exceptions: radio buttons, avatars, switch tracks, progress indicators, wizard step circles.                                                                                                                                                                                    |
 | D-311 | ~~Component overrides~~            | Superseded by D-317. Was: Charcoal emphasized buttons, Warm Mist hover/selection.                                                                                                                                                                                                                                                   |
-| D-312 | Override strategy                  | Single CSS file (`app/shared/css/theme-overrides.css`) loaded after Horizon via `index.html`. Two layers: CSS custom properties first, targeted selectors as fallback. No theme build tooling.                                                                                                                                      |
+| D-312 | Override strategy                  | Single CSS file (`app/shared/css/theme-overrides.css`) loaded after Horizon — today by `includeStylesheet` in the shell `Component.ts`, re-appended after render (§6.3). Two layers: CSS custom properties first, targeted selectors as fallback. No theme build tooling.                                                           |
 | D-313 | ~~Color mapping table~~            | Superseded by D-317. Was: 28 custom properties, 8 kept at defaults.                                                                                                                                                                                                                                                                 |
-| D-317 | Obsidian & Amber identity          | Full brand rebrand. Obsidian (`#2A2725`) shell, Amber (`#C8973E`) accent, Deep Gold (`#8B6B1F`) links, Warm Stone (`#F0EDEA`) page background, Soft Ash (`#E8E5E2`) side nav. Override counts live in §7, not here. Supersedes D-308, D-309, D-311, D-313.                                                                          |
+| D-317 | Obsidian & Amber identity          | Full brand rebrand. Obsidian (`#2A2725`) shell, Amber (`#C8973E`) accent, Deep Gold (`#8B6B1F`, now `#7A5E1B` per D-316) links, Warm Stone (`#F0EDEA`) page background, Soft Ash (`#E8E5E2`) side nav. Override counts live in §7, not here. Supersedes D-308, D-309, D-311, D-313.                                                 |
 | D-316 | Accent contrast                    | Amber is non-text only. Emphasized buttons: white text on Burnt Gold `#8E6A24`, Deep Gold `#7A5E1B` on hover, Umber `#654B1D` pressed, active text pinned white. Deep Gold darkened to `#7A5E1B`. Focus ring is Dark Amber `#A67C2E`. All pass WCAG 2.2 AA (§3.7). Amends D-317.                                                    |
 | D-318 | Selection and field-focus contrast | The three Amber state cues left after D-316 (2.10–2.64:1) move down the hue. `--sapSelectedColor` and `--sapHighlightColor` → Burnt Gold `#8E6A24` (≥ 3.95:1 on every surface, 4.96:1 under white). `--sapField_Focus_BorderColor` → Dark Amber `#A67C2E`, matching the focus ring. Amber keeps brand and hover only. Amends D-316. |
 | D-319 | Illustrations and structural rules | §3.1's "zero SAP blue" covers decorative artwork. `IllustratedMessage` blues → amber ramp, navy outlines → Obsidian, cool greys → Taupe `#B3ABA3`, which also replaces Horizon's grey-blue table rules. Semantic blue and issuer chart colors stay. Amends D-317.                                                                   |
+| D-320 | Label text                         | `--sapContent_LabelColor` → Driftwood `#6B6259`, the warm twin of Horizon's slate `#556B82`. 5.71:1 on Parchment, 5.12:1 on Warm Stone, 4.76:1 on Soft Ash, where the slate fell to 4.39:1. Fixes D-018.                                                                                                                            |
 
 ---
 
