@@ -41,19 +41,30 @@ function requiresClassExport(fileName: string): boolean {
  * All anchor at column 0 so class members (indented) never match.
  */
 const FORBIDDEN = [
-  { pattern: /^(?:export\s+)?(?:async\s+)?function\b/, label: "free function declaration" },
+  {
+    pattern: /^(?:export\s+)?(?:async\s+)?function\b/,
+    label: "free function declaration",
+  },
   { pattern: /^(?:export\s+)?(?:let|var)\b/, label: "mutable module state" },
   {
-    pattern: /^(?:export\s+)?const\s+[A-Za-z_$][\w$]*\s*(?::[^=]+)?=\s*(?:async\s+)?(?:function\b|\(?[^=]*=>)/,
+    pattern:
+      /^(?:export\s+)?const\s+[A-Za-z_$][\w$]*\s*(?::[^=]+)?=\s*(?:async\s+)?(?:function\b|\(?[^=]*=>)/,
     label: "free function assigned to a module-scope const",
   },
 ];
+
+/** A lifecycle extension is wiring, like a Facade: its hooks delegate to a logic class. */
+const EXTENDS_CONTROLLER_EXTENSION = /\bextends\s+ControllerExtension\b/;
+
+/** Control flow that marks logic living in the extension rather than its logic class. */
+const EXTENSION_LOGIC = /\b(?:if|else|for|while|do|switch|try|catch)\b/;
 
 /** Matches a default export and captures what is exported. */
 const DEFAULT_EXPORT = /^export\s+default\s+(.+?)\s*;?\s*$/;
 
 /** Matches a class declaration and captures its name. */
-const CLASS_DECL = /^(?:export\s+)?(?:default\s+)?(?:abstract\s+)?class\s+([A-Za-z_$][\w$]*)/;
+const CLASS_DECL =
+  /^(?:export\s+)?(?:default\s+)?(?:abstract\s+)?class\s+([A-Za-z_$][\w$]*)/;
 
 interface Violation {
   filePath: string;
@@ -71,7 +82,9 @@ function blankNonCode(source: string): string {
   return source
     .replace(/\/\*[\s\S]*?\*\//g, match => match.replace(/[^\n]/g, " "))
     .replace(/\/\/[^\n]*/g, match => " ".repeat(match.length))
-    .replace(/(['"`])(?:\\.|(?!\1)[^\\\n])*\1/g, match => match[0].repeat(match.length));
+    .replace(/(['"`])(?:\\.|(?!\1)[^\\\n])*\1/g, match =>
+      match[0].repeat(match.length),
+    );
 }
 
 /**
@@ -94,6 +107,19 @@ function scanFile(filePath: string): Violation[] {
     }
   });
 
+  if (EXTENDS_CONTROLLER_EXTENSION.test(source)) {
+    lines.forEach((text, index) => {
+      if (EXTENSION_LOGIC.test(text)) {
+        violations.push({
+          filePath: relativePath,
+          line: index + 1,
+          label:
+            "control flow in a ControllerExtension (delegate the hook to a logic class)",
+        });
+      }
+    });
+  }
+
   const classNames = new Set(
     lines.map(text => CLASS_DECL.exec(text)?.[1]).filter(Boolean),
   );
@@ -113,7 +139,8 @@ function scanFile(filePath: string): Violation[] {
   } else if (requiresClassExport(basename(filePath))) {
     const exported = defaultExport.exported;
     const exportsClass =
-      exported.startsWith("class ") || classNames.has(exported.replace(/;$/, ""));
+      exported.startsWith("class ") ||
+      classNames.has(exported.replace(/;$/, ""));
     if (!exportsClass) {
       violations.push({
         filePath: relativePath,
@@ -143,13 +170,16 @@ function main(): void {
     `Scanning ${files.length} controller/extension module(s) for shape...`,
     "All controllers/extensions are a single class with no free code.",
     violations.map(
-      violation => `${violation.filePath}:${violation.line}  ${violation.label}`,
+      violation =>
+        `${violation.filePath}:${violation.line}  ${violation.label}`,
     ),
     `\nFound ${violations.length} controller-shape violation(s). No controller or ` +
       `extension holds code outside a class: no free functions, no module-level ` +
       `let/var state. A registered controller (\`*.controller.ts\`) must \`export ` +
       `default class …\`; an FE custom-action handler module (\`*Ext.ts\`) may export ` +
-      `the SAP object surface but must delegate all logic to a class. Move shared ` +
+      `the SAP object surface but must delegate all logic to a class. A lifecycle ` +
+      `\`ControllerExtension\` is wiring: no if/for/while/switch/try in it — each ` +
+      `hook delegates to a plain logic class that QUnit can test. Move shared ` +
       `behaviour into a helper class (e.g. app/shared/DialogManager.ts, ` +
       `app/shared/Messaging.ts) held as a class field.`,
   );
