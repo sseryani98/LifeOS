@@ -1,6 +1,6 @@
 import { MessagingUtility } from "../../../srv/modules/shared/messagingUtility.js";
 
-import { CONNECTION, HTTP, VERB_KEYS } from "./constants.js";
+import { CONNECTION, HTTP, VALID_CODES, VERB_KEYS } from "./constants.js";
 import type {
   NextAction,
   VerbErrorDetail,
@@ -30,6 +30,23 @@ export class Envelope {
   }
 
   /**
+   * Renders the valid-codes argument of a rejection. An empty list says so in
+   * words, because a blank reads as a template fault rather than as "none".
+   * @param codes Every code the caller could have addressed.
+   * @returns The codes, comma-joined and capped, with the remainder counted.
+   */
+  static formatValidCodes(codes: readonly string[]): string {
+    if (codes.length === 0)
+      return Envelope.resolveMessage(VALID_CODES.NONE_KEY);
+    const listed = codes.slice(0, VALID_CODES.LIMIT).join(", ");
+    if (codes.length <= VALID_CODES.LIMIT) return listed;
+    return Envelope.resolveMessage(VALID_CODES.TRUNCATED_KEY, [
+      listed,
+      String(codes.length - VALID_CODES.LIMIT),
+    ]);
+  }
+
+  /**
    * Raises a rejection under a runtime message key.
    * @param status HTTP status the caller sees.
    * @param key Runtime message key.
@@ -43,7 +60,12 @@ export class Envelope {
     params?: string[],
     detail?: VerbErrorDetail,
   ): never {
-    throw new VerbError(status, key, Envelope.resolveMessage(key, params), detail);
+    throw new VerbError(
+      status,
+      key,
+      Envelope.resolveMessage(key, params),
+      detail,
+    );
   }
 
   /**
@@ -95,8 +117,9 @@ export class Envelope {
       };
     }
     // A fault in this layer, not a lost store. The thrown text is deliberately
-    // dropped: it is where a stack, a path or a SQL fragment would reach the
-    // model, which the spec requires a server to sanitize.
+    // dropped from the envelope — a stack, a path or a SQL fragment must not
+    // reach the model — so stderr is the only place the cause survives.
+    Envelope._logInternalFailure(error);
     return {
       ok: false,
       timestamp,
@@ -122,9 +145,26 @@ export class Envelope {
   }
 
   /**
-   * Reads a CAP handler rejection off a thrown value. Measured on the pinned
-   * runtime: `req.reject(409, key)` arrives as numeric `code: 409` with the key
-   * as the message. A driver's SQLSTATE (`"23505"`) is a string and is
+   * Logs the cause of an internal failure through `cds.log`, which the server
+   * redirects to stderr, off the JSON-RPC stream. Resolved off the global, not imported:
+   * a static "@sap/cds" import would run ahead of the server's CDS_TYPESCRIPT.
+   * @param error The thrown value.
+   */
+  private static _logInternalFailure(error: unknown): void {
+    const runtime = (
+      globalThis as {
+        cds?: {
+          log: (channel: string) => { error: (...args: unknown[]) => void };
+        };
+      }
+    ).cds;
+    const cause =
+      error instanceof Error ? (error.stack ?? error.message) : String(error);
+    runtime?.log("verbs").error(VERB_KEYS.INTERNAL_FAILURE, cause);
+  }
+
+  /**
+   * Reads a handler rejection off a thrown value. A driver's SQLSTATE is
    * deliberately not a status, or a constraint violation would read as one.
    * @param error The thrown value.
    * @returns The rejection's envelope fields, or undefined when it is not one.
@@ -138,8 +178,13 @@ export class Envelope {
       statusCode?: unknown;
       code?: unknown;
       message?: unknown;
+      args?: unknown;
     };
-    const status = [candidate.status, candidate.statusCode, candidate.code].find(
+    const status = [
+      candidate.status,
+      candidate.statusCode,
+      candidate.code,
+    ].find(
       value =>
         typeof value === "number" &&
         value >= HTTP.BAD_REQUEST &&
@@ -156,7 +201,19 @@ export class Envelope {
     const message =
       typeof candidate.message === "string" && candidate.message !== code
         ? candidate.message
-        : Envelope.resolveMessage(code);
+        : Envelope.resolveMessage(
+            code,
+            Envelope._readRejectionArgs(candidate.args),
+          );
     return { status, code, message };
+  }
+
+  /**
+   * Reads the placeholder values a CAP rejection carries on `args`.
+   * @param args The thrown value's `args`, whatever it holds.
+   * @returns The values as strings, or undefined when there are none.
+   */
+  private static _readRejectionArgs(args: unknown): string[] | undefined {
+    return Array.isArray(args) ? args.map(value => String(value)) : undefined;
   }
 }

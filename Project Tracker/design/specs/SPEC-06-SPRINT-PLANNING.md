@@ -3,11 +3,11 @@
 **Spec ID:** SPEC-06
 **FRICEW Objects:** FRM-002 (Form)
 **Wave:** 2
-**CDS Service:** Not yet defined — see §2. This spec is an input to the Data Model stage.
+**CDS Service:** `TrackerService` (`srv/tracker-service.cds`) — the module's one CDS service, defined at the Data Model stage; §2 was its input.
 **Status:** Approved
-**Provisional on:** **R1** (D-39), inherited from SPEC-01 … SPEC-05. ~~and **R9** (D-69), which a Form
+**Provisional on:** **None — R1 executed and closed (D-170).** _As written:_ **R1** (D-39), inherited from SPEC-01 … SPEC-05. ~~and **R9** (D-69), which a Form
 inherits by the ruling taken at this workshop (D-82).~~ **R9 was executed and discharged at the
-Information Architecture stage, 2026-08-06 (D-140, D-141).** **Not Approved-for-build until R1 clears.**
+Information Architecture stage, 2026-08-06 (D-140, D-141).** ~~**Not Approved-for-build until R1 clears.**~~ **R1 executed and closed (D-170).**
 
 ---
 
@@ -22,6 +22,7 @@ Information Architecture stage, 2026-08-06 (D-140, D-141).** **Not Approved-for-
 | 2026-07-30 | Sandro & Claude | Initial creation from the SPEC-06 workshop. Records D-76 through D-82. Provisional on R1 (D-39) and R9 (D-82). SPEC-01 amended in-session with its **seventh** and **eighth** amendments — `plan_sprint`'s `stories[]` gains `shipsUi` (D-76) and the verb gains an explicit `workspace` input (D-77). SPEC-02 §3.2's `Milestone.shipsUi` source cell sharpened; SPEC-04 §6's row addressed to this spec struck through as applied (BR-16). `research/README.md` §5's R9 Affects cell widened to the two Forms (D-82). **SPEC-06 resolves no OI; OI-05 alone remains.**                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | 2026-08-06 | Sandro & Claude | **§3.1's deferred "Layout, navigation, Fiori Elements vs freestyle" is discharged in full.** Information Architecture ruled FRM-002 **a dialog launched from the project view**, which no spec previously stated (D-139); **Design System ruled build technology — Fiori Elements FPM, draft enablement OFF** (D-144). The dialog is loaded by the page controller through the shared `DialogManager`; its scalar fields are `sap.fe.macros.Field`, its mode switch a `sap.m.SegmentedButton`, and its story rows a `sap.m.Table` with drag-and-drop reorder (D-148). No business rule and no FUT changes. Status stays **Approved**.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | 2026-08-15 | Sandro & Claude | **§2 amendment 3 corrected at the Data Model stage (D-172).** An empty `branch` surfaces as **`ASSERT_MANDATORY`**, not `ASSERT_NOT_NULL` — measured against the pinned runtime while executing R1; `ASSERT_NOT_NULL` belongs to a bare `not null` column, a different declaration. **The ruling is unchanged, only the key it names**, and BR-11 and §5 are unaffected since neither mints a `frm.*` key for this case. Status stays **Approved**.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| 2026-11-04 | Claude          | Doc refresh: R1 marked executed and closed (D-170) in the header and wherever this spec gated on it; CDS Service named (`TrackerService`). No rule, FUT or count changed. Status unchanged. |
 
 ---
 
@@ -273,7 +274,7 @@ BR-26/BR-31's warning, delivered inline at the two moments it applies.
   in production. **The serving position is one origin behind a reverse proxy (D-141)**, which removes
   the preflight question entirely; execution belongs to the **Tech Stack** stage.
 
-**This spec is not Approved-for-build until R1 clears.**
+~~**This spec is not Approved-for-build until R1 clears.**~~ **R1 executed and closed (D-170).**
 
 **Cross-spec notes raised, not designed here**
 

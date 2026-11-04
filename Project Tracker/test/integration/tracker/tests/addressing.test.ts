@@ -8,6 +8,7 @@ import {
   DEFECT_INPUT,
   STORY_REFERENCE,
   UNRESOLVABLE,
+  WORLD,
 } from "../../../shared/data/world.js";
 import {
   readActivityLog,
@@ -24,6 +25,7 @@ import {
   trackerServer,
 } from "../../../shared/support/trackerHarness.js";
 import { STAGE } from "../data/chainStates.js";
+import { UNSEEDED_ACTOR } from "../data/seededLibrary.js";
 import {
   buildVerbContext,
   expectFailure,
@@ -96,6 +98,24 @@ describe("addressing and identity", () => {
     expect(result.code).toBe("verb.identity.missing");
   });
 
+  /** An unseeded caller otherwise trips the activity foreign key as an unnamed 500, and only on a database that enforces it. */
+  it("refuses a write from an identity the actor list does not carry, naming the valid ones", async () => {
+    const context = buildVerbContext(service, UNSEEDED_ACTOR);
+
+    const result = expectFailure(
+      await startStage.run(context, {
+        story: STORY_REFERENCE,
+        stage: STAGE.BUILD,
+      }),
+    );
+
+    expect(result.status).toBe(400);
+    expect(result.code).toBe("verb.identity.unknown");
+    expect(result.message).toContain("PROJECT_TRACKER_ACTOR");
+    expect(result.message).toContain(ACTORS.IMPLEMENTER);
+    expect(await readActivityLog(world.workspaceId)).toHaveLength(0);
+  });
+
   /** An unknown stage must list the chain's codes, or the caller guesses at the next call. */
   it("lists the chain's codes when a stage does not resolve", async () => {
     const context = buildVerbContext(service, ACTORS.IMPLEMENTER);
@@ -112,8 +132,8 @@ describe("addressing and identity", () => {
     expect(result.message).toContain(STAGE.CODE_QUALITY);
   });
 
-  /** An unknown story must be refused rather than created, or a typo silently forks the board. */
-  it("refuses a story that does not exist in the workspace", async () => {
+  /** An unknown story must be refused rather than created, and the codes it lists must be stories, not the workspace slug. */
+  it("refuses a story that does not exist in the workspace, listing the stories it holds", async () => {
     const context = buildVerbContext(service, ACTORS.IMPLEMENTER);
 
     const result = expectFailure(
@@ -125,10 +145,11 @@ describe("addressing and identity", () => {
 
     expect(result.status).toBe(404);
     expect(result.code).toBe("verb.target.notFound");
+    expect(result.message).toContain(`Valid codes: ${WORLD.STORY.storyId}.`);
   });
 
-  /** An unknown workspace must not fall back to the only one there is. */
-  it("refuses a workspace slug that does not exist", async () => {
+  /** An unknown workspace must not fall back to the only one there is, but it must name it as the valid choice. */
+  it("refuses a workspace slug that does not exist, listing the slugs that do", async () => {
     const context = buildVerbContext(service, ACTORS.IMPLEMENTER);
 
     const result = expectFailure(
@@ -140,5 +161,6 @@ describe("addressing and identity", () => {
 
     expect(result.status).toBe(404);
     expect(result.code).toBe("verb.target.notFound");
+    expect(result.message).toContain(`Valid codes: ${WORLD.WORKSPACE.slug}.`);
   });
 });

@@ -10,7 +10,7 @@ export class MilestoneStatus {
    * a story created Done is chainless. A chain of only recommended steps has no
    * blocking set, so it falls through to the started checks rather than being
    * vacuously Done.
-   * @param tasks The story's stages, each with its library step kind.
+   * @param tasks The story's stages, each with the kind frozen onto it at instantiation.
    * @returns The derived status code.
    */
   static deriveFromChain(

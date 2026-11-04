@@ -5,12 +5,17 @@ import { TrackerMcpServer } from "../../../mcp/server.js";
 import {
   ACTORS,
   DEFECT_INPUT,
+  NEGATIVE_COUNT_TEST_RUN_METRICS,
   SPRINT_PLAN_WITH_BAD_TYPE,
   STORY_REFERENCE,
   UNRESOLVABLE,
   WORLD,
 } from "../../shared/data/world.js";
-import { readActivityLog } from "../../shared/support/readTracker.js";
+import {
+  countInitiativesOf,
+  readActivityLog,
+  readTestRunsOf,
+} from "../../shared/support/readTracker.js";
 import {
   clearWorld,
   seedCanonicalWorld,
@@ -23,6 +28,7 @@ import {
 import {
   buildReopenStageInput,
   buildSprintPlanInput,
+  buildWorkspaceTestRunInputWithMetrics,
 } from "../../shared/support/verbInputs.js";
 import {
   CONCURRENT_READS,
@@ -34,6 +40,8 @@ import {
   FORBIDDEN_TOOLS,
   INSTRUCTIONS_MARKERS,
   MANIFEST_VERSION,
+  NON_EMPTY_ARRAY_PATHS,
+  NON_NEGATIVE_METRIC_PATHS,
   RETRY_OUTCOME,
   UNKNOWN_ARGUMENT,
   WRITE_TOOL_KINDS,
@@ -44,6 +52,8 @@ import {
   connectClientTo,
   connectInMemoryClient,
   readSchemaEnum,
+  readSchemaMinimum,
+  readSchemaMinItems,
   readToolEnvelope,
 } from "../support/mcpHarness.js";
 
@@ -160,6 +170,60 @@ describe("the exposed tool surface", () => {
     });
 
     expect(result.isError).toBe(true);
+  });
+
+  /** The advertised minimum is what tells a host, before it calls, that a sprint needs a story. */
+  it.each(NON_EMPTY_ARRAY_PATHS)(
+    "declares $TOOL's $PROPERTY as non-empty on the advertised schema",
+    async path => {
+      const listed = await client.listTools();
+      const tool = listed.tools.find(
+        candidate => candidate.name === path.TOOL,
+      );
+
+      expect(readSchemaMinItems(tool, path.PROPERTY)).toBe(1);
+    },
+  );
+
+  /** A client builds its call from the advertised schema, so a floor the schema hides is one it will cross. */
+  it.each(NON_NEGATIVE_METRIC_PATHS)(
+    "declares $TOOL's $MEMBER count non-negative on the advertised schema",
+    async path => {
+      const listed = await client.listTools();
+      const tool = listed.tools.find(
+        candidate => candidate.name === path.TOOL,
+      );
+
+      expect(readSchemaMinimum(tool, path.PROPERTY, path.MEMBER)).toBe(0);
+    },
+  );
+
+  /** A negative count can balance an over-total one, so the schema must refuse it before any row is written. */
+  it("refuses a test run carrying a negative count and writes nothing", async () => {
+    const result = await client.callTool({
+      name: "record_test_run",
+      arguments: buildWorkspaceTestRunInputWithMetrics(
+        NEGATIVE_COUNT_TEST_RUN_METRICS,
+      ),
+    });
+    const events = await readActivityLog(world.workspaceId);
+
+    expect(result.isError).toBe(true);
+    expect(await readTestRunsOf(world.workspaceId)).toHaveLength(0);
+    expect(events).toEqual([]);
+  });
+
+  /** A sprint is an Initiative and its stories; an empty plan wrote an Active sprint with none, and its event. */
+  it("refuses a sprint planned with no stories and writes nothing", async () => {
+    const result = await client.callTool({
+      name: "plan_sprint",
+      arguments: buildSprintPlanInput([]),
+    });
+    const events = await readActivityLog(world.workspaceId);
+
+    expect(result.isError).toBe(true);
+    expect(await countInitiativesOf(world.workspaceId)).toBe(1);
+    expect(events).toEqual([]);
   });
 
   /** A misspelled argument was accepted in silence, so the caller's typo read as a success. */

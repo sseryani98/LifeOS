@@ -3,7 +3,7 @@ import { z } from "zod";
 import { CODES } from "../../srv/modules/shared/constants.js";
 
 import { Addressing } from "./shared/addressing.js";
-import { ACTIVITY_KINDS, GUARD, HTTP, VERB_KEYS } from "./shared/constants.js";
+import { ACTIVITY_KINDS, HTTP, VERB_KEYS } from "./shared/constants.js";
 import { Envelope } from "./shared/envelope.js";
 import { VerbRunner } from "./shared/runVerb.js";
 import { StageGuards } from "./shared/stageGuards.js";
@@ -48,27 +48,17 @@ export class ReopenStageVerb implements VerbDefinition {
    */
   async run(ctx: VerbContext, input: ReopenStageInput): Promise<VerbResult> {
     return VerbRunner.runWriteVerb(ctx, async (gateway, timestamp) => {
-      if (!input.reason.trim()) {
-        Envelope.rejectVerb(HTTP.BAD_REQUEST, VERB_KEYS.REOPEN_REASON_REQUIRED);
-      }
       const { workspace, milestone } = await StageGuards.resolveStoryContext(
         gateway,
         input.story,
       );
       const chain = await gateway.readChain(milestone.ID);
       const task = StageGuards.resolveStage(chain, input.stage);
-      // Only a complete stage reopens: anything else would make this verb an
-      // ungated start_stage, skipping the predecessor-blocking guard.
-      if (task.status_code !== CODES.TASK_STATUS.COMPLETE) {
-        Envelope.rejectVerb(
-          HTTP.CONFLICT,
-          VERB_KEYS.STAGE_NOT_COMPLETE,
-          [task.step_code, task.status_code],
-          {
-            target: task.step_code,
-            remediation: Envelope.resolveMessage(GUARD.REMEDIATION_START_STAGE),
-          },
-        );
+      // The stage's state outranks the reason: a caller reopening the wrong
+      // stage learns that before being asked to explain itself.
+      StageGuards.assertStageComplete(task);
+      if (!input.reason.trim()) {
+        Envelope.rejectVerb(HTTP.BAD_REQUEST, VERB_KEYS.REOPEN_REASON_REQUIRED);
       }
       await gateway.updateTask(task.ID, {
         status_code: CODES.TASK_STATUS.IN_PROGRESS,

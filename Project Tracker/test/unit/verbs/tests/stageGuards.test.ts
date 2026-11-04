@@ -1,12 +1,16 @@
 import { StageGuards } from "../../../../mcp/verbs/shared/stageGuards.js";
+import { TrackerGateway } from "../../../../mcp/verbs/shared/trackerGateway.js";
 import { VerbError } from "../../../../mcp/verbs/shared/verbError.js";
 import {
+  ACTOR_FIXTURE,
   CHAIN_FIXTURE,
   FINISHED_CHAIN,
   FIXTURE_STORY_ID,
   GUARD_KEYS,
+  OPEN_BUILD_STEPS,
   SUBTASK_FIXTURE,
 } from "../data/verbFixtures.js";
+import { buildRecordingRunner } from "../support/fakeRunner.js";
 
 const BUILD = CHAIN_FIXTURE[0];
 const HUMAN_REVIEW = CHAIN_FIXTURE[1];
@@ -17,6 +21,37 @@ describe("stage guards", () => {
   it("refuses a caller that declares nothing and trims one that does", () => {
     expect(StageGuards.assertCallerIdentity(" implementer ")).toBe("implementer");
     expect(() => StageGuards.assertCallerIdentity("   ")).toThrow(VerbError);
+  });
+
+  /** An unseeded caller otherwise trips the activity foreign key as an unnamed fault, and only where the database enforces it. */
+  it("refuses an identity the actor list does not carry, naming the variable and the valid codes", async () => {
+    const gateway = new TrackerGateway(
+      buildRecordingRunner([ACTOR_FIXTURE.ROWS, ACTOR_FIXTURE.ROWS]),
+    );
+    let raised: VerbError | null = null;
+
+    await expect(
+      StageGuards.assertKnownActor(gateway, ACTOR_FIXTURE.KNOWN),
+    ).resolves.toBeUndefined();
+    try {
+      await StageGuards.assertKnownActor(gateway, ACTOR_FIXTURE.UNSEEDED);
+    } catch (error: unknown) {
+      raised = error as VerbError;
+    }
+
+    expect(raised?.status).toBe(400);
+    expect(raised?.code).toBe("verb.identity.unknown");
+    expect(raised?.message).toContain("PROJECT_TRACKER_ACTOR");
+    expect(raised?.message).toContain("implementer, sandro");
+  });
+
+  /** No kind is not a human kind, or any name the list lacks could close a human-only stage. */
+  it("refuses a human-only completion by a caller with no seeded kind", async () => {
+    const gateway = new TrackerGateway(buildRecordingRunner([[]]));
+
+    await expect(
+      StageGuards.assertHumanCaller(gateway, ACTOR_FIXTURE.UNSEEDED, HUMAN_REVIEW),
+    ).rejects.toMatchObject({ code: "wfl.stage.humanOnly" });
   });
 
   /** Recommended steps never block, or a skippable stage strands everything after it. */
@@ -32,6 +67,22 @@ describe("stage guards", () => {
     expect(raised?.remediation).toContain("human-review");
     expect(raised?.remediation).not.toContain("documentation");
     expect(() => StageGuards.assertStageNotBlocked(CHAIN_FIXTURE, HUMAN_REVIEW)).not.toThrow();
+  });
+
+  /** An agent skipping several build steps must be told every one, in order, and the shared command once. */
+  it("names every open earlier step in order and a shared driver once", () => {
+    const gate = OPEN_BUILD_STEPS[3];
+    let raised: VerbError | null = null;
+    try {
+      StageGuards.assertSubtaskNotBlocked(OPEN_BUILD_STEPS, gate);
+    } catch (error: unknown) {
+      raised = error as VerbError;
+    }
+
+    expect(raised?.code).toBe("wfl.subtask.predecessorOpen");
+    expect(raised?.target).toBe("gate");
+    expect(raised?.remediation).toContain("brief, red, implement");
+    expect((raised?.remediation ?? "").split("/build").length - 1).toBe(1);
   });
 
   /** The rejection must name the key and the reopen route, or the caller retries blind against a closed stage. */
@@ -79,6 +130,12 @@ describe("stage guards", () => {
     expect(() => StageGuards.resolveStage(CHAIN_FIXTURE, "nope")).toThrow(VerbError);
     expect(StageGuards.resolveSubtask(SUBTASK_FIXTURE, "handoff").ID).toBe("sub-handoff");
     expect(() => StageGuards.resolveSubtask(SUBTASK_FIXTURE, "smoke")).toThrow(VerbError);
+  });
+
+  /** A blank list read "Valid codes: ." — a template fault, not the fact that nothing is addressable. */
+  it("says none when the stage or the chain has nothing to address", () => {
+    expect(() => StageGuards.resolveSubtask([], "gate")).toThrow(/Valid codes: none\./);
+    expect(() => StageGuards.resolveStage([], "commit")).toThrow(/Valid codes: none\./);
   });
 
   /** The next action is the first incomplete stage regardless of kind, and null once none remains. */

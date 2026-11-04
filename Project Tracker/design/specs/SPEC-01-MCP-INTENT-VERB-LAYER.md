@@ -3,9 +3,9 @@
 **Spec ID:** SPEC-01
 **FRICEW Objects:** INT-001 (Interface)
 **Wave:** 1
-**CDS Service:** Not yet defined — see §2. This spec is an input to the Data Model stage.
+**CDS Service:** `TrackerService` (`srv/tracker-service.cds`) — the module's one CDS service, defined at the Data Model stage; §2 was its input.
 **Status:** Approved
-**Provisional on:** **R1** (D-39) — every behaviour below was verified on in-memory SQLite only.
+**Provisional on:** **None — R1 executed and closed (D-170).** _As written:_ **R1** (D-39) — every behaviour below was verified on in-memory SQLite only.
 
 ---
 
@@ -20,6 +20,7 @@
 | 2026-07-30 | Sandro & Claude | Applied the **ninth** amendment at the SPEC-07 workshop, in two parts (D-83, D-85). (a) §3.1's `project_view` **Returns** cell said "chain", singular, and never said whose, while RPT-003 is per-story — it now reads **each Milestone's chain**, and RPT-003 selects which one to render (SPEC-07 BR-04, BR-05). (b) The write-verb table gains an **`Activity.kind`** column naming all nine emitted kinds — `stageStarted`, `stageCompleted`, `subtaskCompleted`, `stageReopened`, `defectLogged`, `defectResolved`, `decisionRecorded`, `testRunRecorded` and `sprintPlanned` — because BR-03 required every verb to emit a `kind` and **no spec named one**, leaving SPEC-05 BR-33 and SPEC-06 BR-25 referencing an empty set. `sprintPlanned` is shared with FRM-002, so RPT-004 splits machine from human on **`actor`** (D-84). **D-37 §11.1's trigger does not fire** — no guard changed and no verb gained an input; D-55 and D-77's precedent. Status stays **Draft**.                                                                                                                                                                                                                                                                     |
 | 2026-07-30 | Sandro & Claude | Applied the **seventh** and **eighth** amendments at the SPEC-06 workshop. `plan_sprint`'s `stories[]` gains a fourth field, **`shipsUi`** (D-76) — SPEC-02 §3.2 already names `plan_sprint` as a caller that sets it, and without it D-47's predicate evaluates against null on every human-planned story while SPEC-03 BR-16 asserts no Milestone carries a null `shipsUi`. The verb gains an explicit **`workspace`** input (D-77), because §5 already rejects a "duplicate story ID in workspace" with no signature carrying that scope. §3.1's `plan_sprint` row, **BR-21** and **FUT-013**'s literal are updated; no rule is renumbered. **A verb signature changed and D-37 §11.1's amendment trigger does not fire** — that trigger is scoped to the SPEC-01/SPEC-02 seam, and this is neither a guard nor that seam. Status stays **Draft**.                                                                                                                                                                                                                                                                                                                                                                                                  |
 | 2026-07-30 | Sandro & Claude | Applied the **tenth** amendment at the SPEC-08 workshop (D-96). `log_defect` required a `story`, but `/human-review-loop` runs ad hoc as well as in-chain and the ad-hoc entry point has no story — while [SPEC-03](SPEC-03-FINANCIAL-PLANNER-MIGRATION-LOAD.md) BR-21 already permits an Initiative-scoped Defect and all four seeded Defects carry `story` null. So a legal state had **no verb that could create it**, the sixth occurrence of D-40's analysis after D-40, D-74, D-76, D-77, D-78 and D-83. §3.1's row now reads `story?`, `workspace?` with footnote ², new **BR-18a** requires exactly one of the two, §2's `Defect` row names the two nullable links, and §5 gains **`verb.defect.scopeRequired`** (400) — a verb-input shape check no CAP annotation can pre-empt, because with neither input there is nothing to resolve and no row to attempt. **FUT-009 is corrected** — it called `log_defect` with no scope at all, which BR-18a now rejects, so it names the story mode and its precondition names the story. **D-37 §11.1's trigger does not fire** — it is scoped to a _guard_ on the SPEC-01/SPEC-02 seam, and D-77 is the precedent for it holding when a signature genuinely changed. Status stays **Draft** (D-93). |
+| 2026-11-04 | Claude          | Doc refresh: R1 marked executed and closed (D-170) in the header and wherever this spec gated on it; CDS Service named (`TrackerService`). No rule, FUT or count changed. Status unchanged. |
 
 | 2026-07-30 | Sandro & Claude | Applied the **eleventh** amendment at the SPEC-09 workshop (D-104, D-105, D-106). `record_test_run` required a `story` and a `stage`, and its only caller is a `posttest` script that on a bare `npm test` has neither — so the verb gains a **`workspace`** mode exactly as `log_defect` did at D-96, the **seventh** occurrence of D-40's analysis. §3.1's row now reads `story?`+`stage?`, `workspace?`, `metrics`, `executedAt` with footnote ³; new **BR-20a** (exactly one scope) and **BR-20b** (explicit `executedAt`); §5 gains **`verb.testrun.scopeRequired`** (400). The shape needed no entity change — [SPEC-03](SPEC-03-FINANCIAL-PLANNER-MIGRATION-LOAD.md) BR-26 already permits a null Task link and the seeded run is that shape. Two mapping-table corrections: **`startTime` → `executedAt`** is added, discharging [SPEC-05](SPEC-05-WORKSPACE-HEADER-AND-HEALTH.md) §6's obligation; and **`location` is dropped** from the per-failure shape, because `generateTestReport.ts:95` sets it to `suite.name` — the table named four fields where the source produces three (D-106). §2's `TestRun` row gains `executedAt` and its two nullable links, and **amendment 4 makes `executedAt` not null** now that both writers supply it. **D-37 §11.1's trigger does not fire** — a signature changed but it is neither a guard nor the SPEC-01/SPEC-02 seam; D-77 and D-96's precedent. Status stays **Draft** (D-93). |
 | 2026-08-06 | Sandro & Claude | Applied the **twelfth** amendment at the Design System stage (D-145) — **the first amendment since approval, and therefore a re-approval, which is exactly the cost D-136 accepted.** §3.1's transport table said "MCP **stdio**, in-process with CAP. No HTTP server, no listening socket", and three Approved specs say their Report "renders from a single `project_view` call" citing **BR-22** ([SPEC-04](SPEC-04-NEXT-ACTION.md) BR-32, [SPEC-05](SPEC-05-WORKSPACE-HEADER-AND-HEALTH.md) BR-30, [SPEC-07](SPEC-07-CHAIN-AND-REGISTERS.md) BR-01). **A browser cannot call an MCP stdio server, and no spec named the read path** — the write path was already named (D-82; D-79's create-handler on `Initiative` and `Milestone`). The transport table gains a **browser read surface** row and new **BR-22a** states it: the same composed-payload implementation is additionally exposed as a **read-only OData projection** on the CAP service this server connects to. **INT-001's own transport is unchanged** — the stdio row describes the MCP server, not the CAP service behind it — so no verb signature changes and **D-37 §11.1's trigger does not fire**. Status **Approved**. |
@@ -38,7 +39,7 @@ makes the enforced path the only path (D-05). Every verb that changes state emit
 inside its own transaction (D-25, D-42), which is what makes the log structurally complete rather
 than a writer any caller could skip.
 
-**This spec is provisional on R1.** RSH-001's validating spike ran entirely on in-memory SQLite;
+~~**This spec is provisional on R1.**~~ **R1 executed and closed (D-170).** RSH-001's validating spike ran entirely on in-memory SQLite;
 D-39 defers the Postgres repeat to the Data Model stage, together with standing up a binding neither
 Life OS module currently has. Every mechanism below is Verified — on SQLite.
 
@@ -259,17 +260,25 @@ one retry in the system is the single reconnect attempt in BR-20, which is a tra
 | ------------------------------------------------------------- | ----------------------------------------------------------- | -------------------------------- |
 | Bare story ID (no workspace prefix)                           | Reject 400, naming the expected form                        | `verb.story.unqualified`         |
 | Unknown story / stage / subtask code                          | Reject 404, listing valid codes for that chain              | `verb.target.notFound`           |
+| Workspace has no Active sprint (verbs needing one)            | Reject 404, message names `plan_sprint`                     | `verb.sprint.noneActive`         |
 | No caller identity declared                                   | Reject 400                                                  | `verb.identity.missing`          |
+| Caller identity not a seeded Actor (write verbs)              | Reject 400 before any write, listing the valid actors       | `verb.identity.unknown`          |
 | Stage already complete                                        | Reject 409 **with current status and timestamp**            | `verb.stage.alreadyComplete`     |
 | Stage not started                                             | Reject 409 with remediation naming `start_stage`            | `verb.stage.notStarted`          |
 | Methodology guard refuses the transition                      | Reject 409 **with remediation** (WFL-001 supplies the rule) | `verb.stage.blocked`             |
 | Stage completed with open subtasks                            | **Succeed**, `warnings[]` names each open subtask           | `verb.stage.subtasksOpen`        |
 | `reopen_stage` with empty reason                              | Reject 400                                                  | `verb.reopen.reasonRequired`     |
 | `resolve_defect` with empty resolution                        | Reject 400                                                  | `verb.defect.resolutionRequired` |
+| `resolve_defect` on an unknown defect ID                      | Reject 404, `target` = the ID (no code list: UUIDs)         | `verb.defect.notFound`           |
+| `resolve_defect` on a Closed defect                           | Reject 409, resolution kept, remediation names `log_defect` | `verb.defect.alreadyResolved`    |
 | `log_defect` with neither or both of `story` / `workspace`    | Reject 400, naming the two modes                            | `verb.defect.scopeRequired`      |
 | `record_test_run` with neither, both, or `story` sans `stage` | Reject 400, naming the two modes                            | `verb.testrun.scopeRequired`     |
-| Severity or FRICEW type outside its code list                 | Reject 400 (`ASSERT_ENUM` surfaced verbatim)                | `verb.value.notInCodeList`       |
+| `record_test_run` with passed + failed + pending > total      | Reject 400 naming all four counts; nothing written          | `verb.testrun.countsExceedTotal` |
+| `record_test_run` with a negative count                       | Refused at the schema (`minimum: 0`); OData `ASSERT_RANGE`  | —                                |
+| Severity or FRICEW type outside its code list                 | Over MCP, refused at the schema (`enum` lists the values), nothing written; in-process, Reject 400 | `verb.value.notInCodeList`       |
 | `plan_sprint` duplicate story ID in workspace                 | Reject 409                                                  | `verb.story.duplicate`           |
+| `plan_sprint` duplicate sprint name in workspace              | Reject 409, sprint name in message and `target`             | `verb.initiative.duplicate`      |
+| `plan_sprint` with an empty `stories` list (BR-21)            | Refused at the schema (`minItems: 1`), nothing written      | —                                |
 | Connection lost mid-call                                      | One reconnect, then reject 503                              | `verb.connection.unavailable`    |
 | Any handler rejection                                         | Roll back; surface CAP code and message intact              | —                                |
 
@@ -299,7 +308,7 @@ already records every state change, and a rejection surfaces to the agent that c
 
 **Provisional dependency — R1.** Every mechanism specified here was verified on in-memory SQLite. The
 Postgres repeat is owned by the Data Model stage (D-39), which must also stand up a binding neither
-module has. **This spec is not Approved-for-build until R1 clears.**
+module has. ~~**This spec is not Approved-for-build until R1 clears.**~~ **R1 executed and closed (D-170).**
 
 **Cross-spec notes raised, not designed here**
 
@@ -534,4 +543,4 @@ module has. **This spec is not Approved-for-build until R1 clears.**
 
 ---
 
-_SPEC-01 specifies INT-001, the widest fan-out object in [BA-001](../BUSINESS_ARCHITECTURE.md) — every wave-2 and wave-3 object depends on it. Rules behind BR-17's rejections belong to `SPEC-02` (WFL-001), not yet written. **Provisional on R1** per [D-39](../DECISIONS_LOG.md)._
+_SPEC-01 specifies INT-001, the widest fan-out object in [BA-001](../BUSINESS_ARCHITECTURE.md) — every wave-2 and wave-3 object depends on it. Rules behind BR-17's rejections belong to `SPEC-02` (WFL-001), not yet written. ~~**Provisional on R1**~~ (closed by D-170) per [D-39](../DECISIONS_LOG.md)._

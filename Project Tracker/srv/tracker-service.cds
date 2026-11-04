@@ -1,14 +1,13 @@
-using {com.lifeos.projecttracker as pt} from '../db/schema';
+using {com.lifeos.projecttracker as pt} from '../db/hierarchy/schema';
+using from '../db/reference/schema';
+using from '../db/methodology/schema';
+using from '../db/registers/schema';
 
 service TrackerService @(path: '/service/trackerSvcs') {
 
   entity Areas            as projection on pt.Area;
   entity Engagements      as projection on pt.Engagement;
 
-  // The writable entity wins the redirection contest against its own read-only
-  // projection, and the annotation belongs on the service entity rather than on
-  // the database one: annotations propagate into every projection, so at the
-  // database level both candidates would carry it and the tie would remain.
   @cds.redirection.target
   entity Workspaces       as projection on pt.Workspace;
 
@@ -20,7 +19,14 @@ service TrackerService @(path: '/service/trackerSvcs') {
     projection on pt.Milestone {
       *,
       @Common.Label: '{i18n>Milestone.status}'
-      virtual null as status : String(30)
+      virtual null as status : String(30),
+
+      // Create-only input: the create-handler reads it to decide whether a chain
+      // is materialised, and nothing stores it.
+      @UI.Hidden
+      @Core.Computed: false
+      @Common.Label : '{i18n>Milestone.createdDone}'
+      virtual createdDone    : Boolean
     };
 
   // Same tie as Workspaces, between a Task and the queue view built over it.
@@ -38,9 +44,7 @@ service TrackerService @(path: '/service/trackerSvcs') {
   @readonly
   entity TaskQueueItems   as projection on pt.TaskQueueItem;
 
-  // The one-call read surface. A projection rather than a view, because a view
-  // flattens into rows and the registers have to arrive as bindable collections;
-  // rather than a function, because an opaque result cannot be bound at all.
+  // The one-call read surface: the registers arrive as bindable collections.
   @readonly
   entity ProjectView      as
     projection on pt.Workspace {
@@ -88,3 +92,24 @@ service TrackerService @(path: '/service/trackerSvcs') {
       virtual null as gateExecutedAt     : DateTime
     };
 }
+
+// The floor is what makes the handler's sum rule sound: a negative count could
+// otherwise balance an over-total one.
+annotate TrackerService.TestRuns with {
+  total   @assert.range: [
+    0,
+    _
+  ];
+  passed  @assert.range: [
+    0,
+    _
+  ];
+  failed  @assert.range: [
+    0,
+    _
+  ];
+  pending @assert.range: [
+    0,
+    _
+  ];
+};

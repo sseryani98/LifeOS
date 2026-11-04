@@ -23,10 +23,19 @@ export const FUT = {
   CONCURRENT_WRITES: "FUT-016",
 } as const;
 
+/**
+ * The methodology story's functional units that this tier executes. Its
+ * numbering restarts, so each carries its spec to stay distinct from the above.
+ */
+export const METHODOLOGY_FUT = {
+  SEEDED_CODES_ADDRESSABLE: "SPEC-02 FUT-002",
+} as const;
+
 /** The tools these scenarios call, by their advertised names. */
 export const TOOL = {
   START_STAGE: "start_stage",
   COMPLETE_STAGE: "complete_stage",
+  COMPLETE_SUBTASK: "complete_subtask",
   REOPEN_STAGE: "reopen_stage",
   LOG_DEFECT: "log_defect",
   RESOLVE_DEFECT: "resolve_defect",

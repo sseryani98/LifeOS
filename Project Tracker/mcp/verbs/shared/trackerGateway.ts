@@ -140,6 +140,29 @@ export class TrackerGateway {
   }
 
   /**
+   * Reads every seeded identity from the actor code list.
+   * @returns The actor codes, sorted.
+   */
+  async readActorCodes(): Promise<string[]> {
+    const rows = (await this.runner.run(
+      SELECT.from(ENTITIES.ACTOR).columns("code"),
+    )) as { code: string }[];
+    return rows.map(row => row.code).sort();
+  }
+
+  /**
+   * Reads the kind of a calling identity from the actor code list.
+   * @param actor The identity the caller declared.
+   * @returns The actor's kind code, or undefined when the identity is unseeded.
+   */
+  async readActorKind(actor: string): Promise<string | undefined> {
+    const rows = (await this.runner.run(
+      SELECT.from(ENTITIES.ACTOR).columns("kind_code").where({ code: actor }),
+    )) as { kind_code: string }[];
+    return rows[0]?.kind_code;
+  }
+
+  /**
    * Reads the workspace's one active sprint.
    * @param workspaceId The workspace to read.
    * @returns The active initiative, or undefined when none is active.
@@ -157,9 +180,11 @@ export class TrackerGateway {
   }
 
   /**
-   * Reads a milestone's chain with each step's library facts flattened on.
+   * Reads a milestone's chain. Kind, position and the human-only flag are the
+   * row's own, frozen at instantiation; the name and driver are read live from
+   * the library, so a renamed driver is what remediation names.
    * @param milestoneId The milestone whose chain is wanted.
-   * @returns The chain in library position order.
+   * @returns The chain in its instantiated position order.
    */
   async readChain(milestoneId: string): Promise<ChainRow[]> {
     const rows = (await this.runner.run(
@@ -172,9 +197,10 @@ export class TrackerGateway {
           "notes",
           "step_code",
           "step.name as stepName",
-          "step.position as stepPosition",
-          "step.kind_code as stepKind",
+          "position as stepPosition",
+          "kind_code as stepKind",
           "step.driver as driver",
+          "requiresHuman",
         )
         .where({ milestone_ID: milestoneId }),
     )) as ChainRow[];
@@ -273,9 +299,10 @@ export class TrackerGateway {
   }
 
   /**
-   * Reads a stage's steps with each step's library facts flattened on.
+   * Reads a stage's steps. Kind and position are the row's own, as for a
+   * stage; the name and driver are read live from the library.
    * @param taskId The stage whose steps are wanted.
-   * @returns The steps in library position order.
+   * @returns The steps in their instantiated position order.
    */
   async readSubtasks(taskId: string): Promise<SubtaskRow[]> {
     const rows = (await this.runner.run(
@@ -286,7 +313,9 @@ export class TrackerGateway {
           "completedAt",
           "step_code",
           "step.name as stepName",
-          "step.position as stepPosition",
+          "position as stepPosition",
+          "kind_code as stepKind",
+          "step.driver as driver",
         )
         .where({ task_ID: taskId }),
     )) as SubtaskRow[];

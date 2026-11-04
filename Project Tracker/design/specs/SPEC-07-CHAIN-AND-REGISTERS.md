@@ -3,11 +3,11 @@
 **Spec ID:** SPEC-07
 **FRICEW Objects:** RPT-003 (Report), RPT-004 (Report)
 **Wave:** 2
-**CDS Service:** Not yet defined — see §2. This spec is an input to the Data Model stage.
+**CDS Service:** `TrackerService` (`srv/tracker-service.cds`) — the module's one CDS service, defined at the Data Model stage; §2 was its input.
 **Status:** Approved
-**Provisional on:** **R1** (D-39), inherited from SPEC-01 … SPEC-06. ~~and **R9** (D-69), inherited from
+**Provisional on:** **None — R1 executed and closed (D-170).** _As written:_ **R1** (D-39), inherited from SPEC-01 … SPEC-06. ~~and **R9** (D-69), inherited from
 SPEC-04 because this spec carries Reports.~~ **R9 was executed and discharged at the Information
-Architecture stage, 2026-08-06 (D-140, D-141).** **Not Approved-for-build until R1 clears.**
+Architecture stage, 2026-08-06 (D-140, D-141).** ~~**Not Approved-for-build until R1 clears.**~~ **R1 executed and closed (D-170).**
 
 ---
 
@@ -20,6 +20,7 @@ Architecture stage, 2026-08-06 (D-140, D-141).** **Not Approved-for-build until 
 | 2026-07-30 | Sandro & Claude | Seven defects fixed on Sandro's review, before approval. **BR-05 defaulted RPT-003 to the story `next_action()` resolves to, and that verb returns null** when no Milestone holds an incomplete Task — SPEC-04 BR-15's own fourth state, reachable once every Task is Complete, leaving the Report with no rule; now **BR-05a** and **FUT-018**. **FUT-004 asserted an outcome its steps never produced** (SPEC-06 FUT-012's class). **§2 declared `Defect.description` and `Milestone.description` as read while no rule rendered either** — and SPEC-03 BR-23 folds the only Open Defect's content _into_ `description`, so the register's one actionable row hid what made it actionable; BR-11 and BR-20 now render both. **`decidedAt` was made not-null with no writer** on the ongoing path; §2 amendment 2 now states `record_decision` stamps it at insert. Plus a bare `BR-31` where this spec carries one, a wrong-rule citation (SPEC-05 BR-14 → BR-18), and **one defect originating in the brief to the writer rather than in the writer**: §6 claimed D-37 §11.1's trigger fires for the `project_view` change, when §11.1 scopes it to a **guard** that cannot be stated without changing a verb signature — D-55 and D-77's reading. 35 BRs → **36**, 17 FUTs → **18**. |
 | 2026-07-30 | Sandro & Claude | Initial creation from the SPEC-07 workshop. Records D-83 through D-92. **SPEC-07 resolves no OI.** Provisional on R1 (D-39) and R9 (D-69). Amendments owed and applied: SPEC-01's **ninth** (`project_view`'s Returns cell, and nine verb-emitted `Activity.kind` values), SPEC-03's **third** (`Decision.decidedAt`, seeded 2026-07-10), SPEC-06 BR-25's struck clause, and the SPEC-05 §6 / SPEC-06 §6 wording correction from `kind` to `actor`. Three BA-001 corrections listed in §6.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | 2026-08-06 | Sandro & Claude | **BR-03 is discharged in full at the Design System stage (D-144, D-148, D-150).** It deferred five things; navigation and interaction were answered at Information Architecture the same day, and **layout, section arrangement and chart type are answered here** — RPT-003 is section 2 and RPT-004 section 3 of one `sap.uxap.ObjectPageLayout`, and **there is no chart**. Build technology is **Fiori Elements FPM with drafts OFF**. Two control rulings worth naming: RPT-003's Subtasks render as a nested `sap.m.List` that is **always visible, never on expansion**, because IA-001 §6.4's disclosure inventory does not include them; and RPT-004's two expandable regions (`description`, `payload`) are `sap.m.Panel` with `expandable="true"` and `expanded` left unset. **BR-03's "content and ordering only" clause is unchanged.** No business rule and no FUT changes. Status stays **Approved**.                                                                                                                                                                                                                                                                                                                                                                     |
+| 2026-11-04 | Claude          | Doc refresh: R1 marked executed and closed (D-170) in the header and wherever this spec gated on it; CDS Service named (`TrackerService`). No rule, FUT or count changed. Status unchanged. |
 
 ---
 
@@ -294,7 +295,7 @@ which is the view's only signalling surface and is derived on read rather than p
   `X-CSRF-Token`. **The serving position is one origin behind a reverse proxy (D-141)**, executed at the
   **Tech Stack** stage.
 
-**This spec is not Approved-for-build until R1 clears.**
+~~**This spec is not Approved-for-build until R1 clears.**~~ **R1 executed and closed (D-170).**
 
 **Cross-spec notes raised, not designed here**
 

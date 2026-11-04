@@ -1,16 +1,20 @@
 /** Runtime message keys the verb layer rejects and warns with. */
 export const VERB_KEYS = {
   CONNECTION_UNAVAILABLE: "verb.connection.unavailable",
+  DEFECT_ALREADY_RESOLVED: "verb.defect.alreadyResolved",
+  DEFECT_NOT_FOUND: "verb.defect.notFound",
   DEFECT_RESOLUTION_REQUIRED: "verb.defect.resolutionRequired",
   INTERNAL_FAILURE: "verb.internal.failure",
   DEFECT_SCOPE_REQUIRED: "verb.defect.scopeRequired",
   IDENTITY_MISSING: "verb.identity.missing",
+  IDENTITY_UNKNOWN: "verb.identity.unknown",
+  INITIATIVE_DUPLICATE: "verb.initiative.duplicate",
   REOPEN_REASON_REQUIRED: "verb.reopen.reasonRequired",
   STAGE_ALREADY_COMPLETE: "verb.stage.alreadyComplete",
   STAGE_BLOCKED: "verb.stage.blocked",
-  STAGE_NOT_COMPLETE: "verb.stage.notComplete",
   STAGE_NOT_STARTED: "verb.stage.notStarted",
   STAGE_SUBTASKS_OPEN: "verb.stage.subtasksOpen",
+  SPRINT_NONE_ACTIVE: "verb.sprint.noneActive",
   STORY_DUPLICATE: "verb.story.duplicate",
   STORY_UNQUALIFIED: "verb.story.unqualified",
   TARGET_NOT_FOUND: "verb.target.notFound",
@@ -20,9 +24,28 @@ export const VERB_KEYS = {
   WORKSPACE_AMBIGUOUS: "verb.workspace.ambiguous",
 } as const;
 
-/** Remediation templates, and the rule name a guard rejection carries. */
+/**
+ * The methodology guards' own rejection keys, each carried as the envelope code —
+ * except the stage predecessor key, which rides inside the older
+ * `verb.stage.blocked` code. Both predecessor keys are also carried on `rule`.
+ */
+export const WFL_KEYS = {
+  STAGE_ALREADY_STARTED: "wfl.stage.alreadyStarted",
+  STAGE_HUMAN_ONLY: "wfl.stage.humanOnly",
+  STAGE_NOT_COMPLETE: "wfl.stage.notComplete",
+  STAGE_PREDECESSOR_OPEN: "wfl.stage.predecessorOpen",
+  SUBTASK_ALREADY_COMPLETE: "wfl.subtask.alreadyComplete",
+  SUBTASK_PREDECESSOR_OPEN: "wfl.subtask.predecessorOpen",
+  SUBTASK_STAGE_NOT_STARTED: "wfl.subtask.stageNotStarted",
+  TESTRUN_STAGE_NOT_STARTED: "wfl.testrun.stageNotStarted",
+} as const;
+
+/** Remediation templates a guard rejection resolves. */
 export const GUARD = {
-  PREDECESSOR_OPEN_RULE: "wfl.stage.predecessorOpen",
+  REMEDIATION_COMPLETE_STAGE: "verb.remediation.completeStage",
+  REMEDIATION_HUMAN_ONLY: "verb.remediation.humanOnly",
+  REMEDIATION_LOG_DEFECT: "verb.remediation.logDefect",
+  REMEDIATION_NEXT_STEP: "verb.remediation.nextStep",
   REMEDIATION_RUN_DRIVER: "verb.remediation.runDriver",
   REMEDIATION_START_STAGE: "verb.remediation.startStage",
   REMEDIATION_REOPEN_STAGE: "verb.remediation.reopenStage",
@@ -67,6 +90,16 @@ export const PLANNING = {
  */
 export const READ_LIMITS = {
   ACTIVITIES: 50,
+} as const;
+
+/**
+ * How a rejection's list of valid codes is rendered. A workspace's story list
+ * only grows, so past the limit the rest is counted rather than listed.
+ */
+export const VALID_CODES = {
+  LIMIT: 20,
+  NONE_KEY: "verb.target.codesNone",
+  TRUNCATED_KEY: "verb.target.codesTruncated",
 } as const;
 
 /**

@@ -161,7 +161,7 @@ export class ProjectViewVerb implements VerbDefinition {
       Envelope.rejectVerb(HTTP.NOT_FOUND, VERB_KEYS.TARGET_NOT_FOUND, [
         "workspace",
         "",
-        "",
+        Envelope.formatValidCodes([]),
       ]);
     }
     if (workspaces.length > 1) {

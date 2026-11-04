@@ -1,4 +1,9 @@
-import { WORLD } from "../../../shared/data/world.js";
+import {
+  NEGATIVE_COUNT_TEST_RUN_METRICS,
+  OVER_TOTAL_TEST_RUN_METRICS,
+  SPRINT_PLAN,
+  WORLD,
+} from "../../../shared/data/world.js";
 
 /** The service paths the read-path suite writes to and reads from. */
 export const PATHS = {
@@ -54,6 +59,15 @@ export const UI_STORY = {
 /** The qualified reference the verbs address that story by. */
 export const UI_STORY_REFERENCE = `${WORLD.WORKSPACE.slug}/${UI_STORY.storyId}`;
 
+/** The planned stories, split by whether they ship UI. */
+export const PLANNED_STORY = {
+  BACKEND: SPRINT_PLAN.stories[0],
+  UI: SPRINT_PLAN.stories[1],
+} as const;
+
+/** The qualified reference the verbs address the planned UI story by. */
+export const PLANNED_UI_STORY_REFERENCE = `${WORLD.WORKSPACE.slug}/${SPRINT_PLAN.stories[1].id}`;
+
 /** A sprint completed properly, for patching one of its facts away afterwards. */
 export const COMPLETE_INITIATIVE_WITH_FACTS = {
   name: "W1-S8",
@@ -95,6 +109,21 @@ export const DUPLICATE_SLUG_WORKSPACE = {
 
 /** A patch that clears the sprint link, which a story-scoped defect never had. */
 export const CLEAR_SPRINT_LINK_PATCH = { initiative_ID: null } as const;
+
+/** A run reporting more passes than it has tests. */
+export const OVER_TOTAL_TEST_RUN = {
+  ...OVER_TOTAL_TEST_RUN_METRICS,
+  executedAt: "2026-08-16T10:00:00Z",
+} as const;
+
+/** A patch raising passes past the total the stored run keeps. */
+export const OVER_TOTAL_TEST_RUN_PATCH = { passed: 2 } as const;
+
+/** A run whose negative failure count would balance an over-total pass count. */
+export const NEGATIVE_COUNT_TEST_RUN = {
+  ...NEGATIVE_COUNT_TEST_RUN_METRICS,
+  executedAt: "2026-08-16T10:00:00Z",
+} as const;
 
 /** A patch that clears the sprint link a sprint-scoped test run hangs off. */
 export const ORPHANING_TEST_RUN_PATCH = { initiative_ID: null } as const;

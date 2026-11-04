@@ -85,6 +85,17 @@ export const warningTargetsOf = (envelope: Record<string, unknown>): string[] =>
 };
 
 /**
+ * Names how a call came out: "ok" for a success, otherwise the guard rule that
+ * refused it, falling back to the code when no rule was named.
+ * @param envelope The envelope the call answered with.
+ * @returns The outcome label.
+ */
+export const outcomeOf = (envelope: Record<string, unknown>): string => {
+  if (envelope.ok === true) return "ok";
+  return String(envelope.rule ?? envelope.code);
+};
+
+/**
  * Reads the step code a next action points at, or null when nothing remains.
  * @param envelope The success envelope.
  * @returns The step code, or null.

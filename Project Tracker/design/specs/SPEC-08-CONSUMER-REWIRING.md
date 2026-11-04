@@ -3,10 +3,10 @@
 **Spec ID:** SPEC-08
 **FRICEW Objects:** INT-002 (Interface), INT-003 (Interface), INT-005 (Interface)
 **Wave:** 3
-**CDS Service:** Not yet defined — see §2. This spec is an input to the Data Model stage.
+**CDS Service:** `TrackerService` (`srv/tracker-service.cds`) — the module's one CDS service, defined at the Data Model stage; §2 was its input.
 **Status:** Approved
-**Provisional on:** **R1** (D-39), inherited from SPEC-01 … SPEC-07. **R9 is ruled OUT** (D-101) — the
-first spec to rule it out rather than inherit it. **Not Approved-for-build until R1 clears.**
+**Provisional on:** **None — R1 executed and closed (D-170).** _As written:_ **R1** (D-39), inherited from SPEC-01 … SPEC-07. **R9 is ruled OUT** (D-101) — the
+first spec to rule it out rather than inherit it. ~~**Not Approved-for-build until R1 clears.**~~ **R1 executed and closed (D-170).**
 
 ---
 
@@ -20,6 +20,7 @@ first spec to rule it out rather than inherit it. **Not Approved-for-build until
 | 2026-08-04 | Sandro & Claude | **Amended at the SPEC-10 workshop.** **BR-02 now refers to the shared retired-artifact list** rather than enumerating four literals (**D-117**) — measured, those four cannot match `Financial Planner/CLAUDE.md:77`'s bare `sprints/` or `generateTestReport.ts:6`'s split path literal, so a rewiring could pass BR-02 with a retired path intact, and this spec used four different spellings across BR-02, FUT-001, FUT-006 and FUT-009. **The reference count is corrected from sixteen to 21** — sixteen was `PLAN.md` §6's eight-file measurement, including two references in a file SPEC-09 owns and excluding the eight D-23 added. **FUT-001's "under-reports by six files" is corrected to five, with the cause corrected too** (**D-116**): ripgrep applies `.gitignore:10`'s `.claude/*.md` at every depth while git does not, so a default `rg` walks 4 of 37 files under `.claude/`. **One row added to §3.1** — `build.js:379`'s "21 `lint:*` scripts", already false at 22 and made falser by [SPEC-10](SPEC-10-CUTOVER-GUARDS.md) BR-28, D-102's shape a third time. **§6's owed glob row is discharged** by SPEC-10 BR-17's six roots. Status stays **Approved**. |
 | 2026-07-30 | Sandro & Claude | **BR-13 amended at the SPEC-09 workshop (D-107)**, discharging the one note this spec raised there. The instruction BR-13 deletes was only a **truncation fallback** — `test-quality.js:267` already made the jest console table primary — so the fallback is replaced by `coverage/coverage-summary.json` rather than removed, which is the file INT-004 itself reads and which `gate-runner`'s existing `Read` grant already covers. The `TestRun` is **not** readable at gate time: `posttest` fires after `npm test` exits. §3.1's `test-quality.js` row and §6's raised row updated with it. No FUT changes. |
 | 2026-07-30 | Sandro          | **Status → Approved.** All eight DESIGN_WORKSHOP §6 criteria met. Still provisional on **R1** for build; R9 stays ruled out (D-101). Unlike SPEC-01, no decision holds this spec in Draft — D-93's argument is that six workshops have amended SPEC-01 and more will; SPEC-08 has been amended once, by SPEC-09, and that amendment is applied above rather than owed (D-103).                                                                                                                                                     |
+| 2026-11-04 | Claude          | Doc refresh: R1 marked executed and closed (D-170) in the header and wherever this spec gated on it; CDS Service named (`TrackerService`). No rule, FUT or count changed. Status unchanged. |
 
 ---
 
@@ -333,7 +334,7 @@ Nothing observes state, nothing runs on a schedule, and this module schedules no
   gitignored file that D-44 already discharges with a tracked installer. That is a **precondition** on
   SPEC-08's objects, stated in §3, not a risk.
 
-**This spec is not Approved-for-build until R1 clears.**
+~~**This spec is not Approved-for-build until R1 clears.**~~ **R1 executed and closed (D-170).**
 
 **Cross-spec notes raised, not designed here**
 

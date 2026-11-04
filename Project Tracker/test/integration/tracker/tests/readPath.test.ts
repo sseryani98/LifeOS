@@ -1,5 +1,8 @@
 import { DERIVED_SCALARS } from "../../../../srv/modules/shared/constants.js";
-import { WORLD } from "../../../shared/data/world.js";
+import {
+  OVER_TOTAL_TEST_RUN_MESSAGE,
+  WORLD,
+} from "../../../shared/data/world.js";
 import {
   clearWorld,
   seedCanonicalWorld,
@@ -14,6 +17,10 @@ import {
   WHOLE_CHAIN_COMPLETE,
 } from "../data/chainStates.js";
 import {
+  DUPLICATE_OF_CANONICAL,
+  DUPLICATE_STORY_MESSAGE,
+} from "../data/migrationStories.js";
+import {
   CLEAR_SPRINT_LINK_PATCH,
   COMPLETE_INITIATIVE_MISSING_FACTS,
   COMPLETE_INITIATIVE_WITH_FACTS,
@@ -21,9 +28,12 @@ import {
   DECISION_WITHOUT_DECIDED_AT,
   DUPLICATE_SLUG_WORKSPACE,
   INITIATIVE_WITHOUT_BRANCH,
+  NEGATIVE_COUNT_TEST_RUN,
   ORPHAN_DEFECT,
   ORPHAN_TEST_RUN,
   ORPHANING_TEST_RUN_PATCH,
+  OVER_TOTAL_TEST_RUN,
+  OVER_TOTAL_TEST_RUN_PATCH,
   PATHS,
   POSITION_CLASH_INITIATIVE,
   POSITION_CLASH_STORY,
@@ -152,6 +162,7 @@ describe("the browser read path", () => {
     expect(accepted.name).toBe(SECOND_INITIATIVE.name);
     expect(rejected.status).toBe(409);
     expect(rejected.code).toBe("verb.initiative.duplicate");
+    expect(rejected.message).toContain(`"${SECOND_INITIATIVE.name}"`);
   });
 
   /** Sprint names are unique per workspace, so a second board may reuse one the first already holds. */
@@ -182,6 +193,23 @@ describe("the browser read path", () => {
     expect(accepted.storyId).toBe(SECOND_STORY.storyId);
     expect(rejected.status).toBe(409);
     expect(rejected.code).toBe("verb.story.duplicate");
+  });
+
+  /** A story exists once per workspace, so a second sprint is no escape, and the message must not blame the sprint. */
+  it("refuses a story whose identifier another sprint of the workspace holds, naming it", async () => {
+    const secondSprint = await postExpectingSuccess(PATHS.INITIATIVES, {
+      ...SECOND_INITIATIVE,
+      workspace_ID: world.workspaceId,
+    });
+
+    const rejected = await postExpectingRejection(PATHS.MILESTONES, {
+      ...DUPLICATE_OF_CANONICAL,
+      initiative_ID: secondSprint.ID as string,
+    });
+
+    expect(rejected.status).toBe(409);
+    expect(rejected.code).toBe("verb.story.duplicate");
+    expect(rejected.message).toBe(DUPLICATE_STORY_MESSAGE);
   });
 
   /** A complete sprint records how it landed; the annotation that would have said so does not exist. */
@@ -295,21 +323,26 @@ describe("the browser read path", () => {
     expect(updated.description).toBe(UNCHANGED_STORY_ID_DESCRIPTION_EDIT);
   });
 
-  /** A move carries the sprint half only, so the guard has to read the story's identifier off the stored row. */
-  it("refuses moving a story into a sprint that already holds its identifier", async () => {
-    const secondSprint = await postExpectingSuccess(PATHS.INITIATIVES, {
+  /** A move carries the sprint half only, so the guard has to read the identifier off the stored row and the workspace off the target sprint. */
+  it("refuses moving a story into a workspace that already holds its identifier", async () => {
+    const otherWorkspaceId = await seedSecondWorkspace();
+    const otherSprint = await postExpectingSuccess(PATHS.INITIATIVES, {
+      ...SECOND_INITIATIVE,
+      workspace_ID: otherWorkspaceId,
+    });
+    const emptySprint = await postExpectingSuccess(PATHS.INITIATIVES, {
       ...SECOND_INITIATIVE,
       workspace_ID: world.workspaceId,
     });
     const moving = await postExpectingSuccess(PATHS.MILESTONES, {
       ...SECOND_STORY,
       storyId: WORLD.STORY.storyId,
-      initiative_ID: secondSprint.ID as string,
+      initiative_ID: otherSprint.ID as string,
     });
 
     const rejected = await patchExpectingRejection(
       `${PATHS.MILESTONES}(${moving.ID as string})`,
-      { initiative_ID: world.initiativeId },
+      { initiative_ID: emptySprint.ID as string },
     );
 
     expect(rejected.status).toBe(409);
@@ -386,6 +419,43 @@ describe("the browser read path", () => {
 
     expect(rejected.status).toBe(400);
     expect(rejected.code).toBe("tracker.testrun.scopeRequired");
+  });
+
+  /** The sum rule is about the row, so an OData client must meet it as surely as the verb does. */
+  it("refuses a test run whose counts exceed its total, on create and on a count-only patch", async () => {
+    const created = await postExpectingRejection(PATHS.TEST_RUNS, {
+      ...OVER_TOTAL_TEST_RUN,
+      initiative_ID: world.initiativeId,
+      workspace_ID: world.workspaceId,
+    });
+    const stored = await postExpectingSuccess(PATHS.TEST_RUNS, {
+      ...ORPHAN_TEST_RUN,
+      initiative_ID: world.initiativeId,
+      workspace_ID: world.workspaceId,
+    });
+    const patched = await patchExpectingRejection(
+      `${PATHS.TEST_RUNS}(${stored.ID as string})`,
+      { ...OVER_TOTAL_TEST_RUN_PATCH },
+    );
+
+    expect(created.status).toBe(400);
+    expect(created.code).toBe("verb.testrun.countsExceedTotal");
+    expect(created.message).toBe(OVER_TOTAL_TEST_RUN_MESSAGE);
+    expect(patched.status).toBe(400);
+    expect(patched.code).toBe("verb.testrun.countsExceedTotal");
+  });
+
+  /** A negative count can balance an over-total one, so without a floor the sum rule is bypassable. */
+  it("refuses a test run carrying a negative count", async () => {
+    const rejected = await postExpectingRejection(PATHS.TEST_RUNS, {
+      ...NEGATIVE_COUNT_TEST_RUN,
+      initiative_ID: world.initiativeId,
+      workspace_ID: world.workspaceId,
+    });
+
+    expect(rejected.status).toBe(400);
+    expect(rejected.code).toBe("ASSERT_RANGE");
+    expect(rejected.target).toBe("failed");
   });
 
   /** The slug is half of every story reference, so two workspaces sharing one is unaddressable state. */

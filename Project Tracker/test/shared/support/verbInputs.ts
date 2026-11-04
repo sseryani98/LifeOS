@@ -1,3 +1,4 @@
+import type { TestRunMetrics } from "../../../mcp/verbs/shared/types.js";
 import {
   REOPEN_REASON,
   STAGE,
@@ -87,6 +88,25 @@ export const buildStageWithoutStoryTestRunInput = (stage: string): {
     stage,
     workspace: WORLD.WORKSPACE.slug,
     metrics: { ...TEST_RUN_METRICS },
+    executedAt: TEST_RUN_EXECUTED_AT,
+  };
+};
+
+/**
+ * Builds a workspace-scoped test-run input around metrics a rule must refuse.
+ * @param metrics The counts to record.
+ * @returns The verb input.
+ */
+export const buildWorkspaceTestRunInputWithMetrics = (
+  metrics: TestRunMetrics,
+): {
+  workspace: string;
+  metrics: TestRunMetrics;
+  executedAt: string;
+} => {
+  return {
+    workspace: WORLD.WORKSPACE.slug,
+    metrics: { ...metrics },
     executedAt: TEST_RUN_EXECUTED_AT,
   };
 };

@@ -74,6 +74,36 @@ export class RecordDecisionVerb implements VerbDefinition {
   }
 
   /**
+   * Refuses a decision target that is neither a story nor a sprint, listing
+   * both, since the one address form reaches either.
+   * @param gateway The gateway the reads run through.
+   * @param workspaceId The workspace the target was looked up in.
+   * @param innerName The name the caller supplied after the slug.
+   * @returns Never — it always throws.
+   */
+  private async _rejectUnresolvedTarget(
+    gateway: TrackerGateway,
+    workspaceId: string,
+    innerName: string,
+  ): Promise<never> {
+    const stories = await gateway.readMilestones(workspaceId);
+    const sprints = await gateway.readInitiatives(workspaceId);
+    return Envelope.rejectVerb(
+      HTTP.NOT_FOUND,
+      VERB_KEYS.TARGET_NOT_FOUND,
+      [
+        "story or sprint",
+        innerName,
+        Envelope.formatValidCodes([
+          ...stories.map(row => row.storyId),
+          ...sprints.map(row => row.name),
+        ]),
+      ],
+      { target: innerName },
+    );
+  }
+
+  /**
    * Resolves the decision's target. A bare slug targets the workspace itself; a
    * second segment is matched as a story first and as a sprint second, so the two
    * inner targets share one address form rather than inventing a second.
@@ -114,12 +144,7 @@ export class RecordDecisionVerb implements VerbDefinition {
       innerName,
     );
     if (!initiative) {
-      Envelope.rejectVerb(
-        HTTP.NOT_FOUND,
-        VERB_KEYS.TARGET_NOT_FOUND,
-        ["story or sprint", innerName, workspace.slug],
-        { target: innerName },
-      );
+      return this._rejectUnresolvedTarget(gateway, workspace.ID, innerName);
     }
     return {
       workspaceId: workspace.ID,

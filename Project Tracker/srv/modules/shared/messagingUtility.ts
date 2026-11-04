@@ -1,18 +1,13 @@
 import type { CdsWithI18n, MessageBundle } from "./types.js";
 
 /**
- * Resolves runtime messages through CAP's own message bundle, which loads the
- * same srv/_i18n/messages.properties the framework resolves reject keys from —
- * one loader, one cache, one parse behaviour. Bundle paths resolve from
- * cds.root (the working directory unless a cds command set it), so a process
- * started outside the module root falls back to raw keys.
+ * Resolves runtime messages from srv/_i18n/messages.properties, the same
+ * catalogue reject keys resolve from.
  */
 export class MessagingUtility {
   /**
-   * Resolves a runtime message, substituting ordered placeholders. The bundle
-   * is asked for the bare template and the substitution stays here: CAP's own
-   * replacer consumes every braced token, and the catalogue uses named ones
-   * like {workspace} as literal text.
+   * Resolves a runtime message, substituting ordered placeholders here, because
+   * the catalogue uses named tokens like {workspace} as literal text.
    * @param key Message key in camelCase.dots format.
    * @param params Ordered values substituted into {0}, {1}, ... placeholders.
    * @returns The resolved message, or the key itself when no entry matches.

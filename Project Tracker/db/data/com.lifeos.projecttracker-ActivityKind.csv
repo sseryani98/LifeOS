@@ -1,0 +1,17 @@
+code;name
+migration;Migration
+checkpoint;Checkpoint
+statusUpdate;Status Update
+focusChange;Focus Change
+initiativeStatus;Sprint Status
+lesson;Lesson
+sprintPlanned;Sprint Planned
+storyAdded;Story Added
+stageStarted;Stage Started
+stageCompleted;Stage Completed
+subtaskCompleted;Step Completed
+stageReopened;Stage Reopened
+defectLogged;Defect Logged
+defectResolved;Defect Resolved
+decisionRecorded;Decision Recorded
+testRunRecorded;Test Run Recorded

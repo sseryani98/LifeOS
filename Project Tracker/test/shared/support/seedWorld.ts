@@ -1,27 +1,31 @@
 import { randomUUID } from "node:crypto";
 
-import { CODE_LISTS } from "../data/codeLists.js";
-import {
-  METHODOLOGY,
-  STAGE_STEPS,
-  SUBTASK_STEPS,
-} from "../data/methodology.js";
+import cds from "@sap/cds";
+
 import { SECOND_WORKSPACE, WORLD } from "../data/world.js";
 
-/** Database-level entity names, so seeding never passes through a write guard. */
+/**
+ * Database-level entity names, so seeding never passes through a write guard.
+ * The code lists and the methodology library are absent on purpose: they are
+ * the deployed db/data CSVs, and clearWorld never touches them; a suite that
+ * edits them (libraryAccess.ts) must restore them itself.
+ */
 const TABLE = {
   ACTIVITY: "com.lifeos.projecttracker.Activity",
   AREA: "com.lifeos.projecttracker.Area",
+  DECISION: "com.lifeos.projecttracker.Decision",
   DEFECT: "com.lifeos.projecttracker.Defect",
   ENGAGEMENT: "com.lifeos.projecttracker.Engagement",
   INITIATIVE: "com.lifeos.projecttracker.Initiative",
-  METHODOLOGY: "com.lifeos.projecttracker.Methodology",
-  METHODOLOGY_STEP: "com.lifeos.projecttracker.MethodologyStep",
   MILESTONE: "com.lifeos.projecttracker.Milestone",
   SUBTASK: "com.lifeos.projecttracker.Subtask",
   TASK: "com.lifeos.projecttracker.Task",
+  TEST_RUN: "com.lifeos.projecttracker.TestRun",
   WORKSPACE: "com.lifeos.projecttracker.Workspace",
 } as const;
+
+/** The service entity every story is created through, so its create-handler runs. */
+const MILESTONES_ENTITY = "TrackerService.Milestones";
 
 /** Identifiers a seeded world hands back to the suite that asked for it. */
 export interface SeededWorld {
@@ -30,87 +34,75 @@ export interface SeededWorld {
   milestoneId: string;
 }
 
+/** The sprint columns a seeded sprint carries. */
+export interface SprintColumns {
+  name: string;
+  goal: string | null;
+  branch: string;
+  status_code: string;
+  mergeCommit?: string | null;
+  tag?: string | null;
+  position: number;
+}
+
 /**
- * Seeds every code list. Referential integrity is enforced at the database, so
- * this runs before anything else.
- * @returns Resolves once every list is populated.
+ * Creates one story through the service rather than the table, so the
+ * create-handler that materialises its chain runs exactly as it does for every
+ * real caller. A raw insert would bypass it and could never fail.
+ * @param row The story columns, plus any create-only flag the caller sends.
+ * @returns The new story's identifier.
  */
-export const seedCodeLists = async (): Promise<void> => {
-  for (const [list, rows] of Object.entries(CODE_LISTS)) {
-    await INSERT.into(`com.lifeos.projecttracker.${list}`).entries(
-      rows as unknown as Record<string, unknown>[],
-    );
-  }
+export const createMilestoneThroughService = async (
+  row: Record<string, unknown>,
+): Promise<string> => {
+  const service = await cds.connect.to("TrackerService");
+  const milestoneId = randomUUID();
+  await service.run(
+    INSERT.into(MILESTONES_ENTITY).entries({ ID: milestoneId, ...row }),
+  );
+  return milestoneId;
 };
 
 /**
- * Seeds the methodology library the chains are instantiated from.
- * @returns Resolves once the library is in place.
+ * Seeds the hierarchy above every sprint: one area, engagement and workspace.
+ * @returns The workspace's identifier.
  */
-export const seedMethodologyLibrary = async (): Promise<void> => {
-  await INSERT.into(TABLE.METHODOLOGY).entries({ ...METHODOLOGY });
-  await INSERT.into(TABLE.METHODOLOGY_STEP).entries(
-    STAGE_STEPS.map(step => ({
-      code: step.code,
-      name: step.name,
-      description: `${step.name} stage`,
-      kind_code: step.kind,
-      position: step.position,
-      conditional: step.conditional,
-      requiresHuman: step.requiresHuman,
-      driver: step.driver,
-      parent_code: null,
-      methodology_code: METHODOLOGY.code,
-    })),
-  );
-  await INSERT.into(TABLE.METHODOLOGY_STEP).entries(
-    SUBTASK_STEPS.map(step => ({
-      code: step.code,
-      name: step.name,
-      description: `${step.name} step`,
-      kind_code: step.kind,
-      position: step.position,
-      conditional: step.conditional,
-      requiresHuman: false,
-      driver: "/build",
-      parent_code: STAGE_STEPS[0].code,
-      methodology_code: METHODOLOGY.code,
-    })),
-  );
+export const seedHierarchy = async (): Promise<string> => {
+  const areaId = randomUUID();
+  const engagementId = randomUUID();
+  const workspaceId = randomUUID();
+  await INSERT.into(TABLE.AREA).entries({ ID: areaId, ...WORLD.AREA });
+  await INSERT.into(TABLE.ENGAGEMENT).entries({
+    ID: engagementId,
+    ...WORLD.ENGAGEMENT,
+    area_ID: areaId,
+  });
+  await INSERT.into(TABLE.WORKSPACE).entries({
+    ID: workspaceId,
+    ...WORLD.WORKSPACE,
+    engagement_ID: engagementId,
+  });
+  return workspaceId;
 };
 
 /**
- * Materialises a story's chain the way instantiation will once it exists: every
- * Required and Recommended step, plus a Conditional step only where its named
- * predicate holds.
- * @param milestoneId The story to instantiate.
- * @param shipsUi The predicate the Conditional steps name.
- * @returns Resolves once the chain is in place.
+ * Seeds one sprint into a workspace. A sprint has no create-handler that
+ * matters here, so it goes straight to the table.
+ * @param workspaceId The workspace the sprint belongs to.
+ * @param sprint The sprint columns to write.
+ * @returns The new sprint's identifier.
  */
-export const seedStoryChain = async (
-  milestoneId: string,
-  shipsUi: boolean,
-): Promise<void> => {
-  for (const step of STAGE_STEPS) {
-    if (step.conditional === "shipsUi" && !shipsUi) continue;
-    const taskId = randomUUID();
-    await INSERT.into(TABLE.TASK).entries({
-      ID: taskId,
-      step_code: step.code,
-      status_code: "notStarted",
-      milestone_ID: milestoneId,
-    });
-    if (step.code !== STAGE_STEPS[0].code) continue;
-    for (const subtask of SUBTASK_STEPS) {
-      if (subtask.conditional === "shipsUi" && !shipsUi) continue;
-      await INSERT.into(TABLE.SUBTASK).entries({
-        ID: randomUUID(),
-        step_code: subtask.code,
-        status_code: "notStarted",
-        task_ID: taskId,
-      });
-    }
-  }
+export const seedInitiative = async (
+  workspaceId: string,
+  sprint: SprintColumns,
+): Promise<string> => {
+  const initiativeId = randomUUID();
+  await INSERT.into(TABLE.INITIATIVE).entries({
+    ID: initiativeId,
+    ...sprint,
+    workspace_ID: workspaceId,
+  });
+  return initiativeId;
 };
 
 /**
@@ -132,40 +124,21 @@ export const seedSecondWorkspace = async (): Promise<string> => {
 };
 
 /**
- * Seeds the canonical world: one hierarchy, one active sprint, one story with
- * its chain.
+ * Seeds the canonical world: one hierarchy, one active sprint, and one story
+ * created in Backlog, whose chain is whatever the create-handler materialises
+ * from the deployed library.
  * @returns The identifiers the suite addresses the world by.
  */
 export const seedCanonicalWorld = async (): Promise<SeededWorld> => {
-  await seedCodeLists();
-  await seedMethodologyLibrary();
-  const areaId = randomUUID();
-  const engagementId = randomUUID();
-  const workspaceId = randomUUID();
-  const initiativeId = randomUUID();
-  const milestoneId = randomUUID();
-  await INSERT.into(TABLE.AREA).entries({ ID: areaId, ...WORLD.AREA });
-  await INSERT.into(TABLE.ENGAGEMENT).entries({
-    ID: engagementId,
-    ...WORLD.ENGAGEMENT,
-    area_ID: areaId,
-  });
-  await INSERT.into(TABLE.WORKSPACE).entries({
-    ID: workspaceId,
-    ...WORLD.WORKSPACE,
-    engagement_ID: engagementId,
-  });
-  await INSERT.into(TABLE.INITIATIVE).entries({
-    ID: initiativeId,
+  const workspaceId = await seedHierarchy();
+  const initiativeId = await seedInitiative(workspaceId, {
     name: WORLD.INITIATIVE.name,
     goal: WORLD.INITIATIVE.goal,
     branch: WORLD.INITIATIVE.branch,
-    position: WORLD.INITIATIVE.position,
     status_code: "Active",
-    workspace_ID: workspaceId,
+    position: WORLD.INITIATIVE.position,
   });
-  await INSERT.into(TABLE.MILESTONE).entries({
-    ID: milestoneId,
+  const milestoneId = await createMilestoneThroughService({
     storyId: WORLD.STORY.storyId,
     fricewType_code: WORLD.STORY.fricewType,
     description: WORLD.STORY.description,
@@ -173,21 +146,20 @@ export const seedCanonicalWorld = async (): Promise<SeededWorld> => {
     position: WORLD.STORY.position,
     initiative_ID: initiativeId,
   });
-  await seedStoryChain(milestoneId, WORLD.STORY.shipsUi);
   return { workspaceId, initiativeId, milestoneId };
 };
 
 /**
  * Empties every table the suites write to, so one spec's world never leaks into
- * the next.
+ * the next. The deployed library and code lists are left alone.
  * @returns Resolves once the tables are empty.
  */
 export const clearWorld = async (): Promise<void> => {
   const ordered = [
     TABLE.ACTIVITY,
     TABLE.DEFECT,
-    "com.lifeos.projecttracker.Decision",
-    "com.lifeos.projecttracker.TestRun",
+    TABLE.DECISION,
+    TABLE.TEST_RUN,
     TABLE.SUBTASK,
     TABLE.TASK,
     TABLE.MILESTONE,
@@ -195,13 +167,8 @@ export const clearWorld = async (): Promise<void> => {
     TABLE.WORKSPACE,
     TABLE.ENGAGEMENT,
     TABLE.AREA,
-    TABLE.METHODOLOGY_STEP,
-    TABLE.METHODOLOGY,
   ];
   for (const table of ordered) await DELETE.from(table);
-  for (const list of Object.keys(CODE_LISTS).reverse()) {
-    await DELETE.from(`com.lifeos.projecttracker.${list}`);
-  }
 };
 
 /**
@@ -256,4 +223,22 @@ export const setSubtaskStatus = async (
   await UPDATE(TABLE.SUBTASK)
     .set({ status_code: status })
     .where({ task_ID: taskId, step_code: stepCode });
+};
+
+/**
+ * Closes the named workflow steps of a stage at the times given, for fixtures
+ * whose assertion is that a later call left those times alone.
+ * @param taskId The stage the steps hang off.
+ * @param completedAt When each named step closed, keyed by step code.
+ * @returns Resolves once every named step is complete.
+ */
+export const setSubtasksComplete = async (
+  taskId: string,
+  completedAt: Record<string, string>,
+): Promise<void> => {
+  for (const [stepCode, time] of Object.entries(completedAt)) {
+    await UPDATE(TABLE.SUBTASK)
+      .set({ status_code: "complete", completedAt: time })
+      .where({ task_ID: taskId, step_code: stepCode });
+  }
 };

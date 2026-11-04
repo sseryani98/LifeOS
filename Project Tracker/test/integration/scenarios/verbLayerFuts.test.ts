@@ -192,7 +192,10 @@ describe("the intent-verb layer's functional units", () => {
       stage: STAGE.CODE_QUALITY,
       reason: REOPEN_REASON,
     });
-    const reopened = await readTaskByCode(world.milestoneId, STAGE.CODE_QUALITY);
+    const reopened = await readTaskByCode(
+      world.milestoneId,
+      STAGE.CODE_QUALITY,
+    );
     const later = await readTaskByCode(world.milestoneId, STAGE.TEST_QUALITY);
 
     expect(envelope.ok).toBe(true);
@@ -322,7 +325,10 @@ describe("the intent-verb layer's functional units", () => {
     expect(await countInitiativesOf(world.workspaceId)).toBe(2);
     expect(stories).toHaveLength(SPRINT_PLAN.stories.length);
     expect(stories.map(story => story.fricewType_code).sort()).toEqual(
-      SPRINT_PLAN.stories.map(story => story.type).slice().sort(),
+      SPRINT_PLAN.stories
+        .map(story => story.type)
+        .slice()
+        .sort(),
     );
     expect(events).toHaveLength(1);
   });
@@ -353,7 +359,9 @@ describe("the intent-verb layer's functional units", () => {
 
     const { envelope } = await callTool(client, TOOL.PROJECT_VIEW);
     const view = envelope.view as Record<string, unknown>;
-    const sprints = view.initiatives as { milestones: { chain: unknown[] }[] }[];
+    const sprints = view.initiatives as {
+      milestones: { chain: unknown[] }[];
+    }[];
 
     for (const key of VIEW_KEYS) expect(view).toHaveProperty(key);
     expect(view.defects).toHaveLength(1);

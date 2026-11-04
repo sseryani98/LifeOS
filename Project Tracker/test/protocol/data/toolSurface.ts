@@ -58,6 +58,26 @@ export const ENUM_SCHEMA_PATHS = [
 ] as const;
 
 /**
+ * Array parameters the advertised schema must declare non-empty. A sprint is an
+ * Initiative and its stories, so a plan with none has nothing to build.
+ */
+export const NON_EMPTY_ARRAY_PATHS = [
+  { TOOL: "plan_sprint", PROPERTY: "stories" },
+] as const;
+
+/**
+ * Counts the advertised schema must floor at zero. A negative count can balance
+ * an over-total one, so a schema without the floor lets a caller construct a
+ * sum the total check accepts.
+ */
+export const NON_NEGATIVE_METRIC_PATHS = [
+  { TOOL: "record_test_run", PROPERTY: "metrics", MEMBER: "total" },
+  { TOOL: "record_test_run", PROPERTY: "metrics", MEMBER: "passed" },
+  { TOOL: "record_test_run", PROPERTY: "metrics", MEMBER: "failed" },
+  { TOOL: "record_test_run", PROPERTY: "metrics", MEMBER: "pending" },
+] as const;
+
+/**
  * What a description has to clear to count as one. The floor is deliberately
  * low — this catches a description emptied, stubbed or pasted from a sibling,
  * not a thin one, because only the first three are mechanically decidable.

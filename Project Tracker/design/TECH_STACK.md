@@ -456,7 +456,7 @@ Project Tracker/
   tsconfig.json                         Extends the shared base — and is what makes the CLI load .ts (§7.1)
   eslint.config.mjs
   db/
-    schema.cds                          The 25 persisted entities (DM-001)
+    {common,reference,hierarchy,methodology,registers}/   The 25 persisted entities, one folder per domain (DM-001)
     data/                               Code-list + methodology library seeds (CNV-001)
   srv/
     tracker-service.cds                 TrackerService (§5)

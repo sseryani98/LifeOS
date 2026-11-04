@@ -22,11 +22,12 @@ export class StartStageVerb implements VerbDefinition {
     "Put a methodology stage of a story in progress.",
     "",
     "Use when the stage has never been started. A stage whose predecessor is",
-    "still open is refused, as is one already complete.",
+    "still open is refused, as is one already in progress or complete.",
     "Not for restarting a finished stage — that is reopen_stage, and it takes",
     "a reason this verb does not.",
     "",
-    "Returns the story's next incomplete stage after the change.",
+    "Returns the story's next incomplete stage after the change, and the",
+    "stage's workflow steps in position order.",
   ].join("\n");
   readonly inputShape = {
     story: z.string().describe("Story reference, as {workspace-slug}/{story-id}"),
@@ -49,6 +50,7 @@ export class StartStageVerb implements VerbDefinition {
       const chain = await gateway.readChain(milestone.ID);
       const task = StageGuards.resolveStage(chain, input.stage);
       StageGuards.assertStageNotBlocked(chain, task);
+      StageGuards.assertStageNotInProgress(task);
       StageGuards.assertStageNotComplete(task);
       await gateway.updateTask(task.ID, {
         status_code: CODES.TASK_STATUS.IN_PROGRESS,
@@ -68,8 +70,11 @@ export class StartStageVerb implements VerbDefinition {
         timestamp,
       );
       const updated = await gateway.readChain(milestone.ID);
+      // The stage's conditional steps were settled when the chain was made, so
+      // the start is where the caller learns which ones this story carries.
       return {
         nextAction: StageGuards.resolveNextAction(updated, milestone.storyId),
+        extra: { subtasks: await gateway.readSubtasks(task.ID) },
       };
     });
   }

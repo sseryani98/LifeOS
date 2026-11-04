@@ -104,6 +104,7 @@ export interface ChainRow {
   stepPosition: number;
   stepKind: string;
   driver: string;
+  requiresHuman: boolean;
 }
 
 /** A Subtask with its methodology step flattened on. */
@@ -114,6 +115,8 @@ export interface SubtaskRow {
   step_code: string;
   stepName: string;
   stepPosition: number;
+  stepKind: string;
+  driver: string;
 }
 
 /** A Defect as the verb layer reads it. */

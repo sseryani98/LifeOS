@@ -3,10 +3,10 @@
 **Spec ID:** SPEC-03
 **FRICEW Objects:** CNV-002 (Conversion), CNV-003 (Conversion), CNV-004 (Conversion)
 **Wave:** 1
-**CDS Service:** Not yet defined — see §2. This spec is an input to the Data Model stage.
+**CDS Service:** `TrackerService` (`srv/tracker-service.cds`) — the module's one CDS service, defined at the Data Model stage; §2 was its input.
 **Status:** Approved
-**Provisional on:** **R1** (D-39), inherited from SPEC-01 and SPEC-02 — the validating spike ran on
-in-memory SQLite only. **Not Approved-for-build until R1 clears.**
+**Provisional on:** **None — R1 executed and closed (D-170).** _As written:_ **R1** (D-39), inherited from SPEC-01 and SPEC-02 — the validating spike ran on
+in-memory SQLite only. ~~**Not Approved-for-build until R1 clears.**~~ **R1 executed and closed (D-170).**
 
 ---
 
@@ -21,6 +21,7 @@ in-memory SQLite only. **Not Approved-for-build until R1 clears.**
 | 2026-07-30 | Sandro & Claude | Amended in-session at the SPEC-05 workshop (D-72). **CNV-003's TestRun now carries `executedAt` 2026-07-10** — §2 amendment 13, §3.2's TestRun table, BR-25a and FUT-007. `createdAt` reads the cutover date for a run executed at the checkpoint, while BR-28 already stamps the checkpoint Activity from the same file at its own date. Rule inserted as `BR-25a` rather than renumbered, because SPEC-02, SPEC-04 and this spec's own FUTs cite BR-15 … BR-34 by number. Status stays **Approved**.                                                                                  |
 | 2026-08-15 | Sandro & Claude | Amended in-session at the Data Model stage (D-163) — the **fifth** amendment to this spec. §2 gains **amendment 15**: `Defect`, `Decision`, `Activity` and `TestRun` each take a **mandatory `workspace` association**, and CNV-003 sets it from the Workspace it is loading into. It is what makes [SPEC-07](SPEC-07-CHAIN-AND-REGISTERS.md) BR-18's workspace-scoped registers a navigable path rather than a union of two nullable links. **No seeded row's content changes, no source field is needed, no value is inferred, and no BR or FUT changes.** Status stays **Approved**. |
 | 2026-11-02 | Sandro & Claude | Citation sharpening at `SPEC-02`'s build (D-244). **BR-15 now names the carrier** of the creation status: `createdDone` on `TrackerService.Milestones` — `true` on the eleven Done Milestones, omitted on `financial-planner/CNV-001` ([SPEC-02](SPEC-02-METHODOLOGY-AND-STAGE-ENFORCEMENT.md) BR-37). No rule, algorithm or FUT changed; status stays **Approved**.                                                                                                                                                                                                                    |
+| 2026-11-04 | Claude          | Doc refresh: R1 marked executed and closed (D-170) in the header and wherever this spec gated on it; CDS Service named (`TrackerService`). No rule, FUT or count changed. Status unchanged. |
 
 ---
 
@@ -38,7 +39,7 @@ blocked because SPEC-02 BR-29 refuses a Not Started target Task and W1-S2's Mile
 at all. The migration writes through the CAP service layer instead. Under D-54 the chain arrives with
 the Milestone, so CNV-004 asserts rather than instantiates (D-59).
 
-**This spec is provisional on R1.** Nothing here has been executed against Postgres; D-39 assigns the
+~~**This spec is provisional on R1.**~~ **R1 executed and closed (D-170).** Nothing here has been executed against Postgres; D-39 assigns the
 repeat, together with standing up a binding neither Life OS module has, to the Data Model stage.
 
 ---
@@ -388,8 +389,8 @@ loudly and synchronously to its caller.
 
 **Provisional dependency — R1.** Inherited from SPEC-01 and SPEC-02 (D-39). **R4** — `cds deploy`'s
 per-schema `cds_model` snapshot — is largely dissolved by D-29's separate databases and is confirmed
-at the Data Model stage's first deploy, not here. **This spec is not Approved-for-build until R1
-clears.**
+at the Data Model stage's first deploy, not here. ~~**This spec is not Approved-for-build until R1
+clears.**~~ **R1 executed and closed (D-170).**
 
 **Cross-spec notes raised, not designed here**
 
@@ -608,4 +609,4 @@ clears.**
 
 ---
 
-_SPEC-03 specifies CNV-002, CNV-003 and CNV-004 — the load of Financial Planner's markdown project state and the tie-out that proves it landed — per [BA-001 §11 row 03](../BUSINESS_ARCHITECTURE.md) (D-37). The library it depends on is [SPEC-02](SPEC-02-METHODOLOGY-AND-STAGE-ENFORCEMENT.md) (CNV-001); the verb surface it deliberately bypasses is [SPEC-01](SPEC-01-MCP-INTENT-VERB-LAYER.md) (D-58). **Provisional on R1** per [D-39](../DECISIONS_LOG.md)._
+_SPEC-03 specifies CNV-002, CNV-003 and CNV-004 — the load of Financial Planner's markdown project state and the tie-out that proves it landed — per [BA-001 §11 row 03](../BUSINESS_ARCHITECTURE.md) (D-37). The library it depends on is [SPEC-02](SPEC-02-METHODOLOGY-AND-STAGE-ENFORCEMENT.md) (CNV-001); the verb surface it deliberately bypasses is [SPEC-01](SPEC-01-MCP-INTENT-VERB-LAYER.md) (D-58). ~~**Provisional on R1**~~ (closed by D-170) per [D-39](../DECISIONS_LOG.md)._

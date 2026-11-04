@@ -12,7 +12,7 @@ Sandro is the user. The agents are instruments writing into it, not users (D-04)
 ## Status
 
 **Build is under way. `S-00 Module Bootstrap` (2026-08-16) and `SPEC-01 MCP Intent-Verb Layer`
-(2026-08-16) are done; `SPEC-02` is next.** The module now has a CDS model, one CAP service, a read
+(2026-08-16) are done; `SPEC-02` is built and functionally tested (19/19, 2026-11-03), Human Review done 2026-11-04, commit next.** The module now has a CDS model, one CAP service, a read
 projection and an MCP verb server. It still has **no UI** — `app/` is empty by design and
 `SPEC-04` fills it.
 
@@ -24,8 +24,8 @@ What this means concretely:
 - **The schema is deployed.** `cds deploy` ran clean against Postgres into the empty schema and left
   **27 base tables** — this module's 25, plus CAP's own `cds_model` and `cds_outbox_messages`. Code-list
   referential integrity is **live and measured**: an unseeded code is rejected with Postgres `23503`
-  (D-229). **The store is empty of data** — the methodology library and the migrated workspace are
-  `SPEC-02`'s and `SPEC-03`'s.
+  (D-229). **The methodology library and all twelve code lists are seeded** from `db/data/*.csv` by
+  `cds deploy` (`SPEC-02` CNV-001, uncommitted); the migrated workspace is `SPEC-03`'s.
 - **`npm test` is green over `159` tests in `19` suites**, across five tiers: unit, integration (both
   entry points), protocol, script, and the `scenarios` tier that executes `SPEC-01`'s sixteen
   functional units through a real MCP client (D-238). Coverage carries the global band plus **three** per-layer bands

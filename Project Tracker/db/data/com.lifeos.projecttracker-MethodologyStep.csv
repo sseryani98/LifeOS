@@ -1,0 +1,17 @@
+code;name;description;kind_code;position;conditional;requiresHuman;driver;parent_code;methodology_code
+sprint-build;Sprint Build;Build the story end to end: brief, red tests, implementation, gate and coverage;Required;10;;false;/build;;sprint-build
+code-quality;Code Quality;Review the change for code quality against the shared standards;Required;20;;false;/code-quality;;sprint-build
+test-quality;Test Quality;Review the test suite for quality and coverage of the business rules;Required;30;;false;/test-quality;;sprint-build
+functional-test;Functional Test;Run the story's functional unit tests end to end against the running app;Required;40;;false;/functional-test;;sprint-build
+ux-test;UX Test;Review the built pages against the design system, theme and information architecture;Conditional;50;shipsUi;false;/ux-test;;sprint-build
+human-review;Human Review;Sandro reads the diff and every finding is fixed and prevented;Required;60;;true;/human-review-loop;;sprint-build
+documentation;Documentation;Bring the design docs and CLAUDE.md files back in sync with the change;Recommended;70;;false;/refresh-docs;;sprint-build
+pm-update;PM Update;Reconcile the tracking artifacts with the finished story;Required;80;;false;/pm-update;;sprint-build
+commit;Commit;Commit the reviewed change with a Conventional Commits message;Required;90;;false;/commit-diff;;sprint-build
+brief;Brief;Write the build brief from the spec and the design docs;Required;10;;false;/build;sprint-build;sprint-build
+red;Red;Write the failing test suite the implementation must turn green;Required;20;;false;/build;sprint-build;sprint-build
+implement;Implement;Make the failing tests pass without touching them;Required;30;;false;/build;sprint-build;sprint-build
+gate;Gate;Run type-check, lint, tests and build until all four pass;Required;40;;false;/build;sprint-build;sprint-build
+coverage;Coverage;Raise coverage to the enforced thresholds;Required;50;;false;/build;sprint-build;sprint-build
+smoke;Smoke;Smoke-test the built pages in a real browser;Conditional;60;shipsUi;false;/build;sprint-build;sprint-build
+handoff;Handoff;Hand the green, uncommitted build over for review;Required;70;;false;/build;sprint-build;sprint-build

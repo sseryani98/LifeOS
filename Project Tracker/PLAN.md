@@ -7,8 +7,8 @@ twelve Approved**; `IA-001`, `DS-001`, `TH-001`, `DM-001`, `TS-001` and `TST-001
 `BP-001` **Approved**). **All five open items are closed; R1 is executed and R9's proxy
 residual is executed.** **Build is under way: `S-00 Module Bootstrap` and `SPEC-01 MCP Intent-Verb
 Layer` are both DONE (2026-08-16) — the module has a model, a service and eleven verbs — and `SPEC-02`
-is next.** Decisions run **D-01 … D-230**.
-**Last updated:** 2026-08-16
+is built and functionally tested (19/19, 2026-11-03), Human Review done 2026-11-04, commit next.** Decisions run **D-01 … D-248**.
+**Last updated:** 2026-11-04
 **Purpose:** The continuity document. Anyone (or any fresh chat) picking up Project Tracker
 starts here. Read this, then `design/PROBLEM_STATEMENT_AND_VISION.md` (PSV-001),
 `design/BUSINESS_ARCHITECTURE.md` (BA-001) and `design/DECISIONS_LOG.md` for the full
@@ -83,13 +83,13 @@ read path** nobody had ever specified (D-145). `IA-001` is **Approved**.
 
 Project Tracker has a PRD, `design/PROBLEM_STATEMENT_AND_VISION.md` (PSV-001, **Draft**),
 `design/BUSINESS_ARCHITECTURE.md` (BA-001 v1.15, **Approved** — 22 objects in 3 waves, grouped into
-12 specs), a `research/` pack of six documents, a decisions log (D-01 … D-159), a wired module folder,
+12 specs), a `research/` pack of six documents, a decisions log (D-01 … D-248), a wired module folder,
 **twelve written specs — `SPEC-01` … `SPEC-12`, all twelve Approved** (`SPEC-01` flipped from Draft at
 the `SPEC-12` workshop, discharging D-93 — D-136) — and the
-Plan-phase skills installed in `.claude/`. **No module code exists yet.** Ideate, Scope and Research ran
+Plan-phase skills installed in `.claude/`. **Module code exists: `S-00` and `SPEC-01` are Done (2026-08-16); `SPEC-02` is built, uncommitted.** Ideate, Scope and Research ran
 2026-07-26; Scaffold, the Workshops grouping, `SPEC-01` and `SPEC-02` ran 2026-07-27; `SPEC-03` and
 `SPEC-04` ran 2026-07-28; `SPEC-05` … `SPEC-09` ran 2026-07-30; `SPEC-10`, `SPEC-11` and `SPEC-12` ran
-2026-08-04. **OI-01, OI-02, OI-03 and OI-04 are closed**; **only OI-05 remains**, at Data Model.
+2026-08-04. **OI-01, OI-02, OI-03 and OI-04 are closed**; **OI-05 closed at Data Model (D-161).**
 
 ### The one-paragraph version
 
@@ -103,7 +103,7 @@ becomes the first real test of the new system.
 
 ## 2. Decisions already made
 
-Full rationale in `design/DECISIONS_LOG.md` (D-01 … **D-197**; D-19 … D-27 were added at Scope,
+Full rationale in `design/DECISIONS_LOG.md` (D-01 … **D-248**; D-19 … D-27 were added at Scope,
 D-28 … D-32 at Research, D-33 … D-36 at Scaffold, D-37 … D-39 at the Workshops grouping,
 D-40 … D-46 at the `SPEC-01` workshop, D-47 … D-57 at the `SPEC-02` workshop, D-58 … D-65 at the
 `SPEC-03` workshop, D-66 … D-69 at the `SPEC-04` workshop, D-70 … D-75 at the `SPEC-05` workshop and
@@ -149,7 +149,7 @@ mechanism needs a construction step.
 | 10  | Tech Stack         | `/generate-tech-stack` → `doc-writer`       | Authored     | **Done** — 2026-08-15. `TS-001` **Approved**; **the proxy executed**, the loader ruled, the credential homed, **R11 minted** (D-176 … D-185)             |
 | 11  | Test Strategy      | `/generate-test-strategy` → `doc-writer` | Authored     | **Done** — 2026-08-15. `TST-001` **Approved**; **the harness question executed and the exemplar's belief reversed**; 180 FUTs classified (D-186 … D-197) |
 | 12  | Project Planning   | `/generate-build-plan` → `doc-writer`       | Authored     | **Done** — 2026-08-15. `BP-001` **Approved**; **13 stories, 3 sprints**; story zero resolves the eight "first build story" items (D-198 … D-209)         |
-| 13  | Build              | `/build` + chain                                   | Exists       | **In progress** — `S-00` **Done** 2026-08-16 (D-210 … D-217); `SPEC-01` **Done** 2026-08-16 (D-218 … D-230), with **§5's chain run retroactively 2026-08-25 → 26** — stages 2, 3 and 4 closed, 5 skipped, **6 Human Review now closed** (D-232 … D-238); **`SPEC-02` next**, in sprint `PT-W1` (BP-001 §3, §6) |
+| 13  | Build              | `/build` + chain                                   | Exists       | **In progress** — `S-00` **Done** 2026-08-16 (D-210 … D-217); `SPEC-01` **Done** 2026-08-16 (D-218 … D-230), with **§5's chain run retroactively 2026-08-25 → 26** — stages 2, 3 and 4 closed, 5 skipped, **6 Human Review now closed** (D-232 … D-238); **`SPEC-02` in progress** in sprint `PT-W1` — built, `/functional-test` 19/19 on 2026-11-03, Human Review done 2026-11-04, `/commit-diff` next (BP-001 §3, §6) |
 | 14  | **Rewire tooling** | `lintNoMarkdownState` + PreToolUse hook            | Not authored | Not started                                                                                                                                              |
 | 15  | Cutover            | —                                                  | —            | Not started                                                                                                                                              |
 | 16  | Back to FP         | —                                                  | —            | Blocked on cutover                                                                                                                                       |
@@ -166,11 +166,11 @@ and six of its stated defaults.
 `/workshop` reads that table; it does not re-derive a grouping per session. Spec number is build
 order, so the sequence is simply `SPEC-01` → `SPEC-12`.
 
-**`SPEC-01` … `SPEC-06` are written**, all six provisional on R1. ~~and `SPEC-04` … `SPEC-06` additionally on R9~~ — **R9 was executed and discharged at Information Architecture, 2026-08-06 (D-140)**, so no spec is provisional on it any more. `SPEC-01`
-(`design/specs/SPEC-01-MCP-INTENT-VERB-LAYER.md`, **Draft**) is eleven verbs, 29 business rules, 16
+**`SPEC-01` … `SPEC-06` are written**, all six Approved; R1 was executed and closed at Data Model (D-170), so none is provisional on it. ~~and `SPEC-04` … `SPEC-06` additionally on R9~~ — **R9 was executed and discharged at Information Architecture, 2026-08-06 (D-140)**, so no spec is provisional on it any more. `SPEC-01`
+(`design/specs/SPEC-01-MCP-INTENT-VERB-LAYER.md`, **Approved** at the `SPEC-12` workshop, D-136) is eleven verbs, 29 business rules, 16
 FUTs, D-40 … D-46. `SPEC-02` (`design/specs/SPEC-02-METHODOLOGY-AND-STAGE-ENFORCEMENT.md`,
-**Approved** 2026-07-27) is 33 business
-rules, 18 FUTs, D-47 … D-57 — and it discharged all three things `SPEC-01` deferred to it: the guard
+**Approved** 2026-07-27) is 37 business
+rules, 19 FUTs, D-47 … D-57 (amended by D-162, D-166, D-239 … D-246) — and it discharged all three things `SPEC-01` deferred to it: the guard
 table (14 rejections, nine new `wfl.*` keys — eight since D-245 withdrew `wfl.chain.alreadyInstantiated`), the twelfth-verb question (**not needed** — D-50), and
 the slug codes (16, with FUT-002 testing the contract rather than asserting it). `SPEC-03`
 (`design/specs/SPEC-03-FINANCIAL-PLANNER-MIGRATION-LOAD.md`, **Approved** 2026-07-28) is 34 business
@@ -222,8 +222,7 @@ out of six have amended it, five specs remain unwritten, and every remaining Rep
 writes through the verb layer, so a tenth amendment is likelier than not. Draft is what keeps the cheap
 in-session edit path cheap; approving it now would make each further amendment a re-approval ceremony.
 
-**`SPEC-08` (`design/specs/SPEC-08-CONSUMER-REWIRING.md`, **Draft** — written 2026-07-30, awaiting
-Sandro's approval) is 29 business rules, 12 FUTs, three Data Model amendments and D-94 … D-102** — the
+**`SPEC-08` (`design/specs/SPEC-08-CONSUMER-REWIRING.md`, **Approved** 2026-07-30, D-103) is 29 business rules, 12 FUTs, three Data Model amendments and D-94 … D-102** — the
 **first Wave 3 spec** and the first whose
 deliverable is edited agent instructions rather than a service, a screen or a load. It resolves **no**
 OI, and it is the **first spec to rule R9 out** rather than inherit it (D-101). Two findings carried the
@@ -233,8 +232,7 @@ references are prose inside agent prompts and no consumer ever needed a non-agen
 story and never a stage, so converting only the references would have left `complete_subtask('handoff')`
 refused by two SPEC-02 guards on its first call (D-102).
 
-**`SPEC-09` (`design/specs/SPEC-09-TEST-REPORT-TO-TESTRUN.md`, **Draft** — written 2026-07-30, awaiting
-Sandro's approval) is 23 business rules, 13 FUTs, four Data Model amendments and D-103 … D-108** — the
+**`SPEC-09` (`design/specs/SPEC-09-TEST-REPORT-TO-TESTRUN.md`, **Approved** 2026-08-04, D-109) is 23 business rules, 13 FUTs, four Data Model amendments and D-103 … D-108** — the
 second Wave 3 spec, the second standalone one, and the **only object whose consumer is not an agent**.
 It resolves **no** OI and mints **no** error key. **SPEC-08 was approved in the same session (D-103)** —
 it owed nothing, and unlike SPEC-01 no decision held it in Draft.
@@ -302,10 +300,10 @@ and no hook has ever fired in this repo.
 
 **Workshops is complete.** Twelve specs, twelve Approved. **Information Architecture is complete too** — `design/INFORMATION_ARCHITECTURE.md` (IA-001, **Approved** 2026-08-06), D-137 … D-143, with **R9 executed and closed**. **Design System is complete** — `design/DESIGN_SYSTEM.md` (DS-001, **Approved**), D-144 … D-152: **FE FPM for all six objects, drafts OFF**, one `ObjectPageLayout`, 17 semantic-role mappings, no charts, and the browser read path named as a **SPEC-01 amendment**. **Theme is complete** — `design/THEME.md` (TH-001, **Draft**), D-153 … D-159: the module **inherits Financial Planner's theme wholesale and writes no CSS**, and DS-001 §9's 17 roles resolve onto **5** Horizon custom properties measured against the pinned runtime. **Next is stage 9, Data Model** — it owns **OI-05** and **R1**, plus D-145's read-path requirement.
 
-**Still open:** **OI-05 alone** (methodology genericity — Data Model). **OI-03 is closed by D-35 and
+**Still open:** none — OI-05 closed by D-161 at Data Model. **OI-03 is closed by D-35 and
 OI-04 by D-70.** Research risks: R2 is closed
 by D-33 and R3/R8 dissolved with D-29; **R9 is executed and closed** (D-140, 2026-08-06) and
-**R1, R4 and R7 remain unexecuted** — see
+**R4 and R7 remain unexecuted** (R1 executed and closed, D-170) — see
 `research/README.md` §5. **All now have an owner rather than only a description** — R7's and R4's
 were assigned at the `SPEC-11` workshop (D-121): both belong to **`INT-007`'s own build**, because the
 drill needs a real Postgres, a built exporter and loaded data, and dropping and recreating a schema to
@@ -704,6 +702,24 @@ Sandro ruled it a defect.
 - **`doc-writer`'s first run was a dry run over `TH-001`, into a scratch folder.** It re-rendered the approved document and reported that **the approved `THEME.md` is stale against `theme-overrides.css`**: commit `6abcd76` (2026-11-02, the WCAG AA pass) took the file from 187 to 390 lines and 44 to 89 custom properties, `--sapLinkColor` is `#7a5e1b` not `#8B6B1F`, and every `:line` citation in §4, §7, §8 and §10 has moved — so the `/ux-test` rubric measures against the wrong file. **Done the same day: `/refresh-docs` re-measured both TH-001 documents against the CSS** (Project Tracker v1.1, Financial Planner v1.4) — counts, line citations, surfaces, contrast figures and the load mechanism corrected; D-155's Link half noted as lapsed on the figures, the rule kept. The run also surfaced fourteen ambiguities in the theme brief and the agent contract; three are fixed in `doc-writer.md` (brief heading level, same-module IDs cited bare, a record older than the file it measures is a gap), the rest are `HARNESS_BACKLOG` H-05.
 - **One source per rule (review item 4).** `lintAgentPrompts.ts` runs as root `lint:harness`: the canonical memory block (`Standards (Technical + Linting)/agentMemoryBlock.md`) is stamped into every agent and checked for drift, no harness file may name a machine path, and every prose linter count must match the scripts on disk — it had drifted to 18, 20 and 21. `implementer`, `test-author`, `gate-runner` and `quality-reviewer` lost their restated codebase rules and point at the standards; `build.js` renders its locked-test list once; the commands proceed on the common case instead of asking, `/ux-test` reads the BUILD_PLAN Ships UI column, and `/test-quality` derives its lenses from the module instead of carrying Financial Planner's table.
 - **Review item 5, the three ledgers, is D-248:** `CNV-001`, `INT-002` and `SPEC-08` run before the next Financial Planner story, and the `INT-002` workshop settles agent identity against one-server-per-`.mcp.json`-entry before any rewiring.
+
+### 2026-11-03 — Build `SPEC-02`, and its `/functional-test`: thirteen defects, all fixed
+
+- **`SPEC-02` built in the working tree, uncommitted.** `CNV-001`'s library and all twelve code lists
+  ship as `db/data/*.csv` loaded by `cds deploy` (D-240); the single `db/schema.cds` is split into
+  `db/{common,reference,hierarchy,methodology,registers}/`; the scenarios tier gains
+  `methodologyFuts.test.ts`.
+- **`/functional-test` on scratch Postgres `ft_spec_02_202611031332` (dropped)** found the build
+  defects logged as §7 items 5–11; Sandro ruled them build defects. The re-runs (`SPEC-01` 16/16,
+  `SPEC-02` 19/19, both on the shipped Postgres server) added items 12–17. **All thirteen are fixed.**
+- **Item 8 amended the model:** `Task` and `Subtask` now freeze `kind`, `position` and
+  `requiresHuman` at instantiation — `DM-001` v1.3, carried back into `SPEC-02` as §2 amendment 10.
+- **D-246's defect is fixed:** the `storyId` duplicate check is workspace-wide and
+  `verb.story.duplicate` reads `Story "{0}" already exists.`
+- **One finding went to the spec, not the code:** FUT-017's precondition now requires
+  `sprint-build` and `code-quality` Complete (BR-19).
+- **Position:** stages 1–5 of the chain run; **Human Review next**, then `/refresh-docs`,
+  `/pm-update` (both run 2026-11-04) and `/commit-diff`.
 
 ### 2026-11-02 — `SPEC-02` workshop re-opened: `/build`'s two blockers, settled as data
 

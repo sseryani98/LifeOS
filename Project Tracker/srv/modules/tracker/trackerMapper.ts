@@ -1,4 +1,12 @@
-import type { ChainTaskRow, MilestoneRow } from "./types.js";
+import { CODES } from "../shared/constants.js";
+
+import type {
+  ChainTaskRow,
+  LibraryStepRow,
+  MilestoneRow,
+  SubtaskInsertRow,
+  TaskInsertRow,
+} from "./types.js";
 
 /** Shape translation between read results and the shapes the logic works on. */
 export class TrackerMapper {
@@ -39,5 +47,50 @@ export class TrackerMapper {
       else grouped.set(task.milestone_ID, [task]);
     }
     return grouped;
+  }
+
+  /**
+   * Shapes a library stage step into the Task row that materialises it. Every
+   * materialised row starts Not Started. Kind, position and the human-only flag
+   * are copied because the guards and the status derivation read them, and a
+   * chain is never refreshed; the driver is not, because remediation must name
+   * the command as seeded now.
+   * @param taskId The identifier the new Task takes.
+   * @param step The library stage step it materialises.
+   * @param milestoneId The story the chain belongs to.
+   * @returns The Task row to write.
+   */
+  static toTaskRow(
+    taskId: string,
+    step: LibraryStepRow,
+    milestoneId: string,
+  ): TaskInsertRow {
+    return {
+      ID: taskId,
+      step_code: step.code,
+      kind_code: step.kind_code,
+      position: step.position,
+      requiresHuman: step.requiresHuman,
+      status_code: CODES.TASK_STATUS.NOT_STARTED,
+      milestone_ID: milestoneId,
+    };
+  }
+
+  /**
+   * Shapes a library workflow step into the Subtask row that materialises it
+   * under its stage, its guard inputs frozen for the same reason as a Task's.
+   * @param step The library workflow step it materialises.
+   * @param taskId The stage the step hangs off.
+   * @returns The Subtask row to write.
+   */
+  static toSubtaskRow(step: LibraryStepRow, taskId: string): SubtaskInsertRow {
+    return {
+      step_code: step.code,
+      kind_code: step.kind_code,
+      position: step.position,
+      requiresHuman: step.requiresHuman,
+      status_code: CODES.SUBTASK_STATUS.NOT_STARTED,
+      task_ID: taskId,
+    };
   }
 }

@@ -92,27 +92,32 @@ export class TrackerMcpServer {
   }
 
   /**
+   * Loads the model, connects the database and serves every service, in that
+   * order.
+   * @param cds The CAP runtime.
+   * @returns Resolves once every service is served.
+   */
+  static async startRuntime(cds: CdsRuntime): Promise<void> {
+    const model = await cds.load("*");
+    cds.model = cds.compile.for.nodejs(model);
+    await cds.connect.to(BOOTSTRAP.DATABASE_SERVICE);
+    if (TrackerMcpServer._isInMemoryDatabase(cds)) {
+      await TrackerMcpServer._runSilentDeploy(cds, model);
+    }
+    await cds.serve("all").from(model as never);
+  }
+
+  /**
    * Boots CAP in this process, then serves the MCP tools over stdio.
    * @returns Resolves once the transport is connected.
    */
   static async startServer(): Promise<void> {
-    // CAP decides once, at module load, whether ".ts" is in its service-impl
-    // resolver's extension list, and nothing sets that lever for this process —
-    // hence the assignment here and the dynamic import on the next line.
     process.env.CDS_TYPESCRIPT ??= "true";
-    // CAP roots its project at cwd, and a client spawns this from wherever it is
-    // open — from the repo root CAP finds no TrackerService. The static block
-    // only starts this when argv[1] is mcp/server.ts, one level below the module.
+    // A client spawns this from wherever it is open; the project must load from the module root.
     process.chdir(join(dirname(process.argv[1] ?? ""), ".."));
     const cds = (await import("@sap/cds")).default as CdsRuntime;
     TrackerMcpServer.setupStderrLogging(cds);
-    const model = await cds.load("*");
-    if (TrackerMcpServer._isInMemoryDatabase(cds)) {
-      await TrackerMcpServer._runSilentDeploy(cds, model);
-    }
-    // Serving happens exactly once, at boot: with nothing served there is
-    // nothing to connect to, but a reconnect reopens the connection only.
-    await cds.serve("all").from(model as never);
+    await TrackerMcpServer.startRuntime(cds);
     const context: VerbContext = {
       service: await cds.connect.to(BOOTSTRAP.SERVICE_NAME),
       actor: process.env[BOOTSTRAP.ACTOR_VARIABLE] ?? "",
@@ -152,8 +157,7 @@ export class TrackerMcpServer {
   }
 
   /**
-   * Deploys the model without CAP announcing it. The banner is stdout traffic,
-   * and the published signature omits the option the runtime accepts.
+   * Deploys the model silently: stdout belongs to the MCP transport.
    * @param cds The CAP runtime.
    * @param model The loaded model.
    * @returns Resolves once the deployment finishes.

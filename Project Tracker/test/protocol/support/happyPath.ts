@@ -1,7 +1,7 @@
 import type { Client } from "@modelcontextprotocol/sdk/client/index.js";
 
 import {
-  OPEN_STEP,
+  FIRST_STEP,
   REOPEN_REASON,
   STAGE,
 } from "../../integration/tracker/data/chainStates.js";
@@ -40,7 +40,7 @@ export const arrangeHappyPath = async (
       return { ...FIRST_STAGE };
     case "complete_subtask":
       await _driveTool(client, "start_stage", { ...FIRST_STAGE });
-      return { ...FIRST_STAGE, subtask: OPEN_STEP };
+      return { ...FIRST_STAGE, subtask: FIRST_STEP };
     case "reopen_stage":
       await _driveTool(client, "start_stage", { ...FIRST_STAGE });
       await _driveTool(client, "complete_stage", { ...FIRST_STAGE });

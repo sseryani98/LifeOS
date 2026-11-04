@@ -46,3 +46,14 @@ export const readInsertedEntries = (
   if (Array.isArray(entries)) return entries as Record<string, unknown>[];
   return entries ? [entries as Record<string, unknown>] : [];
 };
+
+/**
+ * Reads the keys an array schema's items declare, so a spec can pin the shape
+ * of each row a verb accepts without reaching into the schema library itself.
+ * @param schema The array schema.
+ * @returns The item object's keys, in declaration order.
+ */
+export const readArrayItemKeys = (schema: unknown): string[] => {
+  const element = (schema as { element?: { shape?: Record<string, unknown> } }).element;
+  return Object.keys(element?.shape ?? {});
+};

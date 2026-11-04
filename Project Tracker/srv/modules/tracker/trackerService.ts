@@ -1,6 +1,14 @@
+import { randomUUID } from "node:crypto";
+
 import type cds from "@sap/cds";
 
-import { DERIVED_SCALARS, HANDLER_KEYS } from "../shared/constants.js";
+import {
+  CHAIN_PREDICATES,
+  CODES,
+  DERIVED_SCALARS,
+  HANDLER_KEYS,
+  TEST_RUN_COUNT_FIELDS,
+} from "../shared/constants.js";
 import { PayloadList } from "../shared/payloadList.js";
 
 import { MilestoneStatus } from "./milestoneStatus.js";
@@ -10,15 +18,20 @@ import { TrackerValidator } from "./trackerValidator.js";
 import type {
   DefectPayload,
   InitiativePayload,
+  LibraryStepRow,
   MilestonePayload,
   MilestoneRow,
+  SubtaskInsertRow,
+  TaskInsertRow,
   TestRunPayload,
 } from "./types.js";
 
 /**
- * The handler-layer logic: the friendly named 409s in front of the store's two
- * unique constraints, and the status derivation that is filled on read because
- * no verb may write it.
+ * The handler-layer logic: the named 409s for an Initiative name unique in its
+ * Workspace and a story ID unique across it (wider than the store's per-Initiative
+ * constraint), the Defect and TestRun scope guards, the TestRun count-within-total
+ * guard, the chain a story is given at
+ * creation, and the status derivation filled on read because no verb may write it.
  */
 export class TrackerService {
   private readonly data: TrackerDataService;
@@ -39,7 +52,9 @@ export class TrackerService {
     const tasks = await this.data.readChainTasks(rows.map(row => row.ID));
     const byMilestone = TrackerMapper.groupTasksByMilestone(tasks);
     for (const row of rows) {
-      row.status = MilestoneStatus.deriveFromChain(byMilestone.get(row.ID) ?? []);
+      row.status = MilestoneStatus.deriveFromChain(
+        byMilestone.get(row.ID) ?? [],
+      );
     }
   }
 
@@ -50,7 +65,9 @@ export class TrackerService {
    * they fill rather than a second read path they would have to add.
    * @param rows The project-view rows a read returned.
    */
-  async applyProjectViewDerivations(rows: Record<string, unknown>[]): Promise<void> {
+  async applyProjectViewDerivations(
+    rows: Record<string, unknown>[],
+  ): Promise<void> {
     for (const row of rows) {
       for (const element of DERIVED_SCALARS) row[element] ??= null;
     }
@@ -78,15 +95,18 @@ export class TrackerService {
         merged.name,
         data.ID,
       );
-      if (duplicates > 0) req.reject(409, HANDLER_KEYS.INITIATIVE_DUPLICATE);
+      if (duplicates > 0) {
+        req.reject(409, HANDLER_KEYS.INITIATIVE_DUPLICATE, [merged.name]);
+      }
     }
   }
 
   /**
-   * Guards a Milestone write: a duplicate story ID inside the Initiative gets
-   * its named 409, judged on the merged row so a partial update carrying only
-   * the story ID or only the Initiative is still counted against its real
-   * siblings. The store's unique constraint stays as the backstop.
+   * Guards a Milestone write: a story ID exists once per Workspace, across
+   * every Initiative of it, because the verbs address a story by workspace and
+   * story ID alone. Judged on the merged row, so a move carrying only the
+   * Initiative is counted against the Workspace it lands in. The store's
+   * per-Initiative unique constraint stays as the narrower backstop.
    * @param req Request carrying the Milestone payload.
    */
   async checkMilestoneWrite(req: cds.Request): Promise<void> {
@@ -94,13 +114,52 @@ export class TrackerService {
       if (!this._hasMilestoneIdentity(data)) continue;
       const merged = await this._mergeStoredMilestone(req, data);
       if (!merged.storyId || !merged.initiative_ID) continue;
-      const duplicates = await this.data.countMilestonesWithStoryId(
+      const workspaceId = await this.data.readInitiativeWorkspaceId(
         merged.initiative_ID,
+      );
+      if (!workspaceId) continue;
+      const duplicates = await this.data.countMilestonesWithStoryId(
+        workspaceId,
         merged.storyId,
         data.ID,
       );
-      if (duplicates > 0) req.reject(409, HANDLER_KEYS.STORY_DUPLICATE);
+      if (duplicates > 0) {
+        req.reject(409, HANDLER_KEYS.STORY_DUPLICATE, [merged.storyId]);
+      }
     }
+  }
+
+  /**
+   * Materialises the chain of every story created in Backlog; one created Done
+   * stays chainless, which is why an empty chain derives Done. Conditionality
+   * is settled here, once: a failed predicate gets no row. Each row keeps its
+   * step's guard inputs as of now and this runs only on create, so no library
+   * edit reaches an existing chain.
+   * @param req Request carrying the created Milestone payload.
+   */
+  async createChains(req: cds.Request): Promise<void> {
+    const stories = PayloadList.fromPayload<MilestonePayload>(req.data).filter(
+      story => story.createdDone !== true,
+    );
+    if (stories.length === 0) return;
+    const library = await this.data.readLibrarySteps();
+    const tasks: TaskInsertRow[] = [];
+    const subtasks: SubtaskInsertRow[] = [];
+    for (const story of stories) {
+      const applicable = library.filter(step =>
+        this._isMaterialised(step, story),
+      );
+      for (const stage of applicable.filter(step => !step.parent_code)) {
+        const taskId = randomUUID();
+        tasks.push(TrackerMapper.toTaskRow(taskId, stage, story.ID as string));
+        for (const step of applicable) {
+          if (step.parent_code !== stage.code) continue;
+          subtasks.push(TrackerMapper.toSubtaskRow(step, taskId));
+        }
+      }
+    }
+    await this.data.insertChainTasks(tasks);
+    await this.data.insertChainSubtasks(subtasks);
   }
 
   /**
@@ -119,16 +178,22 @@ export class TrackerService {
   }
 
   /**
-   * Guards a TestRun write: it hangs off a stage or off a sprint. Updates are
-   * guarded too, or a patch nulling the only link would orphan the run; the
-   * same no-link-named skip as Defect keeps unrelated patches through.
+   * Guards a TestRun write: it hangs off a stage or off a sprint, and its counts
+   * fit inside its total. Both rules live here rather than in the verb so an
+   * OData write meets them too. Updates are guarded as well, or a patch could
+   * orphan the run or lift one count past the stored total; a patch naming
+   * neither a link nor a count skips both, as Defect's does.
    * @param req Request carrying the TestRun payload.
    */
   async checkTestRunWrite(req: cds.Request): Promise<void> {
+    const isUpdate = req.event === "UPDATE";
     for (const data of PayloadList.fromPayload<TestRunPayload>(req.data)) {
-      if (req.event === "UPDATE" && !this._hasTestRunScope(data)) continue;
+      const checksScope = !isUpdate || this._hasTestRunScope(data);
+      const checksCounts = !isUpdate || this._hasTestRunCounts(data);
+      if (!checksScope && !checksCounts) continue;
       const merged = await this._mergeStoredTestRun(req, data);
-      this.validator.validateTestRunScope(req, merged);
+      if (checksScope) this.validator.validateTestRunScope(req, merged);
+      if (checksCounts) this.validator.validateTestRunCounts(req, merged);
     }
   }
 
@@ -186,8 +251,8 @@ export class TrackerService {
   }
 
   /**
-   * Overlays an update's payload on the stored TestRun links. Same shape as the
-   * Defect merge.
+   * Overlays an update's payload on the stored TestRun links and counts. Same
+   * shape as the Defect merge.
    * @param req Request carrying the TestRun payload.
    * @param data One payload row of the write.
    * @returns The merged view of the row being written.
@@ -197,7 +262,7 @@ export class TrackerService {
     data: TestRunPayload,
   ): Promise<TestRunPayload> {
     if (req.event !== "UPDATE" || !data.ID) return data;
-    const stored = await this.data.readTestRunScopeRow(data.ID);
+    const stored = await this.data.readTestRunGuardRow(data.ID);
     if (!stored) return data;
     return { ...stored, ...data };
   }
@@ -210,6 +275,15 @@ export class TrackerService {
    */
   private _hasDefectScope(data: DefectPayload): boolean {
     return "milestone_ID" in data || "initiative_ID" in data;
+  }
+
+  /**
+   * Reports whether a payload touches any count the total bounds.
+   * @param data The payload being written.
+   * @returns True when the total or any outcome count appears in it.
+   */
+  private _hasTestRunCounts(data: TestRunPayload): boolean {
+    return TEST_RUN_COUNT_FIELDS.some(field => field in data);
   }
 
   /**
@@ -240,5 +314,24 @@ export class TrackerService {
    */
   private _hasMilestoneIdentity(data: MilestonePayload): boolean {
     return "storyId" in data || "initiative_ID" in data;
+  }
+
+  /**
+   * Decides whether a library step applies to a story. Required and
+   * Recommended steps always do; a Conditional step does only when the
+   * predicate it names holds for the story, and an unknown predicate holds for
+   * none.
+   * @param step The library step.
+   * @param story The story being created.
+   * @returns True when the step is materialised for the story.
+   */
+  private _isMaterialised(
+    step: LibraryStepRow,
+    story: MilestonePayload,
+  ): boolean {
+    if (step.kind_code !== CODES.STEP_KIND.CONDITIONAL) return true;
+    if (step.conditional === CHAIN_PREDICATES.SHIPS_UI)
+      return story.shipsUi === true;
+    return false;
   }
 }

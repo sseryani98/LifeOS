@@ -52,6 +52,7 @@ export const UNRESOLVABLE = {
 export const ACTORS = {
   IMPLEMENTER: "implementer",
   SANDRO: "sandro",
+  SYSTEM: "test-report",
 } as const;
 
 /** The defect a suite logs and then closes. */
@@ -64,6 +65,9 @@ export const DEFECT_INPUT = {
 
 /** The resolution that closes it. */
 export const DEFECT_RESOLUTION = "Category copied onto every split child.";
+
+/** A second, different resolution sent at a defect already closed. */
+export const DEFECT_RESOLUTION_REWRITE = "Rewritten after the fact.";
 
 /** The decision a suite records against the workspace. */
 export const DECISION_INPUT = {
@@ -180,6 +184,24 @@ export const TEST_RUN_METRICS = {
   linesPct: 91.4,
   branchesPct: 86.2,
 } as const;
+
+/** A run reporting more passes than it has tests. */
+export const OVER_TOTAL_TEST_RUN_METRICS = {
+  total: 1,
+  passed: 5,
+  failed: 0,
+} as const;
+
+/** A run whose negative failure count would balance its over-total pass count. */
+export const NEGATIVE_COUNT_TEST_RUN_METRICS = {
+  total: 1,
+  passed: 5,
+  failed: -4,
+} as const;
+
+/** The refusal of the over-total run, every placeholder substituted. */
+export const OVER_TOTAL_TEST_RUN_MESSAGE =
+  "5 passed, 0 failed and 0 pending add up to more than the total of 1.";
 
 /** A run with only the counts a bare invocation produces, plus a failure list. */
 export const MINIMAL_TEST_RUN_METRICS = {

@@ -2,6 +2,8 @@ import { TrackerValidator } from "../../../../srv/modules/tracker/trackerValidat
 import {
   COMPLETION_PAYLOADS,
   DEFECT_SCOPES,
+  TEST_RUN_COUNT_ARGS,
+  TEST_RUN_COUNTS,
   TEST_RUN_SCOPES,
 } from "../data/handlerPayloads.js";
 import { buildRequestDouble } from "../support/requestDouble.js";
@@ -37,6 +39,52 @@ describe("the handler-layer input rules", () => {
     expect(onStage.errors).toHaveLength(0);
     expect(onSprint.errors).toHaveLength(0);
     expect(orphan.errors[0].code).toBe("tracker.testrun.scopeRequired");
+  });
+
+  /** A run claiming more outcomes than tests is a gate figure nothing downstream can trust. */
+  it("refuses test-run counts that add up past the total, naming all four numbers", () => {
+    const atTotal = buildRequestDouble(TEST_RUN_COUNTS.AT_TOTAL_WITH_PENDING);
+    const underTotal = buildRequestDouble(
+      TEST_RUN_COUNTS.UNDER_TOTAL_WITHOUT_PENDING,
+    );
+    const passedOver = buildRequestDouble(TEST_RUN_COUNTS.PASSED_OVER_TOTAL);
+    const pendingOver = buildRequestDouble(TEST_RUN_COUNTS.PENDING_OVER_TOTAL);
+
+    validator.validateTestRunCounts(
+      atTotal.request,
+      TEST_RUN_COUNTS.AT_TOTAL_WITH_PENDING,
+    );
+    validator.validateTestRunCounts(
+      underTotal.request,
+      TEST_RUN_COUNTS.UNDER_TOTAL_WITHOUT_PENDING,
+    );
+    validator.validateTestRunCounts(
+      passedOver.request,
+      TEST_RUN_COUNTS.PASSED_OVER_TOTAL,
+    );
+    validator.validateTestRunCounts(
+      pendingOver.request,
+      TEST_RUN_COUNTS.PENDING_OVER_TOTAL,
+    );
+
+    expect(atTotal.errors).toHaveLength(0);
+    expect(underTotal.errors).toHaveLength(0);
+    expect(passedOver.errors[0].code).toBe("verb.testrun.countsExceedTotal");
+    expect(passedOver.errors[0].args).toEqual([
+      ...TEST_RUN_COUNT_ARGS.PASSED_OVER_TOTAL,
+    ]);
+    expect(pendingOver.errors[0].args).toEqual([
+      ...TEST_RUN_COUNT_ARGS.PENDING_OVER_TOTAL,
+    ]);
+  });
+
+  /** A missing count is the mandatory check's to report; a sum over nothing would refuse under the wrong key. */
+  it("leaves a test run carrying no counts to the mandatory check", () => {
+    const double = buildRequestDouble(TEST_RUN_COUNTS.NO_COUNTS);
+
+    validator.validateTestRunCounts(double.request, TEST_RUN_COUNTS.NO_COUNTS);
+
+    expect(double.errors).toHaveLength(0);
   });
 
   /** Both git facts are required together, so either one missing has to fail on its own. */

@@ -36,6 +36,21 @@ export const TEST_RUN_SCOPES = {
   ORPHAN: { task_ID: null, initiative_ID: null },
 } as const;
 
+/** A test run's counts against its total: exactly at it, under it, and over it two ways. */
+export const TEST_RUN_COUNTS = {
+  AT_TOTAL_WITH_PENDING: { total: 4, passed: 2, failed: 1, pending: 1 },
+  UNDER_TOTAL_WITHOUT_PENDING: { total: 3, passed: 2, failed: 0 },
+  PASSED_OVER_TOTAL: { total: 1, passed: 5, failed: 0 },
+  PENDING_OVER_TOTAL: { total: 3, passed: 2, failed: 1, pending: 1 },
+  NO_COUNTS: { task_ID: "task-1" },
+} as const;
+
+/** The four numbers each over-total case must name, in message order. */
+export const TEST_RUN_COUNT_ARGS = {
+  PASSED_OVER_TOTAL: [5, 0, 0, 1],
+  PENDING_OVER_TOTAL: [2, 1, 1, 3],
+} as const;
+
 /** Chains a story's status is derived from. */
 export const DERIVATION_CHAINS = {
   EMPTY: [],

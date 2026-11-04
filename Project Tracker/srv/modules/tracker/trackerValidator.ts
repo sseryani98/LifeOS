@@ -50,6 +50,33 @@ export class TrackerValidator {
   }
 
   /**
+   * A TestRun cannot report more outcomes than it ran tests: a gate figure built
+   * on such a row is one nothing downstream can trust. Zero is the floor for
+   * each count, and the model's range annotation enforces it.
+   * @param req Request the error accumulates on.
+   * @param data The TestRun payload being written, merged with the stored row.
+   */
+  validateTestRunCounts(req: cds.Request, data: TestRunPayload): void {
+    const { total, passed, failed } = data;
+    // A missing count is ASSERT_MANDATORY's to report, under its own key.
+    if (
+      typeof total !== "number" ||
+      typeof passed !== "number" ||
+      typeof failed !== "number"
+    )
+      return;
+    const pending = data.pending ?? 0;
+    if (passed + failed + pending <= total) return;
+    req.error({
+      code: HANDLER_KEYS.TEST_RUN_COUNTS_EXCEED_TOTAL,
+      message: HANDLER_KEYS.TEST_RUN_COUNTS_EXCEED_TOTAL,
+      target: "total",
+      status: 400,
+      args: [passed, failed, pending, total],
+    });
+  }
+
+  /**
    * A TestRun hangs off the stage that produced it or off the sprint it ran in.
    * @param req Request the error accumulates on.
    * @param data The TestRun payload being written.

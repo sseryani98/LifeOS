@@ -23,7 +23,22 @@ export class TrackerFacade extends BaseFacade {
   /** Registers every handler this facade owns. */
   registerHandlers(): void {
     this._registerWriteGuards();
+    this._registerCreateEffects();
     this._registerReadDerivations();
+  }
+
+  /** Registers the handlers that run once a row has been created. */
+  private _registerCreateEffects(): void {
+    this.srv.after(
+      "CREATE",
+      ENTITIES.MILESTONE,
+      this.wrapHandler(
+        this._handleCreateMilestone,
+        "after-CREATE",
+        "Milestones",
+        "tracker.handler.failed",
+      ),
+    );
   }
 
   /** Registers the two handlers that fill derived elements on read. */
@@ -93,6 +108,17 @@ export class TrackerFacade extends BaseFacade {
       ),
     );
   }
+
+  /**
+   * Materialises the chain of a story created in Backlog.
+   * @param _created The created row, unused: the request carries the payload.
+   * @param req Request carrying the created Milestone payload.
+   * @returns Resolves once the chain is written.
+   */
+  private _handleCreateMilestone = (
+    _created: unknown,
+    req: cds.Request,
+  ): Promise<void> => this.service.createChains(req);
 
   /**
    * Applies the TestRun scope rule.

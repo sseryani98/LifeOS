@@ -27,7 +27,10 @@ export class RecordTestRunVerb implements VerbDefinition {
     "Two scopes, and exactly one of them: story together with stage, or",
     "workspace alone. All three are optional in the schema because each is",
     "used by one of the two forms; story without stage, or a form mixed with",
-    "workspace, is refused.",
+    "workspace, is refused, as is a story-mode run on a stage never started.",
+    "",
+    "Counts are non-negative, and passed + failed + pending may not exceed",
+    "total; a run breaking either rule is refused and nothing is written.",
     "",
     "executedAt is an ISO timestamp carrying an offset.",
   ].join("\n");
@@ -43,10 +46,10 @@ export class RecordTestRunVerb implements VerbDefinition {
     // the caller thought it was recording.
     metrics: z
       .object({
-        total: z.number().int(),
-        passed: z.number().int(),
-        failed: z.number().int(),
-        pending: z.number().int().optional(),
+        total: z.number().int().nonnegative(),
+        passed: z.number().int().nonnegative(),
+        failed: z.number().int().nonnegative(),
+        pending: z.number().int().nonnegative().optional(),
         durationMs: z.number().int().optional(),
         linesPct: z.number().optional(),
         branchesPct: z.number().optional(),
@@ -158,6 +161,7 @@ export class RecordTestRunVerb implements VerbDefinition {
       );
       const chain = await gateway.readChain(milestone.ID);
       const task = StageGuards.resolveStage(chain, input.stage as string);
+      StageGuards.assertTestRunStageStarted(task);
       return {
         workspaceId: workspace.ID,
         taskId: task.ID,

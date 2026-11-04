@@ -38,6 +38,7 @@ export const CHAIN_FIXTURE = [
     stepPosition: 10,
     stepKind: "Required",
     driver: "/build",
+    requiresHuman: false,
   },
   {
     ID: "task-human-review",
@@ -50,6 +51,7 @@ export const CHAIN_FIXTURE = [
     stepPosition: 60,
     stepKind: "Required",
     driver: "/human-review-loop",
+    requiresHuman: true,
   },
   {
     ID: "task-documentation",
@@ -62,6 +64,7 @@ export const CHAIN_FIXTURE = [
     stepPosition: 70,
     stepKind: "Recommended",
     driver: "/refresh-docs",
+    requiresHuman: false,
   },
   {
     ID: "task-commit",
@@ -74,6 +77,7 @@ export const CHAIN_FIXTURE = [
     stepPosition: 90,
     stepKind: "Required",
     driver: "/commit-diff",
+    requiresHuman: false,
   },
 ];
 
@@ -92,6 +96,8 @@ export const SUBTASK_FIXTURE = [
     step_code: "brief",
     stepName: "Brief",
     stepPosition: 10,
+    stepKind: "Required",
+    driver: "/build",
   },
   {
     ID: "sub-handoff",
@@ -100,8 +106,27 @@ export const SUBTASK_FIXTURE = [
     step_code: "handoff",
     stepName: "Handoff",
     stepPosition: 70,
+    stepKind: "Required",
+    driver: "/build",
   },
 ];
+
+/**
+ * Three open build steps ahead of a target, all driven by the same command, so a
+ * guard that names only the first blocker or repeats the shared driver shows.
+ */
+export const OPEN_BUILD_STEPS = ["brief", "red", "implement", "gate"].map(
+  (code, index) => ({
+    ID: `sub-${code}`,
+    status_code: "notStarted",
+    completedAt: null,
+    step_code: code,
+    stepName: code,
+    stepPosition: (index + 1) * 10,
+    stepKind: "Required",
+    driver: "/build",
+  }),
+);
 
 /** The story identifier the resolver stamps onto a next action. */
 export const FIXTURE_STORY_ID = "CNV-001";
@@ -110,6 +135,22 @@ export const FIXTURE_STORY_ID = "CNV-001";
 export const GUARD_KEYS = {
   ALREADY_COMPLETE: "verb.stage.alreadyComplete",
   NOT_STARTED: "verb.stage.notStarted",
+} as const;
+
+/** The actor code list as the gateway reads it, and an identity it does not carry. */
+export const ACTOR_FIXTURE = {
+  ROWS: [{ code: "sandro" }, { code: "implementer" }],
+  KNOWN: "implementer",
+  UNSEEDED: "unseeded-identity",
+} as const;
+
+/** Code lists a rejection renders: one inside the listing cap, one past it. */
+export const VALID_CODE_LISTS = {
+  SHORT: ["CNV-001", "ENH-020"],
+  LONG: Array.from(
+    { length: 25 },
+    (_value, index) => `STORY-${String(index).padStart(2, "0")}`,
+  ),
 } as const;
 
 /** Message keys the envelope suite resolves and rejects under. */
@@ -138,6 +179,13 @@ export const CAP_REJECTION_BY_KEY = {
   statusCode: 409,
   code: "verb.story.duplicate",
   message: "verb.story.duplicate",
+} as const;
+
+/** A rejection raised with placeholder arguments, which ride on `args` beside the key. */
+export const CAP_REJECTION_WITH_ARGS = {
+  code: 409,
+  message: "verb.initiative.duplicate",
+  args: ["W1-S3"],
 } as const;
 
 /** The code a refused socket carries. */
@@ -268,3 +316,18 @@ export const MILESTONE_ORDER = [
   "ENH-020",
   "RPT-003",
 ] as const;
+
+/**
+ * Every argument each methodology-touching verb accepts, exhaustive. The stage
+ * guards decide from stored state alone, so a new argument here would be a way
+ * for the caller to argue with them.
+ */
+export const VERB_INPUT_KEYS = {
+  START_STAGE: ["story", "stage"],
+  COMPLETE_STAGE: ["story", "stage", "notes"],
+  COMPLETE_SUBTASK: ["story", "stage", "subtask"],
+  REOPEN_STAGE: ["story", "stage", "reason"],
+  RECORD_TEST_RUN: ["story", "stage", "workspace", "metrics", "executedAt"],
+  PLAN_SPRINT: ["workspace", "name", "goal", "branch", "stories"],
+  PLANNED_STORY: ["id", "type", "description", "shipsUi"],
+} as const;

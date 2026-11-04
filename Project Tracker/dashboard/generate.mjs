@@ -1,13 +1,6 @@
-// Life OS — Project Tracker (PMO) dashboard generator (v1)
-//
-// Reads the markdown that is already the source of truth for a Life OS module
-// (sprint board, defect log, design timeline, .claude/ tooling, lint suite) and
-// emits a single self-contained dashboard.html. Read-only: never writes to the
-// project's own files. Re-run whenever project state changes.
-//
-//   node "Project Tracker/dashboard/generate.mjs" [ModuleFolderName]
-//
-// Default module: "Financial Planner". The output lands next to this script.
+// Renders a module's tracking markdown into one self-contained dashboard.html next to this
+// script; read-only against the module.
+//   node "Project Tracker/dashboard/generate.mjs" [ModuleFolderName]   (default: Financial Planner)
 
 import { readFileSync, existsSync, readdirSync, writeFileSync, statSync } from "node:fs";
 import { join, dirname, basename } from "node:path";
@@ -17,10 +10,6 @@ const SCRIPT_DIR = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = join(SCRIPT_DIR, "..", ".."); // Life OS/
 const MODULE = process.argv[2] || "Financial Planner";
 const MODULE_DIR = join(REPO_ROOT, MODULE);
-
-// ---------------------------------------------------------------------------
-// tiny fs + markdown helpers
-// ---------------------------------------------------------------------------
 
 const read = (p) => (existsSync(p) ? readFileSync(p, "utf8") : "");
 const esc = (s) =>
@@ -73,7 +62,6 @@ function parseTable(md) {
   return { headers, rows };
 }
 
-// Split markdown into { headingText: bodyText } for a given heading level (## or ###).
 function sections(md, marker) {
   const re = new RegExp(`^${marker}\\s+(.+)$`, "gm");
   const out = [];
@@ -97,10 +85,6 @@ function frontmatter(md) {
   });
   return fm;
 }
-
-// ---------------------------------------------------------------------------
-// gather project state
-// ---------------------------------------------------------------------------
 
 function getSprintBoard() {
   const md = read(join(MODULE_DIR, "project", "SPRINT_BOARD.md"));
@@ -243,10 +227,6 @@ function getDecisions() {
   return out.slice(0, 20);
 }
 
-// ---------------------------------------------------------------------------
-// gather tooling
-// ---------------------------------------------------------------------------
-
 function getTooling() {
   const cdir = join(REPO_ROOT, ".claude");
   const agents = [];
@@ -314,10 +294,6 @@ function getTooling() {
   return { agents, skills, commands, workflows, linters, eslintShared, lintScripts };
 }
 
-// ---------------------------------------------------------------------------
-// methodology model (from METHODOLOGY_BLUEPRINT.md §5) — drives the infographic
-// ---------------------------------------------------------------------------
-
 const METHODOLOGY = [
   {
     phase: "Plan",
@@ -373,10 +349,6 @@ function listProjects() {
     });
 }
 
-// ---------------------------------------------------------------------------
-// render
-// ---------------------------------------------------------------------------
-
 const board = getSprintBoard();
 const defects = getDefects();
 const timeline = getTimeline();
@@ -422,8 +394,6 @@ const storyRows = (rows) =>
 const openDefects = defects.filter((d) => /open/i.test(d.Status)).length;
 const doneStories = board.stories.filter((s) => /done/i.test(s.status)).length;
 const totalStories = board.stories.length;
-
-// section builders --------------------------------------------------------
 
 const secOverview = `
 <div class="grid4">

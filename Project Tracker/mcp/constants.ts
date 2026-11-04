@@ -2,6 +2,8 @@
 export const BOOTSTRAP = {
   /** The one CAP service every verb connects to. */
   SERVICE_NAME: "TrackerService",
+  /** CAP's primary datasource, which has to be connected before anything is served. */
+  DATABASE_SERVICE: "db",
   /** Where the calling agent declares who it is. */
   ACTOR_VARIABLE: "PROJECT_TRACKER_ACTOR",
   /**

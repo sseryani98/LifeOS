@@ -15,6 +15,7 @@ import { VerbRunner } from "./shared/runVerb.js";
 import { StageGuards } from "./shared/stageGuards.js";
 import type { TrackerGateway } from "./shared/trackerGateway.js";
 import type {
+  InitiativeRow,
   PlannedStory,
   PlanSprintInput,
   VerbContext,
@@ -35,7 +36,8 @@ export class PlanSprintVerb implements VerbDefinition {
     "The stories arrive in the order they will be built and keep it. A story",
     "id already used in the workspace is refused, and each story's type must",
     "be one of the six FRICEW codes the schema declares.",
-    "There is no verb that adds a story to an existing sprint.",
+    "A sprint needs at least one story, and its name must be new to the",
+    "workspace. There is no verb that adds a story to an existing sprint.",
     "",
     "Returns the new sprint's id.",
   ].join("\n");
@@ -58,6 +60,9 @@ export class PlanSprintVerb implements VerbDefinition {
           })
           .strict(),
       )
+      // A sprint is an Initiative and its stories; with none, the plan would
+      // write an Active sprint that has nothing to build.
+      .min(1)
       .describe("The sprint's stories, in the order they will be built"),
   };
   readonly readOnly = false;
@@ -74,8 +79,9 @@ export class PlanSprintVerb implements VerbDefinition {
         gateway,
         input.workspace,
       );
-      await this._assertStoryIdsFree(gateway, workspace.ID, input.stories);
       const initiatives = await gateway.readInitiatives(workspace.ID);
+      this._assertSprintNameFree(initiatives, input.name);
+      await this._assertStoryIdsFree(gateway, workspace.ID, input.stories);
       const position =
         initiatives.reduce(
           (highest, row) => Math.max(highest, row.position),
@@ -118,10 +124,26 @@ export class PlanSprintVerb implements VerbDefinition {
   }
 
   /**
-   * Refuses a plan that would create a story ID already live in the workspace —
-   * or carried twice inside the plan itself. The uniqueness the model enforces
-   * is per sprint; the addressing form the verbs use is per workspace, so this
-   * is the wider of the two.
+   * A fail-fast mirror of TrackerService.checkInitiativeWrite, which owns the
+   * per-workspace sprint-name rule. Raised here so the refusal names the sprint
+   * as its `target`, which a handler rejection cannot carry in verb terms.
+   * @param initiatives The workspace's existing sprints.
+   * @param name The sprint name the caller asked for.
+   */
+  private _assertSprintNameFree(
+    initiatives: InitiativeRow[],
+    name: string,
+  ): void {
+    if (!initiatives.some(row => row.name === name)) return;
+    Envelope.rejectVerb(HTTP.CONFLICT, VERB_KEYS.INITIATIVE_DUPLICATE, [name], {
+      target: name,
+    });
+  }
+
+  /**
+   * A fail-fast mirror of TrackerService.checkMilestoneWrite, which owns the
+   * workspace-wide story-ID rule. Checking here, before the first insert, also
+   * catches an ID carried twice inside the plan and names it as the `target`.
    * @param gateway The gateway the read runs through.
    * @param workspaceId The workspace being planned into.
    * @param stories The stories the caller asked for.

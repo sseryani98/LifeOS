@@ -1,6 +1,7 @@
 /** Fully-qualified names of the service entities the handler layer touches. */
 export const ENTITIES = {
   ACTIVITY: "TrackerService.Activities",
+  ACTOR: "TrackerService.Actor",
   DEFECT: "TrackerService.Defects",
   DECISION: "TrackerService.Decisions",
   INITIATIVE: "TrackerService.Initiatives",
@@ -16,6 +17,7 @@ export const ENTITIES = {
 
 /** Code-list values the handler and verb layers branch on. */
 export const CODES = {
+  ACTOR_KIND: { HUMAN: "human" },
   DEFECT_STATUS: { OPEN: "Open", CLOSED: "Closed" },
   INITIATIVE_STATUS: { ACTIVE: "Active", COMPLETE: "Complete" },
   MILESTONE_STATUS: {
@@ -35,6 +37,23 @@ export const CODES = {
     COMPLETE: "complete",
   },
 } as const;
+
+/**
+ * The predicates a Conditional library step may name, keyed by the name the
+ * seed carries. A step naming anything else holds no predicate and is not
+ * materialised, rather than guessed at.
+ */
+export const CHAIN_PREDICATES = {
+  SHIPS_UI: "shipsUi",
+} as const;
+
+/** The TestRun columns the count rule judges; a patch touching none skips it. */
+export const TEST_RUN_COUNT_FIELDS = [
+  "total",
+  "passed",
+  "failed",
+  "pending",
+] as const;
 
 /**
  * The read projection's derived elements — a hand-kept mirror of the `virtual`
@@ -63,5 +82,6 @@ export const HANDLER_KEYS = {
   INITIATIVE_DUPLICATE: "verb.initiative.duplicate",
   DEFECT_SCOPE: "tracker.defect.scopeRequired",
   STORY_DUPLICATE: "verb.story.duplicate",
+  TEST_RUN_COUNTS_EXCEED_TOTAL: "verb.testrun.countsExceedTotal",
   TEST_RUN_SCOPE: "tracker.testrun.scopeRequired",
 } as const;

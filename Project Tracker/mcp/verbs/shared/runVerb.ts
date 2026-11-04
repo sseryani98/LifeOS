@@ -37,7 +37,8 @@ export class VerbRunner {
   /**
    * Runs a write verb: serialized against every other write, inside one
    * transaction opened under the caller's own identity, so the activity event and
-   * the change it describes commit or roll back together.
+   * the change it describes commit or roll back together. Every write records
+   * its caller on an activity row, so an unseeded caller is refused up front.
    * @param ctx The connected service and the calling agent's identity.
    * @param work The verb body, given a gateway bound to the transaction and the
    *   server timestamp the call was stamped with.
@@ -51,9 +52,11 @@ export class VerbRunner {
       const timestamp = WriteQueue.createTimestamp();
       try {
         const actor = StageGuards.assertCallerIdentity(ctx.actor);
-        const outcome = (await ctx.service.tx({ user: actor }, async transaction =>
-          work(new TrackerGateway(transaction), timestamp),
-        )) as VerbOutcome;
+        const outcome = (await ctx.service.tx({ user: actor }, async transaction => {
+          const gateway = new TrackerGateway(transaction);
+          await StageGuards.assertKnownActor(gateway, actor);
+          return work(gateway, timestamp);
+        })) as VerbOutcome;
         return Envelope.buildSuccess(
           timestamp,
           outcome.nextAction ?? null,

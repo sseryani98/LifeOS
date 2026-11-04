@@ -3,11 +3,11 @@
 **Spec ID:** SPEC-05
 **FRICEW Objects:** ENH-003 (Enhancement), RPT-001 (Report), FRM-001 (Form)
 **Wave:** 2
-**CDS Service:** Not yet defined — see §2. This spec is an input to the Data Model stage.
+**CDS Service:** `TrackerService` (`srv/tracker-service.cds`) — the module's one CDS service, defined at the Data Model stage; §2 was its input.
 **Status:** Approved
-**Provisional on:** **R1** (D-39), inherited from SPEC-01 … SPEC-04. ~~and **R9** (D-69), inherited from
+**Provisional on:** **None — R1 executed and closed (D-170).** _As written:_ **R1** (D-39), inherited from SPEC-01 … SPEC-04. ~~and **R9** (D-69), inherited from
 SPEC-04 because this spec carries a Report.~~ **R9 was executed and discharged at the Information
-Architecture stage, 2026-08-06 (D-140, D-141).** **Not Approved-for-build until R1 clears.**
+Architecture stage, 2026-08-06 (D-140, D-141).** ~~**Not Approved-for-build until R1 clears.**~~ **R1 executed and closed (D-170).**
 
 ---
 
@@ -24,6 +24,7 @@ Architecture stage, 2026-08-06 (D-140, D-141).** **Not Approved-for-build until 
 | 2026-08-06 | Sandro & Claude | **R9 executed and discharged** at the Information Architecture stage (D-140, D-141) — provisional on **R1 alone**. §3's deferred "Layout, navigation, Fiori Elements vs freestyle" is answered: FRM-001 is confirmed **inline** (D-139), layout and routing are D-137, and build technology is ruled a deferral-with-deadline to Design System (D-138). RPT-001 health reason items gain click navigation to RPT-003 **when the target is a Milestone**.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | 2026-08-06 | Sandro & Claude | **§3.3's deferred "Layout, navigation, Fiori Elements vs freestyle" is discharged in full.** Layout and navigation at Information Architecture (D-137, D-139); **build technology at Design System — Fiori Elements FPM, draft enablement OFF** (D-144). RPT-001 is the page header of one `sap.uxap.ObjectPageLayout` (D-148); FRM-001's fields render as `sap.fe.macros.Field` inline, and **two of its three actions open a small dialog** for fields the header does not display — a control choice inside D-139's inline ruling, not a change to it. No business rule and no FUT changes. Status stays **Approved**.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | 2026-08-15 | Sandro & Claude | **§2 amendment 6 discharged at the Data Model stage (D-165)**, in the shape it asked for — settled once rather than per spec. The flagged divergence **does not exist as described**: a one-word camelCase identifier _is_ lowercase, so `checkpoint` and `migration` are camelCase like the other fourteen `ActivityKind` values. The cross-list divergence is real and the rule is that a `code` is the literal an Approved spec already froze; three status lists whose spec text is a display phrase with a space take camelCase codes instead. **`HealthState` is unchanged, no BR or FUT changes, and nothing a person sees changes.** Status stays **Approved**.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| 2026-11-04 | Claude          | Doc refresh: R1 marked executed and closed (D-170) in the header and wherever this spec gated on it; CDS Service named (`TrackerService`). No rule, FUT or count changed. Status unchanged. |
 
 ---
 
@@ -382,7 +383,7 @@ which is the page Sandro opens to answer that question.
   `X-CSRF-Token`. **The serving position is one origin behind a reverse proxy (D-141)**, executed at
   the **Tech Stack** stage.
 
-**This spec is not Approved-for-build until R1 clears.**
+~~**This spec is not Approved-for-build until R1 clears.**~~ **R1 executed and closed (D-170).**
 
 **Cross-spec notes raised, not designed here**
 

@@ -3,12 +3,12 @@
 **Spec ID:** SPEC-04
 **FRICEW Objects:** ENH-002 (Enhancement), RPT-002 (Report)
 **Wave:** 2
-**CDS Service:** Not yet defined — see §2. This spec is an input to the Data Model stage.
+**CDS Service:** `TrackerService` (`srv/tracker-service.cds`) — the module's one CDS service, defined at the Data Model stage; §2 was its input.
 **Status:** Approved
-**Provisional on:** **R1** (D-39), inherited from SPEC-01, SPEC-02 and SPEC-03. ~~and **R9** (D-69),
+**Provisional on:** **None — R1 executed and closed (D-170).** _As written:_ **R1** (D-39), inherited from SPEC-01, SPEC-02 and SPEC-03. ~~and **R9** (D-69),
 which goes live here because this is the first spec carrying a Report.~~ **R9 was executed and
 discharged at the Information Architecture stage, 2026-08-06 (D-140, D-141)** — it changed no business
-rule and no FUT here, exactly as D-69 predicted. **Not Approved-for-build until R1 clears.**
+rule and no FUT here, exactly as D-69 predicted. ~~**Not Approved-for-build until R1 clears.**~~ **R1 executed and closed (D-170).**
 
 ---
 
@@ -22,6 +22,7 @@ rule and no FUT here, exactly as D-69 predicted. **Not Approved-for-build until 
 | 2026-07-30 | Sandro & Claude | §6's cross-spec row addressed to SPEC-06 is **struck through as applied** — BR-34's Milestone-position rule is carried by SPEC-06 BR-16, which resolves the row order at save (SPEC-06 BR-29) and adds the Add Story case. No rule changed; status stays **Approved**.                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | 2026-08-06 | Sandro & Claude | **R9 executed and discharged** at the Information Architecture stage (D-140, D-141) — the spec is now provisional on **R1 alone**. R9's stated premise was wrong: cross-origin composition fails under `cds watch` too, not only under `NODE_ENV=production`. Layout, routing and navigation deferred by BR-33 are settled in `INFORMATION_ARCHITECTURE.md` (D-137); RPT-002's story rows gain click navigation selecting RPT-003's chain.                                                                                                                                                                                                                                                                                      |
 | 2026-08-06 | Sandro & Claude | **BR-33 is discharged in full at the Design System stage (D-144, D-148, D-150).** It deferred four things; navigation and section arrangement were answered at Information Architecture the same day, and **layout and chart types are answered here** — RPT-002 is section 1 of one `sap.uxap.ObjectPageLayout`, and **there is no chart**, because no spec specifies one and none is adopted. Build technology is **Fiori Elements FPM with drafts OFF**, so RPT-002's two collections render as `sap.fe.macros.Table` with the default sort and personalization toolbar **explicitly disabled** — BR-31 rules those out and FPM's defaults disagree with it. No business rule and no FUT changes. Status stays **Approved**. |
+| 2026-11-04 | Claude          | Doc refresh: R1 marked executed and closed (D-170) in the header and wherever this spec gated on it; CDS Service named (`TrackerService`). No rule, FUT or count changed. Status unchanged. |
 
 ---
 
@@ -38,7 +39,7 @@ derived (D-53) and vacuous over an empty Task set (D-64). Its candidate ordering
 `Initiative.position` then `Milestone.position` — because the twelve migrated rows share one
 `createdAt` and supply no other total order (D-67).
 
-**This spec is provisional on R1.** Nothing here has been executed against Postgres. ~~and two
+~~**This spec is provisional on R1.**~~ **R1 executed and closed (D-170).** Nothing here has been executed against Postgres. ~~and two
 CAP processes serving into one shell page has never been executed at all. Both are owned, not merely
 noted; see §6.~~ **R9 was executed at the Information Architecture stage and is discharged** — see §6.
 
@@ -277,7 +278,7 @@ before it calls.
   one origin behind a reverse proxy (D-141)**, which leaves every manifest's relative `/service/…` URI
   unchanged. Execution of the proxy belongs to the **Tech Stack** stage.
 
-**This spec is not Approved-for-build until R1 clears.**
+~~**This spec is not Approved-for-build until R1 clears.**~~ **R1 executed and closed (D-170).**
 
 **Cross-spec notes raised, not designed here**
 

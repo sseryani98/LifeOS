@@ -3,10 +3,11 @@ import { z } from "zod";
 import { CODES } from "../../srv/modules/shared/constants.js";
 
 import { Addressing } from "./shared/addressing.js";
-import { ACTIVITY_KINDS, HTTP, VERB_KEYS } from "./shared/constants.js";
+import { ACTIVITY_KINDS, GUARD, HTTP, VERB_KEYS } from "./shared/constants.js";
 import { Envelope } from "./shared/envelope.js";
 import { VerbRunner } from "./shared/runVerb.js";
 import type {
+  DefectRow,
   ResolveDefectInput,
   VerbContext,
   VerbDefinition,
@@ -25,6 +26,7 @@ export class ResolveDefectVerb implements VerbDefinition {
     "",
     "The resolution text is required and may not be blank: a closed defect",
     "with no resolution is the state this register exists to make impossible.",
+    "A defect already closed is refused, and its resolution is kept.",
     "Take the defect identifier from log_defect's result or from project_view.",
   ].join("\n");
   readonly inputShape = {
@@ -48,14 +50,16 @@ export class ResolveDefectVerb implements VerbDefinition {
         );
       }
       const defect = await gateway.readDefect(input.defect);
+      // Defects are addressed by UUID, so there is no code list worth offering.
       if (!defect) {
         Envelope.rejectVerb(
           HTTP.NOT_FOUND,
-          VERB_KEYS.TARGET_NOT_FOUND,
-          ["defect", input.defect, ""],
+          VERB_KEYS.DEFECT_NOT_FOUND,
+          [input.defect],
           { target: input.defect },
         );
       }
+      this._assertDefectOpen(defect);
       await gateway.updateDefect(defect.ID, {
         status_code: CODES.DEFECT_STATUS.CLOSED,
         resolution: input.resolution.trim(),
@@ -72,5 +76,23 @@ export class ResolveDefectVerb implements VerbDefinition {
       );
       return { nextAction: null };
     });
+  }
+
+  /**
+   * Refuses a second close: it would overwrite the stored resolution and log a
+   * second resolution event, rewriting the register's history.
+   * @param defect The defect the caller addressed.
+   */
+  private _assertDefectOpen(defect: DefectRow): void {
+    if (defect.status_code !== CODES.DEFECT_STATUS.CLOSED) return;
+    Envelope.rejectVerb(
+      HTTP.CONFLICT,
+      VERB_KEYS.DEFECT_ALREADY_RESOLVED,
+      [defect.ID, defect.status_code],
+      {
+        target: defect.ID,
+        remediation: Envelope.resolveMessage(GUARD.REMEDIATION_LOG_DEFECT),
+      },
+    );
   }
 }

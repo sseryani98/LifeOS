@@ -1,0 +1,9 @@
+code;name;kind_code
+sandro;Sandro;human
+implementer;Implementer;agent
+test-author;Test Author;agent
+gate-runner;Gate Runner;agent
+build-briefer;Build Briefer;agent
+pm-update;PM Update;agent
+test-report;Test Report;system
+migration;Migration;system

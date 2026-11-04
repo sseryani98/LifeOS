@@ -25,8 +25,9 @@ export class CompleteStageVerb implements VerbDefinition {
     "Complete a methodology stage of a story.",
     "",
     "Use when the stage is in progress. A stage that was never started is",
-    "refused; open workflow steps under it warn rather than block, and the",
-    "warnings name each one.",
+    "refused, as is a human-only stage closed by a caller who is not human;",
+    "open workflow steps under it warn rather than block, and the warnings",
+    "name each one.",
     "Not for closing a single workflow step — that is complete_subtask.",
     "",
     "Returns the story's next incomplete stage, plus any open-step warnings.",
@@ -55,6 +56,7 @@ export class CompleteStageVerb implements VerbDefinition {
       // The order is the answer, not the set: where more than one condition
       // holds, the first to fire is what the caller is told.
       StageGuards.assertStageNotBlocked(chain, task);
+      await StageGuards.assertHumanCaller(gateway, ctx.actor, task);
       StageGuards.assertStageStarted(task);
       StageGuards.assertStageNotComplete(task);
       const warnings = StageGuards.buildOpenSubtaskWarnings(

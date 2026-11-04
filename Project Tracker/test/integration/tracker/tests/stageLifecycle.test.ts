@@ -227,9 +227,27 @@ describe("stage lifecycle", () => {
     const task = await readTaskByCode(world.milestoneId, STAGE.COMMIT);
 
     expect(result.status).toBe(409);
-    expect(result.code).toBe("verb.stage.notComplete");
+    expect(result.code).toBe("wfl.stage.notComplete");
     expect(task.status_code).toBe("inProgress");
     expect(await readActivityLog(world.workspaceId)).toHaveLength(0);
+  });
+
+  /** The stage's state outranks the reason, so a caller reopening the wrong stage learns that before being asked why. */
+  it("reports the stage not complete, not the empty reason, when both conditions hold", async () => {
+    await setChainStates(world.milestoneId, HUMAN_REVIEW_OPEN);
+
+    const result = expectFailure(
+      await reopenStage.run(context, {
+        story: STORY_REFERENCE,
+        stage: STAGE.COMMIT,
+        reason: EMPTY_REASON,
+      }),
+    );
+    const task = await readTaskByCode(world.milestoneId, STAGE.COMMIT);
+
+    expect(result.status).toBe(409);
+    expect(result.code).toBe("wfl.stage.notComplete");
+    expect(task.status_code).toBe("inProgress");
   });
 
   /** A methodology rejection has to name what clears it, or the agent has nothing to act on. */

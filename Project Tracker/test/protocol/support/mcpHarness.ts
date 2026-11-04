@@ -104,6 +104,47 @@ export const readSchemaEnum = (
 };
 
 /**
+ * Reads the minimum length an advertised schema declares on one array parameter.
+ * @param tool The tool as `tools/list` returned it.
+ * @param property The array parameter to read.
+ * @returns The declared `minItems`, or undefined when none is declared.
+ */
+export const readSchemaMinItems = (
+  tool: unknown,
+  property: string,
+): number | undefined => {
+  const schema =
+    (tool as { inputSchema?: Record<string, unknown> } | undefined)
+      ?.inputSchema ?? {};
+  const properties = schema.properties as
+    | Record<string, { minItems?: number }>
+    | undefined;
+  return properties?.[property]?.minItems;
+};
+
+/**
+ * Reads the floor an advertised schema declares on one member of an object
+ * parameter.
+ * @param tool The tool as `tools/list` returned it.
+ * @param property The object parameter to read.
+ * @param member The member of that object whose floor is wanted.
+ * @returns The declared minimum, or undefined when none is declared.
+ */
+export const readSchemaMinimum = (
+  tool: unknown,
+  property: string,
+  member: string,
+): number | undefined => {
+  const schema =
+    (tool as { inputSchema?: Record<string, unknown> } | undefined)
+      ?.inputSchema ?? {};
+  const properties = schema.properties as
+    | Record<string, { properties?: Record<string, { minimum?: number }> }>
+    | undefined;
+  return properties?.[property]?.properties?.[member]?.minimum;
+};
+
+/**
  * Builds a stand-in service whose first transaction dies as a lost connection
  * and whose second answers, so the reconnect-and-retry path has a fault to
  * recover from.

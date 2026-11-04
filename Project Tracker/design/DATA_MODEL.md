@@ -1,8 +1,8 @@
 # Data Model
 
 **Document ID:** DM-001
-**Version:** 1.2
-**Date:** 2026-11-02
+**Version:** 1.3
+**Date:** 2026-11-03
 **Status:** Approved
 
 ---
@@ -11,6 +11,7 @@
 
 | Date       | Author          | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | ---------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-11-03 | Sandro & Claude | **v1.3 — amended at `SPEC-02`'s functional test (PLAN.md §7 defect 8).** §4.6 and §4.7: `Task` and `Subtask` each gain **`kind`** (Association to `StepKind`), **`position`** (Integer) and **`requiresHuman`** (Boolean), all mandatory, copied from the step at instantiation and never refreshed. Kind was read live from `MethodologyStep`, so making `documentation` Required turned a Done story back to In Progress — the refresh `SPEC-02` BR-13 forbids — and FUT-007's "kinds identical" check could not fail. The guards (blocking order, human-only, subtask predecessor), `next_action`'s ordering, the `TaskQueueItem` view and the `Milestone.status` derivation read the stored values; a library reorder or a lifted human-only flag no longer moves an existing chain's guards (Sandro, 2026-11-03). `conditional` is not copied (the predicate is evaluated once, at instantiation, and no row exists for a failed one), and `driver` stays live because `SPEC-02` FUT-008 requires remediation to carry a changed driver. Persisted entity count unchanged; six columns added. Status stays **Approved**. |
 | 2026-11-02 | Sandro & Claude | **v1.2 — amended at `SPEC-02`'s build (D-244, D-246).** §4.5: creation status is carried by **`createdDone`**, a create-only virtual element on `TrackerService.Milestones` (SPEC-02 BR-37), and §12 lists it as not stored. §4.5 and §9: `Milestone.storyId` is unique within its **Workspace**, not its Initiative — the per-Initiative scope was a drift from SPEC-06 BR-17; D-232's `[initiative, storyId]` annotation stays as a narrower backstop and the handler is the authority. No persisted entity or column changes. Status stays **Approved**. |
 | 2026-11-02 | Sandro & Claude | **v1.1 — amended at `SPEC-02`'s build (D-240).** §9's `MethodologyStep.conditional` row no longer says `SPEC-02` §3.1 rejects the load: CNV-001 is a hand-written CSV seed that cannot refuse a row, so a violating seed is caught by `SPEC-02` FUT-001 and FUT-003. No entity or attribute changes. Status stays **Approved**. |
 | 2026-08-15 | Sandro          | **Status → Approved.** All ten Phase 5 coverage checks met; the approval gate D-169 moved to step 0 of Phase 6 was answered before the stage closed.                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
@@ -171,11 +172,19 @@ Backlog, true → Done. Only `CNV-002` sets it true (SPEC-02 BR-37, D-244).
 | Attribute     | Type                           | Required | Requiring spec         | Notes                                                          |
 | ------------- | ------------------------------ | -------- | ---------------------- | -------------------------------------------------------------- |
 | `step`        | Association to MethodologyStep | yes      | SPEC-01 §2, SPEC-02 §2 | FK column is **`step_code`** — the `stepCode` every spec names |
+| `kind`        | Association to StepKind        | yes      | SPEC-02 BR-13, BR-15   | **Copied from `step.kind` at instantiation, never refreshed.** The guards and the status derivation read this, not the library |
+| `position`      | Integer                        | yes      | SPEC-02 BR-13          | **Copied from `step.position` at instantiation, never refreshed.** The blocking order, `next_action` and the queue read this |
+| `requiresHuman` | Boolean                        | yes      | SPEC-02 BR-13, BR-23   | **Copied from `step.requiresHuman` at instantiation, never refreshed.** The human-only guard reads this |
 | `status`      | Association to TaskStatus      | yes      | SPEC-02 §2             | Not Started · In Progress · Complete                           |
 | `startedAt`   | DateTime                       | no       | SPEC-01 §2, SPEC-05 §2 | The stalled signal reads it                                    |
 | `completedAt` | DateTime                       | no       | SPEC-01 §2             | **Must be clearable** — a legal reopen nulls it (D-57)         |
 | `notes`       | LargeString                    | no       | SPEC-01 §2             |                                                                |
 | `milestone`   | Association to Milestone       | yes      | SPEC-02 §3.2           |                                                                |
+
+**`kind`, `position` and `requiresHuman` are frozen onto the row** (v1.3) — every library attribute a
+guard or the status derivation reads. Only `name` and `driver` are still read through `step` —
+`driver` deliberately, because SPEC-02 FUT-008 requires remediation to carry a changed driver. `conditional` is not copied: it is evaluated once, at instantiation, and a failed
+predicate leaves no row to carry it.
 
 **No "was recently completed" attribute** (SPEC-04 §2 am. 3). A reopen clearing `completedAt` is what
 removes a stage from `RPT-002`'s recently-completed section; nothing else records it.
@@ -185,6 +194,9 @@ removes a stage from `RPT-002`'s recently-completed section; nothing else record
 | Attribute     | Type                           | Required | Requiring spec         | Notes                                       |
 | ------------- | ------------------------------ | -------- | ---------------------- | ------------------------------------------- |
 | `step`        | Association to MethodologyStep | yes      | SPEC-01 §2, SPEC-02 §2 | FK column is **`step_code`**                |
+| `kind`        | Association to StepKind        | yes      | SPEC-02 BR-13, BR-15   | Frozen at instantiation, as on `Task`       |
+| `position`      | Integer                        | yes      | SPEC-02 BR-13          | Frozen at instantiation, as on `Task`; the subtask predecessor guard reads it |
+| `requiresHuman` | Boolean                        | yes      | SPEC-02 BR-13          | Frozen at instantiation, as on `Task`. No subtask guard reads it in slice 1 |
 | `status`      | Association to SubtaskStatus   | yes      | SPEC-02 §2             | Not Started · Complete — **no third value** |
 | `completedAt` | DateTime                       | no       | SPEC-01 §2             |                                             |
 | `task`        | Association to Task            | yes      | SPEC-02 §3.2           | Subtasks hang off the `sprint-build` Task   |
@@ -205,7 +217,7 @@ of twelve Milestones, that D-88 raised to this stage rather than settling.
 
 | Reading                  | Result over an empty Task set                                                 | Source                 |
 | ------------------------ | ----------------------------------------------------------------------------- | ---------------------- |
-| BR-17's clauses in order | **Backlog** — "no Task has started" is the first clause and is vacuously true | SPEC-02 BR-17 (`:274`) |
+| BR-17's clauses in order | **Backlog** — "no Task has started" is the first clause and is vacuously true | SPEC-02 BR-17 (`:299`) |
 | D-64's reasoning         | **Done** — "every blocking Task is Complete" is vacuously true                | D-64                   |
 
 Both clauses fire. The rule as written is not a total function, and neither prior decision made it

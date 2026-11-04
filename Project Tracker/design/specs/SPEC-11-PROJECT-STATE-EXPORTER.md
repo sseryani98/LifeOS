@@ -3,9 +3,9 @@
 **Spec ID:** SPEC-11
 **FRICEW Objects:** INT-007 (Interface)
 **Wave:** 3
-**CDS Service:** Not yet defined — see §2. This spec is an input to the Data Model stage.
+**CDS Service:** `TrackerService` (`srv/tracker-service.cds`) — the module's one CDS service, defined at the Data Model stage; §2 was its input.
 **Status:** Approved
-**Provisional on:** **R1** (D-39). **R7 is owned here** and **R4 is settled by the same act** (D-121)
+**Provisional on:** **None — R1 executed and closed (D-170).** _As written:_ **R1** (D-39). **R7 is owned here** and **R4 is settled by the same act** (D-121)
 — [SPEC-10](SPEC-10-CUTOVER-GUARDS.md)'s rule-out of R1 (D-119) is **reversed**, because this object
 reads the database. **R9 is ruled OUT** (D-101's precedent).
 
@@ -18,6 +18,7 @@ reads the database. **R9 is ruled OUT** (D-101's precedent).
 | 2026-08-04 | Sandro & Claude | Initial creation from the SPEC-11 workshop. Records **D-120 … D-128**. **Fourth Wave 3 spec** and the **fifth standalone** one — not the fourth; see §6, where the running standalone count is corrected against BA-001 §11. Declares **no new entity and no new attribute** — it reads every persisted one — and places **one standing requirement** on the Data Model stage (BR-07). **SPEC-11 resolves no OI**; OI-01 was already resolved by D-31 and this object implements that resolution. **Mints no error key**, the seventh spec running and the second where none is structurally possible. **Provisional on R1, reversing [SPEC-10](SPEC-10-CUTOVER-GUARDS.md)'s rule-out (D-121)**; **R7 owned here and R4 settled in the same execution**; **R9 ruled out**. Discharges [SPEC-03](SPEC-03-FINANCIAL-PLANNER-MIGRATION-LOAD.md) §6's, [SPEC-05](SPEC-05-WORKSPACE-HEADER-AND-HEALTH.md) §6's and [SPEC-09](SPEC-09-TEST-REPORT-TO-TESTRUN.md) §6's rows owed to it. Two BA-001 amendments — one correction, one completion (→ v1.12) — and four `research/README.md` corrections applied in-session, listed in §6. Six defects found and fixed on review after the writer's own DoD check passed them, including two FUT preconditions that named the wrong Conversion. |
 | 2026-08-04 | Sandro & Claude | **Status → Approved** on the day it was written, the normal path for this module — only [SPEC-01](SPEC-01-MCP-INTENT-VERB-LAYER.md) is held in Draft by a decision (D-93). It owes nothing: all three §6 rows owed to it are discharged, and every correction it raised against BA-001, `research/README.md`, [SPEC-03](SPEC-03-FINANCIAL-PLANNER-MIGRATION-LOAD.md), [SPEC-05](SPEC-05-WORKSPACE-HEADER-AND-HEALTH.md), [SPEC-09](SPEC-09-TEST-REPORT-TO-TESTRUN.md) and `PLAN.md` was applied in-session rather than left owed.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | 2026-08-06 | Sandro & Claude | **BR-06's open clause is closed at the Design System stage (D-144).** It read "whether any becomes so is **not yet decided**", citing SPEC-05 §3 and SPEC-06 §3's deferral. Design System ruled **Fiori Elements FPM with draft enablement OFF**, so **no entity in this module is draft-enabled and none will be**. **BR-06's rule text is unchanged** — it was written to be true either way, and it stays an unconditional filter rather than a description of the model. Recorded correction: D-138's own consequence wording said BR-06 "becomes vacuous only if stage 7 rules freestyle"; that was wrong, since it is vacuous because drafts are off, which FPM permits. No business rule and no FUT changes. Status stays **Approved**.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| 2026-11-04 | Claude          | Doc refresh: R1 marked executed and closed (D-170) in the header and wherever this spec gated on it; CDS Service named (`TrackerService`). No rule, FUT or count changed. Status unchanged. |
 
 ---
 
@@ -228,8 +229,8 @@ which is the exact failure mode this object exists to prevent.
 **Alerts:** asked per the standing rule — **none.** The exporter observes state, writes nothing, and
 schedules nothing.
 
-**Provisional dependencies — SPEC-11 is provisional on R1, reversing
-[SPEC-10](SPEC-10-CUTOVER-GUARDS.md)'s rule-out.**
+~~**Provisional dependencies — SPEC-11 is provisional on R1, reversing
+[SPEC-10](SPEC-10-CUTOVER-GUARDS.md)'s rule-out.**~~ **R1 executed and closed (D-170).**
 
 - **R1 — binds, and this is a change.** [SPEC-10](SPEC-10-CUTOVER-GUARDS.md) was the first spec in the
   module not provisional on R1 (D-119), because neither cutover guard touches CAP. INT-007 reads the
@@ -426,7 +427,7 @@ and TestRun hold no rows. This is a state the chain passes through, not a contri
 ### FUT-007: The round-trip drill — managed fields survive
 
 **Covers:** INT-007
-_Provisional on R1 — requires Postgres._
+_Requires Postgres — R1 closed (D-170)._
 **Preconditions:** The fixture is loaded on Postgres; one export has run; `createdAt` and `createdBy`
 are captured for every row of every entity.
 **Steps:**
@@ -447,7 +448,7 @@ are captured for every row of every entity.
 ### FUT-008: Omitting managed fields destroys history while every count passes
 
 **Covers:** INT-007
-_Provisional on R1 — requires Postgres._
+_Requires Postgres — R1 closed (D-170)._
 **Preconditions:** The fixture is loaded on Postgres; an export in which the `createdAt` and
 `createdBy` columns have been removed from `…-Decision.csv`.
 **Steps:**
@@ -466,7 +467,7 @@ _Provisional on R1 — requires Postgres._
 ### FUT-009: Omitting keys fails loudly
 
 **Covers:** INT-007
-_Provisional on R1 — requires Postgres._
+_Requires Postgres — R1 closed (D-170)._
 **Preconditions:** The fixture is loaded on Postgres; an export in which the `ID` column has been
 removed from `…-Milestone.csv`.
 **Steps:**
@@ -484,7 +485,7 @@ removed from `…-Milestone.csv`.
 ### FUT-010: Restore is a merge, not a revert
 
 **Covers:** INT-007
-_Provisional on R1 — requires Postgres._
+_Requires Postgres — R1 closed (D-170)._
 **Preconditions:** The fixture is loaded on Postgres; one export has run; afterwards a new Defect is
 logged through `log_defect` in **workspace** scope (D-96).
 **Steps:**

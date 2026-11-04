@@ -26,6 +26,7 @@ export interface ActivityState {
   kind_code: string;
   actor: string;
   target: string;
+  payload: string | null;
   occurredAt: string;
   createdBy: string;
 }
@@ -73,7 +74,14 @@ export const readActivityLog = async (
   workspaceId: string,
 ): Promise<ActivityState[]> => {
   const rows = (await SELECT.from(TABLE.ACTIVITY)
-    .columns("kind_code", "actor_code as actor", "target", "occurredAt", "createdBy")
+    .columns(
+      "kind_code",
+      "actor_code as actor",
+      "target",
+      "payload",
+      "occurredAt",
+      "createdBy",
+    )
     .where({ workspace_ID: workspaceId })) as ActivityState[];
   return rows.sort((left, right) =>
     left.occurredAt.localeCompare(right.occurredAt),

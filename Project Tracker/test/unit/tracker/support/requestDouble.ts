@@ -3,7 +3,7 @@ import type cds from "@sap/cds";
 /** A request double that records what a validator or guard put on it. */
 export interface RequestDouble {
   request: cds.Request;
-  errors: { code?: string; target?: string }[];
+  errors: { code?: string; target?: string; args?: unknown[] }[];
   rejections: { status: number; key: string }[];
 }
 
@@ -18,12 +18,12 @@ export const buildRequestDouble = (
   data: unknown,
   event = "CREATE",
 ): RequestDouble => {
-  const errors: { code?: string; target?: string }[] = [];
+  const errors: { code?: string; target?: string; args?: unknown[] }[] = [];
   const rejections: { status: number; key: string }[] = [];
   const request = {
     data,
     event,
-    error: (detail: { code?: string; target?: string }) => {
+    error: (detail: { code?: string; target?: string; args?: unknown[] }) => {
       errors.push(detail);
     },
     reject: (status: number, key: string) => {

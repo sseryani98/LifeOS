@@ -21,8 +21,10 @@ export class CompleteSubtaskVerb implements VerbDefinition {
   readonly description = [
     "Complete one workflow step inside a methodology stage.",
     "",
-    "Use for a single step within a stage that is still running. Completing",
-    "every step does not close the stage; complete_stage does that.",
+    "Use for a single step within a stage that is still running. A step under",
+    "an unstarted stage, ahead of an open earlier step, or already complete is",
+    "refused. Completing every step does not close the stage; complete_stage",
+    "does that.",
     "",
     "Returns the story's next incomplete stage.",
   ].join("\n");
@@ -47,10 +49,11 @@ export class CompleteSubtaskVerb implements VerbDefinition {
       );
       const chain = await gateway.readChain(milestone.ID);
       const task = StageGuards.resolveStage(chain, input.stage);
-      const subtask = StageGuards.resolveSubtask(
-        await gateway.readSubtasks(task.ID),
-        input.subtask,
-      );
+      const subtasks = await gateway.readSubtasks(task.ID);
+      const subtask = StageGuards.resolveSubtask(subtasks, input.subtask);
+      StageGuards.assertSubtaskStageStarted(task, subtask);
+      StageGuards.assertSubtaskNotBlocked(subtasks, subtask);
+      StageGuards.assertSubtaskNotComplete(subtask);
       await gateway.updateSubtask(subtask.ID, {
         status_code: CODES.SUBTASK_STATUS.COMPLETE,
         completedAt: WriteQueue.toSecondPrecision(timestamp),
