@@ -6,8 +6,8 @@ import { collectFiles, reportViolations } from "./lib/lintWalk.js";
 const ROOT_DIR = process.cwd();
 
 /**
- * Only UI5 views/fragments live here — the redundant-default attribute problem
- * is a UI5 XML concern, so we scan nothing else.
+ * UI5 views/fragments and app manifests both live here — the XML scan covers
+ * redundant control defaults, the manifest scan FE column overrides.
  */
 const SOURCE_DIRS = [join(ROOT_DIR, "app")];
 
@@ -64,12 +64,60 @@ function scanFile(filePath: string): Violation[] {
   return violations;
 }
 
+/**
+ * FE derives an annotation-backed column's alignment from its Edm type
+ * (timestamps and numbers end-align), so a manifest `horizontalAlign` on a
+ * `DataField…::` column overrides a framework default. Custom columns keep it:
+ * they have no type for FE to align by.
+ */
+const ANNOTATION_COLUMN_KEY = /^DataField\w*::/;
+
+function scanManifest(filePath: string): Violation[] {
+  const text = readFileSync(filePath, "utf8");
+  const lines = text.split(/\r?\n/);
+  const violations: Violation[] = [];
+  const visitNode = (node: unknown): void => {
+    if (node === null || typeof node !== "object") return;
+    for (const [key, child] of Object.entries(node)) {
+      if (key === "columns" && child !== null && typeof child === "object") {
+        for (const [columnKey, column] of Object.entries(child)) {
+          if (
+            ANNOTATION_COLUMN_KEY.test(columnKey) &&
+            column !== null &&
+            typeof column === "object" &&
+            "horizontalAlign" in column
+          ) {
+            const keyLine = lines.findIndex(line =>
+              line.includes(`"${columnKey}"`),
+            );
+            violations.push({
+              filePath: relative(ROOT_DIR, filePath),
+              line: keyLine + 1,
+              text: columnKey,
+              match: "horizontalAlign",
+            });
+          }
+        }
+      }
+      visitNode(child);
+    }
+  };
+  visitNode(JSON.parse(text));
+  return violations;
+}
+
 function main(): void {
   const files = SOURCE_DIRS.flatMap(dir => collectFiles(dir, [".xml"]));
-  const violations = files.flatMap(scanFile);
+  const manifests = SOURCE_DIRS.flatMap(dir =>
+    collectFiles(dir, ["manifest.json"]),
+  );
+  const violations = [
+    ...files.flatMap(scanFile),
+    ...manifests.flatMap(scanManifest),
+  ];
 
   reportViolations(
-    `Scanning ${files.length} UI5 view(s) for redundant default attributes...`,
+    `Scanning ${files.length} UI5 view(s) and ${manifests.length} manifest(s) for redundant defaults...`,
     "No redundant default attributes found.",
     violations.map(
       violation =>
@@ -78,7 +126,9 @@ function main(): void {
     `\nFound ${violations.length} redundant default attribute(s). ` +
       `visible/enabled default to true on every control — omit them. ` +
       `(Control-specific defaults like SimpleForm.editable and Panel.expanded ` +
-      `are intentionally NOT flagged; setting those to true can be required.)`,
+      `are intentionally NOT flagged; setting those to true can be required.) ` +
+      `Manifest horizontalAlign on a DataField:: column overrides FE's type-derived ` +
+      `alignment — remove it; only custom (template) columns may set it.`,
   );
 }
 

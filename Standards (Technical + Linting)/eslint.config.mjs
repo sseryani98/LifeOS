@@ -416,6 +416,20 @@ export default [
           message:
             "Resolve i18n via the shared getText helper (app/shared/util/i18n), not getResourceBundle directly.",
         },
+        // The base classes wrap these chains; calling around them re-hand-rolls
+        // the shortcut. The :matches covers the `(… as View)` cast form too.
+        {
+          selector:
+            "CallExpression[callee.property.name=/^(getModel|setModel)$/]:matches([callee.object.callee.property.name='getView'], [callee.object.expression.callee.property.name='getView'])",
+          message:
+            "Use the base controller's this.getModel()/this.setModel(), not this.getView().getModel()/setModel().",
+        },
+        {
+          selector:
+            "CallExpression[callee.property.name='getRouter']:matches([callee.object.callee.property.name='getOwnerComponent'], [callee.object.expression.callee.property.name='getOwnerComponent'])",
+          message:
+            "Use the base controller's this.getRouter(), not this.getOwnerComponent().getRouter().",
+        },
       ],
     },
   },

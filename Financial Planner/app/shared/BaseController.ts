@@ -1,6 +1,6 @@
 import Controller from "sap/ui/core/mvc/Controller";
-import History from "sap/ui/core/routing/History";
 import I18n from "com/financialplanner/shared/util/i18n";
+import Navigation from "com/financialplanner/shared/util/Navigation";
 import type View from "sap/ui/core/mvc/View";
 import type UIComponent from "sap/ui/core/UIComponent";
 import type Router from "sap/ui/core/routing/Router";
@@ -55,12 +55,6 @@ export default class BaseController extends Controller {
    * @param fallbackRoute route name to navigate to when there is no history
    */
   public navigateBack(fallbackRoute?: string): void {
-    const previousHash = History.getInstance().getPreviousHash();
-
-    if (previousHash !== undefined) {
-      window.history.go(-1);
-    } else if (fallbackRoute) {
-      this.getRouter().navTo(fallbackRoute, {}, true);
-    }
+    Navigation.navigateBack(this.getRouter(), fallbackRoute);
   }
 }
