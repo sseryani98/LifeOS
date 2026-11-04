@@ -140,15 +140,15 @@ mechanism needs a construction step.
 | 1   | Ideate             | `/generate-problem-statement-vision`               | Authored     | **Done** — 2026-07-26                                                                                                                                    |
 | 2   | Scope              | `/generate-business-architecture`                  | Authored     | **Done** — 2026-07-26                                                                                                                                    |
 | 3   | Research           | `/gather-research`                                 | Authored     | **Done** — 2026-07-26                                                                                                                                    |
-| 4   | Scaffold           | `/scaffold-module` → `scaffold-writer`             | Authored     | **Done** — 2026-07-27                                                                                                                                    |
-| 5   | Workshops          | `/workshop` → `spec-writer`                        | Exists       | **Done** — 2026-08-04. D-37 grouping; `SPEC-01` … `SPEC-12` all **Approved** (12/12 written; D-136)                                                      |
-| 6   | Information Arch.  | `/generate-information-architecture` → `ia-writer` | Authored     | **Done** — 2026-08-06. `IA-001` **Approved**; 6 objects → 1 route + 1 `story` param; **R9 executed** (D-137 … D-143)                                     |
-| 7   | Design System      | `/generate-design-system` → `design-system-writer` | Authored     | **Done** — 2026-08-06. `DS-001` **Approved**; **FE FPM, drafts OFF**; the browser read path named (D-144 … D-152)                                        |
-| 8   | Theme              | `/generate-theme` → `theme-writer`                 | Authored     | **Done** — 2026-08-06. `TH-001` **Approved** 2026-08-15; **theme inherited wholesale, no CSS written** (D-153 … D-159)                                   |
-| 9   | Data Model         | `/generate-data-model` → `data-model-writer`       | Authored     | **Done** — 2026-08-15. `DM-001` **Approved**; **25 entities, document only, no CDS**; **OI-05 closed**, **R1 executed and closed** (D-160 … D-175)       |
-| 10  | Tech Stack         | `/generate-tech-stack` → `tech-stack-writer`       | Authored     | **Done** — 2026-08-15. `TS-001` **Approved**; **the proxy executed**, the loader ruled, the credential homed, **R11 minted** (D-176 … D-185)             |
-| 11  | Test Strategy      | `/generate-test-strategy` → `test-strategy-writer` | Authored     | **Done** — 2026-08-15. `TST-001` **Approved**; **the harness question executed and the exemplar's belief reversed**; 180 FUTs classified (D-186 … D-197) |
-| 12  | Project Planning   | `/generate-build-plan` → `build-plan-writer`       | Authored     | **Done** — 2026-08-15. `BP-001` **Approved**; **13 stories, 3 sprints**; story zero resolves the eight "first build story" items (D-198 … D-209)         |
+| 4   | Scaffold           | `/scaffold-module` → `doc-writer`             | Authored     | **Done** — 2026-07-27                                                                                                                                    |
+| 5   | Workshops          | `/workshop` → `doc-writer`                        | Exists       | **Done** — 2026-08-04. D-37 grouping; `SPEC-01` … `SPEC-12` all **Approved** (12/12 written; D-136)                                                      |
+| 6   | Information Arch.  | `/generate-information-architecture` → `doc-writer` | Authored     | **Done** — 2026-08-06. `IA-001` **Approved**; 6 objects → 1 route + 1 `story` param; **R9 executed** (D-137 … D-143)                                     |
+| 7   | Design System      | `/generate-design-system` → `doc-writer` | Authored     | **Done** — 2026-08-06. `DS-001` **Approved**; **FE FPM, drafts OFF**; the browser read path named (D-144 … D-152)                                        |
+| 8   | Theme              | `/generate-theme` → `doc-writer`                 | Authored     | **Done** — 2026-08-06. `TH-001` **Approved** 2026-08-15; **theme inherited wholesale, no CSS written** (D-153 … D-159)                                   |
+| 9   | Data Model         | `/generate-data-model` → `doc-writer`       | Authored     | **Done** — 2026-08-15. `DM-001` **Approved**; **25 entities, document only, no CDS**; **OI-05 closed**, **R1 executed and closed** (D-160 … D-175)       |
+| 10  | Tech Stack         | `/generate-tech-stack` → `doc-writer`       | Authored     | **Done** — 2026-08-15. `TS-001` **Approved**; **the proxy executed**, the loader ruled, the credential homed, **R11 minted** (D-176 … D-185)             |
+| 11  | Test Strategy      | `/generate-test-strategy` → `doc-writer` | Authored     | **Done** — 2026-08-15. `TST-001` **Approved**; **the harness question executed and the exemplar's belief reversed**; 180 FUTs classified (D-186 … D-197) |
+| 12  | Project Planning   | `/generate-build-plan` → `doc-writer`       | Authored     | **Done** — 2026-08-15. `BP-001` **Approved**; **13 stories, 3 sprints**; story zero resolves the eight "first build story" items (D-198 … D-209)         |
 | 13  | Build              | `/build` + chain                                   | Exists       | **In progress** — `S-00` **Done** 2026-08-16 (D-210 … D-217); `SPEC-01` **Done** 2026-08-16 (D-218 … D-230), with **§5's chain run retroactively 2026-08-25 → 26** — stages 2, 3 and 4 closed, 5 skipped, **6 Human Review now closed** (D-232 … D-238); **`SPEC-02` next**, in sprint `PT-W1` (BP-001 §3, §6) |
 | 14  | **Rewire tooling** | `lintNoMarkdownState` + PreToolUse hook            | Not authored | Not started                                                                                                                                              |
 | 15  | Cutover            | —                                                  | —            | Not started                                                                                                                                              |
@@ -594,9 +594,116 @@ Settle before or during Scaffold.
 - **`deep-research` does not exist** despite the blueprint citing it as a seed for
   `/gather-research`. Handled as a runtime conditional.
 
+### Defects
+
+Found by `SPEC-02`'s `/functional-test` run, 2026-11-03, on scratch Postgres
+`ft_spec_02_202611031332` (dropped). Sandro ruled all five build defects.
+
+**5. FIXED 2026-11-03 — The verb server cannot reach Postgres — every verb returns 500.** `mcp/server.ts:109-115`:
+`startServer()` deploys only when the database is in-memory, and otherwise calls `cds.serve` with
+`cds.model` unset and no `cds.connect.to("db")`. Jest runs on `:memory:`, so the gate stays green.
+Downstream errors: `SELECT *` keys come back lowercase, the `initiative.workspace_ID` path filter
+loses its FROM clause, and chain Subtask inserts fail with `null value in column "id"`. 13 of 19
+`SPEC-02` FUTs fail on this alone, and all 13 pass once the two calls are added. **Fix:** set
+`cds.model = model` and `await cds.connect.to("db")` before `cds.serve`, then add a Postgres-backed
+boot test so the gate can see it. **Severity: critical.** Found 2026-11-03.
+
+**6. FIXED 2026-11-03 — A nonexistent story returns 500, not 404 `verb.target.notFound`.** Same cause as item 5. It
+hides the error contract from every caller. **Fix:** item 5's fix, plus a scenario that asserts the
+404 on Postgres. **Severity: high.** Found 2026-11-03.
+
+**7. FIXED 2026-11-03 — Internal failures leave no trace.** `mcp/verbs/shared/envelope.ts:69`: `Envelope.toFailure`
+maps any unknown error to `verb.internal.failure` and logs nothing. Stderr held only the ready line,
+and diagnosing item 5 needed a monkeypatch. **Fix:** log the cause to stderr (D-228) before
+returning the envelope. **Severity: medium.** Found 2026-11-03.
+
+**8. FIXED 2026-11-03 (kind, position, requiresHuman frozen; driver and name stay live) — A chain's stage kind is not frozen at instantiation (BR-15).** `db/schema.cds:176`: a Task
+stores only `step`, and kind is read live from `MethodologyStep`. Making `documentation` Required
+turned a Done story (`F009`) back to `inProgress`. FUT-007's "kinds identical" check therefore
+cannot fail. **Fix:** snapshot the kind (and any guard input BR-15 covers) on Task/Subtask at
+creation, and make FUT-007 assert on the stored value. **Severity: high.** Found 2026-11-03.
+
+**9. ~~Backlog-vs-Done creation is reachable only through the service.~~ CLOSED 2026-11-03 — not a
+defect; the finding misread the spec.** SPEC-02 BR-37 (§3.2, line 182) says `plan_sprint` never
+sends `createdDone`; only CNV-002 does. D-54 rejected a verb-level flag as the escape hatch D-05
+removed, and SPEC-03 BR-01 routes conversions through the service layer, not the verbs. FUT-004 is a
+**service-tier** FUT by design (D-243). A creation verb for Workspace, Engagement or Area would be a
+twelfth verb, a design ruling and not a build fix. Original finding, kept for the record:
+`srv/tracker-service.cds:32`: `createdDone` is a virtual on `TrackerService.Milestones` that no verb
+accepts, so `plan_sprint` always creates a Backlog chain and FUT-004 is a service-level test (D-243).
+Workspace, Engagement and Area also have no creation verb. **Fix:** expose the path through a verb,
+or re-classify FUT-004's surface. **Severity: medium.** Found 2026-11-03.
+
+**10. FIXED 2026-11-03 (400 `verb.identity.unknown`) — An unknown actor returns 500 on every write verb.** `mcp/verbs/shared/envelope.ts` `toFailure`
+(~L69-120): if `PROJECT_TRACKER_ACTOR` is not a seeded Actor code, the Activity insert fails the
+Postgres FK `23503` on `activity.actor`. No branch maps that error, so it becomes
+`verb.internal.failure`. **Fix:** validate the actor up front with a 4xx naming the env var and the
+valid Actor codes, or map `23503` on the actor FK to that error. **Severity: high.** Found
+2026-11-03, while fixing item 7.
+
+**11. FIXED 2026-11-03 — The story-not-found message lists the workspace slug as the valid codes.**
+`mcp/verbs/shared/stageGuards.ts:361`: `resolveStoryContext` passes `workspace.slug` as the
+`{2}` "Valid codes" argument of `verb.target.notFound`, so the message reads
+`Valid codes: scratch-ws.` **Fix:** pass the workspace's story ids, or a message key that names the
+workspace instead of listing codes. **Severity: low.** Found 2026-11-03, while fixing item 6.
+
+Found by the 2026-11-03 `/functional-test` re-runs (`SPEC-01` 16/16, `SPEC-02` 19/19, both on the
+shipped Postgres server). Sandro ruled items 12–16 build defects. The sixth finding, `SPEC-02`
+FUT-017's precondition, was fixed in the spec instead.
+
+**12. FIXED 2026-11-03 — The duplicate-sprint 409 shows a raw `{0}`.** `srv/_i18n/messages.properties:18`
+`verb.initiative.duplicate` reaches the caller as `Sprint "{0}" already exists in this workspace.`
+The sprint name is never substituted, and `target` is missing. **Fix:** pass the sprint name as
+the argument and set `target`. Find where the key is raised (`srv/` service or a CDS
+`@assert.unique` message). **Severity: medium.** Found 2026-11-03.
+
+**13. FIXED 2026-11-03 (409 `verb.defect.alreadyResolved`) — `resolve_defect` on a Closed defect overwrites the resolution.** `mcp/verbs/resolveDefect.ts:60`:
+a second call returns ok, replaces the stored resolution and writes a second `defectResolved`
+event, which rewrites history. **Fix:** refuse with 409 (`alreadyResolved`, mirroring
+`verb.stage.alreadyComplete`) and write nothing. **Severity: medium.** Found 2026-11-03.
+
+**14. FIXED 2026-11-03 (`stories` `.min(1)`) — `plan_sprint` with `stories: []` creates an empty Active sprint (BR-21).** `mcp/verbs/planSprint.ts`:
+an Initiative with no Milestones and a `sprintPlanned` event are written. **Fix:** require at least
+one story in the zod input shape, update `test/protocol/data/toolSurface.ts`, and add a test.
+**Severity: medium.** Found 2026-11-03.
+
+**15. FIXED 2026-11-03 (404 `verb.defect.notFound`) — The defect-not-found message lists nothing.** `mcp/verbs/resolveDefect.ts:53`: it reads
+`No defect named "<id>". Valid codes: .` **Fix:** use a key that does not promise a code list
+(defects are addressed by UUID). **Severity: low.** Found 2026-11-03.
+
+**16. FIXED 2026-11-03 — A subtask named under the wrong stage lists nothing.** `mcp/verbs/shared/stageGuards.ts:400`
+`resolveSubtask`: `complete_subtask(stage "code-quality", subtask "gate")` returns
+`No step named "gate". Valid codes: .`, because `code-quality` has no subtasks. **Fix:** render
+"none" through `formatValidCodes`, as item 11 did, or say the stage has no subtasks.
+**Severity: low.** Found 2026-11-03.
+
+Observed but not logged:
+
+- **Two Active Initiatives in one workspace — CLOSED, by design.** SPEC-05 BR-20: "More than one
+  Active Initiative is a legal state, not an error — `plan_sprint` creates the next sprint before the
+  current one closes." The current sprint is the Active one with the highest `position`.
+- `record_test_run` accepting `passed` greater than `total` was ruled a defect: item 17.
+
+**17. FIXED 2026-11-03 (400 `verb.testrun.countsExceedTotal`; negatives refused at schema + `@assert.range`) — `record_test_run` accepts counts that exceed the total.** `mcp/verbs/recordTestRun.ts:46-49`:
+`total: 1, passed: 5` is written as a TestRun. The counts are also unbounded below. **Fix:** refuse with
+400 when `passed + failed + (pending ?? 0) > total`, or when any count is negative, and write no
+TestRun and no Activity. **Severity: medium.** Found 2026-11-03 by the `SPEC-02` functional re-run;
+Sandro ruled it a defect.
+
 ---
 
 ## 8. Session log
+
+### 2026-11-04 — Harness review: hooks fixed, eleven writer agents collapsed into `doc-writer`
+
+- **Sandro asked for an honest review of the agent fleet and chose to apply its findings one by one.** Cross-module, so the record is `Standards (Documents)/HARNESS_BACKLOG.md`; the structural ruling is **D-247** here.
+- **Hooks (H-01).** The only hooks firing in Life OS were Enbridge's, registered at user level: `cds build --for hana` on every `db/*.cds` edit and ESLint from a root with no config, which failed on every save. They now live in that project. Life OS gained `lintOnEditHook.mjs` (per-file ESLint plus the custom linters for the file's kind, parallel, filtered to the edited file, report-only) and `installHooks.mjs`, registered per clone; `eslint_d` at the root keeps ESLint's type-aware program warm, so a `.ts` save costs ~4 s instead of ~9. A Stop-time full lint was rejected — 31 s, and the chain already runs at the gate and at commit.
+- **A freeze on harness edits was adopted and lifted the same day**; the friction-log table it created stays in use for `SPEC-02`'s remaining chain and `CNV-001`'s.
+- **D-247: one `doc-writer` replaces the eleven stage writers.** Each skill now carries a `## Writer brief`; §5's table names the new agent. The old names stay in this log's earlier entries as the record of what ran. Agents: 21 → 11.
+- **Also found, not acted on:** `.agents/skills/` (the 2026-08 Codex port) is a stale mirror of `.claude/skills/` — four skills missing, five diverged.
+- **`doc-writer`'s first run was a dry run over `TH-001`, into a scratch folder.** It re-rendered the approved document and reported that **the approved `THEME.md` is stale against `theme-overrides.css`**: commit `6abcd76` (2026-11-02, the WCAG AA pass) took the file from 187 to 390 lines and 44 to 89 custom properties, `--sapLinkColor` is `#7a5e1b` not `#8B6B1F`, and every `:line` citation in §4, §7, §8 and §10 has moved — so the `/ux-test` rubric measures against the wrong file. **Done the same day: `/refresh-docs` re-measured both TH-001 documents against the CSS** (Project Tracker v1.1, Financial Planner v1.4) — counts, line citations, surfaces, contrast figures and the load mechanism corrected; D-155's Link half noted as lapsed on the figures, the rule kept. The run also surfaced fourteen ambiguities in the theme brief and the agent contract; three are fixed in `doc-writer.md` (brief heading level, same-module IDs cited bare, a record older than the file it measures is a gap), the rest are `HARNESS_BACKLOG` H-05.
+- **One source per rule (review item 4).** `lintAgentPrompts.ts` runs as root `lint:harness`: the canonical memory block (`Standards (Technical + Linting)/agentMemoryBlock.md`) is stamped into every agent and checked for drift, no harness file may name a machine path, and every prose linter count must match the scripts on disk — it had drifted to 18, 20 and 21. `implementer`, `test-author`, `gate-runner` and `quality-reviewer` lost their restated codebase rules and point at the standards; `build.js` renders its locked-test list once; the commands proceed on the common case instead of asking, `/ux-test` reads the BUILD_PLAN Ships UI column, and `/test-quality` derives its lenses from the module instead of carrying Financial Planner's table.
+- **Review item 5, the three ledgers, is D-248:** `CNV-001`, `INT-002` and `SPEC-08` run before the next Financial Planner story, and the `INT-002` workshop settles agent identity against one-server-per-`.mcp.json`-entry before any rewiring.
 
 ### 2026-11-02 — `SPEC-02` workshop re-opened: `/build`'s two blockers, settled as data
 
