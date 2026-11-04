@@ -63,9 +63,9 @@ the findings likely to repeat there.
 - Input fields stay white on Parchment cards by design (editable affordance, THEME.md §5.6).
 - Port 4004 may be held by another session's server — check before `npm start`, don't kill it.
 
-## Reference notes
+## Financial Planner
 
-- [FP Playwright driving](reference_fp_playwright_driving.md) — shell URL, nav by click not hash, baseline console noise, drafts, probe recipe
+- [Playwright driving](modules/financial-planner/playwright_driving.md) — shell URL, nav by click not hash, baseline console noise, drafts, probe recipe
 
 ## False positives to skip (from D-006/D-012, 2026-10-30)
 
@@ -74,3 +74,6 @@ the findings likely to repeat there.
 - The italic placeholder ("No file chosen", "Select a card") is Horizon's normal style, not a leak.
 - Illustrations paint from `--sapContent_Illustrative_ColorN`; `--sapIllus_*` are only aliases.
 - Drive button **hover** — default/transparent buttons leaked Horizon blue only on hover.
+- FE column alignment is type-derived (timestamps/numbers end-align, text begin-aligns) — not a
+  defect unless a design doc specifies otherwise. A D-020 "Last Sync right-aligned" finding led to a
+  manifest override that Human Review reverted (2026-11-04); `lint:default-attrs` now bans it.

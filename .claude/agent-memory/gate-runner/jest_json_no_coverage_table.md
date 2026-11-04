@@ -11,8 +11,13 @@ The `--json` flag suppresses Jest's printed coverage table, and `coverage-summar
 
 - npm skips `posttest` when `test` exits non-zero, so a red run leaves no table anywhere. Say "not
   printed" rather than inventing one.
-- Failing assertions appear as `  ● <describe> › <test>` blocks, ANSI-coloured. Strip with
+- Failing assertions appear as `● <describe> › <test>` blocks, ANSI-coloured. Strip with
   `sed -e 's/\x1b\[[0-9;]*m//g'`, save the output, then grep for `●`, `FAIL`, `Tests:`, `threshold`.
+
+- Bash tool here mangles backslashes: `sed 's#\\#/#g'`, `tr '\\' '/'` and `\d` in `node -e` all fail.
+  Parse lcov with `String.fromCharCode(92)` for the separator and `[0-9]` instead of `\d`.
+- lcov SF paths are `srv\file.ts` (backslashes); `Facade.ts` files are excluded by `coveragePathIgnorePatterns`,
+  so a facade is absent from lcov, not 0%. Say so instead of inventing a row.
 
 **Why:** the `coverageTable` field must be verbatim; without a printed table it has to be derived.
 
