@@ -78,7 +78,8 @@ from their respective API specifications."* That sentence is worth more than a c
 
 ## The document you write
 
-`{module}/research/{topic-slug}.md` — kebab-case, named for the subject, not the mode.
+`{module}/research/{topic-slug}.md` — kebab-case, named for the subject, not the mode. A module-agnostic
+topic's pack lives in `Standards (Documents)/research/` instead — the host's brief names which.
 
 ```
 # {Topic}: {the finding, stated as a claim}

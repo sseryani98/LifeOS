@@ -7,6 +7,7 @@ Cross-module design documentation — the written standards every Life OS module
 | [CODING_STANDARDS.md](CODING_STANDARDS.md)   | The coding, test and git rules every module builds to. Imported by root `CLAUDE.md` |
 | [METHODOLOGY_BLUEPRINT.md](METHODOLOGY_BLUEPRINT.md) | The stage methodology the harness runs                                |
 | [HARNESS_BACKLOG.md](HARNESS_BACKLOG.md)     | Open harness work                                                           |
+| [research/](research/README.md)              | Module-agnostic research packs — currently UI5 testing as a build gate      |
 
 `CODING_STANDARDS.md` moved here from `Financial Planner/CLAUDE.md` on 2026-11-04, once a second
 module (Project Tracker) was in build and had proved which parts were the standard and which were

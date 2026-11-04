@@ -9,8 +9,8 @@ rests on, a UI5 suite running inside `npm test` with coverage of the TypeScript 
 Project Tracker §15 / D-195), the shared test rules, `build.js` gate · **Status:** Draft
 
 Context: 2026-11-04 project decision — UI5 testing is a gate, not a learning exercise; all UI5
-code in every module is tested to production grade with thresholds. The earlier pack
-(`plaid-research.md`, `simplefin-research.md`, `churning-in-canada.md`) is unrelated.
+code in every module is tested to production grade with thresholds. The pack sits here, not under a
+module, because it rules on module-agnostic strategy; the planner's domain research stays in `Financial Planner/research/`.
 
 ## The pack
 

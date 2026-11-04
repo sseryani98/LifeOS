@@ -11,7 +11,10 @@ The stage is fan-out by nature: many sources, most of them irrelevant, all of th
 canonical case for context isolation (`METHODOLOGY_BLUEPRINT.md` §3.2). **One `research-scout` per
 topic runs in parallel and returns citations and a verdict, not raw pages.**
 
-Paths are relative to the module you resolve in Phase 0. The methodology is
+Paths are relative to the module you resolve in Phase 0 — **unless the question is module-agnostic**
+(a stack, tooling or test-strategy question every module would answer the same way, root `CLAUDE.md`
+§Shared vs Module). That pack's root is `Standards (Documents)/research/`, not a module's folder, and
+`{module}/research/` below reads as that path. The UI5-testing pack is the precedent. The methodology is
 `Standards (Documents)/METHODOLOGY_BLUEPRINT.md` §4–5.1 — it is the authority; this skill is the
 harness that runs it.
 
