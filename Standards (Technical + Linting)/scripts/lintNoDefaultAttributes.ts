@@ -12,16 +12,10 @@ const ROOT_DIR = process.cwd();
 const SOURCE_DIRS = [join(ROOT_DIR, "app")];
 
 /**
- * Redundant attribute=value pairs, safe to flag by a flat line match because
- * each is always the control's default wherever the pair can legally appear:
- *   - `visible`/`enabled` default true on EVERY control (Control base), so the
- *     pair is noise anywhere it occurs.
- *   - `layout="ResponsiveGridLayout"` is control-specific, but that value
- *     string only ever sits on `SimpleForm.layout`, where it IS the default
- *     (since UI5 1.16) — so matching the value alone can't false-positive.
- * `editable`/`expanded` stay excluded: their defaults are control-specific AND
- * their values (`true`) are shared, so a flat match couldn't tell a redundant
- * one from a required one. Guidance handles those, not this rule.
+ * Pairs that are the default wherever they can legally appear, so a flat line
+ * match never false-positives. `editable`/`expanded` are excluded: their
+ * defaults are control-specific, so a flat match could not tell redundant from
+ * required.
  */
 const REDUNDANT_DEFAULTS: Array<{ attr: string; value: string }> = [
   { attr: "visible", value: "true" },

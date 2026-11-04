@@ -12,12 +12,9 @@ const SOURCE_DIRS = [join(ROOT_DIR, "app")];
 const EXEMPT_NAMES = new Set(["types.ts"]);
 
 /**
- * The V+C modules this rule governs: freestyle controllers and registered
- * ControllerExtensions (`*.controller.ts`, anywhere), and every FE handler
- * module — any `.ts` sitting directly in an `ext/` folder (the custom-action
- * handler surface and its helper classes). None may hold code outside a class —
- * no free functions, no loose module state. Type-only `types.ts` and object-
- * literal config/formatter modules elsewhere are left to their own conventions.
+ * The V+C modules this rule governs: every `*.controller.ts` and any `.ts`
+ * directly in an `ext/` folder. None may hold code outside a class: no free
+ * functions, no loose module state.
  * @param fileName Basename of a candidate file.
  * @param parentDir Basename of the file's containing directory.
  * @returns True when the file must obey the controller/extension shape.
@@ -28,12 +25,9 @@ function isControllerModule(fileName: string, parentDir: string): boolean {
 }
 
 /**
- * A registered controller (freestyle `*.controller.ts` or a ControllerExtension
- * subclass) must export its class — the framework instantiates it. An FE handler
- * module in `ext/` is resolved as `module.method` and never instantiated; its
- * SAP-documented shape is a plain object of handlers, so it is exempt from the
- * class-export rule (but not from the no-free-code checks — all logic still
- * lives in a class).
+ * A registered controller must export its class. An `ext/` handler module is
+ * exempt: its documented shape is a plain object of handlers, though its logic
+ * still lives in a class.
  * @param fileName Basename of a candidate file.
  * @returns True when the file's default export must be a class.
  */

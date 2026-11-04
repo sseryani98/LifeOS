@@ -35,12 +35,9 @@ const SCANNED_EXTENSIONS = [
 ];
 
 /**
- * Banned design-tracking ID patterns: FRICEW object IDs (FRM/RPT/INT/CNV/ENH/
- * WFL plus the project's FUT/REP variants), business-rule IDs (BR-nn), and
- * spec/decision IDs (SPEC-nn, D-nn). Word-boundary anchored so embedded
- * substrings (e.g. "POINT-1", "PRINT-2") never match.
- * Workflow IDs are WFL, not WKF — the latter matched nothing and left every
- * WFL-nn free to reach source code.
+ * Banned design-tracking IDs: FRICEW objects, business rules, specs and
+ * decisions. Word-boundary anchored so "POINT-1" never matches. Workflow IDs
+ * are WFL, not WKF; the old spelling matched nothing and let WFL-nn through.
  */
 const TRACKING_ID =
   /\b(?:FRM|RPT|INT|CNV|ENH|WFL|REP|FUT|BR|SPEC)-\d+\b|\bD-\d+\b/;

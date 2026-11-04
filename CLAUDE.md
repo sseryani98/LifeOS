@@ -12,7 +12,7 @@ test strategy are decided once here and inherited by every module.
 | Module                | Folder               | Status                                           |
 | --------------------- | -------------------- | ------------------------------------------------ |
 | **Financial Planner** | `Financial Planner/` | **Active** — in build, sprint W1-S3              |
-| **Project Tracker**   | `Project Tracker/`   | **Active** — in build; S-00 + SPEC-01 done, SPEC-02 next |
+| **Project Tracker**   | `Project Tracker/`   | **Active** — in build; S-00 + SPEC-01 done, SPEC-02 reviewed, commit next |
 | Personal CRM          | —                    | Planned — relationship tracker                   |
 | Investment Assistant  | —                    | Planned                                          |
 | Wellness              | —                    | Planned — habits, journalling                    |

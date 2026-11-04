@@ -1,0 +1,14 @@
+{
+  "ui5": {
+    "ui5parser": {
+      "libsToLoad": ["sap.fe.macros"],
+      "excludeFolderPatterns": ["gen/**", "@cds-models/**", "coverage/**"]
+    },
+    "ui5linter": {
+      "eventNamingPattern": "",
+      "usage": {
+        "WrongNamespaceLinter": false
+      }
+    }
+  }
+}

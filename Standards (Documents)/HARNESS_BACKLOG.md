@@ -119,13 +119,13 @@ Financial Planner business rules, Project Tracker/MCP.)
 to `/commit-diff`. The one exception is a bug that stops a run. Everything else goes in the log
 below and is triaged once, as one batch, after the second run.
 
-**Why.** On 2026-11-04 the chain had completed end to end twice in its life (FRM-001, SPEC-02) and
+**Why.** On 2026-11-04 the chain had completed end to end once in its life (FRM-001) and reached Human Review once (SPEC-02) and
 the harness had taken ten commits in three days, each one fixing something a run exposed. Its
 remaining defects are only discoverable by running it, and every speculative edit is itself
 untested JavaScript. Items 3 to 5 of the same review (one `doc-writer` agent, one source per rule
 with a drift linter, the MCP cutover) take their scope from this log.
 
-**Runs in scope.** `SPEC-02` (Project Tracker, mid-chain: Human Review next), then `CNV-001`
+**Runs in scope.** `SPEC-02` (Project Tracker, mid-chain: Human Review done 2026-11-04, commit next), then `CNV-001`
 (Financial Planner, build to commit).
 
 ### Friction log

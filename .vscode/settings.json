@@ -12,5 +12,6 @@
     "**/@cds-models": true,
     "**/gen": true,
     "**/coverage": true
-  }
+  },
+  "ui5.plugin.globalConfigurationPath": "C:\\Projects\\Life OS\\Standards (Technical + Linting)\\ui5plugin.json"
 }

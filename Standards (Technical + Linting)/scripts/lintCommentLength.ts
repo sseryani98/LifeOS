@@ -18,13 +18,38 @@ const SOURCE_DIRS = [
   join(ROOT_DIR, "mcp"),
   join(ROOT_DIR, "test"),
   join(ROOT_DIR, "scripts"),
+  join(ROOT_DIR, "dashboard"),
+  // Exist only at the repo root, where the root `lint:comments` script runs this.
+  join(ROOT_DIR, "Standards (Technical + Linting)"),
+  join(ROOT_DIR, ".claude", "workflows"),
 ];
 
 /**
- * Only TypeScript/JavaScript is scanned — that is where JSDoc lives and where
- * the TS scanner can tokenise comments reliably.
+ * CDS shares TS's `//` and block comment syntax and quotes strings the same
+ * way, so the TS scanner tokenises its comments just as reliably. CSS and
+ * .properties are exempt from the divider ban by ruling (2026-11-04).
  */
-const SCANNED_EXTENSIONS = [".ts", ".js"];
+const SCANNED_EXTENSIONS = [".ts", ".js", ".mjs", ".cds"];
+
+/**
+ * A divider is any comment holding a run of three identical rule characters
+ * (dashes, equals, box-drawing lines). Banners paper over ordering; order the
+ * code instead.
+ */
+const DIVIDER_PATTERN = /([-=*#~_─═━])\1{2,}/;
+
+/** After one of these a slash divides; after anything else it opens a regex. */
+const VALUE_END_TOKENS = new Set<typescript.SyntaxKind>([
+  typescript.SyntaxKind.Identifier,
+  typescript.SyntaxKind.NumericLiteral,
+  typescript.SyntaxKind.StringLiteral,
+  typescript.SyntaxKind.CloseParenToken,
+  typescript.SyntaxKind.CloseBracketToken,
+  typescript.SyntaxKind.CloseBraceToken,
+  typescript.SyntaxKind.TemplateTail,
+  typescript.SyntaxKind.NoSubstitutionTemplateLiteral,
+  typescript.SyntaxKind.ThisKeyword,
+]);
 
 /**
  * Maximum prose lines per comment block. Only the description counts — tag
@@ -37,6 +62,7 @@ const MAX_PROSE_LINES = { jsdoc: 5, inline: 3 } as const;
 type CommentKind = keyof typeof MAX_PROSE_LINES;
 
 interface CommentBlock {
+  hasDivider: boolean;
   startLine: number;
   proseLines: number;
   kind: CommentKind;
@@ -45,8 +71,7 @@ interface CommentBlock {
 interface Violation {
   filePath: string;
   line: number;
-  proseLines: number;
-  kind: CommentKind;
+  message: string;
 }
 
 /**
@@ -122,32 +147,42 @@ function extractComments(text: string): CommentBlock[] {
   let runStart = -1;
   let runLast = -1;
   let runProse = 0;
+  let runDivider = false;
   const flushRun = () => {
     if (runStart !== -1) {
-      blocks.push({ startLine: runStart, proseLines: runProse, kind: "inline" });
+      blocks.push({ hasDivider: runDivider, startLine: runStart, proseLines: runProse, kind: "inline" });
       runStart = -1;
       runLast = -1;
       runProse = 0;
+      runDivider = false;
     }
   };
+  const templateDepths: number[] = [];
+  let braceDepth = 0;
+  let previousToken: typescript.SyntaxKind = typescript.SyntaxKind.Unknown;
   let token = scanner.scan();
   while (token !== typescript.SyntaxKind.EndOfFileToken) {
     const tokenText = scanner.getTokenText();
     const startLine = lineOf(lineStarts, scanner.getTokenEnd() - tokenText.length);
     if (token === typescript.SyntaxKind.SingleLineCommentTrivia) {
       const content = tokenText.replace(/^\/\/+/, "").trim();
+      const divider = DIVIDER_PATTERN.test(content);
       if (runStart !== -1 && startLine === runLast + 1) {
         runLast = startLine;
+        runDivider ||= divider;
         if (content !== "") runProse++;
       } else {
         flushRun();
         runStart = startLine;
         runLast = startLine;
         runProse = content === "" ? 0 : 1;
+        runDivider = divider;
       }
     } else if (token === typescript.SyntaxKind.MultiLineCommentTrivia) {
       flushRun();
+      const body = tokenText.replace(/^\/\*\*?|\*\/$/g, "").replace(/^\s*\*(?=\s|$)/gm, "");
       blocks.push({
+        hasDivider: DIVIDER_PATTERN.test(body),
         startLine,
         proseLines: countBlockProse(tokenText),
         kind: tokenText.startsWith("/**") ? "jsdoc" : "inline",
@@ -157,8 +192,28 @@ function extractComments(text: string): CommentBlock[] {
       token !== typescript.SyntaxKind.NewLineTrivia
     ) {
       flushRun();
+      previousToken = token;
     }
     token = scanner.scan();
+    // A bare scanner has no parser context: without these rescans, text after a
+    // template `${}` and a regex literal's slashes would be read as comments.
+    if (token === typescript.SyntaxKind.TemplateHead) {
+      templateDepths.push(braceDepth);
+    } else if (token === typescript.SyntaxKind.OpenBraceToken) {
+      braceDepth++;
+    } else if (token === typescript.SyntaxKind.CloseBraceToken) {
+      if (templateDepths.at(-1) === braceDepth) {
+        token = scanner.reScanTemplateToken(false);
+        if (token === typescript.SyntaxKind.TemplateTail) templateDepths.pop();
+      } else {
+        braceDepth--;
+      }
+    } else if (
+      (token === typescript.SyntaxKind.SlashToken || token === typescript.SyntaxKind.SlashEqualsToken) &&
+      !VALUE_END_TOKENS.has(previousToken)
+    ) {
+      token = scanner.reScanSlashToken();
+    }
   }
   flushRun();
   return blocks;
@@ -174,29 +229,25 @@ function main(): void {
   const violations: Violation[] = [];
   for (const filePath of files) {
     for (const block of extractComments(readFileSync(filePath, "utf8"))) {
+      const location = { filePath: relative(ROOT_DIR, filePath), line: block.startLine };
       if (block.proseLines > MAX_PROSE_LINES[block.kind]) {
         violations.push({
-          filePath: relative(ROOT_DIR, filePath),
-          line: block.startLine,
-          proseLines: block.proseLines,
-          kind: block.kind,
+          ...location,
+          message: `${block.proseLines} prose lines (${block.kind} cap ${MAX_PROSE_LINES[block.kind]})`,
         });
       }
+      if (block.hasDivider) violations.push({ ...location, message: "divider comment, delete it" });
     }
   }
 
   reportViolations(
     `Scanning ${files.length} source file(s) for over-long comments...`,
     `No comment blocks exceed ${MAX_PROSE_LINES.jsdoc} (JSDoc) or ` +
-      `${MAX_PROSE_LINES.inline} (inline) prose lines.`,
-    violations.map(
-      violation =>
-        `${violation.filePath}:${violation.line}  —  ${violation.proseLines} ` +
-        `prose lines (${violation.kind} cap ${MAX_PROSE_LINES[violation.kind]})`,
-    ),
-    `\nFound ${violations.length} over-long comment block(s). Trim to the ` +
-      `cap — state why, not what. @param/@returns lines are exempt, so widen ` +
-      `signatures freely.`,
+      `${MAX_PROSE_LINES.inline} (inline) prose lines, and no divider comments.`,
+    violations.map(violation => `${violation.filePath}:${violation.line}  :  ${violation.message}`),
+    `\nFound ${violations.length} comment violation(s). Trim over-long blocks to the ` +
+      `cap and state why, not what; @param/@returns lines are exempt. Delete divider ` +
+      `comments: order the code instead of labelling sections.`,
   );
 }
 

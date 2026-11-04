@@ -1,8 +1,6 @@
-// One origin for a page that composes more than one CAP server. Cross-origin
-// composition fails the $batch preflight in every profile, and an absolute
-// dataSource URI crashes CAP at boot — so the manifests keep their relative
-// /service/... URIs and this fronts both processes on a single port.
-// The route table is prefixes and ports, which is configuration: it names no module.
+// One origin for a page that composes more than one CAP server: cross-origin composition
+// fails the $batch preflight, so manifests keep relative URIs and this fronts both processes
+// on one port. The route table is configuration; it names no module.
 import http from "node:http";
 
 const UPSTREAM_HOST = "127.0.0.1";

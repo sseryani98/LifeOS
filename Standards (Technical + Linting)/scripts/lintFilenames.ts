@@ -1,4 +1,4 @@
-import { readdirSync } from "fs";
+import { existsSync, readdirSync } from "fs";
 import { join, basename, relative } from "path";
 
 const ROOT_DIR = process.cwd();
@@ -30,6 +30,7 @@ function isAllowed(filename: string): boolean {
 interface Violation {
   filePath: string;
   filename: string;
+  reason: string;
 }
 
 /**
@@ -42,6 +43,7 @@ function main(): void {
   let totalFiles = 0;
 
   for (const dir of CAP_DIRS) {
+    if (!existsSync(dir)) continue;
     const entries = readdirSync(dir, { recursive: true, encoding: "utf8" });
     const tsFiles = entries.filter(
       entry => entry.endsWith(".ts") || entry.endsWith(".cds"),
@@ -51,15 +53,18 @@ function main(): void {
       totalFiles++;
       const filename = basename(entry);
       const nameWithoutExt = filename.replace(/\.[^.]+$/, "");
+      const filePath = relative(ROOT_DIR, join(dir, entry));
 
+      // Every module splits its model by domain, so the db/ root holds folders only.
+      if (dir.endsWith("db") && entry === filename && filename.endsWith(".cds")) {
+        violations.push({ filePath, filename, reason: "sits at the db/ root; move it into a db/{domain}/ folder" });
+        continue;
+      }
       if (nameWithoutExt === "schema" || nameWithoutExt === "index") continue;
       if (isAllowed(filename)) continue;
 
       if (!isCamelCase(nameWithoutExt)) {
-        violations.push({
-          filePath: relative(ROOT_DIR, join(dir, entry)),
-          filename,
-        });
+        violations.push({ filePath, filename, reason: "is not camelCase" });
       }
     }
   }
@@ -76,13 +81,12 @@ function main(): void {
   console.log();
 
   for (const violation of violations) {
-    console.log(
-      `${violation.filePath}  filename "${violation.filename}" is not camelCase`,
-    );
+    console.log(`${violation.filePath}  filename "${violation.filename}" ${violation.reason}`);
   }
 
   console.log(
-    `\nFound ${violations.length} naming violation(s). CAP files must be camelCase.`,
+    `\nFound ${violations.length} naming violation(s). CAP files must be camelCase, ` +
+      `and CDS models live in db/{domain}/ folders, never at the db/ root.`,
   );
   process.exit(1);
 }

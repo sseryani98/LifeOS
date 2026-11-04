@@ -1,6 +1,5 @@
-// Per-phase and per-agent wall-clock for a finished workflow run. The workflow runtime makes
-// Date.now() throw inside a script (it breaks resume), so timing is read back afterwards from
-// each agent transcript's timestamps and its meta.json workflowPhase.
+// Per-phase wall-clock for a finished workflow run, read back from transcripts because the
+// runtime makes Date.now() throw inside a script.
 // Usage: node .claude/workflows/workflowTimings.mjs "<transcript dir from the Workflow launch>"
 import { readFileSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
