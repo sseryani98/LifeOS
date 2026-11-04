@@ -5,7 +5,7 @@ export const meta = {
     "To build a single story in any Life OS module from its spec and the module's BUILD_PLAN — a FRICEW ID in Financial Planner (FRM-001), a spec ID in Project Tracker (SPEC-02). Leaves a green, uncommitted tree for Sandro to review — it never commits. Invoked by /build.",
   phases: [
     { title: 'Brief', detail: 'resolve the story to a structured brief so no later agent re-reads the design docs' },
-    { title: 'Red', detail: 'write the failing tests from the spec business rules and FUTs', model: 'opus' },
+    { title: 'Red', detail: 'write the failing tests from the spec business rules and FUTs (stories with a cap layer only)', model: 'opus' },
     { title: 'Implement', detail: 'build the handler pattern against frozen tests', model: 'opus' },
     { title: 'Gate', detail: 'tsc, lint, test, cds build — classify failures, hash the tests' },
     { title: 'Coverage', detail: 'raise coverage to the TEST_STRATEGY thresholds' },
@@ -406,7 +406,13 @@ ${brief.testPlan.map(item => `- \`${item.file}\` — ${item.purpose}`).join('\n'
 
 const briefContext = contextFor(brief.businessRules, brief.futs)
 
-phase('Red')
+// The Jest suite asserts on srv/ (and the CAP-hosted folders a module adds). A story with no `cap`
+// layer has nothing the suite can reach — Financial Planner never wrote its UI5 suite (D-80) and
+// Project Tracker ruled one out (D-195) — so its contract is the FUT matrix /functional-test runs
+// against the browser, not a red here. Writing Jest tests for app/ code either produces nothing
+// or trips the red-phase defect below. When a module gains an in-repo UI5 suite, this is where
+// its author plugs in, keyed on 'ui5'.
+const hasJestLayer = brief.layers.includes('cap')
 
 // A FUT's Covers line can name several objects; it belongs to the first so no case is written twice.
 const ownerOf = fut => fut.covers.split(/[,;\s]+/).find(Boolean) ?? fut.covers
@@ -544,12 +550,19 @@ ${standardsFor(brief.layers)}`,
   }
 }
 
-const red = objects.length > 1 ? await writeRedByObject() : await writeRedSingle()
+let red = { testFiles: [], summary: '', confirmedFailing: false, notes: '' }
 
-if (objects.length > 1) log(`Red written by ${objects.length} parallel authors (${objects.join(', ')}) over shared scaffolding.`)
+if (hasJestLayer) {
+  phase('Red')
+  red = objects.length > 1 ? await writeRedByObject() : await writeRedSingle()
 
-if (!red) return { storyId, built: false, note: 'red agent failed' }
-if (!red.testFiles.length) return { storyId, built: false, note: 'red phase wrote no tests' }
+  if (objects.length > 1) log(`Red written by ${objects.length} parallel authors (${objects.join(', ')}) over shared scaffolding.`)
+
+  if (!red) return { storyId, built: false, note: 'red agent failed' }
+  if (!red.testFiles.length) return { storyId, built: false, note: 'red phase wrote no tests' }
+} else {
+  log(`No cap layer (layers: ${brief.layers.join(', ')}) — no Jest red to write. The FUT contract is verified by /functional-test after the build; the gate still runs the existing suite.`)
+}
 
 phase('Gate')
 
@@ -571,7 +584,7 @@ cd "${moduleDir}" && npm run build
 One failure must not mask the other three — if you stop early, the repair agent fixes one thing
 per round and the loop runs out of budget.
 
-\`npm run lint\` is ESLint plus 21 \`lint:*\` scripts chained with \`&&\`, so it halts at the first
+\`npm run lint\` is ESLint plus 22 \`lint:*\` scripts chained with \`&&\`, so it halts at the first
 failing linter. Expected. Report what you got; do not run the rest by hand.
 
 \`npm test\` has \`--coverage\` baked in, and a module may add a \`posttest\` report generator that always fires. Both normal.
@@ -599,11 +612,11 @@ needs the real text.`,
     { label, phase: 'Gate', model: 'haiku', effort: 'low', agentType: 'gate-runner', schema: GATE_SCHEMA },
   )
 
-const redGate = await runGate(`gate:red:${brief.storyId}`, red.testFiles, true)
+const redGate = hasJestLayer ? await runGate(`gate:red:${brief.storyId}`, red.testFiles, true) : null
 
-if (!redGate) return { storyId, built: false, note: 'gate agent failed on the red run' }
+if (hasJestLayer && !redGate) return { storyId, built: false, note: 'gate agent failed on the red run' }
 
-if (!redGate.testsFailing) {
+if (redGate && !redGate.testsFailing) {
   log('The new tests PASS before the implementation exists — they assert nothing. Stopping.')
   return {
     storyId,
@@ -615,18 +628,17 @@ if (!redGate.testsFailing) {
   }
 }
 
-const baselineHashes = hashesOf(redGate)
-log(`Red confirmed: ${red.testFiles.length} test files failing as expected. Baseline hashed; the suite is now locked.`)
+const baselineHashes = redGate ? hashesOf(redGate) : new Map()
+if (redGate) log(`Red confirmed: ${red.testFiles.length} test files failing as expected. Baseline hashed; the suite is now locked.`)
 
 phase('Implement')
 
 const implement = await agent(
-  `Implement **${brief.storyId}**. The tests are written and failing. Make them pass without
-touching them.
+  `Implement **${brief.storyId}**. ${redGate ? 'The tests are written and failing. Make them pass without\ntouching them.' : 'This story ships no `cap` layer, so there is no Jest red: the business rules and FUTs below are your contract, and /functional-test verifies them in the browser after the build. The existing suite must stay green.'}
 
 ${briefContext}
 
-## The failing gate
+${redGate ? `## The failing gate
 
 ${redGate.summary}
 
@@ -636,7 +648,7 @@ ${redGate.failures.map(failure => `### ${failure.check} (${failure.kind})\n${fai
 
 These files are hashed. Any edit fails the gate and the story does not commit:
 
-${lockedTests()}
+${lockedTests()}` : '## The existing tests are frozen\n\nYou may not create, edit or delete anything under `test/`. Nothing in the suite covers `app/`, and a story without a `cap` layer adds nothing to it.'}
 
 ${red.notes ? `The test author left you a note: ${red.notes}\n` : ''}
 If a test cannot pass against any correct implementation — it contradicts its own BR, or asserts
