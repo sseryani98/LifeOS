@@ -11,14 +11,14 @@
             <form:SimpleForm editable="true">
                 <Label text="{i18n>splitMySharePct}" />
                 <Input
-                    id="idSplitPctInput"
+                    id="idMySharePctSplitInput"
                     value="{splitModel>/mySharePct}"
                     type="Number"
                     description="{i18n>splitPctUnit}"
                 />
                 <Label text="{i18n>splitMyShareAmount}" />
                 <Input
-                    id="idSplitAmountInput"
+                    id="idMyShareAmountSplitInput"
                     value="{splitModel>/myShareAmount}"
                     type="Number"
                 />
@@ -36,7 +36,7 @@
         </content>
         <beginButton>
             <Button
-                id="idSplitConfirmButton"
+                id="idSaveSplitButton"
                 text="{i18n>save}"
                 type="Emphasized"
                 press=".onButtonSplitConfirmPress"
@@ -44,7 +44,7 @@
         </beginButton>
         <endButton>
             <Button
-                id="idSplitCancelButton"
+                id="idCancelSplitButton"
                 text="{i18n>cancel}"
                 press=".onButtonSplitCancelPress"
             />

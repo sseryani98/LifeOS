@@ -37,7 +37,7 @@ export const CREATE_DIALOG = {
 /** Stable control ids the controller resolves via byId for structural DOM ops. */
 export const CONTROL_ID = {
   CREATE_DIALOG: "idCreateReferenceDialog",
-  NEW_TABLE: "idNewTable",
+  NEW_TABLE: "idNewRowsTable",
   WIZARD: "idImportWizard",
   DROP_ZONE: "idDropZoneVBox",
 } as const;

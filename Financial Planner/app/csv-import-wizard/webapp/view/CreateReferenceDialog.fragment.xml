@@ -13,13 +13,13 @@
                 class="sapUiContentPadding"
             >
                 <Label
-                    id="idCreateReferenceLabel"
+                    id="idNameReferenceLabel"
                     text="{i18n>referenceName}"
                     required="true"
-                    labelFor="idCreateReferenceInput"
+                    labelFor="idNewRefNameInput"
                 />
                 <Input
-                    id="idCreateReferenceInput"
+                    id="idNewRefNameInput"
                     value="{ui>/newRefName}"
                     placeholder="{i18n>referenceNamePlaceholder}"
                 />
@@ -27,7 +27,7 @@
         </content>
         <beginButton>
             <Button
-                id="idConfirmCreateButton"
+                id="idCreateConfirmButton"
                 text="{i18n>create}"
                 type="Emphasized"
                 press=".onButtonConfirmCreatePress"

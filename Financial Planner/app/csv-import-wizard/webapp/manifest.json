@@ -62,7 +62,7 @@
       },
       "routes": [
         {
-          "pattern": ":?query:",
+          "pattern": "CsvImport:?query:",
           "name": "CsvImportWizard",
           "target": "CsvImportWizard"
         }

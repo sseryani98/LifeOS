@@ -1,8 +1,10 @@
 import BaseController from "com/financialplanner/shared/BaseController";
+import I18n from "com/financialplanner/shared/util/i18n";
 import NavConfig from "com/financialplanner/shell/controller/NavConfig";
 import ComponentContainer, {
   type ComponentContainer$ComponentCreatedEvent,
 } from "sap/ui/core/ComponentContainer";
+import HashChanger from "sap/ui/core/routing/HashChanger";
 import JSONModel from "sap/ui/model/json/JSONModel";
 import type Page from "sap/m/Page";
 import type { SideNavigation$ItemSelectEvent } from "sap/tnt/SideNavigation";
@@ -12,7 +14,7 @@ import type UIComponent from "sap/ui/core/UIComponent";
 /**
  * Shell controller — handles top-level navigation via the side nav.
  * Loads app components into the content area when nav items are selected.
- * Supports deep-link restore from the URL hash on page load.
+ * Follows the URL hash, on load and when it changes, so deep links work.
  *
  * @namespace com.financialplanner.shell.controller
  */
@@ -27,11 +29,13 @@ export default class App extends BaseController {
   public onInit(): void {
     const shellModel = new JSONModel({
       selectedKey: "",
+      pageName: "",
       backVisible: false,
       welcomeVisible: true,
     });
-    (this.getView() as View).setModel(shellModel, "shellView");
+    this.setModel(shellModel, "shellView");
     this._restoreFromHash();
+    this._attachHashChangeHandler();
   }
 
   /**
@@ -39,9 +43,7 @@ export default class App extends BaseController {
    * From a ListReport, returns to the welcome page.
    */
   public onButtonNavBackPress(): void {
-    const shellModel = (this.getView() as View).getModel(
-      "shellView",
-    ) as JSONModel;
+    const shellModel = this._getShellModel();
     const selectedKey = shellModel.getProperty("/selectedKey") as string;
     const config = selectedKey ? NavConfig.getEntry(selectedKey) : null;
     const component = config ? this._components[config.component] : null;
@@ -64,6 +66,24 @@ export default class App extends BaseController {
       return;
     }
     this._navigateToKey(key);
+  }
+
+  /**
+   * Re-runs hash restoration on every hash change — a hash typed or pasted
+   * while the shell is open must switch apps too, not only the one at load.
+   */
+  private _attachHashChangeHandler(): void {
+    HashChanger.getInstance().attachEvent("hashChanged", () =>
+      this._restoreFromHash(),
+    );
+  }
+
+  /**
+   * Returns the shell's navigation-state JSON model.
+   * @returns the "shellView" model
+   */
+  private _getShellModel(): JSONModel {
+    return this.getModel("shellView") as JSONModel;
   }
 
   /**
@@ -121,17 +141,21 @@ export default class App extends BaseController {
     }
 
     this._loadAppComponent(config.component, config.route);
-    const shellModel = (this.getView() as View).getModel(
-      "shellView",
-    ) as JSONModel;
+    const shellModel = this._getShellModel();
     shellModel.setProperty("/selectedKey", key);
+    // The owner component, not the view: a deep link lands here from onInit,
+    // before the view inherits the component's i18n model.
+    shellModel.setProperty(
+      "/pageName",
+      I18n.getText(this.getOwnerComponent() as UIComponent, config.label),
+    );
     shellModel.setProperty("/backVisible", true);
     shellModel.setProperty("/welcomeVisible", false);
   }
 
   /**
-   * Restores navigation state from the URL hash on page load. Matches the hash
-   * against known routes to auto-select the nav item and load its component.
+   * Restores navigation state from the URL hash, on load and on every hash
+   * change. A hash still owned by the open app (its own routing) is a no-op.
    */
   private _restoreFromHash(): void {
     const hash = (window.location.hash || "").replace(/^#\/?/, "");
@@ -141,7 +165,8 @@ export default class App extends BaseController {
 
     const hashPart = hash.split("(")[0].split("/")[0];
     const navKey = NavConfig.getNavKeyForHash(hashPart);
-    if (navKey) {
+    const shellModel = this._getShellModel();
+    if (navKey && navKey !== shellModel.getProperty("/selectedKey")) {
       this._navigateToKey(navKey);
     }
   }
@@ -150,10 +175,9 @@ export default class App extends BaseController {
    * Restores the shell to the welcome page.
    */
   private _showWelcome(): void {
-    const shellModel = (this.getView() as View).getModel(
-      "shellView",
-    ) as JSONModel;
+    const shellModel = this._getShellModel();
     shellModel.setProperty("/selectedKey", "");
+    shellModel.setProperty("/pageName", "");
     shellModel.setProperty("/backVisible", false);
     shellModel.setProperty("/welcomeVisible", true);
     window.location.hash = "";

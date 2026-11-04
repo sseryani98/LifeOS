@@ -177,7 +177,7 @@ export default class CsvImportWizard extends BaseController {
     void this._service
       .createReference(this._createEntitySet, name)
       .then(() => {
-        (this.getView() as View).getModel()?.refresh();
+        this.getModel().refresh();
         this._messages.showToast("msgReferenceCreated");
         this._dialogs.close(CONTROL_ID.CREATE_DIALOG);
       })
@@ -591,6 +591,6 @@ export default class CsvImportWizard extends BaseController {
    * @returns the "ui" model
    */
   private _getState(): JSONModel {
-    return (this.getView() as View).getModel("ui") as JSONModel;
+    return this.getModel("ui") as JSONModel;
   }
 }

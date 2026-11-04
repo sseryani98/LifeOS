@@ -55,6 +55,7 @@ annotate svc.Transactions with @UI: {
     },
     {
       Value                : categorizationStatus,
+      Label                : '{i18n>Transaction.categorizationStatusShort}',
       Criticality          : statusCriticality,
       ![@HTML5.CssDefaults]: {width: '10%'}
     }

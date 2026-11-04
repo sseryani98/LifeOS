@@ -156,20 +156,22 @@ Updated enum: `MAX_CONCURRENT` · `APPS_IN_WINDOW` · `PRODUCT_COOLDOWN` · `ISS
 
 #### Issuers (12)
 
-| Name                    | Short Name |
-| ----------------------- | ---------- |
-| TD Canada Trust         | TD         |
-| American Express Canada | Amex       |
-| CIBC                    | CIBC       |
-| Scotiabank              | Scotia     |
-| BMO                     | BMO        |
-| RBC                     | RBC        |
-| MBNA                    | MBNA       |
-| Neo Financial           | Neo        |
-| Tangerine               | Tangerine  |
-| Canadian Tire Bank      | CT Bank    |
-| PC Financial            | PC         |
-| Rogers Bank             | Rogers     |
+| Name                               | Short Name |
+| ---------------------------------- | ---------- |
+| TD Canada Trust                    | TD         |
+| American Express Canada            | Amex       |
+| Canadian Imperial Bank of Commerce | CIBC       |
+| Scotiabank                         | Scotia     |
+| Bank of Montreal                   | BMO        |
+| Royal Bank of Canada               | RBC        |
+| MBNA Canada                        | MBNA       |
+| Neo Financial                      | Neo        |
+| Tangerine Bank                     | Tangerine  |
+| Canadian Tire Bank                 | CT Bank    |
+| PC Financial                       | PC         |
+| Rogers Bank                        | Rogers     |
+
+Name is the full legal name and never equals the short name: the list shows `Name (Short Name)`, so an identical pair would render as `BMO (BMO)` (D-019).
 
 #### Rewards Programs (14)
 

@@ -2,21 +2,29 @@
     controllerName="com.financialplanner.csvimportwizard.controller.CsvImportWizard"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
+    xmlns:f="sap.f"
     xmlns:core="sap.ui.core"
     xmlns:u="sap.ui.unified"
     xmlns:l="sap.ui.layout"
     displayBlock="true"
     core:require="{ formatter: 'com/financialplanner/csvimportwizard/model/formatter', sharedFormatter: 'com/financialplanner/shared/util/formatter', formatMessage: 'sap/base/strings/formatMessage' }"
 >
-    <Page
-        id="idWizardPage"
-        title="{i18n>pageTitle}"
-        class="sapUiContentPadding"
+    <f:DynamicPage
+        id="idWizardDynamicPage"
+        fitContent="true"
     >
-        <content>
-            <Wizard
-                id="idImportWizard"
-            >
+        <f:title>
+            <f:DynamicPageTitle id="idWizardDynamicPageTitle">
+                <f:heading>
+                    <Title
+                        id="idImportTransactionsFromCSVTitle"
+                        text="{i18n>pageTitle}"
+                    />
+                </f:heading>
+            </f:DynamicPageTitle>
+        </f:title>
+        <f:content>
+            <Wizard id="idImportWizard">
                 <WizardStep
                     id="idUploadWizardStep"
                     title="{i18n>step1Title}"
@@ -35,7 +43,7 @@
                             class="sapUiSmallMarginBottom"
                         />
                         <Text
-                            id="idDropHintText"
+                            id="idDragCSVFilesHereOrUseTheButtonBelowText"
                             text="{i18n>dropHint}"
                             textAlign="Center"
                         />
@@ -61,7 +69,7 @@
                                 text="{i18n>selectedFiles}"
                             />
                             <Text
-                                id="idSelectedFilesText"
+                                id="idFileNamesText"
                                 text="{ui>/fileNames}"
                             />
                         </VBox>
@@ -72,7 +80,7 @@
                                 required="true"
                             />
                             <ComboBox
-                                id="idCardComboBox"
+                                id="idCardInstancesComboBox"
                                 selectedKey="{ui>/selectedCard}"
                                 placeholder="{i18n>selectCardPlaceholder}"
                                 items="{
@@ -91,7 +99,7 @@
                     </l:Grid>
 
                     <Button
-                        id="idParseFilesButton"
+                        id="idParseReviewButton"
                         text="{i18n>parseAndReview}"
                         type="Emphasized"
                         icon="sap-icon://begin"
@@ -136,7 +144,7 @@
                                         text="{ parts: [ 'i18n>runningTotal', { path: 'ui>/totalAmount', formatter: 'sharedFormatter.formatAmount' } ], formatter: 'formatMessage' }"
                                     />
                                     <Button
-                                        id="idApplySelectedButton"
+                                        id="idApplyToSelectedButton"
                                         text="{i18n>applySelected}"
                                         icon="sap-icon://multiselect-all"
                                         press=".onButtonApplySelectedPress"
@@ -156,7 +164,7 @@
                                 </OverflowToolbar>
 
                                 <Table
-                                    id="idNewTable"
+                                    id="idNewRowsTable"
                                     mode="MultiSelect"
                                     items="{ui>/newRows}"
                                     growing="true"
@@ -168,13 +176,13 @@
                                             width="8rem"
                                         >
                                             <Text
-                                                id="idNewDateHeaderText"
+                                                id="idDateNewHeaderText"
                                                 text="{i18n>colDate}"
                                             />
                                         </Column>
                                         <Column id="idNewDescColumn">
                                             <Text
-                                                id="idNewDescHeaderText"
+                                                id="idDescriptionNewHeaderText"
                                                 text="{i18n>colDescription}"
                                             />
                                         </Column>
@@ -184,7 +192,7 @@
                                             hAlign="End"
                                         >
                                             <Text
-                                                id="idNewAmountHeaderText"
+                                                id="idAmountNewHeaderText"
                                                 text="{i18n>colAmount}"
                                             />
                                         </Column>
@@ -193,7 +201,7 @@
                                             width="11rem"
                                         >
                                             <Text
-                                                id="idNewVendorHeaderText"
+                                                id="idVendorNewHeaderText"
                                                 text="{i18n>colVendor}"
                                             />
                                         </Column>
@@ -202,7 +210,7 @@
                                             width="11rem"
                                         >
                                             <Text
-                                                id="idNewTypeHeaderText"
+                                                id="idPurchaseTypeNewHeaderText"
                                                 text="{i18n>colPurchaseType}"
                                             />
                                         </Column>
@@ -211,7 +219,7 @@
                                             width="11rem"
                                         >
                                             <Text
-                                                id="idNewEarnHeaderText"
+                                                id="idEarningCategoryNewHeaderText"
                                                 text="{i18n>colEarningCategory}"
                                             />
                                         </Column>
@@ -221,7 +229,7 @@
                                             hAlign="End"
                                         >
                                             <Text
-                                                id="idNewYieldHeaderText"
+                                                id="idEarningYieldNewHeaderText"
                                                 text="{i18n>colEarningYield}"
                                             />
                                         </Column>
@@ -231,7 +239,7 @@
                                             visible="{ui>/hasSuppCards}"
                                         >
                                             <Text
-                                                id="idNewCardHeaderText"
+                                                id="idCardNewHeaderText"
                                                 text="{i18n>colCard}"
                                             />
                                         </Column>
@@ -240,7 +248,7 @@
                                             width="13rem"
                                         >
                                             <Text
-                                                id="idNewActionHeaderText"
+                                                id="idActionsNewHeaderText"
                                                 text="{i18n>colActions}"
                                             />
                                         </Column>
@@ -251,53 +259,53 @@
                                         >
                                             <cells>
                                                 <Input
-                                                    id="idRowDateInput"
+                                                    id="idPostedAtRowInput"
                                                     value="{ui>postedAt}"
                                                     editable="{= !${ui>cleared} }"
                                                 />
                                                 <Input
-                                                    id="idRowDescInput"
+                                                    id="idRawDescriptionRowInput"
                                                     value="{ui>rawDescription}"
                                                     editable="{= !${ui>cleared} }"
                                                 />
                                                 <Input
-                                                    id="idRowAmountInput"
+                                                    id="idAmountRowInput"
                                                     value="{ui>amount}"
                                                     textAlign="End"
                                                     editable="{= !${ui>cleared} }"
                                                 />
                                                 <ComboBox
-                                                    id="idRowVendorComboBox"
+                                                    id="idVendorsRowComboBox"
                                                     selectedKey="{ui>vendor_ID}"
                                                     enabled="{= !${ui>cleared} }"
                                                     items="{ path: '/Vendors', templateShareable: false }"
                                                 >
                                                     <core:Item
-                                                        id="idRowVendorItem"
+                                                        id="idNameRowVendorItem"
                                                         key="{ID}"
                                                         text="{name}"
                                                     />
                                                 </ComboBox>
                                                 <ComboBox
-                                                    id="idRowTypeComboBox"
+                                                    id="idPurchaseTypesRowComboBox"
                                                     selectedKey="{ui>purchaseType_ID}"
                                                     enabled="{= !${ui>cleared} }"
                                                     items="{ path: '/PurchaseTypes', templateShareable: false }"
                                                 >
                                                     <core:Item
-                                                        id="idRowTypeItem"
+                                                        id="idNameRowTypeItem"
                                                         key="{ID}"
                                                         text="{name}"
                                                     />
                                                 </ComboBox>
                                                 <ComboBox
-                                                    id="idRowEarnComboBox"
+                                                    id="idEarningCategoriesRowComboBox"
                                                     selectedKey="{ui>earningCategory_ID}"
                                                     enabled="{= !${ui>cleared} }"
                                                     items="{ path: '/EarningCategories', templateShareable: false }"
                                                 >
                                                     <core:Item
-                                                        id="idRowEarnItem"
+                                                        id="idNameRowEarnItem"
                                                         key="{ID}"
                                                         text="{name}"
                                                     />
@@ -307,14 +315,14 @@
                                                     text="{i18n>yieldDeferred}"
                                                 />
                                                 <ComboBox
-                                                    id="idRowCardComboBox"
+                                                    id="idCardInstancesRowComboBox"
                                                     selectedKey="{ui>cardInstance_ID}"
                                                     enabled="{= !${ui>cleared} }"
                                                     visible="{ui>/hasSuppCards}"
                                                     items="{ path: '/CardInstances', parameters: { $expand: 'marketCard' }, templateShareable: false }"
                                                 >
                                                     <core:ListItem
-                                                        id="idRowCardListItem"
+                                                        id="idNameRowCardListItem"
                                                         key="{ID}"
                                                         text="{marketCard/name}"
                                                         additionalText="{cardholderName}"
@@ -322,7 +330,7 @@
                                                 </ComboBox>
                                                 <HBox id="idRowActionHBox">
                                                     <Button
-                                                        id="idRowClearButton"
+                                                        id="idClearRowButton"
                                                         text="{i18n>clear}"
                                                         type="Transparent"
                                                         press=".onButtonClearRowPress"
@@ -337,7 +345,7 @@
                                                         visible="{= !${ui>cleared} }"
                                                     />
                                                     <Button
-                                                        id="idRowUndoButton"
+                                                        id="idUndoRowButton"
                                                         text="{i18n>undo}"
                                                         type="Transparent"
                                                         press=".onButtonUndoRowPress"
@@ -351,25 +359,25 @@
                             </IconTabFilter>
 
                             <IconTabFilter
-                                id="idDuplicatesIconTabFilter"
+                                id="idPotentialDuplicatesIconTabFilter"
                                 key="duplicates"
                                 text="{i18n>tabDuplicates}"
                                 count="{ui>/duplicateCount}"
                             >
                                 <Table
-                                    id="idDuplicatesTable"
+                                    id="idDuplicateRowsTable"
                                     items="{ui>/duplicateRows}"
                                 >
                                     <columns>
                                         <Column id="idDupCsvDateColumn">
                                             <Text
-                                                id="idDupCsvDateHeaderText"
+                                                id="idCSVDateDupHeaderText"
                                                 text="{i18n>colCsvDate}"
                                             />
                                         </Column>
                                         <Column id="idDupCsvDescColumn">
                                             <Text
-                                                id="idDupCsvDescHeaderText"
+                                                id="idCSVDescriptionDupHeaderText"
                                                 text="{i18n>colCsvDescription}"
                                             />
                                         </Column>
@@ -378,19 +386,19 @@
                                             hAlign="End"
                                         >
                                             <Text
-                                                id="idDupCsvAmountHeaderText"
+                                                id="idCSVAmountDupHeaderText"
                                                 text="{i18n>colCsvAmount}"
                                             />
                                         </Column>
                                         <Column id="idDupExDateColumn">
                                             <Text
-                                                id="idDupExDateHeaderText"
+                                                id="idExistingDateDupHeaderText"
                                                 text="{i18n>colExistingDate}"
                                             />
                                         </Column>
                                         <Column id="idDupExDescColumn">
                                             <Text
-                                                id="idDupExDescHeaderText"
+                                                id="idExistingDescriptionDupHeaderText"
                                                 text="{i18n>colExistingDescription}"
                                             />
                                         </Column>
@@ -399,7 +407,7 @@
                                             hAlign="End"
                                         >
                                             <Text
-                                                id="idDupExAmountHeaderText"
+                                                id="idExistingAmountDupHeaderText"
                                                 text="{i18n>colExistingAmount}"
                                             />
                                         </Column>
@@ -408,7 +416,7 @@
                                             width="14rem"
                                         >
                                             <Text
-                                                id="idDupDecisionHeaderText"
+                                                id="idDecisionDupHeaderText"
                                                 text="{i18n>colDecision}"
                                             />
                                         </Column>
@@ -419,44 +427,44 @@
                                         >
                                             <cells>
                                                 <Text
-                                                    id="idDupCsvDateText"
+                                                    id="idPostedAtDupText"
                                                     text="{ui>csv/postedAt}"
                                                 />
                                                 <Text
-                                                    id="idDupCsvDescText"
+                                                    id="idRawDescriptionDupText"
                                                     text="{ui>csv/rawDescription}"
                                                 />
                                                 <Text
-                                                    id="idDupCsvAmountText"
+                                                    id="idAmountDupText"
                                                     text="{ path: 'ui>csv/amount', formatter: 'sharedFormatter.formatAmount' }"
                                                 />
                                                 <Text
-                                                    id="idDupExDateText"
+                                                    id="idExistingPostedAtDupText"
                                                     text="{ui>existingPostedAt}"
                                                 />
                                                 <Text
-                                                    id="idDupExDescText"
+                                                    id="idExistingDescriptionDupText"
                                                     text="{ui>existingDescription}"
                                                 />
                                                 <Text
-                                                    id="idDupExAmountText"
+                                                    id="idExistingAmountDupText"
                                                     text="{ path: 'ui>existingAmount', formatter: 'sharedFormatter.formatAmount' }"
                                                 />
                                                 <HBox id="idDupActionHBox">
                                                     <Button
-                                                        id="idDupSkipButton"
+                                                        id="idSkipDupButton"
                                                         text="{i18n>skip}"
                                                         type="Transparent"
                                                         press=".onButtonSkipDuplicatePress"
                                                     />
                                                     <Button
-                                                        id="idDupImportButton"
+                                                        id="idImportAnywayDupButton"
                                                         text="{i18n>importAnyway}"
                                                         type="Transparent"
                                                         press=".onButtonImportDuplicatePress"
                                                     />
                                                     <ObjectStatus
-                                                        id="idDupDecisionObjectStatus"
+                                                        id="idDecisionDupObjectStatus"
                                                         text="{ui>decision}"
                                                         class="sapUiTinyMarginBegin"
                                                     />
@@ -474,7 +482,7 @@
                                 count="{ui>/excludedCount}"
                             >
                                 <Table
-                                    id="idExcludedTable"
+                                    id="idExcludedRowsTable"
                                     items="{ui>/excludedRows}"
                                 >
                                     <columns>
@@ -483,7 +491,7 @@
                                             width="5rem"
                                         >
                                             <Text
-                                                id="idExRowHeaderText"
+                                                id="idRowExHeaderText"
                                                 text="{i18n>colRow}"
                                             />
                                         </Column>
@@ -492,13 +500,13 @@
                                             width="8rem"
                                         >
                                             <Text
-                                                id="idExFieldHeaderText"
+                                                id="idFieldExHeaderText"
                                                 text="{i18n>colField}"
                                             />
                                         </Column>
                                         <Column id="idExRawColumn">
                                             <Text
-                                                id="idExRawHeaderText"
+                                                id="idRawCellsExHeaderText"
                                                 text="{i18n>colRawCells}"
                                             />
                                         </Column>
@@ -507,7 +515,7 @@
                                             width="12rem"
                                         >
                                             <Text
-                                                id="idExValueHeaderText"
+                                                id="idCorrectedValueExHeaderText"
                                                 text="{i18n>colCorrectedValue}"
                                             />
                                         </Column>
@@ -516,7 +524,7 @@
                                             width="10rem"
                                         >
                                             <Text
-                                                id="idExActionHeaderText"
+                                                id="idActionsExHeaderText"
                                                 text="{i18n>colActions}"
                                             />
                                         </Column>
@@ -525,24 +533,24 @@
                                         <ColumnListItem id="idExColumnListItem">
                                             <cells>
                                                 <Text
-                                                    id="idExRowText"
+                                                    id="idRowNumberExText"
                                                     text="{ui>rowNumber}"
                                                 />
                                                 <ObjectStatus
-                                                    id="idExFieldObjectStatus"
+                                                    id="idErrorFieldExObjectStatus"
                                                     text="{ui>errorField}"
                                                     state="Error"
                                                 />
                                                 <Text
-                                                    id="idExRawText"
+                                                    id="idRawJoinedExText"
                                                     text="{ui>rawJoined}"
                                                 />
                                                 <Input
-                                                    id="idExValueInput"
+                                                    id="idEditedValueExInput"
                                                     value="{ui>editedValue}"
                                                 />
                                                 <Button
-                                                    id="idExMoveButton"
+                                                    id="idMoveToNewExButton"
                                                     text="{i18n>moveToNew}"
                                                     type="Transparent"
                                                     press=".onButtonMoveToNewPress"
@@ -570,11 +578,11 @@
                             class="sapUiSmallMargin"
                         >
                             <Label
-                                id="idConfirmNewLabel"
+                                id="idToImportConfirmLabel"
                                 text="{i18n>confirmToImport}"
                             />
                             <ObjectNumber
-                                id="idConfirmNewObjectNumber"
+                                id="idClearedCountConfirmObjectNumber"
                                 number="{ui>/clearedCount}"
                             />
                         </VBox>
@@ -583,11 +591,11 @@
                             class="sapUiSmallMargin"
                         >
                             <Label
-                                id="idConfirmSkippedLabel"
+                                id="idSkippedPendingConfirmLabel"
                                 text="{i18n>confirmSkipped}"
                             />
                             <ObjectNumber
-                                id="idConfirmSkippedObjectNumber"
+                                id="idSkippedCountConfirmObjectNumber"
                                 number="{ui>/skippedCount}"
                             />
                         </VBox>
@@ -596,11 +604,11 @@
                             class="sapUiSmallMargin"
                         >
                             <Label
-                                id="idConfirmExcludedLabel"
+                                id="idExcludedConfirmLabel"
                                 text="{i18n>confirmExcluded}"
                             />
                             <ObjectNumber
-                                id="idConfirmExcludedObjectNumber"
+                                id="idExcludedCountConfirmObjectNumber"
                                 number="{ui>/excludedCount}"
                             />
                         </VBox>
@@ -626,6 +634,6 @@
                     />
                 </WizardStep>
             </Wizard>
-        </content>
-    </Page>
+        </f:content>
+    </f:DynamicPage>
 </mvc:View>

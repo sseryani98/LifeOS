@@ -44,7 +44,7 @@ export default class ConnectionManager extends BasePageController {
    * Opens the Add-Connection dialog with cleared inputs.
    */
   public onActionAddConnectionPress(): void {
-    const uiModel = (this.getView() as View).getModel("ui") as JSONModel;
+    const uiModel = this.getModel("ui") as JSONModel;
     uiModel.setProperty("/setupToken", "");
     uiModel.setProperty("/displayName", "");
     void this._dialogs.open(ADD_CONNECTION_DIALOG.FRAGMENT);
@@ -83,7 +83,7 @@ export default class ConnectionManager extends BasePageController {
    * Claims the pasted setup token and creates a connection.
    */
   public onButtonClaimTokenPress(): void {
-    const uiModel = (this.getView() as View).getModel("ui") as JSONModel;
+    const uiModel = this.getModel("ui") as JSONModel;
     const token = ((uiModel.getProperty("/setupToken") as string) || "").trim();
     const name = ((uiModel.getProperty("/displayName") as string) || "").trim();
     if (!token || !name) {

@@ -50,7 +50,7 @@
     "routing": {
       "routes": [
         {
-          "pattern": ":?query:",
+          "pattern": "SimpleFINConnections:?query:",
           "name": "ConnectionManager",
           "target": "ConnectionManager"
         }
@@ -59,6 +59,7 @@
         "ConnectionManager": {
           "type": "Component",
           "id": "ConnectionManager",
+          "contextPattern": "",
           "name": "sap.fe.core.fpm",
           "options": {
             "settings": {

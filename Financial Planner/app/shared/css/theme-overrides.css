@@ -23,6 +23,7 @@
  *   Side Nav (Soft Ash):          #E8E5E2
  *   Selection (Gold Mist):        #F5EDD8
  *   Shell Hover (Warm Smoke):     #3D3A37
+ *   Label Text (Driftwood):       #6B6259
  *
  * No !important — ever. Match Horizon selector specificity exactly.
  * See THEME.md for full mapping table.
@@ -69,6 +70,11 @@
   --sapLink_Hover_Color: #7a5e1b;
   --sapLink_Active_Color: #7a5e1b;
   --sapLink_Visited_Color: #7a5e1b;
+
+  /* --- Labels --- */
+  /* Horizon's slate #556B82 was the one cool text tone, and fell to 4.39:1 on
+     Soft Ash. Driftwood clears 4.5:1 on every surface, Soft Ash included. */
+  --sapContent_LabelColor: #6b6259;
 
   /* --- Page Background & Surfaces --- */
   --sapBackgroundColor: #f0edea;

@@ -7,7 +7,6 @@
  * See TEST_STRATEGY.md for naming pattern and canonical test world.
  */
 
-// ─── Issuers ────────────────────────────────────────────────────────────────
 export const TD_ISSUER = {
   ID: "a1b2c3d4-0001-4000-8000-000000000001",
   name: "TD Canada Trust",
@@ -22,7 +21,7 @@ export const AMEX_ISSUER = {
 
 export const CIBC_ISSUER = {
   ID: "a1b2c3d4-0001-4000-8000-000000000003",
-  name: "CIBC",
+  name: "Canadian Imperial Bank of Commerce",
   shortName: "CIBC",
 } as const;
 
@@ -34,17 +33,16 @@ export const SCOTIA_ISSUER = {
 
 export const BMO_ISSUER = {
   ID: "a1b2c3d4-0001-4000-8000-000000000005",
-  name: "BMO",
+  name: "Bank of Montreal",
   shortName: "BMO",
 } as const;
 
 export const RBC_ISSUER = {
   ID: "a1b2c3d4-0001-4000-8000-000000000006",
-  name: "RBC",
+  name: "Royal Bank of Canada",
   shortName: "RBC",
 } as const;
 
-// ─── Rewards Programs ───────────────────────────────────────────────────────
 export const AEROPLAN_PROGRAM = {
   ID: "a1b2c3d4-0002-4000-8000-000000000001",
   name: "Aeroplan",
@@ -80,7 +78,6 @@ export const CASH_BACK_PROGRAM = {
   cppValuation: 1.0,
 } as const;
 
-// ─── Card Networks ──────────────────────────────────────────────────────────
 export const VISA_NETWORK = {
   ID: "a1b2c3d4-0003-4000-8000-000000000001",
   name: "Visa",
@@ -96,7 +93,6 @@ export const AMEX_NETWORK = {
   name: "Amex",
 } as const;
 
-// ─── Purchase Categories (subset for tests) ────────────────────────────────
 export const GROCERIES_CATEGORY = {
   ID: "a1b2c3d4-000d-4000-8000-000000000001",
   name: "Groceries",
@@ -127,7 +123,6 @@ export const REIMBURSABLE_CATEGORY = {
   excludesFromBudget: true,
 } as const;
 
-// ─── Purchase Types (subtypes, subset for tests) ───────────────────────────
 export const RESTAURANTS_PURCHASE_TYPE = {
   ID: "a1b2c3d4-000d-4000-8000-100000000001",
   name: "Restaurants",
@@ -140,7 +135,6 @@ export const FAST_FOOD_PURCHASE_TYPE = {
   category_ID: DINING_CATEGORY.ID,
 } as const;
 
-// ─── Earning Categories (subset for tests) ──────────────────────────────────
 export const GROCERIES_EARNING_CATEGORY = {
   ID: "a1b2c3d4-000c-4000-8000-000000000001",
   name: "Groceries",
@@ -166,7 +160,6 @@ export const EVERYTHING_ELSE_EARNING_CATEGORY = {
   name: "Everything Else",
 } as const;
 
-// ─── Alert Types (full set — used across many specs) ────────────────────────
 export const ALERT_TYPE_MSR_DEADLINE = {
   ID: "a1b2c3d4-000e-4000-8000-000000000001",
   name: "msr_deadline",
@@ -216,7 +209,6 @@ export const ALERT_TYPE_REVIEW_OVERDUE = {
   name: "review_overdue",
 } as const;
 
-// ─── Alert Severities ───────────────────────────────────────────────────────
 export const INFO_SEVERITY = {
   ID: "a1b2c3d4-0004-4000-8000-000000000001",
   name: "info",
@@ -230,7 +222,6 @@ export const CRITICAL_SEVERITY = {
   name: "critical",
 } as const;
 
-// ─── System Config Keys ─────────────────────────────────────────────────────
 export const SYSCONFIG_SIMPLEFIN_SYNC_TIME = {
   ID: "a1b2c3d4-0012-4000-8000-000000000001",
   key: "SIMPLEFIN_SYNC_TIME",
@@ -257,7 +248,6 @@ export const SYSCONFIG_LAST_REVIEW_DATE = {
   value: null,
 } as const;
 
-// ─── CSV Format Configs ─────────────────────────────────────────────────────
 export const SCOTIA_CSV_CONFIG = {
   ID: "a1b2c3d4-0011-4000-8000-000000000001",
   issuer_ID: SCOTIA_ISSUER.ID,
@@ -279,7 +269,6 @@ export const AMEX_CSV_CONFIG = {
   configName: "Amex CSV Export",
 } as const;
 
-// ─── Program Tiers (Aeroplan) ───────────────────────────────────────────────
 export const AEROPLAN_ENTRY_TIER = {
   ID: "a1b2c3d4-000f-4000-8000-000000000001",
   rewardsProgram_ID: AEROPLAN_PROGRAM.ID,
@@ -296,7 +285,6 @@ export const AEROPLAN_PREMIUM_TIER = {
   name: "Premium",
 } as const;
 
-// ─── Perk Types ─────────────────────────────────────────────────────────────
 export const LOUNGE_PASS_PERK = {
   ID: "a1b2c3d4-0008-4000-8000-000000000001",
   name: "Lounge Pass",
@@ -306,7 +294,6 @@ export const TRAVEL_CREDIT_PERK = {
   name: "Travel Credit",
 } as const;
 
-// ─── Adjustment Types ───────────────────────────────────────────────────────
 export const SIGNUP_BONUS_ADJUSTMENT = {
   ID: "a1b2c3d4-0009-4000-8000-000000000001",
   name: "Sign-up Bonus",
@@ -316,7 +303,6 @@ export const REFERRAL_ADJUSTMENT = {
   name: "Referral",
 } as const;
 
-// ─── Pattern Sources ────────────────────────────────────────────────────────
 export const SEED_PATTERN_SOURCE = {
   ID: "a1b2c3d4-0005-4000-8000-000000000001",
   name: "seed",
@@ -326,7 +312,6 @@ export const LEARNED_PATTERN_SOURCE = {
   name: "learned",
 } as const;
 
-// ─── Confidence Levels ──────────────────────────────────────────────────────
 export const HIGH_CONFIDENCE = {
   ID: "a1b2c3d4-0006-4000-8000-000000000001",
   name: "high",
@@ -340,7 +325,6 @@ export const LOW_CONFIDENCE = {
   name: "low",
 } as const;
 
-// ─── Redemption Types ───────────────────────────────────────────────────────
 export const FLIGHT_REDEMPTION = {
   ID: "a1b2c3d4-000a-4000-8000-000000000001",
   name: "Flight",
@@ -350,7 +334,6 @@ export const HOTEL_REDEMPTION = {
   name: "Hotel",
 } as const;
 
-// ─── Financial Account Types ───────────────────────────────────────────────
 export const RRSP_ACCOUNT_TYPE = {
   ID: "a1b2c3d4-000b-4000-8000-000000000001",
   name: "RRSP",
@@ -362,7 +345,6 @@ export const CAR_LOAN_ACCOUNT_TYPE = {
   isAsset: false,
 } as const;
 
-// ─── Income Source Types ───────────────────────────────────────────────────
 export const SALARY_INCOME_TYPE = {
   ID: "a1b2c3d4-0007-4000-8000-000000000001",
   name: "Salary",

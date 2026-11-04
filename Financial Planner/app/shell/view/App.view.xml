@@ -26,6 +26,14 @@
                     level="H4"
                     class="sapUiTinyMarginBegin"
                 />
+                <Title
+                    id="idPageNameTitle"
+                    core:require="{ formatMessage: 'sap/base/strings/formatMessage' }"
+                    text="{ parts: [ 'i18n>pageNameSeparator', 'shellView>/pageName' ], formatter: 'formatMessage' }"
+                    level="H4"
+                    visible="{= !!${shellView>/pageName} }"
+                    class="sapUiTinyMarginBegin"
+                />
                 <ToolbarSpacer />
             </tnt:ToolHeader>
         </tnt:header>

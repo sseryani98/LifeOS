@@ -46,7 +46,7 @@
     "routing": {
       "routes": [
         {
-          "pattern": ":?query:",
+          "pattern": "Transactions:?query:",
           "name": "TransactionsList",
           "target": "TransactionsList"
         },

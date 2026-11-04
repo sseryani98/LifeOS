@@ -11,7 +11,7 @@
             <form:SimpleForm editable="true">
                 <Label text="{i18n>applyVendor}" />
                 <ComboBox
-                    id="idApplyVendorComboBox"
+                    id="idVendorsApplyComboBox"
                     selectedKey="{applyModel>/vendor_ID}"
                     items="{path: '/Vendors', sorter: {path: 'name'}}"
                 >
@@ -22,7 +22,7 @@
                 </ComboBox>
                 <Label text="{i18n>applyPurchaseType}" />
                 <ComboBox
-                    id="idApplyPurchaseTypeComboBox"
+                    id="idPurchaseTypesApplyComboBox"
                     selectedKey="{applyModel>/purchaseType_ID}"
                     items="{path: '/PurchaseTypes', sorter: {path: 'name'}}"
                 >
@@ -33,7 +33,7 @@
                 </ComboBox>
                 <Label text="{i18n>applyEarningCategory}" />
                 <ComboBox
-                    id="idApplyEarningCategoryComboBox"
+                    id="idEarningCategoriesApplyComboBox"
                     selectedKey="{applyModel>/earningCategory_ID}"
                     items="{path: '/EarningCategories', sorter: {path: 'name'}}"
                 >
@@ -54,7 +54,7 @@
         </beginButton>
         <endButton>
             <Button
-                id="idApplyCancelButton"
+                id="idCancelApplyButton"
                 text="{i18n>cancel}"
                 press=".onButtonApplyCancelPress"
             />
