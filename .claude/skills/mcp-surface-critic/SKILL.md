@@ -8,7 +8,7 @@ description: Audit and critique Project Tracker's MCP verb server — mcp/server
 This server is the only write path into project state. D-05 removed the escape hatch, so every rule
 the methodology enforces is enforced _here_ — and the surface grows with every spec. Twenty-two
 files carry it, and until this skill existed nothing in the repo knew what a well-designed MCP tool
-looks like. The twenty-one shared linters check facade purity and test structure; ESLint does not
+looks like. The twenty-two shared linters check facade purity and test structure; ESLint does not
 know that an omitted `destructiveHint` defaults to **true**.
 
 So the goal is not to find fault. **Both the server and its suite are already above the median for

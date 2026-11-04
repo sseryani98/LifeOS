@@ -200,6 +200,10 @@ document never competes for context with the conversation you just held.
    one question, add his answer to the record, and re-invoke. Do not fill the hole yourself.
 6. Review the returned DoD check against §6. Show Sandro the spec path and the one-line summary and
    ask for explicit approval. On approval, flip status Draft → Approved and update `MEMORY.md`.
+7. **If this was an amendment to an existing spec**, run `/refresh-docs` scoped to that spec before
+   closing. A spec re-baselined in place leaves every count or row copied into BUILD_PLAN,
+   TEST_STRATEGY and sibling specs stale — SPEC-03's Defect count (4 → 27) sat wrong in both until a
+   build briefer tripped on it. `lint:design-counts` catches FUT and business-rule counts only; register and row counts need the sweep.
 
 **The spec must be lean** — the writer enforces this, and it is still the bar: template exactly, no
 filler, no restating BA/DM/Decisions, tables over paragraphs, every sentence earning its place by

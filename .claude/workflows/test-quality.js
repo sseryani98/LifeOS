@@ -247,7 +247,7 @@ Run all three even if an early one fails — one failure must not mask the other
 
 **\`tsc --noEmit\` is the ONLY authority on type errors.** ${gateIsScoped ? 'The test command below runs a scoped subset through ts-jest, whose per-file diagnostics can disagree with a full compile (it may flag a method as missing that exists, or miss a real error). Take every \`mechanical\`/type failure from `tsc`, never from the jest output — a TS line printed by jest is noise unless \`tsc\` also reports it.' : 'Report type errors from its output.'}
 
-\`npm run lint\` is ESLint plus 21 \`lint:*\` scripts chained with \`&&\`, so it halts at the first failing linter. Expected. Report what you got.
+\`npm run lint\` is ESLint plus 22 \`lint:*\` scripts chained with \`&&\`, so it halts at the first failing linter. Expected. Report what you got.
 
 ${
   gateIsScoped

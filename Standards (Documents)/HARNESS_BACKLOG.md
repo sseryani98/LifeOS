@@ -125,7 +125,7 @@ remaining defects are only discoverable by running it, and every speculative edi
 untested JavaScript. Items 3 to 5 of the same review (one `doc-writer` agent, one source per rule
 with a drift linter, the MCP cutover) take their scope from this log.
 
-**Runs in scope.** `SPEC-02` (Project Tracker, mid-chain: Human Review done 2026-11-04, commit next), then `CNV-001`
+**Runs in scope.** `SPEC-02` (Project Tracker, committed `c7d29bb`) and `SPEC-03` (chain complete 2026-11-04), then `CNV-001`
 (Financial Planner, build to commit).
 
 ### Friction log

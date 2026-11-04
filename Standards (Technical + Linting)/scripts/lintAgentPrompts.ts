@@ -19,7 +19,24 @@ const WRITE = process.argv.includes("--write");
  * already did across the harness.
  */
 const LINTER_COUNT_CLAIM =
-  /\b(\d+)\s+(?:shared |architectural |custom |\\?`?lint:\*\\?`? )*(?:linters|lint scripts|lint:\* scripts|\\?`lint:\*\\?` scripts)\b/g;
+  /\b(\d+|eighteen|nineteen|twenty(?:-(?:one|two|three|four|five|six|seven|eight|nine))?|thirty)\s+(?:shared |architectural |custom |\\?`?lint:\*\\?`? )*(?:linters|lint scripts|lint:\* scripts|\\?`lint:\*\\?` scripts)\b/gi;
+
+/**
+ * Spelled-out counts, so "Twenty-two linters" is held to the same number as "22 linters".
+ */
+const NUMBER_WORDS: Record<string, number> = {
+  eighteen: 18,
+  nineteen: 19,
+  twenty: 20,
+  thirty: 30,
+  ...Object.fromEntries(["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"].map((word, index) => [`twenty-${word}`, 21 + index])),
+};
+
+/**
+ * Lines that record the past rather than claim the present: struck-through text, change-history
+ * rows (a date or version in the first cell), and "was/is now" corrections that quote the old count.
+ */
+const HISTORICAL_LINE = /~~|^\|\s*(?:v?\d+\.\d+|\d{4}-\d{2}-\d{2})\s*\||\balready (?:stale|false)\b/i;
 
 /**
  * A drive-letter path is one machine's. Agents and workflows run on whatever clone starts them,
@@ -47,6 +64,7 @@ const CLAIM_FILES = [
   ...listFiles(join(HARNESS_DIR, "skills"), ".md"),
   join(ROOT_DIR, "CLAUDE.md"),
   ...moduleClaudeFiles(),
+  ...moduleDesignFiles(),
 ];
 
 interface Violation {
@@ -70,10 +88,26 @@ function listFiles(dir: string, extension: string): string[] {
  * the day it is added to `workspaces`.
  */
 function moduleClaudeFiles(): string[] {
+  return moduleFolders().map(folder => join(ROOT_DIR, folder, "CLAUDE.md")).filter(existsSync);
+}
+
+/**
+ * Every module's design docs. The decisions log is excluded: it is a record of what was true when
+ * each ruling was made, and its counts are meant to age.
+ */
+function moduleDesignFiles(): string[] {
+  return moduleFolders()
+    .flatMap(folder => listFiles(join(ROOT_DIR, folder, "design"), ".md"))
+    .filter(filePath => basename(filePath) !== "DECISIONS_LOG.md");
+}
+
+/**
+ * The workspace module folders, read from the root package.json.
+ */
+function moduleFolders(): string[] {
   const packageJson = join(ROOT_DIR, "package.json");
   if (!existsSync(packageJson)) return [];
-  const workspaces: string[] = JSON.parse(readFileSync(packageJson, "utf8")).workspaces ?? [];
-  return workspaces.map(folder => join(ROOT_DIR, folder, "CLAUDE.md")).filter(existsSync);
+  return JSON.parse(readFileSync(packageJson, "utf8")).workspaces ?? [];
 }
 
 /**
@@ -130,10 +164,16 @@ function checkAgent(filePath: string, violations: Violation[]): void {
  */
 function checkLinterCounts(filePath: string, count: number, violations: Violation[]): void {
   const source = readFileSync(filePath, "utf8");
+  const lines = source.split("\n");
   for (const match of source.matchAll(LINTER_COUNT_CLAIM)) {
-    const claimed = Number(match[1]);
+    const token = match[1].toLowerCase();
+    const claimed = NUMBER_WORDS[token] ?? Number(token);
     if (claimed === count) continue;
     const line = source.slice(0, match.index).split("\n").length;
+    if (HISTORICAL_LINE.test(lines[line - 1])) continue;
+    // A count inside double quotes reports what another file said, not what is true now.
+    const before = source.slice(source.lastIndexOf("\n", match.index) + 1, match.index);
+    if ((before.match(/["“”]/g) ?? []).length % 2 === 1) continue;
     violations.push({ filePath, message: `line ${line} claims ${claimed} linters; there are ${count} lint*.ts scripts` });
   }
 }

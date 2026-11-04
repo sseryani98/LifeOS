@@ -12,12 +12,12 @@ test strategy are decided once here and inherited by every module.
 | Module                | Folder               | Status                                           |
 | --------------------- | -------------------- | ------------------------------------------------ |
 | **Financial Planner** | `Financial Planner/` | **Active** — in build, sprint W1-S3              |
-| **Project Tracker**   | `Project Tracker/`   | **Active** — in build; S-00 + SPEC-01 done, SPEC-02 reviewed, commit next |
+| **Project Tracker**   | `Project Tracker/`   | **Active** — in build; story status in `Project Tracker/PLAN.md` |
 | Personal CRM          | —                    | Planned — relationship tracker                   |
 | Investment Assistant  | —                    | Planned                                          |
 | Wellness              | —                    | Planned — habits, journalling                    |
 
-The list is open-ended. Two modules exist, and the second is one story into its build — so
+The list is open-ended. Two modules exist, and the second is four stories into its build — so
 the conventions below are proven on one module and have only just _survived contact_
 with a second. Where Project Tracker has already falsified something, it is corrected in
 place below rather than carved out in the module.
@@ -45,7 +45,7 @@ Life OS/
     eslint.config.mjs              The shared ESLint rules — single source for all modules
     tsconfig.base.json             Shared compilerOptions
     tsconfig.json                  Type-checks this folder's own scripts
-    scripts/                       Shared lint suite (21 linters) + generateTestReport
+    scripts/                       Shared lint suite (22 linters) + generateTestReport
 ```
 
 `package.json`, `package-lock.json`, and `node_modules/` also sit at the root — npm
@@ -85,10 +85,10 @@ second module forces the vocabulary apart; THEME.md, DATA_MODEL.md, specs/ are p
 
 ## The Shared Lint Suite
 
-`Standards (Technical + Linting)/scripts/` holds 21 architectural linters that no
+`Standards (Technical + Linting)/scripts/` holds 22 architectural linters that no
 off-the-shelf rule covers (facade purity, test structure, mapper placement, phantom
 enforcement claims). They are shared because they encode standards, not planner
-specifics. All 21 are wired into a module's `lint:*` block.
+specifics. All 22 are wired into a module's `lint:*` block.
 
 Every linter roots itself at `process.cwd()` and takes no arguments, which is what makes
 one copy serve every module: an npm script runs with cwd set to its own module, so
@@ -129,7 +129,7 @@ Run `/scaffold-module` — it executes these seven steps and reconciles this fil
 
 1. Create the folder and add it to `workspaces` in the root `package.json`.
 2. `package.json` — module deps and cds config only. Copy the `lint:*` block from
-   Financial Planner, then **audit it**: the 21 shared linters are module-relative, but
+   Financial Planner, then **audit it**: the 22 shared linters are module-relative, but
    the block also carries scripts that name a specific app folder (`lint:ui5` is
    `cd app/admin-master-data && ui5lint`). Those are planner text riding inside a block
    that is otherwise portable — drop or rewrite them. The `eslint` leg is `eslint .`, which
