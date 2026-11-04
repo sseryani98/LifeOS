@@ -642,7 +642,8 @@ All backend implementation follows the Red-Green-Refactor cycle:
 | **ENH engines**       | Yes  | Core computation logic. Test expected outputs per scenario, then implement.                                    |
 | **Facades**           | No   | Zero logic by design (ESLint-enforced). Covered by integration tests after unit TDD is complete.               |
 | **Integration tests** | No   | Written after unit-level TDD for a module is complete, since they require the full CDS stack via `cds.test()`. |
-| **Frontend**          | No   | A build gate, not a learning exercise (D-321, reverses D-80). Tests written alongside or after implementation. |
+| **Frontend unit**     | Yes  | QUnit on logic classes, `model/` services, formatters, controls, `shared/util`: test first (D-330).            |
+| **Frontend journeys** | No   | OPA5 and E2E need rendered stable IDs, so written after; proof is a break-and-see-red (D-330).                 |
 
 ### 13.2 Workflow Per Module
 
@@ -669,20 +670,20 @@ For each FRICEW object being built:
 
 Decisions made during technical standards definition (Step 9):
 
-| ID    | Title                             | Summary                                                                                                                                 |
-| ----- | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| D-63  | CDS Naming & Modeling Conventions | PascalCase entities, camelCase fields, CAP auto-generated FKs, modular schema by domain, entity-based annotations in folder             |
-| D-64  | TypeScript Strict Mode            | `strict: true`, ES2022 target, Node16 module, all strict sub-flags enabled                                                              |
-| D-65  | CDS Entity Type Patterns          | Follow CAP standard — `#cds-models/` imports, entity references in handlers, `types.ts` per module                                      |
-| D-66  | Three-Layer Handler Pattern       | Facade → Service → Validator, always 3 files, `wrapHandler` on every handler                                                            |
-| D-67  | Error Handling Patterns           | `req.error()` for validation, `req.reject()` for fatal, always i18n keys, field targets on validation errors                            |
-| D-68  | Logging Standards                 | Structured JSON, dual output (console + file), dedicated `error.log`, correlation IDs, sensitive data redaction                         |
-| D-69  | i18n Three-Tier Convention        | CDS labels (PascalCase), runtime messages (camelCase.dots), UI5 (camelCase)                                                             |
-| D-70  | Encryption — OI-07                | AES-256-GCM, env var key in `.env`, per-field IV, `EncryptionUtility.ts`                                                                |
-| D-71  | ESLint Configuration              | Enbridge-adapted, custom architectural rules, errors for most rules, warn for complexity, JSDoc descriptions required, Hungarian in UI5 |
-| D-72  | SAPUI5 Conventions                | XML views, BaseController, entity-based annotations, `{ViewType}Ext` extensions, Hungarian notation, max 10 deps                        |
-| D-73  | Code Review Checklists            | Per-persona checklists for 6 review roles at sprint checkpoint meetings                                                                 |
-| D-230 | Test-Driven Development           | Red-Green-Refactor for Validators, Services, Utilities, ENH engines. Integration and frontend tests written after.                      |
+| ID    | Title                             | Summary                                                                                                                                     |
+| ----- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| D-63  | CDS Naming & Modeling Conventions | PascalCase entities, camelCase fields, CAP auto-generated FKs, modular schema by domain, entity-based annotations in folder                 |
+| D-64  | TypeScript Strict Mode            | `strict: true`, ES2022 target, Node16 module, all strict sub-flags enabled                                                                  |
+| D-65  | CDS Entity Type Patterns          | Follow CAP standard — `#cds-models/` imports, entity references in handlers, `types.ts` per module                                          |
+| D-66  | Three-Layer Handler Pattern       | Facade → Service → Validator, always 3 files, `wrapHandler` on every handler                                                                |
+| D-67  | Error Handling Patterns           | `req.error()` for validation, `req.reject()` for fatal, always i18n keys, field targets on validation errors                                |
+| D-68  | Logging Standards                 | Structured JSON, dual output (console + file), dedicated `error.log`, correlation IDs, sensitive data redaction                             |
+| D-69  | i18n Three-Tier Convention        | CDS labels (PascalCase), runtime messages (camelCase.dots), UI5 (camelCase)                                                                 |
+| D-70  | Encryption — OI-07                | AES-256-GCM, env var key in `.env`, per-field IV, `EncryptionUtility.ts`                                                                    |
+| D-71  | ESLint Configuration              | Enbridge-adapted, custom architectural rules, errors for most rules, warn for complexity, JSDoc descriptions required, Hungarian in UI5     |
+| D-72  | SAPUI5 Conventions                | XML views, BaseController, entity-based annotations, `{ViewType}Ext` extensions, Hungarian notation, max 10 deps                            |
+| D-73  | Code Review Checklists            | Per-persona checklists for 6 review roles at sprint checkpoint meetings                                                                     |
+| D-230 | Test-Driven Development           | Red-Green-Refactor for Validators, Services, Utilities, ENH engines. Integration tests and UI5 journeys after; UI5 unit tier first (D-330). |
 
 ---
 

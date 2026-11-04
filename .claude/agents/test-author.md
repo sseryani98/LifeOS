@@ -13,7 +13,8 @@ implementer will make whatever you write pass, and no later phase re-checks your
 ## You write tests, and only tests
 
 Everything you create or edit lives under the `test/` folder of the module your prompt names
-(`Financial Planner/test/`, `Project Tracker/test/`), or an app's `webapp/test/`. You never touch
+(`Financial Planner/test/`, `Project Tracker/test/`), except `test/e2e/`. UI5 and browser tests —
+an app's `webapp/test/`, `app/shared/test/`, `test/e2e/` — are `ui5-test-author`'s. You never touch
 source — `srv/`, `db/`, `app/`, or any other source folder the module's CLAUDE.md lists (`mcp/`). If a test cannot be written without a source
 change, say so in your output — do not make the change.
 

@@ -1896,3 +1896,10 @@ Amendments are made in place — the superseded text is struck through and marke
 - **Decision:** Both are adopted unchanged. Extensions delegate (`CODING_STANDARDS.md` §SAPUI5, lint-enforced by the host's in-session extension of `lint:frontend-controller-shape`). Extensions are excluded from UI5 coverage and proven by journeys. Tests sit at `app/{app}/webapp/test/{unit,integration}/`, with page objects in `integration/pages/` and data in `webapp/test/data/`. The gate passes one `--url` per app testsuite (provisional). Sandro, 2026-11-04.
 - **Rationale:** A standard without lint, or waiting on a fake-`base` spike (UI5-pack R4), were rejected. A module-level suite was rejected because cross-app serving is unproven, and a suite outside `webapp/` is not served under the app's namespace.
 - **Consequences:** `TST-001` §12, §15.2, §15.4. This module has no `app/shared/` and no shell, so its page objects live in its own app. **Owed:** an `app/**/test/**` ESLint block, `lint:test-structure` and `lint:test-data` reaching `app/**/webapp/test/`, and `*.qunit.ts` (`TST-001` §17.2).
+
+## D-264: UI5 Logic Classes Are Test-Driven; Journeys Are Written After — Shared Ruling Adopted
+
+- **Context:** Financial Planner D-330 (2026-11-04) splits UI5 test timing by tier when the `ui5-test-author` agent is authored. QUnit on a plain logic class can go red for the right reason; an OPA5 journey cannot before the page renders its stable IDs.
+- **Decision:** Adopted unchanged. QUnit on any `model/{App}Service.ts` method, ext logic class, formatter or custom control this module ships is written red first. The contract journey (D-259), any SQLite-observable browser-FUT journey (D-261) and the E2E specs (D-262) are written after the page renders. `ui5-test-author` owns all three; `test-author` stays CAP-only. Sandro, 2026-11-04.
+- **Rationale:** As Financial Planner D-330.
+- **Consequences:** `TST-001` §15.2, §15.3. The `build.js` UI5 Red leg is owed to Sprint 2 story 1.

@@ -104,7 +104,7 @@ Authored in TypeScript, transpiled to classic `sap.ui.define` AMD at serve/build
 
 ## Test Rules
 
-- **TDD:** Red-Green-Refactor for Validators, Services, Utilities, ENH engines
+- **TDD:** Red-Green-Refactor for Validators, Services, Utilities, ENH engines, and the UI5 unit tier (QUnit on logic classes, `model/` services, formatters, controls). OPA5 journeys and E2E specs are written after the page renders — a journey cannot go red for the right reason before its stable IDs exist (Financial Planner D-330, Project Tracker D-264)
 - **Framework:** Jest + ts-jest (backend); QUnit 2 + OPA5 via `ui5-test-runner` 5.14.2 (frontend, inside `npm test`); Playwright (e2e, sprint boundary). Evidence: `Standards (Documents)/research/`
 - **UI5 is a build gate, not a learning exercise** (2026-11-04): every app in every module is tested with enforced thresholds. **Gate mechanics are provisional** until Sprint 2 story 1 executes the chain (research R1) — the tiers, rules and numbers below are ruled; how `npm test` enforces them is not yet proven
 - **UI5 unit tier:** `*.qunit.ts`, one logic class at a time — formatters, `app/shared/util/`, custom controls, `model/{App}Service.ts`, freestyle controller logic, FE logic classes. No backend. Never FE/UI5 framework behaviour
