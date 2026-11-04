@@ -184,13 +184,9 @@ const diffFocus =
     ? `\n## This is a post-build review\n\nThe build changed these files:\n\n${changedFiles.join('\n')}\n\n**Judge the tests that cover this changeset.** A gap unrelated to what moved is real but is not what this run is for, and reporting it buries the gaps that are. Ask: does the changed behavior have a test that would fail if the change were wrong?\n\nThese tests were likely written by the build workflow's \`test-author\` from the spec's business rules. **Nothing else re-checks its judgment — you are the only thing that does.** It wrote tests the implementer then made pass; if it aimed at the wrong behavior, every phase after it agreed.\n`
     : ''
 
-// The full suite runs all ~266 tests + whole-project coverage. For a single-module or diff run,
-// that is 200+ wasted seconds — the reviewers only read their own module's rows. Scope jest to the
-// lenses under review, and clear the config threshold so unrun modules don't emit phantom
-// "coverage not met" failures (the gate agent flags real shortfalls from the table, not the exit
-// code). `all` runs every module, so scope is empty and it falls back to plain `npm test`.
-// The caller passes the module's full lens list. Without it, assume this run's lenses are all of
-// them — jest then runs the whole suite, which is slower but never under-scoped.
+// Scope jest to the lenses under review and clear the threshold, so unrun modules don't emit
+// phantom "coverage not met" failures. Without the caller's full lens list, assume these are all
+// of them: the whole suite runs, slower but never under-scoped.
 const ALL_MODULES = scope.allModules ?? lenses.map(lens => lens.name)
 
 const jestCommandFor = names => {
@@ -203,8 +199,6 @@ const jestCommandFor = names => {
 
 const gateTestCommand = jestCommandFor(lenses.map(lens => lens.name))
 const gateIsScoped = gateTestCommand !== 'npm test'
-
-// ---------------------------------------------------------------- Phase 1: Gate
 
 phase('Gate')
 
@@ -290,7 +284,7 @@ const standards = `## The rules you review against
 - Test tree is \`{test-type}/{module}/{data,support,tests}\`. A \`*.test.ts\` is imports + AAA. Payloads/UUIDs are named UPPER_SNAKE constants from \`data/\`. Assertions may hold inline expected values. No CQL in specs — it lives in \`support/\` helpers. No FRICEW IDs under \`test/\` outside \`integration/scenarios/\` data.
 - No real secrets, card or account numbers, or PII in committed fixtures — semantic placeholders only.
 
-Sandro's standing corrections are \`feedback_*.md\` in C:\\\\Users\\\\sandr\\\\.claude\\\\projects\\\\c--Projects-Life-OS\\\\memory\\\\.
+Sandro's standing corrections are \`feedback_*.md\` in \`~/.claude/projects/c--Projects-Life-OS/memory/\`.
 
 **This module — \`${moduleDir}\`** (extracted from its TEST_STRATEGY.md and CLAUDE.md; cite those, not this digest):
 
@@ -316,13 +310,9 @@ Overall: ${gateResult?.overall ?? '(unavailable)'}
 
 ${gateResult?.coverageTable ?? '(no coverage table — say so in any finding that depends on coverage rather than inventing a number)'}`
 
-// One grouping, used twice: it decides which adversary rules on a finding and which author writes
-// it. Both need the same answer — the module that owns the file.
-//
-// A finding may anchor to source rather than a spec, and legitimately so: "this branch is
-// uncovered" cites `srv/`, because the test that would cover it does not exist yet. Matching only
-// test paths would dump every one of those into `shared` — wrong adversary, wrong author, and the
-// sequential bucket swallowing work that should run in parallel.
+// Picks both the adversary and the author for a finding: the module that owns the file. Source
+// paths match too, since "this branch is uncovered" cites `srv/`; test-only matching would dump
+// those into `shared`.
 const OWNER_PATTERNS = [
   /test[/\\](?:unit|integration)[/\\]([^/\\]+)[/\\]/, // test/unit/transaction/...
   /srv[/\\]modules[/\\]([^/\\]+)[/\\]/, //               srv/modules/transaction/...
@@ -349,8 +339,6 @@ const groupBy = items => {
 
 // Review and Triage run only for the review action; apply skips straight to Implement.
 if (action === 'review') {
-
-  // -------------------------------------------------------------- Phase 2: Review
 
   phase('Review')
 
@@ -521,8 +509,6 @@ Use category \`functional-coverage\`.`,
     }
   }
 
-  // -------------------------------------------------------------- Phase 3: Triage
-
   phase('Triage')
 
   const renderFindings = items =>
@@ -645,8 +631,6 @@ ${standards}`,
   return { ...report, rules: moduleRules, consensus: consensus.map(item => ({ ...item.finding, adversary: item.adversary })) }
 }
 
-// ------------------------------------------------- apply: write what Sandro picked
-
 // A defect that reaches apply would be deferred by an author after a full read of the tree — refuse
 // it here for free and hand it back.
 const refusedDefects = (scope.items ?? []).filter(finding => finding.needsSourceChange)
@@ -655,8 +639,6 @@ if (!consensus.length) {
   return { scope: label, implemented: [], refusedDefects, verification: null, note: 'No writable items selected — nothing was written.' }
 }
 const report = { scope: label, gate: gateResult, refusedDefects, counts: { selected: consensus.length, refusedDefects: refusedDefects.length } }
-
-// ----------------------------------------------------------- Phase 4: Implement
 
 phase('Implement')
 
@@ -722,8 +704,6 @@ const deferred = implemented.filter(item => item.status === 'deferred')
 const authorSourceBugs = implemented.filter(item => item.status === 'sourceBug')
 log(`${wrote.length} written · ${deferred.length} deferred · ${authorSourceBugs.length} source bug(s) found. Verifying.`)
 
-// -------------------------------------------------------------- Phase 5: Verify
-
 phase('Verify')
 
 // Verify only what changed. A module author touches one tree, so its writes can only break its own
@@ -751,10 +731,8 @@ const postGate = await agent(verifyPrompt, { label: 'verify:gate', phase: 'Verif
 let repair = null
 let finalGate = postGate
 
-// Red only because of the sourceBug tests the authors left failing on purpose? Then there is
-// nothing to repair, and a repair pass plus a confirm run is ~2-3 minutes spent re-proving it.
-// Every failure must be a `logic` failure naming a file a sourceBug item touched — anything else
-// (lint, tsc, coverage, or a red test in another file) still goes to repair.
+// Red only from sourceBug tests left failing on purpose means nothing to repair. Every failure
+// must be a `logic` failure in a file a sourceBug item touched; anything else still goes to repair.
 const sourceBugFiles = authorSourceBugs.flatMap(item => item.filesTouched ?? []).map(path => path.split(/[/\\]/).pop()).filter(Boolean)
 const onlyKnownRed =
   Boolean(postGate) &&
@@ -803,10 +781,9 @@ ${standards}`,
 
 const sourceBugs = [...authorSourceBugs.map(item => `${item.id} — ${item.what}`), ...(repair?.sourceBugs ?? [])]
 
-// A null gate is UNVERIFIED, not "failed" — the gate can die (session limit, crash), and the smoke
-// test hit exactly that. Reporting passed:false there hid that nothing had checked the tree. And a
-// run that plants a sourceBug test is SUPPOSED to end red: separate that expected red from a real
-// repair failure, or every good run that catches a bug reads as broken.
+// A null gate is UNVERIFIED, not "failed": the gate can die, and passed:false hid that nothing
+// checked the tree. A run that plants a sourceBug test is supposed to end red, so that red is kept
+// apart from a real repair failure.
 const verdictOf = () => {
   if (!finalGate) return 'unverified'
   if (finalGate.passed) return 'clean'

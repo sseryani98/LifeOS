@@ -110,6 +110,13 @@ ESLint skips an uncovered file inside a passed folder _silently_ — that is how
 unlinted from `SPEC-01` to 2026-10-30. A new source folder needs a `files:` glob and a
 catch-all `ignores` entry, or `no-restricted-syntax` fails the build.
 
+**The harness is linted too.** `npm run lint:harness` at the root runs `lintAgentPrompts.ts`, which
+roots at the repo rather than a module: every `.claude/agents/*.md` must carry the memory block in
+`Standards (Technical + Linting)/agentMemoryBlock.md` verbatim (`--write` restamps all of them), no
+harness file may name a drive-letter path, and every prose count of the linters must equal the
+`lint*.ts` files on disk. Rules about the codebase live in CLAUDE.md files only; an agent file is role,
+prohibitions and memory, and a workflow prompt carries run-specific context plus a pointer.
+
 ## Adding a Module
 
 Run `/scaffold-module` — it executes these six steps and reconciles this file afterward.
@@ -131,6 +138,12 @@ Run `/scaffold-module` — it executes these six steps and reconciles this file 
    artifacts named after its database. Without it the first `cds build` leaves generated
    files staged.
 7. Run `npm install` from the root so the workspace links.
+
+When a module gains its first UI5 app, add it to the root `package.json` under
+`ui5.ui5parser.proxyWorkspaces`. Without that entry the VSCode ui5plugin parses the repo
+root as JavaScript, so TypeScript handlers show as "not found". The plugin's rules are
+cross-module: they live in `Standards (Technical + Linting)/ui5plugin.json`, never in a
+module's `package.json`.
 
 Then close out this file: the Modules table, §Undecided against the module's decisions
 log, and any claim here the new module just disproved.
@@ -203,9 +216,9 @@ Do not invent an answer to these — ask.
   standards it records apply to every module, not just the planner.
 - **Playwright MCP** (`.mcp.json`, root) validates frontend work in every module. **That file is
   gitignored** (`.gitignore:13`), so it is machine-local, not a repo artifact — a fresh clone has no
-  MCP servers registered. Any server the repo depends on therefore ships as a **tracked installer
+  MCP servers registered. Any server or hook the repo depends on therefore ships as a **tracked installer
   script** under `Standards (Technical + Linting)/scripts/` rather than as a committed config; see
-  Project Tracker D-32 (the `INT-006` hook) and D-44 (the `INT-001` verb server).
+  Project Tracker D-32 (the `INT-006` hook) and D-44 (the `INT-001` verb server). Run `node "Standards (Technical + Linting)/scripts/installHooks.mjs"` once per clone; it registers the per-edit linter hook. Run `installUi5PluginConfig.mjs` from the same folder too; it points the VSCode ui5plugin at the shared `ui5plugin.json`, which the plugin accepts only as an absolute path.
 - **Commits** are Conventional Commits. Scope by module when a change is module-local.
 
 ## Do NOT

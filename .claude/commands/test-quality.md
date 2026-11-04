@@ -17,14 +17,16 @@ Sandro names. Never call apply without his indices.
 ## 1. Resolve the target
 
 Resolve the module first: the workspace folder the diff sits in, or the one the argument names. If
-neither settles it, ask — there is no default module. The lens table below is Financial Planner's; for another
-module, build one lens per folder under its `test/unit/` and `test/integration/`, map each to the
-source it covers, and pass the full lens-name list as `allModules`.
+neither settles it, ask — there is no default module. **Lenses are derived from the module, never
+listed here:** one lens per folder under its `test/unit/` and `test/integration/`, each mapped to the
+source it covers (`srv/modules/{lens}/**`, plus any root service file the module's `CLAUDE.md` or
+`TEST_STRATEGY.md` maps to it — a lens whose source resolves by glob to nothing gets an empty review).
+Pass the full lens-name list as `allModules`.
 
 | "$ARGUMENTS" | Scope |
 | --- | --- |
 | *(empty)* | **Diff mode.** See §1a — the range is not always the working tree. |
-| `all` or `backend` | All five lenses. `backend` is an accepted alias — only four `srv/modules/` folders have source (`categorization`, `ingestion`, `shared`, `transaction`; the other four are stubs) and no frontend tests exist, so `backend` and `all` resolve identically. |
+| `all` or `backend` | Every lens the module has. `backend` is an accepted alias: while a module has no frontend tests the two resolve identically. |
 | anything else | Treat as a **module name**. If it matches no lens below, list the real ones and ask — do not guess. |
 
 ## 1a. Diff mode — resolve the range before you trust it
@@ -53,18 +55,10 @@ file to the module that owns it and review that module's tests. A build that cha
 
 Pass the resolved file list as `changedFiles` so reviewers judge coverage *of the changeset*.
 
-The five lenses, with their source — **the map is not 1:1, so pass `sourceFiles` explicitly**:
-
-| Lens | Tests | Source |
-| --- | --- | --- |
-| `admin` | `test/integration/admin/**` | `srv/admin-service.ts`, `srv/admin-service.cds` |
-| `categorization` | `test/{unit,integration}/categorization/**` | `srv/modules/categorization/**` |
-| `ingestion` | `test/{unit,integration}/ingestion/**` | `srv/modules/ingestion/**` |
-| `shared` | `test/unit/shared/**` | `srv/modules/shared/**` |
-| `transaction` | `test/{unit,integration}/transaction/**` | `srv/modules/transaction/**`, `srv/transaction-service.ts` |
-
-`admin` has no `srv/modules/admin` — it maps to the root service files. Resolving that by glob
-gives a reviewer an empty source list and a useless review.
+**The lens-to-source map is not 1:1, so pass `sourceFiles` explicitly.** A lens named for a root
+service (an `admin` lens over `srv/admin-service.ts`) has no `srv/modules/{lens}` folder; resolving it
+by glob gives a reviewer an empty source list and a useless review. Read the module's `CLAUDE.md`
+Folder Structure and `TEST_STRATEGY.md` for the real mapping.
 
 Exclude from every mode: `gen/`, `@cds-models/`, `node_modules/`, `coverage/`, `logs/`, `db/seed/`,
 `*.log`, lockfiles, `design/`, `project/`.

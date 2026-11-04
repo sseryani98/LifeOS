@@ -1,13 +1,14 @@
 ---
 description: Review a story's built pages against the Design System, Theme and Information Architecture in a real browser — contrast, theme adherence, wording, page-to-page consistency. Reports only, never fixes.
-argument: FRICEW story ID (e.g. FRM-001). Omit to take the story most recently marked Build Done, Awaiting Review.
+argument: Story ID as the module's BUILD_PLAN defines it (FRM-001, SPEC-02), optionally Module/ID. Omit to take the story most recently built and awaiting review.
 ---
 
 Your job is **resolution and rendering**. The `ux-tester` agent does the reviewing — you do not
 open the browser and you do not fix what it finds.
 
-This is methodology stage 5 of the Sprint Build chain, and it is **conditional**: it runs for
-stories that ship UI, which in practice means `FRM-*` and any `RPT-*` with a page. It answers a
+This is methodology stage 5 of the Sprint Build chain, and it is **conditional**: it runs only for
+stories that ship UI. Where the module's BUILD_PLAN has a Ships UI column, it decides; otherwise the
+story type does (FRM ships UI, RPT usually, ENH and CNV usually not). It answers a
 different question from `/functional-test` — not *does it work* but *does it look and read like the
 rest of the product*.
 
@@ -15,12 +16,13 @@ rest of the product*.
 
 | `$ARGUMENTS` | Do |
 | --- | --- |
-| A FRICEW ID | Use it |
-| Empty | Take the story currently **Build Done, Awaiting Review** |
-| Anything else | Resolve it against the story backlog. One match, use it; otherwise ask |
+| `<Module>/<ID>` | Use it |
+| A bare ID | Match it against every module's BUILD_PLAN story list. One match, use it; more, ask |
+| Empty | The story awaiting review: Build Done on a module's board, or — board-less module — built in the tree and not yet logged as Done in its progress record |
+| Anything else | Resolve it against the story lists. One match, use it; otherwise ask |
 
-**If the story ships no UI, say so and stop.** An `ENH` or `CNV` story has no pages, and running
-this against one produces a review of somebody else's screens. That is not a failure of the story —
+**If the story ships no UI, say so and stop.** Running this against a story with no pages produces a
+review of somebody else's screens. That is not a failure of the story —
 say the stage is not applicable and move on.
 
 Stop rather than run if the module has no Design System, Theme, or Information Architecture
@@ -30,7 +32,7 @@ taste, which is not a standard. Name which is missing.
 ## 2. Confirm before spending
 
 State the story, the pages it adds or changes, which reference documents will be used, and that a
-browser session runs. Get a yes.
+browser session runs. Then proceed; a missing rubric document is the only reason to wait.
 
 ## 3. Invoke
 

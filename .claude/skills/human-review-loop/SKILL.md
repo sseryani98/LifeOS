@@ -66,7 +66,7 @@ Work the confirmed rows, grouped by shared mechanism. Per group:
 4. **Green** — fix the instance. Re-run. Exit 0.
 5. **Sweep** — scan the whole codebase for the same class. Report candidates vs true offenders
    and justify each exemption. Principled exemption beats mass-renaming.
-6. **Wire + regress** — add to the chain, then run the **full** `npm run lint`. A new
+6. **Wire + regress** — add to the chain, then run the **full** `npm run lint`. Then `npx eslint_d restart`, so the per-edit hook judges by the new rule rather than the daemon's cached config. A new
    codebase-wide check almost always lights up existing files. Do not declare victory on Green.
 7. **Document** — see Where It Lands.
 
@@ -147,7 +147,7 @@ the exact enforcing rule/config/globs + the gap that let it through). Add the on
   Pushback is wanted.
 - **Prose has no Red.** An unprovable rule is an unenforceable one — that is why the FRICEW-ID
   rule was re-violated ~80× before it was linted. This is the entire argument for mechanising.
-- **Check "widen an existing linter" before writing a new one.** The chain is 18 long and
+- **Check "widen an existing linter" before writing a new one.** The chain is long and
   `&&`-joined; at 30 it is slow and hides failures.
 - **A CLAUDE.md line is one terse trigger naming its `lint:*` script** — that's the file's own
   philosophy (line 75): aim right on the first pass instead of round-tripping through a lint

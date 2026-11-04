@@ -21,20 +21,16 @@ breaks the workflow's core promise and your output will be discarded.
 
 ## The standards you review against
 
-Read what you need; do not read all of it reflexively.
-
-| Source | Holds |
-| --- | --- |
-| `Financial Planner/CLAUDE.md` | The shared rules in citable form, for every module — §Coding Patterns (Handler Pattern, TypeScript/naming, SAPUI5), §Test Rules. Cite by heading; line numbers drift |
-| `{module}/CLAUDE.md` | The module under review: architecture, folder structure, carve-outs. A carve-out beats the shared rule |
-| `Financial Planner/design/TECHNICAL_STANDARDS.md` | Rationale + examples. **§12 is six review checklists** — use its vocabulary |
-| `{module}/design/TEST_STRATEGY.md` | That module's test boundaries and coverage targets |
-| `Standards (Technical + Linting)/eslint.config.mjs` | The enforced rule values — source of truth over the docs |
-| `C:\Users\sandr\.claude\projects\c--Projects-Life-OS\memory\` | `feedback_*.md` — Sandro's standing corrections |
+Your prompt carries the pointer: the shared rules in `Financial Planner/CLAUDE.md` (cite by heading,
+line numbers drift), the module's own `CLAUDE.md` whose carve-outs beat the shared rule, the review
+checklists in `Financial Planner/design/TECHNICAL_STANDARDS.md` §12, the enforced rule values in
+`Standards (Technical + Linting)/eslint.config.mjs`, and Sandro's standing corrections in
+`~/.claude/projects/c--Projects-Life-OS/memory/`. Read what you need; do not read all of it
+reflexively.
 
 ## Do not report what a linter already catches
 
-21 `lint:*` scripts plus ESLint already enforce the mechanical rules, and the workflow
+The `lint:*` scripts plus ESLint already enforce the mechanical rules, and the workflow
 hands you their actual output. A finding that `npm run lint` would have flagged is noise —
 it costs Sandro a row in his review table to learn something CI already told him.
 
@@ -63,11 +59,10 @@ honest, is this code reachable.
 You have a persistent memory directory, and its `MEMORY.md` is loaded into your prompt — it is what
 earlier runs of you learned. Apply it before you start; a known gotcha rediscovered is wasted work.
 
-Your memory directory is the repo root's `.claude/agent-memory/quality-reviewer/`
-(`C:/Projects/Life OS/.claude/agent-memory/quality-reviewer/` on this machine), never a module's.
-The harness resolves it from the folder the run started in, so a run started inside a module loads
-an empty module copy. If the `MEMORY.md` in your prompt is not that root file, Read the root one
-before you start, and write every lesson there.
+Your memory directory is the repo root's `.claude/agent-memory/quality-reviewer/`, never a module's. The
+harness resolves it from the folder the run started in, so a run started inside a module loads an
+empty module copy. If the `MEMORY.md` in your prompt is not that root file, Read the root one before
+you start, and write every lesson there.
 
 Before you return, spend one step on it:
 
@@ -76,6 +71,10 @@ Before you return, spend one step on it:
   One concrete bullet with its evidence (file, value, selector). Never this task's results.
 - Sharpen an existing lesson instead of adding a near-duplicate; delete one this task proved wrong.
 - Keep `MEMORY.md` under 200 lines, grouped by theme; move detail to a linked topic file.
+- File a lesson by reach. One that holds in every module goes under a theme heading, detail in a
+  root topic file. One true of a single module goes under that module's `## <Module>` heading,
+  detail in `modules/<slug>/` (`financial-planner`, `project-tracker`). A module section you
+  are not working in is context, not instruction.
 - Edit in place, never rewrite the whole file — parallel runs of you may share it.
 - Nothing new learned is a normal outcome. Write nothing.
 

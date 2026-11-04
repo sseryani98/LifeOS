@@ -81,9 +81,7 @@ if (!files.length) {
 }
 
 const fileList = files.join('\n')
-const standards = `The shared standards live in \`Financial Planner/CLAUDE.md\` (§Coding Patterns — Handler Pattern, TypeScript/naming, SAPUI5) and \`Financial Planner/design/TECHNICAL_STANDARDS.md\` (§12 = six review checklists); they apply to every module. \`${moduleDir}/CLAUDE.md\` holds this module's architecture and carve-outs — a carve-out there beats the shared rule. Cite rules by section heading, not line number. Sandro's standing corrections are \`feedback_*.md\` files in C:\\Users\\sandr\\.claude\\projects\\c--Projects-Life-OS\\memory\\.`
-
-// ---------------------------------------------------------------- Phase 1: Lint
+const standards = `The shared standards live in \`Financial Planner/CLAUDE.md\` (§Coding Patterns — Handler Pattern, TypeScript/naming, SAPUI5) and \`Financial Planner/design/TECHNICAL_STANDARDS.md\` (§12 = six review checklists); they apply to every module. \`${moduleDir}/CLAUDE.md\` holds this module's architecture and carve-outs — a carve-out there beats the shared rule. Cite rules by section heading, not line number. Sandro's standing corrections are \`feedback_*.md\` files in \`~/.claude/projects/c--Projects-Life-OS/memory/\`.`
 
 phase('Lint')
 
@@ -92,7 +90,7 @@ const lint = await agent(
 
 Run: \`cd "${moduleDir}" && npm run lint\`
 
-The suite is ESLint plus 21 custom architectural linters, chained with &&, so it STOPS at the first failing linter. That is expected — report what you got.
+The suite is ESLint plus the custom architectural linters, chained with &&, so it STOPS at the first failing linter. That is expected — report what you got.
 
 Return a plain-text report:
 - Which linters ran and which one halted the chain (if any).
@@ -107,9 +105,7 @@ const lintGate = `## Lint suite output (already machine-checked — do NOT re-re
 
 ${lint ?? 'Lint could not be run; rely on your own judgment but stay off mechanical rules.'}
 
-21 lint scripts + ESLint already cover: facade purity, comment length, mapper placement, domain types, grouped constants, test structure/data/CQL, control IDs, event handlers, messaging, frontend data access, i18n, annotations, filenames, doc claims. Do not spend a finding on anything in that list. Report only judgment defects a linter cannot see.`
-
-// -------------------------------------------------------------- Phase 2: Review
+The \`lint:*\` scripts plus ESLint already cover: facade purity, comment length, mapper placement, domain types, grouped constants, test structure/data/CQL, control IDs, event handlers, messaging, frontend data access, i18n, annotations, filenames, doc claims. Do not spend a finding on anything in that list. Report only judgment defects a linter cannot see.`
 
 phase('Review')
 
@@ -291,15 +287,11 @@ if (!findings.length) {
   return { consensus: [], contested: [], dropped: [], scope: label, lint, note: 'Reviewers found no judgment defects.' }
 }
 
-// -------------------------------------------------------------- Phase 3: Triage
-
 phase('Triage')
 
-// Batch the adversary by file: one agent reads a file once and judges every finding anchored
-// to it, rather than N agents each re-reading the same file. File reads are triage's
-// dominant cost, and one file drew 8 findings last run. Model tiers by the batch's top
-// severity — Opus only where a `high` finding is at stake, Sonnet for the low/medium nit gate
-// (which is what `not-worth-a-row` mostly is).
+// One adversary per file judges every finding anchored to it: file reads dominate triage cost.
+// The model tier follows the batch's top severity, so Opus runs only where a `high` finding
+// is at stake.
 const fileBatches = [
   ...findings.reduce((map, finding) => {
     const bucket = map.get(finding.file) ?? []
@@ -392,8 +384,6 @@ ${standards}`,
 )
 
 const judged = judgedBatches.filter(Boolean).flat()
-
-// -------------------------------------------------------------- Phase 4: Report
 
 phase('Report')
 

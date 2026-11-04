@@ -31,8 +31,9 @@ const BRIEF_SCHEMA = {
         properties: {
           id: { type: 'string', description: 'BR-nn' },
           text: { type: 'string', description: 'The rule, quoted — not paraphrased' },
+          covers: { type: 'string', description: "The one FRICEW object this rule governs, e.g. CNV-001 — or 'shared' when it spans several objects or the story as a whole" },
         },
-        required: ['id', 'text'],
+        required: ['id', 'text', 'covers'],
         additionalProperties: false,
       },
     },
@@ -105,6 +106,30 @@ const RED_SCHEMA = {
     notes: { type: 'string', description: 'Anything the implementer needs to know. Empty string if nothing' },
   },
   required: ['testFiles', 'summary', 'confirmedFailing', 'notes'],
+  additionalProperties: false,
+}
+
+const FOUNDATION_SCHEMA = {
+  type: 'object',
+  properties: {
+    sharedFiles: { type: 'array', items: { type: 'string' }, description: 'Every test file created or modified, repo-relative. Deletions go in notes — a deleted file cannot be hashed' },
+    owners: {
+      type: 'array',
+      description: 'Every file in the TDD list, assigned to exactly one object group — the group that writes its cases',
+      items: {
+        type: 'object',
+        properties: {
+          file: { type: 'string' },
+          owner: { type: 'string', description: 'One of the object IDs you were given' },
+        },
+        required: ['file', 'owner'],
+        additionalProperties: false,
+      },
+    },
+    summary: { type: 'string', description: 'What scaffolding now exists and how a group author uses it' },
+    notes: { type: 'string', description: 'Anything the implementer needs to know. Empty string if nothing' },
+  },
+  required: ['sharedFiles', 'owners', 'summary', 'notes'],
   additionalProperties: false,
 }
 
@@ -225,7 +250,18 @@ if (!moduleDir) {
   return { storyId, built: false, note: 'no moduleDir in args' }
 }
 
-const standards = `Module architecture, folder structure and carve-outs are in \`${moduleDir}/CLAUDE.md\` — a carve-out there beats the shared standard. The shared standards (handler pattern, TS/naming, i18n, SAPUI5, test rules) live in \`Financial Planner/CLAUDE.md\` for every module until they move (root \`CLAUDE.md\` §Standards); rationale in \`Financial Planner/design/TECHNICAL_STANDARDS.md\`. Test tiers and boundaries are in \`${moduleDir}/design/TEST_STRATEGY.md\`; the enforced coverage thresholds are \`coverageThreshold\` in \`${moduleDir}/jest.config.ts\`. Sandro's standing corrections are \`feedback_*.md\` files in C:\\Users\\sandr\\.claude\\projects\\c--Projects-Life-OS\\memory\\.`
+const standards = `Module architecture, folder structure and carve-outs are in \`${moduleDir}/CLAUDE.md\` — a carve-out there beats the shared standard. The shared standards (handler pattern, TS/naming, i18n, SAPUI5, test rules) live in \`Financial Planner/CLAUDE.md\` for every module until they move (root \`CLAUDE.md\` §Standards); rationale in \`Financial Planner/design/TECHNICAL_STANDARDS.md\`. Test tiers and boundaries are in \`${moduleDir}/design/TEST_STRATEGY.md\`; the enforced coverage thresholds are \`coverageThreshold\` in \`${moduleDir}/jest.config.ts\`. Sandro's standing corrections are \`feedback_*.md\` files in \`~/.claude/projects/c--Projects-Life-OS/memory/\`.`
+
+// The full suite runs with --coverage and a posttest report, minutes per pass on a large module.
+// Agents iterate on their own files and leave the full run to the gate, which runs it anyway.
+const focusedRuns = `## Run tests narrowly while you work
+
+Iterate with \`cd "${moduleDir}" && npx jest <the test files you are working against> --coverage=false\`.
+Run the full \`npm test\` at most once, as your final check — the gate runs it again regardless, so
+every extra full run is minutes spent learning nothing new.`
+
+// The locked test list is rendered into three prompts; one helper keeps them identical.
+const lockedTests = () => red.testFiles.map(file => `- ${file}`).join('\n')
 
 const hashesOf = gate => new Map((gate.testHashes ?? []).map(entry => [entry.file, entry.hash]))
 
@@ -238,8 +274,6 @@ const findTestDrift = (baseline, current) => {
   }
   return drift
 }
-
-// --------------------------------------------------------------- Phase 1: Brief
 
 phase('Brief')
 
@@ -259,8 +293,8 @@ prompt blocks, and its Ships UI column if it has one. Then:
 - **The story's prompt block** in BUILD_PLAN, if the plan has them — files to create and the numbered TDD list. If it has none, take files from the spec and \`${moduleDir}/design/TECH_STACK.md\`'s folder structure, and the TDD list from \`${moduleDir}/design/TEST_STRATEGY.md\`'s FUT tier assignment. Cite; do not invent.
 - \`${moduleDir}/design/DATA_MODEL.md\` — entities and fields the story touches.
 ${boardFile
-  ? `- \`${moduleDir}/${boardFile}\` — the story's row, and whether its dependencies are Done.`
-  : `- **This module has no sprint board** — leave \`boardRow\` empty. Judge whether dependency stories are Done from the progress record BUILD_PLAN names (its Progress Tracking section), and from what exists on disk.`}
+    ? `- \`${moduleDir}/${boardFile}\` — the story's row, and whether its dependencies are Done.`
+    : `- **This module has no sprint board** — leave \`boardRow\` empty. Judge whether dependency stories are Done from the progress record BUILD_PLAN names (its Progress Tracking section), and from what exists on disk.`}
 
 Read what ${storyId} touches. Do not read every spec.
 
@@ -313,7 +347,7 @@ if (brief.blockers.length) {
 
 log(`${brief.storyId} — ${brief.storyName}. ${brief.businessRules.length} business rules, ${brief.futs.length} FUTs. ${brief.hasFrontend ? 'Frontend story: smoke will run.' : 'Backend-only: skipping smoke.'}`)
 
-const briefContext = `## Story
+const contextFor = (rules, futs) => `## Story
 
 **${brief.storyId} — ${brief.storyName}**
 ${brief.summary}
@@ -323,11 +357,11 @@ ${brief.bundledWith.length ? `\n**Scope guard:** BUILD_PLAN bundles this story i
 
 ## Business rules (quoted from the spec — treat as the source of truth)
 
-${brief.businessRules.map(rule => `- **${rule.id}** — ${rule.text}`).join('\n')}
+${rules.map(rule => `- **${rule.id}** (${rule.covers}) — ${rule.text}`).join('\n')}
 
 ## Functional unit tests (spec §8)
 
-${brief.futs.map(fut => `### ${fut.id}: ${fut.title}\n**Covers:** ${fut.covers}\n**Preconditions:** ${fut.preconditions}\n**Steps:** ${fut.steps}\n**Expected:** ${fut.expected}`).join('\n\n')}
+${futs.map(fut => `### ${fut.id}: ${fut.title}\n**Covers:** ${fut.covers}\n**Preconditions:** ${fut.preconditions}\n**Steps:** ${fut.steps}\n**Expected:** ${fut.expected}`).join('\n\n')}
 
 ## Files the design docs call for
 
@@ -338,12 +372,26 @@ Modify: ${brief.filesToModify.join(', ') || '(none listed)'}
 
 ${brief.testPlan.map(item => `- \`${item.file}\` — ${item.purpose}`).join('\n') || '(none listed)'}`
 
-// ----------------------------------------------------------------- Phase 2: Red
+const briefContext = contextFor(brief.businessRules, brief.futs)
 
 phase('Red')
 
-const red = await agent(
-  `Write the failing tests for **${brief.storyId}**. This is the red of red-green-refactor, and it
+// A FUT's Covers line can name several objects; it belongs to the first so no case is written twice.
+const ownerOf = fut => fut.covers.split(/[,;\s]+/).find(Boolean) ?? fut.covers
+const objects = [...new Set(brief.futs.map(ownerOf))]
+
+const redRules = `Write tests that trace to the rules above. Every test names a BR-nn or FUT-nnn it protects — if
+you cannot name one, the test does not belong. Do not invent coverage for behavior nobody
+specified, and do not soften an expected value because it looks awkward to assert.
+
+Work from the quoted text above. Do not open the spec — it has already been read for you.`
+
+const redLock = `Return every test file you touched in \`testFiles\`. The workflow hashes exactly that list to lock
+the suite against the implementer — a file you omit is a file he can silently rewrite.`
+
+const writeRedSingle = () =>
+  agent(
+    `Write the failing tests for **${brief.storyId}**. This is the red of red-green-refactor, and it
 is the highest-judgment step in the run: the implementer will make whatever you write pass, and
 nothing downstream re-checks whether you asked for the right behavior.
 
@@ -351,30 +399,125 @@ ${briefContext}
 
 ## Your job
 
-Write tests that trace to the rules above. Every test names a BR-nn or FUT-nnn it protects — if
-you cannot name one, the test does not belong. Do not invent coverage for behavior nobody
-specified, and do not soften an expected value because it looks awkward to assert.
+${redRules}
 
-Work from the quoted text above. Do not open the spec — it has already been read for you.
+${focusedRuns}
 
 ## Before you finish
 
-Run \`cd "${moduleDir}" && npm test\` and confirm your new tests **fail on a missing or wrong
-implementation** — not on a typo, a bad import, or a fixture that does not compile. Those are your
-bugs, and the gate rejects them as a red-phase defect. Set \`confirmedFailing\` only if you actually
-saw this.
+Confirm your new tests **fail on a missing or wrong implementation** — not on a typo, a bad import,
+or a fixture that does not compile. Those are your bugs, and the gate rejects them as a red-phase
+defect. Set \`confirmedFailing\` only if you actually saw this.
 
-Return every test file you touched in \`testFiles\`. The workflow hashes exactly that list to lock
-the suite against the implementer — a file you omit is a file he can silently rewrite.
+${redLock}
 
 ${standards}`,
-  { label: `red:${brief.storyId}`, phase: 'Red', model: 'opus', effort: 'high', agentType: 'test-author', schema: RED_SCHEMA },
-)
+    { label: `red:${brief.storyId}`, phase: 'Red', model: 'opus', effort: 'high', agentType: 'test-author', schema: RED_SCHEMA },
+  )
+
+// One author per object on a multi-object story: their cases are independent, and written serially
+// they were the longest phase in the run (SPEC-02: 28 minutes, 19 FUTs over three objects). Shared
+// scaffolding goes first so parallel authors never edit the same file.
+const writeRedByObject = async () => {
+  const foundation = await agent(
+    `Lay the shared test scaffolding for **${brief.storyId}**, so that ${objects.length} authors — one per
+object: ${objects.join(', ')} — can then write its failing tests **in parallel** without touching the
+same file. You write the ground they stand on; you write no test case.
+
+${briefContext}
+
+## Your job
+
+1. **Shared scaffolding** — the test data and support modules more than one object's cases need
+   (seeded worlds, harness helpers, builders, read-back helpers), and any change to an **existing**
+   suite or fixture this story's rules force (a fixture copy a rule removes, a harness a new seed
+   breaks). Existing files are yours alone: the group authors may not edit any of them.
+2. **Assign every file in the TDD list to exactly one object** in \`owners\` — the object whose rules
+   its cases trace to. A file two objects need goes to the one with more cases in it; the other
+   writes its cases in a new file of its own.
+
+Do not write a \`describe\`/\`it\` for any BR or FUT — that is the group authors' work, and a case you
+write is one nobody re-checks against its rule.
+
+${focusedRuns}
+
+## Before you finish
+
+Run \`cd "${moduleDir}" && npx tsc --noEmit\` — the group authors build on your files, and a type error
+here is ${objects.length} failed authors. Existing suites you changed may now fail on the missing
+implementation; that is expected. Return every file you created or modified in \`sharedFiles\`, and
+name any you deleted in \`notes\` — a deleted file cannot be hashed.
+
+${standards}`,
+    { label: `red:foundation:${brief.storyId}`, phase: 'Red', model: 'opus', effort: 'high', agentType: 'test-author', schema: FOUNDATION_SCHEMA },
+  )
+
+  if (!foundation) return null
+
+  const groupAuthors = objects.map(object => () => {
+    const futs = brief.futs.filter(fut => ownerOf(fut) === object)
+    const rules = brief.businessRules.filter(rule => rule.covers === object || rule.covers === 'shared')
+    const ownedFiles = foundation.owners.filter(entry => entry.owner === object).map(entry => entry.file)
+    return agent(
+      `Write the failing tests for **${object}**, one object of story **${brief.storyId}**. This is the red
+of red-green-refactor: the implementer will make whatever you write pass, and nothing downstream
+re-checks whether you asked for the right behavior.
+
+${objects.length - 1} other author(s) are writing ${objects.filter(other => other !== object).join(', ')} at this
+moment, in the same tree. Stay inside your lane and you never collide.
+
+${contextFor(rules, futs)}
+
+## Your lane
+
+Your FUTs and the rules above — **${object}'s rules plus the shared ones** — are yours. The other
+objects' rules are not; do not write cases for them.
+
+**Files you own** (create them, or fill them in): ${ownedFiles.map(file => `\`${file}\``).join(', ') || '(none assigned — create new files)'}.
+You may also create **new** files named for your object's behavior. You may **not** modify any file
+that existed before you started, or any of the shared scaffolding — another author may be reading it:
+
+${foundation.sharedFiles.map(file => `- ${file}`).join('\n') || '(none)'}
+
+The scaffolding author left this: ${foundation.summary}
+If the scaffolding lacks something you need, build it in a new support file of your own and say so
+in \`notes\`.
+
+## Your job
+
+${redRules}
+
+## Run only your files
+
+\`cd "${moduleDir}" && npx jest <your test files> --coverage=false\` — never the full \`npm test\`. It
+would run the other authors' half-written files, and the gate runs the full suite next anyway.
+Confirm your tests **fail on a missing or wrong implementation**, not on a typo, a bad import or a
+fixture that does not compile. Set \`confirmedFailing\` only if you saw this.
+
+${redLock}
+
+${standards}`,
+      { label: `red:${object}:${brief.storyId}`, phase: 'Red', model: 'opus', effort: 'high', agentType: 'test-author', schema: RED_SCHEMA },
+    )
+  })
+
+  const groups = await parallel(groupAuthors)
+  if (groups.some(group => !group)) return null
+
+  return {
+    testFiles: [...new Set([...foundation.sharedFiles, ...groups.flatMap(group => group.testFiles)])],
+    summary: [foundation.summary, ...groups.map((group, index) => `${objects[index]}: ${group.summary}`)].join('\n\n'),
+    confirmedFailing: groups.every(group => group.confirmedFailing),
+    notes: [foundation.notes, ...groups.map((group, index) => group.notes && `${objects[index]}: ${group.notes}`)].filter(Boolean).join('\n\n'),
+  }
+}
+
+const red = objects.length > 1 ? await writeRedByObject() : await writeRedSingle()
+
+if (objects.length > 1) log(`Red written by ${objects.length} parallel authors (${objects.join(', ')}) over shared scaffolding.`)
 
 if (!red) return { storyId, built: false, note: 'red agent failed' }
 if (!red.testFiles.length) return { storyId, built: false, note: 'red phase wrote no tests' }
-
-// ------------------------------------------------- Phase 3: Gate (expects red)
 
 phase('Gate')
 
@@ -443,8 +586,6 @@ if (!redGate.testsFailing) {
 const baselineHashes = hashesOf(redGate)
 log(`Red confirmed: ${red.testFiles.length} test files failing as expected. Baseline hashed; the suite is now locked.`)
 
-// ----------------------------------------------------------- Phase 4: Implement
-
 phase('Implement')
 
 const implement = await agent(
@@ -463,7 +604,7 @@ ${redGate.failures.map(failure => `### ${failure.check} (${failure.kind})\n${fai
 
 These files are hashed. Any edit fails the gate and the story does not commit:
 
-${red.testFiles.map(file => `- ${file}`).join('\n')}
+${lockedTests()}
 
 ${red.notes ? `The test author left you a note: ${red.notes}\n` : ''}
 If a test cannot pass against any correct implementation — it contradicts its own BR, or asserts
@@ -471,12 +612,13 @@ behavior the spec does not specify — set \`hasDispute\` and explain. That rout
 blocked by a wrong test is a real outcome; relaxing an assertion to get green is the failure this
 workflow exists to prevent.
 
-## Build to the pattern
+## Build to the standards
 
-Facade (pure wiring) → Service (logic, no CQL) → DataService (all CQL, no logic) → Validator
-(accumulates \`req.error\`) → Mapper (only if foreign-shape translation exists). Prefer a CAP
-annotation to a hand-written check wherever the model can state it. Source folders outside \`srv/\`
-(Project Tracker's \`mcp/\`) follow whatever \`${moduleDir}/CLAUDE.md\` rules for them.
+The handler pattern, the annotation-first rule and the CQL rules are in the standards named below;
+prefer a CAP annotation to a hand-written check wherever the model can state it. Source folders
+outside \`srv/\` (Project Tracker's \`mcp/\`) follow whatever \`${moduleDir}/CLAUDE.md\` rules for them.
+
+${focusedRuns}
 
 Run \`cd "${moduleDir}" && npm run lint\` before you report done — a violation you could have caught
 costs a full gate round.
@@ -498,8 +640,6 @@ if (implement.hasDispute) {
     note: 'test dispute — the implementer says a test cannot pass against any correct implementation',
   }
 }
-
-// ------------------------------------------------- Phase 5: Gate + repair loop
 
 // A repair round can add files the first pass never wrote, and the result reports this set as the
 // story's diff — losing a round's output here means Sandro reviews an incomplete changeset.
@@ -552,9 +692,11 @@ ${hasLogicFailure ? 'A failing assertion means your implementation is wrong. Re-
 
 ## The tests are still frozen
 
-${red.testFiles.map(file => `- ${file}`).join('\n')}
+${lockedTests()}
 
 Hashed and checked every round. If a test is genuinely wrong, set \`hasDispute\` — do not edit it.
+
+${focusedRuns}
 
 ${standards}`,
     {
@@ -611,8 +753,6 @@ if (blockingFailures.length) {
 
 log(`Gate green after ${round} repair round(s).`)
 
-// ------------------------------------------------------------ Phase 6: Coverage
-
 let coverage = null
 
 if (gate.failures.some(failure => failure.kind === 'coverage')) {
@@ -643,7 +783,10 @@ care about, buys a number and costs a maintainer. If a branch is genuinely unrea
 
 You may add test files. You may not change the ones from the red phase:
 
-${red.testFiles.map(file => `- ${file}`).join('\n')}
+${lockedTests()}
+
+While you work, measure only what you are raising: \`npx jest <test files> --coverage
+--collectCoverageFrom=<the source file>\`. One full \`npm test\` at the end — the gate runs it again.
 
 ${standards}`,
     { label: `coverage:${brief.storyId}`, phase: 'Coverage', model: 'sonnet', effort: 'medium', agentType: 'test-author', schema: COVERAGE_SCHEMA },
@@ -680,8 +823,6 @@ ${standards}`,
     }
   }
 }
-
-// --------------------------------------------------------------- Phase 7: Smoke
 
 let smoke = null
 
@@ -743,8 +884,6 @@ false green here means nobody looks again.`,
     }
   }
 }
-
-// ------------------------------------------------------------- Phase 8: Handoff
 
 // A board-less module has nothing to hand off to, and spawning an agent to edit a file that
 // does not exist invites it to edit the wrong module's board instead.

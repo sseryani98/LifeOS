@@ -32,34 +32,15 @@ You are given `businessRules` and `futs` quoted from the spec. Work from them. E
 to a BR-nn or FUT-nnn — if you cannot name the rule a test protects, the test does not belong.
 Do not invent coverage for behavior nobody specified.
 
-## The test tree — `lint:test-structure` and `lint:test-data` enforce this
+## The test rules
 
-`test/{unit|integration}/{module}/{data,support,tests}/`, plus top-level `test/shared/{data,support}`
-for anything crossing modules or the unit↔integration boundary.
-
-| Folder | Holds | The rule that bites |
-| --- | --- | --- |
-| `data/` | Fixtures + factories, UPPER_SNAKE_CASE constants | Every payload and UUID is a named constant from here — never inline in a spec |
-| `support/` | Mocks, harness, `seedXxx` builders, HTTP stubs — **functions only** | An exported object/array fixture here is a violation. It belongs in the sibling `data/` |
-| `tests/` | The `*.test.ts` specs | Imports + arrange-act-assert, nothing else |
-
-- Modules mirror `srv/modules/`. The ingestion domain is `ingestion`, never `integration`.
-- A module's `design/TEST_STRATEGY.md` file-structure section governs where it adds tiers this
-  shape lacks (Project Tracker's protocol tier for `mcp/`). Read it before placing a file.
-- FUT scenarios go under `test/integration/scenarios/`, not a new top-level folder.
-- **No CQL in a spec** (`lint:test-cql`) — every `SELECT`/`INSERT`/`UPDATE`/`DELETE`/`cds.run`
-  lives in a named `support/` helper the spec calls, returning a typed row shape.
-- **One-line JSDoc on every `it`/`test`** (`lint:test-data`) stating the *why* — the rule it
-  protects or what breaks without it. Not a paraphrase of the title.
-
-## Boundaries
-
-- **Unit:** no DB, CDS mocked. Validators tested exhaustively (they are pure). Services tested
-  with CDS mocked but the **real** Validator.
-- **Integration:** `cds.test()` + SQLite, one file per CDS service.
-- **Never test the framework** — no CAP CRUD, no draft machinery, no `@readonly` enforcement. Do
-  test annotation constraints (`@assert.unique`, `@mandatory`, `@assert.range`) as contract
-  documentation, and every piece of custom handler logic.
+`Financial Planner/CLAUDE.md` §Test Rules holds them for every module: the
+`test/{unit|integration}/{module}/{data,support,tests}` tree and what each folder may hold, no CQL
+in a spec, the one-line why-JSDoc on every `it`, the unit and integration boundaries, and never
+testing the framework. `lint:test-structure`, `lint:test-data` and `lint:test-cql` enforce the
+mechanical half. The module's `design/TEST_STRATEGY.md` governs placement and adds the tiers this
+shape lacks (Project Tracker's protocol tier for `mcp/`); read it before placing a file. FUT
+scenarios go under `test/integration/scenarios/`, never a new top-level folder.
 
 ## Coverage mode
 
@@ -77,8 +58,7 @@ rather than contorting a test to hit it.
 You have a persistent memory directory, and its `MEMORY.md` is loaded into your prompt — it is what
 earlier runs of you learned. Apply it before you start; a known gotcha rediscovered is wasted work.
 
-Your memory directory is the repo root's `.claude/agent-memory/test-author/`
-(`C:/Projects/Life OS/.claude/agent-memory/test-author/` on this machine), never a module's. The
+Your memory directory is the repo root's `.claude/agent-memory/test-author/`, never a module's. The
 harness resolves it from the folder the run started in, so a run started inside a module loads an
 empty module copy. If the `MEMORY.md` in your prompt is not that root file, Read the root one before
 you start, and write every lesson there.
@@ -90,6 +70,10 @@ Before you return, spend one step on it:
   One concrete bullet with its evidence (file, value, selector). Never this task's results.
 - Sharpen an existing lesson instead of adding a near-duplicate; delete one this task proved wrong.
 - Keep `MEMORY.md` under 200 lines, grouped by theme; move detail to a linked topic file.
+- File a lesson by reach. One that holds in every module goes under a theme heading, detail in a
+  root topic file. One true of a single module goes under that module's `## <Module>` heading,
+  detail in `modules/<slug>/` (`financial-planner`, `project-tracker`). A module section you
+  are not working in is context, not instruction.
 - Edit in place, never rewrite the whole file — parallel runs of you may share it.
 - Nothing new learned is a normal outcome. Write nothing.
 

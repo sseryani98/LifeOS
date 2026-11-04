@@ -24,41 +24,19 @@ does not specify, or cannot pass against any correct implementation — **stop a
 Being blocked by a wrong test is a real outcome; quietly relaxing an assertion to get green is
 the failure this whole workflow exists to prevent.
 
-## Build to the pattern
+## Build to the standards
 
-The handler split is the shared standard in `Financial Planner/CLAUDE.md` §Handler Pattern, and it
-applies to every module. The module you are building in may carve out of it — read its own
-`CLAUDE.md` for that (Project Tracker's `mcp/` verb layer is one). The short version:
+The handler split (Facade → Service → DataService → Validator → Mapper), the annotation-first rule
+and the CQL rules are `Financial Planner/CLAUDE.md` §Handler Pattern, and they apply to every
+module; rationale and examples are in `Financial Planner/design/TECHNICAL_STANDARDS.md`. The
+module's own `CLAUDE.md` holds its architecture and its carve-outs (Project Tracker's `mcp/` verb
+layer is one) — a carve-out there beats the shared rule. `feedback_*.md` in
+`~/.claude/projects/c--Projects-Life-OS/memory/` holds Sandro's standing corrections. Read what the
+story touches; do not read it all reflexively.
 
-| Layer | Does | Calls |
-| --- | --- | --- |
-| `{Domain}Facade.ts` | Handler registration + `wrapHandler` only | Service |
-| `{Domain}Service.ts` | Business logic, orchestration | Validator, DataService, Mapper |
-| `{Domain}DataService.ts` | Every CDS query. No logic, no `req.error` | Nothing |
-| `{Domain}Validator.ts` | Input validation, accumulates `req.error` | Nothing |
-| `{Domain}Mapper.ts` | Pure shape translation, static, no deps | Nothing |
-
-- Facades are pure wiring — no `if`/`for`/`while`, no `try`/`catch`, no CQL. Each handler is a
-  one-line private `_handle{Action}{Entity}` delegating to the Service. `wrapHandler` takes a
-  **function reference**. `lint:facades`
-- Services never issue CQL. CQL is directly awaitable — **never `cds.run()`**.
-- Add a Mapper only when foreign-shape translation actually exists. A scalar converter
-  (epoch→ISO) is a utility, not a mapper. `lint:mapper-methods`
-- `req.error({code, message, target, status: 400})` accumulates in the Validator;
-  `req.reject(status, message)` is fatal, from the Service. Always i18n keys.
-- **Prefer an annotation to a handler.** `@mandatory`, `@assert.unique`, `@assert.range`,
-  `@readonly`, `@cds.on.insert` — if the model can state it, the model states it. Hand-rolling a
-  check CAP already enforces is the most common defect in this codebase.
-
-## The rest of the standards
-
-`Financial Planner/CLAUDE.md` holds them in citable form for every module: TypeScript and naming,
-i18n tiers, SAPUI5, test rules. The module's own `CLAUDE.md` holds its architecture and carve-outs. `feedback_*.md` in
-`C:\Users\sandr\.claude\projects\c--Projects-Life-OS\memory\` holds Sandro's standing
-corrections. Read what the story touches; do not read it all reflexively.
-
-21 `lint:*` scripts plus ESLint enforce the mechanical half. Run `npm run lint` yourself before
-you report done — a violation you could have caught costs a full gate round.
+The `lint:*` scripts plus ESLint enforce the mechanical half, and the per-edit hook shows you a
+violation as you save. Run `npm run lint` yourself before you report done — a violation you could
+have caught costs a full gate round.
 
 ## Repair mode
 
@@ -92,8 +70,7 @@ fine and often useful.
 You have a persistent memory directory, and its `MEMORY.md` is loaded into your prompt — it is what
 earlier runs of you learned. Apply it before you start; a known gotcha rediscovered is wasted work.
 
-Your memory directory is the repo root's `.claude/agent-memory/implementer/`
-(`C:/Projects/Life OS/.claude/agent-memory/implementer/` on this machine), never a module's. The
+Your memory directory is the repo root's `.claude/agent-memory/implementer/`, never a module's. The
 harness resolves it from the folder the run started in, so a run started inside a module loads an
 empty module copy. If the `MEMORY.md` in your prompt is not that root file, Read the root one before
 you start, and write every lesson there.
@@ -105,6 +82,10 @@ Before you return, spend one step on it:
   One concrete bullet with its evidence (file, value, selector). Never this task's results.
 - Sharpen an existing lesson instead of adding a near-duplicate; delete one this task proved wrong.
 - Keep `MEMORY.md` under 200 lines, grouped by theme; move detail to a linked topic file.
+- File a lesson by reach. One that holds in every module goes under a theme heading, detail in a
+  root topic file. One true of a single module goes under that module's `## <Module>` heading,
+  detail in `modules/<slug>/` (`financial-planner`, `project-tracker`). A module section you
+  are not working in is context, not instruction.
 - Edit in place, never rewrite the whole file — parallel runs of you may share it.
 - Nothing new learned is a normal outcome. Write nothing.
 

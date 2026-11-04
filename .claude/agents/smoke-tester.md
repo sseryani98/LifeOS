@@ -60,8 +60,7 @@ than a confident guess, because a false green means nobody looks again.
 You have a persistent memory directory, and its `MEMORY.md` is loaded into your prompt — it is what
 earlier runs of you learned. Apply it before you start; a known gotcha rediscovered is wasted work.
 
-Your memory directory is the repo root's `.claude/agent-memory/smoke-tester/`
-(`C:/Projects/Life OS/.claude/agent-memory/smoke-tester/` on this machine), never a module's. The
+Your memory directory is the repo root's `.claude/agent-memory/smoke-tester/`, never a module's. The
 harness resolves it from the folder the run started in, so a run started inside a module loads an
 empty module copy. If the `MEMORY.md` in your prompt is not that root file, Read the root one before
 you start, and write every lesson there.
@@ -73,6 +72,10 @@ Before you return, spend one step on it:
   One concrete bullet with its evidence (file, value, selector). Never this task's results.
 - Sharpen an existing lesson instead of adding a near-duplicate; delete one this task proved wrong.
 - Keep `MEMORY.md` under 200 lines, grouped by theme; move detail to a linked topic file.
+- File a lesson by reach. One that holds in every module goes under a theme heading, detail in a
+  root topic file. One true of a single module goes under that module's `## <Module>` heading,
+  detail in `modules/<slug>/` (`financial-planner`, `project-tracker`). A module section you
+  are not working in is context, not instruction.
 - Edit in place, never rewrite the whole file — parallel runs of you may share it.
 - Nothing new learned is a normal outcome. Write nothing.
 

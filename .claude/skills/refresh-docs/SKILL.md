@@ -44,7 +44,7 @@ in context.
 - **Cross-doc contradiction** — two docs stating incompatible facts. The source of truth wins:
   code over doc, newer decision over older, the spec over a summary of it. If it is genuinely
   unclear which is right, that is not drift — leave it and list it (see below).
-- **Count / inventory mismatch** — "39 entities", "20 linters", "6 agents" that no longer matches
+- **Count / inventory mismatch** — "39 entities", "N linters", "6 agents" that no longer matches
   what exists.
 
 ## What is NOT drift (never touch)

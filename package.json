@@ -9,9 +9,11 @@
     "Project Tracker"
   ],
   "scripts": {
-    "lint": "npm run lint:standards && npm run lint --workspaces --if-present",
+    "lint": "npm run lint:harness && npm run lint:standards && npm run lint --workspaces --if-present",
     "lint:standards": "cd \"Standards (Technical + Linting)\" && eslint scripts/",
-    "test": "npm run test --workspaces --if-present"
+    "test": "npm run test --workspaces --if-present",
+    "lint:comments": "tsx \"Standards (Technical + Linting)/scripts/lintCommentLength.ts\"",
+    "lint:harness": "tsx \"Standards (Technical + Linting)/scripts/lintAgentPrompts.ts\""
   },
   "devDependencies": {
     "@sap/cds": "9.8.4",
@@ -20,6 +22,7 @@
     "@typescript-eslint/eslint-plugin": "^8",
     "@typescript-eslint/parser": "^8",
     "eslint": "^9",
+    "eslint_d": "^15.0.3",
     "eslint-plugin-import": "^2",
     "eslint-plugin-jsdoc": "^50",
     "eslint-plugin-unicorn": "^64.0.0",
@@ -28,5 +31,12 @@
     "ts-node": "^10",
     "tsx": "^4",
     "typescript": "^5"
+  },
+  "ui5": {
+    "ui5parser": {
+      "proxyWorkspaces": [
+        "Financial Planner"
+      ]
+    }
   }
 }

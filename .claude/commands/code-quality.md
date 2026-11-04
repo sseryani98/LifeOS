@@ -56,7 +56,18 @@ per file with findings`.
 For `all`, or anything over ~40 files, **ask for confirmation first**. For diff mode and
 single modules, just report the shape and proceed — that is the common case and it is cheap.
 
-## 4. Invoke
+## 4. Run the lint gate
+
+Run the suite yourself, with output to a log in the scratchpad so it never enters your context:
+
+```bash
+cd "{module}" && npm run lint > "<scratchpad>/code-quality-lint.log" 2>&1; echo "exit=$?"
+```
+
+Read only the exit code. `0` → `lintPassed: true`; anything else → `lintPassed: false` and pass
+the log's absolute path as `lintLog` — reviewers read it themselves.
+
+## 5. Invoke
 
 ```js
 Workflow({
@@ -64,6 +75,8 @@ Workflow({
   args: {
     label: '<human-readable scope, e.g. "uncommitted diff (24 files)">',
     moduleDir: '<the resolved module folder>',
+    lintPassed: true,
+    lintLog: '<absolute path, when lintPassed is false>',
     files: [ /* repo-relative paths */ ],
     domains: [ { name: 'transaction', files: [ /* ... */ ] } ],
     hasBackend: true,
@@ -76,7 +89,7 @@ Workflow({
 `hasBackend: false` skips the `cap-annotation-hunter` agent entirely — it has nothing to say
 about `app/`.
 
-## 5. Render the result, then stop
+## 6. Render the result, then stop
 
 The workflow returns `{consensus, contested, dropped, counts, lint}`. Render two numbered
 tables. **Number them in one continuous sequence across both tables** so Sandro can say
@@ -99,7 +112,8 @@ Also report, in one line each:
   go to contested). There is no rebuttal round, so **list the dropped items briefly, one line
   each** — Sandro is the only appeal. A silent drop reads as "nothing was there."
 - `counts.deduped` — how many findings two finders independently agreed on.
-- Whether the lint suite passed clean or halted, and where.
+- Whether the lint suite passed clean or halted — on a halt, `grep` the log for the failing
+  script name rather than reading it whole.
 - **Timings** — Sandro uses these to measure whether the workflow is optimized. The workflow
   runtime makes `Date.now()` throw, so run
   `node .claude/workflows/workflowTimings.mjs "<transcript dir>"` against the **Transcript dir**
@@ -110,7 +124,7 @@ If everything came back empty, say that plainly in one sentence. A clean review 
 result — do not pad it with the findings that were dropped or invent a "consider also"
 section.
 
-## 6. After he rules
+## 7. After he rules
 
 Apply only the indices he names, in a fresh turn.
 
