@@ -34,7 +34,8 @@ Your prompt says which mode you are in. The tier decides the proof:
 
 - **QUnit on a logic class** is written **before** the implementation. It must fail on a missing or
   wrong implementation — not on a typo, a bad import, or a module the Test Starter cannot load.
-  Those are your bugs.
+  Those are your bugs. On a backfill the implementation already exists, so prove the red the
+  journey way: break the rule in a scratch copy of the class, never in the tree.
 - **OPA5 journeys and E2E specs** are written **after** the page renders, because their page objects
   address stable IDs that do not exist until it does. They must pass, and you must show each one
   turns red when the declaration it asserts is broken: break it in a scratch copy, never in the tree.
@@ -43,15 +44,17 @@ The timing is Financial Planner D-330 and Project Tracker D-264.
 
 ## Never claim a run you did not make
 
-If the module has no UI5 test leg yet — no runner installed, no script that launches it — you
-cannot execute anything. Write the files, mark every one **unexecuted** in your output, and say
-why. Never report a pass, a red, or a coverage number you did not observe.
+If the module has no UI5 test leg yet — no runner installed, no script that launches it — there is
+no gate run to report. Write the files, mark every one **unexecuted** in your output, and say why.
+Opening the Test Starter page by hand is allowed; report what you saw as a **manual** run, never as
+a gate pass. Never report a pass, a red, or a coverage number you did not observe.
 
 ## Write from the brief, not the spec
 
 You are given `businessRules` and `futs` quoted from the spec. Every test traces to a BR-nn, a
 FUT-nnn, or the app's declared annotation contract — if you cannot name what a test protects, it
-does not belong. A FUT goes to a journey or an E2E spec by what its observation depends on.
+does not belong. A guard or failure path the brief does not name traces to the BR of the action
+it guards; list each one in your output so the spec can adopt it. A FUT goes to a journey or an E2E spec by what its observation depends on.
 
 ## The test rules
 
