@@ -12,6 +12,9 @@ metadata:
   `TECH_STACK.md` and `DATA_MODEL.md` were already prettier-unclean, so `--write` would churn the
   whole file; there, add table rows unpadded or pad by hand. Specs and `TEST_STRATEGY.md` were clean,
   so `--write` safely re-pads their tables.
+- **Financial Planner (2026-11-04):** `design/TEST_STRATEGY.md` and `design/user-profile/DECISIONS_LOG.md`
+  are LF; TEST_STRATEGY was prettier-unclean (two hand-added rows), the log was clean. Exact-match
+  prefixes like `| **Frontend**` hit both §2 and §10 — include the padding or more text.
 - **Large Bash heredocs carrying JSON/markdown failed** with `unexpected EOF while looking for
   matching '` even when quoted `<<'EOF'`. Reliable path: Write the replacement pairs to a JSON file in
   the scratchpad, apply with a small Python script that asserts each old string matches exactly once.

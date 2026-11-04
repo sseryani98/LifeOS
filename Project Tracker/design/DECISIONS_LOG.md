@@ -1377,6 +1377,8 @@ Amendments are made in place — the superseded text is struck through and marke
 
 ## D-195: No In-Repo Frontend Test Suite
 
+> **Superseded 2026-11-04 by D-257.** UI5 testing is a gate in every module. The entry below is kept as decided.
+
 - **Context:** The exemplar runs QUnit on shared resources and OPA5 journeys on two of its 23 apps, explicitly as a learning exercise with no enforced threshold. It was written before `/functional-test` and `/ux-test` existed.
 - **Options:** A) no in-repo suite; B) one OPA5 journey on the project view.
 - **Decision:** **A. None — QUnit and OPA5 both.** `app/**` is excluded from coverage rather than counted at zero.
@@ -1841,3 +1843,56 @@ Amendments are made in place — the superseded text is struck through and marke
 - **Decision:** No band lands yet. It remains with `SPEC-09`, subject to the same measurement. Claude, on Sandro's delegation, 2026-11-04.
 - **Rationale:** Measured on 2026-11-04 with `jest --coverage`: the script's tests spawn it as a child process, so the coverage summary holds no entry for it. A band over a folder with no covered file is D-215's hard error. The script is a thin entry point, and every rule it runs lives in `srv/modules/migration/` at 100% lines, inside the Services band.
 - **Consequences:** TST-001 §13's note has been amended. D-215's trigger is read as "the first covered file", not "the first file".
+
+## D-257: The Frontend Is a Gated In-Repo Suite — D-195 Reversed
+
+- **Context:** D-195 ruled out any in-repo frontend suite for three reasons. The exemplar's suite was a learning exercise; QUnit over one FPM page would test Fiori Elements; and `/functional-test` already runs the browser FUTs. Settled since then, and inherited here rather than re-argued: UI5 testing is a **gate, not a learning exercise**, for every app in every module, with thresholds enforced (`CODING_STANDARDS.md` §Test Rules). The research pack at `Standards (Documents)/research/` returns GO WITH CAVEATS. This module's only page is FPM, and no `sap.fe.test` page object exists for an FPM custom page (UI5-pack R3; the `TemplatePage` constructor is protected). `app/` is empty: `SPEC-04`'s page is unbuilt.
+- **Options:** A) keep D-195; B) a UI5 unit tier and a UI5 journey tier, with the FPM page driven by a hand-written plain OPA5 page object; C) Playwright for the FPM page; D) a per-module answer.
+- **Decision:** **B.** Sandro, 2026-11-04. The unit tier is QUnit 2 in Test Starter layout, `*.qunit.ts`, run headless by community `ui5-test-runner` **5.14.2** in remote mode. The journey tier is OPA5 under the same runner, against `cds-serve` in the `[development]` profile (in-memory SQLite, seeded from `db/data/`). Coverage comes from `ui5-tooling-transpile` 3.12.0's `coverage` option. Every invocation carries `--no-npm-install --coverage-report-dir coverage-ui5 --report-dir report-ui5` (UI5-pack R5, R6). **Every gate-mechanics statement is provisional** until Sprint 2 story 1 closes UI5-pack R1. That covers the runner flags, the `--url` list, report paths, the coverage pipeline, threshold enforcement and `npm test` chaining.
+- **Rationale:** D-195's cost was no UI regression net between stories, and the gate decision removes the premise that the cost was acceptable. A plain OPA5 page object uses the same runner and produces the same coverage number. C would add a second mechanism and gives no coverage number. D was rejected because the rule is shared. The runner is pinned at 5.14.2 because v6 needs Node ≥ 24.11.1 and the repo runs v22.19.0. `@ui5/middleware-code-coverage` was rejected because it needs UI5 CLI v5 and UI5 1.136.25, and the repo has 4.0.59 and 1.136.16. Karma was rejected because it was archived 2025-12-12.
+- **Consequences:** `TST-001` §15, §3.1, §5. **The failure mode is a silent pass.** If the transpile `coverage` option is off for the test run, or a served tree is not instrumented, the suites pass at zero or partial coverage. Story 1 must show that a deliberately failing threshold fails the gate. This module adds no test, script or config now. Its UI5 leg lands with the first `.ts` under `app/`, on D-186's reasoning (provisional). D-195 is superseded.
+
+## D-258: Project Tracker Launches Its FPM Component Directly, Never Through Financial Planner's Shell
+
+- **Context:** Financial Planner's journeys start at its shell route through a custom Shell page object (Financial Planner D-324). This module's page is hosted in that shell in production (D-30, D-141).
+- **Options:** A) launch through Financial Planner's shell; B) launch the component directly.
+- **Decision:** **B** — `iStartMyUIComponent`. The shell → this module route is covered by the E2E tier (D-262). Sandro, 2026-11-04.
+- **Rationale:** A would make this module's gate boot Financial Planner's CAP process and `serveOneOrigin.mjs`, which breaks D-29's isolation. A red Financial Planner would then red-line this module.
+- **Consequences:** `TST-001` §15.3. UI5-pack R2 (`sap.fe.test.Shell` assumes FLP) is sidestepped here. **Unmeasured:** the page depends on Financial Planner's `app/shared/` at `/shared` (D-147). A direct launch must still resolve it without that module's process. This is part of UI5-pack R1's leg for this module.
+
+## D-259: The FPM Page Owes One Contract Journey, Plus QUnit on Every Logic Class
+
+- **Context:** The shared ruling is that every FE app owes QUnit on every logic class, plus at least one OPA5 contract journey that asserts its annotation contract. Fiori Elements' generic behaviour stays forbidden.
+- **Decision:** This module's page is FPM, so it owes **one** contract journey: its declared columns, filters, actions and extensions render as declared. It also owes QUnit on any logic class or `model/{App}Service.ts` method it ships. Sorting, paging, draft machinery and variant management are never asserted. Sandro, 2026-11-04.
+- **Rationale:** An annotation contract is this module's own declaration, so asserting it is contract, like `@assert.range`. FE's generic behaviour is the framework, which §5.1 forbids by name.
+- **Consequences:** `TST-001` §15.2, §15.3. A page built with no logic class owes the journey alone.
+
+## D-260: UI5 Coverage Is a Separate Gate; This Module Has No Shared-Helper Target
+
+- **Context:** The shared UI5 thresholds are `app/shared/util/**` (including `formatter.ts`) at 100/100 and overall `app/**` at 85/80. They are a separate gate with no merge into Jest. Thin `ext/` handler modules, lifecycle `ControllerExtension`s and `*.gen.d.ts` are excluded. This module owns no `app/shared/`: it consumes Financial Planner's (D-147).
+- **Options:** A) separate per-tier thresholds; B) a lower starting threshold with a ratchet; C) one merged repo number.
+- **Decision:** **A.** Overall `app/**` 85/80. The 100/100 band has **no target here**, which is stated rather than dropped. Jest's exclusion of `app/**` stays, because Jest never loads it. Where the thresholds live (`nyc check-coverage` flags or `.nycrc`) is provisional, for story 1. Sandro, 2026-11-04.
+- **Rationale:** C needs an extra `nyc merge` step (UI5-pack R8), and A avoids it. The numbers mirror the Jest bands. `app/shared/**` is counted in Financial Planner's UI5 gate (UI5-pack R9, re-owned to story 1).
+- **Consequences:** `TST-001` §13.1, §13.2. D-193's `app/**` exclusion reason changes from "no suite" to "covered by the UI5 gate".
+
+## D-261: A Browser FUT Also Gets a Journey, or an E2E Spec
+
+- **Context:** `/functional-test` runs only the current story's FUTs and commits nothing. Postgres-only and cross-module behaviour of shipped stories therefore had no regression net (Sandro raised it). `TST-001` §14 classifies **10** FUTs as browser: `SPEC-05` 1, `SPEC-06` 1, `SPEC-07` 8.
+- **Decision:** A browser FUT whose observation does **not** depend on Postgres also gets an OPA5 journey in `npm test`. One that depends on Postgres, or crosses modules (shell → module routing through `serveOneOrigin.mjs`), gets an E2E spec. Neither is titled with its FUT ID (`lint:tracking-ids`). `/functional-test` still runs every FUT of the story being built and keeps its probing. Sandro, 2026-11-04.
+- **Rationale:** The journey copy is the per-story regression net. Like D-238's scenarios tier, it is a deliberate exception to §14.1's "once".
+- **Consequences:** `TST-001` §14.3. The per-FUT split is applied by the story that builds each FUT, not pre-classified here. §14.2's Browser column stays 10. `BP-001` §8.3 and D-204's "done when `/functional-test` passes them" are raised for amendment.
+
+## D-262: The E2E Tier Is Committed Playwright Specs, Run at Each Sprint Boundary
+
+- **Context:** The browser FUTs D-261 sends to E2E need real Postgres, both CAP processes and the proxy. `@playwright/test` is **not installed**, measured 2026-11-04. Playwright exists only as the `npx @playwright/mcp` server in the gitignored `.mcp.json`, which refutes the research pack's "already installed".
+- **Options:** A) Playwright (`@playwright/test`); B) wdi5.
+- **Decision:** **A**, run at the sprint checkpoint and not in every `npm test` or build gate. It is not counted in coverage. Specs sit in `test/e2e/{area}/{data,support,tests}/`, suffix `*.e2e.ts`, so Jest's `**/*.test.ts` never collects them (provisional). It is installed in Sprint 2 alongside `ui5-test-runner`, `playwright` and `nyc`. Sandro, 2026-11-04, after asking twice about wdi5.
+- **Rationale:** Playwright costs ~3 packages, runs on the same engine as `/functional-test`, and waits through DOM selectors with `RecordReplay`. Its page objects are written twice. wdi5 offers UI5 selectors and reuse of `sap.fe.test` page objects, but costs 460 packages / 121 MB and a second runner.
+- **Consequences:** `TST-001` §15.6, §12. **Owed:** `lint:test-structure` must accept `test/e2e/`. Today a `*.e2e.ts` spec fails it, because the linter recognises a spec only by `.test.ts`. Checkpoint runs are recorded as `TST-001` §16 records a checkpoint.
+
+## D-263: Two Shared UI5 Rulings Adopted — Extension Delegation and Per-App Test Layout
+
+- **Context:** Two rulings from the 2026-11-04 session are shared across modules and are recorded in `CODING_STANDARDS.md` and Financial Planner D-323 (delegation) and D-326 (layout). First, a lifecycle `ControllerExtension` hook delegates to a plain logic class. This is the twin of the custom-action rule, and the extension becomes wiring like a Facade. Second, tests are laid out per app.
+- **Decision:** Both are adopted unchanged. Extensions delegate (`CODING_STANDARDS.md` §SAPUI5, lint-enforced by the host's in-session extension of `lint:frontend-controller-shape`). Extensions are excluded from UI5 coverage and proven by journeys. Tests sit at `app/{app}/webapp/test/{unit,integration}/`, with page objects in `integration/pages/` and data in `webapp/test/data/`. The gate passes one `--url` per app testsuite (provisional). Sandro, 2026-11-04.
+- **Rationale:** A standard without lint, or waiting on a fake-`base` spike (UI5-pack R4), were rejected. A module-level suite was rejected because cross-app serving is unproven, and a suite outside `webapp/` is not served under the app's namespace.
+- **Consequences:** `TST-001` §12, §15.2, §15.4. This module has no `app/shared/` and no shell, so its page objects live in its own app. **Owed:** an `app/**/test/**` ESLint block, `lint:test-structure` and `lint:test-data` reaching `app/**/webapp/test/`, and `*.qunit.ts` (`TST-001` §17.2).

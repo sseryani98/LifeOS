@@ -1,8 +1,8 @@
 # Test Strategy
 
 **Document ID:** TST-001
-**Version:** 1.3
-**Date:** 2026-11-02
+**Version:** 1.4
+**Date:** 2026-11-04
 **Status:** Approved
 
 ---
@@ -11,7 +11,9 @@
 
 | Date       | Author          | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | ---------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-11-04 | Claude          | `/refresh-docs` after SPEC-03 build: §12 and §17.1's "empty tree" claims annotated — the tree holds 42 spec files; §17.1's linter block 21 → 22 and the coverage-numbers row is Live; §12's `script/` tier names its three current specs; the Twenty-linters note marked resolved. No rule changed. |
+| 2026-11-04 | Sandro & Claude | **v1.4 — amended at the UI5-testing Test Strategy run (D-257 … D-263). D-195 is reversed:** UI5 is a build gate. §15 rewritten; §2, §3, §5, §11, §12, §13, §14.3, §16, §17, §18, §19, §21 amended for the UI5 unit, UI5 journey and E2E tiers. **Every gate-mechanics statement is provisional** until Sprint 2 story 1 closes UI5-pack R1. No FUT count, Jest threshold or Jest tier changes. Status → **Draft**, pending Sandro's re-approval.                                                                                          |
+| 2026-11-04 | Sandro          | **Status → Approved.** UI5-testing amendment approved by Sandro; gate mechanics stay provisional until Sprint 2 story 1 closes R1.                                                                                                                                                                                                                                                                                                                                                                                                        |
+| 2026-11-04 | Claude          | `/refresh-docs` after SPEC-03 build: §12 and §17.1's "empty tree" claims annotated — the tree holds 42 spec files; §17.1's linter block 21 → 22 and the coverage-numbers row is Live; §12's `script/` tier names its three current specs; the Twenty-linters note marked resolved. No rule changed.                                                                                                                                                                                                                                       |
 | 2026-11-02 | Sandro & Claude | **v1.3 — amended at `SPEC-02`'s build (D-244, D-246).** §14: `SPEC-02` gains BR-37, so the contract is **181** FUTs across **370** business rules — `SPEC-02` now carries 19 FUTs and 37 rules. §9: `Milestone.storyId` is unique in **Workspace**, not Initiative (D-246). Status stays **Approved**.                                                                                                                                                                                                                                    |
 | 2026-11-02 | Sandro & Claude | **v1.2 — amended at `SPEC-02`'s build (D-239, D-242).** §10: the twelve code lists are seeded at `CNV-001`, not `CNV-002`, and `SPEC-02` FUT-019 joins the migration reconciliation as cover for a seed defect. §11.1: the Methodology and Code lists seed sets come from the `db/data/` CSVs, never a fixture copy. §2, §14: `SPEC-02` FUT-019 is classified **Verb (A)** (Sandro), so the contract is **181** FUTs (verb **60**) across **369** business rules — `SPEC-02` now carries 19 FUTs and 36 rules. Status stays **Approved**. |
 | 2026-08-15 | Sandro & Claude | **v1.1 — amended at the Project Planning stage.** §17.2's linter candidate is **answered rather than left open**: no new linter, and the `setupFiles` lever gets an in-module guard in story `SPEC-01`'s definition of done instead (BP-001 §11, D-208). No threshold, tier, folder or count changes.                                                                                                                                                                                                                                     |
@@ -26,27 +28,29 @@ module's sequence and not this one's.
 
 ## 2. Summary
 
-| Area                   | Standard                                                                                                                                                        |
-| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Runner**             | Jest + ts-jest, declared at the repo root. One `jest.config.ts` per module                                                                                      |
-| **Harness loading**    | **`cds.test` loads the `.ts` service impl** — one `setupFiles` entry setting `CDS_TYPESCRIPT` (D-187). Measured; the exemplar believes it cannot                |
-| **The failure mode**   | Omitting the lever is a **silent pass**, not an error — the handler never registers and the test asserts CAP's generic CRUD instead (D-187)                     |
-| **Tiers**              | **4** under Jest — Unit, Integration (**two** entry points), Protocol, Script — plus the browser and one-time verification outside it (D-188)                   |
-| **The write path**     | The eleven verbs test as **plain functions** over the served service. Only the **transport** needs the MCP SDK (D-189)                                          |
-| **Assertable surface** | **4** constraints assert as contract, **6** must be exercised as logic, **1** is unassertable under the test profile (D-190)                                    |
-| **Test profile**       | in-memory SQLite (TS-001 §10). Blind spot: `assert_integrity: 'DB'`'s `23503` and Postgres types (D-191)                                                        |
-| **Test data**          | Inherited wholesale — factories + named constants in `data/`, never inline (D-192)                                                                              |
-| **File structure**     | Inherited wholesale — `{unit\|integration}/{module}/{data,support,tests}` + `test/shared/` (D-192)                                                              |
-| **Coverage**           | Numbers **inherited**, layers **re-mapped**: Validators 100/100, Services + verbs + scripts 90/85, Overall 85/80, Facades excluded (D-193)                      |
-| **Utilities**          | **None** — this module encrypts nothing and schedules nothing, so the exemplar's 100/100 Utilities band has no target here (D-193)                              |
-| **FUT contract**       | All **181** FUTs classified: **59** script, **60** verb, **41** OData, **10** browser, **7** one-time, **4** protocol (D-194)                                   |
-| **Frontend**           | **No in-repo suite.** `/functional-test` and `/ux-test` are the tier (D-195)                                                                                    |
-| **Recording a run**    | Destination **and** transition. The `posttest` hook **cannot record a failing run**, so both gate sites call it explicitly (D-196)                              |
-| **Enforcement**        | **3** live test `lint:*` scripts (of **5** enforced rules). Coverage mapping, tier boundaries, the FUT contract and the lever are enforced by **nothing** (§17) |
-| **Deliverable**        | The document only. **No test, no script, no config** — `test/` stays empty until Build (D-186)                                                                  |
-| **Amendments caused**  | **6** — 5 applied in-session, **1 raised and owed** (§18)                                                                                                       |
-| **Risks**              | **None assigned** — register checked, not assumed. R7's drill gains a tier without changing owner (D-197)                                                       |
-| **Open items**         | **None.** All five closed at Data Model; `PSV-001` §8 carries no sixth row (§20)                                                                                |
+| Area                   | Standard                                                                                                                                                                                                                                                              |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Runner**             | Jest + ts-jest, declared at the repo root. One `jest.config.ts` per module                                                                                                                                                                                            |
+| **Harness loading**    | **`cds.test` loads the `.ts` service impl** — one `setupFiles` entry setting `CDS_TYPESCRIPT` (D-187). Measured; the exemplar believes it cannot                                                                                                                      |
+| **The failure mode**   | Omitting the lever is a **silent pass**, not an error — the handler never registers and the test asserts CAP's generic CRUD instead (D-187)                                                                                                                           |
+| **Tiers**              | **4** under Jest — Unit, Integration (**two** entry points), Protocol, Script (D-188) — plus **UI5 unit** and **UI5 journey** under `ui5-test-runner` (D-257), **E2E** under Playwright at the sprint boundary (D-262), `/functional-test`, and one-time verification |
+| **The write path**     | The eleven verbs test as **plain functions** over the served service. Only the **transport** needs the MCP SDK (D-189)                                                                                                                                                |
+| **Assertable surface** | **4** constraints assert as contract, **6** must be exercised as logic, **1** is unassertable under the test profile (D-190)                                                                                                                                          |
+| **Test profile**       | in-memory SQLite (TS-001 §10). Blind spot: `assert_integrity: 'DB'`'s `23503` and Postgres types (D-191)                                                                                                                                                              |
+| **Test data**          | Inherited wholesale — factories + named constants in `data/`, never inline (D-192)                                                                                                                                                                                    |
+| **File structure**     | Inherited wholesale — `{unit\|integration}/{module}/{data,support,tests}` + `test/shared/` (D-192)                                                                                                                                                                    |
+| **Coverage**           | Numbers **inherited**, layers **re-mapped**: Validators 100/100, Services + verbs + scripts 90/85, Overall 85/80, Facades excluded (D-193)                                                                                                                            |
+| **Utilities**          | **None** — this module encrypts nothing and schedules nothing, so the exemplar's 100/100 Utilities band has no target here (D-193)                                                                                                                                    |
+| **UI5 coverage**       | **A separate gate, never merged with Jest.** Overall `app/**` 85/80; the shared-util 100/100 band has **no target here** — this module owns no `app/shared/` (D-260)                                                                                                  |
+| **FUT contract**       | All **181** FUTs classified: **59** script, **60** verb, **41** OData, **10** browser, **7** one-time, **4** protocol (D-194). Each of the **10** browser FUTs also gets a journey when SQLite-observable, else an E2E spec (D-261)                                   |
+| **Frontend**           | **A gated in-repo suite — D-195 reversed (D-257).** QUnit on every logic class, plus **one** contract journey on the FPM page (D-259), launched directly, never through Financial Planner's shell (D-258). Not built yet: `app/` is empty                             |
+| **Gate mechanics**     | **Provisional** until Sprint 2 story 1 closes UI5-pack R1. Silent-pass mode: coverage not instrumented → suites **pass** at zero coverage (§15.5)                                                                                                                     |
+| **Recording a run**    | Destination **and** transition. The `posttest` hook **cannot record a failing run**, so both gate sites call it explicitly (D-196)                                                                                                                                    |
+| **Enforcement**        | **3** live test `lint:*` scripts (of **7** enforced rules). Coverage mapping, tier boundaries, the FUT contract, the lever and the whole UI5 test tree are enforced by **nothing** (§17)                                                                              |
+| **Deliverable**        | The document only. **No test, no script, no config** — `test/` stays empty until Build (D-186). The v1.4 amendment adds none either: `app/` is empty (D-257)                                                                                                          |
+| **Amendments caused**  | **12** — v1.0: 5 applied in-session, 1 raised. v1.4: **4** applied in-session by the host, **2** raised and owed (§18)                                                                                                                                                |
+| **Risks**              | **None assigned** at v1.0 (D-197). v1.4: UI5-pack **R1** and **R9** re-owned to Sprint 2 story 1; **R3**, **R4**, **R8** resolved by ruling, **R2** sidestepped, R5 to R7 settled or owned (§19.1)                                                                    |
+| **Open items**         | **None.** All five closed at Data Model; `PSV-001` §8 carries no sixth row (§20)                                                                                                                                                                                      |
 
 ---
 
@@ -63,6 +67,23 @@ module's sequence and not this one's.
 All three are **repo-root** declarations, not this module's — the root `CLAUDE.md` forbids a module
 declaring shared tooling. A `jest.config.ts` is module-local; the runner behind it is not.
 
+**The UI5 and E2E tooling — provisional until Sprint 2 story 1 closes UI5-pack R1 (D-257, D-262).**
+None of it is installed; every row below is the ruling, not the disk.
+
+| Tool                              | Version / state, measured 2026-11-04                                                                                                      | Purpose                                                                                                                                          |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **`ui5-test-runner`** (community) | pin **5.14.2**, not installed. v6 needs Node ≥ 24.11.1; repo runs **v22.19.0**. 5.14.2's own Node floor is unverified — story 1 checks it | Runs QUnit and OPA5 headless, remote mode against a runner-spawned `cds-serve`                                                                   |
+| **`playwright`**                  | **not installed**                                                                                                                         | The headless Chromium `ui5-test-runner` drives. `--no-npm-install` (UI5-pack R6) stops the runner fetching it, so story 1 installs it explicitly |
+| **`ui5-tooling-transpile`**       | **3.12.0** installed (app ranges `^3.11.3`), `babel-plugin-istanbul` present                                                              | Its `coverage` option instruments the `.ts` sources — the UI5 coverage source                                                                    |
+| **`nyc`**                         | not installed                                                                                                                             | Threshold check on the UI5 report. Whether thresholds live in `nyc check-coverage` flags or `.nycrc` is story 1's                                |
+| **`@playwright/test`**            | **not installed** — Playwright exists only as the `npx @playwright/mcp` server in the gitignored `.mcp.json`                              | The E2E tier's runner (§15.6)                                                                                                                    |
+
+Every runner invocation carries `--no-npm-install --coverage-report-dir coverage-ui5 --report-dir
+report-ui5` (UI5-pack R5, R6), so it never deletes Jest's `coverage/` and never installs at run time.
+`@ui5/middleware-code-coverage` is rejected (needs UI5 CLI v5 and UI5 1.136.25; the repo has CLI
+4.0.59 and runtime 1.136.16), and Karma is rejected (archived 2025-12-12). Evidence:
+`Standards (Documents)/research/` — `qunit-unit-tests.md`, `opa5-journeys.md`, `gate-integration.md`.
+
 **`@sap/cds` 9.8.4 is load-bearing here specifically.** 9.9.x `await`s `cds.plugins` inside
 `bin/serve.js`, a dynamic import Jest's CJS VM rejects without `--experimental-vm-modules`, which
 red-lines **every** `cds.test` suite in the repo (D-34). **This stage does not raise the pin and
@@ -72,18 +93,18 @@ nothing here may raise it as a side effect.**
 
 Written by the first test story (D-186); this table is the specification.
 
-| Setting                      | Value                                                                                       | Why                                                                             |
-| ---------------------------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| `preset`                     | `ts-jest`                                                                                   | Inherited                                                                       |
-| `testEnvironment`            | `node`                                                                                      | No DOM — §15 rules out an in-repo frontend suite                                |
-| `roots`                      | `['<rootDir>/test']`                                                                        | Inherited                                                                       |
-| `testMatch`                  | `['**/*.test.ts']`                                                                          | Inherited                                                                       |
-| **`setupFiles`**             | **`['<rootDir>/test/setEnv.ts']`**                                                          | **The harness lever — §4. Not optional, and its absence is silent**             |
-| `testTimeout`                | `30000`                                                                                     | `cds.test` cold starts exceed Jest's 5s default under coverage                  |
-| `moduleNameMapper`           | `{ '^(\\.{1,2}/.*)\\.js$': '$1' }`                                                          | **Load-bearing.** `module: Node16` makes TS source import a sibling as `./x.js` |
-| `coverageDirectory`          | `coverage/`                                                                                 | Inherited                                                                       |
-| `coveragePathIgnorePatterns` | `['/node_modules/', '/@cds-models/', '/gen/', 'Facade\\.ts$', 'mcp/server\\.ts$', '/app/']` | §13.2                                                                           |
-| `coverageThreshold`          | §13.1                                                                                       | Jest enforces the numbers at run time                                           |
+| Setting                      | Value                                                                                       | Why                                                                                                                         |
+| ---------------------------- | ------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `preset`                     | `ts-jest`                                                                                   | Inherited                                                                                                                   |
+| `testEnvironment`            | `node`                                                                                      | No DOM — ~~§15 rules out an in-repo frontend suite~~ the UI5 suite runs in a browser under its own runner (§15), never Jest |
+| `roots`                      | `['<rootDir>/test']`                                                                        | Inherited                                                                                                                   |
+| `testMatch`                  | `['**/*.test.ts']`                                                                          | Inherited                                                                                                                   |
+| **`setupFiles`**             | **`['<rootDir>/test/setEnv.ts']`**                                                          | **The harness lever — §4. Not optional, and its absence is silent**                                                         |
+| `testTimeout`                | `30000`                                                                                     | `cds.test` cold starts exceed Jest's 5s default under coverage                                                              |
+| `moduleNameMapper`           | `{ '^(\\.{1,2}/.*)\\.js$': '$1' }`                                                          | **Load-bearing.** `module: Node16` makes TS source import a sibling as `./x.js`                                             |
+| `coverageDirectory`          | `coverage/`                                                                                 | Inherited                                                                                                                   |
+| `coveragePathIgnorePatterns` | `['/node_modules/', '/@cds-models/', '/gen/', 'Facade\\.ts$', 'mcp/server\\.ts$', '/app/']` | §13.2                                                                                                                       |
+| `coverageThreshold`          | §13.1                                                                                       | Jest enforces the numbers at run time                                                                                       |
 
 The last two rows of the middle block are the ones the exemplar's own document omits: its §3.3 table
 lists neither `testTimeout` nor `moduleNameMapper`, both of which are present in
@@ -210,17 +231,22 @@ hand.
 
 ## 5. Test Boundaries (D-188)
 
-**Four tiers run under Jest. Two destinations are not Jest at all, and saying so is the point of the
-table** — a FUT with no tier is a FUT nobody writes.
+**Four tiers run under Jest. ~~Two destinations are not Jest at all~~ — since v1.4, two UI5 tiers run
+under `ui5-test-runner`, one E2E tier under Playwright, and two destinations are not tests in the
+repo at all. Saying so is the point of the table** — a FUT with no tier is a FUT nobody writes. The
+UI5 and E2E rows are rulings (D-257, D-262); how the gate runs them is provisional (§15.5).
 
-| Tier                    | Runner                            | Boots                             | Database          | May assert                                                                                | May **not**                                                  |
-| ----------------------- | --------------------------------- | --------------------------------- | ----------------- | ----------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
-| **Unit**                | Jest                              | nothing                           | **none — mocked** | One class, one method. Pure logic: resolver ordering, health banding, mapping, validation | Touch a database, boot a service, or assert an OData shape   |
-| **Integration**         | Jest + `cds.test`                 | `TrackerService` + the model      | SQLite `:memory:` | Handlers, constraints, projections — through **either** entry point in §7                 | Assert anything whose mechanism is Postgres (§10)            |
-| **Protocol**            | Jest + MCP SDK in-memory pair     | `mcp/server.ts`                   | SQLite `:memory:` | The tool list, JSON-RPC framing, the stdout guard, the `zod` input boundary               | Re-assert verb behaviour the integration tier already proves |
-| **Script**              | Jest                              | a Node entry point, or none       | varies            | A script's observable effect: files written, exit codes, denials, rows recorded           | Assume a CAP server it did not start                         |
-| _Browser_               | **`/functional-test`** — not Jest | the real servers behind the proxy | Postgres          | What is on screen (§15)                                                                   | Be counted in coverage, or gate `npm test`                   |
-| _One-time verification_ | **a person, once**                | —                                 | —                 | That a cutover step happened (§14.3)                                                      | Be a re-runnable test at all                                 |
+| Tier                    | Runner                                                                 | Boots                                                             | Database                          | May assert                                                                                                                     | May **not**                                                                                                                            |
+| ----------------------- | ---------------------------------------------------------------------- | ----------------------------------------------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| **Unit**                | Jest                                                                   | nothing                                                           | **none — mocked**                 | One class, one method. Pure logic: resolver ordering, health banding, mapping, validation                                      | Touch a database, boot a service, or assert an OData shape                                                                             |
+| **Integration**         | Jest + `cds.test`                                                      | `TrackerService` + the model                                      | SQLite `:memory:`                 | Handlers, constraints, projections — through **either** entry point in §7                                                      | Assert anything whose mechanism is Postgres (§10)                                                                                      |
+| **Protocol**            | Jest + MCP SDK in-memory pair                                          | `mcp/server.ts`                                                   | SQLite `:memory:`                 | The tool list, JSON-RPC framing, the stdout guard, the `zod` input boundary                                                    | Re-assert verb behaviour the integration tier already proves                                                                           |
+| **Script**              | Jest                                                                   | a Node entry point, or none                                       | varies                            | A script's observable effect: files written, exit codes, denials, rows recorded                                                | Assume a CAP server it did not start                                                                                                   |
+| **UI5 unit**            | QUnit 2 via `ui5-test-runner` 5.14.2                                   | UI5 in a headless browser, no backend                             | **none** — OData mocked or absent | One logic class: a `model/{App}Service.ts` intent method against a stubbed model, an ext logic class, a custom control (§15.2) | Boot `cds-serve`; assert FE/UI5 framework behaviour; render a whole app                                                                |
+| **UI5 journey**         | OPA5 — a plain OPA5 page object for the FPM page — via the same runner | `cds-serve`, `[development]` profile, seeded from `db/data/` CSVs | SQLite `:memory:`                 | The page's annotation contract and extensions as rendered; SQLite-observable browser FUTs (§14.3)                              | FE generic behaviour; anything whose mechanism is Postgres; cross-module routing                                                       |
+| **E2E**                 | Playwright (`@playwright/test`)                                        | Postgres + both modules' CAP processes + `serveOneOrigin.mjs`     | Postgres                          | Postgres-dependent and cross-module browser FUTs; the shell → this module's route                                              | Run per story; count in coverage; gate `npm test`                                                                                      |
+| _Browser_               | **`/functional-test`** — a stage, not a tier in `npm test`             | the real servers behind the proxy                                 | throwaway Postgres                | ~~What is on screen (§15)~~ The story's FUTs, plus exploratory probing (§15)                                                   | Be counted in coverage, or gate `npm test`; ~~be the only browser assertion~~ be the only regression net — since D-261 it no longer is |
+| _One-time verification_ | **a person, once**                                                     | —                                                                 | —                                 | That a cutover step happened (§14.3)                                                                                           | Be a re-runnable test at all                                                                                                           |
 
 ### 5.1 Boundary rules
 
@@ -441,6 +467,13 @@ linters that enforce it already run here.
 | **No CQL in a spec**                             | Every `SELECT`/`INSERT`/`UPDATE`/`DELETE` lives in a named `support/` helper. `lint:test-cql`  |
 | One-line JSDoc per `it`                          | States the **why** — the rule protected — not the title restated. `lint:test-data`             |
 
+**The UI5 and E2E tiers inherit the same rules, and nothing enforces them there yet (v1.4).** UI5
+fixtures are named constants in `app/<app>/webapp/test/data/`, never inline in a `*.qunit.ts` or a
+page object, and every test carries the one-line `/** why */` JSDoc. `lint:test-data` and
+`lint:test-structure` scan `test/**` only, and `lint:test-data` reads only `*.test.ts`, so neither
+sees `app/**/test/**` or a `*.e2e.ts`. Journeys use the same seed as the server they boot — the
+`db/data/` CSVs — never a fixture copy (D-242). §17.2 lists the owed linter work.
+
 ### 11.1 The canonical test world
 
 This module's canonical world is **the migrated Financial Planner workspace**, because the module
@@ -492,7 +525,23 @@ test/
   protocol/{data,support,tests}/   §8 — the MCP transport
   script/{data,support,tests}/     §5 — recordTestRun, the hook, the linter, the exporter;
                                    today installMcpServer, serveOneOrigin and migrateFinancialPlanner
+  e2e/
+    {area}/{data,support,tests}/   §15.6 — *.e2e.ts, run at the sprint boundary (D-262)
+app/
+  {app}/webapp/test/               §15 — Test Starter layout, per app (D-263)
+    unit/                          *.qunit.ts — logic classes
+    integration/                   OPA5 journeys
+      pages/                       Page objects, the FPM page's plain OPA5 one included
+    data/                          UI5 fixtures (§11)
 ```
+
+**v1.4 adds two trees, and the live linters reject or ignore both today.** A `*.e2e.ts` under
+`test/e2e/{area}/tests/` fails `lint:test-structure`: the linter recognises a spec only by its
+`.test.ts` suffix, so any other `.ts` must sit under `data/` or `support/`. The `.e2e.ts` suffix is
+kept anyway so Jest's `**/*.test.ts` never collects an E2E spec (provisional, D-262). `app/**/test/**`
+is outside every test linter's scan root. Both are owed (§17.2). **This module has no `app/shared/`
+and no shell**, so it has no shared page objects: its page objects live in its own app's
+`integration/pages/`.
 
 **Two folders are new against the exemplar and neither breaks the linter's contract**, because
 `lint:test-structure` keys on the `{data,support,tests}` split beneath a test-type folder, not on a
@@ -550,17 +599,37 @@ that exists is a number no gate can fairly enforce — and the exemplar demonstr
 degree: §4.1 measured the `.ts` implementation instrumented at 100% from OData calls alone. In the
 exemplar, where the service entry point never loads, integration tests contribute far less.
 
+#### The UI5 gate (v1.4, D-260)
+
+**A separate gate with its own numbers, never merged with Jest's** — so UI5-pack R8's `nyc merge`
+step is avoided by ruling, not solved. The numbers are rulings; where they are enforced (`nyc
+check-coverage` flags or `.nycrc`) is provisional until Sprint 2 story 1.
+
+| Band                   | Line | Branch | This module's folders                                                                                           |
+| ---------------------- | ---- | ------ | --------------------------------------------------------------------------------------------------------------- |
+| **Shared UI5 helpers** | 100% | 100%   | **None — this module owns no `app/shared/`.** It consumes Financial Planner's (D-147), whose UI5 gate counts it |
+| **Overall `app/**`**   | 85%  | 80%    | `./app/{app}/webapp/**/*.ts` — the one FPM page (§15)                                                           |
+
+QUnit and journeys both feed the number (same runner, same instrumentation). **The band lands with the
+first story that creates a `.ts` under `app/`** — the page's build — never over an empty tree (provisional, §15.5), on
+D-186's reasoning: a gate over zero files is a meaningless green. Rejected: a lower starting threshold
+with a ratchet, and one merged repo number.
+
 ### 13.2 Excluded from coverage
 
-| Excluded            | Why                                                                                |
-| ------------------- | ---------------------------------------------------------------------------------- |
-| `*Facade.ts`        | Zero logic by design, `lint:facades`. Wiring is proven by the integration tier     |
-| **`mcp/server.ts`** | Bootstrap wiring — the same class as a Facade. §8's protocol tier proves it        |
-| **`app/**`**        | §15 rules out an in-repo frontend suite; a folder with no tests would drag Overall |
-| `db/**`             | CDS, not TypeScript. Declarative and compiled                                      |
-| `@cds-models/`      | Generated by CAP                                                                   |
-| `gen/`              | Build output                                                                       |
-| `node_modules/`     | Dependencies                                                                       |
+| Excluded                     | Why                                                                                                                                                                                 |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `*Facade.ts`                 | Zero logic by design, `lint:facades`. Wiring is proven by the integration tier                                                                                                      |
+| **`mcp/server.ts`**          | Bootstrap wiring — the same class as a Facade. §8's protocol tier proves it                                                                                                         |
+| **`app/**`** — from **Jest** | ~~§15 rules out an in-repo frontend suite; a folder with no tests would drag Overall~~ Jest never loads it (`roots: ['<rootDir>/test']`); the **UI5 gate** covers it (§13.1, D-260) |
+
+**Excluded from the UI5 gate** (D-260): thin `ext/` SAP handler modules, lifecycle
+`ControllerExtension`s — wiring since D-263 — and `*.gen.d.ts`. The journey tier proves them, as the
+integration tier proves Facades.
+| `db/**` | CDS, not TypeScript. Declarative and compiled |
+| `@cds-models/` | Generated by CAP |
+| `gen/` | Build output |
+| `node_modules/` | Dependencies |
 
 ### 13.3 The exemplar's coverage section is wrong about its own repo
 
@@ -652,14 +721,30 @@ they are simply not what a FUT maps to.
 
 ### 14.3 The seventeen that are not Jest tests
 
-| Class                     | Count | What runs them                                    | Examples                                                                                |
-| ------------------------- | ----- | ------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| **Browser**               | 10    | `/functional-test` per story, in a real browser   | SPEC-07 FUT-001 "renders eight Tasks and six nested Subtasks"; FUT-013's expansion      |
-| **One-time verification** | 7     | A person, once, at cutover — recorded, not re-run | SPEC-12 FUT-007 "The dashboard is gone"; FUT-008 "`Financial Planner/project/` is gone" |
+| Class                     | Count | What runs them                                                                                    | Examples                                                                                |
+| ------------------------- | ----- | ------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| **Browser**               | 10    | `/functional-test` per story, in a real browser; since v1.4 also a journey or an E2E spec (D-261) | SPEC-07 FUT-001 "renders eight Tasks and six nested Subtasks"; FUT-013's expansion      |
+| **One-time verification** | 7     | A person, once, at cutover — recorded, not re-run                                                 | SPEC-12 FUT-007 "The dashboard is gone"; FUT-008 "`Financial Planner/project/` is gone" |
 
 **Neither class is a gap.** The browser ten are covered by a stage the build chain already runs and
 `PLAN.md` §5 already lists (`/functional-test` → `functional-tester`); putting them in Jest as well
-would be the double-assertion §14.1 forbids. The one-time seven assert that a **deletion happened** —
+would be the double-assertion §14.1 forbids. ~~That stage is their only test.~~
+
+**Amended v1.4 (D-261): the Browser row moves; the One-time row does not.** `/functional-test` alone
+was a regression gap — it runs only the current story's FUTs and commits nothing, so a shipped
+story's browser behaviour had no net. Each of the ten now also gets a committed test, by one rule:
+
+| A browser FUT whose observation…                                           | Also gets                         | Runs                 |
+| -------------------------------------------------------------------------- | --------------------------------- | -------------------- |
+| does **not** depend on Postgres                                            | an OPA5 **journey** (§15.3)       | every `npm test`     |
+| depends on Postgres, **or** crosses modules (shell → module via the proxy) | a Playwright **E2E** spec (§15.6) | each sprint boundary |
+
+Neither is titled with its FUT ID — `lint:tracking-ids` bans identifiers outside a `test/**/data/`
+folder. `/functional-test` still runs every FUT of the story being built and keeps its exploratory
+probing. **This document does not split the ten per FUT**; the story that builds each spec's
+browser FUTs (`SPEC-05` 1, `SPEC-06` 1, `SPEC-07` 8) applies the rule. §14.2's Browser column is
+unchanged at **10**: it records where a FUT is observed, not how many files test it. Like D-238's
+scenarios tier, the journey copy is a deliberate exception to "once" (§14.1), not a licence. The one-time seven assert that a **deletion happened** —
 a property that is true forever after `CNV-005` runs and that a permanent test would re-assert every
 day for no information. `CNV-005`'s own procedure records them.
 
@@ -679,27 +764,121 @@ transfer.**
 
 ---
 
-## 15. Frontend Testing (D-195)
+## 15. Frontend Testing (D-257 … D-263)
 
-**None. No QUnit, no OPA5, no in-repo frontend suite — and that is a ruling with a reason, not an
-omission.**
+**A gated in-repo suite: QUnit unit tests and OPA5 journeys inside `npm test`, plus a Playwright E2E
+tier at each sprint boundary. This reverses D-195 (D-257).** Nothing is built yet. `app/` is empty
+(only `.gitkeep`), so this section states what the page will owe when it is built. No test exists.
 
-| The exemplar                                                   | This module                                                             |
-| -------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| 23 UI apps, 14 of them freestyle with hand-written controllers | **One** page, Fiori Elements FPM, **drafts OFF** (IA-001 §4, DS-001 §4) |
-| Frontend tests explicitly "a learning exercise", no thresholds | The learning was done there; repeating it here buys nothing             |
-| Written before `/functional-test` and `/ux-test` existed       | Both run per story in the build chain (`PLAN.md` §5, stages 4 and 5)    |
+**Read every gate-mechanics sentence below as provisional.** No part of the UI5 gate chain has been
+executed on this machine. That covers the runner flags, the `--url` list, report paths, the coverage
+pipeline, threshold enforcement and how the leg chains into `npm test`. It is documented on paper only
+(`Standards (Documents)/research/gate-integration.md` §Verdict, "The spike"). It stays provisional
+until **Sprint 2 story 1** closes UI5-pack R1 (§19.1). The tiers, the assertable surface, the layout and
+the numbers are rulings. How the gate enforces them is not.
 
-Near-zero hand-written controller logic means a QUnit suite would test Fiori Elements — the framework
-— which §5.1 forbids by name. And the ten browser-tier FUTs (§14.3) already have a stage that runs
-them in a real browser against the real servers, which is a stronger assertion than OPA5 against
-mocks.
+`R1` … `R9` in this section are the UI5 research pack's risks
+(`Standards (Documents)/research/README.md` §Open risks), not this module's `research/README.md` §5
+register.
 
-**What this costs, stated:** there is no regression net on the UI between stories other than a human
-running the chain. Accepted, because the surface is one page and D-22 rules against specifying what
-nothing tests.
+### 15.1 What changed since D-195
 
-`app/**` is therefore **excluded from coverage** (§13.2) rather than counted at zero.
+| D-195's reason (v1.0)                                                     | What changed (2026-11-04)                                                                                                                                                                                              |
+| ------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| The exemplar's suite was "a learning exercise"; repeating it buys nothing | **The gate decision (inherited, not re-argued here):** UI5 testing is a gate, not a learning exercise. It covers every app in every module, with thresholds enforced (`CODING_STANDARDS.md` §Test Rules)               |
+| QUnit over one FPM page would test Fiori Elements                         | Still true of FE's **generic** behaviour, and that stays forbidden. An app's **annotation contract** is the module's own declaration, and asserting it is contract, like `@assert.range` (§15.3, D-259)                |
+| `/functional-test` runs the ten browser FUTs against the real servers     | It runs only the **current** story's FUTs and commits nothing. A shipped story's browser behaviour therefore had no regression net, which is the cost D-195 accepted. D-261 closes it                                  |
+| No `sap.fe.test` page object exists for an FPM custom page                | It still does not (UI5-pack R3; the `TemplatePage` constructor is protected). A **plain OPA5 page object** fills the gap (D-257). Playwright for FPM was rejected: a second mechanism, and it gives no coverage number |
+| _(no research existed)_                                                   | The research pack at `Standards (Documents)/research/` returns **GO WITH CAVEATS**. Its caveats are UI5-pack R1 … R9 (§19)                                                                                             |
+
+### 15.2 UI5 unit tier: what the page owes
+
+QUnit 2 in Test Starter layout, `*.qunit.ts`, headless through `ui5-test-runner` 5.14.2 (§3.1). The
+tier tests **one logic class at a time**, with no backend:
+
+| Owes a QUnit test                                                                 | Does not                                                                                                             |
+| --------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| Every intent method of the app's `model/{App}Service.ts`, against a stubbed model | The FPM page's rendering. That belongs to the journey (§15.3)                                                        |
+| Every ext **logic class** a lifecycle extension or action handler delegates to    | The thin `ext/` handler module or the `ControllerExtension` itself. These are wiring, excluded from coverage (§13.2) |
+| Any custom control or formatter the page adds                                     | Anything in Financial Planner's `app/shared/`. Its own gate tests that (D-147)                                       |
+
+**Extensions delegate (D-263).** A lifecycle `ControllerExtension` hook delegates to a plain logic
+class, the same way a custom-action handler already delegates (`CODING_STANDARDS.md` §SAPUI5,
+`lint:frontend-controller-shape`). The extension stays thin wiring, like a Facade.
+
+If the page is built with no logic class and no `model/` method, this tier has nothing to test. The
+journey (§15.3) still applies.
+
+### 15.3 UI5 journey tier: one contract journey (D-257, D-258, D-259)
+
+| Ruling                 | Detail                                                                                                                                                                                                                                                   |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Page object**        | A hand-written **plain OPA5 page object** for the FPM page, in `integration/pages/`. Same runner, same coverage as QUnit                                                                                                                                 |
+| **Boots**              | `cds-serve` in the `[development]` profile: in-memory SQLite, seeded from the `db/data/` CSVs                                                                                                                                                            |
+| **Launch**             | **The component directly** (`iStartMyUIComponent`), **never** Financial Planner's shell (D-258). This module's gate must not boot that module's CAP process or `serveOneOrigin.mjs` (D-29). A red Financial Planner would otherwise red-line this module |
+| **What it owes**       | **At least one contract journey**: the page's annotation-declared columns, filters, actions and extensions render as declared (D-259). Plus one journey per SQLite-observable browser FUT (§14.3, D-261)                                                 |
+| **May not**            | Assert FE's generic behaviour: sorting, paging, draft machinery, variant management. That is the framework (§5.1)                                                                                                                                        |
+| **Shell → page route** | Not here. It crosses modules, so it is the E2E tier's (§15.6)                                                                                                                                                                                            |
+
+**One dependency to settle under UI5-pack R1 (provisional).** The page depends on Financial Planner's
+`app/shared/` at `/shared` (D-147). A direct launch under this module's own `cds-serve` must still
+resolve `/shared` without booting that module's process. This has not been measured. It is part of
+UI5-pack R1's leg for this module.
+
+### 15.4 Layout (D-263)
+
+Per app, in Test Starter layout: `app/{app}/webapp/test/{unit,integration}/`, page objects in
+`integration/pages/`, data in `webapp/test/data/` (§12). The gate passes **one `--url` per app
+testsuite** (provisional). With one app, that is one `--url`. A module-level suite was rejected
+because cross-app serving is unproven, and a suite outside `webapp/` is not served under the app's
+namespace.
+
+### 15.5 Gate mechanics, and the silent pass (provisional until UI5-pack R1 closes)
+
+| Mechanic                     | Ruling on paper                                                                                                                                   |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Runner invocation            | `--no-npm-install --coverage-report-dir coverage-ui5 --report-dir report-ui5` (UI5-pack R5, R6), remote mode against a runner-spawned `cds-serve` |
+| Coverage source              | `ui5-tooling-transpile`'s `coverage` option (babel-plugin-istanbul) on the test run                                                               |
+| Threshold check              | On the UI5 report alone (§13.1): `nyc check-coverage` flags or `.nycrc`, chosen by story 1                                                        |
+| Inside `npm test`            | A second leg after Jest. How it chains is story 1's                                                                                               |
+| When this module's leg lands | With the story that creates the first `.ts` under `app/`. Until then there is no leg (D-186's reasoning)                                          |
+
+**The failure mode is a silent pass, and it must be named.** Suppose the transpile `coverage` option
+is not switched on for the test run, or a served source tree is not instrumented (UI5-pack R9). The
+QUnit and OPA5 suites still **pass**, and they report zero or partial coverage. A threshold check on
+the UI5 report is the only thing that catches it. **Story 1 must show that a deliberately failing
+threshold fails the gate.** Until it does, a green UI5 leg is not evidence that the threshold was
+checked. Nothing in this module checks the lever per file (§17.2).
+
+### 15.6 The E2E tier (D-262)
+
+| Ruling        | Detail                                                                                                                                                                                                                                |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Runner**    | Committed **Playwright** specs (`@playwright/test`). It is the same engine as `/functional-test`, uses DOM selectors with `RecordReplay` waiting, and costs ~3 packages. wdi5 was rejected: 460 packages / 121 MB and a second runner |
+| **When**      | **At each sprint boundary** (the checkpoint). Not in every `npm test` or build gate, because it needs real Postgres, both CAP processes and the proxy                                                                                 |
+| **Asserts**   | Postgres-dependent and cross-module browser FUTs (§14.3), and the shell → this module route                                                                                                                                           |
+| **Where**     | `test/e2e/{area}/{data,support,tests}/`, suffix `*.e2e.ts` so Jest's `**/*.test.ts` never collects one (provisional)                                                                                                                  |
+| **Coverage**  | Not counted                                                                                                                                                                                                                           |
+| **Installed** | Not yet. `@playwright/test` lands in Sprint 2 alongside `ui5-test-runner`, `playwright` and `nyc` (§3.1)                                                                                                                              |
+
+### 15.7 The v1.0 ruling, superseded
+
+~~**None. No QUnit, no OPA5, no in-repo frontend suite — and that is a ruling with a reason, not an
+omission.**~~
+
+| ~~The exemplar~~                                                   | ~~This module~~                                                             |
+| ------------------------------------------------------------------ | --------------------------------------------------------------------------- |
+| ~~23 UI apps, 14 of them freestyle with hand-written controllers~~ | ~~**One** page, Fiori Elements FPM, **drafts OFF** (IA-001 §4, DS-001 §4)~~ |
+| ~~Frontend tests explicitly "a learning exercise", no thresholds~~ | ~~The learning was done there; repeating it here buys nothing~~             |
+| ~~Written before `/functional-test` and `/ux-test` existed~~       | ~~Both run per story in the build chain (`PLAN.md` §5, stages 4 and 5)~~    |
+
+~~Near-zero hand-written controller logic means a QUnit suite would test Fiori Elements —
+the framework — which §5.1 forbids by name. And the ten browser-tier FUTs (§14.3) already have a stage
+that runs them in a real browser against the real servers, which is a stronger assertion than OPA5
+against mocks.~~ ~~**What this costs, stated:** there is no regression net on the UI between stories
+other than a human running the chain. Accepted, because the surface is one page and D-22 rules against
+specifying what nothing tests.~~ ~~`app/**` is therefore **excluded from coverage** (§13.2) rather than
+counted at zero.~~ Superseded by D-257. §15.1 records why.
 
 ---
 
@@ -740,6 +919,18 @@ from **idempotence** (SPEC-09 FUT-013 — recording twice writes one row), not f
 those five are **untracked and gitignored**, so their deletion is the one irreversible part of the
 decommission.
 
+### 16.4 The UI5 and E2E legs (v1.4, provisional until UI5-pack R1 closes)
+
+| Leg | Result file              | Who reads it                                                                                      |
+| --- | ------------------------ | ------------------------------------------------------------------------------------------------- |
+| UI5 | `report-ui5/report.json` | `gate-runner`, beside Jest's `coverage/test-results.json`                                         |
+| E2E | Playwright's report      | Recorded at the sprint checkpoint the same way this section records a checkpoint run (§16.1–16.2) |
+
+**Whether a failing UI5 run is recorded is not yet measured.** §16.3's lesson applies directly: npm
+skips a `post` script on a non-zero exit, so the recorder must be called **explicitly after both
+legs**, whatever either leg's exit code. Story 1 measures that a red UI5 leg still produces a
+recorded run.
+
 ---
 
 ## 17. Enforcement
@@ -749,26 +940,37 @@ is which is this section's whole job.**
 
 ### 17.1 Enforced
 
-| Rule                                                    | Script                     | Status                                                                   |
-| ------------------------------------------------------- | -------------------------- | ------------------------------------------------------------------------ |
-| The `{data,support,tests}` contract (§12)               | `lint:test-structure`      | **Live** — runs in this module's 22-linter block                         |
-| Imports + AAA, no inline payloads, one-line JSDoc (§11) | `lint:test-data`           | **Live**                                                                 |
-| No CQL in a spec (§11)                                  | `lint:test-cql`            | **Live**                                                                 |
-| The coverage **numbers** (§13.1)                        | `jest` `coverageThreshold` | **Live** — `test` script and `coverageThreshold` since `S-00`            |
-| Facades hold zero logic (§6, §13.2)                     | `lint:facades`             | **Live**                                                                 |
+| Rule                                                            | Script                           | Status                                                                                                         |
+| --------------------------------------------------------------- | -------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| The `{data,support,tests}` contract (§12)                       | `lint:test-structure`            | **Live** — runs in this module's 22-linter block                                                               |
+| Imports + AAA, no inline payloads, one-line JSDoc (§11)         | `lint:test-data`                 | **Live**                                                                                                       |
+| No CQL in a spec (§11)                                          | `lint:test-cql`                  | **Live**                                                                                                       |
+| The coverage **numbers** (§13.1)                                | `jest` `coverageThreshold`       | **Live** — `test` script and `coverageThreshold` since `S-00`                                                  |
+| Facades hold zero logic (§6, §13.2)                             | `lint:facades`                   | **Live**                                                                                                       |
+| No FUT ID in a journey or E2E title (§14.3, D-261)              | `lint:tracking-ids`              | **Live** — scans `app/` and `test/`; only a `/test/…/data/` path is exempt                                     |
+| A lifecycle extension delegates to a logic class (§15.2, D-263) | `lint:frontend-controller-shape` | **Extended in-session by the host** (uncommitted when this was written). Nothing in `app/` yet for it to check |
 
 All five are already wired; three were verified running against this module's empty `test/` tree this
 session, which is D-36's rule holding. _Annotated 2026-11-04:_ `test/` is no longer empty (42 spec files).
+_v1.4:_ two rows added, `lint:tracking-ids` and `lint:frontend-controller-shape`. **No linter yet sees
+`app/**/test/**`**; the owed work is in §17.2, assigned to Sprint 2 story 1 or a Standards change of
+its own.
 
 ### 17.2 Enforced by nothing
 
-| Rule                                                      | Consequence if broken                                             |
-| --------------------------------------------------------- | ----------------------------------------------------------------- |
-| **The `setupFiles` lever (§4)**                           | **A silent pass** — the sharpest unenforced rule in this document |
-| Every coverage target maps to a folder that exists (§13)  | The exemplar's own §8.3, unnoticed for six months                 |
-| Tier boundaries (§5) — a test written at the wrong tier   | Duplication, or an assertion about the framework                  |
-| The FUT contract (§14) — a FUT with no test               | Specified behaviour nobody built                                  |
-| The assertable surface (§9) — asserting a dead annotation | A green test over an unenforced constraint                        |
+| Rule                                                       | Consequence if broken                                                                                                                                                  |
+| ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **The `setupFiles` lever (§4)**                            | **A silent pass** — the sharpest unenforced rule in this document                                                                                                      |
+| Every coverage target maps to a folder that exists (§13)   | The exemplar's own §8.3, unnoticed for six months                                                                                                                      |
+| Tier boundaries (§5) — a test written at the wrong tier    | Duplication, or an assertion about the framework                                                                                                                       |
+| The FUT contract (§14) — a FUT with no test                | Specified behaviour nobody built                                                                                                                                       |
+| The assertable surface (§9) — asserting a dead annotation  | A green test over an unenforced constraint                                                                                                                             |
+| **The UI5 coverage lever (§15.5)**                         | **A silent pass** — suites green at zero coverage. Owed to Sprint 2 story 1: a deliberately failing threshold must fail the gate                                       |
+| The UI5 thresholds (§13.1)                                 | No enforcement mechanism exists until story 1 lands one (`nyc`)                                                                                                        |
+| UI5 test data and JSDoc rules under `app/**/test/**` (§11) | Inline fixtures go unnoticed. **Owed:** `lint:test-data` reaches `*.qunit.ts` and page objects                                                                         |
+| The `app/**/webapp/test/` and `test/e2e/` layout (§12)     | **Owed:** `lint:test-structure` accepts both; today a `*.e2e.ts` spec fails it and `app/**` is unscanned                                                               |
+| ESLint over `app/**/test/**`                               | Today `app/**/*.ts` applies the class-only rule, which `*.qunit.ts` and OPA5 page objects trip. **Owed:** an `app/**/test/**` block mirroring the `test/**` exemptions |
+| The FE contract journey exists (§15.3, D-259)              | An FE app ships with no journey                                                                                                                                        |
 
 **No linter is proposed here.** A shared linter asserting the lever would be a Standards change with
 no story owning it, which is the thing D-22 rules against one level up. It is named as a candidate for
@@ -784,7 +986,7 @@ The other four rules in this table stay enforced by nothing and are re-listed as
 
 ## 18. Amendments
 
-**Six. Five applied in-session; one raised and owed.**
+**v1.0: six. Five applied in-session; one raised and owed.**
 
 | #   | Target                                                                 | Change                                                                                                                                                                                                                                                                                                              | Status                |
 | --- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- |
@@ -794,6 +996,17 @@ The other four rules in this table stay enforced by nothing and are re-listed as
 | 4   | [CLAUDE.md](../CLAUDE.md) §Folder Structure                            | `test/ (empty) ← Test Strategy stage` corrected — the structure is ruled here (§12); the folder is filled at Build (D-186), the same distinction D-160 drew for `db/`                                                                                                                                               | **Applied**           |
 | 5   | [research/README.md](../research/README.md) §7                         | Gains a **Test Strategy row**, which it has never had. **Fifth occurrence** of the defect D-135 named — §7 is written when a document is created and not maintained when a consumer is added — and the second time the consuming stage fixed its own row                                                            | **Applied**           |
 | 6   | **`Financial Planner/design/TEST_STRATEGY.md`** §8.3 and §3.3          | Three coverage-config discrepancies against its own `jest.config.ts` (§13.3), plus two settings its §3.3 omits. Another module's design document, D-12 markdown, belonging to a `/refresh-docs` sweep — the same class as the two Theme-stage items still owed                                                      | **Raised — Sandro's** |
+
+**v1.4 adds six (D-257 … D-263). Four were applied in-session by the host; two are raised and owed.**
+
+| #   | Target                                                              | Change                                                                                                                                                                                                                         | Status                         |
+| --- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------ |
+| 7   | `Standards (Documents)/CODING_STANDARDS.md` §Test Rules             | The Framework line names the runner and Playwright. It gains UI5 bullets for the gate, unit tier, journey tier, layout, browser FUTs and UI5 coverage. These are shared rulings, the same in Financial Planner's decisions log | **Applied — host, in-session** |
+| 8   | `Standards (Documents)/CODING_STANDARDS.md` §SAPUI5                 | A lifecycle `ControllerExtension` is wiring and delegates to a logic class (D-263), naming `lint:frontend-controller-shape`                                                                                                    | **Applied — host, in-session** |
+| 9   | `lint:frontend-controller-shape` (`lintFrontendControllerShape.ts`) | Extended to enforce row 8                                                                                                                                                                                                      | **Applied — host, in-session** |
+| 10  | `Standards (Documents)/research/` — `playwright-in-repo.md`, README | "`@playwright/test` already installed" refuted. Measured 2026-11-04: it is absent from the root `node_modules` and `package.json`                                                                                              | **Applied — host, in-session** |
+| 11  | [BP-001](BUILD_PLAN.md) §8.3 and D-204                              | The browser ten are "done when `/functional-test` passes them". Under D-261 each also owes a journey (by its story) or an E2E spec (at the sprint boundary)                                                                    | **Raised — Sandro's**          |
+| 12  | `.claude/commands/build.md` and `.claude/workflows/build.js`        | `build.md`'s "there is no in-repo UI5 suite" and `build.js`'s comment citing Financial Planner D-80 and D-195 go stale when the gate lands. The `ui5` author hook plugs in at `hasJestLayer`                                   | **Owed — Sprint 2 story 1**    |
 
 ~~**One thing deliberately not amended, and flagged rather than fixed.** [CLAUDE.md](../CLAUDE.md):31~~
 ~~says "Twenty linters run" while the module wires **21**. It is already on the open `/refresh-docs`~~
@@ -805,7 +1018,7 @@ Twenty-two, and the module wires 22.
 
 ## 19. Risks Assigned to This Stage
 
-**None — and that is a check, not an assumption.** `research/README.md` §5's live rows were read this
+**v1.0: none — and that is a check, not an assumption.** v1.4's assignments are in §19.1. `research/README.md` §5's live rows were read this
 session, and §7's routing table was read and found to have **no Test Strategy row at all** (§18,
 amendment 5).
 
@@ -825,6 +1038,23 @@ executing questions the register never graded, not evidence that a row was misse
 **R11 is not settled here and must not be.** Adding `@sap/cds-dk` as a pinned root devDependency
 collides with D-34 and is its own change, run with the suite green either side.
 
+### 19.1 v1.4: the UI5 research pack's risks
+
+The v1.4 amendment is assigned the UI5 research pack's register
+(`Standards (Documents)/research/README.md` §Open risks). Its `R1` … `R9` are **not** the rows
+above. Each one is executed, re-owned, or resolved by a ruling:
+
+| Risk                | What it is                                                                                             | Disposition                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| ------------------- | ------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **UI5-pack R1**     | The gate chain is unexecuted: runner, `cds-serve`, transpile coverage and thresholds in one `npm test` | **Re-owned to Sprint 2 story 1.** It installs `ui5-test-runner@5.14.2`, `playwright` (the runner's headless Chromium, which `--no-npm-install` stops it fetching), `nyc` and `@playwright/test`. It runs the `gate-integration.md` §Verdict spike 3× and lands the gate wiring. For this module it must also show the direct launch resolves `/shared` (§15.3). Executing it here was the wrong shape: it is an install plus wiring, which is a build story. **Every gate mechanic in this document stays provisional until it closes** |
+| **UI5-pack R2**     | `sap.fe.test.Shell` assumes FLP                                                                        | **Sidestepped (D-258).** This module never launches through the shell. Financial Planner's custom Shell page object is that module's                                                                                                                                                                                                                                                                                                                                                                                                    |
+| **UI5-pack R3**     | No `sap.fe.test` page object exists for an FPM custom page, and this module's only page is FPM         | **Resolved by ruling (D-257):** a plain OPA5 page object                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| **UI5-pack R4**     | Unit-testing a `ControllerExtension` in isolation is undocumented                                      | **Resolved by ruling (D-263):** the delegation standard plus `lint:frontend-controller-shape`. No fake-`base` spike is needed                                                                                                                                                                                                                                                                                                                                                                                                           |
+| **UI5-pack R5, R6** | The runner recreates `coverage/`; it runs `npm install -g` at runtime                                  | **Settled:** the fixed flags (§3.1)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| **UI5-pack R7**     | The runner has a single maintainer                                                                     | Pinned at 5.14.2. **Owner:** whoever raises the Node pin. Revisit when Node moves to 24                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| **UI5-pack R8**     | A merged UI5 + Jest threshold                                                                          | **Avoided by ruling (D-260):** a separate gate                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| **UI5-pack R9**     | Whether `/shared/` is instrumented                                                                     | **Re-owned to Sprint 2 story 1.** For this module, `app/shared/**` is Financial Planner's and is counted in that module's UI5 gate (§13.1)                                                                                                                                                                                                                                                                                                                                                                                              |
+
 ---
 
 ## 20. Open Items Resolved
@@ -832,25 +1062,34 @@ collides with D-34 and is its own change, run with the suite green either side.
 **None — and that is measured, not assumed.** All five open items were closed before this stage
 opened: OI-01 (D-31), OI-02 (D-29, D-30), OI-03 (D-35), OI-04 (D-70) and OI-05 (D-161), the last, at
 Data Model. `PSV-001` §8 is the register and it carries no sixth row. **This stage opens none.**
+**v1.4 opens none either.** Its one unmeasured dependency, `/shared` under a direct launch (§15.3), is
+carried by UI5-pack R1 (§19.1). It is not a new open item.
 
 ---
 
 ## 21. Decisions Reference
 
-| ID        | Title                                                                    | Summary                                                                                                                                                                                                                                                         |
-| --------- | ------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **D-186** | The Test Strategy stage ships the document and nothing else              | No test, no `test` script, no `jest.config.ts`. D-160's reasoning one level on: a script added now is a green gate over zero tests. The exact script text and the measured `--passWithNoTests` escape are recorded so the first test story needs no discovery   |
-| **D-187** | `cds.test` **can** load a TypeScript service implementation              | Measured: without the lever, 501 on an action **and a cross-field guard that silently accepted an invalid row**; with a `setupFiles` entry setting `CDS_TYPESCRIPT`, 4/4 green, 409 with its key, and the impl instrumented at 100%. No `tsx` needed under Jest |
-| **D-188** | Four Jest tiers, plus two destinations that are not Jest                 | Unit, Integration (two entry points), Protocol, Script — plus the browser and one-time cutover verification. The exemplar's three-tier pyramid has no tier for 59 of this module's 180 FUTs                                                                     |
-| **D-189** | The eleven verbs test as functions; only the transport needs the SDK     | Measured: `cds.connect.to` + `srv.tx({user})` reaches the real handlers under `cds.test` with no transport and no port — SPEC-01 BR-06/BR-07's own mechanism. Four FUTs need a real MCP client and get a thin protocol tier                                     |
-| **D-190** | Four constraints assert as contract, six as logic, one not at all        | Derived from DM-001 §9, executed against Postgres 17.6. Two annotations a test must never assert: cross-field `@assert` (D-171) and field-level `@assert.unique` (D-172), and there is no `ASSERT_UNIQUE` key                                                   |
-| **D-191** | The SQLite test profile's blind spot, and what covers each item          | `assert_integrity: 'DB'`'s `23503` has **no automated cover anywhere** — it is a seed defect caught by `CNV-004`'s reconciliation. Running the tier on Postgres was rejected: it trades a named blind spot for unnamed flakiness                                |
-| **D-192** | Test data and file structure inherited wholesale; two new test types     | Nothing about this module's data argues for a different rule, and three linters already enforce it here. `protocol/` and `script/` join `unit/` and `integration/`; the linter keys on the role split, not a closed type list                                   |
-| **D-193** | Coverage numbers inherited, layers re-mapped                             | Validators 100/100, Services + verbs + scripts 90/85, Overall 85/80, Facades and `mcp/server.ts` and `app/**` excluded. **No Utilities target** — this module has no utility layer. The exemplar's §8.3 was found wrong about its own repo in three ways        |
-| **D-194** | A FUT is written at the outermost tier that can observe it, once         | Unit tests come from the 366 business rules, not from the 180 FUTs. All 180 classified: 59 script, 59 verb, 41 OData, 10 browser, 7 one-time, 4 protocol. The largest destination is a tier the exemplar does not have                                          |
-| **D-195** | No in-repo frontend suite                                                | One FPM page with drafts OFF and near-zero controller logic; QUnit would test Fiori Elements, which the shared standards forbid. `/functional-test` and `/ux-test` run per story against the real servers. Cost stated: no UI regression net between stories    |
-| **D-196** | Run recording describes the destination **and** the transition           | They coexist through Build. The `posttest` hook cannot record a failing run (D-107, npm 10.9.3), so both gate sites call `npm run record-test-run` explicitly and safety comes from idempotence. No `posttest` script is declared                               |
-| **D-197** | No risk is assigned to this stage; R7's drill gains a tier, not an owner | §5's live rows and §7's routing table were read rather than assumed — §7 has no Test Strategy row at all, the fifth occurrence of D-135. SPEC-11 FUT-007 is R7's settling drill and is classified `script`; D-121's owner is unchanged                          |
+| ID            | Title                                                                    | Summary                                                                                                                                                                                                                                                                            |
+| ------------- | ------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **D-186**     | The Test Strategy stage ships the document and nothing else              | No test, no `test` script, no `jest.config.ts`. D-160's reasoning one level on: a script added now is a green gate over zero tests. The exact script text and the measured `--passWithNoTests` escape are recorded so the first test story needs no discovery                      |
+| **D-187**     | `cds.test` **can** load a TypeScript service implementation              | Measured: without the lever, 501 on an action **and a cross-field guard that silently accepted an invalid row**; with a `setupFiles` entry setting `CDS_TYPESCRIPT`, 4/4 green, 409 with its key, and the impl instrumented at 100%. No `tsx` needed under Jest                    |
+| **D-188**     | Four Jest tiers, plus two destinations that are not Jest                 | Unit, Integration (two entry points), Protocol, Script — plus the browser and one-time cutover verification. The exemplar's three-tier pyramid has no tier for 59 of this module's 180 FUTs                                                                                        |
+| **D-189**     | The eleven verbs test as functions; only the transport needs the SDK     | Measured: `cds.connect.to` + `srv.tx({user})` reaches the real handlers under `cds.test` with no transport and no port — SPEC-01 BR-06/BR-07's own mechanism. Four FUTs need a real MCP client and get a thin protocol tier                                                        |
+| **D-190**     | Four constraints assert as contract, six as logic, one not at all        | Derived from DM-001 §9, executed against Postgres 17.6. Two annotations a test must never assert: cross-field `@assert` (D-171) and field-level `@assert.unique` (D-172), and there is no `ASSERT_UNIQUE` key                                                                      |
+| **D-191**     | The SQLite test profile's blind spot, and what covers each item          | `assert_integrity: 'DB'`'s `23503` has **no automated cover anywhere** — it is a seed defect caught by `CNV-004`'s reconciliation. Running the tier on Postgres was rejected: it trades a named blind spot for unnamed flakiness                                                   |
+| **D-192**     | Test data and file structure inherited wholesale; two new test types     | Nothing about this module's data argues for a different rule, and three linters already enforce it here. `protocol/` and `script/` join `unit/` and `integration/`; the linter keys on the role split, not a closed type list                                                      |
+| **D-193**     | Coverage numbers inherited, layers re-mapped                             | Validators 100/100, Services + verbs + scripts 90/85, Overall 85/80, Facades and `mcp/server.ts` and `app/**` excluded. **No Utilities target** — this module has no utility layer. The exemplar's §8.3 was found wrong about its own repo in three ways                           |
+| **D-194**     | A FUT is written at the outermost tier that can observe it, once         | Unit tests come from the 366 business rules, not from the 180 FUTs. All 180 classified: 59 script, 59 verb, 41 OData, 10 browser, 7 one-time, 4 protocol. The largest destination is a tier the exemplar does not have                                                             |
+| ~~**D-195**~~ | ~~No in-repo frontend suite~~ — **superseded by D-257**                  | ~~One FPM page with drafts OFF and near-zero controller logic; QUnit would test Fiori Elements, which the shared standards forbid. `/functional-test` and `/ux-test` run per story against the real servers. Cost stated: no UI regression net between stories~~                   |
+| **D-196**     | Run recording describes the destination **and** the transition           | They coexist through Build. The `posttest` hook cannot record a failing run (D-107, npm 10.9.3), so both gate sites call `npm run record-test-run` explicitly and safety comes from idempotence. No `posttest` script is declared                                                  |
+| **D-197**     | No risk is assigned to this stage; R7's drill gains a tier, not an owner | §5's live rows and §7's routing table were read rather than assumed — §7 has no Test Strategy row at all, the fifth occurrence of D-135. SPEC-11 FUT-007 is R7's settling drill and is classified `script`; D-121's owner is unchanged                                             |
+| **D-257**     | The frontend is a gated in-repo suite — D-195 reversed                   | UI5 unit (QUnit 2) and UI5 journey (OPA5) tiers under `ui5-test-runner` 5.14.2, against `cds-serve` `[development]` SQLite. The FPM page gets a plain OPA5 page object. **Gate mechanics provisional** until Sprint 2 story 1 closes UI5-pack R1; the silent pass is named (§15.5) |
+| **D-258**     | This module launches its FPM component directly, never the shell         | `iStartMyUIComponent`, so the gate never boots Financial Planner's CAP process or the proxy (D-29). The shell → page route is the E2E tier's                                                                                                                                       |
+| **D-259**     | The page owes one contract journey, plus QUnit on every logic class      | The journey asserts the annotation contract as rendered: contract, never FE's generic behaviour. QUnit covers every logic class and `model/` service method                                                                                                                        |
+| **D-260**     | UI5 coverage is a separate gate                                          | Overall `app/**` 85/80. The shared-helper 100/100 band has no target here, because this module owns no `app/shared/`. Thin ext handlers, `ControllerExtension`s and `*.gen.d.ts` are excluded. Never merged with Jest (UI5-pack R8 avoided)                                        |
+| **D-261**     | A browser FUT also gets a journey, or an E2E spec                        | SQLite-observable → OPA5 journey in `npm test`; Postgres-dependent or cross-module → E2E. No FUT ID in a title. `/functional-test` still runs the story's FUTs                                                                                                                     |
+| **D-262**     | The E2E tier: committed Playwright specs at the sprint boundary          | `test/e2e/{area}/{data,support,tests}/*.e2e.ts`, against Postgres, both CAP processes and the proxy. Not in `npm test`, not counted in coverage. wdi5 was rejected                                                                                                                 |
+| **D-263**     | Two shared rulings adopted: extension delegation and per-app layout      | A `ControllerExtension` delegates to a logic class (`CODING_STANDARDS.md` §SAPUI5, `lint:frontend-controller-shape`). Tests sit per app in `webapp/test/{unit,integration}/`. These match Financial Planner's decisions log                                                        |
 
 ---
 
@@ -859,6 +1098,7 @@ asserts it, where it lives, what runs it, and what a coverage number means once 
 the **4** questions the design documents defer to this stage by name across **2** files, and rules
 nothing that [DM-001](DATA_MODEL.md), [TS-001](TECH_STACK.md), [DS-001](DESIGN_SYSTEM.md) or
 [IA-001](INFORMATION_ARCHITECTURE.md) already settled. Decisions are logged in the
-[Decisions Log](DECISIONS_LOG.md) at D-186 … D-197. **The harness question was executed, not
+[Decisions Log](DECISIONS_LOG.md) at D-186 … D-197, and the v1.4 frontend gate at D-257 … D-263 on the
+evidence in `Standards (Documents)/research/`. **The harness question was executed, not
 inherited**, and it reversed the belief this module would otherwise have carried. No test and no
 script is written here; that is the first build story's (§3.3, §12)._

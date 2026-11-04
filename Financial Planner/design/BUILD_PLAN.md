@@ -668,7 +668,7 @@ Sprint-specific checks:
 - [ ] WFL-001: Weekly review journey works end-to-end (connection health → CSV → review → dashboards)
 - [ ] WFL-002: Card lifecycle state machine (Focus → Active → To Cancel → Closed)
 - [ ] WFL-002: Focus→Active auto-triggers when all bonus tranches met
-- [ ] Frontend tests: QUnit for shared resources, OPA5 for FRM-001 and FRM-003
+- [ ] Frontend tests: QUnit on logic classes + a contract journey per app, per TS-003 §9 (D-321 reverses D-80)
 - [ ] Card onboarding scenario test passes
 - [ ] **Wave 1 checkpoint:** Full weekly session testable
 
@@ -1754,7 +1754,7 @@ Update `app/index.html` side navigation:
 **Testing:**
 - QUnit: Verify navigation routing
 - OPA5: Weekly review journey (connection check → transaction review → dashboard)
-- Frontend tests: QUnit for shared resources, OPA5 for FRM-001 and FRM-003
+- Frontend tests: QUnit on logic classes + a contract journey per app, per TS-003 §9 (D-321 reverses D-80)
 
 Update sprint board: move WFL-001 to Done.
 

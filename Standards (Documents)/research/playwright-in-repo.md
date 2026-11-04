@@ -1,6 +1,6 @@
 # playwright-in-repo: Plain Playwright can be the in-repo UI5 journey suite, because UI5 ships the waiter and locator primitives wdi5 itself borrows
 
-**Playwright (already installed) is Recommended for the journey tier: UI5-aware waiting and locating come from `sap.ui.test.RecordReplay`, which is injected into the page with one `page.evaluate` — the same mechanism wdi5 uses — and TS coverage comes from a `coverage: true` switch already present in ui5-tooling-transpile 3.12.0.** What holds: no new runtime dependency, TypeScript authoring for free, `webServer` can own `cds-serve`. What does not: Fiori Elements' OPA test library (`sap.fe.test` ListReport/ObjectPage helpers) is unusable from Playwright, so FE journeys address controls by FE's documented stable IDs instead of page-object verbs. Cost: a ~100-line in-repo helper (`waitForUI5`, control-selector lookup, coverage dump) that the project then owns. What would change the answer: if the gate must express FE journeys with SAP's own FE page objects, wdi5 (sibling `wdi5-e2e`) is the only route to them.
+**Playwright (**refuted 2026-11-04:** `@playwright/test` is in neither root `node_modules` nor `package.json` — only the `npx @playwright/mcp` server exists; ~3 packages to install) is Recommended for the journey tier: UI5-aware waiting and locating come from `sap.ui.test.RecordReplay`, which is injected into the page with one `page.evaluate` — the same mechanism wdi5 uses — and TS coverage comes from a `coverage: true` switch already present in ui5-tooling-transpile 3.12.0.** What holds: no new runtime dependency, TypeScript authoring for free, `webServer` can own `cds-serve`. What does not: Fiori Elements' OPA test library (`sap.fe.test` ListReport/ObjectPage helpers) is unusable from Playwright, so FE journeys address controls by FE's documented stable IDs instead of page-object verbs. Cost: a ~100-line in-repo helper (`waitForUI5`, control-selector lookup, coverage dump) that the project then owns. What would change the answer: if the gate must express FE journeys with SAP's own FE page objects, wdi5 (sibling `wdi5-e2e`) is the only route to them.
 
 **Mode:** Compare · **Verdict:** Recommended · **Confidence:** Medium (mechanism verified in package sources; no spike run on the real app) · **Feeds:** Test Strategy journey tier · **Researched:** 2026-11-04 · **Status:** Draft
 
@@ -20,15 +20,30 @@ import { test as base, expect, Page } from "@playwright/test";
 
 async function injectUI5(page: Page) {
   await page.waitForFunction(() => !!(window as any).sap?.ui);
-  await page.evaluate(() => new Promise<void>((res, rej) =>
-    (window as any).sap.ui.require(["sap/ui/test/RecordReplay"],
-      (RR: any) => { (window as any).__rr = RR; res(); }, rej)));
+  await page.evaluate(
+    () =>
+      new Promise<void>((res, rej) =>
+        (window as any).sap.ui.require(
+          ["sap/ui/test/RecordReplay"],
+          (RR: any) => {
+            (window as any).__rr = RR;
+            res();
+          },
+          rej,
+        ),
+      ),
+  );
 }
-async function waitForUI5(page: Page) {           // serialise: _autoWaiterAsync rejects re-entrant calls
-  await page.evaluate(() => (window as any).__rr.waitForUI5({ timeout: 15000, interval: 400 }));
+async function waitForUI5(page: Page) {
+  // serialise: _autoWaiterAsync rejects re-entrant calls
+  await page.evaluate(() =>
+    (window as any).__rr.waitForUI5({ timeout: 15000, interval: 400 }),
+  );
 }
 export const test = base.extend<{ ui5: { waitForUI5: () => Promise<void> } }>({
-  ui5: async ({ page }, use) => { await use({ waitForUI5: () => waitForUI5(page) }); },
+  ui5: async ({ page }, use) => {
+    await use({ waitForUI5: () => waitForUI5(page) });
+  },
 });
 export { expect };
 ```
@@ -37,12 +52,12 @@ Two documented caveats shape the helper. `_autoWaiterAsync.waitAsync` rejects wi
 
 ## Addressing UI5 controls without wdi5 has three documented handles
 
-| Handle | What it addresses | Source | Cost |
-|---|---|---|---|
-| `page.locator('id=<stable id>')` | Fiori Elements macros. FE documents the pattern `<ApplicationId>::<PageId>--fe::table::<Entity>::LineItem::Table` ("Interacting with a Table Using the API", SAP-docs/sapui5). Playwright's `id=` engine takes the raw attribute, so `::` and `--` need no CSS escaping (playwright.dev "Other locators"). | Documented | none |
-| `getByRole` / `getByText` / `getByLabel` | Freestyle views, dialogs, toolbar buttons; UI5 renders ARIA roles. | Documented (Playwright) · Inferred (UI5 ARIA completeness per control) | none |
-| `__rr.findDOMElementByControlSelector({selector})` + `interactWithControl` | OPA-style selectors (`controlType`, `properties`, `bindingPath`, `i18NText`, `ancestor`) copied from the UI5 Test Recorder's **raw selector** dialect, which the Test Recorder doc (SAP-docs, 1.74+) describes as "just the control locator with no function invocations" for use in other frameworks. | Documented | helper wrapper |
-| `playwright-ui5` 1.6.9 (community, DetachHead, ISC, last publish 2026-06-25) | `ui5=sap.m.Button[text='Save']` custom selector engine | Reported (npm + README) | one dev dep; unknown maintenance |
+| Handle                                                                       | What it addresses                                                                                                                                                                                                                                                                                          | Source                                                                 | Cost                             |
+| ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- | -------------------------------- |
+| `page.locator('id=<stable id>')`                                             | Fiori Elements macros. FE documents the pattern `<ApplicationId>::<PageId>--fe::table::<Entity>::LineItem::Table` ("Interacting with a Table Using the API", SAP-docs/sapui5). Playwright's `id=` engine takes the raw attribute, so `::` and `--` need no CSS escaping (playwright.dev "Other locators"). | Documented                                                             | none                             |
+| `getByRole` / `getByText` / `getByLabel`                                     | Freestyle views, dialogs, toolbar buttons; UI5 renders ARIA roles.                                                                                                                                                                                                                                         | Documented (Playwright) · Inferred (UI5 ARIA completeness per control) | none                             |
+| `__rr.findDOMElementByControlSelector({selector})` + `interactWithControl`   | OPA-style selectors (`controlType`, `properties`, `bindingPath`, `i18NText`, `ancestor`) copied from the UI5 Test Recorder's **raw selector** dialect, which the Test Recorder doc (SAP-docs, 1.74+) describes as "just the control locator with no function invocations" for use in other frameworks.     | Documented                                                             | helper wrapper                   |
+| `playwright-ui5` 1.6.9 (community, DetachHead, ISC, last publish 2026-06-25) | `ui5=sap.m.Button[text='Save']` custom selector engine                                                                                                                                                                                                                                                     | Reported (npm + README)                                                | one dev dep; unknown maintenance |
 
 For freestyle views the project controls the markup, so `<core:CustomData key="testid" writeToDom="true"/>` plus `testIdAttribute: 'data-testid'` is also available (Inferred from UI5 CustomData `writeToDom` behaviour; not re-verified this round).
 
@@ -61,7 +76,7 @@ server:
     - name: ui5-tooling-transpile-middleware
       afterMiddleware: compression
       configuration:
-        coverage: { exclude: ["**/test/**"] }   # babel-plugin-istanbul options
+        coverage: { exclude: ["**/test/**"] } # babel-plugin-istanbul options
 ```
 
 ```ts
@@ -77,15 +92,15 @@ Merging with Jest: Jest emits Istanbul JSON (`coverage/coverage-final.json`); `n
 
 ## Comparison
 
-| Criterion | Plain Playwright | wdi5 (see `wdi5-e2e`) | OPA5 (see `opa5-journeys`) |
-|---|---|---|---|
-| New deps | 0 (+ `babel-plugin-istanbul`, `nyc` for coverage) | WebdriverIO v9 stack (`@wdio/cli`, `webdriverio`, …; peerDeps Verified) | none (runs in browser; needs a runner) |
-| UI5 waiting | RecordReplay via `page.evaluate` (Documented) | same API, built in | native |
-| FE page objects (`sap.fe.test`) | no | yes (`fe_bridge`) | yes |
-| TS authoring | native (`@playwright/test`) | yes | via transpile |
-| Serving under `cds-serve` | `webServer: { command: 'cds-serve', url }` (Documented) | wdio `baseUrl` to the running server | needs page served by same server |
-| TS coverage | transpile `coverage` option (Verified in 3.12.0) | same middleware trick | same |
-| Headless CI | Chromium already installed | needs chromedriver/WDIO runner | needs headless runner |
+| Criterion                       | Plain Playwright                                                                   | wdi5 (see `wdi5-e2e`)                                                   | OPA5 (see `opa5-journeys`)             |
+| ------------------------------- | ---------------------------------------------------------------------------------- | ----------------------------------------------------------------------- | -------------------------------------- |
+| New deps                        | 0 (+ `babel-plugin-istanbul`, `nyc` for coverage)                                  | WebdriverIO v9 stack (`@wdio/cli`, `webdriverio`, …; peerDeps Verified) | none (runs in browser; needs a runner) |
+| UI5 waiting                     | RecordReplay via `page.evaluate` (Documented)                                      | same API, built in                                                      | native                                 |
+| FE page objects (`sap.fe.test`) | no                                                                                 | yes (`fe_bridge`)                                                       | yes                                    |
+| TS authoring                    | native (`@playwright/test`)                                                        | yes                                                                     | via transpile                          |
+| Serving under `cds-serve`       | `webServer: { command: 'cds-serve', url }` (Documented)                            | wdio `baseUrl` to the running server                                    | needs page served by same server       |
+| TS coverage                     | transpile `coverage` option (Verified in 3.12.0)                                   | same middleware trick                                                   | same                                   |
+| Headless CI                     | system Chrome (as the MCP server uses); `@playwright/test` itself is not installed | needs chromedriver/WDIO runner                                          | needs headless runner                  |
 
 ## Prior assumption, graded
 

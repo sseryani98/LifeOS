@@ -12,6 +12,16 @@ metadata:
   **Why:** the writer must not re-measure or override the record, but silently rendering a stale
   value turns into a wrong `/ux-test` rubric. **How to apply:** render the record's value, and report
   the mismatch to the host as a gap/finding — never substitute your own measurement.
+- **Names and citations drift too, not only counts.** FP TS-003 UI5 amendment (2026-11-04): the
+  record named `lint:no-tracking-ids` (live script is `lint:tracking-ids`; file is
+  `lintNoTrackingIds.ts`) and cited `gate-integration.md` §Recommendation (heading is §Verdict).
+  **How to apply:** grep the module `package.json` for every `lint:*` name and grep the cited file's
+  `^#` headings before rendering; `lint:doc-claims` would fail a wrong script name.
+- **A record's claim about what a linter checks needs the linter read, not trusted.** The UI5 record
+  said `lint:test-structure` "accepts only `test/{unit,integration}`"; that is its error *message*.
+  The code keys on the `.test.ts` suffix, so `test/e2e/**/*.e2e.ts` fails for that reason instead.
+  Read the scan root and the match rule (`collectFiles(TEST_DIR, …)`) before you write an
+  enforcement row.
 - **Contrast ratios are cheap to recompute** from two hexes (WCAG relative-luminance formula, a
   10-line Python script in the scratchpad). Doing it confirms the record's arithmetic; it does not
   confirm the hexes are current (see above).

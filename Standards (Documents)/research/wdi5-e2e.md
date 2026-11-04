@@ -1,6 +1,6 @@
 # wdi5 E2E: the recommended UI5-aware E2E framework, and it attaches to cds-serve without a second server
 
-**wdi5 (`wdio-ui5-service` 3.0.12) is SAP's documented E2E recommendation for SAPUI5 1.136, runs in TypeScript headless, and attaches to any URL where UI5 bootstraps — including the CAP-served app on :4004 — so the kill criterion is refuted.** What it costs is the WebdriverIO 9 stack: 460 packages / 121 MB of devDependencies beside the Playwright that is already installed, a second automation protocol (BiDi over WebDriver), and a browser-driver download step. Its Fiori Elements test library (`sap.fe.test`, shipped in SAPUI5 1.136.16 and served from the CDN) gives journey helpers for ListReport/ObjectPage that nothing else offers, but the `Shell` helper assumes FLP, so the custom `sap.tnt.ToolPage` shell needs own page objects. wdi5 does not produce code coverage of app TypeScript; coverage must come from the unit tier or from instrumenting the transpile step (sibling `gate-integration`). The answer flips to Playwright if the team decides UI5-aware locators and the FE helpers are not worth 460 packages — see `playwright-in-repo`.
+**wdi5 (`wdio-ui5-service` 3.0.12) is SAP's documented E2E recommendation for SAPUI5 1.136, runs in TypeScript headless, and attaches to any URL where UI5 bootstraps — including the CAP-served app on :4004 — so the kill criterion is refuted.** What it costs is the WebdriverIO 9 stack: 460 packages / 121 MB of devDependencies beside a Playwright that needs only `@playwright/test` (~3 packages — it is not installed; refuted 2026-11-04), a second automation protocol (BiDi over WebDriver), and a browser-driver download step. Its Fiori Elements test library (`sap.fe.test`, shipped in SAPUI5 1.136.16 and served from the CDN) gives journey helpers for ListReport/ObjectPage that nothing else offers, but the `Shell` helper assumes FLP, so the custom `sap.tnt.ToolPage` shell needs own page objects. wdi5 does not produce code coverage of app TypeScript; coverage must come from the unit tier or from instrumenting the transpile step (sibling `gate-integration`). The answer flips to Playwright if the team decides UI5-aware locators and the FE helpers are not worth 460 packages — see `playwright-in-repo`.
 
 **Mode:** Compare · **Verdict:** Recommended (for the journey tier, conditional on dependency-weight acceptance) · **Confidence:** Medium · **Feeds:** Test Strategy journey tier · **Researched:** 2026-11-04 · **Status:** Draft
 
@@ -24,6 +24,7 @@ baseUrl: "http://localhost:4004/fiori-apps.html#Books-manage",
 services: ["ui5"],
 framework: "mocha",
 ```
+
 ```json
 // root package.json of the wdi5 repo
 "_startApp:cap": "npm run start --workspace=examples/cap-bookshop-wdi5",   // cds deploy && cds run
@@ -40,18 +41,22 @@ So: one `cds-serve` on :4004 (which cds-plugin-ui5 already fronts with ui5-tooli
 Headless is a capability flag, with a documented warning to pin a window size (Documented: docs/recipes.md):
 
 ```js
-capabilities: [{ browserName: "chrome",
-  "goog:chromeOptions": { args: ["--window-size=1440,800", "--headless"] } }]
+capabilities: [
+  {
+    browserName: "chrome",
+    "goog:chromeOptions": { args: ["--window-size=1440,800", "--headless"] },
+  },
+];
 ```
 
 Browser/driver: WebdriverIO 9 auto-downloads a matching ChromeDriver (and Chrome, if none found) — an internet-reaching step. The already-installed Playwright Chromium can be reused via `goog:chromeOptions.binary`, and a driver pinned via `wdio:chromedriverOptions.binary` or `CHROMEDRIVER_PATH` (Documented: webdriver.io/docs/capabilities, "Fully offline environments"). This is a gate-stability item for `gate-integration`.
 
 ## Dependency weight is the real cost: 460 packages, 121 MB
 
-| Stack | Added packages | node_modules | Protocol | Source |
-|---|---|---|---|---|
-| wdi5 3.0.12 + required wdio 9 peers (`@wdio/cli, globals, local-runner, mocha-framework, spec-reporter, webdriverio`) | 460 (486 lockfile entries, 309 top-level dirs) | 121 MB | WebDriver BiDi (default), classic WebDriver opt-in | Verified: fresh `npm install` in scratch dir, 2026-11-04 |
-| Playwright (already in repo) | 0 new | 0 new | CDP | Brief (Verified by host) |
+| Stack                                                                                                                 | Added packages                                 | node_modules | Protocol                                           | Source                                                   |
+| --------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- | ------------ | -------------------------------------------------- | -------------------------------------------------------- |
+| wdi5 3.0.12 + required wdio 9 peers (`@wdio/cli, globals, local-runner, mocha-framework, spec-reporter, webdriverio`) | 460 (486 lockfile entries, 309 top-level dirs) | 121 MB       | WebDriver BiDi (default), classic WebDriver opt-in | Verified: fresh `npm install` in scratch dir, 2026-11-04 |
+| Playwright — **not in repo** (only `npx @playwright/mcp`)                                                             | `@playwright/test`, ~3                         | small        | CDP                                                | Brief said 0; **refuted** by measurement 2026-11-04      |
 
 wdi5 itself declares a single runtime dependency (`compare-versions`); the weight is entirely WebdriverIO (Verified: `npm view wdio-ui5-service dependencies peerDependencies`). It also brings a second test runner (Mocha via `@wdio/mocha-framework`) beside Jest; wdio's Jasmine/Cucumber adapters exist, but no Jest adapter — wdi5 runs as its own `wdio run` process, which `npm test` would have to chain (feeds `gate-integration`).
 

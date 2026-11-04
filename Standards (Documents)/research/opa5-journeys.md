@@ -10,17 +10,17 @@
 
 **The "maintenance-only" premise does not hold on any evidence found.** The current OpenUI5 "Testing" page (ui5/docs `main`, fetched 2026-11-04) states verbatim "We recommend OPA5 for integration tests. OPA5 is part of OpenUI5. It is built on top of QUnit and provides good integration with OpenUI5," and introduces wdi5 only as the E2E complement ("WDIO ... lacks awareness of the app's web framework ... wdi5, which is a WDIO plugin, bridges this gap"). Neither that page nor the OPA5 topic page carries a deprecation or status note (Documented). The `Opa5.js` source on `SAP/openui5` master has no `@deprecated` tag (Verified: `grep -n "@deprecated" Opa5.js` → no match, 1576 lines). The OpenUI5 2.0 nightly distribution still serves the module (Verified: `curl -w "%{http_code}" https://sdk.openui5.org/nightly/2/resources/sap/ui/test/Opa5.js` → `200`, 10571 bytes; `sap-ui-version.json` reports `2.0.0-SNAPSHOT`, build `202611020356`). The "Introducing OpenUI5 2.x" SAP blog mentions no test-API removal (Documented, Oliver Graeff, undated page).
 
-What I could *not* measure is development velocity (commit history on `sap/ui/test` was blocked — see below). "Stable, not deprecated" is the defensible claim; "actively evolving" is Unknown.
+What I could _not_ measure is development velocity (commit history on `sap/ui/test` was blocked — see below). "Stable, not deprecated" is the defensible claim; "actively evolving" is Unknown.
 
 ## `sap.fe.test` exists for this exact stack, is public and typed, and is what SAP generates
 
 **Fiori Elements V4 apps get a first-party OPA5 test library whose page objects speak FE vocabulary (`onTable`, `onFilterBar`, `onHeader`, dialogs) and a `JourneyRunner`.** The 1.136.16 API reference (`test-resources/sap/fe/test/designtime/apiref/api.json`, Verified) lists `sap.fe.test.JourneyRunner`, `ListReport`, `ObjectPage`, `TemplatePage`, `Shell`, `BaseArrangements/Actions/Assertions`, and ~40 `sap.fe.test.api.*` classes (Table, FilterBar, Form, Header, Footer, Dialog*), all `visibility: public`, none flagged deprecated or experimental. The typings ship: `@sapui5/types@1.136.16` contains `types/sap.fe.test.d.ts` with 38 `declare module "sap/fe/test/..."` blocks including `JourneyRunner` (Verified by unpacking the tarball). SAP's Fiori tools tutorial "Write OPA Tests for an SAP Fiori Elements for OData V4 Application" (developers.sap.com, Documented) generates exactly this shape — `OpaTests.qunit.js` → `JourneyRunner.run({launchUrl, opaConfig, pages})`, page objects extending `ListReport`/`ObjectPage` with app-specific actions — so this is SAP's reference pattern, not a community convention.
 
-| Capability | Fiori Elements (ListReport/ObjectPage, 3 apps) | FPM page (`sap.fe.core.fpm`, 1 ref) | Freestyle (`csv-import-wizard`, `shell`) |
-|---|---|---|---|
-| Page objects | `sap.fe.test.ListReport` / `ObjectPage` + custom actions/assertions (Documented) | `sap.fe.test.TemplatePage` exists; FPM-specific coverage Unknown | Plain `Opa5.createPageObjects` / class extending `Opa5` (Documented, TS walkthrough step 28) |
-| App start | `JourneyRunner` → `iStartMyApp` → iframe on `launchUrl` (Verified from `BaseArrangements.js`) | same | `iStartMyUIComponent` in-page (faster, Documented) or iframe |
-| Shell helpers | `sap.fe.test.Shell` assumes FLP (tiles, shell back button) — **not usable against the custom `sap.tnt.ToolPage` shell** (Inferred from `Shell.js` method list) | same | Must write own shell page object |
+| Capability    | Fiori Elements (ListReport/ObjectPage, 3 apps)                                                                                                                 | FPM page (`sap.fe.core.fpm`, 1 ref)                              | Freestyle (`csv-import-wizard`, `shell`)                                                     |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| Page objects  | `sap.fe.test.ListReport` / `ObjectPage` + custom actions/assertions (Documented)                                                                               | `sap.fe.test.TemplatePage` exists; FPM-specific coverage Unknown | Plain `Opa5.createPageObjects` / class extending `Opa5` (Documented, TS walkthrough step 28) |
+| App start     | `JourneyRunner` → `iStartMyApp` → iframe on `launchUrl` (Verified from `BaseArrangements.js`)                                                                  | same                                                             | `iStartMyUIComponent` in-page (faster, Documented) or iframe                                 |
+| Shell helpers | `sap.fe.test.Shell` assumes FLP (tiles, shell back button) — **not usable against the custom `sap.tnt.ToolPage` shell** (Inferred from `Shell.js` method list) | same                                                             | Must write own shell page object                                                             |
 
 Two design-relevant facts from the source (Verified): `iStartMyApp(sIntent, params)` builds `launchUrl + "?" + params + "#" + intent` and hands it to `iStartMyAppInAFrame` — so `launchUrl` can be the app's own `index.html` or the Life OS shell, no FLP sandbox required; and `JourneyRunner` defaults `autoWait: true, timeout: 30, viewNamespace: "sap.fe.templates"`, i.e. FE's own waiting logic is on by default.
 
@@ -30,7 +30,7 @@ Two design-relevant facts from the source (Verified): `iStartMyApp(sIntent, para
 
 ## Headless OPA is possible but the runner is community-owned, and coverage has a version trap
 
-**No SAP-owned headless runner exists any more.** `karma-ui5`'s README says "DEPRECATED ... pick a successor from the available UI5 community projects" and npm marks 4.1.0 (2024-11-08) deprecated (Verified via registry). The de-facto successor is `ui5-test-runner` (npm `ui5-test-runner` — *not* `@ui5/test-runner`, which returns 404), v6.0.5 published 2026-11-03, MIT, maintained by Arnaud Buchholz (SAP employee, personal repo) (Verified via registry). It is explicitly "designed and built as a substitute of the UI5 karma runner," runs each test page in parallel browser tabs, and its *remote mode* "can test applications that are already served": `ui5-test-runner --url http://host/path/testsuite.qunit.html` (Documented, `docs/modes/remote.md`). Driver table lists `playwright` with `chromium` (Documented) — matching what the repo already has. Node requirement is `>= 24.11.1` (Documented README) — check the module's Node.
+**No SAP-owned headless runner exists any more.** `karma-ui5`'s README says "DEPRECATED ... pick a successor from the available UI5 community projects" and npm marks 4.1.0 (2024-11-08) deprecated (Verified via registry). The de-facto successor is `ui5-test-runner` (npm `ui5-test-runner` — _not_ `@ui5/test-runner`, which returns 404), v6.0.5 published 2026-11-03, MIT, maintained by Arnaud Buchholz (SAP employee, personal repo) (Verified via registry). It is explicitly "designed and built as a substitute of the UI5 karma runner," runs each test page in parallel browser tabs, and its _remote mode_ "can test applications that are already served": `ui5-test-runner --url http://host/path/testsuite.qunit.html` (Documented, `docs/modes/remote.md`). Driver table lists `playwright` with `chromium` (Documented) — matching what the repo already has. Node requirement is `>= 24.11.1` (Documented README) — check the module's Node.
 
 Coverage in remote mode needs `@ui5/middleware-code-coverage` in the served app's `ui5.yaml` (Documented, `docs/coverage.md`); that middleware "instruments the transpiled JavaScript and remaps the collected coverage back onto the original `.ts` source" (Documented, SAP/ui5-tooling-extensions README `main`). **Trap:** that same README states it "requires UI5 CLI v5 or higher, and a minimum UI5 version of 1.120.52, 1.136.25, or 1.155.0" — the repo has `@ui5/cli` 4.0.59 and UI5 1.136.16. Published versions: 2.0.4 (2026-08-18) and 3.0.0-alpha.1 (2026-10-30); which line the README on `main` describes is Unknown. This is topic 6's spike to pin.
 
@@ -45,10 +45,12 @@ import opaTest from "sap/ui/test/opaQunit";
 const onTheHelloPanelPage = new HelloPanelPage();
 QUnit.module("Navigation");
 opaTest("Should open the Hello dialog", function () {
-    onTheHelloPanelPage.iStartMyUIComponent({ componentConfig: { name: "ui5.walkthrough" } });
-    onTheHelloPanelPage.iPressTheSayHelloWithDialogButton();
-    onTheHelloPanelPage.iShouldSeeTheHelloDialog();
-    onTheHelloPanelPage.iTeardownMyApp();
+  onTheHelloPanelPage.iStartMyUIComponent({
+    componentConfig: { name: "ui5.walkthrough" },
+  });
+  onTheHelloPanelPage.iPressTheSayHelloWithDialogButton();
+  onTheHelloPanelPage.iShouldSeeTheHelloDialog();
+  onTheHelloPanelPage.iTeardownMyApp();
 });
 ```
 

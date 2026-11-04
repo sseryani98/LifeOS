@@ -30,6 +30,13 @@ workshop record will not list them. Grep before handing back.
 - **Spec behaviour cited by DM-001:** `design/DATA_MODEL.md` §9's constraints table quotes specs'
   mechanisms (e.g. "SPEC-02 §3.1 rejects the _load_"). Changing a spec's mechanism breaks that row.
 
+- **Logging new D-nn trips `lint:design-counts` on `PLAN.md:10`** ("decisions run to D-256"). Run
+  `npm run -s lint:design-counts` from the module after appending; PLAN.md is the host's, so report
+  the drift rather than editing it (2026-11-04, D-257 … D-263).
+- **Two `R-nn` registers collide:** this module's `research/README.md` §5 (R4, R7, R10, R11) and the
+  UI5 pack at `Standards (Documents)/research/README.md` (R1–R9). Prefix the pack's as "UI5-pack Rn".
+- **Browser-FUT ruling ripples to BP-001 §8.3 and D-204** ("done when `/functional-test` passes").
+
 **Why:** DoD criterion 7 (no broken cross-references) fails silently on these; the record only names
 the docs the host thought of.
 

@@ -1,7 +1,7 @@
 # Test Strategy
 
 **Document ID:** TS-003
-**Version:** 1.0
+**Version:** 1.1
 **Date:** 2026-02-16
 **Status:** Approved
 
@@ -9,29 +9,31 @@
 
 ## 1. Change History
 
-| Date       | Author          | Description                                                                                           |
-| ---------- | --------------- | ----------------------------------------------------------------------------------------------------- |
-| 2026-02-16 | Sandro & Claude | Initial creation — Step 10 complete. D-74 through D-80 logged.                                        |
-| 2026-02-16 | Sandro & Claude | Added §12 — Markdown test report generation (rolling 5 files).                                        |
-| 2026-02-20 | Sandro & Claude | Added TDD workflow reference in §2 Summary (D-230). Primary definition in TECHNICAL_STANDARDS.md §13. |
-| 2026-02-20 | Claude          | Status → Approved. Step 12 complete — all 21 specs approved.                                          |
-| 2026-07-15 | Sandro & Claude | Life OS restructure — §12.1 test report script now shared from Standards.                             |
-| 2026-08-26 | Sandro & Claude | §6.4 rewritten — `integration/scenarios/` becomes the Functional Test stage's evidence, mandatory for a story that ships no UI. Proven on Project Tracker (D-238).           |
+| Date       | Author          | Description                                                                                                                                                                                                                                                                        |
+| ---------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-02-16 | Sandro & Claude | Initial creation — Step 10 complete. D-74 through D-80 logged.                                                                                                                                                                                                                     |
+| 2026-02-16 | Sandro & Claude | Added §12 — Markdown test report generation (rolling 5 files).                                                                                                                                                                                                                     |
+| 2026-02-20 | Sandro & Claude | Added TDD workflow reference in §2 Summary (D-230). Primary definition in TECHNICAL_STANDARDS.md §13.                                                                                                                                                                              |
+| 2026-02-20 | Claude          | Status → Approved. Step 12 complete — all 21 specs approved.                                                                                                                                                                                                                       |
+| 2026-07-15 | Sandro & Claude | Life OS restructure — §12.1 test report script now shared from Standards.                                                                                                                                                                                                          |
+| 2026-08-26 | Sandro & Claude | §6.4 rewritten — `integration/scenarios/` becomes the Functional Test stage's evidence, mandatory for a story that ships no UI. Proven on Project Tracker (D-238).                                                                                                                 |
+| 2026-11-04 | Sandro & Claude | Amendment — UI5 testing becomes a gate. D-80 reversed by D-321; D-322 to D-329 logged. §9 rewritten; §2, §3.2, §4.1, §4.2, §8.4, §10 Wave 1, §11, §12.6 and §13 updated. Gate mechanics provisional until Sprint 2 story 1 closes R1. Status Approved → Draft pending re-approval. |
+| 2026-11-04 | Sandro          | **Status → Approved.** UI5-testing amendment approved by Sandro; gate mechanics stay provisional until Sprint 2 story 1 closes R1.                                                                                                                                                 |
 
 ---
 
 ## 2. Summary
 
-| Area                     | Standard                                                                                                  |
-| ------------------------ | --------------------------------------------------------------------------------------------------------- |
-| **Framework**            | Jest + ts-jest (backend), QUnit + OPA5 (frontend)                                                         |
-| **Test pyramid**         | Unit → Integration → Functional (scenario). External APIs always mocked.                                  |
-| **Unit targets**         | Validators (100%), Services + ENH engines (90%), Utilities (100%). Facades skipped.                       |
-| **Integration**          | `cds.test()` + SQLite. One test file per CDS service. Scenarios under `integration/scenarios/`.           |
-| **Test data**            | Hybrid factories + named constants. Canonical test world for integration. Semantic naming.                |
-| **Coverage**             | Validators/Utilities: 100%/100%. Services: 90%/85%. Overall: 85%/80%. Frontend: no enforced threshold.    |
-| **Frontend**             | QUnit for shared resources + select controllers. OPA5 journeys on 2 apps (learning exercise).             |
-| **Development workflow** | Test-driven development (D-230). Primary definition in [Technical Standards](TECHNICAL_STANDARDS.md) §13. |
+| Area                     | Standard                                                                                                                                                                                    |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Framework**            | Jest + ts-jest (backend). QUnit 2 + OPA5 via `ui5-test-runner` 5.14.2 (frontend, D-321). Playwright `@playwright/test` (E2E, D-329).                                                        |
+| **Test pyramid**         | Unit → Integration → Functional (scenario). External APIs always mocked.                                                                                                                    |
+| **Unit targets**         | Validators (100%), Services + ENH engines (90%), Utilities (100%). Facades skipped.                                                                                                         |
+| **Integration**          | `cds.test()` + SQLite. One test file per CDS service. Scenarios under `integration/scenarios/`.                                                                                             |
+| **Test data**            | Hybrid factories + named constants. Canonical test world for integration. Semantic naming.                                                                                                  |
+| **Coverage**             | Jest: Validators/Utilities 100%/100%, Services 90%/85%, Overall 85%/80%. UI5, a separate gate (D-327): `app/shared/util/**` 100%/100%, overall `app/**` 85%/80%.                            |
+| **Frontend**             | A gate on every app (D-321). QUnit on every logic class; at least one OPA5 contract journey per FE app (D-325); journeys launch through the shell (D-324). Gate mechanics provisional (§9). |
+| **Development workflow** | Test-driven development (D-230). Primary definition in [Technical Standards](TECHNICAL_STANDARDS.md) §13.                                                                                   |
 
 ---
 
@@ -51,10 +53,21 @@ Jest is CAP's documented test framework. `cds.test()` is framework-agnostic but 
 
 ### 3.2 Frontend
 
-| Tool      | Purpose                                                                                     |
-| --------- | ------------------------------------------------------------------------------------------- |
-| **QUnit** | SAPUI5's built-in unit test framework — tests controller logic, formatters, custom controls |
-| **OPA5**  | SAPUI5's integration/journey test framework — simulates user interaction through actual UI  |
+**Decision D-321.** Versions measured 2026-11-04.
+
+| Tool                              | Version                                 | Purpose                                                                                                                                                                   |
+| --------------------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **QUnit 2** (Test Starter)        | SAPUI5 runtime, 1.136.16                | UI5 unit tier — `*.qunit.ts`                                                                                                                                              |
+| **OPA5** + `sap.fe.test`          | SAPUI5 runtime, 1.136.16                | UI5 journey tier — `sap.fe.test` for ListReport/ObjectPage; plain OPA5 page objects for FPM, freestyle and the shell                                                      |
+| **`ui5-test-runner`** (community) | **5.14.2**, pinned                      | Headless runner for both UI5 tiers, remote mode. v6 needs Node ≥ 24.11.1; the repo runs Node v22.19.0. 5.14.2's own Node floor is unverified — Sprint 2 story 1 checks it |
+| **`ui5-tooling-transpile`**       | 3.12.0 installed (app ranges `^3.11.3`) | Its `coverage` option (`babel-plugin-istanbul`, present) instruments the TypeScript sources                                                                               |
+| **`nyc`**                         | Not installed                           | Threshold check on the UI5 report. Where the thresholds live is provisional                                                                                               |
+| **`playwright`**                  | Not installed                           | The browser `ui5-test-runner` drives. `--no-npm-install` stops the runner fetching it, so story 1 installs it explicitly (R1)                                             |
+| **`@playwright/test`**            | Not installed                           | E2E tier (D-329)                                                                                                                                                          |
+
+**Runner invocation** always carries `--no-npm-install --coverage-report-dir coverage-ui5 --report-dir report-ui5` (R5, R6). The flags are ruled; the invocation that carries them is provisional until R1 closes (§9). UI5 CLI is 4.0.59.
+
+**Rejected:** Karma (`karma-ui5` archived 2025-12-12); `@ui5/middleware-code-coverage` (its TypeScript-capable line needs UI5 CLI v5 and UI5 ≥ 1.136.25); wdi5 (D-329).
 
 ### 3.3 Configuration
 
@@ -76,24 +89,31 @@ Jest is CAP's documented test framework. `cds.test()` is framework-agnostic but 
 
 **Decision D-75.**
 
-### 4.1 Three-Tier Pyramid
+### 4.1 Tiers
 
-| Level           | Scope                                     | Database?                     | Network?                  | What It Validates                                                                   |
-| --------------- | ----------------------------------------- | ----------------------------- | ------------------------- | ----------------------------------------------------------------------------------- |
-| **Unit**        | Single class/method in isolation          | No — mocked                   | No — mocked               | Logic correctness. One layer at a time.                                             |
-| **Integration** | OData endpoint through the full CAP stack | Yes — SQLite via `cds.test()` | No — external APIs mocked | Request → CDS → Handler → DB → Response. Layers wire together correctly.            |
-| **Functional**  | Multi-step user scenario                  | Yes — SQLite via `cds.test()` | No — external APIs mocked | FUT scenarios from functional specs. Sequence of OData calls simulating a workflow. |
+| Level           | Scope                                                    | Database?                     | Network?                                    | What It Validates                                                                     |
+| --------------- | -------------------------------------------------------- | ----------------------------- | ------------------------------------------- | ------------------------------------------------------------------------------------- |
+| **Unit**        | Single class/method in isolation                         | No — mocked                   | No — mocked                                 | Logic correctness. One layer at a time.                                               |
+| **Integration** | OData endpoint through the full CAP stack                | Yes — SQLite via `cds.test()` | No — external APIs mocked                   | Request → CDS → Handler → DB → Response. Layers wire together correctly.              |
+| **Functional**  | Multi-step user scenario                                 | Yes — SQLite via `cds.test()` | No — external APIs mocked                   | FUT scenarios from functional specs. Sequence of OData calls simulating a workflow.   |
+| **UI5 unit**    | One UI5 logic class, headless browser                    | No                            | No — OData mocked or absent                 | Frontend logic correctness (D-321). Scope and ceiling: §9.1.                          |
+| **UI5 journey** | One app through OPA5 against `cds-serve` `[development]` | Yes — SQLite `:memory:`       | Local `cds-serve` only                      | An app's annotation contract and SQLite-observable browser FUTs (D-325, D-328). §9.1. |
+| **E2E**         | Browser flow across real servers, at the sprint boundary | Yes — Postgres                | Module CAP processes + `serveOneOrigin.mjs` | Postgres-dependent and cross-module browser FUTs (D-329). §9.1.                       |
 
 ### 4.2 Boundary Rules
 
-| Rule                                                            | Rationale                                                                                                                                |
-| --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| External APIs are always mocked (SimpleFIN, cheerio, node-cron) | Deterministic, fast, no network dependency                                                                                               |
-| Unit tests never touch the database                             | CDS queries mocked. Pure logic testing.                                                                                                  |
-| Integration tests use SQLite, not PostgreSQL                    | `cds.test()` makes SQLite zero-config. Pragmatic trade-off for a solo project — PostgreSQL-specific edge cases caught in manual testing. |
-| Functional tests are integration tests with storylines          | Same `cds.test()` + SQLite infrastructure. Organized by user journey, not by endpoint.                                                   |
-| Functional tests nest under `test/integration/scenarios/`       | Not a separate top-level folder — same test infrastructure, different organization.                                                      |
-| A story that ships **no UI** discharges Functional Test here    | The browser instrument does not apply, but the FUTs stay executable at that story's outermost surface. See §6.4.                          |
+| Rule                                                                           | Rationale                                                                                                                                |
+| ------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| External APIs are always mocked (SimpleFIN, cheerio, node-cron)                | Deterministic, fast, no network dependency                                                                                               |
+| Unit tests never touch the database                                            | CDS queries mocked. Pure logic testing.                                                                                                  |
+| Integration tests use SQLite, not PostgreSQL                                   | `cds.test()` makes SQLite zero-config. Pragmatic trade-off for a solo project — PostgreSQL-specific edge cases caught in manual testing. |
+| Functional tests are integration tests with storylines                         | Same `cds.test()` + SQLite infrastructure. Organized by user journey, not by endpoint.                                                   |
+| Functional tests nest under `test/integration/scenarios/`                      | Not a separate top-level folder — same test infrastructure, different organization.                                                      |
+| A story that ships **no UI** discharges Functional Test here                   | The browser instrument does not apply, but the FUTs stay executable at that story's outermost surface. See §6.4.                         |
+| UI5 unit tests never boot `cds-serve` or render a whole app                    | One logic class at a time; the journey tier owns rendering.                                                                              |
+| No UI5 tier asserts FE or UI5 generic behaviour                                | Sorting, paging, draft machinery and variant management are the framework (D-325).                                                       |
+| UI5 journeys never assert a Postgres mechanism or cross-module routing         | They run on in-memory SQLite inside one module; those FUTs go to E2E (D-328).                                                            |
+| E2E never runs per story, never gates `npm test`, never counts toward coverage | It needs real Postgres, both CAP processes and the proxy (D-329).                                                                        |
 
 ---
 
@@ -214,17 +234,17 @@ stage 4 by executing every one of its FUTs here**, at whatever its outermost cal
 actually is — an MCP tool call, a service action, a CLI entry point.
 
 | Rule                                                               | Why                                                                                                    |
-| -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| **One spec per FUT**, not one per journey                          | The stage asks *does each named unit pass*, which a merged storyline cannot answer per unit             |
-| **The spec title carries the FUT identifier**                      | A run of the tier then answers traceability in its own output, with no separate matrix to keep true     |
-| **The identifiers live in the sibling `data/` folder**             | `lint:tracking-ids` bans a design identifier anywhere under `test/` outside `data/`; specs interpolate  |
-| **Drive the real surface, not an internal function**               | A FUT verified below the boundary it is written against is not that FUT                                 |
-| **The FUT's own Preconditions/Steps/Expected Result are the spec** | The spec is the contract; a scenario that improves on it has stopped testing the FUT                    |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------ |
+| **One spec per FUT**, not one per journey                          | The stage asks _does each named unit pass_, which a merged storyline cannot answer per unit            |
+| **The spec title carries the FUT identifier**                      | A run of the tier then answers traceability in its own output, with no separate matrix to keep true    |
+| **The identifiers live in the sibling `data/` folder**             | `lint:tracking-ids` bans a design identifier anywhere under `test/` outside `data/`; specs interpolate |
+| **Drive the real surface, not an internal function**               | A FUT verified below the boundary it is written against is not that FUT                                |
+| **The FUT's own Preconditions/Steps/Expected Result are the spec** | The spec is the contract; a scenario that improves on it has stopped testing the FUT                   |
 
 **This tier deliberately re-asserts what the unit and integration tiers already cover**, which is a
 real exception to the rule that a FUT is written at the outermost tier that can observe it, **once**.
 That rule assumed a browser tier existed to be the outermost one. The tier suites own regression;
-this tier owns the stage. When a UI story reaches stage 4 and the browser *does* apply, this tier may
+this tier owns the stage. When a UI story reaches stage 4 and the browser _does_ apply, this tier may
 have nothing to add — re-read the rule then rather than duplicating by reflex.
 
 **Proven on one module, not two.** Project Tracker's `INT-001` is the first story to run it (D-238):
@@ -385,63 +405,175 @@ coverageThreshold: {
 
 Coverage report runs on every `npm test` execution. Not a separate step.
 
+### 8.4 UI5 Thresholds
+
+**Decision D-327.** A separate gate from Jest's — the two are never merged into one number. The Jest thresholds above are unchanged, and Jest still never loads `app/**` (`roots: ['<rootDir>/test']`, measured).
+
+| Scope                   | Folder                                         | Line | Branch | Rationale               |
+| ----------------------- | ---------------------------------------------- | ---- | ------ | ----------------------- |
+| **Shared pure helpers** | `app/shared/util/**`, including `formatter.ts` | 100% | 100%   | Mirrors Utilities       |
+| **Overall UI5**         | `app/**`                                       | 85%  | 80%    | Mirrors Overall project |
+
+| Excluded from UI5 coverage                                            | Why                                                                 |
+| --------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| Thin `ext/` SAP handler modules (e.g. `TransactionsListActions.ts`)   | Wiring; the journey tier proves them, as integration proves Facades |
+| Lifecycle `ControllerExtension`s (e.g. `ObjectPageExt.controller.ts`) | Wiring once they delegate (D-323); proven by journeys               |
+| `*.gen.d.ts`                                                          | Generated declarations                                              |
+
+**Provisional:** where the thresholds are enforced (`nyc check-coverage` flags or a `.nycrc`) is settled by Sprint 2 story 1. A threshold check that never sees instrumented sources passes silently — §9.
+
 ---
 
 ## 9. Frontend Testing
 
-**Decision D-80.**
+**Decisions D-321 through D-329.** Supersedes D-80, which framed frontend tests as a learning exercise on two apps with no thresholds. None was ever written: no `webapp/test/` exists anywhere under `app/` (measured 2026-11-04).
 
-Frontend testing is included as a **learning exercise** — no enforced coverage thresholds. Enough scope to learn QUnit and OPA5 patterns for both Fiori Elements and freestyle SAPUI5 apps. Test files are authored in **TypeScript** (like all of `app/` since D-315) and transpiled by `ui5-tooling-transpile`.
+UI5 testing is a **gate, not a learning exercise** (D-321). Every app under `app/` is tested and the thresholds in §8.4 are enforced. Test files are TypeScript, like all of `app/` (D-315). Evidence: the research pack at `Standards (Documents)/research/` (`README.md`, verdict **GO WITH CAVEATS**).
 
-### 9.1 QUnit — Controller Logic and Shared Resources
+> **Provisional: every gate-mechanics statement in this document.** No part of the UI5 gate chain has been executed. The runner flags, the `--url` list, the report paths, the coverage pipeline, where the thresholds are enforced and how the run chains into `npm test` exist on paper only (`README.md` R1, `gate-integration.md` §Verdict). They stay provisional **until Sprint 2 story 1 closes R1**. The tiers, the assertable surface, the layout and the threshold numbers are rulings, not provisional.
 
-| Target                                 | What to Test                                              |
-| -------------------------------------- | --------------------------------------------------------- |
-| `app/shared/util/formatter.ts`         | Currency formatting, date formatting, status text mapping |
-| `app/shared/BaseController.ts`         | Helper methods (model access, navigation)                 |
-| `app/shared/controls/VizFrameCard.ts`  | Property binding, config generation                       |
-| `app/shared/controls/ApexChartCard.ts` | Property binding, config generation                       |
-| 1-2 freestyle controllers              | Event handlers that transform data before OData calls     |
+**The silent pass.** If `ui5-tooling-transpile`'s `coverage` option is not switched on for the test run, or `/shared/` is not instrumented (R9), the QUnit and OPA5 suites **still pass** while reporting zero or partial coverage. Nothing in the suite itself fails. Only the threshold check on the per-tier UI5 report catches it. The lever is the transpile `coverage` option in the UI5 configuration the test run loads; which file carries it is provisional (the spike proposes a test-only copy of each `ui5.yaml`). Story 1 must show that a deliberately failing threshold fails the gate.
 
-### 9.2 OPA5 — Journey Tests
+UI5 tests are written by a dedicated `ui5-test-author` agent, selected by the build brief's `layers` vocabulary; `test-author` stays CAP-only.
 
-| App                                      | Journey                                             | Learning Goal                                                    |
-| ---------------------------------------- | --------------------------------------------------- | ---------------------------------------------------------------- |
-| `transactions` (FRM-001, Fiori Elements) | Open list → filter → navigate to object page → edit | OPA5 on Fiori Elements — the pattern used in enterprise projects |
-| `csv-import` (FRM-003, Freestyle Wizard) | Upload → review tabs → approve → verify             | OPA5 on freestyle — different setup, more manual wiring          |
+### 9.1 Tiers
 
-Two apps, not twenty-two. Enough to learn both patterns. Adding more is repetition.
+| Tier                   | Runner                                                                                                 | Boots                                                                  | DB                            | May assert                                                                                                                                                                              | May not                                                                                |
+| ---------------------- | ------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------- | ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| **UI5 unit**           | QUnit 2 via `ui5-test-runner` 5.14.2                                                                   | UI5 in a headless browser, no backend                                  | None — OData mocked or absent | One logic class at a time: formatters, `shared/util`, custom controls, `model/{App}Service.ts` intent methods against a stubbed model, freestyle controller logic, `ext/` logic classes | Boot `cds-serve`; assert FE or UI5 framework behaviour; render a whole app             |
+| **UI5 journey**        | OPA5 via the same runner — `sap.fe.test` for ListReport/ObjectPage, plain OPA5 for FPM/freestyle/shell | `cds-serve` in the `[development]` profile, seeded from `db/data` CSVs | SQLite `:memory:`             | An app's annotation contract and extensions as rendered; browser FUTs observable on SQLite; freestyle flows                                                                             | FE generic behaviour; anything whose mechanism is Postgres; cross-module routing       |
+| **E2E**                | Playwright (`@playwright/test`)                                                                        | Postgres + the module CAP processes + `serveOneOrigin.mjs`             | Postgres                      | Postgres-dependent and cross-module browser FUTs; shell → module routing                                                                                                                | Run per story; count toward coverage; gate `npm test`                                  |
+| **`/functional-test`** | Playwright MCP — a methodology stage, not a tier in `npm test`                                         | Real servers                                                           | Throwaway Postgres            | The story's FUTs, plus exploratory probing                                                                                                                                              | Be the only regression net — it runs only the current story's FUTs and commits nothing |
 
-### 9.3 File Structure
+### 9.2 What Each Surface Owes
+
+| Surface                      | Apps (measured)                                                                                                       | UI5 unit (QUnit)                                                                                  | UI5 journey (OPA5)                                                                                       | Excluded from UI5 coverage                                                                                                                         |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **FE ListReport/ObjectPage** | `admin-master-data` (one `ControllerExtension`), `transactions` (no controllers; `ext/` logic class + handler module) | Every logic class — e.g. `ext/TransactionActions.ts` — and `model/{App}Service.ts` intent methods | At least one **contract journey** per app via `sap.fe.test` (D-325)                                      | The thin `ext/` handler module (`TransactionsListActions.ts`); the `ControllerExtension` (`ObjectPageExt.controller.ts`) once it delegates (D-323) |
+| **FE FPM custom page**       | `connection-manager` (`sap.fe.core.fpm`, `controller/ConnectionManager.controller.ts`)                                | Every logic class — e.g. `model/ConnectionService.ts`                                             | At least one contract journey, with **plain OPA5 page objects** — `sap.fe.test` has none for FPM (D-322) | None                                                                                                                                               |
+| **Freestyle**                | `csv-import-wizard` (`controller/CsvImportWizard.controller.ts`)                                                      | Controller logic and every `model/` class                                                         | Freestyle flows, plain OPA5 page objects                                                                 | None                                                                                                                                               |
+| **Shell**                    | `shell` (`sap.tnt.ToolPage`, `controller/App.controller.ts`; **no `webapp/` folder**)                                 | Controller logic                                                                                  | Hosts every journey's start: a custom Shell page object at the shell route (D-324)                       | None                                                                                                                                               |
+| **Shared library**           | `shared/` (14 `.ts` files, two of them `*.gen.d.ts`; namespace `com.financialplanner.shared`, served at `/shared`)    | `util/**` including `formatter.ts`, custom controls, base classes                                 | None of its own — it hosts the shared page objects                                                       | `*.gen.d.ts`                                                                                                                                       |
+
+**The contract journey (D-325).** It asserts that the app's columns, filters, actions and extensions render **as declared** — the annotation contract, the UI5 analogue of asserting `@assert.range`. It never asserts FE's generic behaviour: sorting, paging, draft machinery, variant management. That is the framework, and testing it stays forbidden.
+
+**Lifecycle extensions delegate (D-323).** A `ControllerExtension` hook delegates to a plain logic class, the twin of the custom-action rule (`TransactionsListActions` → `TransactionActions`). The extension becomes wiring like a Facade: excluded from UI5 coverage, proven by the journey tier. The logic class is QUnit-tested. The rule lives in `CODING_STANDARDS.md` §SAPUI5, enforced by `lint:frontend-controller-shape`.
+
+### 9.3 Journey Launch
+
+Every Financial Planner journey starts at the **shell route** through a custom Shell page object, in place of `sap.fe.test.Shell`, which assumes the Fiori launchpad (D-324). No journey starts a component directly.
+
+### 9.4 File Structure
+
+Per app, in QUnit Test Starter layout (D-326). Page objects in `integration/pages/`; test data in the app's `test/data/`. Page objects shared across apps — the Shell page object and the FPM base page object — live in `app/shared/test/`. The shell and the shared library have no `webapp/` folder, so their trees sit directly under the app folder. A suite outside `webapp/` is not served under the app's namespace, which is why there is no module-level suite.
 
 ```
 app/
-├── shared/
-│   └── test/
-│       └── unit/
-│           ├── formatter.test.ts
-│           ├── BaseController.test.ts
-│           ├── VizFrameCard.test.ts
-│           └── ApexChartCard.test.ts
-├── transactions/
-│   └── webapp/
-│       └── test/
-│           ├── unit/
-│           │   └── ListReportExt.test.ts
-│           └── integration/
-│               └── TransactionJourney.ts
-└── csv-import/
-    └── webapp/
-        └── test/
-            ├── unit/
-            │   └── CsvImportController.test.ts
-            └── integration/
-                └── CsvImportJourney.ts
+├── admin-master-data/webapp/test/
+│   ├── unit/
+│   ├── integration/
+│   │   └── pages/
+│   └── data/
+├── connection-manager/webapp/test/
+│   ├── unit/
+│   ├── integration/
+│   │   └── pages/                ← extend the FPM base page object
+│   └── data/
+├── transactions/webapp/test/
+│   ├── unit/                     ← TransactionActions, TransactionsService
+│   ├── integration/
+│   │   └── pages/
+│   └── data/
+├── csv-import-wizard/webapp/test/
+│   ├── unit/
+│   ├── integration/
+│   │   └── pages/
+│   └── data/
+├── shell/test/                   ← no webapp/ folder
+│   ├── unit/
+│   ├── integration/
+│   │   └── pages/
+│   └── data/
+└── shared/test/                  ← no webapp/ folder
+    ├── unit/                     ← util/**, controls, base classes
+    └── (shared page objects)     ← FP Shell page object, FPM base page object
 ```
 
-### 9.4 Coverage
+The gate passes **one `--url` per app testsuite** (provisional, R1).
 
-No enforced thresholds. Frontend tests are a learning exercise, not a quality gate. Backend coverage targets (§8) remain the project's quality gatekeepers.
+### 9.5 Coverage
+
+UI5 coverage is a **separate gate** from Jest's, never merged into one number (D-327). Thresholds and exclusions: §8.4. Each surface in §9.2 counts toward the overall `app/**` row; `app/shared/util/**` carries the 100/100 row as well, which makes `/shared/` instrumentation (R9) load-bearing.
+
+### 9.6 Browser FUTs
+
+| A browser FUT whose observation…                                                          | Lands in                                                                                                                      |
+| ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| does **not** depend on Postgres                                                           | An OPA5 journey in `npm test` — the per-story regression net. Titled **without** the FUT ID: `lint:tracking-ids` scans `app/` |
+| depends on Postgres, or crosses modules (shell → module routing via `serveOneOrigin.mjs`) | The E2E tier (§9.7)                                                                                                           |
+| any of the above, for the story being built                                               | Also `/functional-test`, which runs every FUT of that story and keeps its exploratory probing                                 |
+
+`/functional-test` alone was a regression gap: it runs only the current story's FUTs and commits nothing, so the Postgres-only and cross-module behaviour of already-shipped stories had no net (D-328).
+
+**Counts: none measured for this amendment.** Its record scoped the FUT question to routing browser FUTs to a tier; no per-spec count of browser FUTs was taken.
+
+### 9.7 E2E Tier
+
+| Rule     | Ruling (D-329)                                                                                                                                                                                |
+| -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| What     | Committed Playwright specs (`@playwright/test`)                                                                                                                                               |
+| When     | At each sprint boundary (the checkpoint) — never in every `npm test` or build gate, because they need real Postgres, both CAP processes and the proxy                                         |
+| Where    | `test/e2e/{area}/{data,support,tests}/` (§11)                                                                                                                                                 |
+| Suffix   | `*.e2e.ts`, so Jest's `**/*.test.ts` never collects them (provisional with the rest of the gate mechanics)                                                                                    |
+| Coverage | Not counted                                                                                                                                                                                   |
+| Install  | `@playwright/test` is **not installed** (measured: absent from root `node_modules` and root `package.json`). Sprint 2 story 1 installs it with `ui5-test-runner`, `nyc` and `playwright` (R1) |
+| Rejected | wdi5 — UI5 selectors and `sap.fe.test` reuse, bought with 460 packages / 121 MB and a second runner                                                                                           |
+
+### 9.8 Test Data
+
+The shared Test Rules carry over: no inline payloads, named constants in the app's `test/data/` folder, a one-line `/** why */` JSDoc on every test. **Enforced by nothing for `app/**/test/**` today** — `lint:test-data` and `lint:test-structure` scan `test/` only.
+
+### 9.9 Enforcement
+
+| Rule                                                     | Enforced by                                                                                                                                                                                              |
+| -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ControllerExtension` hooks delegate to a logic class    | `lint:frontend-controller-shape`, extended for D-323 by the host in this amendment's session                                                                                                             |
+| No FUT ID in a journey title                             | `lint:tracking-ids` (scans `app/`)                                                                                                                                                                       |
+| UI5 test data and layout (`app/**/test/**`)              | **Nothing** — `lint:test-data` and `lint:test-structure` scan `test/` only                                                                                                                               |
+| ESLint on `app/**/test/**`                               | **Fails today, not enforced.** The `app/**/*.ts` block applies the class-only rule, which `*.qunit.ts` files and OPA5 page objects trip. An `app/**/test/**` block mirroring the test exemptions is owed |
+| `test/e2e/` tree                                         | **Fails today.** `lint:test-structure` accepts only `test/{unit,integration}/…` and `test/shared/…`                                                                                                      |
+| UI5 thresholds (§8.4)                                    | Provisional until R1 closes                                                                                                                                                                              |
+| One contract journey per FE app; the browser-FUT routing | **Nothing**                                                                                                                                                                                              |
+| The transpile `coverage` lever                           | **Nothing** but the threshold check on the UI5 report — the silent pass above                                                                                                                            |
+
+### 9.10 Amendments
+
+The host applies these in-session; this document lists them.
+
+| Target                                                  | Change                                                                                                                                                                                                                                                                                                                                                  |
+| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Standards (Documents)/CODING_STANDARDS.md` §Test Rules | Framework line, and a UI5 tier bullet set (D-321, D-323, D-325, D-327, D-328, D-329)                                                                                                                                                                                                                                                                    |
+| `Standards (Documents)/CODING_STANDARDS.md` §SAPUI5     | The extension-delegation rule, naming `lint:frontend-controller-shape` (D-323)                                                                                                                                                                                                                                                                          |
+| `lint:frontend-controller-shape`                        | Extended for D-323                                                                                                                                                                                                                                                                                                                                      |
+| Research pack (`playwright-in-repo.md`, `README.md`)    | "Playwright already installed" refuted                                                                                                                                                                                                                                                                                                                  |
+| Project Tracker `TEST_STRATEGY.md` §13.2, §17           | `app/**` exclusion reason changes (Jest still excludes; the UI5 gate covers it); the owed items join the inventory as enforced by nothing                                                                                                                                                                                                               |
+| **Owed to Sprint 2 story 1** (listed, not applied)      | ESLint `app/**/test/**` block; `lint:test-structure` accepts `test/e2e/` and `app/**/webapp/test/`; `lint:test-data` reaches `*.qunit.ts`; `build.js` `hasJestLayer` gains the `ui5` author hook; the `build.md` "there is no in-repo UI5 suite" sentence and the `build.js` comment citing D-80 and Project Tracker D-195 go stale when the gate lands |
+
+### 9.11 Risks
+
+Register: `Standards (Documents)/research/README.md` §Open risks.
+
+| Risk                                          | Outcome                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **R1** Gate chain unexecuted                  | **Re-owned** to Sprint 2 story 1: installs `ui5-test-runner@5.14.2`, `nyc`, `@playwright/test` and **`playwright`** — the runner drives headless Chromium through Playwright, which is not installed, and `--no-npm-install` (R6) stops the runner fetching it — then runs the `gate-integration.md` spike three times, lands the gate wiring. Installing needs Sandro's approval, so it is a build story, not this stage. Gate mechanics provisional until it closes |
+| **R2** `sap.fe.test.Shell` assumes FLP        | **Resolved by ruling** (D-324: custom Shell page object); **executed** by story 1's first journey through the shell route                                                                                                                                                                                                                                                                                                                                             |
+| **R3** No `sap.fe.test` page object for FPM   | **Resolved by ruling** (D-322: plain OPA5). Hits this module's `connection-manager`, not only Project Tracker                                                                                                                                                                                                                                                                                                                                                         |
+| **R4** `ControllerExtension` unit-testability | **Resolved by ruling** (D-323: delegation standard + lint); no fake-`base` spike needed                                                                                                                                                                                                                                                                                                                                                                               |
+| **R5** Coverage directory collision           | Settled: the runner always carries `--coverage-report-dir coverage-ui5 --report-dir report-ui5`                                                                                                                                                                                                                                                                                                                                                                       |
+| **R6** Runner installs drivers at runtime     | Settled: the runner always carries `--no-npm-install`                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| **R7** Single-maintainer runner               | Pinned 5.14.2; revisit when Node moves to 24. Owner: whoever raises the Node pin                                                                                                                                                                                                                                                                                                                                                                                      |
+| **R8** Merged UI5 + Jest threshold            | **Avoided by ruling** (D-327: separate gate)                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| **R9** `/shared/` instrumentation             | **Re-owned** to story 1. Intent stated here: `app/shared/**` counts in this module's UI5 gate, including the 100/100 row                                                                                                                                                                                                                                                                                                                                              |
 
 ---
 
@@ -451,12 +583,12 @@ Test scope grows with each wave. Earlier waves carry heavier test weight because
 
 ### Wave 1 — Core Pipeline (23 objects)
 
-| Test Type       | Scope                                                                                               |
-| --------------- | --------------------------------------------------------------------------------------------------- |
-| **Unit**        | All 7 Validators, all 7 Services, all ENH engines (ENH-001, 003, 006, 007, 008, 009), all Utilities |
-| **Integration** | All 4 CDS services — CRUD + custom actions for Wave 1 entities                                      |
-| **Scenarios**   | Weekly review (WFL-001), card onboarding (WFL-004), CSV import (FRM-003)                            |
-| **Frontend**    | QUnit: shared resources. OPA5: transactions (FRM-001), csv-import (FRM-003).                        |
+| Test Type       | Scope                                                                                                       |
+| --------------- | ----------------------------------------------------------------------------------------------------------- |
+| **Unit**        | All 7 Validators, all 7 Services, all ENH engines (ENH-001, 003, 006, 007, 008, 009), all Utilities         |
+| **Integration** | All 4 CDS services — CRUD + custom actions for Wave 1 entities                                              |
+| **Scenarios**   | Weekly review (WFL-001), card onboarding (WFL-004), CSV import (FRM-003)                                    |
+| **Frontend**    | ~~QUnit: shared resources. OPA5: transactions (FRM-001), csv-import (FRM-003).~~ Every app, per §9 (D-321). |
 
 ### Wave 2 — Churning Depth + Goals (8 objects)
 
@@ -488,11 +620,11 @@ Test scope grows with each wave. Earlier waves carry heavier test weight because
 
 **The contract (`lint:test-structure`).** Every backend test file lives under `test/{unit|integration}/{module}/{data|support|tests}/`, plus one cross-cutting `test/shared/{data,support}/`:
 
-| Role folder | Holds | Rule |
-| --- | --- | --- |
-| `data/` | Fixtures + factories — named constants (UPPER_SNAKE_CASE) and builder functions returning plain objects | Data lives here, nowhere else |
-| `support/` | Mocks, service/harness wiring, `seedXxx`, HTTP stubs — **functions only** | An exported object/array fixture here is a lint violation → move to sibling `data/` |
-| `tests/` | The `*.test.ts` specs (imports + arrange-act-assert) | A spec outside a `tests/`/`scenarios/` folder is a violation |
+| Role folder | Holds                                                                                                   | Rule                                                                                |
+| ----------- | ------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `data/`     | Fixtures + factories — named constants (UPPER_SNAKE_CASE) and builder functions returning plain objects | Data lives here, nowhere else                                                       |
+| `support/`  | Mocks, service/harness wiring, `seedXxx`, HTTP stubs — **functions only**                               | An exported object/array fixture here is a lint violation → move to sibling `data/` |
+| `tests/`    | The `*.test.ts` specs (imports + arrange-act-assert)                                                    | A spec outside a `tests/`/`scenarios/` folder is a violation                        |
 
 - **`{module}`** mirrors `srv/modules/`. The data-ingestion domain lives in `srv/modules/ingestion` (CSV, SimpleFIN, Scheduling, Dedup) and keeps that `ingestion` name in the test tree — renamed from `integration` so it never collides with the _integration_ test type.
 - **`test/shared/{data,support}`** is for fixtures/builders shared across modules **or** across the unit↔integration boundary (e.g. `cards.ts`, `reference.ts`). A fixture used by only one module+test-type stays in that module's local `data/`.
@@ -558,7 +690,18 @@ test/
     └── scenarios/                        ← FUT multi-step specs
 ```
 
-Frontend tests live within their respective `app/` folders (see §9.3).
+Frontend tests live within their respective `app/` folders (see §9.4).
+
+**E2E tree (D-329).** Outside the contract above today — `lint:test-structure` rejects it until Sprint 2 story 1 widens it (§9.9). Specs carry the `*.e2e.ts` suffix so Jest never collects them (provisional).
+
+```
+test/
+└── e2e/
+    └── {area}/
+        ├── data/
+        ├── support/
+        └── tests/                       ← *.e2e.ts
+```
 
 ---
 
@@ -655,23 +798,41 @@ project/
     └── ...
 ```
 
+### 12.6 UI5 and E2E Runs
+
+**Provisional until R1 closes (§9).**
+
+| Run          | Recorded how                                                                                                                                                                                                                                                                                                                                       |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **UI5 gate** | The runner writes `report-ui5/report.json`; `gate-runner` parses it beside Jest's JSON. A **failing** UI5 run is recorded only if the recorder is called explicitly after both legs — npm skips a `post` script when the main script exits non-zero, so a `posttest` hook never sees a failure. Story 1 measures whether a failing run is recorded |
+| **E2E**      | At the sprint checkpoint, recorded the way a checkpoint run is already recorded here — a test report per §12.1–§12.4                                                                                                                                                                                                                               |
+
 ---
 
 ## 13. Decisions Reference
 
-Decisions made during test strategy definition (Step 10):
+Decisions made during test strategy definition (Step 10) and the 2026-11-04 frontend amendment:
 
-| ID    | Title                      | Summary                                                                                                                                                                       |
-| ----- | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| D-74  | Test Framework             | Jest + ts-jest for backend. CAP-aligned, built-in mocking.                                                                                                                    |
-| D-75  | Test Boundaries            | Three-tier pyramid. External APIs always mocked. Unit tests never touch DB. Integration uses SQLite via `cds.test()`. Functional tests nested under `integration/scenarios/`. |
-| D-76  | Unit Test Standards        | Validators fully tested (pure, no mocks). Services tested with CDS mocked, Validator real. Facades skipped. Private methods tested via bracket notation.                      |
-| D-77  | Integration Test Standards | `cds.test()` + SQLite. One file per CDS service. Scenario tests for FUT workflows. Test data always imported with semantic names — never inline.                              |
-| D-78  | Test Data Strategy         | Hybrid factories + named constants. Canonical test world for integration seeds. Obviously fake sensitive data.                                                                |
-| D-79  | Coverage Targets           | Validators/Utilities: 100%/100%. Services: 90%/85%. Overall: 85%/80%. Facades excluded. Enforced via `jest.config.ts`.                                                        |
-| D-80  | Frontend Testing           | QUnit for shared resources + select controllers. OPA5 journeys on FRM-001 (Fiori Elements) and FRM-003 (freestyle). Learning exercise, no enforced thresholds.                |
-| D-230 | Test-Driven Development    | Red-Green-Refactor for Validators, Services, Utilities, ENH engines. Primary definition in [Technical Standards](TECHNICAL_STANDARDS.md) §13.                                 |
+| ID    | Title                                        | Summary                                                                                                                                                                                     |
+| ----- | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| D-74  | Test Framework                               | Jest + ts-jest for backend. CAP-aligned, built-in mocking.                                                                                                                                  |
+| D-75  | Test Boundaries                              | Three-tier pyramid. External APIs always mocked. Unit tests never touch DB. Integration uses SQLite via `cds.test()`. Functional tests nested under `integration/scenarios/`.               |
+| D-76  | Unit Test Standards                          | Validators fully tested (pure, no mocks). Services tested with CDS mocked, Validator real. Facades skipped. Private methods tested via bracket notation.                                    |
+| D-77  | Integration Test Standards                   | `cds.test()` + SQLite. One file per CDS service. Scenario tests for FUT workflows. Test data always imported with semantic names — never inline.                                            |
+| D-78  | Test Data Strategy                           | Hybrid factories + named constants. Canonical test world for integration seeds. Obviously fake sensitive data.                                                                              |
+| D-79  | Coverage Targets                             | Validators/Utilities: 100%/100%. Services: 90%/85%. Overall: 85%/80%. Facades excluded. Enforced via `jest.config.ts`.                                                                      |
+| D-80  | Frontend Testing                             | ~~QUnit for shared resources + select controllers. OPA5 journeys on FRM-001 (Fiori Elements) and FRM-003 (freestyle). Learning exercise, no enforced thresholds.~~ **Superseded by D-321.** |
+| D-230 | Test-Driven Development                      | Red-Green-Refactor for Validators, Services, Utilities, ENH engines. Primary definition in [Technical Standards](TECHNICAL_STANDARDS.md) §13.                                               |
+| D-321 | Frontend Testing Is a Gate                   | Reverses D-80. Every app tested, thresholds enforced. QUnit 2 + OPA5 via `ui5-test-runner` 5.14.2; journeys on `cds-serve` `[development]`. Gate mechanics provisional until R1 closes.     |
+| D-322 | FPM Pages Use Plain OPA5 Page Objects        | `connection-manager` (and Project Tracker's page) get hand-written OPA5 page objects, same runner and coverage. Playwright for FPM rejected.                                                |
+| D-323 | Extensions Delegate to a Logic Class         | A `ControllerExtension` hook delegates to a plain logic class; the extension is wiring, excluded from UI5 coverage. `lint:frontend-controller-shape`.                                       |
+| D-324 | Journeys Launch Through the Shell            | Every Financial Planner journey starts at the shell route via a custom Shell page object, in place of `sap.fe.test.Shell`.                                                                  |
+| D-325 | What a Fiori Elements App Owes               | QUnit on every logic class, plus at least one OPA5 contract journey per FE app. FE generic behaviour stays untested.                                                                        |
+| D-326 | UI5 Test Layout Per App                      | `app/<app>/webapp/test/{unit,integration}/`, page objects in `integration/pages/`, data in `test/data/`; shared page objects in `app/shared/test/`; shell at `app/shell/test/`.             |
+| D-327 | UI5 Coverage Is a Separate Gate              | `app/shared/util/**` 100%/100%; overall `app/**` 85%/80%; thin ext handlers, `ControllerExtension`s, `*.gen.d.ts` excluded. No merge with Jest.                                             |
+| D-328 | Browser FUT Routing                          | SQLite-observable browser FUTs also get an OPA5 journey in `npm test`; Postgres-dependent or cross-module ones go to E2E. `/functional-test` unchanged.                                     |
+| D-329 | E2E Tier — Playwright at the Sprint Boundary | Committed `@playwright/test` specs in `test/e2e/{area}/{data,support,tests}/`, `*.e2e.ts`, run at each checkpoint, not counted in coverage. wdi5 rejected.                                  |
 
 ---
 
-_This document is the single source of truth for the Financial Planner test strategy. All test personas reference these standards. Traces back to [Technical Standards](TECHNICAL_STANDARDS.md) (coding patterns), [Tech Stack](TECH_STACK.md) (project structure), [Business Architecture](BUSINESS_ARCHITECTURE.md) (FRICEW catalog), and [Decisions Log](user-profile/DECISIONS_LOG.md)._
+_This document is the single source of truth for the Financial Planner test strategy. All test personas reference these standards. Traces back to [Technical Standards](TECHNICAL_STANDARDS.md) (coding patterns), [Tech Stack](TECH_STACK.md) (project structure), [Business Architecture](BUSINESS_ARCHITECTURE.md) (FRICEW catalog), [Decisions Log](user-profile/DECISIONS_LOG.md), and the UI5 testing research pack (`Standards (Documents)/research/README.md`)._

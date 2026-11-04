@@ -22,19 +22,19 @@
 
 This document formalizes coding conventions and patterns so all build personas follow consistent rules from Sprint 1. Turns the high-level Enbridge conventions ([TECH_STACK.md](TECH_STACK.md) §7) into enforceable standards.
 
-| Area                     | Key Standard                                                                                        |
-| ------------------------ | --------------------------------------------------------------------------------------------------- |
-| **CDS**                  | PascalCase entities, camelCase fields, CAP auto-generated FKs, modular schema files by domain       |
-| **TypeScript**           | `strict: true`, all sub-flags, `ES2022` target, `Node16` module                                     |
-| **Handler pattern**      | Facade → Service → Validator, always 3 files, `wrapHandler` on every handler                        |
-| **Error handling**       | `req.error()` for validation (accumulate), `req.reject()` for fatal. Always i18n keys.              |
-| **Logging**              | Structured JSON, dual output (console + file), dedicated `error.log`, correlation IDs               |
-| **i18n**                 | Three tiers: CDS labels (PascalCase), runtime messages (camelCase.dots), UI5 (camelCase)            |
-| **Encryption**           | AES-256-GCM, env var key, per-field IV, `EncryptionUtility.ts`                                      |
-| **ESLint**               | Enbridge-adapted, custom architectural rules; UI5 shares the backend tsRules                        |
-| **SAPUI5**               | XML views, BaseController, entity-based annotations, `{ViewType}Ext` extensions, ES modules (TS)    |
-| **Code review**          | Per-persona checklists for sprint checkpoint meetings                                               |
-| **Development workflow** | Test-driven development — Red-Green-Refactor for all Validators, Services, Utilities                |
+| Area                     | Key Standard                                                                                     |
+| ------------------------ | ------------------------------------------------------------------------------------------------ |
+| **CDS**                  | PascalCase entities, camelCase fields, CAP auto-generated FKs, modular schema files by domain    |
+| **TypeScript**           | `strict: true`, all sub-flags, `ES2022` target, `Node16` module                                  |
+| **Handler pattern**      | Facade → Service → Validator, always 3 files, `wrapHandler` on every handler                     |
+| **Error handling**       | `req.error()` for validation (accumulate), `req.reject()` for fatal. Always i18n keys.           |
+| **Logging**              | Structured JSON, dual output (console + file), dedicated `error.log`, correlation IDs            |
+| **i18n**                 | Three tiers: CDS labels (PascalCase), runtime messages (camelCase.dots), UI5 (camelCase)         |
+| **Encryption**           | AES-256-GCM, env var key, per-field IV, `EncryptionUtility.ts`                                   |
+| **ESLint**               | Enbridge-adapted, custom architectural rules; UI5 shares the backend tsRules                     |
+| **SAPUI5**               | XML views, BaseController, entity-based annotations, `{ViewType}Ext` extensions, ES modules (TS) |
+| **Code review**          | Per-persona checklists for sprint checkpoint meetings                                            |
+| **Development workflow** | Test-driven development — Red-Green-Refactor for all Validators, Services, Utilities             |
 
 ---
 
@@ -528,17 +528,17 @@ Applied to `app/**/*.ts` (D-315). The frontend **shares the backend `tsRules` ve
 
 ### 11.2 Freestyle Apps (14 apps — 12 dashboards + 2 wizards)
 
-| Convention         | Standard                                                                     |
-| ------------------ | ---------------------------------------------------------------------------- |
-| Base controller    | All extend `BaseController.ts` in `app/shared/`                              |
-| Controller naming  | `{PageName}.controller.ts`                                                   |
-| View naming        | `{PageName}.view.xml` — XML views only                                       |
-| Fragment naming    | `{FragmentName}.fragment.xml`                                                |
-| Model access       | Named models: `this.getView().getModel("data")`. OData stays as default.     |
-| Formatter          | `formatter.ts` per app for display logic. No inline formatting in XML views. |
-| Event handlers     | `on` prefix: `onPressSubmit`, `onSelectCard`, `onChangeMonth`                |
-| Identifier naming  | No Hungarian notation (D-315). Min 3-letter identifiers (`id-length`).       |
-| Private methods    | `_` prefix: `_loadChartData`, `_buildFilterArray`                            |
+| Convention        | Standard                                                                     |
+| ----------------- | ---------------------------------------------------------------------------- |
+| Base controller   | All extend `BaseController.ts` in `app/shared/`                              |
+| Controller naming | `{PageName}.controller.ts`                                                   |
+| View naming       | `{PageName}.view.xml` — XML views only                                       |
+| Fragment naming   | `{FragmentName}.fragment.xml`                                                |
+| Model access      | Named models: `this.getView().getModel("data")`. OData stays as default.     |
+| Formatter         | `formatter.ts` per app for display logic. No inline formatting in XML views. |
+| Event handlers    | `on` prefix: `onPressSubmit`, `onSelectCard`, `onChangeMonth`                |
+| Identifier naming | No Hungarian notation (D-315). Min 3-letter identifiers (`id-length`).       |
+| Private methods   | `_` prefix: `_loadChartData`, `_buildFilterArray`                            |
 
 ### 11.3 Custom Controls
 
@@ -642,7 +642,7 @@ All backend implementation follows the Red-Green-Refactor cycle:
 | **ENH engines**       | Yes  | Core computation logic. Test expected outputs per scenario, then implement.                                    |
 | **Facades**           | No   | Zero logic by design (ESLint-enforced). Covered by integration tests after unit TDD is complete.               |
 | **Integration tests** | No   | Written after unit-level TDD for a module is complete, since they require the full CDS stack via `cds.test()`. |
-| **Frontend**          | No   | Learning exercise (D-80). Tests written alongside or after implementation.                                     |
+| **Frontend**          | No   | A build gate, not a learning exercise (D-321, reverses D-80). Tests written alongside or after implementation. |
 
 ### 13.2 Workflow Per Module
 

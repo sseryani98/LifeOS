@@ -1,6 +1,6 @@
 # QUnit unit tests: QUnit stays, Karma is gone, `ui5-test-runner` (community) is the headless runner, and coverage of TS sources comes from `babel-plugin-istanbul` inside `ui5-tooling-transpile`
 
-**QUnit 2 via the UI5 Test Starter remains SAP's unit framework for UI5 1.136, and the supported headless path is the community `ui5-test-runner` pointed at the test suite page in remote mode, with TypeScript coverage produced by the `coverage` option that ui5-tooling-transpile 3.12.0 (the exact version pinned in the repo) already provides.** What holds: TS authoring is first-class (SAP's own walkthrough writes `*.qunit.ts`), no second framework is needed, and the runner can start/stop `cds-serve` itself and enforce per-metric thresholds. What does not hold: there is no SAP-owned runner (the `@ui5/test-runner` name in the brief does not exist on npm; the real package is `ui5-test-runner` by Arnaud Buchholz), and v6 requires Node >= 24.11.1, which is unverified for this repo. What it costs: one devDependency (plus on-demand `nyc`, `babel-plugin-istanbul`), a second `ui5.yaml` per app for instrumented serving, and a test page per app. What would change the answer: if the repo cannot move to Node 24 and v5.14 proves unmaintained, the fallback is a 60-line Playwright script that opens `testsuite.qunit.html` and reads QUnit's results (Playwright is already installed).
+**QUnit 2 via the UI5 Test Starter remains SAP's unit framework for UI5 1.136, and the supported headless path is the community `ui5-test-runner` pointed at the test suite page in remote mode, with TypeScript coverage produced by the `coverage` option that ui5-tooling-transpile 3.12.0 (the exact version pinned in the repo) already provides.** What holds: TS authoring is first-class (SAP's own walkthrough writes `*.qunit.ts`), no second framework is needed, and the runner can start/stop `cds-serve` itself and enforce per-metric thresholds. What does not hold: there is no SAP-owned runner (the `@ui5/test-runner` name in the brief does not exist on npm; the real package is `ui5-test-runner` by Arnaud Buchholz), and v6 requires Node >= 24.11.1, which is unverified for this repo. What it costs: one devDependency (plus on-demand `nyc`, `babel-plugin-istanbul`), a second `ui5.yaml` per app for instrumented serving, and a test page per app. What would change the answer: if the repo cannot move to Node 24 and v5.14 proves unmaintained, the fallback is a 60-line Playwright script that opens `testsuite.qunit.html` and reads QUnit's results (Playwright: only the MCP server is installed — `@playwright/test` would be added; refuted 2026-11-04).
 
 **Mode:** Compare · **Verdict:** Recommended (`ui5-test-runner` remote mode + transpile-side istanbul) · **Confidence:** Medium · **Feeds:** Test Strategy unit tier · **Researched:** 2026-11-04 · **Status:** Draft
 
@@ -20,12 +20,12 @@ The built-in Test Starter `coverage` option still loads Blanket (`configuration-
 
 ### Runner comparison
 
-| Option | Headless | TS sources | Coverage + thresholds | Attaches to cds-serve | New deps | Verdict |
-|---|---|---|---|---|---|---|
-| `ui5-test-runner` v6, `--driver playwright`, remote mode | Chromium (Playwright/Puppeteer/WDIO/Selenium drivers) | served/transpiled by cds-plugin-ui5 | nyc merge/report, `--coverage-check-{lines,branches,functions,statements}` | yes, `--url` + `--start "cds-serve"` + `--start-wait-url` | 1 (+ nyc, babel-plugin-istanbul on demand) | **Recommended** |
-| Playwright script that opens `testsuite.qunit.html`, polls `QUnit.done`, dumps `window.top.__coverage__`, then `nyc report --check-coverage` | yes | same | DIY via nyc | yes | 0 new (nyc) | Viable alternative / fallback |
-| karma-ui5 + karma-ui5-transpile | yes | yes | karma-coverage | needs `url` to cds-serve | 4+ deprecated packages | Rejected |
-| Jest (jsdom) importing app TS directly | n/a | only files with no `sap/*` imports | Jest's own | no UI5 runtime | 0 | Rejected as the tier; the loader/`sap.ui.define` transform makes it fail for anything touching UI5 (Inferred) |
+| Option                                                                                                                                       | Headless                                              | TS sources                          | Coverage + thresholds                                                      | Attaches to cds-serve                                     | New deps                                   | Verdict                                                                                                       |
+| -------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- | ----------------------------------- | -------------------------------------------------------------------------- | --------------------------------------------------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------- |
+| `ui5-test-runner` v6, `--driver playwright`, remote mode                                                                                     | Chromium (Playwright/Puppeteer/WDIO/Selenium drivers) | served/transpiled by cds-plugin-ui5 | nyc merge/report, `--coverage-check-{lines,branches,functions,statements}` | yes, `--url` + `--start "cds-serve"` + `--start-wait-url` | 1 (+ nyc, babel-plugin-istanbul on demand) | **Recommended**                                                                                               |
+| Playwright script that opens `testsuite.qunit.html`, polls `QUnit.done`, dumps `window.top.__coverage__`, then `nyc report --check-coverage` | yes                                                   | same                                | DIY via nyc                                                                | yes                                                       | 0 new (nyc)                                | Viable alternative / fallback                                                                                 |
+| karma-ui5 + karma-ui5-transpile                                                                                                              | yes                                                   | yes                                 | karma-coverage                                                             | needs `url` to cds-serve                                  | 4+ deprecated packages                     | Rejected                                                                                                      |
+| Jest (jsdom) importing app TS directly                                                                                                       | n/a                                                   | only files with no `sap/*` imports  | Jest's own                                                                 | no UI5 runtime                                            | 0                                          | Rejected as the tier; the loader/`sap.ui.define` transform makes it fail for anything touching UI5 (Inferred) |
 
 ## Coverage of TypeScript sources is solved on the transpile side, not the runner side
 
@@ -38,14 +38,14 @@ Minimal shape per app (Inferred composition of the documented pieces):
 ```yaml
 # app/csv-import-wizard/ui5-coverage.yaml
 specVersion: "4.0"
-extends: ui5.yaml            # if the repo's ui5.yaml has no `extends` support, duplicate it
+extends: ui5.yaml # if the repo's ui5.yaml has no `extends` support, duplicate it
 server:
   customMiddleware:
     - name: ui5-tooling-transpile-middleware
       afterMiddleware: compression
       configuration:
         transformTypeScript: true
-        coverage: true          # babel-plugin-istanbul, ui5-tooling-transpile >= 3.12.0
+        coverage: true # babel-plugin-istanbul, ui5-tooling-transpile >= 3.12.0
         excludes: ["/test/"]
 ```
 
