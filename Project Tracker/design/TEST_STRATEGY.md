@@ -11,6 +11,7 @@
 
 | Date       | Author          | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | ---------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-11-04 | Claude          | `/refresh-docs` after SPEC-03 build: §12 and §17.1's "empty tree" claims annotated — the tree holds 42 spec files; §17.1's linter block 21 → 22 and the coverage-numbers row is Live; §12's `script/` tier names its three current specs; the Twenty-linters note marked resolved. No rule changed. |
 | 2026-11-02 | Sandro & Claude | **v1.3 — amended at `SPEC-02`'s build (D-244, D-246).** §14: `SPEC-02` gains BR-37, so the contract is **181** FUTs across **370** business rules — `SPEC-02` now carries 19 FUTs and 37 rules. §9: `Milestone.storyId` is unique in **Workspace**, not Initiative (D-246). Status stays **Approved**.                                                                                                                                                                                                                                    |
 | 2026-11-02 | Sandro & Claude | **v1.2 — amended at `SPEC-02`'s build (D-239, D-242).** §10: the twelve code lists are seeded at `CNV-001`, not `CNV-002`, and `SPEC-02` FUT-019 joins the migration reconciliation as cover for a seed defect. §11.1: the Methodology and Code lists seed sets come from the `db/data/` CSVs, never a fixture copy. §2, §14: `SPEC-02` FUT-019 is classified **Verb (A)** (Sandro), so the contract is **181** FUTs (verb **60**) across **369** business rules — `SPEC-02` now carries 19 FUTs and 36 rules. Status stays **Approved**. |
 | 2026-08-15 | Sandro & Claude | **v1.1 — amended at the Project Planning stage.** §17.2's linter candidate is **answered rather than left open**: no new linter, and the `setupFiles` lever gets an in-module guard in story `SPEC-01`'s definition of done instead (BP-001 §11, D-208). No threshold, tier, folder or count changes.                                                                                                                                                                                                                                     |
@@ -390,8 +391,8 @@ section exists to prevent. **`@assert.unique` violations surface as the driver's
 error, not a CAP key** — so the assertion is on the rejection and its status, never on a
 `ASSERT_UNIQUE` code that does not exist.
 
-**This amends a shared standard, not only this document.** `Financial Planner/CLAUDE.md` §Test Rules
-still instructs every module to "DO test annotation-based constraints (`@assert.unique`,
+**This amends a shared standard, not only this document.** The shared Test Rules — then in
+`Financial Planner/CLAUDE.md`, now `Standards (Documents)/CODING_STANDARDS.md` §Test Rules — instructed every module to "DO test annotation-based constraints (`@assert.unique`,
 `@mandatory`, `@assert.range`, **cross-field `@assert`**) as contract documentation". The last of
 those four is a test of an annotation that does not exist. Corrected in-session (§18), on D-156's
 precedent — it is a live agent instruction rather than documentation. Its CDS bullet was corrected at
@@ -452,7 +453,7 @@ tests reuses a shape three Approved specs already fix, rather than inventing a p
 | Initiatives | Three — two Complete with their real git facts, one Active               | SPEC-03 §3.1                                            |
 | Milestones  | Twelve, `shipsUi` set on all twelve, exactly one in Backlog with a chain | SPEC-03 FUT-002                                         |
 | Methodology | Nine stages, seven subtasks                                              | `db/data/` CSVs (CNV-001), never a fixture copy (D-242) |
-| Registers   | Four Defects, five Decisions, two Activity rows, one TestRun             | SPEC-03 §3.2                                            |
+| Registers   | Defects, Decisions, Activity rows and one TestRun, counted by BR-30      | SPEC-03 §3.2                                            |
 | Code lists  | All twelve, fully seeded (DM-001 §8)                                     | `db/data/` CSVs (CNV-001), never a fixture copy (D-242) |
 
 **No sensitive-data rules are needed, and that is a stated "none".** This module holds sprint state.
@@ -465,7 +466,8 @@ here.
 
 **Inherited wholesale**, and already enforced: `lint:test-structure` runs in this module's `lint`
 block today and passes over the empty tree (measured this session — "Scanning 0 test file(s)", exit
-0), which is D-36's missing-folder rule working as intended.
+0), which is D-36's missing-folder rule working as intended. _Annotated 2026-11-04:_ the tree is no
+longer empty — it holds 42 spec files, and the linter still passes over them.
 
 | Role folder | Holds                                                     | Rule                                                |
 | ----------- | --------------------------------------------------------- | --------------------------------------------------- |
@@ -488,7 +490,8 @@ test/
     {domain}/{data,support,tests}/ Entry point A and B (§7)
     scenarios/                     Multi-step FUT workflows
   protocol/{data,support,tests}/   §8 — the MCP transport
-  script/{data,support,tests}/     §5 — recordTestRun, the hook, the linter, the exporter
+  script/{data,support,tests}/     §5 — recordTestRun, the hook, the linter, the exporter;
+                                   today installMcpServer, serveOneOrigin and migrateFinancialPlanner
 ```
 
 **Two folders are new against the exemplar and neither breaks the linter's contract**, because
@@ -527,7 +530,10 @@ that exists is a number no gate can fairly enforce — and the exemplar demonstr
 > `**/*Validator.ts` 100/100, `**/*Service.ts` 90/85 and `mcp/verbs/**` 90/85 — because that story
 > creates the first file under each folder, which is what D-215 requires. **`./scripts/**/*.ts` is
 > still absent**: `SPEC-01` puts one `.mjs` installer there and a `.ts` band over a folder with no
-> covered `.ts` file is the hard error D-215 measured. It lands with `SPEC-09`.
+> covered `.ts` file is the hard error D-215 measured. It lands with `SPEC-09`. **Re-measured
+> 2026-11-04 at `SPEC-03` (D-256):** `scripts/migrateFinancialPlanner.ts` is the first `.ts` there, but
+> its tests spawn it as a child process, so Jest records no coverage for it and the band would still
+> red the run. Its logic lives in `srv/modules/migration/` (100% lines), inside the Services band.
 
 **Three mapping notes, each a consequence rather than a choice.**
 
@@ -745,14 +751,14 @@ is which is this section's whole job.**
 
 | Rule                                                    | Script                     | Status                                                                   |
 | ------------------------------------------------------- | -------------------------- | ------------------------------------------------------------------------ |
-| The `{data,support,tests}` contract (§12)               | `lint:test-structure`      | **Live** — runs in this module's 21-linter block, green on an empty tree |
+| The `{data,support,tests}` contract (§12)               | `lint:test-structure`      | **Live** — runs in this module's 22-linter block                         |
 | Imports + AAA, no inline payloads, one-line JSDoc (§11) | `lint:test-data`           | **Live**                                                                 |
 | No CQL in a spec (§11)                                  | `lint:test-cql`            | **Live**                                                                 |
-| The coverage **numbers** (§13.1)                        | `jest` `coverageThreshold` | Live once a `test` script exists                                         |
+| The coverage **numbers** (§13.1)                        | `jest` `coverageThreshold` | **Live** — `test` script and `coverageThreshold` since `S-00`            |
 | Facades hold zero logic (§6, §13.2)                     | `lint:facades`             | **Live**                                                                 |
 
 All five are already wired; three were verified running against this module's empty `test/` tree this
-session, which is D-36's rule holding.
+session, which is D-36's rule holding. _Annotated 2026-11-04:_ `test/` is no longer empty (42 spec files).
 
 ### 17.2 Enforced by nothing
 
@@ -789,10 +795,11 @@ The other four rules in this table stay enforced by nothing and are re-listed as
 | 5   | [research/README.md](../research/README.md) §7                         | Gains a **Test Strategy row**, which it has never had. **Fifth occurrence** of the defect D-135 named — §7 is written when a document is created and not maintained when a consumer is added — and the second time the consuming stage fixed its own row                                                            | **Applied**           |
 | 6   | **`Financial Planner/design/TEST_STRATEGY.md`** §8.3 and §3.3          | Three coverage-config discrepancies against its own `jest.config.ts` (§13.3), plus two settings its §3.3 omits. Another module's design document, D-12 markdown, belonging to a `/refresh-docs` sweep — the same class as the two Theme-stage items still owed                                                      | **Raised — Sandro's** |
 
-**One thing deliberately not amended, and flagged rather than fixed.** [CLAUDE.md](../CLAUDE.md):31
-says "Twenty linters run" while the module wires **21**. It is already on the open `/refresh-docs`
-list; this document cites the measured 21 (§17.1) rather than the stale twenty, and the one-word fix
-is left to that sweep rather than taken here.
+~~**One thing deliberately not amended, and flagged rather than fixed.** [CLAUDE.md](../CLAUDE.md):31~~
+~~says "Twenty linters run" while the module wires **21**. It is already on the open `/refresh-docs`~~
+~~list; this document cites the measured 21 (§17.1) rather than the stale twenty, and the one-word fix~~
+~~is left to that sweep rather than taken here.~~ **Resolved 2026-11-04:** CLAUDE.md now says
+Twenty-two, and the module wires 22.
 
 ---
 

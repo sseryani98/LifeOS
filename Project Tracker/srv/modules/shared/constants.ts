@@ -2,8 +2,10 @@
 export const ENTITIES = {
   ACTIVITY: "TrackerService.Activities",
   ACTOR: "TrackerService.Actor",
+  AREA: "TrackerService.Areas",
   DEFECT: "TrackerService.Defects",
   DECISION: "TrackerService.Decisions",
+  ENGAGEMENT: "TrackerService.Engagements",
   INITIATIVE: "TrackerService.Initiatives",
   MILESTONE: "TrackerService.Milestones",
   METHODOLOGY_STEP: "TrackerService.MethodologySteps",
@@ -19,6 +21,14 @@ export const ENTITIES = {
 export const CODES = {
   ACTOR_KIND: { HUMAN: "human" },
   DEFECT_STATUS: { OPEN: "Open", CLOSED: "Closed" },
+  FRICEW_TYPES: [
+    "Interface",
+    "Conversion",
+    "Enhancement",
+    "Form",
+    "Report",
+    "Workflow",
+  ],
   INITIATIVE_STATUS: { ACTIVE: "Active", COMPLETE: "Complete" },
   MILESTONE_STATUS: {
     BACKLOG: "backlog",

@@ -54,3 +54,26 @@ metadata:
 **Why:** these were the only real gaps a 99.5%-coverage suite still had; the numbers point elsewhere.
 **How to apply:** on any Project Tracker test-quality run, start from the facade registrations and TEST_STRATEGY §9's
 contract list, not from the coverage table.
+
+- **TDD-red computed-path loaders outlive green** (2026-11-04, SPEC-03; that file was deleted later the same day — re-grep, don't cite it): `test/shared/support/migrationModule.ts`
+  `require(join(...))`s srv/ so red-phase suites type-check before the domain exists; after green it makes the
+  support re-declare srv types (`registerValidator.ts` vs `migration/types.ts`) and drift goes uncaught by `tsc`.
+  Grep `require(join` under test/ on every domain review; other suites import srv directly.
+- **A file missing from the coverage table was never loaded by any test** (2026-11-04, SPEC-03): `scripts/` has no
+  band until SPEC-09, so `scripts/migrateFinancialPlanner.ts` (call order, `process.exitCode = 1`) sat at 0% with the
+  suite green; its scenario FUTs run one layer in, at `MigrationService`. The spawn pattern for a script-tier spec is
+  `test/script/support/originHarness.ts`. Diff the table against the build's changed-file list. **Resolved by the
+  next SPEC-03 pass (still 2026-11-04): the file is gone and grep finds 0 hits — a brief may still list it; ignore.**
+- **Code-value constants are never pinned to their CSV** (2026-11-04): `CODES.FRICEW_TYPES` (srv/modules/shared/constants.ts)
+  gates zod, migrationValidator and reconciliation, but `test/protocol/data/toolSurface.ts` imports it as its own
+  oracle, and `methodologySeed.test.ts` pins only `seededLibrary.ts` to the CSVs. Check any hoisted code list for a
+  constant-vs-`readCodeList()` test.
+- **`intact = a && b && c …` reconciliation predicates read 100% branch-covered with most conjuncts dead** (2026-11-04,
+  SPEC-03 `reconciliationFindings.ts` `findChainOffenders`): only conjuncts with a tamper in
+  `test/integration/migration/data/reconcileTampers.ts` are protected. Map each conjunct to a tamper; DB-impossible
+  states (unique/not-null `position`) need a unit call on the static finder instead. Also: the migration snapshot is
+  embedded, so every §5 bad-data rejection (fricewType, orphan defect) is unreachable end-to-end without a tamper or a unit test.
+- **SPEC-03 seams (2026-11-04):** MigrationService reads its source from an embedded JSON, so the 400 register
+  refusals are unreachable unless a spec tampers the *store* first (e.g. rename a sprint so `_resolveSprints` misses).
+  `position` is `not null` + `@assert.unique`, so BR-33a's ordering failure is untamperable under SQLite — it needs a
+  pure unit test of `ReconciliationFindings`. The scenario FUTs call the service, not `scripts/migrateFinancialPlanner.ts`.

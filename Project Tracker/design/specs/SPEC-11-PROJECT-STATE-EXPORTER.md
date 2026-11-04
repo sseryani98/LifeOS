@@ -19,6 +19,7 @@ reads the database. **R9 is ruled OUT** (D-101's precedent).
 | 2026-08-04 | Sandro & Claude | **Status → Approved** on the day it was written, the normal path for this module — only [SPEC-01](SPEC-01-MCP-INTENT-VERB-LAYER.md) is held in Draft by a decision (D-93). It owes nothing: all three §6 rows owed to it are discharged, and every correction it raised against BA-001, `research/README.md`, [SPEC-03](SPEC-03-FINANCIAL-PLANNER-MIGRATION-LOAD.md), [SPEC-05](SPEC-05-WORKSPACE-HEADER-AND-HEALTH.md), [SPEC-09](SPEC-09-TEST-REPORT-TO-TESTRUN.md) and `PLAN.md` was applied in-session rather than left owed.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | 2026-08-06 | Sandro & Claude | **BR-06's open clause is closed at the Design System stage (D-144).** It read "whether any becomes so is **not yet decided**", citing SPEC-05 §3 and SPEC-06 §3's deferral. Design System ruled **Fiori Elements FPM with draft enablement OFF**, so **no entity in this module is draft-enabled and none will be**. **BR-06's rule text is unchanged** — it was written to be true either way, and it stays an unconditional filter rather than a description of the model. Recorded correction: D-138's own consequence wording said BR-06 "becomes vacuous only if stage 7 rules freestyle"; that was wrong, since it is vacuous because drafts are off, which FPM permits. No business rule and no FUT changes. Status stays **Approved**.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | 2026-11-04 | Claude          | Doc refresh: R1 marked executed and closed (D-170) in the header and wherever this spec gated on it; CDS Service named (`TrackerService`). No rule, FUT or count changed. Status unchanged. |
+| 2026-11-04 | Claude          | `/refresh-docs` after SPEC-03 build: FUT-005's precondition now cites 27 seeded Defects with D-021 … D-027 Open, and resolves D-021 (SPEC-03 re-baseline, D-249). No rule changed. |
 
 ---
 
@@ -393,10 +394,10 @@ BR-25a) — and one export has run.
 
 **Covers:** INT-007
 **Preconditions:** The fixture is loaded and one export has run; at least one Defect is Open — CNV-003
-seeds four Defects, of which **Defect D-004** is Open.
+seeds 27 Defects, of which **Defects D-021 … D-027** are Open.
 **Steps:**
 
-1. Resolve that Defect through `resolve_defect`.
+1. Resolve one of them — Defect D-021 — through `resolve_defect`.
 2. Re-export.
 
 **Expected Result:**

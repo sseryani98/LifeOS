@@ -31,6 +31,25 @@ export const METHODOLOGY_FUT = {
   SEEDED_CODES_ADDRESSABLE: "SPEC-02 FUT-002",
 } as const;
 
+/**
+ * The migration load's functional units. Its numbering restarts too, and it
+ * ships no tool: these execute at the migration's service methods.
+ */
+export const MIGRATION_FUT = {
+  HIERARCHY_WITH_GIT_FACTS: "SPEC-03 FUT-001",
+  TWELVE_STORIES_ONE_CHAIN: "SPEC-03 FUT-002",
+  SHIPS_UI_ON_ALL: "SPEC-03 FUT-003",
+  TYPE_REMAP_REACHES_DATA: "SPEC-03 FUT-004",
+  DEFECTS_KEEP_NO_STORY: "SPEC-03 FUT-005",
+  OPEN_DEFECT_NO_RESOLUTION: "SPEC-03 FUT-006",
+  TEST_RUN_STATED_METRIC: "SPEC-03 FUT-007",
+  FIVE_DECISIONS: "SPEC-03 FUT-008",
+  TWO_ACTIVITY_ROWS: "SPEC-03 FUT-009",
+  ROWS_ATTRIBUTABLE: "SPEC-03 FUT-010",
+  RERUN_REFUSED: "SPEC-03 FUT-011",
+  RECONCILIATION_TIES_OUT: "SPEC-03 FUT-012",
+} as const;
+
 /** The tools these scenarios call, by their advertised names. */
 export const TOOL = {
   START_STAGE: "start_stage",

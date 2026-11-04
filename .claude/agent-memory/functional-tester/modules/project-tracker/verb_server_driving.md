@@ -44,6 +44,15 @@ metadata:
   `verb.value.notInCodeList` key (§5 row says 400 + that key; spec/impl gap). Parse defensively.
 - Task story mode TestRun has `initiative_id` null by design (BR-20a).
 
+## Migration (SPEC-03) driving
+
+- No verb/OData surface: drive `npm run migrate-financial-planner` (env `CDS_REQUIRES_DB_CREDENTIALS_DATABASE`=scratch,
+  exit 0/1, failure printed as `Migration failed: <i18n key>`). For per-step fixtures write a tsx driver that boots
+  `cds.load("*")`/`serve("all")` like the script and calls `new MigrationService(tracker).<loadHierarchy|seedRegisters|reconcile>()`.
+- Columns: task/subtask `step_code` (not stepcode); defect has no story column; `references` needs quoting in SQL.
+- `seedRegisters` has no already-seeded guard: a 2nd call duplicated 34 rows (27+5+1+1).
+- Milestone `position` unique per initiative is a DB index (SQL dup probe is refused by Postgres).
+
 ## Probing
 
 - Task/Subtask timestamps are second-precision, Activity.occurredAt is ms: sleep >1s between steps when testing

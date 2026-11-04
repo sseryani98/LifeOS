@@ -11,6 +11,7 @@
 
 | Date       | Author          | Description                                                                                                                                                                                                                                                              |
 | ---------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 2026-11-04 | Claude          | `/refresh-docs` after SPEC-03 build: §2's `lint:*` count 21 → 22, §15.1's "empty tree" annotated (42 spec files) and §15.1 gains the `lint:design-counts` row; `db/schema.cds` → `db/{domain}/schema.cds` (`common`, `reference`, `hierarchy`, `methodology`, `registers`); `SPEC-09`'s handoff names only `scripts/recordTestRun.ts`; the §6 note that `build.md` takes only a FRICEW ID annotated stale. No story, order or contract changed. |
 | 2026-11-02 | Sandro & Claude | **v1.2 — rule count re-stated after the second `SPEC-02` amendment (D-244 … D-246).** `SPEC-02` gains BR-37, so it carries **19** FUTs and **37** rules and the plan **181** FUTs across **370** rules. §9's re-measurement note and §9.1 updated. No FUT, story, sprint or ruling changes. Status stays **Approved**. |
 | 2026-11-02 | Sandro & Claude | **v1.1 — FUT and rule counts re-stated after the `SPEC-02` amendment (D-239 … D-242).** `SPEC-02` gains FUT-019, classified **Verb (A)** by Sandro, and BR-34 … BR-36, so it carries **19** FUTs and **36** rules and the plan **181** FUTs across **369** rules. §2, §3, §3.1, §8.3 and §9 (story table, re-measurement note, §9.1) updated; Jest now runs **164 of 181** (60 verb). No story, sprint or ruling changes. Status stays **Approved**. |
 | 2026-08-15 | Sandro          | **Status → Approved.** All eleven Phase 5 coverage checks met; the approval gate at step 0 of Phase 6 was answered before the stage closed — the **fourth** stage running, after `DM-001`, `TS-001` and `TST-001`. **Plan + Design is complete; Build opens on `S-00`.** |
@@ -30,12 +31,12 @@
 | **Prerequisite**       | **One, and it is human** — creating the `project_tracker` Postgres role, before `S-00` (D-200)                                                                                    |
 | **Definition of done** | The baseline gate, the nine-stage chain, and the story's Functional Unit Tests **by ID** at the tier [TST-001](TEST_STRATEGY.md) §14.2 assigns (D-204)                            |
 | **FUTs**               | **181**, each claimed by exactly one story. `S-00` claims none and carries **one** test of its own, which is what lets the `test` script land without `--passWithNoTests` (D-199) |
-| **Shared surfaces**    | Two. `db/schema.cds` + `TrackerService` are created by `SPEC-01`; `app/project-view/` is created by `SPEC-04` and extended by three later stories (D-205)                         |
+| **Shared surfaces**    | Two. `db/{domain}/schema.cds` + `TrackerService` are created by `SPEC-01`; `app/project-view/` is created by `SPEC-04` and extended by three later stories (D-205)                         |
 | **Non-story work**     | **One item** — the Postgres role. Everything else is a story or is docketed                                                                                                       |
 | **Deferred docket**    | **Eight items.** Four share one unblocking event, and it is **downstream of `PT-W3`** (D-206)                                                                                     |
 | **Progress tracking**  | **None.** `PLAN.md` §8's session log is the record. This module does not track itself in slice 1 (D-207)                                                                          |
 | **Risks**              | **None assigned.** R4, R7 and R10 gain a story, a sprint and a FUT for the first time; R11 is docketed (D-209)                                                                    |
-| **Enforcement**        | The four gate commands and the **21** `lint:*` scripts. **The story cut, the order, the boundaries, the contracts and the definition of done are enforced by nothing** (§15)      |
+| **Enforcement**        | The four gate commands and the **22** `lint:*` scripts. **The story cut, the order, the boundaries, the contracts and the definition of done are enforced by nothing** (§15)      |
 
 ---
 
@@ -103,7 +104,7 @@ to **eight distinct items**. `S-00` is what they resolve to.
 | **7** | `Standards (Technical + Linting)/scripts/serveOneOrigin.mjs`                 | [TS-001](TECH_STACK.md) §11 (D-184)           | `S-00`                            |
 | **8** | `jest.config.ts`, `test/setEnv.ts`, and the `test` script                    | [TST-001](TEST_STRATEGY.md) §3.3, §12 (D-186) | `S-00` — amended by D-213         |
 | —     | The `record-test-run` script                                                 | [TST-001](TEST_STRATEGY.md) §3.3 (D-186)      | **`SPEC-09`** — D-213             |
-| —     | `db/schema.cds` — the 25 persisted entities                                  | [DM-001](DATA_MODEL.md) §3 (D-160)            | **`SPEC-01`** — see §4.2          |
+| —     | `db/{domain}/schema.cds` — the 25 persisted entities                                | [DM-001](DATA_MODEL.md) §3 (D-160)            | **`SPEC-01`** — see §4.2          |
 
 `Project Tracker/.gitignore` already carries `.env`; that one line was applied at the Tech Stack
 stage (D-176) precisely so item 3 could not create the hazard it removes.
@@ -128,7 +129,7 @@ handshake).
 ### 4.2 Why the schema is `SPEC-01`'s and not `S-00`'s
 
 D-160 says the CDS files are "`CNV-001`'s and `INT-001`'s work in the Build Plan's order". That order
-is now stated: **`SPEC-01` declares `db/schema.cds` in full.** `INT-001`'s eleven verbs read and write
+is now stated: **`SPEC-01` declares `db/{domain}/schema.cds` in full.** `INT-001`'s eleven verbs read and write
 every entity in [DM-001](DATA_MODEL.md), and `CNV-001` sits one story later inside `SPEC-02`, so a
 split schema would leave `SPEC-01` unable to run its own tests. `S-00` deliberately writes no CDS: a
 schema in the bootstrap story would be code no spec's tests cover, which is what D-160 refuses one
@@ -248,7 +249,7 @@ A story is Done when **both** parts pass. Neither is optional and neither is suf
 | Check                | Command                     | Bar                                                                                                                                                |
 | -------------------- | --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Types                | `npx tsc --noEmit`          | Zero errors                                                                                                                                        |
-| Lint                 | `npm run lint`              | Zero errors — **21 `lint:*` scripts**, measured in this module's 24-script block                                                                   |
+| Lint                 | `npm run lint`              | Zero errors from every `lint:*` script in the module's block — the count is `lint:harness`'s to hold, not this row's                                                                   |
 | Tests + coverage     | `npm test`                  | Green, and Jest's `coverageThreshold` met: Validators 100/100, Services + verbs + scripts 90/85, Overall 85/80 ([TST-001](TEST_STRATEGY.md) §13.1) |
 | CDS build            | `npm run build`             | Zero errors                                                                                                                                        |
 | The nine-stage chain | `/build` and its successors | Every Required stage complete; `UX Test` complete on a `shipsUi` story (§14)                                                                       |
@@ -326,11 +327,11 @@ What each story hands the ones after it. A story that consumes a row below must 
 | Producer      | Artifact                                                                                                                                                                                          | Consumed by                                | The contract                                                                                                                                                               |
 | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **`S-00`**    | `.cdsrc.json`, `.env`, the Postgres binding with SQLite moved to `[test]`, `"start": "cds serve --port 4005"`, `serveOneOrigin.mjs`, `jest.config.ts`, `test/setEnv.ts`, the `test` script        | every later story                          | `npm start` serves on :4005; the proxy fronts :4000; `npm test` runs; `CDS_TYPESCRIPT` is set by `setupFiles` and never per spec. `record-test-run` is `SPEC-09`'s (D-213) |
-| **`SPEC-01`** | `db/schema.cds` (25 persisted entities), `srv/tracker-service.{cds,ts}` — one service `TrackerService` at `/service/trackerSvcs` — the `ProjectView` projection, `mcp/server.ts`, `mcp/verbs/`, and `scripts/installMcpServer.mjs` (D-224) | every later story                          | `cds deploy` succeeds against Postgres — **run 2026-08-16, 25 tables, clean** (D-229); `cds.connect.to('TrackerService')` + `srv.tx({ user })` reaches the real handlers (D-189); the eleven verbs answer                 |
+| **`SPEC-01`** | `db/{domain}/schema.cds` (25 persisted entities), `srv/tracker-service.{cds,ts}` — one service `TrackerService` at `/service/trackerSvcs` — the `ProjectView` projection, `mcp/server.ts`, `mcp/verbs/`, and `scripts/installMcpServer.mjs` (D-224) | every later story                          | `cds deploy` succeeds against Postgres — **run 2026-08-16, 25 tables, clean** (D-229); `cds.connect.to('TrackerService')` + `srv.tx({ user })` reaches the real handlers (D-189); the eleven verbs answer                 |
 | **`SPEC-02`** | The seeded Methodology library, chain instantiation, and the guard set                                                                                                                            | `SPEC-03`, `SPEC-04`, `SPEC-07`, `SPEC-08` | A Milestone created in Backlog materialises **9** Tasks on a `shipsUi` story and **8** otherwise, with 7 Subtasks under `sprint-build` alone                               |
-| **`SPEC-03`** | The loaded workspace — 1 Area, 1 Engagement, 1 Workspace, 3 Initiatives, 12 Milestones, 4 Defects, 5 Decisions, 1 TestRun, 2 Activity rows                                                        | `SPEC-04` … `SPEC-07`, `SPEC-11`           | `CNV-004`'s reconciliation ties out. Every Report reads real data rather than a fixture; the exporter has rows to export                                                   |
+| **`SPEC-03`** | The loaded workspace — the hierarchy and registers whose counts `SPEC-03` BR-30 fixes                                                                                                             | `SPEC-04` … `SPEC-07`, `SPEC-11`           | `CNV-004`'s reconciliation ties out. Every Report reads real data rather than a fixture; the exporter has rows to export                                                   |
 | **`SPEC-04`** | **`app/project-view/`** — the one FPM app, its `manifest.json`, `Component.ts` and the single route with its optional `story` parameter (`IA-001` §4)                                             | `SPEC-05`, `SPEC-06`, `SPEC-07`            | Later UI stories **add sections and a dialog to this app**. No story creates a second app, a second route or a second component                                            |
-| **`SPEC-09`** | `Project Tracker/scripts/` and `recordTestRun.ts`                                                                                                                                                 | the gate, from `SPEC-09` onward            | Both gate call sites invoke `npm run record-test-run` explicitly, after the test command, whatever its exit code (D-107)                                                   |
+| **`SPEC-09`** | `scripts/recordTestRun.ts` (`scripts/` exists since `SPEC-01`, D-224)                                                                                                                                 | the gate, from `SPEC-09` onward            | Both gate call sites invoke `npm run record-test-run` explicitly, after the test command, whatever its exit code (D-107)                                                   |
 | **`SPEC-10`** | `Standards (Technical + Linting)/retired-paths.json` (5 records), `lintNoMarkdownState.ts`, and the hook installer — **all delivered unregistered** (D-07, `SPEC-10` BR-25)                       | `SPEC-12`                                  | `SPEC-12` runs the installer and enables both guards. Neither is enabled earlier; `SPEC-10` FUT-014 asserts that                                                           |
 | **`SPEC-11`** | The CSV exporter, and the round-trip drill it runs                                                                                                                                                | `SPEC-12`                                  | `CNV-005` cannot retire markdown until the diffable form of state exists (`BA-001` §10, D-31)                                                                              |
 
@@ -340,7 +341,7 @@ The exemplar found its equivalent late — its sync point 6 ("dashboard shells a
 was written after two Reports had already been cut in half across sprints. Both of this module's are
 stated up front:
 
-1. **`db/schema.cds`, created by `SPEC-01`.** [DM-001](DATA_MODEL.md) consolidates all twelve specs
+1. **`db/{domain}/schema.cds`, created by `SPEC-01`.** [DM-001](DATA_MODEL.md) consolidates all twelve specs
    into 25 persisted entities, so **no story after `SPEC-01` adds an entity.** A story that finds it
    needs one has found a Data Model amendment, not a build task.
 2. **`app/project-view/`, created by `SPEC-04`.** `IA-001` §3 puts all six UI-bearing objects on
@@ -447,6 +448,9 @@ against the spec, which is what a story ID being a spec ID (§3) makes trivial.
 > subtask writes a board §13 rules this module does not have. Both files are `SPEC-08`'s rewiring
 > targets, so the fix belongs there rather than to whichever story trips over it next. Chain stages
 > 2 through 9 still apply per story.
+>
+> _Annotated 2026-11-04:_ the resolution-table half is stale — `.claude/commands/build.md` now
+> resolves spec IDs, and `SPEC-02` and `SPEC-03` were built through `/build`.
 
 ### 14.1 `/pm-update` reconciles nothing on a Project Tracker story, until cutover
 
@@ -472,9 +476,10 @@ which are not is this section's whole job.**
 | ------------------------------------------------------ | -------------------------------------------------------- | ------------------------------------------------------------------------------ |
 | The gate's four commands (§8.1)                        | `gate-runner` in the `/build` chain                      | **Live** — the chain already runs them                                         |
 | Coverage thresholds                                    | Jest `coverageThreshold`                                 | Live from `S-00`, when `jest.config.ts` lands                                  |
-| Test file structure, test data rules, no CQL in a spec | `lint:test-structure`, `lint:test-data`, `lint:test-cql` | **Live** — three of this module's 21 `lint:*` scripts, green on the empty tree |
+| Test file structure, test data rules, no CQL in a spec | `lint:test-structure`, `lint:test-data`, `lint:test-cql` | **Live** — three of this module's `lint:*` scripts; the tree now holds 42 spec files |
 | Facades hold zero logic                                | `lint:facades`                                           | **Live**                                                                       |
 | A `CLAUDE.md` enforcement claim names a real script    | `lint:doc-claims`                                        | **Live**                                                                       |
+| FUT, rule and decision counts cited in docs match their sources | `lint:design-counts`                                     | **Live**                                                                       |
 | The guards are delivered unregistered (§10, D-07)      | `SPEC-10` FUT-014                                        | A test, not a linter — but a real mechanical check                             |
 
 ### 15.2 Enforced by nothing
@@ -551,7 +556,7 @@ owner and no date, because each needs a built thing that did not exist.
 | **D-202** | Three sprints, one per wave, with no branch, no merge and no tag of their own | Each wave is already a testable increment. D-13 puts cutover before Financial Planner's `CNV-001`, so all three run inside its open `sprint/W1-S3`. Measured: tags `v1.1` and `v1.2` exist, so a `PT-W1` tag under `v{wave}.{sprint}` would collide                         |
 | **D-203** | What runs on a boundary — and two corrections to what was assumed to          | The wave's testable increment, a `PLAN.md` §8 entry, and `INT-007`'s export at `PT-W3` only (D-31). **`recordTestRun` fires per gate, not per checkpoint** (D-196), and there is **no ten-persona meeting** — the reviewers are per-story slash commands                    |
 | **D-204** | Definition of done — the gate, the chain, and the story's FUTs by ID          | A count cannot be checked; an ID range can. 163 of 180 are covered by the gate. The 10 browser FUTs are done when `/functional-test` passes them; the 7 one-time are **recorded, not re-run** — `SPEC-12`'s six in `CNV-005`'s procedure, `SPEC-08`'s one in its handoff    |
-| **D-205** | Two shared surfaces, named up front                                           | `db/schema.cds` + `TrackerService` created by `SPEC-01`, and **no story after it adds an entity** — a story that needs one has found a Data Model amendment. `app/project-view/` created by `SPEC-04` and extended by `SPEC-05` … `SPEC-07`; no second app, no second route |
+| **D-205** | Two shared surfaces, named up front                                           | `db/{domain}/schema.cds` + `TrackerService` created by `SPEC-01`, and **no story after it adds an entity** — a story that needs one has found a Data Model amendment. `app/project-view/` created by `SPEC-04` and extended by `SPEC-05` … `SPEC-07`; no second app, no second route |
 | **D-206** | An eight-item deferred docket, four sharing one unblocking event              | Every raised-and-owed amendment and pinned-dependency raise in the repo, each with what unblocks it. Items 1–4 all wait on Financial Planner's W1-S3 closing, which D-13 puts **downstream of `PT-W3`** — so no repo-wide dependency change can land during this build      |
 | **D-207** | This module tracks its own build nowhere; `PLAN.md` §8 is the record          | `CNV-002` loads one Workspace and nothing in slice 1 creates a second; Financial Planner's board is that module's and `SPEC-12` deletes it; a new markdown board is the defect this module exists to fix. Cost stated: no dogfooding in slice 1                             |
 | **D-208** | No linter for the `setupFiles` lever; `SPEC-01` carries an assertion instead  | `TST-001` §17.2 left it as a candidate. A shared linter is a Standards change with no story owning it (D-22 one level up). `SPEC-01` is the earliest story with a `.ts` implementation to load, so the guard lives in its `test/integration/`                               |

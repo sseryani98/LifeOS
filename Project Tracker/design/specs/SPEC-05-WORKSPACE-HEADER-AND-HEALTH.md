@@ -25,6 +25,8 @@ Architecture stage, 2026-08-06 (D-140, D-141).** ~~**Not Approved-for-build unti
 | 2026-08-06 | Sandro & Claude | **§3.3's deferred "Layout, navigation, Fiori Elements vs freestyle" is discharged in full.** Layout and navigation at Information Architecture (D-137, D-139); **build technology at Design System — Fiori Elements FPM, draft enablement OFF** (D-144). RPT-001 is the page header of one `sap.uxap.ObjectPageLayout` (D-148); FRM-001's fields render as `sap.fe.macros.Field` inline, and **two of its three actions open a small dialog** for fields the header does not display — a control choice inside D-139's inline ruling, not a change to it. No business rule and no FUT changes. Status stays **Approved**.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | 2026-08-15 | Sandro & Claude | **§2 amendment 6 discharged at the Data Model stage (D-165)**, in the shape it asked for — settled once rather than per spec. The flagged divergence **does not exist as described**: a one-word camelCase identifier _is_ lowercase, so `checkpoint` and `migration` are camelCase like the other fourteen `ActivityKind` values. The cross-list divergence is real and the rule is that a `code` is the literal an Approved spec already froze; three status lists whose spec text is a display phrase with a space take camelCase codes instead. **`HealthState` is unchanged, no BR or FUT changes, and nothing a person sees changes.** Status stays **Approved**.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 | 2026-11-04 | Claude          | Doc refresh: R1 marked executed and closed (D-170) in the header and wherever this spec gated on it; CDS Service named (`TrackerService`). No rule, FUT or count changed. Status unchanged. |
+| 2026-11-04 | Claude          | `/refresh-docs` after SPEC-03 build: the seeded Open defect D-004 → D-021 … D-027 in the seeded-health table, the page narrative and the FUTs (SPEC-03 re-baseline, D-249). The Workspace reason string and W1-S3's `openDefect` item are left as written — pending decision. No rule changed. |
+| 2026-11-04 | Sandro & Claude | **D-253:** at 27 seeded Defects a node carries one `openDefect` reason item per Open Defect, worst severity first then by ID; a header summarises them as a count per severity. §3's worked example re-baselined to D-021 … D-027. No BR changes — BR-15's shape already admits a multi-item reason. |
 
 ---
 
@@ -130,9 +132,9 @@ inventing prose for it would be filler.
 | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ------------------ | ----------------------------------------- |
 | W1-S1                         | Complete; 3 Done Milestones; no Open Defect, no live TestRun, no Task at all                                             | **Healthy**        | empty                                     |
 | W1-S2                         | Complete; 5 Done Milestones; 3 **Closed** Defects (D-001, D-002, D-003); the seeded TestRun (never live, null Task link) | **Healthy**        | empty                                     |
-| W1-S3                         | Active; 4 Milestones. **D-004 is Open, Medium, and links to the W1-S3 Initiative, not to a story** (SPEC-03 BR-21)       | **NeedsAttention** | `openDefect` on W1-S3 — D-004 (Medium)    |
+| W1-S3                         | Active; 4 Milestones. **D-021 … D-027 are Open (5 Medium, 2 Low) and link to the W1-S3 Initiative, not to a story** (SPEC-03 BR-21)| **NeedsAttention** | 7 × `openDefect` on W1-S3 — D-021, D-022, D-024, D-026, D-027 (Medium), D-023, D-025 (Low) (D-253) |
 | `financial-planner/CNV-001`   | 8 Not Started Tasks — none In Progress, so nothing is stalled — and no Defect links to it                                | **Healthy**        | empty                                     |
-| Workspace `financial-planner` | Worst of its Initiatives                                                                                                 | **NeedsAttention** | "1 open defect on W1-S3 — D-004 (Medium)" |
+| Workspace `financial-planner` | Worst of its Initiatives                                                                                                 | **NeedsAttention** | "7 open defects on W1-S3 — 5 Medium, 2 Low" (D-253) |
 
 **The finding this exposes:** the seeded defects attach at **Initiative** level, so the roll-up had to
 admit a Defect at **two** levels. That is a direct consequence of D-61 / SPEC-03 BR-21 and it surfaces
@@ -179,7 +181,7 @@ derived (D-70).
 #### Day one
 
 Status reads `W1-S3 — Transaction Processing · Active`. Current Focus renders its empty state. Health
-reads **NeedsAttention** on D-004. The gate tile shows **174/174 passed, 98.71% lines, 89.37%
+reads **NeedsAttention** on D-021 … D-027. The gate tile shows **174/174 passed, 98.71% lines, 89.37%
 branches, W1-S2, executed 2026-07-10** — a sprint that closed before cutover, and the label is what
 stops that reading as current.
 
@@ -420,7 +422,7 @@ which is the page Sandro opens to answer that question.
 
 **Expected Result:**
 
-- The Workspace is **NeedsAttention**, with a reason naming **D-004 (Medium)** on W1-S3 (BR-08, BR-09, BR-14, BR-15).
+- The Workspace is **NeedsAttention**, with a reason naming **D-021 … D-027** on W1-S3 (BR-08, BR-09, BR-14, BR-15).
 - W1-S1 and W1-S2 are **Healthy** with **empty** reasons (BR-04).
 - `financial-planner/CNV-001` is **Healthy** — its 8 Tasks are Not Started, so none is In Progress and none can be stalled (BR-11).
 - No node's computation read a `status` field (BR-06).
@@ -439,7 +441,7 @@ which is the page Sandro opens to answer that question.
 **Expected Result:**
 
 - After step 1 the Workspace is **Struggling**, its reason naming the new defect and the Milestone (BR-07, BR-14).
-- After step 3 it returns to **NeedsAttention** on D-004 alone (BR-09).
+- After step 3 it returns to **NeedsAttention** on D-021 … D-027 alone (BR-09).
 
 ### FUT-003: A Closed defect signals nothing
 
@@ -465,13 +467,13 @@ which is the page Sandro opens to answer that question.
 **Expected Result:**
 
 - The Milestone is **Healthy** — Recommended never blocks and therefore never degrades (BR-05, BR-11).
-- The Workspace is **NeedsAttention** on D-004 alone, and its reason names **no** item from this Milestone — the residual Recommended step contributed nothing to the roll-up (BR-05, BR-14, BR-15).
+- The Workspace is **NeedsAttention** on D-021 … D-027 alone, and its reason names **no** item from this Milestone — the residual Recommended step contributed nothing to the roll-up (BR-05, BR-14, BR-15).
 - The answer is identical whether the Milestone derives Done or not, because no status was read (BR-06).
 
 ### FUT-005: Roll-up is worst-child-wins across two Initiatives
 
 **Covers:** ENH-003
-**Preconditions:** CNV-002 **and CNV-003** have run — D-004 is Open on W1-S3 and the expected result below turns on it; `plan_sprint` has created W1-S4 with three stories (SPEC-04 FUT-006's fixture); `log_defect` has logged a **Critical** defect on one W1-S4 story.
+**Preconditions:** CNV-002 **and CNV-003** have run — D-021 … D-027 are Open on W1-S3 and the expected result below turns on them; `plan_sprint` has created W1-S4 with three stories (SPEC-04 FUT-006's fixture); `log_defect` has logged a **Critical** defect on one W1-S4 story.
 **Steps:**
 
 1. Read health at all three levels — Milestone, Initiative, Workspace.
@@ -479,14 +481,14 @@ which is the page Sandro opens to answer that question.
 **Expected Result:**
 
 - That Milestone is **Struggling**; W1-S4 is **Struggling** (BR-07, BR-14).
-- W1-S3 is **NeedsAttention** on D-004 (BR-08).
+- W1-S3 is **NeedsAttention** on D-021 … D-027 (BR-08).
 - The Workspace is **Struggling** (BR-14).
 - The Workspace's reason names W1-S4, then the Milestone, then the Defect — **three links** (BR-15).
 
 ### FUT-006: A stalled stage degrades health, and health changed with no write
 
 **Covers:** ENH-003
-**Preconditions:** CNV-002 **and CNV-003** have run — the expected result below turns on **D-004**, which CNV-003 seeds (SPEC-03 BR-20). `financial-planner/CNV-001` has `sprint-build` **In Progress**, started by `start_stage`, whose Activity event is the most recent against that Task.
+**Preconditions:** CNV-002 **and CNV-003** have run — the expected result below turns on **D-021 … D-027**, which CNV-003 seeds (SPEC-03 BR-20). `financial-planner/CNV-001` has `sprint-build` **In Progress**, started by `start_stage`, whose Activity event is the most recent against that Task.
 **Steps:**
 
 1. Read health.
@@ -495,7 +497,7 @@ which is the page Sandro opens to answer that question.
 
 **Expected Result:**
 
-- Step 1 reads **NeedsAttention** on D-004 only.
+- Step 1 reads **NeedsAttention** on D-021 … D-027 only.
 - Step 3 still reads NeedsAttention, but the reason now **also** names `sprint-build` stalled 8 days, over a **7-day** threshold (BR-11, BR-16).
 - **No row was written between the two reads** (BR-02, BR-03).
 
@@ -532,7 +534,7 @@ which is the page Sandro opens to answer that question.
 ### FUT-009: Coverage does not move health
 
 **Covers:** RPT-001, ENH-003
-**Preconditions:** FUT-008's fixture, with CNV-003 also run — the expected result turns on **D-004** (SPEC-03 BR-20) — but the recorded run has `failed` **0** and `linesPct` **41.0**.
+**Preconditions:** FUT-008's fixture, with CNV-003 also run — the expected result turns on **D-021 … D-027** (SPEC-03 BR-20) — but the recorded run has `failed` **0** and `linesPct` **41.0**.
 **Steps:**
 
 1. Read the gate tile.
@@ -542,7 +544,7 @@ which is the page Sandro opens to answer that question.
 
 - The tile renders the coverage figures (BR-24).
 - Health carries **no** gate item (BR-19).
-- The Workspace is **NeedsAttention** on D-004 alone (BR-08, BR-14).
+- The Workspace is **NeedsAttention** on D-021 … D-027 alone (BR-08, BR-14).
 
 ### FUT-010: The tile's empty state
 

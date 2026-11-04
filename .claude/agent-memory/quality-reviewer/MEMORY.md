@@ -2,8 +2,8 @@
 
 ## Test review — every module
 
-- [Test review gotchas](test_review_gotchas.md) — key-insensitive mocks, real-export fixture leaks, chained integration specs, OR-clause fixtures, unasserted mappers
-- [Review gotchas](reference_review_gotchas.md) — cat -n line offsets, Facade coverage blind spot, no SELECT global in unit tier, payload-only UPDATE guards, srv/mcp twin key constants, cuid fill + probe recipe
+- [Test review gotchas](test_review_gotchas.md) — key-insensitive mocks, real-export fixture leaks, chained integration specs, OR-clause fixtures, unasserted mappers, dead data-map keys, twin TABLE maps, unasserted refusal keys, script coverage blind spot, mid-review churn
+- [Review gotchas](reference_review_gotchas.md) — cat -n offsets, Facade coverage blind spot, srv/mcp twin keys, spec-mandated twins, red-phase loader leftovers, cuid fill probe
 
 ## Financial Planner
 
@@ -12,4 +12,4 @@
 
 ## Project Tracker
 
-- [PT test gaps](modules/project-tracker/test_gaps.md) — facade registrations, sortKey not a gap, no *Mocks.ts, TaskQueueItem filter, guard-order pairs, unseeded actor
+- [PT test gaps](modules/project-tracker/test_gaps.md) — facade registrations, sortKey not a gap, no *Mocks.ts, TaskQueueItem filter, guard-order pairs, unseeded actor, red-phase require loaders, SPEC-03 migration seams

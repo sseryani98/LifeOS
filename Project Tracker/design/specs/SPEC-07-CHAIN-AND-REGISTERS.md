@@ -21,6 +21,8 @@ Architecture stage, 2026-08-06 (D-140, D-141).** ~~**Not Approved-for-build unti
 | 2026-07-30 | Sandro & Claude | Initial creation from the SPEC-07 workshop. Records D-83 through D-92. **SPEC-07 resolves no OI.** Provisional on R1 (D-39) and R9 (D-69). Amendments owed and applied: SPEC-01's **ninth** (`project_view`'s Returns cell, and nine verb-emitted `Activity.kind` values), SPEC-03's **third** (`Decision.decidedAt`, seeded 2026-07-10), SPEC-06 BR-25's struck clause, and the SPEC-05 §6 / SPEC-06 §6 wording correction from `kind` to `actor`. Three BA-001 corrections listed in §6.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | 2026-08-06 | Sandro & Claude | **BR-03 is discharged in full at the Design System stage (D-144, D-148, D-150).** It deferred five things; navigation and interaction were answered at Information Architecture the same day, and **layout, section arrangement and chart type are answered here** — RPT-003 is section 2 and RPT-004 section 3 of one `sap.uxap.ObjectPageLayout`, and **there is no chart**. Build technology is **Fiori Elements FPM with drafts OFF**. Two control rulings worth naming: RPT-003's Subtasks render as a nested `sap.m.List` that is **always visible, never on expansion**, because IA-001 §6.4's disclosure inventory does not include them; and RPT-004's two expandable regions (`description`, `payload`) are `sap.m.Panel` with `expandable="true"` and `expanded` left unset. **BR-03's "content and ordering only" clause is unchanged.** No business rule and no FUT changes. Status stays **Approved**.                                                                                                                                                                                                                                                                                                                                                                     |
 | 2026-11-04 | Claude          | Doc refresh: R1 marked executed and closed (D-170) in the header and wherever this spec gated on it; CDS Service named (`TrackerService`). No rule, FUT or count changed. Status unchanged. |
+| 2026-11-04 | Claude          | `/refresh-docs` after SPEC-03 build: Defect counts four → 27 and the seeded Open defect D-004 → D-021 … D-027 in §2 Day one and FUT-008 … FUT-010 and the scope FUT (SPEC-03 re-baseline, D-249). BR-20 and BR-33 left as written — pending decision. No rule changed. |
+| 2026-11-04 | Sandro & Claude | **D-254, D-255:** BR-33 (no register controls) and BR-20 (`description` on expansion) both stand at 27 Defects; their rationale is re-grounded, since the 4-row volume and D-004's product fork no longer hold. |
 
 ---
 
@@ -171,7 +173,7 @@ exists to survive.
 
 #### Day one
 
-**4 Defects** — all with `story` null, all linked to an Initiative (SPEC-03 BR-21), so every Scope
+**27 Defects** — all with `story` null, all linked to an Initiative (SPEC-03 BR-21), so every Scope
 cell resolves to an Initiative name. **5 Decisions** — all on the W1-S2 Initiative, all with
 `context` and `options` null, and **exactly one** with a null `rationale` (SPEC-03 BR-24).
 **2 Activity rows** — both written by the migration under actor `migration`, so **both land in the
@@ -180,7 +182,7 @@ human row it needs rather than assuming one.
 
 #### Filters and sorting
 
-**None in slice 1** (BR-33). At 4, 5 and 2 rows a filter control tests nothing (D-22), and
+**None in slice 1** (BR-33). ~~At 4, 5 and 2 rows a filter control tests nothing (D-22)~~ At 27 Defects BR-22's ordering already puts the 7 Open rows first, so a filter would only hide history (D-254), and
 interaction is Information Architecture's (BR-03, D-21).
 
 #### Drill-down
@@ -192,7 +194,7 @@ itself is the Information Architecture stage's** (BR-03, D-21).
 #### Empty states
 
 **No register empty state is specified, because none is reachable in slice 1.** The migration writes
-4 Defects, 5 Decisions and 2 Activity rows before any user opens the page, and nothing deletes any of
+27 Defects, 5 Decisions and 2 Activity rows before any user opens the page, and nothing deletes any of
 them — D-50's invariant extends: no verb deletes a Defect, a Decision or an Activity row.
 Specifying an untestable empty state is what D-22 refuses.
 
@@ -235,7 +237,7 @@ the same contract SPEC-04 BR-32 gives RPT-002 and SPEC-05 BR-30 gives RPT-001 (B
 
 - **BR-18** All three registers are **workspace-scoped**, matching `project_view`'s own signature. RPT-001's health reads open Defects workspace-wide because D-71's roll-up terminates at the Workspace, so an Initiative-scoped Defect table would let the header read NeedsAttention on a Defect the register on the same page does not show.
 - **BR-19** The Defect table renders every Defect in the Workspace.
-- **BR-20** Defect table columns are ID, `severity`, `status`, **`Scope`**, `title`, `resolution`. **`Scope` resolves to whichever link is present** — `{workspace-slug}/{story-id}` for a Milestone (D-45, the form SPEC-05 BR-29 uses), the Initiative's `name` otherwise. SPEC-03 BR-21 guarantees at least one is present, so no cell is blank. **`description` renders on expansion**, the same treatment BR-29 gives `payload`: SPEC-03 BR-22 preserves it verbatim and SPEC-03 BR-23 folds the Open Defect's product fork _into_ it, so the only actionable row in the register carries its content there rather than in `title` or `resolution`.
+- **BR-20** Defect table columns are ID, `severity`, `status`, **`Scope`**, `title`, `resolution`. **`Scope` resolves to whichever link is present** — `{workspace-slug}/{story-id}` for a Milestone (D-45, the form SPEC-05 BR-29 uses), the Initiative's `name` otherwise. SPEC-03 BR-21 guarantees at least one is present, so no cell is blank. **`description` renders on expansion**, the same treatment BR-29 gives `payload`: SPEC-03 BR-22 preserves it verbatim — the log's multi-sentence prose, too long for a column — ~~and SPEC-03 BR-23 folds the Open Defect's product fork _into_ it~~ (that fold was withdrawn with D-249), so expansion keeps the table scannable while every row's full account stays one click away (D-255).
 - **BR-21** `resolution` renders **only on a Closed Defect**. SPEC-03 BR-23 nulls it on an Open one in **both directions**, so the empty cell is structural rather than missing.
 - **BR-22** Defects order **Open before Closed**, then `severity` descending — Critical, High, Medium, Low (SPEC-01 BR-18) — then by ID.
 - **BR-23** The Decision list renders `decision`, `rationale`, target and `decidedAt`. **`context` and `options` are not rendered in slice 1**: both are null on every seeded row (SPEC-03 BR-24), so they would be fields empty for every row that exists. They stay in the entity for post-cutover `record_decision` calls (SPEC-01 BR-20).
@@ -248,7 +250,7 @@ the same contract SPEC-04 BR-32 gives RPT-002 and SPEC-05 BR-30 gives RPT-001 (B
 - **BR-30** Each row is labelled **machine or human**, derived from **`actor`**: `migration` and any agent identity are machine, `sandro` is human (D-41, D-63, D-74).
 - **BR-31** The machine/human split reads **`actor`, never `kind`** — `sprintPlanned` has both a verb writer and a Form writer, so a kind-based split would misfile one of them.
 - **BR-32** `Activity.kind` admits **sixteen** values: the eight already required, plus eight new verb-emitted kinds. The nine write verbs map to `stageStarted`, `stageCompleted`, `subtaskCompleted`, `stageReopened`, `defectLogged`, `defectResolved`, `decisionRecorded`, `testRunRecorded` and `sprintPlanned`, per §3.2's table. `plan_sprint`'s kind is shared with FRM-002 (SPEC-06 BR-23).
-- **BR-33** **No filter and no sort controls on any register in slice 1.** At 4, 5 and 2 rows a control tests nothing (D-22); interaction falls under BR-03.
+- **BR-33** **No filter and no sort controls on any register in slice 1.** ~~At 4, 5 and 2 rows a control tests nothing (D-22)~~ At 27 Defects, 5 Decisions and 2 Activity rows, BR-22's Open-before-Closed ordering surfaces every actionable row without a control (D-254); interaction falls under BR-03.
 - **BR-34** The timeline shows **what happened, never what was prevented**. A rejected verb call leaves no row at all (SPEC-01 BR-05, D-42).
 - **BR-35** **No de-duplication of timeline events.** `PRD.md:798`'s "duplicate events are shown once" is not carried into slice 1, and duplicates are structurally impossible: SPEC-01 BR-03 gives each verb exactly one event, SPEC-06 BR-23 gives FRM-002 one row per sprint rather than per story, and SPEC-03 BR-04 gives the migration two rows in total.
 
@@ -444,10 +446,10 @@ a Complete Task (SPEC-02 BR-27), so a fixture that reopens a Not Started one is 
 - **No second call is issued**, and in particular no `next_action` call of RPT-003's own (BR-01).
 - The response carries **every** Milestone's chain, not only the rendered one (BR-04).
 
-### FUT-008: The Defect table renders four sprint-scoped defects with a resolving Scope
+### FUT-008: The Defect table renders 27 sprint-scoped defects with a resolving Scope
 
 **Covers:** RPT-004
-**Preconditions:** FUT-001's fixture — 4 Defects, all with `story` **null**, each linked to its
+**Preconditions:** FUT-001's fixture — 27 Defects, all with `story` **null**, each linked to its
 recorded Initiative (SPEC-03 BR-20 and SPEC-03 BR-21).
 **Steps:**
 
@@ -455,38 +457,38 @@ recorded Initiative (SPEC-03 BR-20 and SPEC-03 BR-21).
 
 **Expected Result:**
 
-- **Four rows** — Defect D-001, D-002, D-003 and D-004 (BR-19).
+- **27 rows** — Defect D-001 … D-027 (BR-19).
 - Every `Scope` cell shows an **Initiative name**: `W1-S2` for Defect D-001, D-002 and D-003, and
-  `W1-S3` for Defect D-004 (BR-20).
+  `W1-S3` for Defects D-004 … D-027 (BR-20).
 - **No `Scope` cell is blank** — SPEC-03 BR-21 guarantees at least one link is present (BR-20).
 - The table shows only Workspace-scoped rows and does not narrow to the Active Initiative (BR-18).
 
 ### FUT-009: An Open Defect renders no resolution; a Closed one does
 
 **Covers:** RPT-004
-**Preconditions:** FUT-008's fixture — Defect D-004 is **Open**, Defect D-001, D-002 and D-003 are
+**Preconditions:** FUT-008's fixture — Defects D-021 … D-027 are **Open**, Defects D-001 … D-020 are
 **Closed** (SPEC-03 BR-20).
 **Steps:**
 
-1. Read the `resolution` cell on each of the four rows.
+1. Read the `resolution` cell on each of the 27 rows.
 
 **Expected Result:**
 
-- Defect D-001, D-002 and D-003 each render a non-empty `resolution` (BR-21, SPEC-03 BR-23).
-- Defect D-004's `resolution` cell is **empty**, and the emptiness is **structural** — SPEC-03 BR-23
+- Defects D-001 … D-020 each render a non-empty `resolution` (BR-21, SPEC-03 BR-23).
+- Defects D-021 … D-027's `resolution` cells are **empty**, and the emptiness is **structural** — SPEC-03 BR-23
   nulls `resolution` on an Open Defect in both directions, so no data is missing (BR-21).
 
 ### FUT-010: Open before Closed outranks severity
 
 **Covers:** RPT-004
-**Preconditions:** FUT-008's fixture — Defect D-004 is Open / Medium, Defect D-001 is Closed / High.
+**Preconditions:** FUT-008's fixture — Defect D-021 is Open / Medium, Defect D-001 is Closed / High.
 **Steps:**
 
 1. Read the Defect table's row order.
 
 **Expected Result:**
 
-- **Defect D-004 sorts above Defect D-001** — Open before Closed is the first key and beats severity
+- **Defect D-021 sorts above Defect D-001** — Open before Closed is the first key and beats severity
   (BR-22).
 - Within the Closed block, Defect D-001 (High) and Defect D-003 (High) sort above Defect D-002
   (Medium), and D-001 above D-003 on the ID tiebreak (BR-22).
@@ -614,7 +616,7 @@ Decisions target **W1-S2** (SPEC-03 BR-24).
 
 - The Decision list shows **all five** W1-S2 decisions while W1-S3 is Active; an Initiative-scoped
   list would render **zero** (BR-18).
-- The Defect table shows all four Defects, including the three on W1-S2 (BR-18, BR-19).
+- The Defect table shows all 27 Defects, including the three on W1-S2 (BR-18, BR-19).
 - Every register's scope matches the Workspace RPT-001 computes its health over, so the header can
   never flag a Defect a register on the same page omits (BR-18, SPEC-05 BR-18).
 

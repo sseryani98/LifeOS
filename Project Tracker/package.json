@@ -11,8 +11,9 @@
     "start": "cds serve --port 4005",
     "build": "cds build",
     "install-mcp": "node scripts/installMcpServer.mjs",
+    "migrate-financial-planner": "tsx scripts/migrateFinancialPlanner.ts",
     "test": "jest --json --outputFile=coverage/test-results.json --coverage",
-    "lint": "eslint . &&npm run lint:i18n && npm run lint:annotations && npm run lint:filenames && npm run lint:tracking-ids && npm run lint:default-attrs && npm run lint:test-data && npm run lint:test-structure && npm run lint:test-cql && npm run lint:grouped-constants && npm run lint:frontend-constants && npm run lint:domain-types && npm run lint:comment-length && npm run lint:mapper-methods && npm run lint:messaging && npm run lint:frontend-data-access && npm run lint:frontend-controller-shape && npm run lint:control-ids && npm run lint:event-handlers && npm run lint:handler-event-types && npm run lint:facades && npm run lint:doc-claims",
+    "lint": "eslint . &&npm run lint:i18n && npm run lint:annotations && npm run lint:filenames && npm run lint:tracking-ids && npm run lint:default-attrs && npm run lint:test-data && npm run lint:test-structure && npm run lint:test-cql && npm run lint:grouped-constants && npm run lint:frontend-constants && npm run lint:domain-types && npm run lint:comment-length && npm run lint:mapper-methods && npm run lint:messaging && npm run lint:frontend-data-access && npm run lint:frontend-controller-shape && npm run lint:control-ids && npm run lint:event-handlers && npm run lint:handler-event-types && npm run lint:facades && npm run lint:design-counts && npm run lint:doc-claims",
     "lint:i18n": "tsx \"../Standards (Technical + Linting)/scripts/lintI18n.ts\"",
     "lint:annotations": "tsx \"../Standards (Technical + Linting)/scripts/lintAnnotations.ts\"",
     "lint:filenames": "tsx \"../Standards (Technical + Linting)/scripts/lintFilenames.ts\"",
@@ -33,6 +34,7 @@
     "lint:event-handlers": "tsx \"../Standards (Technical + Linting)/scripts/lintEventHandlers.ts\"",
     "lint:handler-event-types": "tsx \"../Standards (Technical + Linting)/scripts/lintHandlerEventTypes.ts\"",
     "lint:facades": "tsx \"../Standards (Technical + Linting)/scripts/lintFacades.ts\"",
+    "lint:design-counts": "tsx \"../Standards (Technical + Linting)/scripts/lintDesignCounts.ts\"",
     "lint:doc-claims": "tsx \"../Standards (Technical + Linting)/scripts/lintDocClaims.ts\""
   },
   "dependencies": {

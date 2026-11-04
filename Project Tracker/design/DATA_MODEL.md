@@ -328,7 +328,7 @@ makes that scope a navigable path rather than a query the model cannot express.
 | `references`  | LargeString                   | no       | SPEC-01 §2                      | Free text — the `file:line` list a caller supplies                        |
 | `resolution`  | LargeString                   | no       | SPEC-01 §2                      | Nulled on an Open Defect in **both directions** (SPEC-03 BR-23)           |
 | `milestone`   | Association to Milestone      | no       | SPEC-03 §2 am. 6                | **At least one of `milestone` / `initiative`** (§9)                       |
-| `initiative`  | Association to Initiative     | no       | SPEC-03 §2 am. 6, SPEC-08 am. 2 | All four seeded Defects link here with a null story                       |
+| `initiative`  | Association to Initiative     | no       | SPEC-03 §2 am. 6, SPEC-08 am. 2 | Every seeded Defect links here with a null story (SPEC-03 BR-21)         |
 | `workspace`   | Association to Workspace      | yes      | **D-163**                       | The scope root                                                            |
 
 **No date attribute, and that is a ruling.** `RPT-004` orders Defects **Open before Closed, then

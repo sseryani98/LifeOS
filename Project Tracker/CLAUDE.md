@@ -11,9 +11,10 @@ Sandro is the user. The agents are instruments writing into it, not users (D-04)
 
 ## Status
 
-**Build is under way. `S-00 Module Bootstrap` (2026-08-16) and `SPEC-01 MCP Intent-Verb Layer`
-(2026-08-16) are done; `SPEC-02` is built and functionally tested (19/19, 2026-11-03), Human Review done 2026-11-04, commit next.** The module now has a CDS model, one CAP service, a read
-projection and an MCP verb server. It still has **no UI** — `app/` is empty by design and
+**Build is under way. Which story is where lives in [PLAN.md](PLAN.md)'s Status line only** — it is
+not restated here, because three copies of it drifted apart within a day. The module now has a CDS model, one CAP service, a read
+projection and an MCP verb server, plus a one-time migration (`srv/modules/migration/`, run by
+`npm run migrate-financial-planner`, D-251). It still has **no UI** — `app/` is empty by design and
 `SPEC-04` fills it.
 
 What this means concretely:
@@ -25,13 +26,15 @@ What this means concretely:
   **27 base tables** — this module's 25, plus CAP's own `cds_model` and `cds_outbox_messages`. Code-list
   referential integrity is **live and measured**: an unseeded code is rejected with Postgres `23503`
   (D-229). **The methodology library and all twelve code lists are seeded** from `db/data/*.csv` by
-  `cds deploy` (`SPEC-02` CNV-001, uncommitted); the migrated workspace is `SPEC-03`'s.
-- **`npm test` is green over `159` tests in `19` suites**, across five tiers: unit, integration (both
-  entry points), protocol, script, and the `scenarios` tier that executes `SPEC-01`'s sixteen
-  functional units through a real MCP client (D-238). Coverage carries the global band plus **three** per-layer bands
+  `cds deploy` (`SPEC-02` CNV-001); the migrated workspace is loaded by `npm run migrate-financial-planner`
+  (`SPEC-03`, uncommitted).
+- **`npm test` is green**, across five tiers: unit, integration (both
+  entry points), protocol, script, and the `scenarios` tier that executes the functional units of
+  `SPEC-01` (16), `SPEC-02` (19) and `SPEC-03` (12) through a real MCP client (D-238). Coverage carries the global band plus **three** per-layer bands
   — Validators 100/100, Services 90/85, verbs 90/85. `./scripts/**/*.ts` still has none, and lands
-  with `SPEC-09` (D-215, D-224).
-- **`npm run lint` checks real code now.** Twenty-one linters over `srv/`, `mcp/`, `scripts/` and the
+  with `SPEC-09` (D-215, D-224) — though a `.ts` now sits under that glob (`migrateFinancialPlanner.ts`,
+  D-251) with no band yet.
+- **`npm run lint` checks real code now.** Twenty-two linters over `srv/`, `mcp/`, `scripts/` and the
   test tree. `mcp/` was invisible to four of them until `SPEC-01` added it (D-225) — and to ESLint
   itself until 2026-10-30, when the leg became `eslint .` (that claim was phantom until then).
 - **The verb server runs as its own process.** `npm run install-mcp` writes the gitignored
@@ -84,7 +87,7 @@ populated when it is not is the thing most likely to mislead the next agent here
   Standards (Technical + Linting)/
     eslint.config.mjs        The shared rules — this module's eslint.config.mjs re-exports them
     tsconfig.base.json       Shared compilerOptions — this module's tsconfig.json extends it
-    scripts/                 The 21 shared linters, called by path from the lint:* block
+    scripts/                 The 22 shared linters, called by path from the lint:* block
 .gitignore                   CAP generated output, coverage, local Postgres artifacts
 .cdsrc.json                  assert_integrity: 'DB' — without it code-list integrity is imaginary
 .env                         GITIGNORED. The Postgres role's password, and nothing else
@@ -97,7 +100,7 @@ dashboard/                   The v1 HTML generator. Deleted by CNV-005 at cutove
 db/                          One folder per domain, same layout as Financial Planner. No story after SPEC-01 adds an entity (D-205)
   common/common.cds          The local CodeList aspect
   reference/schema.cds       The twelve code lists
-  hierarchy/schema.cds       Area → Workspace → Initiative → Milestone → Task → Subtask, plus the TaskQueueItem read view
+  hierarchy/schema.cds       Area → Engagement → Workspace → Initiative → Milestone → Task → Subtask, plus the TaskQueueItem read view
   methodology/schema.cds     Methodology + MethodologyStep
   registers/schema.cds       Defect, Decision, Activity, TestRun
 srv/
@@ -106,11 +109,13 @@ srv/
   _i18n/                     i18n.properties (labels) + messages.properties (runtime keys)
   modules/shared/            baseFacade, logger, messagingUtility, constants
   modules/tracker/           Facade / Service / DataService / Validator / Mapper + milestoneStatus
+  modules/migration/         Service / DataService / Validator / Mapper + the embedded Financial Planner snapshot (D-251)
 mcp/                         A SIBLING of srv/, not under it (D-44)
   server.ts                  Bootstrap, stdout guard, tool registration, transport. Excluded from coverage
   verbs/                     The eleven intent verbs + shared/. Never imports the MCP SDK (D-228)
 scripts/
   installMcpServer.mjs       Writes the gitignored .mcp.json registration (D-224)
+  migrateFinancialPlanner.ts The one-time CNV-002 → 003 → 004 load (D-251)
 app/                         (empty)  ← SPEC-04 builds the one FPM page
 test/                        setEnv.ts (the lever) + {unit,integration,protocol,script,shared}/ — TST-001 §12
   integration/scenarios/     One spec per functional unit, named by its identifier. Stage 4's evidence (D-238)
@@ -133,7 +138,8 @@ app/admin-master-data && ui5lint` — a named app folder sitting inside a block 
   module in every line, and D-103 puts such a script in the module rather than in the shared linter
   folder. It is `.mjs` deliberately — that keeps it out of `tsc`'s program and out of
   `./scripts/**/*.ts`, the coverage band `SPEC-09` owns. `scripts/recordTestRun.ts` still arrives at
-  `INT-004` (D-213).
+  `INT-004` (D-213). **Amended at `SPEC-03` (D-251):** it now also holds `migrateFinancialPlanner.ts`,
+  which is in `tsc`'s program and under the `./scripts/**/*.ts` glob.
 - **`@sap/cds` is pinned to `9.8.4`, not `^9`** — at the root and in both modules. With two workspace
   packages npm hoists one CAP runtime for the whole repo, so a floating range upgrades every module
   at once, silently. 9.9.x `await`s `cds.plugins` in `bin/serve.js`, a dynamic import Jest's CJS VM
@@ -189,8 +195,8 @@ invoked directly, and never passes through that file — it sets neither lever. 
 `app-service.js` fallback and answered **501 `Service "X" has no handler`**. **`npm start` is
 therefore `cds serve`, not `cds-serve`.**
 
-**Set both levers explicitly in anything that is not a `cds` command** — `mcp/server.ts` and
-`scripts/recordTestRun.ts`. Set `process.env.CDS_TYPESCRIPT` _before_ requiring `@sap/cds`, and run
+**Set both levers explicitly in anything that is not a `cds` command** — `mcp/server.ts`,
+`scripts/recordTestRun.ts` and `scripts/migrateFinancialPlanner.ts`. Set `process.env.CDS_TYPESCRIPT` _before_ requiring `@sap/cds`, and run
 under a `tsx` loader.
 
 ~~The `cds.test` path is **not** settled: it belongs to Test Strategy (stage 11).~~ **Settled

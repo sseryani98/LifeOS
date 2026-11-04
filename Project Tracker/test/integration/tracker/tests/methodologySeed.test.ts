@@ -1,3 +1,4 @@
+import { CODES } from "../../../../srv/modules/shared/constants.js";
 import { trackerServer } from "../../../shared/support/trackerHarness.js";
 import {
   CODE_LIST_ROW_TOTAL,
@@ -138,6 +139,13 @@ describe("the seeded methodology library and code lists", () => {
 
     expect(Object.keys(EXPECTED_CODE_LISTS)).toHaveLength(12);
     expect(total).toBe(CODE_LIST_ROW_TOTAL);
+  });
+
+  /** The constant is the only allow-list plan_sprint and the migration check against, so a drift from the CSV refuses a valid type. */
+  it("allows exactly the FRICEW types the code list seeds", async () => {
+    const seeded = (await readCodeList("FricewType")).map(row => row.code);
+
+    expect([...CODES.FRICEW_TYPES].sort()).toEqual(seeded.sort());
   });
 
   /** The name is what every dropdown and register shows, so the phrases the data model fixes must be the ones seeded. */

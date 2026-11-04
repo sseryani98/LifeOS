@@ -1782,3 +1782,62 @@ Amendments are made in place — the superseded text is struck through and marke
 - **Decision:** **A.** Sandro, 2026-11-04.
 - **Rationale:** The three ledgers are where the recent correction churn came from (D-23, D-38, D-100, D-117 are all recounts of markdown references). Each Financial Planner story under B grows the migration; C is the ad-hoc rewiring D-23 already ruled out. A costs nothing new — the three stories are specced — and makes Handoff call `complete_stage`, `/test-quality` call `log_defect` and `/functional-test` call `record_test_run` as one change.
 - **Consequences:** `BP-001` §3's order holds; what changes is that Financial Planner's `CNV-001` waits. **Verify first, in the `INT-002` workshop:** D-41 rules per-agent identity and the verb server reads its actor from an environment variable at connect, while Claude Code registers one server per `.mcp.json` entry with one environment — so the fleet needs either one entry per agent identity or an `actor` parameter on the verbs. Not to be discovered mid-rewire.
+
+## D-249: The Migration Loads Financial Planner's Ledgers as They Stand at Cutover, Snapshotted 2026-11-04
+
+- **Context:** `SPEC-03`'s build briefer stopped on drift. §3.1 and §3.2 fixed the source row by row on 2026-07-27, and Financial Planner has moved since: `DEFECT_LOG.md` holds 27 rows, not 4, and D-004 is now Closed with a real fix instead of Open awaiting a product decision. The board's 12 stories are unchanged (D-248 holds Financial Planner's `CNV-001`), but their descriptions and W1-S3's goal have been rewritten. The spec says "from the log's Resolution cell" and "verbatim from the board", but its tables and counts froze the July values.
+- **Options:** A) load the ledgers as they stand at cutover, re-baselining the spec's tables and counts to a snapshot of today's files; B) load the frozen July values and discard what changed since.
+- **Decision:** **A.** Claude, on Sandro's delegation, 2026-11-04.
+- **Rationale:** The migration exists to carry the project state that really exists (§1, D-01). Under B, 23 real defects never reach the register built to replace the log, and D-004 would read Open when it is fixed. The source-of-truth wording in §3 was already A; only the tables were dated. D-248 freezes Financial Planner's story work until cutover, so the snapshot stays current.
+- **Consequences:** The source is a snapshot of `Financial Planner/project/` at `2704696`. 27 Defects: D-001…D-003 under W1-S2, D-004…D-027 under W1-S3; 20 Closed, 7 Open (D-021…D-027, Resolution cell `—`, which loads as null). BR-20, BR-21, BR-23, BR-30, FUT-005, FUT-006 and FUT-012 are re-baselined. D-004's "product fork folds into description" clause is withdrawn because the source no longer carries one. W1-S3's goal and the twelve descriptions are taken verbatim from the board at `2704696`. If a ledger changes before cutover, re-snapshotting is a spec amendment, not a build fix.
+
+## D-250: Merge Commits Come From Git — `513170a` and `a4535fc`
+
+- **Context:** BR-11 and FUT-001 cite `0a9804f` / `9bbe826`. Neither resolves in this repository. The `merge(sprint):` commits git actually holds are `513170a` (W1-S1) and `a4535fc` (W1-S2), and the board and the W1-S2 checkpoint were corrected to those at `2704696`.
+- **Decision:** Git governs. Claude, on Sandro's delegation, 2026-11-04. Not a real fork: §3.1 already names git as the source for merge commits.
+- **Consequences:** BR-11, §3.1's Initiative table and FUT-001 carry `513170a`/`v1.1` and `a4535fc`/`v1.2`.
+
+## D-251: The Migration Is a `srv/modules/migration` Domain Behind One Script, Carrying an Embedded Snapshot
+
+- **Context:** BR-01 says the load writes "through the CAP service layer, not through INT-001's verbs", and no document names an entry point. FUT-011 and FUT-012 need something callable as "run CNV-00x".
+- **Options:** A) a `srv/modules/migration/` domain (Service, DataService, Validator, Mapper) driven by a thin `scripts/migrateFinancialPlanner.ts`, with the source embedded as a snapshot; B) the same domain, parsing the markdown at runtime; C) OData actions on `TrackerService`.
+- **Decision:** **A.** Claude, on Sandro's delegation, 2026-11-04.
+- **Rationale:** C leaves a permanent public surface for a one-time load. B ties the tests to files `CNV-005` deletes (SPEC-12 FUT-008), so the suite would break at decommission, and it adds a markdown parser no other story needs. An embedded snapshot is deterministic, survives `CNV-005`, and gives TST-001 §11.1's canonical test world real rows instead of invented ones.
+- **Consequences:** `MigrationService` exposes one public method per conversion: `loadHierarchy` (CNV-002), `seedRegisters` (CNV-003) and `reconcile` (CNV-004). Each runs in its own transaction (§5's per-conversion atomicity) as user `migration`, so CAP's managed `createdBy` and ENH-001's create-handler both fire through `TrackerService` (BR-01, BR-02, BR-33). The snapshot lives in `srv/modules/migration/financialPlannerSnapshot.json`, imported by `MigrationService`; `constants.ts` carries only the migration config and message keys, and the script runs the three in BR-03's order. Tests call the service methods in-process, matching TST-001 §14.2's Verb (A) classification of all 12 FUTs. TS-001 §12's tree gains the folder and the script.
+
+## D-252: `seedRegisters` Gets No Re-Run Guard — Duplicates Are Left to `reconcile`
+
+- **Context:** SPEC-03's functional test (2026-11-04, 12/12 pass) found that `MigrationService.seedRegisters` (CNV-003) succeeds when it is called a second time. Each extra call adds another 27 Defects, 5 Decisions, 1 TestRun and the checkpoint Activity row, so row counts go 33 → 67 → 101. §5 guards only CNV-002 (BR-05), so the build matches the spec, and this is a gap in the spec, not a defect in the build.
+- **Options:** A) accept the gap and rely on `reconcile`; B) amend SPEC-03 with a BR that makes `seedRegisters` refuse when the workspace already has Defects, then re-approve the spec and rebuild.
+- **Decision:** **A.** Sandro, 2026-11-04.
+- **Rationale:** The only path to the duplicate is a hand-run of the seeding step on its own, because `migrateFinancialPlanner` calls `loadHierarchy` first and that refuses a re-run (FUT-011). If the step is re-run by hand, `reconcile` fails loudly with `cnv.reconcile.countMismatch` (FUT-012). The migration is a one-off cutover, so a guard costs a spec amendment and a rebuild to protect a path nobody is expected to take.
+- **Consequences:** SPEC-03 is unchanged. Anyone re-running a conversion by hand after a partial failure must drop the database and rerun the full script, not call `seedRegisters` again.
+
+## D-253: A Multi-Defect Health Reason Lists One Item per Open Defect
+
+- **Context:** D-249 seeds 27 Defects, 7 of them Open on W1-S3 (5 Medium, 2 Low). SPEC-05's worked example and FUTs assumed one Open Defect, D-004, and never showed what a reason looks like when several Defects signal on one node.
+- **Options:** A) one `openDefect` item per Open Defect; B) one aggregated item per node, naming only the worst Defect.
+- **Decision:** **A.** Items are ordered worst severity first, then by ID, the same order SPEC-07 BR-22 uses. A one-line header summary states a count per severity: "7 open defects on W1-S3 — 5 Medium, 2 Low". Claude, on Sandro's delegation, 2026-11-04.
+- **Rationale:** BR-15 needs the chain to be walkable to the row that signals. An aggregate hides six of the seven rows, and a Medium Defect the user might act on would then be visible only in SPEC-07's register. No BR changes, because SPEC-05 §3's reason shape is already a list.
+- **Consequences:** SPEC-05 §3's worked example has been re-baselined, and its FUTs already name the set D-021 … D-027. The band is unchanged: NeedsAttention, because the worst Open severity is Medium.
+
+## D-254: SPEC-07 BR-33 Stands at 27 Defects — No Register Controls in Slice 1
+
+- **Context:** BR-33 justified "no filter or sort controls" with "at 4, 5 and 2 rows a control tests nothing". D-249 raised the Defect register to 27 rows.
+- **Options:** A) keep BR-33 and re-ground it; B) add an Open/Closed filter.
+- **Decision:** **A.** Claude, on Sandro's delegation, 2026-11-04.
+- **Rationale:** BR-22 already orders the table Open before Closed, then by severity. The 7 actionable rows always sit at the top, and the 20 Closed rows below them are history. A filter would only hide that history, and interaction remains Information Architecture's (BR-03, D-21).
+- **Consequences:** SPEC-07 §3 and BR-33 carry the new rationale. Revisit when a register's volume makes the Open block scroll off the first screen.
+
+## D-255: SPEC-07 BR-20 Keeps `description` on Expansion Without the Product-Fork Premise
+
+- **Context:** BR-20 justified rendering `description` on expansion partly through SPEC-03 BR-23's folding of D-004's product fork into it. D-249 closed D-004 and withdrew that fold.
+- **Decision:** The rule stands. The remaining ground is enough: SPEC-03 BR-22 preserves the log's descriptions verbatim, and that multi-sentence prose is too long for a column. Claude, on Sandro's delegation, 2026-11-04.
+- **Consequences:** BR-20's struck clause is replaced. No FUT changes.
+
+## D-256: The `./scripts/**/*.ts` Coverage Band Still Waits — the First `.ts` There Is Never Instrumented
+
+- **Context:** D-215 lands a band "with the story that creates the first file under its folder". SPEC-03 creates `scripts/migrateFinancialPlanner.ts`, the first `.ts` under `scripts/`.
+- **Decision:** No band lands yet. It remains with `SPEC-09`, subject to the same measurement. Claude, on Sandro's delegation, 2026-11-04.
+- **Rationale:** Measured on 2026-11-04 with `jest --coverage`: the script's tests spawn it as a child process, so the coverage summary holds no entry for it. A band over a folder with no covered file is D-215's hard error. The script is a thin entry point, and every rule it runs lives in `srv/modules/migration/` at 100% lines, inside the Services band.
+- **Consequences:** TST-001 §13's note has been amended. D-215's trigger is read as "the first covered file", not "the first file".

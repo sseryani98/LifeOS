@@ -6,8 +6,8 @@ Strategy **and Project Planning** (grouping settled, `SPEC-01` … `SPEC-12`; **
 twelve Approved**; `IA-001`, `DS-001`, `TH-001`, `DM-001`, `TS-001` and `TST-001` **Approved**;
 `BP-001` **Approved**). **All five open items are closed; R1 is executed and R9's proxy
 residual is executed.** **Build is under way: `S-00 Module Bootstrap` and `SPEC-01 MCP Intent-Verb
-Layer` are both DONE (2026-08-16) — the module has a model, a service and eleven verbs — and `SPEC-02`
-is built and functionally tested (19/19, 2026-11-03), Human Review done 2026-11-04, commit next.** Decisions run **D-01 … D-248**.
+Layer` are both DONE (2026-08-16) — the module has a model, a service and eleven verbs — `SPEC-02`
+is committed (`c7d29bb`), and `SPEC-03` is built and functionally tested (12/12, 2026-11-04), Human Review done 2026-11-04, `/refresh-docs` and `/pm-update` run 2026-11-04; commit next.** Decisions run **D-01 … D-256**.
 **Last updated:** 2026-11-04
 **Purpose:** The continuity document. Anyone (or any fresh chat) picking up Project Tracker
 starts here. Read this, then `design/PROBLEM_STATEMENT_AND_VISION.md` (PSV-001),
@@ -83,10 +83,10 @@ read path** nobody had ever specified (D-145). `IA-001` is **Approved**.
 
 Project Tracker has a PRD, `design/PROBLEM_STATEMENT_AND_VISION.md` (PSV-001, **Draft**),
 `design/BUSINESS_ARCHITECTURE.md` (BA-001 v1.15, **Approved** — 22 objects in 3 waves, grouped into
-12 specs), a `research/` pack of six documents, a decisions log (D-01 … D-248), a wired module folder,
+12 specs), a `research/` pack of six documents, a decisions log, a wired module folder,
 **twelve written specs — `SPEC-01` … `SPEC-12`, all twelve Approved** (`SPEC-01` flipped from Draft at
 the `SPEC-12` workshop, discharging D-93 — D-136) — and the
-Plan-phase skills installed in `.claude/`. **Module code exists: `S-00` and `SPEC-01` are Done (2026-08-16); `SPEC-02` is built, uncommitted.** Ideate, Scope and Research ran
+Plan-phase skills installed in `.claude/`. Ideate, Scope and Research ran
 2026-07-26; Scaffold, the Workshops grouping, `SPEC-01` and `SPEC-02` ran 2026-07-27; `SPEC-03` and
 `SPEC-04` ran 2026-07-28; `SPEC-05` … `SPEC-09` ran 2026-07-30; `SPEC-10`, `SPEC-11` and `SPEC-12` ran
 2026-08-04. **OI-01, OI-02, OI-03 and OI-04 are closed**; **OI-05 closed at Data Model (D-161).**
@@ -103,7 +103,7 @@ becomes the first real test of the new system.
 
 ## 2. Decisions already made
 
-Full rationale in `design/DECISIONS_LOG.md` (D-01 … **D-248**; D-19 … D-27 were added at Scope,
+Full rationale in `design/DECISIONS_LOG.md` (D-01 … **D-256**; D-19 … D-27 were added at Scope,
 D-28 … D-32 at Research, D-33 … D-36 at Scaffold, D-37 … D-39 at the Workshops grouping,
 D-40 … D-46 at the `SPEC-01` workshop, D-47 … D-57 at the `SPEC-02` workshop, D-58 … D-65 at the
 `SPEC-03` workshop, D-66 … D-69 at the `SPEC-04` workshop, D-70 … D-75 at the `SPEC-05` workshop and
@@ -144,12 +144,12 @@ mechanism needs a construction step.
 | 5   | Workshops          | `/workshop` → `doc-writer`                        | Exists       | **Done** — 2026-08-04. D-37 grouping; `SPEC-01` … `SPEC-12` all **Approved** (12/12 written; D-136)                                                      |
 | 6   | Information Arch.  | `/generate-information-architecture` → `doc-writer` | Authored     | **Done** — 2026-08-06. `IA-001` **Approved**; 6 objects → 1 route + 1 `story` param; **R9 executed** (D-137 … D-143)                                     |
 | 7   | Design System      | `/generate-design-system` → `doc-writer` | Authored     | **Done** — 2026-08-06. `DS-001` **Approved**; **FE FPM, drafts OFF**; the browser read path named (D-144 … D-152)                                        |
-| 8   | Theme              | `/generate-theme` → `doc-writer`                 | Authored     | **Done** — 2026-08-06. `TH-001` **Approved** 2026-08-15; **theme inherited wholesale, no CSS written** (D-153 … D-159)                                   |
+| 8   | Theme              | `/generate-theme` → `doc-writer`                 | Authored     | **Done** — 2026-08-06. `TH-001` **Approved** 2026-08-15, re-approved 2026-11-04 after the refresh (`7ab93eb`); **theme inherited wholesale, no CSS written** (D-153 … D-159)                                   |
 | 9   | Data Model         | `/generate-data-model` → `doc-writer`       | Authored     | **Done** — 2026-08-15. `DM-001` **Approved**; **25 entities, document only, no CDS**; **OI-05 closed**, **R1 executed and closed** (D-160 … D-175)       |
 | 10  | Tech Stack         | `/generate-tech-stack` → `doc-writer`       | Authored     | **Done** — 2026-08-15. `TS-001` **Approved**; **the proxy executed**, the loader ruled, the credential homed, **R11 minted** (D-176 … D-185)             |
-| 11  | Test Strategy      | `/generate-test-strategy` → `doc-writer` | Authored     | **Done** — 2026-08-15. `TST-001` **Approved**; **the harness question executed and the exemplar's belief reversed**; 180 FUTs classified (D-186 … D-197) |
+| 11  | Test Strategy      | `/generate-test-strategy` → `doc-writer` | Authored     | **Done** — 2026-08-15. `TST-001` **Approved**; **the harness question executed and the exemplar's belief reversed**; 181 FUTs classified (D-186 … D-197) |
 | 12  | Project Planning   | `/generate-build-plan` → `doc-writer`       | Authored     | **Done** — 2026-08-15. `BP-001` **Approved**; **13 stories, 3 sprints**; story zero resolves the eight "first build story" items (D-198 … D-209)         |
-| 13  | Build              | `/build` + chain                                   | Exists       | **In progress** — `S-00` **Done** 2026-08-16 (D-210 … D-217); `SPEC-01` **Done** 2026-08-16 (D-218 … D-230), with **§5's chain run retroactively 2026-08-25 → 26** — stages 2, 3 and 4 closed, 5 skipped, **6 Human Review now closed** (D-232 … D-238); **`SPEC-02` in progress** in sprint `PT-W1` — built, `/functional-test` 19/19 on 2026-11-03, Human Review done 2026-11-04, `/commit-diff` next (BP-001 §3, §6) |
+| 13  | Build              | `/build` + chain                                   | Exists       | **In progress** — `S-00` **Done** 2026-08-16 (D-210 … D-217); `SPEC-01` **Done** 2026-08-16 (D-218 … D-230), with **§5's chain run retroactively 2026-08-25 → 26** — stages 2, 3 and 4 closed, 5 skipped, **6 Human Review now closed** (D-232 … D-238); `SPEC-02` committed `c7d29bb`; **`SPEC-03` in progress** in sprint `PT-W1` — built, `/functional-test` 12/12 on 2026-11-04 (one repeat-call finding, accepted as D-252), Human Review done 2026-11-04, `/refresh-docs` and `/pm-update` run 2026-11-04 (D-249 … D-256), `/commit-diff` next (BP-001 §3, §6) |
 | 14  | **Rewire tooling** | `lintNoMarkdownState` + PreToolUse hook            | Not authored | Not started                                                                                                                                              |
 | 15  | Cutover            | —                                                  | —            | Not started                                                                                                                                              |
 | 16  | Back to FP         | —                                                  | —            | Blocked on cutover                                                                                                                                       |
@@ -691,6 +691,27 @@ Sandro ruled it a defect.
 ---
 
 ## 8. Session log
+
+### 2026-11-04 — `SPEC-02` committed; `SPEC-03` built, functionally tested 12/12, reviewed and docs refreshed
+
+- **`SPEC-02` closed its chain.** Human Review done 2026-11-04, then committed as `c7d29bb`. The
+  2026-11-03 entry's "Human Review next" position is superseded.
+- **`SPEC-03` built in the working tree, uncommitted** — `CNV-002`, `CNV-003` and `CNV-004` as a
+  `srv/modules/migration/` domain behind `npm run migrate-financial-planner`, carrying an embedded
+  snapshot of Financial Planner's ledgers at `2704696` (D-249 … D-251). Gate green: **42 suites /
+  377 tests**.
+- **`/functional-test` 12/12 on scratch Postgres** (`ft_spec_03_202611041200a`/`b`, both dropped),
+  with one repeat-call finding: a second `seedRegisters` duplicates every register row. Sandro
+  accepted it as **D-252** — no guard; `reconcile` catches it, and recovery is drop-and-rerun.
+- **Human Review done 2026-11-04.**
+- **`/refresh-docs`** corrected about 70 stale facts across 14 docs — chiefly the July 4-Defect seed
+  (now 27, D-021 … D-027 Open) carried by `SPEC-01`, `-05`, `-07`, `-08`, `-11`, BA-001 and DS-001.
+  It ruled four judgment items, on Sandro's delegation: **D-253** (a health reason lists one item per
+  Open Defect), **D-254** (SPEC-07 BR-33 stands at 27 rows), **D-255** (BR-20 keeps `description` on
+  expansion) and **D-256** (the `./scripts/**/*.ts` coverage band still waits, measured).
+- **`/pm-update`:** this entry, plus §2's decision range, §3's Theme re-approval, the TST-001 FUT
+  count and the Build row.
+- **Position:** `SPEC-03` stages 1–8 run, UX Test skipped (no UI); **`/commit-diff` next**.
 
 ### 2026-11-04 — Harness review: hooks fixed, eleven writer agents collapsed into `doc-writer`
 

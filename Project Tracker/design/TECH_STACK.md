@@ -11,6 +11,7 @@
 
 | Date       | Author          | Description                                                                                                                                                                                                                                                                                                                                                                                                           |
 | ---------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-11-04 | Claude          | `/refresh-docs` after SPEC-03 build: §7.2 gains the `scripts/migrateFinancialPlanner.ts` row and its `cds.test` row is annotated settled (D-187); the Postgres role and the empty-source-folder claims annotated as no longer true; the deploy step is `npx cds deploy` (no `deploy` script exists). No ruling changed. |
 | 2026-11-02 | Sandro & Claude | **v1.1 — amended at `SPEC-02`'s build (D-239, D-240).** §12: `db/data/` holds the code-list **and** methodology library seeds, as hand-written CSVs loaded by `cds deploy`, and they belong to `CNV-001`, not `CNV-002`. Status stays **Approved**. |
 | 2026-08-15 | Sandro          | **Status → Approved.** All twelve Phase 5 coverage checks met; the approval gate at step 0 of Phase 6 was answered before the stage closed — the second stage running, after `DM-001`.                                                                                                                                                                                                                                |
 | 2026-08-15 | Sandro & Claude | Initial creation from the Tech Stack stage. Settles the **5** questions the design documents defer here by name across **14** files. Records D-176 through D-185. **D-141's reverse proxy is EXECUTED and closed** — `$batch` POST and an OData write both green in a real browser under `NODE_ENV=production`, with no CORS header of any kind. Mints **R11**. Two measured defects found, one of them cross-module. |
@@ -219,7 +220,8 @@ configuration at all.
 | **`npm start`**                | **`cds serve --port 4005`** — changed from `cds-serve` | Both, **automatic** | Same. The current script is measured broken for a TypeScript impl. **The port is not optional** — bare `cds serve` binds :4004, the other module's port (D-214) |
 | **MCP server**                 | `mcp/server.ts` under `tsx`                            | Both, **explicit**  | The launcher sets `process.env.CDS_TYPESCRIPT` **before** requiring `@sap/cds`, and runs under a `tsx` loader. Neither is supplied for it                       |
 | **`scripts/recordTestRun.ts`** | `tsx …` (INT-004, D-103)                               | Both, **explicit**  | Same shape. It also `process.chdir`s to this module's root before requiring `@sap/cds`                                                                          |
-| **`cds.test` suites**          | Jest                                                   | **Unsettled here**  | Financial Planner's suites carry the comment "cds.test cannot load the TypeScript service impl". **Handed to Test Strategy (stage 11) by name**                 |
+| **`scripts/migrateFinancialPlanner.ts`** | `npm run migrate-financial-planner` → `tsx` (D-251) | Both, **explicit**  | Same shape. It sets `CDS_TYPESCRIPT ??= "true"` itself and `process.chdir`s to this module's root before importing `@sap/cds` |
+| **`cds.test` suites**          | Jest                                                   | **Unsettled here**  | Financial Planner's suites carry the comment "cds.test cannot load the TypeScript service impl". **Handed to Test Strategy (stage 11) by name** — _settled since: D-187, `TST-001` §4 (one `setupFiles` entry sets `CDS_TYPESCRIPT`)_ |
 
 **The `npm start` change is not cosmetic and its cost is stated.** It makes this module's start command
 depend on a globally-installed `@sap/cds-dk@9.7.2` that nothing in the repo pins — **R11** (§16). The
@@ -256,7 +258,7 @@ credential that made R1 pass was supplied through the environment.
 server that an agent fleet drives, and a superuser binding gives a bug in that path reach over every
 database on the machine — including `financial_planner`, which holds Sandro's card portfolio and which
 D-29 separated structurally. A role that owns one database makes that separation enforced rather than
-merely intended. **The role does not exist yet:** creating it is a change to a Postgres installation
+merely intended. **The role does not exist yet** _(annotated 2026-11-04: it exists — `cds deploy` ran 2026-08-16, D-229)_**:** creating it is a change to a Postgres installation
 outside this repo, so it is the one **prerequisite** of the first build story rather than something
 this stage did unasked (D-168's precedent).
 
@@ -439,7 +441,7 @@ write it left unproven is now measured green in the profile that previously prod
 
 ## 12. Project Structure
 
-**Every source folder is still empty** (D-160). The tree below is the **destination**, not a
+**Every source folder is still empty** (D-160). _Annotated 2026-11-04: only `app/` is still empty._ The tree below is the **destination**, not a
 description — it says where the first build story puts things.
 
 ```text
@@ -463,6 +465,7 @@ Project Tracker/
     tracker-service.ts                  Entry point
     _i18n/                              i18n.properties + messages.properties
     modules/{domain}/                   Facade / Service / DataService / Validator / Mapper
+      migration/                        CNV-002/003/004 — MigrationService + embedded snapshot (D-251)
   mcp/                                  ← sibling of db/ srv/ app/ test/, NOT under srv/ (D-44)
     server.ts                           Sets CDS_TYPESCRIPT, guards stdout (§7.2, §9.1)
     verbs/                              The eleven intent verbs (SPEC-01)
@@ -472,6 +475,7 @@ Project Tracker/
   scripts/
     installMcpServer.mjs                ← NEW at SPEC-01 (D-224). Writes the gitignored registration
     recordTestRun.ts                    INT-004 (D-103)
+    migrateFinancialPlanner.ts          Runs CNV-002 → CNV-003 → CNV-004 once (D-251)
   test/                                 Structure is Test Strategy's (stage 11)
 ```
 
@@ -512,7 +516,7 @@ Local only. No Docker, no BTP, no cloud (PSV §7.2).
 | 1    | `createdb project_tracker`                                               | Already exists from R1 (D-170); skip if present                                    |
 | 2    | `CREATE ROLE project_tracker LOGIN PASSWORD …; GRANT …`                  | **Prerequisite of the first build story** (§8), not run here                       |
 | 3    | Write `Project Tracker/.env` with `CDS_REQUIRES_DB_CREDENTIALS_PASSWORD` | Gitignored (§8)                                                                    |
-| 4    | `npm run deploy` → `cds deploy`                                          | Postgres. **Cannot add a `not null` column to a populated table** (D-175)          |
+| 4    | `npx cds deploy` (no `deploy` script exists)                             | Postgres. **Cannot add a `not null` column to a populated table** (D-175)          |
 | 5    | `npm start` → **`cds serve`** on :4005                                   | **Not `cds-serve`** (§7)                                                           |
 | 6    | `npm start` in Financial Planner, on :4004                               | Serves the shell and `index.html`                                                  |
 | 7    | `node "Standards (Technical + Linting)/scripts/serveOneOrigin.mjs"`      | :4000 (§11)                                                                        |

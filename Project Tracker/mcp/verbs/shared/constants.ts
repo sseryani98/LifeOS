@@ -1,3 +1,5 @@
+import { CODES } from "../../../srv/modules/shared/constants.js";
+
 /** Runtime message keys the verb layer rejects and warns with. */
 export const VERB_KEYS = {
   CONNECTION_UNAVAILABLE: "verb.connection.unavailable",
@@ -65,14 +67,7 @@ export const ACTIVITY_KINDS = {
 } as const;
 
 /** The six FRICEW type codes a planned story may carry. */
-export const FRICEW_TYPES = [
-  "Interface",
-  "Conversion",
-  "Enhancement",
-  "Form",
-  "Report",
-  "Workflow",
-] as const;
+export const FRICEW_TYPES = CODES.FRICEW_TYPES;
 
 /** The four defect severities. */
 export const DEFECT_SEVERITIES = ["Critical", "High", "Medium", "Low"] as const;

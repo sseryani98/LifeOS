@@ -13,6 +13,7 @@
 | ---------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | 2026-08-06 | Sandro & Claude | Initial creation from the Design System stage. Build technology ruled **Fiori Elements FPM** for all 6 UI-bearing objects with **drafts off**; the browser read path named; theme and density recorded as inherited; one `ObjectPageLayout` in 4 regions; **17** domain-to-role mappings; charts answered **none**. Records D-144 through D-152. |
 | 2026-08-06 | Sandro          | Approved at the opening of the Theme stage. Status Draft → Approved.                                                                                                                                                                                                                                                                             |
+| 2026-11-04 | Claude          | `/refresh-docs` after SPEC-03 build: the slice-1 volume in the chart ruling is 27 Defects (7 open), not 4 (SPEC-03 re-baseline, D-249). No ruling changed. |
 
 ---
 
@@ -390,10 +391,9 @@ this module inherits.
 
 **Three deliberate departures from `Financial Planner`'s DS-001 §9.1.1**, which mandates search,
 personalization and variant management on all tables. Reason: SPEC-04 BR-31 and SPEC-07 BR-33 rule
-filters and sorting out of slice 1, and the day-one volumes are **8 open Tasks, 4 Defects, 5
-Decisions and 2 Activity rows** — a personalization dialog over four rows tests nothing, which is
-D-22's own principle. **Financial Planner's DS-001 is that module's design system, not a shared
-standard**; the shared standards live in `Financial Planner/CLAUDE.md` and are not departed from.
+filters and sorting out of slice 1, and the day-one volumes are the ones SPEC-03 BR-30 fixes — tens of rows, not hundreds — and a
+personalization dialog over a register that small tests nothing, which is D-22's own principle. **Financial Planner's DS-001 is that module's design system, not a shared
+standard**; the shared standards live in `Standards (Documents)/CODING_STANDARDS.md` and are not departed from.
 
 ---
 
@@ -503,7 +503,7 @@ recorded here so the next reader does not "correct" the figure below. The remain
 handing chart types to this stage — not requests for a chart. **No spec requires a chart.**
 
 The surfaces are tiles, tables, a nested list and a timeline. The slice-1 volumes — **8** open Tasks,
-**4** Defects, **5** Decisions, **2** Activity rows and **1** TestRun — do not support a chart that
+**27** Defects (7 open), **5** Decisions, **2** Activity rows and **1** TestRun — do not support a chart that
 would tell Sandro anything a table does not. **No chart library is adopted**, and
 `Financial Planner/app/shared/controls/VizFrameCard.ts` and `ApexChartCard.ts` are not used by this
 module.
@@ -540,7 +540,7 @@ one shell does not carry two empty-state idioms.
 
 **RPT-003 and RPT-004 sit on opposite sides of the same principle deliberately** (D-89). RPT-003's
 empty state is the **normal case**, on eleven of twelve Milestones; RPT-004's is **unreachable**,
-because the migration writes 4 Defects, 5 Decisions and 2 Activity rows before any user opens the
+because the migration writes Defects, Decisions and Activity rows (SPEC-03 BR-30) before any user opens the
 page and nothing deletes any of them. Recorded so the asymmetry does not read as an inconsistency.
 
 ---

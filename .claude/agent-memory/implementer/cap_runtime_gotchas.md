@@ -31,3 +31,9 @@ Moved here from source comments 2026-11-04 (Sandro: framework behaviour belongs 
 - **Draft `before('SAVE')` receives the full activated row**, so "did the vendor change" means comparing against the stored row (Financial Planner `transactionService`).
 - **UPDATE key lives in the last `req.params` entry**, as an id string or a `{ ID }` object.
 - **`cuid` fills `ID` before any handler runs** — every created row already has an ID in `before CREATE`.
+
+Measured at SPEC-03 (migration domain, 2026-11-04):
+
+- **Code-list and parent FKs are `DEFERRABLE INITIALLY DEFERRED` on both sqlite and postgres** (`cds compile --to sql --dialect postgres`), so a child row may be inserted before its parent inside one tx (the migration Activity precedes its Workspace).
+- **`srv.tx({ user: new cds.User("migration") }, fn)`** stamps `createdBy` on every row, including rows an `after CREATE` handler writes by direct `await INSERT` (the chain Tasks/Subtasks). Direct `await SELECT` inside `fn` joins the same tx.
+- **A request outside dispatch:** `new cds.Request({ event })` gives a real `req.error()` accumulator; `req.reject()` with no args throws the one error, or `MULTIPLE_ERRORS` with `details`. Both `req.errors` and the no-arg `reject()` are missing from the typings — cast to a local interface. Extra fields on `req.error({...})` (e.g. `counts`) need a non-literal variable, or TS's excess-property check rejects the overload.

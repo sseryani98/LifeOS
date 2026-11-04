@@ -22,6 +22,8 @@ in-memory SQLite only. ~~**Not Approved-for-build until R1 clears.**~~ **R1 exec
 | 2026-08-15 | Sandro & Claude | Amended in-session at the Data Model stage (D-163) — the **fifth** amendment to this spec. §2 gains **amendment 15**: `Defect`, `Decision`, `Activity` and `TestRun` each take a **mandatory `workspace` association**, and CNV-003 sets it from the Workspace it is loading into. It is what makes [SPEC-07](SPEC-07-CHAIN-AND-REGISTERS.md) BR-18's workspace-scoped registers a navigable path rather than a union of two nullable links. **No seeded row's content changes, no source field is needed, no value is inferred, and no BR or FUT changes.** Status stays **Approved**. |
 | 2026-11-02 | Sandro & Claude | Citation sharpening at `SPEC-02`'s build (D-244). **BR-15 now names the carrier** of the creation status: `createdDone` on `TrackerService.Milestones` — `true` on the eleven Done Milestones, omitted on `financial-planner/CNV-001` ([SPEC-02](SPEC-02-METHODOLOGY-AND-STAGE-ENFORCEMENT.md) BR-37). No rule, algorithm or FUT changed; status stays **Approved**.                                                                                                                                                                                                                    |
 | 2026-11-04 | Claude          | Doc refresh: R1 marked executed and closed (D-170) in the header and wherever this spec gated on it; CDS Service named (`TrackerService`). No rule, FUT or count changed. Status unchanged. |
+| 2026-11-04 | Claude (Sandro's delegation) | **Re-baselined at `SPEC-03`'s build briefing (D-249, D-250, D-251).** The source is a snapshot of `Financial Planner/project/` at `2704696`, taken at cutover rather than at the July workshop. Defects go from 4 to **27**: 20 Closed, 7 Open. D-004 is now Closed, and its "product fork" clause is withdrawn. The merge SHAs come from git, `513170a` / `a4535fc`. W1-S3's goal and the twelve descriptions come from the board as it stands now. The entry point is named: `MigrationService` in `srv/modules/migration/`, driven by `scripts/migrateFinancialPlanner.ts`. Touches §1, §3.1, §3.2, §3.3, BR-01, BR-11, BR-20, BR-21, BR-23, BR-30, FUT-001, FUT-005, FUT-006 and FUT-012. FUT count unchanged at 12. Status stays **Approved**. |
+| 2026-11-04 | Claude | `/refresh-docs` after SPEC-03 build: snapshot file named (`financialPlannerSnapshot.json`); Defect counts four → 27 in §2; Postgres execution and DM-001 annotated; §5 gains the type and ordering tie-out rows; BA-001 corrections count three → four. No rule or FUT changed. |
 
 ---
 
@@ -29,7 +31,7 @@ in-memory SQLite only. ~~**Not Approved-for-build until R1 clears.**~~ **R1 exec
 
 The one-time load of Financial Planner's markdown project state into Project Tracker's own database
 (D-29), and the tie-out that proves it landed. CNV-002 loads the hierarchy and twelve story
-Milestones; CNV-003 loads the registers that genuinely exist — four defects, five decisions, one test
+Milestones; CNV-003 loads the registers that genuinely exist — 27 defects, five decisions, one test
 run and one checkpoint narrative; CNV-004 reconciles both.
 
 The load's defining constraint is that **the eleven verbs cannot perform it** (D-58): no verb creates
@@ -40,13 +42,13 @@ at all. The migration writes through the CAP service layer instead. Under D-54 t
 the Milestone, so CNV-004 asserts rather than instantiates (D-59).
 
 ~~**This spec is provisional on R1.**~~ **R1 executed and closed (D-170).** Nothing here has been executed against Postgres; D-39 assigns the
-repeat, together with standing up a binding neither Life OS module has, to the Data Model stage.
+repeat, together with standing up a binding neither Life OS module has, to the Data Model stage. _Annotated 2026-11-04:_ no longer true — R1 was executed on Postgres 17.6 (D-170), and the load itself was functionally tested on Postgres, 12/12, on 2026-11-04.
 
 ---
 
 ## 2. Data Model References
 
-**There is no DM-001 yet.** Workshops is stage 5 and Data Model is stage 9, so this section is an
+**There is no DM-001 yet.** _(Annotated 2026-11-04: DM-001 now exists — [`design/DATA_MODEL.md`](../DATA_MODEL.md).)_ Workshops is stage 5 and Data Model is stage 9, so this section is an
 **input to** the data model rather than a reference to it (D-43). Every entity and attribute below is
 a requirement this spec places on the Data Model stage.
 
@@ -58,7 +60,7 @@ a requirement this spec places on the Data Model stage.
 | **Initiative**         | The three sprints                                                      | `name`, `goal` (**nullable**), `branch`, `status`, `mergeCommit` (nullable), `tag` (nullable), **`position`**                                                                                |
 | **Milestone**          | The twelve stories                                                     | `storyId`, `fricewType`, `description`, `shipsUi`, **`position`**, `status` (**derived**, SPEC-02 BR-17)                                                                                     |
 | **Task** / **Subtask** | Written by ENH-001 as a consequence of CNV-002's load, not by the load | `stepCode`, `status`                                                                                                                                                                         |
-| **Defect**             | CNV-003's four                                                         | `severity`, `status`, `title`, `description`, `references` (nullable), `resolution` (nullable), plus links to Milestone (nullable) and Initiative (nullable)                                 |
+| **Defect**             | CNV-003's 27                                                           | `severity`, `status`, `title`, `description`, `references` (nullable), `resolution` (nullable), plus links to Milestone (nullable) and Initiative (nullable)                                 |
 | **Decision**           | CNV-003's five                                                         | `target`, `context` (nullable), `options` (nullable), `decision`, `rationale` (**nullable**), **`decidedAt`** (SPEC-07 §2 amendment 2, D-92)                                                 |
 | **TestRun**            | CNV-003's one                                                          | `total`, `passed`, `failed`, `pending` (nullable), `durationMs` (nullable), `linesPct`, `branchesPct`, `failures`, **`executedAt`**, plus links to Task (nullable) and Initiative (nullable) |
 | **Activity**           | The load's two rows                                                    | `kind`, `actor`, `target`, `payload`, `occurredAt`                                                                                                                                           |
@@ -73,7 +75,7 @@ a requirement this spec places on the Data Model stage.
 | 3   | **`Initiative.goal` is nullable** — W1-S1's is unrecoverable (no W1-S1 checkpoint file exists).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | 4   | **`Workspace.currentFocus` is nullable** — FRM-001's to write; no markdown holds it.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | 5   | **A Milestone's creation status is a transient input, not a stored attribute** (D-64). SPEC-02 §3.2 lists "`Milestone.status` at creation" as an ENH-001 input; because status is derived (D-53, SPEC-02 BR-17) and BR-17's "every blocking Task is Complete" is **vacuously true over an empty set**, the derivation returns Done for a Backlog and a Done Milestone alike at the instant of creation and cannot discriminate. It cannot be a stored flag either — D-54 rejected exactly that. **Amends SPEC-02 §3.2.**                                                                             |
-| 6   | **`Defect` links to a Milestone OR an Initiative**, both nullable, at least one present. All four seeded defects link to an Initiative and carry a null story.                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| 6   | **`Defect` links to a Milestone OR an Initiative**, both nullable, at least one present. All 27 seeded defects link to an Initiative and carry a null story.                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | 7   | **`TestRun` links to a Task OR an Initiative**, both nullable, at least one present. `pending` and `durationMs` nullable.                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | 8   | **`Decision.rationale` is nullable**, not only `context` and `options` — one seeded decision records none.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | 9   | **`Activity.kind` admits `checkpoint` and `migration`.**                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
@@ -97,6 +99,13 @@ merge commits, tags and branches; `Financial Planner/project/sprints/W1-S2-check
 W1-S2's goal. All re-verified against the files on 2026-07-27; the board held exactly as documented,
 which is worth recording because PLAN.md §5 and BA-001 have each drifted before.
 
+**The source is a snapshot taken at cutover, at `2704696` (D-249).** It was re-verified 2026-11-04.
+The twelve stories and their statuses held, but the descriptions and W1-S3's goal had been rewritten,
+so both are taken as the board prints them at that commit. The values are embedded in
+`srv/modules/migration/financialPlannerSnapshot.json`, imported by `MigrationService`, rather than parsed at run time (D-251), because `CNV-005`
+deletes `Financial Planner/project/`. If a ledger changes before cutover, re-snapshotting it is a
+spec amendment.
+
 #### Transformation rules — hierarchy
 
 Area "Personal Software" → Engagement "Life OS" → Workspace `financial-planner` / "Financial
@@ -110,12 +119,14 @@ having started, which is the only thing about a failed load that is true.
 
 | name                           | goal                                                                                                         | branch         | status   | mergeCommit | tag    | position |
 | ------------------------------ | ------------------------------------------------------------------------------------------------------------ | -------------- | -------- | ----------- | ------ | -------- |
-| W1-S1 — Foundation & Seed Data | **null**                                                                                                     | `sprint/W1-S1` | Complete | `0a9804f`   | `v1.1` | 10       |
-| W1-S2 — Ingestion Pipeline     | From its checkpoint — "Transactions flow from SimpleFIN and CSV into the system. Connection health visible." | `sprint/W1-S2` | Complete | `9bbe826`   | `v1.2` | 20       |
-| W1-S3 — Transaction Processing | From the board — "Transactions categorized, splits supported, historical data backfilled."                   | `sprint/W1-S3` | Active   | null        | null   | 30       |
+| W1-S1 — Foundation & Seed Data | **null**                                                                                                     | `sprint/W1-S1` | Complete | `513170a`   | `v1.1` | 10       |
+| W1-S2 — Ingestion Pipeline     | From its checkpoint — "Transactions flow from SimpleFIN and CSV into the system. Connection health visible." | `sprint/W1-S2` | Complete | `a4535fc`   | `v1.2` | 20       |
+| W1-S3 — Transaction Processing | From the board — "Transactions categorized, splits supported, historical data backfilled, weekly review surface functional." | `sprint/W1-S3` | Active   | null        | null   | 30       |
 
 All three branches were verified present on the remote, and both SHAs verified as the
-`merge(sprint):` commits. W1-S1's goal is null because no W1-S1 checkpoint file exists — the folder
+`merge(sprint):` commits. They were re-verified 2026-11-04: `513170a` and `a4535fc` are the
+commits git holds, and the July values `0a9804f` / `9bbe826` do not resolve in this repository
+(D-250). W1-S1's goal is null because no W1-S1 checkpoint file exists — the folder
 holds only `.gitkeep` and `W1-S2-checkpoint.md` (D-61).
 
 #### Transformation rules — the twelve Milestones
@@ -184,20 +195,23 @@ mechanism rather than a rule someone must remember.
 column**, which is what forces D-61. `Financial Planner/project/sprints/W1-S2-checkpoint.md` supplies
 the decisions, the test run and the checkpoint narrative.
 
-#### Transformation rules — four Defects
+#### Transformation rules — 27 Defects
 
-| id    | Initiative | severity | status   | resolution                     |
-| ----- | ---------- | -------- | -------- | ------------------------------ |
-| D-001 | W1-S2      | High     | Closed   | From the log's Resolution cell |
-| D-002 | W1-S2      | Medium   | Closed   | From the log's Resolution cell |
-| D-003 | W1-S2      | High     | Closed   | From the log's Resolution cell |
-| D-004 | W1-S3      | Medium   | **Open** | **null**                       |
+Re-baselined to the snapshot at `2704696` (D-249). The July workshop's four rows were D-001 … D-004.
 
-All four carry a **null story** — the source records a Sprint and nothing finer, and inferring one is
-D-24's prohibition on fabricated linkage. `title` is derived from each description's leading clause;
-`description` is preserved verbatim; `references` is null on seed. D-004's Resolution cell records a
-product fork awaiting Sandro rather than a resolution, so it folds into `description` and
-`resolution` stays null.
+| ids             | Initiative | count | status   | resolution                     |
+| --------------- | ---------- | ----- | -------- | ------------------------------ |
+| D-001 … D-003   | W1-S2      | 3     | Closed   | From the log's Resolution cell |
+| D-004 … D-020   | W1-S3      | 17    | Closed   | From the log's Resolution cell |
+| D-021 … D-027   | W1-S3      | 7     | **Open** | **null** — the cell reads `—`  |
+
+Each Defect's `severity` is its row's Severity cell as recorded: 2 High, 13 Medium, 12 Low.
+
+All 27 carry a **null story**. The source records a Sprint and nothing finer, and inferring one is
+D-24's prohibition on fabricated linkage. That holds even where a description names a story in prose,
+as D-021 … D-027 name FRM-001. `title` is derived from each description's leading clause;
+`description` is preserved verbatim; `references` is null on seed. An Open row's `—` Resolution cell
+is the log's placeholder for "none" and loads as null.
 
 #### Transformation rules — five Decisions
 
@@ -277,7 +291,7 @@ Three assertion families, all of which fail the migration loudly rather than war
 
 | Family                | Assertion                                                                                                                                                 | Rule         |
 | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
-| Counts                | 1 Area, 1 Engagement, 1 Workspace, 3 Initiatives, 12 Milestones, 4 Defects, 5 Decisions, 1 TestRun, 2 Activity rows                                       | BR-30        |
+| Counts                | 1 Area, 1 Engagement, 1 Workspace, 3 Initiatives, 12 Milestones, 27 Defects, 5 Decisions, 1 TestRun, 2 Activity rows                                      | BR-30        |
 | The chain             | Exactly one Milestone has a chain — `financial-planner/CNV-001`, 8 Tasks and 6 Subtasks, all Not Started; zero rows carry `stepCode` `ux-test` or `smoke` | BR-31        |
 | Provenance and typing | No Milestone carries `fricewType` = `Integration`; every migrated row carries `createdBy` = `migration`                                                   | BR-32, BR-33 |
 
@@ -299,7 +313,7 @@ CNV-004 _is_ the reconciliation approach for CNV-002 and CNV-003.
 
 **Load mechanism and provenance — cross-cutting**
 
-- **BR-01** CNV-002, CNV-003 and CNV-004 write through the CAP service layer, not through INT-001's verbs. D-05's prohibition binds agents bypassing the service layer; a one-time Conversion is not an agent.
+- **BR-01** CNV-002, CNV-003 and CNV-004 write through the CAP service layer, not through INT-001's verbs. D-05's prohibition binds agents bypassing the service layer; a one-time Conversion is not an agent. The entry point is `MigrationService` in `srv/modules/migration/`, with `loadHierarchy` (CNV-002), `seedRegisters` (CNV-003) and `reconcile` (CNV-004). Each runs in its own transaction as user `migration`, writing through `TrackerService` so ENH-001's create-handler fires. `scripts/migrateFinancialPlanner.ts` runs them in BR-03's order. It is not an OData action (D-251).
 - **BR-02** Every row the migration writes carries `createdBy` = `migration`, an enumerated identity that is neither human nor agent.
 - **BR-03** Execution is strictly CNV-001 → CNV-002 → CNV-003 → CNV-004.
 - **BR-04** The migration emits no per-row Activity event. It emits exactly two Activity rows, and each names its writer: **CNV-002 emits one of kind `migration`** at load time as the load's first act, so a migration that fails partway is still recorded as having started; **CNV-003 emits the `checkpoint` entry**, at the checkpoint's own date.
@@ -312,7 +326,7 @@ CNV-004 _is_ the reconciliation approach for CNV-002 and CNV-003.
 - **BR-08** `Workspace.currentFocus` is null on load.
 - **BR-09** Three Initiatives are created: W1-S1, W1-S2, W1-S3.
 - **BR-10** `Initiative.status` ∈ {Active, Complete}. W1-S1 and W1-S2 are Complete; W1-S3 is Active.
-- **BR-11** `Initiative.mergeCommit` and `Initiative.tag` are nullable. W1-S1 `0a9804f`/`v1.1`; W1-S2 `9bbe826`/`v1.2`; W1-S3 both null.
+- **BR-11** `Initiative.mergeCommit` and `Initiative.tag` are nullable. W1-S1 `513170a`/`v1.1`; W1-S2 `a4535fc`/`v1.2`; W1-S3 both null (D-250).
 - **BR-12** `Initiative.branch` is the real git ref: `sprint/W1-S1`, `sprint/W1-S2`, `sprint/W1-S3`.
 - **BR-13** `Initiative.goal` comes from the board for W1-S3 and from its checkpoint for W1-S2. W1-S1's is null.
 
@@ -328,10 +342,10 @@ CNV-004 _is_ the reconciliation approach for CNV-002 and CNV-003.
 
 **Registers — CNV-003**
 
-- **BR-20** Four Defects are seeded with their recorded severity and status: D-001 High/Closed, D-002 Medium/Closed, D-003 High/Closed, D-004 Medium/Open.
-- **BR-21** A Defect links to a Milestone or an Initiative, both nullable, at least one present. All four link to their recorded Initiative; `story` stays null.
+- **BR-20** 27 Defects, D-001 … D-027, are seeded with their recorded severity and status: 20 Closed (D-001 … D-020) and 7 Open (D-021 … D-027). By severity: 2 High, 13 Medium, 12 Low (D-249).
+- **BR-21** A Defect links to a Milestone or an Initiative, both nullable, at least one present. All 27 link to their recorded Initiative: D-001 … D-003 to W1-S2, D-004 … D-027 to W1-S3. `story` stays null.
 - **BR-22** `Defect.title` is derived from the description's leading clause; `description` is preserved verbatim; `references` is null on seed.
-- **BR-23** `Defect.resolution` is populated **from the log's Resolution cell when status is Closed, and is null when status is Open** — both directions. D-004 is Open, so its Resolution cell, which records a product fork rather than a resolution, folds into `description`.
+- **BR-23** `Defect.resolution` is populated **from the log's Resolution cell when status is Closed, and is null when status is Open** — both directions. An Open row's Resolution cell reads `—`, the log's placeholder for none, and loads as null. ~~D-004 is Open, so its Resolution cell folds into `description`.~~ D-004 is now Closed with a real fix, so that clause is withdrawn (D-249).
 - **BR-24** Five Decisions are seeded against the W1-S2 Initiative. `decision` comes from the checkpoint; `rationale` where the checkpoint records one; `context` and `options` are null.
 - **BR-24a** Every seeded Decision carries `decidedAt` = **2026-07-10**, the checkpoint's own date — not the load date CAP's `createdAt` records. Same correction `TestRun.executedAt` received for the same reason, from the same source file (BR-25a, D-72, D-92).
 - **BR-25** One TestRun: `total` 174, `passed` 174, `failed` 0, `linesPct` 98.71, `branchesPct` 89.37, `failures` empty; `pending` and `durationMs` null.
@@ -343,7 +357,7 @@ CNV-004 _is_ the reconciliation approach for CNV-002 and CNV-003.
 **Reconciliation — CNV-004**
 
 - **BR-29** CNV-004 writes nothing. It asserts and reports.
-- **BR-30** Count tie-out: 1 Area, 1 Engagement, 1 Workspace, 3 Initiatives, 12 Milestones, 4 Defects, 5 Decisions, 1 TestRun, 2 Activity rows.
+- **BR-30** Count tie-out: 1 Area, 1 Engagement, 1 Workspace, 3 Initiatives, 12 Milestones, 27 Defects, 5 Decisions, 1 TestRun, 2 Activity rows.
 - **BR-31** Chain assertion: exactly one Milestone has a chain — `financial-planner/CNV-001` with 8 Tasks and 6 Subtasks, all Not Started; zero rows carry `stepCode` `ux-test` or `smoke`.
 - **BR-32** Type assertion: no Milestone carries `fricewType` = `Integration`.
 - **BR-33** Provenance assertion: every migrated row carries `createdBy` = `migration`.
@@ -367,6 +381,8 @@ CNV-004 _is_ the reconciliation approach for CNV-002 and CNV-003.
 | CNV-004's count tie-out does not match BR-30                                       | **Fail loudly**, reporting expected vs actual per entity; write nothing | `cnv.reconcile.countMismatch`      |
 | CNV-004 finds a Milestone count of chains other than exactly one                   | Fail loudly, naming the offending Milestones                            | `cnv.reconcile.chainMismatch`      |
 | CNV-004 finds a row whose `createdBy` is not `migration`                           | Fail loudly, naming the row                                             | `cnv.reconcile.provenanceMismatch` |
+| CNV-004 finds a Milestone whose `fricewType` is outside the six singular values (BR-32) | Fail loudly, naming the row and the value                               | `cnv.reconcile.typeMismatch`       |
+| CNV-004 finds a null or repeated `position` on an Initiative or Milestone (BR-33a) | Fail loudly, naming the offending rows                                  | `cnv.reconcile.orderingMismatch`   |
 
 ¹ Existing SPEC-01 key, reused rather than duplicated.
 
@@ -406,7 +422,7 @@ clears.**~~ **R1 executed and closed (D-170).**
 | ~~**CNV-005 must not run before CNV-004's tie-out has passed**~~ — **discharged at the SPEC-12 workshop as [SPEC-12](SPEC-12-DECOMMISSION.md) BR-03**, and as a **check rather than a note** (D-129): a precondition call to `project_view('financial-planner')` must return the correct next action for Financial Planner's `CNV-001`, and a wrong or erroring answer aborts the whole conversion. The two assertions are complementary — CNV-004 asserts the load's counts, chain, typing and provenance, while SPEC-12 BR-03 asserts the load still _answers_, which is the property CNV-005 is about to rely on (RSH-005 §8)                          | SPEC-12 — discharged |
 | ~~**CNV-002 must set `Initiative.position` and `Milestone.position`** — SPEC-04's ENH-002 orders open Milestones by them, and the twelve migrated rows share one `createdAt`, so there is no fallback tiebreak (D-67)~~ — applied in this spec at the SPEC-04 workshop: §2 amendment 12, §3.1's two tables, BR-14a, BR-33a, FUT-001 and FUT-002                                                                                                                                                                                                                                                                                                           | SPEC-03 — applied    |
 
-**BA-001 corrections** — all three **applied at BA-001 v1.4**, in this session.
+**BA-001 corrections** — all four **applied at BA-001 v1.4**, in this session.
 
 | Correction                                                                                                                                                           | Where                   |
 | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
@@ -434,7 +450,7 @@ clears.**~~ **R1 executed and closed (D-170).**
 - One Area "Personal Software", one Engagement "Life OS", one Workspace with slug `financial-planner` (BR-07).
 - `Workspace.currentFocus` is null (BR-08).
 - W1-S1 and W1-S2 are Complete; W1-S3 is Active (BR-10).
-- `0a9804f`/`v1.1`, `9bbe826`/`v1.2`, and W1-S3 with both null (BR-11).
+- `513170a`/`v1.1`, `a4535fc`/`v1.2`, and W1-S3 with both null (BR-11).
 - All three `branch` values are `sprint/W1-S1`, `sprint/W1-S2`, `sprint/W1-S3` (BR-12).
 - **W1-S1's `goal` is null**; W1-S2's and W1-S3's are non-null (BR-13).
 - `position` is 10 / 20 / 30 in that order, none null (BR-14a).
@@ -492,12 +508,12 @@ clears.**~~ **R1 executed and closed (D-170).**
 **Steps:**
 
 1. Run CNV-003.
-2. Read all four Defects.
+2. Read all 27 Defects.
 
 **Expected Result:**
 
-- Four Defects with their recorded severity and status; D-004 is Open (BR-20).
-- Every `story` is null, and each links to its recorded Initiative — D-001/D-002/D-003 to W1-S2, D-004 to W1-S3 (BR-21).
+- 27 Defects with their recorded severity and status: 20 Closed, and 7 Open (D-021 … D-027) (BR-20).
+- Every `story` is null, and each links to its recorded Initiative — D-001 … D-003 to W1-S2, D-004 … D-027 to W1-S3 (BR-21).
 - Every `description` is verbatim and every `references` is null (BR-22).
 - Every Defect carries a non-empty `title` (BR-22).
 
@@ -507,13 +523,13 @@ clears.**~~ **R1 executed and closed (D-170).**
 **Preconditions:** CNV-003 has run.
 **Steps:**
 
-1. Read D-004.
-2. Read D-001, D-002 and D-003.
+1. Read the seven Open Defects, D-021 … D-027.
+2. Read the twenty Closed Defects, D-001 … D-020.
 
 **Expected Result:**
 
-- D-004 is Open with `resolution` null, and the product-fork text is present in its `description` (BR-23).
-- The three Closed defects each carry a non-empty `resolution`, taken from the log's Resolution cell (BR-23).
+- All seven Open Defects carry `resolution` null. None carries the log's `—` placeholder as text (BR-23).
+- The twenty Closed Defects each carry a non-empty `resolution`, taken from the log's Resolution cell (BR-23).
 - No Defect is Open with a non-null `resolution` (BR-23).
 
 ### FUT-007: The TestRun records the metric the checkpoint actually states
@@ -604,7 +620,7 @@ clears.**~~ **R1 executed and closed (D-170).**
 **Expected Result:**
 
 - Against (a) every assertion in BR-30…BR-33 passes and the counts are reported (BR-29, BR-30).
-- Against (b) it **fails loudly** rather than warning — 0 Defects against an expected 4, 0 Decisions against 5, 0 TestRuns against 1, and 1 Activity row against 2, since CNV-002 emitted the `migration` row and CNV-003 never emitted the `checkpoint` one (BR-04, BR-30, BR-34).
+- Against (b) it **fails loudly** rather than warning — 0 Defects against an expected 27, 0 Decisions against 5, 0 TestRuns against 1, and 1 Activity row against 2, since CNV-002 emitted the `migration` row and CNV-003 never emitted the `checkpoint` one (BR-04, BR-30, BR-34).
 - Neither run writes anything: total row count is identical either side of both (BR-29).
 
 ---
