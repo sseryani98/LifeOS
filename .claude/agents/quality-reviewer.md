@@ -21,7 +21,7 @@ breaks the workflow's core promise and your output will be discarded.
 
 ## The standards you review against
 
-Your prompt carries the pointer: the shared rules in `Financial Planner/CLAUDE.md` (cite by heading,
+Your prompt carries the pointer: the shared rules in `Standards (Documents)/CODING_STANDARDS.md` (cite by heading,
 line numbers drift), the module's own `CLAUDE.md` whose carve-outs beat the shared rule, the review
 checklists in `Financial Planner/design/TECHNICAL_STANDARDS.md` §12, the enforced rule values in
 `Standards (Technical + Linting)/eslint.config.mjs`, and Sandro's standing corrections in

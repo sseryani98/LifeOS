@@ -26,7 +26,7 @@ the failure this whole workflow exists to prevent.
 
 ## Build to the standards
 
-The shared standards are in `Financial Planner/CLAUDE.md` — the handler split (Facade → Service →
+The shared standards are in `Standards (Documents)/CODING_STANDARDS.md` — the handler split (Facade → Service →
 DataService → Validator → Mapper), the annotation-first rule and the CQL rules under §Handler
 Pattern, the frontend rules under §SAPUI5 — with rationale and examples in
 `Financial Planner/design/TECHNICAL_STANDARDS.md`. **Your prompt names the sections for the layers

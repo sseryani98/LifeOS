@@ -34,7 +34,7 @@ Grep these before diagnosing. Where a rule *isn't* is the diagnosis.
 
 | Layer | Path | Binds? |
 |---|---|---|
-| Terse pre-coding rules | `{Module}/CLAUDE.md`, plus the shared standards in `Financial Planner/CLAUDE.md` | No — prose |
+| Terse pre-coding rules | `{Module}/CLAUDE.md`, plus the shared standards in `Standards (Documents)/CODING_STANDARDS.md` | No — prose |
 | Rationale + examples | `Financial Planner/design/TECHNICAL_STANDARDS.md` | No — prose |
 | Why + provenance | `~/.claude/projects/c--Projects-Life-OS/memory/*.md` | No — prose |
 | ESLint | `Standards (Technical + Linting)/eslint.config.mjs` — the shared rules; `{Module}/eslint.config.mjs` only re-exports them | Yes |

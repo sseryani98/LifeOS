@@ -1,4 +1,4 @@
-# Project Tracker — Scaffold
+# Project Tracker — Build Phase
 
 ## What This Is
 
@@ -18,7 +18,7 @@ projection and an MCP verb server. It still has **no UI** — `app/` is empty by
 
 What this means concretely:
 
-- **`npm run build` compiles a real model.** `db/schema.cds` declares the **25 persisted entities**
+- **`npm run build` compiles a real model.** `db/{domain}/schema.cds` declares the **25 persisted entities**
   the entity contract names, plus two read views that persist nothing. A green build here now means
   something.
 - **The schema is deployed.** `cds deploy` ran clean against Postgres into the empty schema and left
@@ -43,11 +43,11 @@ What this means concretely:
 
 ## Standards
 
-**The shared Life OS standards are in [Financial Planner/CLAUDE.md](../Financial%20Planner/CLAUDE.md)
-and they apply here in full** — CDS conventions, the Facade/Service/DataService/Validator/Mapper
-handler pattern, TypeScript rules, i18n tiers, SAPUI5 rules, test rules, git workflow. They are
-written in the planner's vocabulary because the planner was the only module when they were written;
-substitute this module's namespace and domain.
+**The shared Life OS standards are in
+[Standards (Documents)/CODING_STANDARDS.md](../Standards%20(Documents)/CODING_STANDARDS.md) and they
+apply here in full** — CDS conventions, the Facade/Service/DataService/Validator/Mapper handler
+pattern, TypeScript rules, i18n tiers, SAPUI5 rules, test rules, git workflow. The root `CLAUDE.md`
+imports them into every session. Their examples are still Financial Planner's; read them as examples.
 
 Nothing in that file is restated here. This file carries only what is true of Project Tracker and
 false or unknown of Financial Planner.
@@ -75,8 +75,8 @@ Planner only (D-11).
 
 ## Folder Structure
 
-Every source folder is empty. The stage that fills each one is named, because a folder tree that
-looks populated when it is not is the thing most likely to mislead the next agent here.
+`app/` is still empty and the stage that fills it is named, because a folder tree that looks
+populated when it is not is the thing most likely to mislead the next agent here.
 
 ```text
 ../                          Life OS monorepo root — `npm install` runs HERE
@@ -94,8 +94,12 @@ PRD.md                       Full product design; slice 1 is a small fraction of
 design/                      PSV, BUSINESS_ARCHITECTURE, specs/, IA, DESIGN_SYSTEM, THEME, DATA_MODEL, TECH_STACK, TEST_STRATEGY, DECISIONS_LOG
 research/                    Six research docs + README.md (pack index, risk register, gate verdict)
 dashboard/                   The v1 HTML generator. Deleted by CNV-005 at cutover (D-02) — not yet
-db/
-  schema.cds                 The 25 persisted entities + the two read views. No story after SPEC-01 adds one (D-205)
+db/                          One folder per domain, same layout as Financial Planner. No story after SPEC-01 adds an entity (D-205)
+  common/common.cds          The local CodeList aspect
+  reference/schema.cds       The twelve code lists
+  hierarchy/schema.cds       Area → Workspace → Initiative → Milestone → Task → Subtask, plus the TaskQueueItem read view
+  methodology/schema.cds     Methodology + MethodologyStep
+  registers/schema.cds       Defect, Decision, Activity, TestRun
 srv/
   tracker-service.cds        TrackerService at /service/trackerSvcs — the only service (D-178)
   tracker-service.ts         Entry point; registers the facade

@@ -34,7 +34,7 @@ Do not invent coverage for behavior nobody specified.
 
 ## The test rules
 
-`Financial Planner/CLAUDE.md` §Test Rules holds them for every module: the
+`Standards (Documents)/CODING_STANDARDS.md` §Test Rules holds them for every module: the
 `test/{unit|integration}/{module}/{data,support,tests}` tree and what each folder may hold, no CQL
 in a spec, the one-line why-JSDoc on every `it`, the unit and integration boundaries, and never
 testing the framework. `lint:test-structure`, `lint:test-data` and `lint:test-cql` enforce the

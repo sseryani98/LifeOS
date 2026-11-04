@@ -33,9 +33,9 @@ module-local and must not be flattened into one answer:
 `Financial Planner/design/DESIGN_WORKSHOP.md` is the authority for **every** module — this skill is
 the harness that runs it. §4 (template), §5.2 (question bank), §6 (definition of done) and §9 (file
 naming) are cross-module in substance, written in the planner's vocabulary because the planner was
-the only module when they were written. That is the same arrangement as the shared standards in
-`Financial Planner/CLAUDE.md`: root `CLAUDE.md` §Still Undecided keeps it in place until a second
-module reaches **build**. Read it where it is, treat it as shared, and do not move it.
+the only module when they were written. That is the arrangement the shared coding standards had until
+they moved to `Standards (Documents)/CODING_STANDARDS.md` on 2026-11-04; this document has not
+moved yet. Read it where it is, treat it as shared, and do not move it in a workshop.
 
 What in it is *not* shared: §3 (the planner's 21-spec grouping), §7 (its OI-01…OI-08), §8 (its spec
 ordering) and §10 are Financial Planner's own answers. Another module supplies its own — see Phase 0.

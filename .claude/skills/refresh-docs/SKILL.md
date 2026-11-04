@@ -21,8 +21,8 @@ The corpus for one module `{module}`:
 - Root `CLAUDE.md` and both `Standards` folders — the cross-module layer. Check these in every pass,
   but correct only facts about **this** module; drift about another module goes in the
   left-alone list for its own pass.
-- `Financial Planner/CLAUDE.md` is also the shared standards file for every module — when it is not
-  the module under sweep, check it only for statements about the module that is.
+- `Standards (Documents)/CODING_STANDARDS.md` is the shared standards file for every module — its
+  examples are the planner's by design; sweep it for rules that no longer hold, not for vocabulary.
 - Ground truth when a doc's claim is checkable: the module's actual tree (`srv/`, `app/`, `db/`,
   and any other source folder its `CLAUDE.md` lists), its tracking artifacts (the sprint board, or
   `PLAN.md`), and git history.

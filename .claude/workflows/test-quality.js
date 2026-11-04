@@ -213,7 +213,7 @@ const extractRules = () =>
   agent(
     `Read the test rules for the \`${moduleDir}\` module and return a digest other agents will review tests against.
 
-Read: \`${moduleDir}/design/TEST_STRATEGY.md\` (skip its change history) and \`${moduleDir}/CLAUDE.md\` (its standards, carve-outs and any test section). The shared rules in \`Financial Planner/CLAUDE.md\` §Test Rules are already given to the reviewers — include only where this module **differs** from them.
+Read: \`${moduleDir}/design/TEST_STRATEGY.md\` (skip its change history) and \`${moduleDir}/CLAUDE.md\` (its standards, carve-outs and any test section). The shared rules in \`Standards (Documents)/CODING_STANDARDS.md\` §Test Rules are already given to the reviewers — include only where this module **differs** from them.
 
 Return at most 40 bullets, each ending with its source as \`(FILE §heading)\`. Cover, where the documents say:
 
@@ -273,12 +273,12 @@ Put the **raw output** in \`detail\`, with \`file:line\`. Do not diagnose, do no
   scope.baselineRules ? Promise.resolve(scope.baselineRules) : extractRules(),
 ])
 
-// Shared rules (Financial Planner/CLAUDE.md §Test Rules applies to every module) stay inline. What
+// Shared rules (Standards (Documents)/CODING_STANDARDS.md §Test Rules applies to every module) stay inline. What
 // differs per module — runner, harness, mocking policy, coverage targets, sensitive data, planned
 // scenarios, the exemplar spec — comes from the extractor that read the module's own documents.
 const standards = `## The rules you review against
 
-**Shared, every module** (\`Financial Planner/CLAUDE.md\` §Test Rules; \`${moduleDir}/CLAUDE.md\` carve-outs win):
+**Shared, every module** (\`Standards (Documents)/CODING_STANDARDS.md\` §Test Rules; \`${moduleDir}/CLAUDE.md\` carve-outs win):
 
 - **Never test CAP CRUD/draft machinery or \`@readonly\` enforcement.** Framework behaviour is banned outright. Annotation constraints (\`@assert.unique\`, \`@mandatory\`, \`@assert.range\`) ARE fair game as contract documentation. There is no cross-field \`@assert\` at the pinned CAP version — a cross-field rule is a handler, tested as logic.
 - Test tree is \`{test-type}/{module}/{data,support,tests}\`. A \`*.test.ts\` is imports + AAA. Payloads/UUIDs are named UPPER_SNAKE constants from \`data/\`. Assertions may hold inline expected values. No CQL in specs — it lives in \`support/\` helpers. No FRICEW IDs under \`test/\` outside \`integration/scenarios/\` data.

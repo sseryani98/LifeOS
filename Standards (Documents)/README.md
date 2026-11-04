@@ -2,23 +2,28 @@
 
 Cross-module design documentation — the written standards every Life OS module follows.
 
-**This folder is intentionally empty.** The standards exist, but they currently live in
-[Financial Planner/design/](../Financial%20Planner/design/) because they were written for
-the planner and still speak its vocabulary (FRICEW IDs, sprint waves, card entities).
+| Document                                     | What it is                                                                  |
+| -------------------------------------------- | --------------------------------------------------------------------------- |
+| [CODING_STANDARDS.md](CODING_STANDARDS.md)   | The coding, test and git rules every module builds to. Imported by root `CLAUDE.md` |
+| [METHODOLOGY_BLUEPRINT.md](METHODOLOGY_BLUEPRINT.md) | The stage methodology the harness runs                                |
+| [HARNESS_BACKLOG.md](HARNESS_BACKLOG.md)     | Open harness work                                                           |
 
-Promote a document here once a second module proves which parts are the standard and
-which were only ever the example. Moving them earlier would mean guessing — and a
-standard invented for modules that do not exist yet is worse than one that is honestly
-scoped to the module that does.
+`CODING_STANDARDS.md` moved here from `Financial Planner/CLAUDE.md` on 2026-11-04, once a second
+module (Project Tracker) was in build and had proved which parts were the standard and which were
+only ever the planner's example. Its examples are still the planner's; its rules are not.
 
 ## Expected to move here
 
-| Document                | Why it qualifies                                    |
-| ----------------------- | --------------------------------------------------- |
-| TECHNICAL_STANDARDS.md  | CDS/TypeScript/UI5 conventions — stack-level         |
-| TEST_STRATEGY.md        | Test pyramid, coverage targets, test tree layout     |
-| TECH_STACK.md           | The stack itself, identical for every module         |
-| VERSION_CONTROL.md      | Branching, commits, tagging                          |
+The rationale documents behind the standards still sit under
+[Financial Planner/design/](../Financial%20Planner/design/) and still speak the planner's vocabulary.
+Each follows the same path once a second module forces the standard apart from the example.
+
+| Document               | Why it qualifies                                 |
+| ---------------------- | ------------------------------------------------ |
+| TECHNICAL_STANDARDS.md | Rationale and worked examples for CODING_STANDARDS |
+| TEST_STRATEGY.md       | Test pyramid, coverage targets, test tree layout |
+| TECH_STACK.md          | The stack itself, identical for every module     |
+| VERSION_CONTROL.md     | Branching, commits, tagging                      |
 
 ## Expected to stay per-module
 

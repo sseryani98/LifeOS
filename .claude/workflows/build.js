@@ -261,22 +261,22 @@ if (!moduleDir) {
 // `path` §Heading form so lintAgentPrompts.ts can check every heading still exists.
 const STANDARDS_SECTIONS = {
   cap: [
-    '`Financial Planner/CLAUDE.md` §CDS, §TypeScript, §Handler Pattern, §Error Handling, §Logging, §i18n, §Encryption',
+    '`Standards (Documents)/CODING_STANDARDS.md` §CDS, §TypeScript, §Handler Pattern, §Error Handling, §Logging, §i18n, §Encryption',
     '`Financial Planner/design/TECHNICAL_STANDARDS.md` §3, §4, §5, §6, §7, §8, §9 (rationale and worked examples)',
   ],
   ui5: [
-    '`Financial Planner/CLAUDE.md` §SAPUI5, §i18n, §Frontend Validation',
+    '`Standards (Documents)/CODING_STANDARDS.md` §SAPUI5, §i18n, §Frontend Validation',
     '`Financial Planner/design/TECHNICAL_STANDARDS.md` §8, §11 (rationale and worked examples)',
   ],
   every: [
-    '`Financial Planner/CLAUDE.md` §Test Rules, §Do NOT',
+    '`Standards (Documents)/CODING_STANDARDS.md` §Test Rules, §Do NOT',
     '`Financial Planner/design/TECHNICAL_STANDARDS.md` §13 (the TDD workflow)',
   ],
 }
 
 const standardsFor = layers => `## Standards for this story (layers: ${layers.join(', ')})
 
-Module architecture, folder structure and carve-outs are in \`${moduleDir}/CLAUDE.md\` — a carve-out there beats the shared standard. The shared standards live in \`Financial Planner/CLAUDE.md\` for every module until they move (root \`CLAUDE.md\` §Standards). **Read only the sections below, by heading** — Grep the heading, then Read that range. Do not read either file end to end; the sections for a layer this story does not ship are context you are paying for and not using.
+Module architecture, folder structure and carve-outs are in \`${moduleDir}/CLAUDE.md\` — a carve-out there beats the shared standard. The shared standards live in \`Standards (Documents)/CODING_STANDARDS.md\` for every module. **Read only the sections below, by heading** — Grep the heading, then Read that range. Do not read either file end to end; the sections for a layer this story does not ship are context you are paying for and not using.
 
 ${[...layers, 'every'].flatMap(layer => STANDARDS_SECTIONS[layer].map(line => `- ${line}`)).join('\n')}
 

@@ -12,13 +12,13 @@ test strategy are decided once here and inherited by every module.
 | Module                | Folder               | Status                                           |
 | --------------------- | -------------------- | ------------------------------------------------ |
 | **Financial Planner** | `Financial Planner/` | **Active** — in build, sprint W1-S3              |
-| **Project Tracker**   | `Project Tracker/`   | **Active** — Plan phase; scaffolded, no code yet |
+| **Project Tracker**   | `Project Tracker/`   | **Active** — in build; S-00 + SPEC-01 done, SPEC-02 next |
 | Personal CRM          | —                    | Planned — relationship tracker                   |
 | Investment Assistant  | —                    | Planned                                          |
 | Wellness              | —                    | Planned — habits, journalling                    |
 
-The list is open-ended. Two modules exist, and the second is a scaffold rather than a
-build — so the conventions below are proven on one module and merely _survived contact_
+The list is open-ended. Two modules exist, and the second is one story into its build — so
+the conventions below are proven on one module and have only just _survived contact_
 with a second. Where Project Tracker has already falsified something, it is corrected in
 place below rather than carved out in the module.
 
@@ -40,7 +40,7 @@ Life OS/
   Project Tracker/                 Module (workspace package) — same four config files
     PLAN.md                        Continuity document — read first
     design/ research/              Plan-phase artifacts
-  Standards (Documents)/           Written cross-module standards (empty — see its README)
+  Standards (Documents)/           Written cross-module standards — CODING_STANDARDS.md lives here
   Standards (Technical + Linting)/ Executable standards
     eslint.config.mjs              The shared ESLint rules — single source for all modules
     tsconfig.base.json             Shared compilerOptions
@@ -68,18 +68,20 @@ The split follows one test: would a second module answer this the same way?
 
 ## Standards
 
-**The standards live in [Financial Planner/CLAUDE.md](Financial%20Planner/CLAUDE.md).**
-They are cross-module in substance — CDS conventions, the Facade/Service/DataService/
-Validator/Mapper handler pattern, i18n tiers, SAPUI5 rules, test rules — but they are
-still written in the planner's vocabulary (`com.financialplanner`, card encryption,
-churning domain). Read that file before writing code in any module — including Project
-Tracker, which references it rather than restating it. They stay there until a second
-module _in build_ separates the standard from the example; see §Still Undecided.
+**The standards live in [Standards (Documents)/CODING_STANDARDS.md](Standards%20(Documents)/CODING_STANDARDS.md)**
+— CDS conventions, the Facade/Service/DataService/Validator/Mapper handler pattern, i18n
+tiers, SAPUI5 rules, test rules, git workflow, the shared Do NOT list. The import below
+loads it into every session, so it is in context before the first line of code is written.
+A module's `CLAUDE.md` carries only what is true of that module: architecture, folder
+structure, carve-outs. A carve-out there beats the shared rule.
 
-Rationale and worked examples sit under `Financial Planner/design/` —
-TECHNICAL_STANDARDS.md, TEST_STRATEGY.md, TECH_STACK.md, VERSION_CONTROL.md are the
-cross-module ones; THEME.md, DATA_MODEL.md, specs/ are planner-only. `Standards
-(Documents)/` is where those four land once a second module earns the move.
+@Standards\ (Documents)/CODING_STANDARDS.md
+
+The file moved out of `Financial Planner/CLAUDE.md` on 2026-11-04, once Project Tracker was
+in build. Its examples are still the planner's; its rules are not. Rationale and worked
+examples sit under `Financial Planner/design/` — TECHNICAL_STANDARDS.md, TEST_STRATEGY.md,
+TECH_STACK.md, VERSION_CONTROL.md are the cross-module ones and follow the same path when a
+second module forces the vocabulary apart; THEME.md, DATA_MODEL.md, specs/ are planner-only.
 
 ## The Shared Lint Suite
 
@@ -123,7 +125,7 @@ prohibitions and memory, and a workflow prompt carries run-specific context plus
 
 ## Adding a Module
 
-Run `/scaffold-module` — it executes these six steps and reconciles this file afterward.
+Run `/scaffold-module` — it executes these seven steps and reconciles this file afterward.
 
 1. Create the folder and add it to `workspaces` in the root `package.json`.
 2. `package.json` — module deps and cds config only. Copy the `lint:*` block from
@@ -193,26 +195,19 @@ because one module cannot answer them; Project Tracker forced each one. Rational
   Planner already runs the pattern for one module: a hand-built `sap.tnt.ToolPage` at
   `app/shell` hosting four apps as components.
 
-  **The unfinished part is real and belongs to whoever builds the second module's UI.** A
-  shared shell needs one HTTP **origin**, which is not the same as one CAP process — and
-  D-29 gives every module its own process. OData data-source URIs in the app manifests are
-  absolute server-root paths, so they resolve against whatever origin serves the shell
-  page, not against the app's mount path. Cross-origin composition would probably work
-  under `cds watch` (CAP defaults `cors: !production`) and stop working the moment
-  `NODE_ENV=production` is set. **This has never been executed** — it is risk **R9** in
-  `Project Tracker/research/README.md`, graded `Inferred`. Settle it with a second server
-  on another port, one resource root, both components in one host page, before building
-  cross-module shell navigation.
+  A shared shell needs one HTTP **origin**, which is not the same as one CAP process — and
+  D-29 gives every module its own process. **Settled: one origin behind a reverse proxy**
+  (D-141, executed D-184). Cross-origin composition fails under `cds watch` too, not only in
+  production — CAP's CORS middleware never sends `Access-Control-Allow-Headers`, so UI5's
+  `$batch` preflight is rejected — and an absolute `http://` dataSource URI crashes CAP at
+  boot. The proxy is `Standards (Technical + Linting)/scripts/serveOneOrigin.mjs`; every
+  manifest keeps its relative `/service/...` URI. Detail: `Project Tracker/CLAUDE.md` §Open Risks.
 
 ## Still Undecided
 
-Do not invent an answer to these — ask.
-
-- **Where the shared standards live.** They are still inside
-  `Financial Planner/CLAUDE.md`, written in the planner's vocabulary, and Project Tracker
-  now references them from outside. That is the arrangement the §Standards section already
-  describes as temporary. A second module in _build_ — not just scaffolded — is what should
-  trigger the move to `Standards (Documents)/`.
+Nothing at the moment. The last item — where the shared standards live — closed 2026-11-04
+with the move to `Standards (Documents)/CODING_STANDARDS.md`. When something lands here, do
+not invent an answer — ask.
 
 ## Conventions
 
