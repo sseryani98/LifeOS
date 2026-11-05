@@ -2,7 +2,7 @@ export const meta = {
   name: 'test-quality',
   description: 'Isolated-agent test quality review. action "review": gate, per-module reviewers, one adversary triage pass per module, report. action "apply": write the findings Sandro picked, then verify.',
   whenToUse:
-    'After a build (review the tests that cover the changeset), or ad hoc against a module or "all". Twin of code-quality, pointed at test/ instead of srv/. Re-checks the judgment of build\'s test-author, which nothing else does. Invoked by /test-quality.',
+    'After a build (review the tests that cover the changeset), or ad hoc against a module or "all". Twin of code-quality, pointed at test/ (Jest) and app/**/test/ (UI5) instead of srv/. Re-checks the judgment of build\'s test-author and ui5-test-author, which nothing else does. Invoked by /test-quality.',
   phases: [
     { title: 'Gate', detail: 'run the suite so reviewers read real coverage numbers, not guesses' },
     { title: 'Review', detail: 'isolated reviewers: one per module, plus integration/mocks and functional-coverage lenses' },
@@ -34,7 +34,7 @@ const GATE_SCHEMA = {
       items: {
         type: 'object',
         properties: {
-          check: { type: 'string', enum: ['tsc', 'lint', 'test', 'cds-build'] },
+          check: { type: 'string', enum: ['tsc', 'lint', 'test', 'test-ui5', 'cds-build'] },
           kind: { type: 'string', enum: ['mechanical', 'logic', 'coverage'] },
           detail: { type: 'string', description: 'Raw output including file:line. Quoted, not summarized, not diagnosed' },
         },
@@ -47,8 +47,13 @@ const GATE_SCHEMA = {
       description: 'The per-file statements/branches coverage table from the jest run, verbatim. This is the payload — reviewers argue from these numbers.',
     },
     overall: { type: 'string', description: 'Overall statements/branches percentages as printed' },
+    ui5CoverageTable: {
+      type: 'string',
+      description: "The per-file table npm run test:ui5 printed, verbatim, plus its threshold ERROR lines. Empty string when the UI5 leg was not run.",
+    },
+    ui5Overall: { type: 'string', description: "The UI5 leg's 'All files' row as printed. Empty string when not run" },
   },
-  required: ['passed', 'failures', 'coverageTable', 'overall'],
+  required: ['passed', 'failures', 'coverageTable', 'overall', 'ui5CoverageTable', 'ui5Overall'],
   additionalProperties: false,
 }
 
@@ -70,7 +75,7 @@ const FINDINGS_SCHEMA = {
           needsSourceChange: {
             type: 'boolean',
             description:
-              'True when the fix cannot be written under test/ alone — it needs new or changed code in srv/, app/ or db/ first. False for a test that is merely red today because the source is wrong: that test is still writable.',
+              'True when the fix cannot be written in a test tree alone (test/, or an app/**/test/ tree) — it needs new or changed code in srv/, app/ or db/ first. False for a test that is merely red today because the source is wrong: that test is still writable.',
           },
         },
         required: ['file', 'line', 'category', 'summary', 'argument', 'fix', 'severity', 'needsSourceChange'],
@@ -159,6 +164,11 @@ const scope = (typeof args === 'string' ? JSON.parse(args) : args) ?? {}
 const moduleDir = scope.moduleDir
 if (!moduleDir) throw new Error('test-quality needs args.moduleDir — the command resolves it; nothing defaults to a module')
 const lenses = scope.lenses ?? []
+// A UI5 lens (`tier: 'ui5'`, named `ui5:<app>`) reviews one app's QUnit/OPA5 tree under app/**/test/.
+// It runs under test:ui5, never Jest, and its author is ui5-test-author (FP D-330, D-331).
+const isUi5Lens = lens => lens.tier === 'ui5'
+const jestLenses = lenses.filter(lens => !isUi5Lens(lens))
+const ui5Lenses = lenses.filter(isUi5Lens)
 const changedFiles = scope.changedFiles ?? []
 const mode = scope.mode ?? 'adhoc'
 const label = scope.label ?? 'target'
@@ -176,7 +186,7 @@ if (!lenses.length) {
 // Apply authors may write only under test/, so those rows could never land — they are defects, and
 // they reach Sandro on their own list instead of competing with writable tests.
 const testScope = `## A finding is a test you can write today
-This workflow writes under \`test/\` and nothing else. If closing a gap needs new or changed code in \`srv/\`, \`app/\` or \`db/\` first — a method that does not exist, a redesign, a new model class — set \`needsSourceChange: true\`. It goes to Sandro as a **defect**, not a test. Keep the argument; that bug report is still valuable.
+This workflow writes under \`test/\` and the app test trees (\`app/<app>/webapp/test/\`, \`app/<app>/test/\`) and nothing else. If closing a gap needs new or changed code in \`srv/\`, \`app/\` or \`db/\` first — a method that does not exist, a redesign, a new model class — set \`needsSourceChange: true\`. It goes to Sandro as a **defect**, not a test. Keep the argument; that bug report is still valuable.
 A test that is simply **red today because the source is wrong** is \`needsSourceChange: false\` — it can be written now, and it is the best evidence of the bug.`
 
 const diffFocus =
@@ -187,18 +197,22 @@ const diffFocus =
 // Scope jest to the lenses under review and clear the threshold, so unrun modules don't emit
 // phantom "coverage not met" failures. Without the caller's full lens list, assume these are all
 // of them: the whole suite runs, slower but never under-scoped.
-const ALL_MODULES = scope.allModules ?? lenses.map(lens => lens.name)
+const ALL_MODULES = (scope.allModules ?? jestLenses.map(lens => lens.name)).filter(name => !name.startsWith('ui5:'))
 
+// `npm test` chains test:ui5 from posttest, so a full Jest run here would also run the UI5 leg; the
+// UI5 leg is run explicitly instead, so the Jest leg is always `npx jest`. Null when no Jest lens.
 const jestCommandFor = names => {
   const modules = [...new Set(names)].filter(name => ALL_MODULES.includes(name))
-  const isFull = ALL_MODULES.every(module => modules.includes(module)) || !modules.length
+  if (!modules.length) return null
+  const isFull = ALL_MODULES.every(module => modules.includes(module))
   // jest 29: --testPathPattern is singular. --coverageThreshold="{}" clears the config gate so unrun
   // modules do not emit phantom "threshold not met" failures.
-  return isFull ? 'npm test' : `npx jest --coverage --coverageThreshold="{}" --testPathPattern="(${modules.join('|')})"`
+  return isFull ? 'npx jest --coverage' : `npx jest --coverage --coverageThreshold="{}" --testPathPattern="(${modules.join('|')})"`
 }
 
-const gateTestCommand = jestCommandFor(lenses.map(lens => lens.name))
-const gateIsScoped = gateTestCommand !== 'npm test'
+const gateTestCommand = jestCommandFor(jestLenses.map(lens => lens.name))
+const gateIsScoped = gateTestCommand !== null && gateTestCommand !== 'npx jest --coverage'
+const ui5Command = 'npm run test:ui5'
 
 phase('Gate')
 
@@ -233,42 +247,43 @@ Quote values exactly. Write "not stated" for an item the documents do not cover 
 
 const [gateResult, moduleRules] = await Promise.all([
   scope.baseline ? Promise.resolve(scope.baseline) : agent(
-  `Run the checks for \`${moduleDir}\` and report what happened, **plus the coverage table**.
+    `Run the checks for \`${moduleDir}\` and report what happened, **plus the coverage table${ui5Lenses.length ? 's' : ''}**.
 
 ## Run these
 
 \`\`\`
 cd "${moduleDir}" && npx tsc --noEmit
 cd "${moduleDir}" && npm run lint
-cd "${moduleDir}" && ${gateTestCommand}
-\`\`\`
+${gateTestCommand ? `cd "${moduleDir}" && ${gateTestCommand}\n` : ''}${ui5Lenses.length ? `cd "${moduleDir}" && ${ui5Command}\n` : ''}\`\`\`
 
-Run all three even if an early one fails — one failure must not mask the others.
+Run every one even if an early one fails — one failure must not mask the others.
+${ui5Lenses.length ? `
+**\`${ui5Command}\` is the UI5 leg** — a headless browser runs each app's QUnit testsuite against a server it spawns, then checks the UI5 coverage rows. Report its failures with \`check: "test-ui5"\`: a page whose result box shows 🐞 and fewer passed than total is \`logic\`; nyc's \`"Coverage for … does not meet global threshold"\` lines are \`coverage\`. Put its per-file table **and** those threshold lines in \`ui5CoverageTable\`, verbatim, and its \`All files\` row in \`ui5Overall\`.
+` : 'No UI5 lens is in scope: set `ui5CoverageTable` and `ui5Overall` to empty strings.'}
 
 **\`tsc --noEmit\` is the ONLY authority on type errors.** ${gateIsScoped ? 'The test command below runs a scoped subset through ts-jest, whose per-file diagnostics can disagree with a full compile (it may flag a method as missing that exists, or miss a real error). Take every \`mechanical\`/type failure from `tsc`, never from the jest output — a TS line printed by jest is noise unless \`tsc\` also reports it.' : 'Report type errors from its output.'}
 
-\`npm run lint\` is ESLint plus 22 \`lint:*\` scripts chained with \`&&\`, so it halts at the first failing linter. Expected. Report what you got.
+\`npm run lint\` is ESLint plus 23 \`lint:*\` scripts chained with \`&&\`, so it halts at the first failing linter. Expected. Report what you got.
 
-${
-  gateIsScoped
-    ? `The test command is **scoped to the modules under review** (\`${gateTestCommand}\`) — it runs only their tests, not the full ~266, and clears the coverage threshold so unrun modules do not raise phantom failures. The coverage table it prints therefore covers the target modules and whatever they exercise; that is the scope you are reviewing, so it is complete for this run. Report a \`coverage\` failure only by reading a target file's numbers against the targets below — jest will not exit non-zero on coverage here.`
-    : '\`npm test\` has \`--coverage\` baked in and a \`posttest\` generator that writes markdown under \`project/test-reports/\`. If the console table is truncated, read the newest report there.'
-}
+${gateIsScoped
+      ? `The test command is **scoped to the modules under review** (\`${gateTestCommand}\`) — it runs only their tests, not the full ~266, and clears the coverage threshold so unrun modules do not raise phantom failures. The coverage table it prints therefore covers the target modules and whatever they exercise; that is the scope you are reviewing, so it is complete for this run. Report a \`coverage\` failure only by reading a target file's numbers against the targets below — jest will not exit non-zero on coverage here.`
+      : 'The Jest command runs the whole suite with coverage. If the console table is truncated, re-run it piped to a file and read that.'
+    }
 
 ## The coverage table is the payload
 
-This workflow's reviewers argue about what is untested. **They need real numbers, or they guess.** Put the per-file statements/branches table in \`coverageTable\` **verbatim** — every file under \`srv/\`, numbers exact, including the uncovered-line column. Do not summarize it, do not round, do not drop rows you think are boring. A file at 0% is the most interesting row on the table and the easiest to omit by accident.
+This workflow's reviewers argue about what is untested. **They need real numbers, or they guess.** Put the Jest per-file statements/branches table in \`coverageTable\` **verbatim** — every file under \`srv/\`, numbers exact, including the uncovered-line column${gateTestCommand ? '' : ' (no Jest lens is in scope this run: set it and `overall` to empty strings)'}. Do not summarize it, do not round, do not drop rows you think are boring. A file at 0% is the most interesting row on the table and the easiest to omit by accident.
 
 No test file hashing on this run — you were given no test list, so skip that step.
 
 ## Classify each failure
 
 - \`mechanical\` — a rule was broken and the message says how: any \`lint:*\` violation, an ESLint rule, a \`tsc\` type error.
-- \`logic\` — a failing Jest assertion: expected X, received Y.
-- \`coverage\` — Jest's \`"coverage threshold ... not met"\`.
+- \`logic\` — a failing Jest assertion (expected X, received Y), or a failed UI5 page.
+- \`coverage\` — Jest's \`"coverage threshold ... not met"\`, or the UI5 leg's nyc threshold lines.
 
 Put the **raw output** in \`detail\`, with \`file:line\`. Do not diagnose, do not suggest a fix.`,
-  { label: 'gate', phase: 'Gate', model: 'haiku', effort: 'low', agentType: 'gate-runner', schema: GATE_SCHEMA },
+    { label: 'gate', phase: 'Gate', model: 'haiku', effort: 'low', agentType: 'gate-runner', schema: GATE_SCHEMA },
   ),
   scope.baselineRules ? Promise.resolve(scope.baselineRules) : extractRules(),
 ])
@@ -283,6 +298,7 @@ const standards = `## The rules you review against
 - **Never test CAP CRUD/draft machinery or \`@readonly\` enforcement.** Framework behaviour is banned outright. Annotation constraints (\`@assert.unique\`, \`@mandatory\`, \`@assert.range\`) ARE fair game as contract documentation. There is no cross-field \`@assert\` at the pinned CAP version — a cross-field rule is a handler, tested as logic.
 - Test tree is \`{test-type}/{module}/{data,support,tests}\`. A \`*.test.ts\` is imports + AAA. Payloads/UUIDs are named UPPER_SNAKE constants from \`data/\`. Assertions may hold inline expected values. No CQL in specs — it lives in \`support/\` helpers. No FRICEW IDs under \`test/\` outside \`integration/scenarios/\` data.
 - No real secrets, card or account numbers, or PII in committed fixtures — semantic placeholders only.
+${ui5Lenses.length ? `- **UI5 tests** (\`app/**/test/\`; \`CODING_STANDARDS.md\` §Test Rules UI5 bullets): QUnit on one logic class at a time — never FE or UI5 framework behaviour (sorting, paging, drafts, variants). An OPA5 journey asserts an app's **annotation contract** (declared columns, filters, actions render as declared); that is contract, not framework. Layout is \`testsuite.qunit.ts\` at the root, \`*.qunit.ts\` under \`unit/\`/\`integration/\`, page objects in \`integration/pages/\`, fixtures in \`data/\`, builders in \`support/\`. Collaborators are stubbed by patching their \`prototype\` and restoring it (no sinon types). The runtime is **QUnit 2.3.2** — there is no \`assert.rejects\`, though \`tsc\` accepts it. Excluded from UI5 coverage: thin \`ext/\` handler modules, lifecycle \`ControllerExtension\`s, \`*.gen.d.ts\`.` : ''}
 
 Sandro's standing corrections are \`feedback_*.md\` in \`~/.claude/projects/c--Projects-Life-OS/memory/\`.
 
@@ -292,13 +308,12 @@ ${moduleRules ?? `(The rules digest is unavailable. Read \`${moduleDir}/design/T
 
 const gate = `## Machine-checked already — do NOT re-report any of this
 
-${
-  gateResult
+${gateResult
     ? gateResult.passed
       ? 'The suite passed clean: tsc, lint and test are all green.'
       : `The suite is not clean. Failures:\n\n${gateResult.failures.map(failure => `- **${failure.check}** (${failure.kind}): ${failure.detail}`).join('\n')}`
     : 'The gate could not be run; rely on your own judgment but stay off mechanical rules and do not invent coverage numbers.'
-}
+  }
 
 \`lint:test-data\` (inline literals + missing JSDoc), \`lint:test-structure\` (data/support/tests roles), \`lint:test-cql\` (CQL in specs), \`lint:comment-length\` and \`lint:tracking-ids\` run on every commit. **Do not spend a finding on anything they cover.** "Add a JSDoc to this test" is not a finding — it is a lint failure, and reporting it costs Sandro a row to learn what CI already told him.
 
@@ -306,23 +321,30 @@ Your value is the judgment layer no script reaches: does this test assert someth
 
 ## Coverage — real numbers. Argue from these, never guess.
 
-Overall: ${gateResult?.overall ?? '(unavailable)'}
+${gateTestCommand ? `**Jest** — overall: ${gateResult?.overall || '(unavailable)'}
 
-${gateResult?.coverageTable ?? '(no coverage table — say so in any finding that depends on coverage rather than inventing a number)'}`
+${gateResult?.coverageTable || '(no coverage table — say so in any finding that depends on coverage rather than inventing a number)'}` : ''}
+${ui5Lenses.length ? `
+**UI5 leg** (\`${ui5Command}\`, a separate gate — never merged with Jest's numbers) — overall: ${gateResult?.ui5Overall || '(unavailable)'}
+
+${gateResult?.ui5CoverageTable || '(no UI5 coverage table — say so in any finding that depends on it rather than inventing a number)'}` : ''}`
 
 // Picks both the adversary and the author for a finding: the module that owns the file. Source
 // paths match too, since "this branch is uncovered" cites `srv/`; test-only matching would dump
 // those into `shared`.
 const OWNER_PATTERNS = [
-  /test[/\\](?:unit|integration)[/\\]([^/\\]+)[/\\]/, // test/unit/transaction/...
-  /srv[/\\]modules[/\\]([^/\\]+)[/\\]/, //               srv/modules/transaction/...
-  /srv[/\\]([^/\\]+)-service\.(?:ts|cds)$/, //           srv/admin-service.ts — the non-1:1 lens
+  [/app[/\\]([^/\\]+)[/\\]/, 'ui5:'], //                                   app/transactions/... — a UI5 lens
+  [/(?:^|[/\\])test[/\\](?:unit|integration)[/\\]([^/\\]+)[/\\]/, ''], // test/unit/transaction/...
+  [/srv[/\\]modules[/\\]([^/\\]+)[/\\]/, ''], //                          srv/modules/transaction/...
+  [/srv[/\\]([^/\\]+)-service\.(?:ts|cds)$/, ''], //                      srv/admin-service.ts — the non-1:1 lens
 ]
 
 const ownerOf = finding => {
-  for (const pattern of OWNER_PATTERNS) {
-    const owner = pattern.exec(finding.file)?.[1]
-    if (owner && owner !== 'scenarios' && lenses.some(lens => lens.name === owner)) return owner
+  for (const [pattern, prefix] of OWNER_PATTERNS) {
+    const captured = pattern.exec(finding.file)?.[1]
+    const owner = captured && `${prefix}${captured}`
+    // An app/ finding always goes to a UI5 author: the Jest `shared` bucket cannot write app test trees.
+    if (owner && (prefix === 'ui5:' || (captured !== 'scenarios' && lenses.some(lens => lens.name === owner)))) return owner
   }
   return 'shared'
 }
@@ -350,8 +372,10 @@ if (action === 'review') {
 
     reviewers.push(() =>
       agent(
-        `You are the **test reviewer** for the \`${lens.name}\` module. You are the only agent looking at it — nobody else will catch what you miss.
-
+        `You are the **test reviewer** for the \`${lens.name}\` ${isUi5Lens(lens) ? 'UI5 app test tree' : 'module'}. You are the only agent looking at it — nobody else will catch what you miss.
+${isUi5Lens(lens) ? `
+**This is a UI5 lens.** The tests are QUnit (\`QUnit.module\`/\`QUnit.test\`, \`assert.*\`) and OPA5, run in a headless browser by \`${ui5Command}\`, not Jest. Read the UI5 coverage table, not Jest's. In question 3 the banned framework is Fiori Elements / UI5 behaviour (sorting, paging, draft, variants, a control rendering itself); a journey asserting the app's **declared annotation contract** is the deliberate exception. An app with sources but an empty test list is not an empty review: say which logic classes owe QUnit first (\`model/*Service.ts\`, \`ext/\` logic classes, formatters, controls, \`shared/util\`).
+` : ''}
 ## Your scope — read these and nothing else
 
 Tests:
@@ -400,7 +424,7 @@ Cite a real \`file:line\` — read the file, never infer a location. State the a
     agent(
       `You are the **integration and mocking reviewer**, working across the target (${label}). The per-module reviewers each see one tree; you see the seams between them.
 
-**Your scope is the modules under review: ${lenses.map(lens => lens.name).join(', ')}.** Read their integration tests (\`${moduleDir}/test/integration/{module}/\`) and their unit mocks (\`${moduleDir}/test/unit/{module}/support/*Mocks.ts\`) — not every module's. Leave that tree only to check a mock against the real class it stands in for, or to confirm whether another module's test already covers a seam. Reading unreviewed modules is the slowest thing in this workflow and finds gaps that are not this run's job.
+**Your scope is the modules under review: ${lenses.map(lens => lens.name).join(', ')}.** Read their integration tests (\`${moduleDir}/test/integration/{module}/\`) and their unit mocks (\`${moduleDir}/test/unit/{module}/support/*Mocks.ts\`)${ui5Lenses.length ? ', and for each UI5 lens its fakes (`app/<app>/**/test/support/*.ts`) — a UI5 fake that has drifted from the real class or ExtensionAPI it stands in for passes forever' : ''} — not every module's. Leave that tree only to check a mock against the real class it stands in for, or to confirm whether another module's test already covers a seam. Reading unreviewed modules is the slowest thing in this workflow and finds gaps that are not this run's job.
 
 ${diffFocus}
 ${gate}
@@ -433,7 +457,7 @@ This is a spec-to-test mapping job, and you are the only agent doing it.
 ## Method
 
 1. Read the functional specs — **but only for the modules under review this run: ${lenses.map(lens => lens.name).join(', ')}.** Glob \`${moduleDir}/design/specs/SPEC-*.md\` and read the ones whose subject is a module in that list; skip the rest. Reading every spec on a single-module run is wasted effort — the gaps you would find in an unreviewed module are not this run's job and will bury the ones that are. Open another module's spec only if a rule you are tracing for an in-scope module explicitly reaches into it. **§5 of each spec holds the business rules**; the specs also enumerate functional unit tests (FUTs). Those are the contract.
-2. Map each rule and FUT to the test that protects it. Grep the test tree for the **behavior**, not the ID.
+2. Map each rule and FUT to the test that protects it. Grep the test tree${ui5Lenses.length ? 's — `test/` and every `app/**/test/`' : ''} for the **behavior**, not the ID. A browser FUT observable on SQLite owes an OPA5 journey; one that depends on Postgres or crosses modules owes an E2E spec under \`test/e2e/\` (module TEST_STRATEGY.md browser-FUT routing).
 3. Report the ones with **no test**, ranked by what breaks if the rule silently stops holding.
 
 ## Known gaps — confirm before reporting, they may have moved
@@ -653,17 +677,18 @@ If an item turns out to be wrong once you read the code, return it \`deferred\` 
 
 ## Your write scope — a hard boundary
 
-${
-  owner === 'shared'
-    ? `You own \`${moduleDir}/test/shared/**\` and any test path the module authors could not claim. You are running **alone** — every module author has already finished, so nothing is racing you.`
-    : `You may write **only** under:
+${owner.startsWith('ui5:')
+    ? `You may write **only** under \`${moduleDir}/app/${owner.slice(4)}/webapp/test/**\` (or \`${moduleDir}/app/${owner.slice(4)}/test/**\` for an app with no \`webapp/\`), plus that suite's \`url\` entry in \`${moduleDir}/ui5-test-runner.json\` if you create a new testsuite — the gate never runs a suite that is not listed. Other authors are writing other trees **right now**; stay inside yours. Run \`cd "${moduleDir}" && ${ui5Command}\` once at the end.`
+    : owner === 'shared'
+      ? `You own \`${moduleDir}/test/shared/**\` and any test path the module authors could not claim. You are running **alone** — every module author has already finished, so nothing is racing you.`
+      : `You may write **only** under:
 - \`${moduleDir}/test/unit/${owner}/**\`
 - \`${moduleDir}/test/integration/${owner}/**\`
 
 Other authors are writing other modules **right now**. A write outside those two trees races them and corrupts a file neither of you can see the other editing. If an item needs \`${moduleDir}/test/shared/**\`, return it \`deferred\` — a later sequential stage owns that path.`
-}
+  }
 
-**Never edit \`srv/\`** — you have no mandate to, and this workflow exists to judge the tests, not change the code. If a test fails because **the source is wrong**, that is the most valuable thing this run can produce: return it \`sourceBug\` with the failure quoted, and leave both the test and the source alone. Greening your own test by editing the code under test destroys the only signal it was worth writing.
+**Never edit \`srv/\` or app source** (anything under \`app/\` outside a \`test/\` tree) — you have no mandate to, and this workflow exists to judge the tests, not change the code. If a test fails because **the source is wrong**, that is the most valuable thing this run can produce: return it \`sourceBug\` with the failure quoted, and leave both the test and the source alone. Greening your own test by editing the code under test destroys the only signal it was worth writing.
 
 ## The items
 
@@ -691,8 +716,9 @@ const moduleBuckets = [...buckets.entries()].filter(([owner]) => owner !== 'shar
 
 // Barrier: the shared bucket owns paths a module author might otherwise collide with, so it must
 // not start until every module author has put its tools down.
+const authorFor = owner => (owner.startsWith('ui5:') ? 'ui5-test-author' : 'test-author')
 const moduleResults = await parallel(
-  moduleBuckets.map(([owner, items]) => () => agent(implementPrompt(owner, items), { label: `author:${owner}`, phase: 'Implement', agentType: 'test-author', schema: IMPLEMENT_SCHEMA })),
+  moduleBuckets.map(([owner, items]) => () => agent(implementPrompt(owner, items), { label: `author:${owner}`, phase: 'Implement', agentType: authorFor(owner), schema: IMPLEMENT_SCHEMA })),
 )
 
 const sharedItems = buckets.get('shared')
@@ -710,21 +736,26 @@ phase('Verify')
 // tests — scope the confirm run to the buckets that were written. The shared bucket is the
 // exception: it edits cross-module fixtures, so any shared write forces a full run.
 const writtenBuckets = [...buckets.keys()]
-const verifyTestCommand = writtenBuckets.includes('shared') ? 'npm test' : jestCommandFor(writtenBuckets)
+const verifyTestCommand = writtenBuckets.includes('shared') ? jestCommandFor(ALL_MODULES) : jestCommandFor(writtenBuckets)
+const verifyUi5 = writtenBuckets.some(owner => owner.startsWith('ui5:'))
 
 const verifyPrompt = `Run the checks for \`${moduleDir}\` after new tests were just written into it.
 
 \`\`\`
 cd "${moduleDir}" && npx tsc --noEmit
 cd "${moduleDir}" && npm run lint
-cd "${moduleDir}" && ${verifyTestCommand}
-\`\`\`
+${verifyTestCommand ? `cd "${moduleDir}" && ${verifyTestCommand}\n` : ''}${verifyUi5 ? `cd "${moduleDir}" && ${ui5Command}\n` : ''}\`\`\`
 
-Run all three even if an early one fails. Report the coverage table verbatim in \`coverageTable\` as before. No hashing on this run.
+Run every one even if an early one fails. Report the Jest coverage table verbatim in \`coverageTable\` as before${verifyUi5 ? `, and the UI5 leg's table plus its threshold lines in \`ui5CoverageTable\` (its failures as \`check: "test-ui5"\`)` : ' (set `ui5CoverageTable`/`ui5Overall` to empty strings)'}${verifyTestCommand ? '' : '; no Jest command runs, so set `coverageTable`/`overall` to empty strings'}. No hashing on this run.
 
-**\`tsc --noEmit\` is the only authority on type errors** — ${verifyTestCommand === 'npm test' ? 'report them from its output.' : "the scoped ts-jest run's per-file type diagnostics can disagree with a full compile, so take type/`mechanical` failures from `tsc`, not from jest's printed TS lines."} A pre-existing \`tsc\` error in a file no author touched is not this run's doing — check it against the baseline below before calling it a new failure.
+**\`tsc --noEmit\` is the only authority on type errors** — ${!verifyTestCommand || verifyTestCommand === 'npx jest --coverage' ? 'report them from its output.' : "the scoped ts-jest run's per-file type diagnostics can disagree with a full compile, so take type/`mechanical` failures from `tsc`, not from jest's printed TS lines."} A pre-existing \`tsc\` error in a file no author touched is not this run's doing — check it against the baseline below before calling it a new failure.
 
 Classify each failure: \`mechanical\` (a lint/ESLint/tsc rule — the message says the fix), \`logic\` (a failing Jest assertion), \`coverage\` (threshold not met). Put the **raw output** in \`detail\`. Do not diagnose and do not suggest fixes — the agent reading this needs the real text.`
+
+// A UI5 coverage shortfall the baseline already had (FP D-333: red until the backfill lands) is not
+// this run's doing. It must not send repair chasing a whole-module backfill, nor mark a clean run red.
+const baselineUi5Coverage = (gateResult?.failures ?? []).some(failure => failure.check === 'test-ui5' && failure.kind === 'coverage')
+const newFailuresOf = result => (result?.failures ?? []).filter(failure => !(baselineUi5Coverage && failure.check === 'test-ui5' && failure.kind === 'coverage'))
 
 const postGate = await agent(verifyPrompt, { label: 'verify:gate', phase: 'Verify', model: 'haiku', effort: 'low', agentType: 'gate-runner', schema: GATE_SCHEMA })
 
@@ -734,24 +765,25 @@ let finalGate = postGate
 // Red only from sourceBug tests left failing on purpose means nothing to repair. Every failure
 // must be a `logic` failure in a file a sourceBug item touched; anything else still goes to repair.
 const sourceBugFiles = authorSourceBugs.flatMap(item => item.filesTouched ?? []).map(path => path.split(/[/\\]/).pop()).filter(Boolean)
+const postNew = newFailuresOf(postGate)
 const onlyKnownRed =
   Boolean(postGate) &&
   !postGate.passed &&
   sourceBugFiles.length > 0 &&
-  (postGate.failures ?? []).length > 0 &&
-  postGate.failures.every(failure => failure.kind === 'logic' && sourceBugFiles.some(name => failure.detail.includes(name)))
+  postNew.length > 0 &&
+  postNew.every(failure => failure.kind === 'logic' && sourceBugFiles.some(name => failure.detail.includes(name)))
 if (onlyKnownRed) log('Only the planted sourceBug tests are red — skipping repair and confirm.')
 
 // The gate reports and the author repairs — never the same agent. An agent that grades its own
 // repair work has every incentive to call a red tree green, and Sandro merges on that word.
-if (postGate && !postGate.passed && !onlyKnownRed) {
+if (postGate && !postGate.passed && postNew.length > 0 && !onlyKnownRed) {
   repair = await agent(
     `New tests were just written into \`${moduleDir}\` and the suite is not clean. Repair it.
 
 ## What the gate found
 
-${postGate.failures.map(failure => `- **${failure.check}** (${failure.kind}): ${failure.detail}`).join('\n')}
-
+${postNew.map(failure => `- **${failure.check}** (${failure.kind}): ${failure.detail}`).join('\n')}
+${baselineUi5Coverage ? '\nThe UI5 coverage rows were already short before this run; that shortfall is not yours and is left out above. Do not chase it.\n' : ''}
 ## What was just written
 
 ${wrote.map(item => `- ${item.id}: ${item.what}\n  ${(item.filesTouched ?? []).join(', ')}`).join('\n') || '(nothing reported — check `git status`)'}
@@ -766,14 +798,14 @@ ${wrote.map(item => `- ${item.id}: ${item.what}\n  ${(item.filesTouched ?? []).j
 
 **Never touch a pre-existing failure.** Compare against the baseline below — if a test was already failing before this run, it is not yours. Say so in \`unfixed\`.
 
-**Never edit \`srv/\`.**
+**Never edit \`srv/\` or app source.** A UI5 test file under \`app/**/test/\` is yours to repair like any other test.
 
 ## The baseline, from before any tests were written
 
 ${gateResult ? (gateResult.passed ? 'The suite was clean before this run — every failure above is new and is yours.' : `The suite was ALREADY not clean:\n\n${gateResult.failures.map(failure => `- **${failure.check}** (${failure.kind}): ${failure.detail}`).join('\n')}`) : '(no baseline — the pre-run gate failed. Be conservative about claiming a failure is new.)'}
 
 ${standards}`,
-    { label: 'verify:repair', phase: 'Verify', agentType: 'test-author', schema: REPAIR_SCHEMA },
+    { label: 'verify:repair', phase: 'Verify', agentType: postNew.every(failure => failure.check === 'test-ui5') ? 'ui5-test-author' : 'test-author', schema: REPAIR_SCHEMA },
   )
 
   finalGate = await agent(verifyPrompt, { label: 'verify:confirm', phase: 'Verify', model: 'haiku', effort: 'low', agentType: 'gate-runner', schema: GATE_SCHEMA })
@@ -786,10 +818,10 @@ const sourceBugs = [...authorSourceBugs.map(item => `${item.id} — ${item.what}
 // apart from a real repair failure.
 const verdictOf = () => {
   if (!finalGate) return 'unverified'
-  if (finalGate.passed) return 'clean'
+  const failures = newFailuresOf(finalGate)
+  if (finalGate.passed || !failures.length) return 'clean'
   // mechanical/coverage failures are never expected: the author's tests must lint-clean and must not
   // drop coverage. Only a `logic` failure can be a planted sourceBug left deliberately red.
-  const failures = finalGate.failures ?? []
   const allLogic = failures.length > 0 && failures.every(failure => failure.kind === 'logic')
   return sourceBugs.length && allLogic ? 'red-known' : 'red-unexpected'
 }

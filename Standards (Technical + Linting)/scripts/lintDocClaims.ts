@@ -1,5 +1,5 @@
-import { readFileSync, existsSync } from "fs";
-import { join, relative } from "path";
+import { readFileSync, existsSync, readdirSync, statSync } from "fs";
+import { dirname, join, relative } from "path";
 
 const ROOT_DIR = process.cwd();
 const PACKAGE_JSON = join(ROOT_DIR, "package.json");
@@ -32,6 +32,16 @@ const CLAIM_MARKERS = [/\(ESLint\)/, /lint-enforced/i, /enforced (by|via)/i];
  * would otherwise substring-match half the config.
  */
 const RULE_ID = /^[@a-z][a-z0-9@/_-]*[-/][a-z0-9@/_-]+$/;
+
+// Living docs whose `path:NN` citations must still land on a real line. The decisions log is a
+// dated record — its citations describe the tree as it was, so it is never re-checked.
+const CITING_DIRS = [join(ROOT_DIR, "design"), join(ROOT_DIR, "design", "specs")];
+const CITING_FILES = [join(ROOT_DIR, "CLAUDE.md"), join(ROOT_DIR, "PLAN.md")];
+const HISTORICAL_DOCS = new Set(["DECISIONS_LOG.md"]);
+const REPO_ROOT = join(import.meta.dirname, "..", "..");
+
+/** A backticked `some/file.ext:12` or `file.ext:12-30` citation. */
+const LINE_CITATION = /`([^`\s][^`]*?\.[A-Za-z]{2,5}):(\d+)(?:-(\d+))?`/g;
 
 interface Violation {
   file: string;
@@ -80,6 +90,59 @@ function namesLiveMechanism(text: string, scripts: string[], activeConfig: strin
 }
 
 /**
+ * Lists the living docs a module's citation check scans.
+ */
+function listCitingDocs(): string[] {
+  const inDirs = CITING_DIRS.filter(existsSync).flatMap(dir =>
+    readdirSync(dir)
+      .filter(name => name.endsWith(".md") && !HISTORICAL_DOCS.has(name))
+      .map(name => join(dir, name)),
+  );
+  return [...CITING_FILES.filter(existsSync), ...inDirs];
+}
+
+/**
+ * Resolves a cited path the way a reader would: beside the doc, then the module, then the repo.
+ * An unresolvable bare name (`manifest.json:13`) is ambiguous rather than wrong, so it is skipped.
+ */
+function resolveCitation(cited: string, docPath: string): string | undefined {
+  return [dirname(docPath), ROOT_DIR, join(ROOT_DIR, "design"), REPO_ROOT]
+    .map(base => join(base, cited))
+    .find(candidate => existsSync(candidate) && statSync(candidate).isFile());
+}
+
+/**
+ * Flags every `path:NN` citation in a living doc whose file is now shorter than the cited line —
+ * the signature of a file that was split or moved out from under the citation.
+ */
+function findStaleCitations(): { violations: Violation[]; checked: number } {
+  const violations: Violation[] = [];
+  const lengths = new Map<string, number>();
+  let checked = 0;
+
+  for (const docPath of listCitingDocs()) {
+    const file = relative(ROOT_DIR, docPath);
+    for (const [index, text] of readFileSync(docPath, "utf8").split(/\r?\n/).entries()) {
+      for (const match of text.matchAll(LINE_CITATION)) {
+        const target = resolveCitation(match[1], docPath);
+        if (!target) continue;
+        checked++;
+        if (!lengths.has(target)) lengths.set(target, readFileSync(target, "utf8").split(/\r?\n/).length);
+        const lastLine = Number(match[3] ?? match[2]);
+        if (lastLine > (lengths.get(target) ?? 0)) {
+          violations.push({
+            file,
+            line: index + 1,
+            message: `cites ${match[1]}:${lastLine} — that file has ${lengths.get(target)} line(s)`,
+          });
+        }
+      }
+    }
+  }
+  return { violations, checked };
+}
+
+/**
  * Verifies CLAUDE.md's enforcement claims against reality, in both directions: no claim
  * without a live mechanism, and no mechanism the chain forgets to run.
  * Exits with code 1 if violations found.
@@ -122,9 +185,12 @@ function main(): void {
     }
   }
 
+  const citations = findStaleCitations();
+  violations.push(...citations.violations);
+
   const unwired = scriptNames.filter(name => name.startsWith("lint:") && !chain.includes(name));
 
-  console.log(`Scanning ${lineCount} line(s) across ${files.length} standards file(s) against ${scriptNames.length} npm script(s)...`);
+  console.log(`Scanning ${lineCount} line(s) across ${files.length} standards file(s) against ${scriptNames.length} npm script(s), and ${citations.checked} line citation(s)...`);
 
   if (!violations.length && !unwired.length) {
     console.log("All enforcement claims resolve to live mechanisms.");

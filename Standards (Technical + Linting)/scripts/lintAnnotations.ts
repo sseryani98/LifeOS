@@ -303,6 +303,14 @@ function checkTechnicalFieldsHidden(
   const isCodeList = /\bcode\s+@UI\.Hidden/.test(block.content);
   if (isCodeList) return violations;
 
+  // A read-only view keyed on something else (a synthetic combo key) is the same
+  // case: it hides its own key and names no technical field at all.
+  const namesTechnicalField = TECHNICAL_FIELDS.some(field =>
+    new RegExp(`\\b${field}\\b`).test(block.content),
+  );
+  const hidesOwnKey = /\b\w+\s+@UI\.Hidden/.test(block.content);
+  if (!namesTechnicalField && hidesOwnKey) return violations;
+
   for (const field of TECHNICAL_FIELDS) {
     const hiddenPattern = new RegExp(`\\b${field}\\b[^;]*@UI\\.Hidden`, "s");
     if (!hiddenPattern.test(block.content)) {

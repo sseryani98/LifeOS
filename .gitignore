@@ -26,5 +26,8 @@ Desktop.ini
 # Agent memory lives only at the repo root. A run started in any subfolder writes a stray copy there.
 /*/**/.claude/agent-memory/
 
+# Defect-sweep run logs (machine-local; the tracked record is .claude/defect-sweep/ledger.md)
+.claude/defect-sweep/logs/
+
 # Claude Code agent worktrees (machine-local)
 .claude/worktrees/

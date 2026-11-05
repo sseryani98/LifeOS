@@ -3,7 +3,7 @@
 ## CAP
 
 - [CAP rejection shapes](cap_rejection_shapes.md) — cds 9.8.4: @mandatory = 400 ASSERT_MANDATORY + target; @assert.unique = 500 SQLITE_CONSTRAINT_UNIQUE; String(n) overflow via service = ASSERT_DATA_TYPE (column-length asserts are framework tests); in-process MULTIPLE_ERRORS has no code, only message+details
-- [CAP test facts](cap_test_facts.md) — facades not auto-registered under cds.test; req.params is `{ID}`; projection `virtual` stripped on INSERT unless `@Core.Computed: false`
+- [CAP test facts](cap_test_facts.md) — facades not auto-registered under cds.test; req.params is `{ID}`; projection `virtual` stripped on INSERT unless `@Core.Computed: false`; null complex-function result = 204 + `""`
 
 ## Lint and coverage traps
 
@@ -19,6 +19,8 @@
 - A red where every suite dies on one shared cause (e.g. `FOREIGN KEY constraint failed` once fixture seeds give way to undeployed CSVs) hides your own assertion bugs. Prove the suite against a throwaway prototype: copy the module to `C:/Projects/Life OS/.proto-pt/` (inside the repo so `../node_modules` resolves; exclude coverage/design), patch a quick impl, run, mutate to confirm tests bite, then `rm -rf` it. SPEC-02 2026-11-03: 247/247 green, and it surfaced the D-244 virtual-strip finding.
 - Test-quality batch: apply one mutation per finding on *disjoint* code paths in a single prototype copy (unique folder name — parallel authors), run once with `--verbose`, and the `×` list must be exactly your new tests. 2026-11-03 tracker: 6 mutations, 7/7 new tests red, 0 old ones — one run proved every finding.
 - Red for a source file that does not exist yet: load it through a computed-path `require` (Project Tracker `test/shared/support/migrationModule.ts`) so `tsc` stays green, and make any "expect it to reject" helper rethrow `MODULE_NOT_FOUND`/`TypeError` — otherwise the absent module *is* the rejection and "fails loudly" passes on day one (seen in the SPEC-03 probe: key came back `MODULE_NOT_FOUND`).
+- Red for a *method* missing on an existing class: ts-jest type-checks the spec, so a direct call fails compile and red-lines every old test in the file. Call it through a cast helper in `support/` (`suggestRecurringSplitOn` in FP `test/unit/transaction/support/transactionMocks.ts`) so the red is `TypeError: ... is not a function`.
+- A "404 for unknown id" OData test passes on day one: CAP 404s an undeclared function too (`code: "404"`, "Invalid resource path"). Assert the error *key* from `response.data.error.code`.
 - A "fails on tamper X" test that asserts only a key namespace (`/^cnv\.reconcile\./`) passes whenever the check fails for *any* reason. A mutation that breaks the clean fixture (load as the wrong user) exposed four such tests in SPEC-03. Assert the exact key, or `not.toContain` the other assertions' keys.
 - Prototype mutations: `perl -e` eats `—` (wrote literal `2014`) and silently misses patterns containing `\n`; use the Edit tool on the prototype file and `grep -c` each mutation landed before running. Back up the clean impl first (`cp x.ts /tmp/x.orig`) so a second batch starts clean.
 - A prototype mutation that leaves an unused local fails ts-jest (`noUnusedLocals`), the server never boots, and every test times out in `beforeAll`. That is a broken mutation, not a result. Same for a wrong value that is not in its code list (`fricewType_code: "Integration"`): FK failure kills the shared arrangement, 24/24 red. Swap to another *valid* code.
@@ -26,7 +28,7 @@
 
 ## Tooling
 
-- [Tooling gotchas](tooling_gotchas.md) — no `python` (REPL hang); heredoc edits fail; tar+perl prototype mutation; prettier --check is not a gate
+- [Tooling gotchas](tooling_gotchas.md) — no `python` (REPL hang); heredoc edits fail; tar+perl prototype mutation; prettier --check is not a gate; FP prototype needs a node_modules junction
 - Test-quality finding paths can be stale (tests get moved between scenario files): F8 cited verbLayerFuts.test.ts:402 in a 397-line file; the FUT lived in methodologyFuts.test.ts. Grep the cited symbols before deferring.
 
 ## Financial Planner

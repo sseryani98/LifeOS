@@ -2,12 +2,12 @@
 
 ## Test review — every module
 
-- [Test review gotchas](test_review_gotchas.md) — key-insensitive mocks, real-export fixture leaks, chained integration specs, OR-clause fixtures, unasserted mappers, dead data-map keys, twin TABLE maps, unasserted refusal keys, script coverage blind spot, mid-review churn
+- [Test review gotchas](test_review_gotchas.md) — key-insensitive mocks, real-export fixture leaks, chained integration specs, OR-clause fixtures, unasserted mappers, dead data-map keys, twin TABLE maps, unasserted refusal keys, either/or quadrants, PG decimal-string coercion, empty-seed append blind spot, script coverage blind spot, UI5 stale selection field + stubbed-service wiring, mid-review churn, async pending-state races
 - [Review gotchas](reference_review_gotchas.md) — cat -n offsets, Facade coverage blind spot, srv/mcp twin keys, spec-mandated twins, red-phase loader leftovers, cuid fill probe
 
 ## Financial Planner
 
-- [Functional coverage gotchas](modules/financial-planner/functional_coverage_gotchas.md) — FRM logic in app/ controllers, vacuous default-equal mocks, uncovered DataService filters, cds9 req.params
+- [Functional coverage gotchas](modules/financial-planner/functional_coverage_gotchas.md) — FRM logic in app/ controllers, vacuous default-equal mocks, uncovered DataService filters, cds9 req.params, edited-suggestion branch, no txn seed CSVs
 - [Integration review checks](modules/financial-planner/integration_review_checks.md) — facade registration under cds.test, req.params shape, _enc exposure, order dependency
 
 ## Project Tracker

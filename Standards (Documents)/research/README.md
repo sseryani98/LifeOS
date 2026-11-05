@@ -3,7 +3,7 @@
 **Gate verdict: GO WITH CAVEATS.** The Test Strategy amendment can be designed now — every
 framework question has a documented answer and no kill criterion tripped — but the one thing it
 rests on, a UI5 suite running inside `npm test` with coverage of the TypeScript sources, is
-**Unproven until the prescribed spike runs** (two packages to install, Sandro's call).
+~~Unproven until the prescribed spike runs~~ **Proven** — the spike ran 2026-11-04 (Financial Planner D-331).
 
 **Researched:** 2026-11-04 · **Feeds:** Test Strategy amendment (Financial Planner §9 / D-80,
 Project Tracker §15 / D-195), the shared test rules, `build.js` gate · **Status:** Draft
@@ -21,7 +21,8 @@ module, because it rules on module-agnostic strategy; the planner's domain resea
 | [wdi5-e2e.md](wdi5-e2e.md)                                     | Compare  | **Viable alternative** (scout said Recommended; downgraded in reconciliation, see below)                                          | Medium     | Journey tier     |
 | [playwright-in-repo.md](playwright-in-repo.md)                 | Compare  | **Viable alternative** for in-repo journeys; already the `/functional-test` tier (scout said Recommended; see below)              | Medium     | Journey tier     |
 | [fiori-elements-testability.md](fiori-elements-testability.md) | Ground   | — (no recommendation)                                                                                                             | Medium     | Philosophy       |
-| [gate-integration.md](gate-integration.md)                     | Validate | **Unproven** — fully documented, nothing executed; spike prescribed                                                               | Medium     | Gate, `build.js` |
+| [gate-integration.md](gate-integration.md)                     | Validate | ~~Unproven~~ **Proven** — spike executed 2026-11-04 (Financial Planner D-331)                                                      | High       | Gate, `build.js` |
+| [fe-nested-component-routing.md](fe-nested-component-routing.md) | Validate | **Viable with caveats** (as a mechanism) — not the right fix for D-096                                                          | Medium     | Financial Planner D-096; shell (D-30 / D-141) |
 
 ## Reconciliation — where the scouts disagreed
 
@@ -70,7 +71,7 @@ middleware returns as a question if the repo ever moves to CLI v5.
 | SAP steers new E2E work to wdi5                      | **holds** — but it is not the only route                                                                                                          |
 | Playwright cannot wait reliably on UI5               | **refuted** — `RecordReplay.waitForUI5` is public since 1.60                                                                                      |
 | Near-zero logic in FE apps → little to unit-test     | **holds for the unit tier, refuted for coverage** — annotation-driven behaviour and extensions are "ours" and SAP covers them at the journey tier |
-| A UI5 suite fits in `npm test`                       | **unknown** — holds on paper, spike pending                                                                                                       |
+| A UI5 suite fits in `npm test`                       | **holds** — verified by the spike (Financial Planner D-331; `posttest` → `test:ui5`)                                                            |
 | Playwright's test runner is already installed        | **refuted** (2026-11-04, Test Strategy amendment) — only the MCP server is; the e2e tier installs `@playwright/test` in Sprint 2                  |
 
 ## Open risks
@@ -109,7 +110,7 @@ middleware returns as a question if the repo ever moves to CLI v5.
 
 ## Second wave (if the first holds)
 
-1. R1 is a build story, not research. Spike R2 (FE page objects under the tnt shell) — prescribed in `opa5-journeys.md` / `wdi5-e2e.md`.
+1. ~~R1 is a build story, not research.~~ R1 closed 2026-11-04 (D-331). Spike R2 (FE page objects under the tnt shell) — prescribed in `opa5-journeys.md` / `wdi5-e2e.md`.
 2. FPM page strategy for Project Tracker (R3).
 3. `ControllerExtension` unit-testability (R4) → may become a coding standard.
 4. Deterministic journey data: dev-profile in-memory SQLite + `db/data` CSVs vs `iResetTestData()` override.

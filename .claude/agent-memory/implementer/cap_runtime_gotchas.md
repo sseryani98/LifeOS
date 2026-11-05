@@ -18,6 +18,7 @@ metadata:
 
 Moved here from source comments 2026-11-04 (Sandro: framework behaviour belongs in agent memory, not in code comments):
 
+- **A supplied `managed` stamp survives a direct db `INSERT`** (probed 2026-11-04, Financial Planner: `modifiedAt: "2026-01-10..."` read back unchanged), so a seed can pin `modifiedAt` to make "latest" ordering deterministic. The overwrite below is the service-layer path.
 - **`@cds.on.insert` / `managed` stamps overwrite a supplied value.** `Decision.decidedAt` has no stamp on purpose: the verb layer always supplies the envelope's timestamp, and a stamp would discard it.
 - **`@cds.autoexpose` exposes an entity under its singular name** (`TrackerService.Actor`, not `Actors`) — that is why `ENTITIES.ACTOR` is singular in `srv/modules/shared/constants.ts`.
 - **A projection, not a view, when registers must stay collections.** A view flattens associations into rows; a function's result can't be bound. `ProjectView` is a projection for this reason.
@@ -37,3 +38,13 @@ Measured at SPEC-03 (migration domain, 2026-11-04):
 - **Code-list and parent FKs are `DEFERRABLE INITIALLY DEFERRED` on both sqlite and postgres** (`cds compile --to sql --dialect postgres`), so a child row may be inserted before its parent inside one tx (the migration Activity precedes its Workspace).
 - **`srv.tx({ user: new cds.User("migration") }, fn)`** stamps `createdBy` on every row, including rows an `after CREATE` handler writes by direct `await INSERT` (the chain Tasks/Subtasks). Direct `await SELECT` inside `fn` joins the same tx.
 - **A request outside dispatch:** `new cds.Request({ event })` gives a real `req.error()` accumulator; `req.reject()` with no args throws the one error, or `MULTIPLE_ERRORS` with `details`. Both `req.errors` and the no-arg `reject()` are missing from the typings — cast to a local interface. Extra fields on `req.error({...})` (e.g. `counts`) need a non-literal variable, or TS's excess-property check rejects the overload.
+
+Measured on Financial Planner D-063 (2026-11-05):
+
+- **A targeted `req.error` in a draft PATCH handler does not fail the PATCH.** Lean draft (`cds.fiori.draft_messages`, default on) diverts any error with a `target` into draft messages; the PATCH returns 2xx with the bad value stored, and `draftActivate` still succeeds. To refuse the edit, raise it without `target` (it then fails the PATCH 400).
+- **The planner's `wrapHandler` turns any throw into a 500**, including a deliberate `req.reject(400, ...)`; Project Tracker's passes rejections through. In planner handlers, refuse with `req.error`, not `req.reject`.
+- **FE fires no annotated side effect for a plain `sap.m.Input` in a custom field fragment**; call `context.requestSideEffects` from its `change` (via the app's `model/` service).
+
+
+- **A refused draft PATCH stays pending in UI5 and is re-sent with the next edit** — call `resetChanges()` only after the failed batch settles (not inside `patchCompleted`), then re-read the affected fields; resetting earlier is lost and the PATCH loops (Financial Planner D-064, 2026-11-05).
+- **`@assert.range.message` translates only a `{i18n>key}` value** — a bare key is shown verbatim (Financial Planner D-066).

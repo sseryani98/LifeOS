@@ -45,7 +45,7 @@ Life OS/
     eslint.config.mjs              The shared ESLint rules — single source for all modules
     tsconfig.base.json             Shared compilerOptions
     tsconfig.json                  Type-checks this folder's own scripts
-    scripts/                       Shared lint suite (22 linters) + generateTestReport
+    scripts/                       Shared lint suite (23 linters) + generateTestReport
 ```
 
 `package.json`, `package-lock.json`, and `node_modules/` also sit at the root — npm
@@ -85,10 +85,10 @@ second module forces the vocabulary apart; THEME.md, DATA_MODEL.md, specs/ are p
 
 ## The Shared Lint Suite
 
-`Standards (Technical + Linting)/scripts/` holds 22 architectural linters that no
+`Standards (Technical + Linting)/scripts/` holds 23 architectural linters that no
 off-the-shelf rule covers (facade purity, test structure, mapper placement, phantom
 enforcement claims). They are shared because they encode standards, not planner
-specifics. All 22 are wired into a module's `lint:*` block.
+specifics. All 23 are wired into a module's `lint:*` block.
 
 Every linter roots itself at `process.cwd()` and takes no arguments, which is what makes
 one copy serve every module: an npm script runs with cwd set to its own module, so
@@ -129,7 +129,7 @@ Run `/scaffold-module` — it executes these seven steps and reconciles this fil
 
 1. Create the folder and add it to `workspaces` in the root `package.json`.
 2. `package.json` — module deps and cds config only. Copy the `lint:*` block from
-   Financial Planner, then **audit it**: the 22 shared linters are module-relative, but
+   Financial Planner, then **audit it**: the 23 shared linters are module-relative, but
    the block also carries scripts that name a specific app folder (`lint:ui5` is
    `cd app/admin-master-data && ui5lint`). Those are planner text riding inside a block
    that is otherwise portable — drop or rewrite them. The `eslint` leg is `eslint .`, which
@@ -230,6 +230,14 @@ not invent an answer — ask.
   MCP servers registered. Any server or hook the repo depends on therefore ships as a **tracked installer
   script** under `Standards (Technical + Linting)/scripts/` rather than as a committed config; see
   Project Tracker D-32 (the `INT-006` hook) and D-44 (the `INT-001` verb server). Run `node "Standards (Technical + Linting)/scripts/installHooks.mjs"` once per clone; it registers the per-edit linter hook. Run `installUi5PluginConfig.mjs` from the same folder too; it points the VSCode ui5plugin at the shared `ui5plugin.json`, which the plugin accepts only as an absolute path.
+- **Defect sweep** — `/defect-sweep <Module>/<Story>` runs the bounded test-fix loop: functional
+  and UX testers in parallel, Medium-and-worse findings fixed test-first, one commit per round, stop
+  when a round raises nothing Medium+ or after five rounds. Behaviour the spec leaves open is logged
+  "needs Sandro", never defaulted. `/defect-sweep --pick` is the scheduled mode: it rotates through
+  Done stories by `.claude/defect-sweep/ledger.md`. Run
+  `node "Standards (Technical + Linting)/scripts/installDefectSweepTask.mjs"` once to schedule it
+  every Wednesday 23:00 (Windows Task Scheduler; `--uninstall` removes it). It needs a clean tree,
+  a sprint branch and local Postgres up, and stops otherwise. Rules: `.claude/skills/defect-sweep/SKILL.md`.
 - **Commits** are Conventional Commits. Scope by module when a change is module-local.
 
 ## Do NOT

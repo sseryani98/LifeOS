@@ -22,3 +22,5 @@ Checks that found real gaps in the ingestion integration review (2026-11-02):
   `to.have.length(N)` totals that only hold after earlier `it`s ran.
 
 Related: [[feedback_no_framework_tests]]
+
+- **Null/empty function results tested in-process only.** A support helper that calls `buildTransactionService().method(actionRequest(...))` bypasses wrapHandler, the CDS return type and OData serialization. If only the happy path goes over `GET`, the wire shape of a `null` return (204 vs `value: null`) is unpinned while the UI5 fake hard-codes `getObject() === null`. (2026-11-04, `suggestRecurringSplit`.)

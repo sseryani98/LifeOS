@@ -21,7 +21,7 @@ assumption about Claude Code / SAP tooling and must be checked against docs befo
 
 **Problem.** Fast agent output accumulates drift: one-off patterns, stale memory, sprawl.
 
-**Already in place.** 21 shared architectural linters; `/human-review-loop` (turns each review
+**Already in place.** 23 shared architectural linters; `/human-review-loop` (turns each review
 finding into a durable prevention); `/code-quality` + `/test-quality` workflows;
 `cap-annotation-hunter`; per-agent `.claude/agent-memory/`.
 

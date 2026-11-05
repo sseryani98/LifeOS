@@ -281,7 +281,7 @@ defect status `Open | Closed`.
 
 **Project tooling views:**
 
-- **ESLint rules** — from the shared `eslint.config.mjs` + the 20-linter suite in
+- **ESLint rules** — from the shared `eslint.config.mjs` + the 23-linter suite in
   `Standards (Technical + Linting)/scripts/`.
 - **Custom skills / workflows / agents** — inventory of `.claude/` (name, purpose, model).
 - **Methodology infographic** — the §4 phase map, rendered.

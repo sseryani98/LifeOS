@@ -623,7 +623,7 @@ cd "${moduleDir}" && npm run build
 One failure must not mask the other three — if you stop early, the repair agent fixes one thing
 per round and the loop runs out of budget.
 
-\`npm run lint\` is ESLint plus 22 \`lint:*\` scripts chained with \`&&\`, so it halts at the first
+\`npm run lint\` is ESLint plus 23 \`lint:*\` scripts chained with \`&&\`, so it halts at the first
 failing linter. Expected. Report what you got; do not run the rest by hand.
 
 \`npm test\` has \`--coverage\` baked in, and a module may add a \`posttest\` report generator. Both normal.
@@ -916,10 +916,10 @@ ${standardsFor(brief.layers)}`,
   const raised = await parallel([...(shortfall ? [raiseJestCoverage] : []), ...(ui5Shortfall ? [raiseUi5Coverage] : [])])
   coverage = raised.some(Boolean)
     ? {
-        testFiles: raised.flatMap(result => result?.testFiles ?? []),
-        summary: raised.map(result => result?.summary).filter(Boolean).join('\n\n'),
-        unreachable: raised.flatMap(result => result?.unreachable ?? []),
-      }
+      testFiles: raised.flatMap(result => result?.testFiles ?? []),
+      summary: raised.map(result => result?.summary).filter(Boolean).join('\n\n'),
+      unreachable: raised.flatMap(result => result?.unreachable ?? []),
+    }
     : null
 
   phase('Gate')

@@ -19,7 +19,7 @@ const CHECKS = [
   { test: /^(srv|mcp)[/].*[.]ts$/i, scripts: ["lintFacades", "lintMapperMethods", "lintHandlerEventTypes"] },
   { test: /^app[/].*[.]ts$/i, scripts: ["lintMessaging", "lintFrontendDataAccess", "lintFrontendControllerShape", "lintFrontendConstants"] },
   { test: /^test[/].*[.]ts$/i, scripts: ["lintTestData", "lintTestStructure", "lintTestCqlAccess"] },
-  { test: /[.]cds$/i, scripts: ["lintAnnotations", "lintI18n", "lintFilenames"] },
+  { test: /[.]cds$/i, scripts: ["lintAnnotations", "lintI18n", "lintFilenames", "lintCdsServiceLayout"] },
   { test: /^app[/].*[.]xml$/i, scripts: ["lintControlIds", "lintNoDefaultAttributes", "lintEventHandlers", "lintI18n"] },
   { test: /[.]properties$/i, scripts: ["lintI18n"] },
   { test: /CLAUDE[.]md$/, scripts: ["lintDocClaims"] },

@@ -10,7 +10,7 @@ isolated subagents inside the workflow — you never read the tests yourself. Ke
 clean is the entire point of this command; a summary you write from your own reading of the suite
 defeats it.
 
-This is the twin of `/code-quality`, pointed at `test/` instead of `srv/`. It runs in two
+This is the twin of `/code-quality`, pointed at the test trees — `test/` (Jest) and every `app/**/test/` (UI5) — instead of `srv/`. It runs in two
 invocations: **review** writes nothing and returns tables; **apply** writes only the indices
 Sandro names. Never call apply without his indices.
 
@@ -21,12 +21,22 @@ neither settles it, ask — there is no default module. **Lenses are derived fro
 listed here:** one lens per folder under its `test/unit/` and `test/integration/`, each mapped to the
 source it covers (`srv/modules/{lens}/**`, plus any root service file the module's `CLAUDE.md` or
 `TEST_STRATEGY.md` maps to it — a lens whose source resolves by glob to nothing gets an empty review).
-Pass the full lens-name list as `allModules`.
+Pass the full Jest lens-name list as `allModules`.
+
+**UI5 lenses** come from the module's `app/` folder, one per UI5 app (a folder with a `ui5.yaml`),
+named `ui5:<app>` with `tier: 'ui5'`. Only a module with a UI5 leg (`<module>/ui5-test-runner.json`)
+gets them. `testFiles` is the app's test tree (`app/<app>/webapp/test/**`, or `app/<app>/test/**`
+for an app with no `webapp/`); `sourceFiles` is every other `.ts` in the app. An app with sources and
+no tests still gets a lens — its review names what owes QUnit first. Never list `ui5:` names in
+`allModules`: that list scopes Jest.
 
 | "$ARGUMENTS" | Scope |
 | --- | --- |
 | *(empty)* | **Diff mode.** See §1a — the range is not always the working tree. |
-| `all` or `backend` | Every lens the module has. `backend` is an accepted alias: while a module has no frontend tests the two resolve identically. |
+| `all` | Every lens the module has, Jest and UI5. |
+| `backend` | Jest lenses only. |
+| `frontend` or `ui5` | UI5 lenses only — the Jest leg is not run. |
+| `ui5:<app>` | That one app's UI5 lens. |
 | anything else | Treat as a **module name**. If it matches no lens below, list the real ones and ask — do not guess. |
 
 ## 1a. Diff mode — resolve the range before you trust it
@@ -50,7 +60,8 @@ If step 2 spans more than ~3 commits, offer the narrower `HEAD~1` range (the las
 let him pick. **Do not silently review a whole sprint** because he asked about one story.
 
 **A diff touching only `srv/` still has lenses** — that is the whole point. Map each changed source
-file to the module that owns it and review that module's tests. A build that changed
+file to the module that owns it and review that module's tests. A changed file under `app/<app>/`
+maps to the `ui5:<app>` lens. A build that changed
 `srv/modules/transaction/` and wrote no tests is exactly what this mode is for.
 
 Pass the resolved file list as `changedFiles` so reviewers judge coverage *of the changeset*.
@@ -88,7 +99,10 @@ Workflow({
     lenses: [
       { name: 'transaction',
         testFiles: [ /* repo-relative */ ],
-        sourceFiles: [ /* repo-relative */ ] }
+        sourceFiles: [ /* repo-relative */ ] },
+      { name: 'ui5:transactions', tier: 'ui5',
+        testFiles: [ /* app/transactions/webapp/test/** */ ],
+        sourceFiles: [ /* app/transactions/**/*.ts outside test/ */ ] }
     ]
   }
 })
@@ -163,10 +177,10 @@ Workflow({
 It returns `{implemented, sourceBugs, verification, counts}`. Report, leading with
 whichever applies:
 
-- **`sourceBugs`** — a new test caught a real bug in `srv/`. Lead with it. Nothing was fixed — the
+- **`sourceBugs`** — a new test caught a real bug in `srv/` or app source. Lead with it. Nothing was fixed — the
   authors and the verifier are forbidden from editing `srv/`.
 - **`verification.status`** — do not collapse it to pass/fail:
-  - `clean` — `tsc`, `lint`, `test` all green.
+  - `clean` — `tsc`, `lint`, the Jest leg and (when a UI5 item was written) `test:ui5` all green. A UI5 coverage shortfall the baseline already had (Financial Planner, FP D-333) is not counted against the run; `failures` still lists it.
   - `red-known` — the only failures are sourceBug tests, left red on purpose. A successful run.
   - `red-unexpected` — red for another reason. **Lead with this** and show `verification.unfixed`.
   - `unverified` — the gate never completed. Say the writes are unconfirmed and offer to run
@@ -175,7 +189,7 @@ whichever applies:
 - Any **`deferred`** item — an author declined it. Name it and why.
 - The **timings** (§Timings).
 
-Finally `git diff --stat "<moduleDir>/test/"` — the table is a claim, the diffstat is the evidence.
+Finally `git diff --stat "<moduleDir>/test/" "<moduleDir>/app/"` — the table is a claim, the diffstat is the evidence.
 
 ## Timings
 
