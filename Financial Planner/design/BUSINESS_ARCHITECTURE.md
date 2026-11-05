@@ -16,6 +16,7 @@
 | 2026-02-20 | Claude          | Status → Approved. All 43 objects fully specified across 21 functional specs (Step 12 complete). Footer updated.                                                                                                         |
 | 2026-02-20 | Claude          | Post-audit fixes: FRM-004 description updated (removed "redemptions", D-280). ENH-005 description updated (removed "redemptions", D-142). RPT-004 description updated (ALP + CRUD, D-279).                               |
 | 2026-02-20 | Claude          | Post-audit fixes (batch 2): WFL-004 marked absorbed by FRM-006 (D-188). ENH-004 +ISSUER_COOLDOWN +dual output. RPT-010 +Transfer Points +Manual Adjustment +page type. FRM-005 +full CRUD +chart +status +Quick-compare. |
+| 2026-11-05 | Claude          | CNV-001 moved from Foundation & Seed Data to Transaction Processing, matching its W1-S3 slot in PROJECT_MANAGEMENT.md (it needs INT-002, built in W1-S2). |
 
 ---
 
@@ -140,9 +141,9 @@ The minimum set that makes the weekly 15-minute session work: transactions flow 
 
 | Layer                  | Objects                                     |
 | ---------------------- | ------------------------------------------- |
-| Foundation & Seed Data | CNV-002, CNV-003, CNV-001, FRM-009          |
+| Foundation & Seed Data | CNV-002, CNV-003, FRM-009                   |
 | Ingestion Pipeline     | ENH-008, INT-001, INT-002, FRM-003, FRM-010 |
-| Transaction Processing | ENH-001, ENH-009                            |
+| Transaction Processing | ENH-001, ENH-009, CNV-001                   |
 | Computation Engines    | ENH-003, ENH-006, ENH-007, FRM-007          |
 | UI Surfaces            | FRM-001, FRM-004, FRM-006                   |
 | Dashboards (partial)   | RPT-001, RPT-002                            |
