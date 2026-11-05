@@ -189,6 +189,13 @@ that package leaves the symlink missing, and every module's `tsc` fails with
 `TS2688: Cannot find type definition file for 'sap__cds'`. Re-run its postinstall from the
 root rather than editing any `tsconfig.json`.
 
+## Build Order
+
+Across modules, until Project Tracker's cutover: **`PT-W1` → `PT-W2` → `PT-W3` (cutover) → Financial
+Planner's `CNV-001`** (Project Tracker D-13, D-202), all inside the planner's open `sprint/W1-S3`.
+Read position from `Project Tracker/PLAN.md` §1, not the planner's board. Delete this section at
+cutover, when `next_action` answers for every module.
+
 ## Cross-Module Rulings
 
 All three items this section held as undecided are now settled. They were open only

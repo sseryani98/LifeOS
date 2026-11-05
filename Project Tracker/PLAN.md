@@ -7,8 +7,8 @@ twelve Approved**; `IA-001`, `DS-001`, `TH-001`, `DM-001`, `TS-001` and `TST-001
 `BP-001` **Approved**). **All five open items are closed; R1 is executed and R9's proxy
 residual is executed.** **Build is under way: `S-00 Module Bootstrap` and `SPEC-01 MCP Intent-Verb
 Layer` are both DONE (2026-08-16) — the module has a model, a service and eleven verbs — `SPEC-02`
-is committed (`c7d29bb`), and `SPEC-03` is built and functionally tested (12/12, 2026-11-04), Human Review done 2026-11-04, `/refresh-docs` and `/pm-update` run 2026-11-04; commit next.** Decisions run **D-01 … D-264**.
-**Last updated:** 2026-11-04
+is committed (`c7d29bb`), and `SPEC-03` is committed (`354dfd8`), closing `PT-W1`. Next: the `PT-W1` boundary checkpoint (D-202), then `PT-W2` from `SPEC-04`.** Decisions run **D-01 … D-264**.
+**Last updated:** 2026-11-05
 **Purpose:** The continuity document. Anyone (or any fresh chat) picking up Project Tracker
 starts here. Read this, then `design/PROBLEM_STATEMENT_AND_VISION.md` (PSV-001),
 `design/BUSINESS_ARCHITECTURE.md` (BA-001) and `design/DECISIONS_LOG.md` for the full

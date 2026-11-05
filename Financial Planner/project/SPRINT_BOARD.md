@@ -10,7 +10,7 @@
 
 | Story | Type | Description | Status |
 | --- | --- | --- | --- |
-| CNV-001 | Conversion | Historical backfill: BackfillService orchestration (parse via INT-002 → ENH-008 dedup → ENH-001 categorize → ImportLog), purchases-only + date-cutoff filters, halt-on-parse-error, supp-card attribution. Scenario test. | Backlog |
+| CNV-001 | Conversion | Historical backfill: BackfillService orchestration (parse via INT-002 → ENH-008 dedup → ENH-001 categorize → ImportLog), purchases-only + date-cutoff filters, halt-on-parse-error, supp-card attribution. Scenario test. | Backlog — blocked by Project Tracker `PT-W1` → `PT-W3` cutover (PT D-13, D-202); see `Project Tracker/PLAN.md` §1 |
 
 ### In Progress
 
