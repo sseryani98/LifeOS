@@ -7,7 +7,7 @@ twelve Approved**; `IA-001`, `DS-001`, `TH-001`, `DM-001`, `TS-001` and `TST-001
 `BP-001` **Approved**). **All five open items are closed; R1 is executed and R9's proxy
 residual is executed.** **Build is under way: `S-00 Module Bootstrap` and `SPEC-01 MCP Intent-Verb
 Layer` are both DONE (2026-08-16) — the module has a model, a service and eleven verbs — `SPEC-02`
-is committed (`c7d29bb`), and `SPEC-03` is committed (`354dfd8`), closing `PT-W1`. Next: the `PT-W1` boundary checkpoint (D-202), then `PT-W2` from `SPEC-04`.** Decisions run **D-01 … D-264**.
+is committed (`c7d29bb`), and `SPEC-03` is committed (`354dfd8`), closing `PT-W1`. The `PT-W1` boundary checkpoint passed 2026-11-05 against the real store (§8). Next: `PT-W2` from `SPEC-04`.** Decisions run **D-01 … D-264**.
 **Last updated:** 2026-11-05
 **Purpose:** The continuity document. Anyone (or any fresh chat) picking up Project Tracker
 starts here. Read this, then `design/PROBLEM_STATEMENT_AND_VISION.md` (PSV-001),
@@ -691,6 +691,46 @@ Sandro ruled it a defect.
 ---
 
 ## 8. Session log
+
+### 2026-11-05 — `PT-W1` boundary checkpoint: the real store was empty, now loaded and verified by query
+
+The `BP-001` §7 checkpoint (D-203), run against the real `project_tracker` database rather than a
+throwaway one. `BA-001` §10's wave-1 increment: **passed**, after two missing operational steps.
+
+- **The real store was empty.** The MCP server (`.mcp.json` → `mcp/server.ts`) binds through
+  `package.json` `cds.requires.db` + `.env` to `project_tracker` on `localhost:5432`. `project_view`
+  answered `404 verb.target.notFound` — "Valid codes: none" — so the 2026-11-05 `{"nextAction": null}`
+  meant an empty store, not a finished one. A read-only count found 27 base tables and **zero rows**
+  outside `cds_model`: the schema was from the 2026-08-16 `S-00` deploy, and neither `SPEC-02`'s
+  library seed nor `SPEC-03`'s load had ever reached the real DB. `CLAUDE.md`'s "library and code
+  lists are seeded" was true only of the throwaway DBs until this session.
+- **Sandro's ruling:** the real-DB load is a checkpoint step, not a missed step of `SPEC-03`. No doc
+  assigns it to `SPEC-03`'s DoD (`BP-001` §8 is gate + FUTs, which ran 12/12 on scratch Postgres), so
+  **`SPEC-03`'s Done stands** and the fix is recorded here.
+- **Loaded.** `npm run migrate-financial-planner` first refused `cnv.migration.libraryMissing`;
+  `npx cds deploy` seeded the 14 `db/data/*.csv` files; the rerun's `reconcile` tied out **9 of 9**
+  (Area 1, Engagement 1, Workspace 1, Initiative 3, Milestone 12, Defect 27, Decision 5, TestRun 1,
+  Activity 2). One run only, so D-252's register duplication does not apply.
+- **Increment 1 — verified by query.** `project_view` returns workspace `financial-planner`: W1-S1
+  and W1-S2 `Complete` (`v1.1`, `v1.2`), W1-S3 `Active`; Financial Planner `FRM-001` `done`,
+  Financial Planner `CNV-001` `backlog` with its 8-stage chain instantiated (`ENH-001` fired);
+  27 Defects, D-021 … D-027 Open. `nextAction` → Financial Planner `CNV-001` `sprint-build`, `/build`.
+- **Increment 2 — four forbidden writes, all refused, with status and remediation** (Sandro chose
+  more than one probe):
+  - `complete_stage` `sprint-build` (never started) → `409 verb.stage.notStarted`, "Start the stage
+    first, with start_stage."
+  - `complete_stage` `code-quality` → `409 verb.stage.blocked` (`wfl.stage.predecessorOpen`),
+    "Complete sprint-build first, with /build."
+  - `start_stage` `code-quality` out of chain order → the same `409 verb.stage.blocked`.
+  - `start_stage` on bare `CNV-001` → `400 verb.story.unqualified`.
+
+  A read-only count afterwards: still 2 Activities, all 8 Tasks `notStarted` — no refusal wrote.
+- **Finding, open before cutover:** the migration's embedded snapshot is Financial Planner's ledgers
+  at `2704696`; three commits have touched `Financial Planner/project/` since (`83df5a2`, `77fd778`,
+  `517fa28`). The real store reflects the snapshot, not HEAD. It must be reconciled before `PT-W3`
+  retires the markdown, or the cutover loses whatever those commits recorded.
+- **Not run, by rule:** no `recordTestRun`, no persona meeting (§7.1); no CSV export (`PT-W3` only).
+- **Position:** `PT-W1` closed. Next: `PT-W2` from `SPEC-04` — `/build "Project Tracker/SPEC-04"`.
 
 ### 2026-11-04 — `SPEC-02` committed; `SPEC-03` built, functionally tested 12/12, reviewed and docs refreshed
 
