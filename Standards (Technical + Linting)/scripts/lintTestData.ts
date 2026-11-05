@@ -1,9 +1,9 @@
 import { readFileSync } from "fs";
-import { join, relative } from "path";
+import { basename, join, relative } from "path";
 
 import typescript from "typescript";
 
-import { collectFiles, reportViolations } from "./lib/lintWalk.js";
+import { collectFiles, collectUi5TestRoots, reportViolations } from "./lib/lintWalk.js";
 
 const ROOT_DIR = process.cwd();
 const TEST_DIR = join(ROOT_DIR, "test");
@@ -13,7 +13,16 @@ const TEST_DIR = join(ROOT_DIR, "test");
  * fixtures) and `test/support/` (mock/service/seed builders) are exactly where
  * inline construction is allowed to live — the rule pushes data *there*.
  */
-const SPEC_EXTENSIONS = [".test.ts"];
+const SPEC_EXTENSIONS = [".test.ts", ".e2e.ts"];
+
+/** UI5 specs live in each app's own test/ tree, not under the module's test/. */
+const UI5_SPEC_EXTENSIONS = [".qunit.ts"];
+
+/** The Test Starter suite config is configuration, not a spec. */
+const UI5_SUITE_CONFIG = "testsuite.qunit.ts";
+
+/** QUnit declares a test as `QUnit.test(…)` and OPA5 as `opaTest(…)`. */
+const QUNIT_TEST_NAMES = new Set(["test", "only", "skip"]);
 
 /** Full-string UUID literal — an identifier that belongs in a `test/data/` constant. */
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -55,6 +64,12 @@ const ASSERTION_CALLEES = new Set([
   "match",
   "within",
   "closeTo",
+  "deepEqual",
+  "notDeepEqual",
+  "strictEqual",
+  "notStrictEqual",
+  "propEqual",
+  "notPropEqual",
 ]);
 
 interface Violation {
@@ -111,7 +126,8 @@ function testCallRoot(call: typescript.CallExpression): string | null {
 /** A `it(...)` / `test(...)` call that declares a body (excludes `it.todo`). */
 function isTestCall(call: typescript.CallExpression): boolean {
   const root = testCallRoot(call);
-  if (root !== "it" && root !== "test") return false;
+  const isQUnitTest = root === "QUnit" && QUNIT_TEST_NAMES.has(calleeName(call) ?? "");
+  if (root !== "it" && root !== "test" && root !== "opaTest" && !isQUnitTest) return false;
   return call.arguments.some(
     arg => typescript.isArrowFunction(arg) || typescript.isFunctionExpression(arg),
   );
@@ -189,12 +205,17 @@ function scanFile(filePath: string): Violation[] {
 }
 
 /**
- * Scans every `test/**​/*.test.ts` for inline test data and exits non-zero when
+ * Scans every `test/**​/*.{test,e2e}.ts` and UI5 `*.qunit.ts` for inline test data and exits non-zero when
  * any is found. Test bodies must be arrange-act-assert against named constants;
  * fixtures belong in `test/data/`, builders in `test/support/`.
  */
 function main(): void {
-  const files = collectFiles(TEST_DIR, SPEC_EXTENSIONS);
+  const files = [
+    ...collectFiles(TEST_DIR, SPEC_EXTENSIONS),
+    ...collectUi5TestRoots(ROOT_DIR)
+      .flatMap(root => collectFiles(root, UI5_SPEC_EXTENSIONS))
+      .filter(file => basename(file) !== UI5_SUITE_CONFIG),
+  ];
   const violations = files.flatMap(scanFile);
 
   reportViolations(

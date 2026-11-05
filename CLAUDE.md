@@ -145,6 +145,13 @@ Run `/scaffold-module` — it executes these seven steps and reconciles this fil
    files staged.
 7. Run `npm install` from the root so the workspace links.
 
+When a module gains its first UI5 source, it also gains its **UI5 test leg** (Financial Planner
+D-331 is the worked example): a `ui5-test-runner.json` at the module root on a module-own port, a
+`ui5-test.yaml` beside each app's `ui5.yaml`, a `test:ui5` script calling
+`Standards (Technical + Linting)/scripts/runUi5Gate.ts`, chained from `posttest`, and the
+`coverage-ui5/`, `report-ui5/` and `.nyc_output-ui5/` gitignore lines. Not before: a gate over zero
+files is a meaningless green.
+
 When a module gains its first UI5 app, add it to the root `package.json` under
 `ui5.ui5parser.proxyWorkspaces`. Without that entry the VSCode ui5plugin parses the repo
 root as JavaScript, so TypeScript handlers show as "not found". The plugin's rules are
@@ -168,6 +175,11 @@ floating range silently upgrades every module at once. That is not theoretical: 
 without `--experimental-vm-modules`, which red-lines every `cds.test` suite in the repo.
 
 Raise the pin as its own change, with the suite green before and after.
+
+`ui5-tooling-transpile` is pinned exactly for the same reason (Financial Planner D-332). At 3.13.1
+and below, its `coverage` option instruments nothing under `cds-plugin-ui5`, with no warning.
+Moving the pin can silently zero the UI5 coverage gate. After a move, re-run a deliberately failing
+threshold.
 
 One related trap: `@cap-js/cds-types` creates `node_modules/@types/sap__cds` from a
 `postinstall` keyed on `INIT_CWD`. An incremental `npm install` that does not re-fetch

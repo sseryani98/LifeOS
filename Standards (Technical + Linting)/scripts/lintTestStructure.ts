@@ -3,7 +3,7 @@ import { basename, join, relative, sep } from "path";
 
 import typescript from "typescript";
 
-import { collectFiles, reportViolations } from "./lib/lintWalk.js";
+import { collectFiles, collectUi5TestRoots, reportViolations } from "./lib/lintWalk.js";
 
 const ROOT_DIR = process.cwd();
 const TEST_DIR = join(ROOT_DIR, "test");
@@ -16,6 +16,23 @@ const TEST_DIR = join(ROOT_DIR, "test");
 const DATA_SEGMENT = "data";
 const SUPPORT_SEGMENT = "support";
 const SPEC_SEGMENTS = new Set(["tests", "scenarios"]);
+
+/**
+ * Playwright specs run at the sprint boundary, never under Jest, so they carry their
+ * own suffix and live only under `test/e2e/<area>/tests/`.
+ */
+const E2E_SUFFIX = ".e2e.ts";
+const E2E_SEGMENT = "e2e";
+
+/**
+ * UI5 test trees (each app's `test/` folder) use the QUnit Test Starter layout: the suite
+ * config at the root, specs (`*.qunit.ts`) under unit/ or integration/, OPA5 page
+ * objects under integration/pages/, and the shared data/ + support/ split.
+ */
+const UI5_SPEC_SUFFIX = ".qunit.ts";
+const UI5_SPEC_SEGMENTS = new Set(["unit", "integration"]);
+const UI5_ROOT_FILES = new Set(["testsuite.qunit.ts"]);
+const UI5_PAGES_SEGMENT = "pages";
 
 /**
  * Runner lifecycle files, allowed at the root of `test/` and nowhere else. They
@@ -44,9 +61,9 @@ interface Violation {
   reason: string;
 }
 
-/** Path segments of a test file relative to `test/`, e.g. `unit/ingestion/data`. */
-function segmentsOf(filePath: string): string[] {
-  return relative(TEST_DIR, filePath).split(sep);
+/** Path segments of a test file relative to its test root, e.g. `unit/ingestion/data`. */
+function segmentsOf(filePath: string, testRoot = TEST_DIR): string[] {
+  return relative(testRoot, filePath).split(sep);
 }
 
 /** Recursive size of a literal: own members plus the weight of nested literals. */
@@ -133,6 +150,16 @@ function checkPlacement(filePath: string): Violation | null {
   const segments = segmentsOf(filePath);
   const roleSegment = segments.slice(0, -1);
   const isSpec = filePath.endsWith(".test.ts");
+  const isE2eSpec = filePath.endsWith(E2E_SUFFIX);
+
+  if (isE2eSpec || (isSpec && segments[0] === E2E_SEGMENT)) {
+    if (isE2eSpec && segments[0] === E2E_SEGMENT && roleSegment.includes("tests")) return null;
+    return {
+      filePath: relative(ROOT_DIR, filePath),
+      line: 1,
+      reason: `an e2e spec must be a *${E2E_SUFFIX} file under test/e2e/<area>/tests/`,
+    };
+  }
 
   if (isSpec) {
     if (roleSegment.some(segment => SPEC_SEGMENTS.has(segment))) return null;
@@ -162,7 +189,42 @@ function checkPlacement(filePath: string): Violation | null {
 }
 
 /**
- * Enforces the test tree contract: `test/{unit,integration}/<module>/{data,
+ * Checks a file in a UI5 test tree sits where the Test Starter layout puts it.
+ */
+function checkUi5Placement(filePath: string, testRoot: string): Violation | null {
+  const segments = segmentsOf(filePath, testRoot);
+  const roleSegment = segments.slice(0, -1);
+  const fileName = basename(filePath);
+  const violation = (reason: string): Violation => ({
+    filePath: relative(ROOT_DIR, filePath),
+    line: 1,
+    reason,
+  });
+
+  if (roleSegment.length === 0) {
+    return UI5_ROOT_FILES.has(fileName)
+      ? null
+      : violation("only testsuite.qunit.ts sits at a UI5 test root; specs go under unit/ or integration/");
+  }
+  if (fileName.endsWith(UI5_SPEC_SUFFIX)) {
+    return UI5_SPEC_SEGMENTS.has(roleSegment[0])
+      ? null
+      : violation(`a *${UI5_SPEC_SUFFIX} spec must live under unit/ or integration/`);
+  }
+  if (
+    roleSegment.includes(DATA_SEGMENT) ||
+    roleSegment.includes(SUPPORT_SEGMENT) ||
+    (roleSegment[0] === "integration" && roleSegment.includes(UI5_PAGES_SEGMENT))
+  ) {
+    return null;
+  }
+  return violation(
+    "a non-spec UI5 test file must live under data/, support/ or integration/pages/",
+  );
+}
+
+/**
+ * Enforces the test tree contract: `test/{unit,integration,e2e}/<module>/{data,
  * support,tests}` plus the cross-cutting `test/shared/{data,support}`. Data
  * lives in data/, builders in support/, specs in tests/ — no data in support/.
  */
@@ -178,6 +240,18 @@ function main(): void {
     }
   }
 
+  const ui5Roots = collectUi5TestRoots(ROOT_DIR);
+  for (const testRoot of ui5Roots) {
+    for (const filePath of collectFiles(testRoot, [".ts"])) {
+      files.push(filePath);
+      const placement = checkUi5Placement(filePath, testRoot);
+      if (placement) violations.push(placement);
+      if (segmentsOf(filePath, testRoot).slice(0, -1).includes(SUPPORT_SEGMENT)) {
+        violations.push(...scanSupportForData(filePath));
+      }
+    }
+  }
+
   reportViolations(
     `Scanning ${files.length} test file(s) for structure violations...`,
     "Test tree follows the data/support/tests contract.",
@@ -186,7 +260,8 @@ function main(): void {
     ),
     `\nFound ${violations.length} test-structure violation(s). Layout is ` +
       `test/{unit,integration}/<module>/{data,support,tests} (+ test/shared/` +
-      `{data,support}): fixtures in data/, builders in support/, specs in tests/.`,
+      `{data,support}, test/e2e/<area>/{data,support,tests}), and app/**/test/` +
+      `{unit,integration[/pages],data,support}: fixtures in data/, builders in support/.`,
   );
 }
 

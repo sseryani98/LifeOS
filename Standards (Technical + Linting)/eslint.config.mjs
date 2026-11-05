@@ -237,6 +237,9 @@ export default [
       "**/node_modules/**",
       "**/@cds-models/**",
       "**/coverage/**",
+      "**/coverage-ui5/**",
+      "**/report-ui5/**",
+      "**/.nyc_output-ui5/**",
       "**/gen/**",
       "**/dist/**",
       "**/*.min.js",
@@ -415,6 +418,20 @@ export default [
         ...noFunctionKeyword,
         ...classOnlyModule.slice(0, 2),
       ],
+    },
+  },
+
+  // UI5 tests get the backend test block's exemptions and no more: QUnit's module/test
+  // calls sit at top level, so class-only is off; the keyword ban stays.
+  {
+    files: ["app/**/test/**/*.ts"],
+    rules: {
+      "no-magic-numbers": "off",
+      "dot-notation": "off",
+      "jsdoc/require-jsdoc": "off",
+      // A QUnit.module callback holds the whole module, as a Jest describe does.
+      "max-lines-per-function": "off",
+      "no-restricted-syntax": ["error", ...restrictedSyntax, ...noFunctionKeyword],
     },
   },
 

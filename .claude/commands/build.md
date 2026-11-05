@@ -58,9 +58,11 @@ agent, then one Opus test author per object. Add those to the count — `SPEC-02
 it 4 Red agents instead of 1, finishing sooner for more spend.
 
 Say whether smoke runs: use the BUILD_PLAN's Ships UI column where it has one (Project Tracker),
-else the story type — FRM ships UI, ENH and CNV usually do not. A story that ships only UI (no
-`srv/`, `db/` or `mcp/` files) gets no Red phase — there is no in-repo UI5 suite — so count one
-Opus agent fewer and say the FUTs are verified by `/functional-test` afterwards. For a board-less module, say the
+else the story type — FRM ships UI, ENH and CNV usually do not. **Find the module's UI5 leg:** if
+`<Module>/ui5-test-runner.json` exists, pass `hasUi5Leg: true`; a UI story then gets a
+`ui5-test-author` QUnit red beside (or instead of) the Jest red, so count it. A UI-only story in a
+module with no UI5 leg (Project Tracker until its first `app/` source lands) gets no Red phase —
+count one Opus agent fewer and say the FUTs are verified by `/functional-test` afterwards. For a board-less module, say the
 handoff marks nothing. Then proceed. Ask first only when the Red phase will fan out to more than one
 author, or when a stop condition above fired — those are the runs worth a second look before the spend.
 
@@ -69,12 +71,12 @@ author, or when a stop condition above fired — those are the runs worth a seco
 ```
 Workflow({
   name: 'build',
-  args: { storyId: 'FRM-001', moduleDir: 'Financial Planner', boardFile: 'project/SPRINT_BOARD.md' }
+  args: { storyId: 'FRM-001', moduleDir: 'Financial Planner', boardFile: 'project/SPRINT_BOARD.md', hasUi5Leg: true }
 })
 
 Workflow({
   name: 'build',
-  args: { storyId: 'SPEC-02', moduleDir: 'Project Tracker', boardFile: '' }
+  args: { storyId: 'SPEC-02', moduleDir: 'Project Tracker', boardFile: '', hasUi5Leg: false }
 })
 ```
 

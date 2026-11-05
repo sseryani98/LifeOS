@@ -43,6 +43,25 @@ export function collectFiles(dir: string, extensions: string[]): string[] {
 }
 
 /**
+ * Finds every UI5 test tree under `<root>/app`: each folder named `test`, which is
+ * `<app>/webapp/test/` for a webapp app and `<app>/test/` for one without a webapp/
+ * folder (a shell or shared library). Never descends into a found tree.
+ * @param root Module root to search from.
+ * @returns Absolute paths of every UI5 test root; [] when the module has no app/.
+ */
+export function collectUi5TestRoots(root: string): string[] {
+  const walk = (dir: string): string[] => {
+    if (!existsSync(dir)) return [];
+    return readdirSync(dir, { withFileTypes: true })
+      .filter(entry => entry.isDirectory() && !SKIP_SEGMENTS.has(entry.name))
+      .flatMap(entry =>
+        entry.name === "test" ? [join(dir, entry.name)] : walk(join(dir, entry.name)),
+      );
+  };
+  return walk(join(root, "app"));
+}
+
+/**
  * Prints the suite's shared report shape — the scan headline, then either the
  * success message or one line per violation plus a remediation hint — and
  * exits 0/1 accordingly, so every linter fails a build the same way.

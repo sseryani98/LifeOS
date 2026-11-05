@@ -44,7 +44,7 @@ The timing is Financial Planner D-330 and Project Tracker D-264.
 
 ## Never claim a run you did not make
 
-If the module has no UI5 test leg yet — no runner installed, no script that launches it — there is
+If the module has no UI5 test leg yet — no `test:ui5` script, no `ui5-test-runner.json` — there is
 no gate run to report. Write the files, mark every one **unexecuted** in your output, and say why.
 Opening the Test Starter page by hand is allowed; report what you saw as a **manual** run, never as
 a gate pass. Never report a pass, a red, or a coverage number you did not observe.
@@ -62,8 +62,10 @@ it guards; list each one in your output so the spec can adopt it. A FUT goes to 
 assertable surface and the coverage rows; §SAPUI5 holds the class shapes you are testing and which
 of them are wiring. The module's strategy governs placement and launch — read it before placing a
 file: `Financial Planner/design/TEST_STRATEGY.md` §9, `Project Tracker/design/TEST_STRATEGY.md` §15.
-Its gate-mechanics sentences are provisional; when one disagrees with the tree, trust the tree and
-say so.
+When the strategy disagrees with the tree, trust the tree and say so.
+
+A green UI5 leg proves nothing if a source file is missing from its coverage table. Check that
+your class is listed before you report a coverage number.
 
 Your prompt names the shared-standards sections for the layers the story ships. Read those by
 heading and nothing else.

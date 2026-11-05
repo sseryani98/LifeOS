@@ -6,7 +6,7 @@
 
 ## UI5
 
-- [UI5 test lint gotchas](ui5_test_lint_gotchas.md) — which shared linters scan app/**/test; no ext/ mirror, data in constants.ts, qunit types reference, prototype stubs
+- [UI5 test lint gotchas](ui5_test_lint_gotchas.md) — QUnit 2.3.2 has no assert.rejects; app/**/test ESLint block; linted layout; qunit types reference; how to run test:ui5
 
 ## Financial Planner
 

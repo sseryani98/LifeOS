@@ -142,7 +142,7 @@ const GATE_SCHEMA = {
   type: 'object',
   properties: {
     passed: { type: 'boolean', description: 'True only if all four checks exited zero' },
-    testsFailing: { type: 'boolean', description: "True if any Jest assertion failed. On the pre-implementation run this is expected to be true" },
+    testsFailing: { type: 'boolean', description: "True if any Jest assertion or UI5 (QUnit/OPA5) test failed. On the pre-implementation run this is expected to be true" },
     testHashes: {
       type: 'array',
       description: 'git hash-object output for every test file given to you, verbatim',
@@ -162,6 +162,7 @@ const GATE_SCHEMA = {
         type: 'object',
         properties: {
           check: { type: 'string', enum: ['tsc', 'lint', 'test', 'cds-build'] },
+          tier: { type: 'string', enum: ['jest', 'ui5', 'none'], description: "Which suite a 'test' failure came from: the Jest leg or the UI5 leg (test:ui5). 'none' for tsc, lint and cds-build" },
           kind: {
             type: 'string',
             enum: ['mechanical', 'logic', 'coverage'],
@@ -169,7 +170,7 @@ const GATE_SCHEMA = {
           },
           detail: { type: 'string', description: 'Raw output including file:line. Quoted, not summarized, not diagnosed' },
         },
-        required: ['check', 'kind', 'detail'],
+        required: ['check', 'tier', 'kind', 'detail'],
         additionalProperties: false,
       },
     },
@@ -243,6 +244,9 @@ const moduleDir = input.moduleDir ?? ''
 // Module-relative; empty means the module tracks no board (Project Tracker, BP-001 §13 / D-207).
 // A workflow script has no filesystem, so /build checks the file exists and passes the answer in.
 const boardFile = input.boardFile ?? ''
+// True when the module has a UI5 test leg (a ui5-test-runner.json beside its package.json); /build
+// checks the file, for the same no-filesystem reason as boardFile. Without a leg, UI5 tests cannot run.
+const hasUi5Leg = input.hasUi5Leg === true
 
 if (!storyId) {
   log('No storyId given — nothing to build.')
@@ -280,7 +284,7 @@ Module architecture, folder structure and carve-outs are in \`${moduleDir}/CLAUD
 
 ${[...layers, 'every'].flatMap(layer => STANDARDS_SECTIONS[layer].map(line => `- ${line}`)).join('\n')}
 
-Test tiers and boundaries are in \`${moduleDir}/design/TEST_STRATEGY.md\`; the enforced coverage thresholds are \`coverageThreshold\` in \`${moduleDir}/jest.config.ts\`. Sandro's standing corrections are \`feedback_*.md\` files in \`~/.claude/projects/c--Projects-Life-OS/memory/\`.`
+Test tiers and boundaries are in \`${moduleDir}/design/TEST_STRATEGY.md\`; the enforced coverage thresholds are \`coverageThreshold\` in \`${moduleDir}/jest.config.ts\`${hasUi5Leg ? `, and for the separate UI5 gate \`${moduleDir}/ui5-test-runner.json\` plus the \`--row\` arguments of its \`test:ui5\` script` : ''}. Sandro's standing corrections are \`feedback_*.md\` files in \`~/.claude/projects/c--Projects-Life-OS/memory/\`.`
 
 // The full suite runs with --coverage and a posttest report, minutes per pass on a large module.
 // Agents iterate on their own files and leave the full run to the gate, which runs it anyway.
@@ -406,13 +410,12 @@ ${brief.testPlan.map(item => `- \`${item.file}\` — ${item.purpose}`).join('\n'
 
 const briefContext = contextFor(brief.businessRules, brief.futs)
 
-// The Jest suite asserts on srv/ (and the CAP-hosted folders a module adds). A story with no `cap`
-// layer has nothing the suite can reach — Financial Planner never wrote its UI5 suite (D-80) and
-// Project Tracker ruled one out (D-195) — so its contract is the FUT matrix /functional-test runs
-// against the browser, not a red here. Writing Jest tests for app/ code either produces nothing
-// or trips the red-phase defect below. When a module gains an in-repo UI5 suite, this is where
-// its author plugs in, keyed on 'ui5'.
+// Two suites, two authors. Jest asserts on srv/ (and the CAP-hosted folders a module adds), so a
+// `cap` layer gets test-author's red. A `ui5` layer gets ui5-test-author's QUnit red on its logic
+// classes, but only in a module with a UI5 leg (FP D-321, PT D-257): a test no gate runs cannot go
+// red. Journeys are written after the page renders (FP D-330, PT D-264), so never in this phase.
 const hasJestLayer = brief.layers.includes('cap')
+const hasUi5Red = brief.layers.includes('ui5') && hasUi5Leg
 
 // A FUT's Covers line can name several objects; it belongs to the first so no case is written twice.
 const ownerOf = fut => fut.covers.split(/[,;\s]+/).find(Boolean) ?? fut.covers
@@ -550,18 +553,54 @@ ${standardsFor(brief.layers)}`,
   }
 }
 
+const writeUi5Red = () =>
+  agent(
+    `Write the failing **UI5 unit tests** for **${brief.storyId}**: QUnit on the logic classes this story
+ships under \`app/\`. This is the red of red-green-refactor for the UI5 layer; the implementer will
+make whatever you write pass.
+
+${briefContext}
+
+## Your job
+
+${redRules}
+
+QUnit only, one logic class at a time: \`model/{App}Service.ts\` intent methods, \`ext/\` logic classes,
+formatters, custom controls, freestyle controller logic. No OPA5 journey and no E2E spec in this
+phase; those are written after the page renders.${hasJestLayer ? ' Another author is writing the Jest red for the `cap` layer at this moment; `test/` outside `test/e2e/` is theirs.' : ''}
+
+## Run the UI5 leg
+
+\`cd "${moduleDir}" && npm run test:ui5\` starts its own server, runs every app's testsuite and checks
+the UI5 coverage rows, so a red run also fails on coverage. Read your pages' QUnit result in its
+output, not the exit code. Confirm your tests **fail on a missing or wrong implementation**, not on a
+module the Test Starter cannot load. Set \`confirmedFailing\` only if you saw this.
+
+${redLock}
+
+${standardsFor(brief.layers)}`,
+    { label: `red:ui5:${brief.storyId}`, phase: 'Red', model: 'opus', effort: 'high', agentType: 'ui5-test-author', schema: RED_SCHEMA },
+  )
+
 let red = { testFiles: [], summary: '', confirmedFailing: false, notes: '' }
 
-if (hasJestLayer) {
+if (hasJestLayer || hasUi5Red) {
   phase('Red')
-  red = objects.length > 1 ? await writeRedByObject() : await writeRedSingle()
+  const writeJestRed = () => (objects.length > 1 ? writeRedByObject() : writeRedSingle())
+  const reds = await parallel([...(hasJestLayer ? [writeJestRed] : []), ...(hasUi5Red ? [writeUi5Red] : [])])
 
-  if (objects.length > 1) log(`Red written by ${objects.length} parallel authors (${objects.join(', ')}) over shared scaffolding.`)
+  if (hasJestLayer && objects.length > 1) log(`Red written by ${objects.length} parallel authors (${objects.join(', ')}) over shared scaffolding.`)
 
-  if (!red) return { storyId, built: false, note: 'red agent failed' }
+  if (reds.some(result => !result)) return { storyId, built: false, note: 'red agent failed' }
+  red = {
+    testFiles: [...new Set(reds.flatMap(result => result.testFiles))],
+    summary: reds.map(result => result.summary).join('\n\n'),
+    confirmedFailing: reds.every(result => result.confirmedFailing),
+    notes: reds.map(result => result.notes).filter(Boolean).join('\n\n'),
+  }
   if (!red.testFiles.length) return { storyId, built: false, note: 'red phase wrote no tests' }
 } else {
-  log(`No cap layer (layers: ${brief.layers.join(', ')}) — no Jest red to write. The FUT contract is verified by /functional-test after the build; the gate still runs the existing suite.`)
+  log(`No red to write (layers: ${brief.layers.join(', ')}${brief.layers.includes('ui5') ? '; this module has no UI5 test leg' : ''}). The FUT contract is verified by /functional-test after the build; the gate still runs the existing suite.`)
 }
 
 phase('Gate')
@@ -587,8 +626,13 @@ per round and the loop runs out of budget.
 \`npm run lint\` is ESLint plus 22 \`lint:*\` scripts chained with \`&&\`, so it halts at the first
 failing linter. Expected. Report what you got; do not run the rest by hand.
 
-\`npm test\` has \`--coverage\` baked in, and a module may add a \`posttest\` report generator that always fires. Both normal.
-
+\`npm test\` has \`--coverage\` baked in, and a module may add a \`posttest\` report generator. Both normal.
+${hasUi5Leg ? `
+This module also has a **UI5 leg**, \`npm run test:ui5\`, which \`posttest\` runs after Jest. A failing
+Jest run skips \`posttest\`, so when Jest fails, run \`cd "${moduleDir}" && npm run test:ui5\` yourself:
+a UI5 result hidden behind a Jest failure costs the repair agent a round. Give every \`test\` failure
+its \`tier\`, \`jest\` or \`ui5\`.
+` : ''}
 ## Hash these test files
 
 ${testFiles.map(file => `- ${file}`).join('\n')}
@@ -600,8 +644,10 @@ These hashes prove the implementer did not weaken the tests to get green — nev
 ## Classify each failure
 
 - \`mechanical\` — a rule was broken and the message says how to fix it: any \`lint:*\` violation, an ESLint rule, a \`tsc\` type error, a \`cds build\` error.
-- \`logic\` — a failing Jest assertion: expected X, received Y. The implementation is wrong.
-- \`coverage\` — Jest's \`"Jest: coverage threshold ... not met"\`. The code is right, the tests do not reach it.
+- \`logic\` — a failing Jest assertion (expected X, received Y), or a failed UI5 page (the runner's
+  result box shows 🐞 and fewer passed than total). The implementation is wrong.
+- \`coverage\` — Jest's \`"Jest: coverage threshold ... not met"\`, or the UI5 leg's nyc
+  \`"Coverage for lines (…) does not meet global threshold"\`. The code is right, the tests do not reach it.
 
 \`test\` produces both \`logic\` and \`coverage\`, and they route to different agents. \`npm test\` exits
 non-zero for either, so read the output, not the exit code. If a run has both, report both.
@@ -648,7 +694,7 @@ ${redGate.failures.map(failure => `### ${failure.check} (${failure.kind})\n${fai
 
 These files are hashed. Any edit fails the gate and the story does not commit:
 
-${lockedTests()}` : '## The existing tests are frozen\n\nYou may not create, edit or delete anything under `test/`. Nothing in the suite covers `app/`, and a story without a `cap` layer adds nothing to it.'}
+${lockedTests()}` : '## The existing tests are frozen\n\nYou may not create, edit or delete anything under `test/` or any `app/**/test/` tree. This story wrote no red, so it adds nothing to either suite.'}
 
 ${red.notes ? `The test author left you a note: ${red.notes}\n` : ''}
 If a test cannot pass against any correct implementation — it contradicts its own BR, or asserts
@@ -802,9 +848,11 @@ let coverage = null
 if (gate.failures.some(failure => failure.kind === 'coverage')) {
   phase('Coverage')
 
-  const shortfall = gate.failures.filter(failure => failure.kind === 'coverage').map(failure => failure.detail).join('\n\n')
+  const shortfallOf = tier => gate.failures.filter(failure => failure.kind === 'coverage' && failure.tier === tier).map(failure => failure.detail).join('\n\n')
+  const shortfall = shortfallOf('jest')
+  const ui5Shortfall = shortfallOf('ui5')
 
-  coverage = await agent(
+  const raiseJestCoverage = () => agent(
     `Raise test coverage for **${brief.storyId}** to threshold. The implementation is correct — the
 gate is green apart from coverage. The tests just do not reach all of it.
 
@@ -835,6 +883,44 @@ While you work, measure only what you are raising: \`npx jest <test files> --cov
 ${standardsFor(brief.layers)}`,
     { label: `coverage:${brief.storyId}`, phase: 'Coverage', model: 'sonnet', effort: 'medium', agentType: 'test-author', schema: COVERAGE_SCHEMA },
   )
+
+  const raiseUi5Coverage = () => agent(
+    `Raise **UI5** test coverage for **${brief.storyId}** to threshold. The implementation is correct: the
+gate is green apart from the UI5 coverage rows. The tests just do not reach all of it.
+
+${briefContext}
+
+## The shortfall
+
+${ui5Shortfall}
+
+## Thresholds
+
+The UI5 gate is separate from Jest's. Its global row is \`coverageCheckLines\`/\`coverageCheckBranches\`
+in \`${moduleDir}/ui5-test-runner.json\`; per-folder rows are the \`--row\` arguments of the
+\`test:ui5\` script in \`${moduleDir}/package.json\`. Exclusions are the \`coverage.exclude\` list in
+each app's \`ui5-test.yaml\`. \`${moduleDir}/design/TEST_STRATEGY.md\` explains each number.
+
+Reach uncovered branches **through behaviour that matters**; list a genuinely unreachable one in
+\`unreachable\` with the reason. You may add test files. You may not change the ones from the red phase:
+
+${lockedTests()}
+
+\`cd "${moduleDir}" && npm run test:ui5\` measures it; the per-file table is in its output and in
+\`coverage-ui5/lcov-report/\`.
+
+${standardsFor(brief.layers)}`,
+    { label: `coverage:ui5:${brief.storyId}`, phase: 'Coverage', model: 'sonnet', effort: 'medium', agentType: 'ui5-test-author', schema: COVERAGE_SCHEMA },
+  )
+
+  const raised = await parallel([...(shortfall ? [raiseJestCoverage] : []), ...(ui5Shortfall ? [raiseUi5Coverage] : [])])
+  coverage = raised.some(Boolean)
+    ? {
+        testFiles: raised.flatMap(result => result?.testFiles ?? []),
+        summary: raised.map(result => result?.summary).filter(Boolean).join('\n\n'),
+        unreachable: raised.flatMap(result => result?.unreachable ?? []),
+      }
+    : null
 
   phase('Gate')
   const coverageGate = await runGate(`gate:coverage:${brief.storyId}`, red.testFiles, false)
