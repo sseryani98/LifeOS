@@ -110,14 +110,14 @@ it is the whole evidence base for this ruling:
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Target shape         | `type: "Component"`, `name: "sap.fe.core.fpm"`, `options.settings: { viewName, contextPath, navigation }` — `webapp/manifest.json:56-78`               |
 | `contextPath`        | `/ProviderConnections` — `webapp/manifest.json:70`                                                                                                     |
-| **Draft enablement** | **None.** `ProviderConnections` is a plain projection with a bound action — `Financial Planner/srv/admin-service.cds:73-75`, no `@odata.draft.enabled` |
+| **Draft enablement** | **None.** `ProviderConnections` is a plain projection with a bound action — `Financial Planner/srv/admin/entities.cds:73` + `srv/admin/actions.cds:4`, no `@odata.draft.enabled` |
 | Root view            | `sap.fe.core.rootView.NavContainer` — `webapp/manifest.json:32`                                                                                        |
 | FE libraries         | `sap.fe.core` and `sap.fe.macros`, declared **per-component** in its own manifest (`:27-28`), not page-globally                                        |
 | View                 | A hand-written XML view using `sap.fe.macros` — `webapp/view/ConnectionManager.view.xml`                                                               |
 | Controller           | Extends the shared `BasePageController`, using `DialogManager`, `Messaging` and `model/ConnectionService.ts` — the shared standards' pattern exactly   |
 
 **`@odata.draft.enabled` appears 17 times in Financial Planner's model** — 16 in
-`srv/admin-service.cds` and 1 in `srv/transaction-service.cds` — and **not one of them is the FPM
+`srv/admin/entities.cds` and 1 in `srv/transaction/entities.cds` — and **not one of them is the FPM
 app's entity**. FPM's benefits therefore arrive without drafts, which is what makes this ruling
 compatible with D-05 rather than in tension with it.
 

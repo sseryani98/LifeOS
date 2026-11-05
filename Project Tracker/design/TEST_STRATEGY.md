@@ -945,7 +945,7 @@ is which is this section's whole job.**
 
 | Rule                                                            | Script                           | Status                                                                                                         |
 | --------------------------------------------------------------- | -------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| The `{data,support,tests}` contract (§12)                       | `lint:test-structure`            | **Live** — runs in this module's 22-linter block                                                               |
+| The `{data,support,tests}` contract (§12)                       | `lint:test-structure`            | **Live** — runs in this module's 23-linter block                                                               |
 | Imports + AAA, no inline payloads, one-line JSDoc (§11)         | `lint:test-data`                 | **Live**                                                                                                       |
 | No CQL in a spec (§11)                                          | `lint:test-cql`                  | **Live**                                                                                                       |
 | The coverage **numbers** (§13.1)                                | `jest` `coverageThreshold`       | **Live** — `test` script and `coverageThreshold` since `S-00`                                                  |
@@ -1013,7 +1013,7 @@ The other four rules in this table stay enforced by nothing and are re-listed as
 ~~says "Twenty linters run" while the module wires **21**. It is already on the open `/refresh-docs`~~
 ~~list; this document cites the measured 21 (§17.1) rather than the stale twenty, and the one-word fix~~
 ~~is left to that sweep rather than taken here.~~ **Resolved 2026-11-04:** CLAUDE.md now says
-Twenty-two, and the module wires 22.
+Twenty-two, and the module wires 22 (Twenty-three / 23 since `lint:cds-layout`, 2026-11-05).
 
 ---
 

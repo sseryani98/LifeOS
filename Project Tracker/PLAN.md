@@ -627,7 +627,7 @@ sends `createdDone`; only CNV-002 does. D-54 rejected a verb-level flag as the e
 removed, and SPEC-03 BR-01 routes conversions through the service layer, not the verbs. FUT-004 is a
 **service-tier** FUT by design (D-243). A creation verb for Workspace, Engagement or Area would be a
 twelfth verb, a design ruling and not a build fix. Original finding, kept for the record:
-`srv/tracker-service.cds:32`: `createdDone` is a virtual on `TrackerService.Milestones` that no verb
+`srv/tracker/entities.cds:29` (cited as tracker-service.cds line 32 before the service split): `createdDone` is a virtual on `TrackerService.Milestones` that no verb
 accepts, so `plan_sprint` always creates a Backlog chain and FUT-004 is a service-level test (D-243).
 Workspace, Engagement and Area also have no creation verb. **Fix:** expose the path through a verb,
 or re-classify FUT-004's surface. **Severity: medium.** Found 2026-11-03.
@@ -1442,7 +1442,7 @@ Sandro ruled it a defect.
   recommendation rested on FPM forcing drafts, which is **false**: `connection-manager` is the only
   `sap.fe.core.fpm` target among the 4 app manifests under `Financial Planner/app/*/webapp/` (2 are
   `sap.fe.templates`, 1 freestyle), and it binds `contextPath: "/ProviderConnections"` — a plain
-  projection with **no `@odata.draft.enabled`** (`srv/admin-service.cds:73-75`), while 17 other
+  projection with **no `@odata.draft.enabled`** (`srv/admin/entities.cds:73`), while 17 other
   entities in that module are draft-enabled and none of them is the FPM app's. So FPM's macros and
   field machinery arrive without rebuilding D-05's escape hatch, and **D-138's second constraint
   dissolves rather than being inherited**. Drafts OFF closes `SPEC-11` BR-06's open clause — and

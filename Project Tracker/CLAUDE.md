@@ -34,7 +34,7 @@ What this means concretely:
   — Validators 100/100, Services 90/85, verbs 90/85. `./scripts/**/*.ts` still has none, and lands
   with `SPEC-09` (D-215, D-224) — though a `.ts` now sits under that glob (`migrateFinancialPlanner.ts`,
   D-251) with no band yet.
-- **`npm run lint` checks real code now.** Twenty-two linters over `srv/`, `mcp/`, `scripts/` and the
+- **`npm run lint` checks real code now.** Twenty-three linters over `srv/`, `mcp/`, `scripts/` and the
   test tree. `mcp/` was invisible to four of them until `SPEC-01` added it (D-225) — and to ESLint
   itself until 2026-10-30, when the leg became `eslint .` (that claim was phantom until then).
 - **The verb server runs as its own process.** `npm run install-mcp` writes the gitignored
@@ -87,7 +87,7 @@ populated when it is not is the thing most likely to mislead the next agent here
   Standards (Technical + Linting)/
     eslint.config.mjs        The shared rules — this module's eslint.config.mjs re-exports them
     tsconfig.base.json       Shared compilerOptions — this module's tsconfig.json extends it
-    scripts/                 The 22 shared linters, called by path from the lint:* block
+    scripts/                 The 23 shared linters, called by path from the lint:* block
 .gitignore                   CAP generated output, coverage, local Postgres artifacts
 .cdsrc.json                  assert_integrity: 'DB' — without it code-list integrity is imaginary
 .env                         GITIGNORED. The Postgres role's password, and nothing else
@@ -104,7 +104,8 @@ db/                          One folder per domain, same layout as Financial Pla
   methodology/schema.cds     Methodology + MethodologyStep
   registers/schema.cds       Defect, Decision, Activity, TestRun
 srv/
-  tracker-service.cds        TrackerService at /service/trackerSvcs — the only service (D-178)
+  tracker-service.cds        TrackerService at /service/trackerSvcs — the only service (D-178); a shell
+  tracker/                   Its members: entities.cds + annotations.cds (lint:cds-layout)
   tracker-service.ts         Entry point; registers the facade
   _i18n/                     i18n.properties (labels) + messages.properties (runtime keys)
   modules/shared/            baseFacade, logger, messagingUtility, constants

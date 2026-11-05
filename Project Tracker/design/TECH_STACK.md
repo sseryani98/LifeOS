@@ -461,7 +461,8 @@ Project Tracker/
     {common,reference,hierarchy,methodology,registers}/   The 25 persisted entities, one folder per domain (DM-001)
     data/                               Code-list + methodology library seeds (CNV-001)
   srv/
-    tracker-service.cds                 TrackerService (§5)
+    tracker-service.cds                 TrackerService (§5) — shell; members in tracker/
+    tracker/                            entities.cds + annotations.cds
     tracker-service.ts                  Entry point
     _i18n/                              i18n.properties + messages.properties
     modules/{domain}/                   Facade / Service / DataService / Validator / Mapper
