@@ -16,6 +16,7 @@
 | ---------- | --------------- | ----------------------------------------------------------------- |
 | 2026-02-17 | Sandro & Claude | Initial creation — workshop complete. D-114 through D-122 logged. |
 | 2026-11-04 | Claude          | Doc refresh: DM-001 amendments marked applied; ENH-007 notes retargeted SPEC-09 → SPEC-05; FRM-001 Goal field points at D-152 (SPEC-09's PT-picker amendment). No rule changed. |
+| 2026-11-04 | Claude          | §6 adopts two guards the code already enforced (Apply Categories needs a vendor; Split needs exactly one row), found by the first UI5 test run. Defect D-029. |
 
 ---
 
@@ -358,6 +359,8 @@ Helps the user understand why the system suggested what it did and pick alternat
 | Split: percentage outside 0–1 fraction range               | Validation error                                  | `@assert.range` on `mySharePct`        |
 | Split: my_share_amount exceeds transaction amount          | Validation error                                  | `transaction.split.amountExceedsTotal` |
 | Re-categorize: no rows selected                            | Warning — select at least one row                 | `transaction.recategorize.noSelection` |
+| Apply Categories: confirmed with no vendor chosen          | Warning — dialog stays open, nothing applied      | `msgVendorRequired` (UI5 app tier)     |
+| Split: zero or several rows selected                       | Warning — dialog does not open                    | `msgSplitOneRow` (UI5 app tier)        |
 | Vendor merge: target has same ID as source                 | Validation error                                  | `admin.vendor.mergeSameVendor`         |
 | Vendor merge: source vendor has 0 transactions             | Warning — nothing to merge (allow delete instead) | `admin.vendor.mergeEmpty`              |
 | Goal linking: goal is inactive                             | Validation error — select an active goal          | `transaction.goal.inactive`            |

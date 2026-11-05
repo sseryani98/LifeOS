@@ -1,0 +1,24 @@
+specVersion: "4.0"
+metadata:
+  name: com.financialplanner.adminmasterdata
+type: application
+customConfiguration:
+  cds-plugin-ui5:
+    mountPath: /admin-master-data/webapp
+builder:
+  customTasks:
+    - name: ui5-tooling-transpile-task
+      afterTask: replaceVersion
+server:
+  customMiddleware:
+    - name: ui5-tooling-transpile-middleware
+      afterMiddleware: compression
+      configuration:
+        # Test-run copy of ui5.yaml: instruments sources for the UI5 coverage gate.
+        # Exclusions mirror TEST_STRATEGY.md §8.4 — tests, thin ext/ handler modules,
+        # lifecycle ControllerExtensions.
+        coverage:
+          exclude:
+            - "**/test/**"
+            - "**/ext/TransactionsListActions.ts"
+            - "**/ext/controller/*.controller.ts"

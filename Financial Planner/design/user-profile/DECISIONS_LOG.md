@@ -2227,3 +2227,54 @@ All decisions made during the discovery and design phases. Each decision is refe
 - **Decision:** **C.** The UI5 unit tier joins TDD scope: QUnit for logic classes, `model/` services, formatters, custom controls and `shared/util` is written failing before the implementation, under the same red-for-the-right-reason rule as the backend. OPA5 journeys and Playwright E2E specs are written after the page renders, and their proof is a green that turns red when the asserted declaration is broken. One `ui5-test-author` agent owns all three — QUnit, OPA5 and the E2E specs under `test/e2e/`; `test-author` stays CAP-only. Sandro, 2026-11-04.
 - **Rationale:** The unit tier gets the design-through-testing benefit D-230 bought for Services, and the journey tier is not asked for a red it cannot produce honestly. The E2E specs assert the browser through the same page knowledge the journeys use, so they sit with the UI5 author even though they live under `test/`.
 - **Consequences:** Amends D-230 (frontend scope) and TECHNICAL_STANDARDS.md §13.1. `build.js` needs a UI5 Red leg for `ui5` stories and a post-implementation journey leg; that wiring is owed to Sprint 2 story 1 with the rest of the gate. Until story 1 installs `ui5-test-runner`, the agent cannot execute a test and returns its files marked unexecuted. Project Tracker adopts the same ruling as its D-264.
+
+## D-331: UI5 Gate Mechanics, as Executed (Closes Research R1)
+
+- **Context:** 2026-11-04, Sprint 2 story 1. D-321 made UI5 a gate with mechanics on paper only (`Standards (Documents)/research/gate-integration.md` §Verdict). The spike ran on the 26 QUnit tests for `app/transactions/webapp/ext/TransactionActions.ts`. The runner turned out to be 5.14.2, not v6, because Node is 22.19.0.
+- **Options:** A) The research shape: `ui5-test-runner` in remote mode against a runner-spawned `cds-serve`. B) The fallback: `ui5 serve` per app.
+- **Decision:** **A.** Each part was measured:
+  - `cds-plugin-ui5` serves and transpiles `webapp/test/` on in-memory SQLite, with no Postgres, so the fallback is unused.
+  - `ui5-test-runner.json` at the module root drives the runner. It spawns `node ../node_modules/@sap/cds/bin/serve.js` on port 4104 with `CDS_PLUGIN_UI5_MODULES` pointing every app at a test-only `ui5-test.yaml`. That file is `ui5.yaml` plus the transpile `coverage` option and the §8.4 exclusions. The keys are app **folder names**; the package name is silently ignored.
+  - The global thresholds are `coverageCheckLines`/`coverageCheckBranches` in that file.
+  - Per-folder rows are `--row "<glob>:<lines>:<branches>"` on `Standards (Technical + Linting)/scripts/runUi5Gate.ts`, which runs `nyc check-coverage --include` over the merged UI5 coverage.
+  - `scanUi5Coverage.cjs` (same folder) adds every app source to the denominator, including files no test loads. The runner's default scanner expects a UI5 directory listing that `cds-serve` never renders, so without it the gate passed on partial coverage (`[COVALL]`).
+  - The leg chains as `posttest`, after the Jest report.
+- **Rationale:** Proven, not argued:
+  - Three runs: exit 0 each, 14–16 s, 26/26, identical coverage, port released afterwards.
+  - Coverage lines map to TS: `_getApi`'s `throw` is reported at its `.ts` line 179.
+  - A 100% lines threshold fails the run with exit 1.
+  - One mutated rule fails 1 of 26 tests and the leg exits 1.
+  - Jest's `coverage/` is untouched (R5).
+- **Consequences:**
+  - The runner resolves `coverageRemoteScanner` from its own `src/` while `checkAccess` resolves it from cwd, so only an absolute path works. `runUi5Gate.ts` passes one.
+  - `npx` cannot pass `$/playwright.js` on Git Bash, and Windows cannot spawn bare `npx`; both are avoided by the config file and `node`.
+  - A failing Jest run skips `posttest`, so the build gate runs `test:ui5` itself when Jest fails.
+  - `ui5-test.yaml` duplicates `ui5.yaml` per app, and nothing checks that the two stay in step.
+  - Project Tracker has no leg until its first `app/` source lands (its D-186 reasoning).
+
+## D-332: `ui5-tooling-transpile` Pinned to 3.14.0 (Closes Research R9)
+
+- **Context:** At 3.12.0 the transpile `coverage` option instrumented nothing under `cds-plugin-ui5`. `determineResourceFSPath` hands Babel the real file path only when `process.cwd()` is the app root. Under `cds-serve`, cwd is the module root, so istanbul received virtual paths (`/ext/X.ts`), treated them as outside cwd and skipped every file, with no warning. 3.13.1 behaves the same; 3.14.0 (2026-10-25) always prefers the source-metadata path.
+- **Options:** A) Bump to 3.14.0. B) The runner's experimental `--coverage-proxy`, which instruments the transpiled AMD and reports JS lines, not TS.
+- **Decision:** **A**, pinned exactly in `package.json`; Sandro approved. The pin resolves for Project Tracker too, through the hoisted copy.
+- **Rationale:** Real absolute `.ts` keys give TS-accurate lines. `/shared/` files get their own keys, so the `app/shared/util/**` 100/100 row is measurable (R9: yes, instrumented). It also avoids a collision: under virtual paths, `shared/constants.ts` and `transactions/webapp/constants.ts` would both have been keyed `/constants.ts`.
+- **Consequences:** Raising or lowering this pin can silently zero the UI5 gate. Re-run the deliberate-fail threshold check when it moves.
+
+## D-333: UI5 Thresholds Enforced at the Ruled Numbers from Day One
+
+- **Context:** With every app's sources in the denominator (D-331), the first gate measured 15.86% lines and 19.5% branches overall, and 3.03%/17.85% on `app/shared/util/**`. Only `TransactionActions.ts` has tests.
+- **Options:** A) A ratchet: start at a floor under today's numbers, raise to D-327's as the backfill lands. B) D-327's numbers now.
+- **Decision:** **B**, Sandro, 2026-11-04. Overall `app/**` 85% lines / 80% branches; `app/shared/util/**` 100/100.
+- **Rationale:** D-327 already rejected a ratchet. A floor would have to be raised by hand, and nothing would make anyone raise it.
+- **Consequences:** Financial Planner's `npm test` exits non-zero until every app is backfilled. Every FP build story's gate reports a UI5 `coverage` failure, which routes to the Coverage phase's `ui5-test-author`. Jest is unaffected.
+
+## D-334: UI5 Test Layout Adds `support/`; QUnit Types Per File
+
+- **Context:** The smoke run put builders in `test/support/` beside `test/data/`, a folder D-326 did not name. The app `tsconfig.json` (`types: ["@sapui5/types"]`) hides the QUnit globals. `@sapui5/types` resolves to 1.150.0, whose `@types/qunit` 2.5.4 has `assert.rejects`, while the 1.136.16 runtime loads QUnit 2.3.2, which does not: three tests type-checked and then failed in the browser.
+- **Decision:**
+  - An app test tree is `testsuite.qunit.ts` at its root, `*.qunit.ts` under `unit/` or `integration/`, page objects under `integration/pages/`, fixtures in `data/` and builders in `support/`. As under `test/`, data never lives in `support/`.
+  - `lint:test-structure` enforces the layout and `test/e2e/<area>/tests/*.e2e.ts`.
+  - `lint:test-data` reaches every `*.qunit.ts` (`QUnit.test`, `opaTest`) and `*.e2e.ts`.
+  - QUnit types come from `/// <reference types="qunit" />` atop each spec, not the app `tsconfig.json`, so production source cannot see the test globals.
+  - The ESLint `app/**/test/**` block takes the backend `test/**` exemptions and no more: class-only off, keyword ban kept.
+- **Consequences:** QUnit assertions are limited to the 2.3.2 API; `assert.rejects` is unavailable. The 1.150 typings still offer what the runtime lacks, which the `@sapui5/types` range causes (memory `feedback_ui5_version`); repinning it is its own change.

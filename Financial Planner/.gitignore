@@ -20,6 +20,9 @@ logs/
 
 # Test artifacts
 coverage/
+coverage-ui5/
+report-ui5/
+.nyc_output-ui5/
 project/test-reports/
 
 # TypeScript build cache

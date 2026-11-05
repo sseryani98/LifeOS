@@ -1,0 +1,24 @@
+{
+  "url": [
+    "http://localhost:4104/transactions/webapp/test/testsuite.qunit.html"
+  ],
+  "start": "node ../node_modules/@sap/cds/bin/serve.js",
+  "startTimeout": 60000,
+  "env": [
+    "PORT=4104",
+    "CDS_PLUGIN_UI5_MODULES={\"admin-master-data\":{\"configFile\":\"ui5-test.yaml\"},\"connection-manager\":{\"configFile\":\"ui5-test.yaml\"},\"csv-import-wizard\":{\"configFile\":\"ui5-test.yaml\"},\"shared\":{\"configFile\":\"ui5-test.yaml\"},\"shell\":{\"configFile\":\"ui5-test.yaml\"},\"transactions\":{\"configFile\":\"ui5-test.yaml\"}}"
+  ],
+  "browser": "$/playwright.js",
+  "ci": true,
+  "reportDir": "report-ui5",
+  "coverage": true,
+  "coverageReportDir": "coverage-ui5",
+  "coverageTempDir": ".nyc_output-ui5",
+  "coverageReporters": [
+    "lcov",
+    "json-summary",
+    "text"
+  ],
+  "coverageCheckLines": 85,
+  "coverageCheckBranches": 80
+}

@@ -11,7 +11,8 @@
     "start": "cds-serve",
     "build": "cds build",
     "test": "jest --json --outputFile=coverage/test-results.json --coverage",
-    "posttest": "tsx \"../Standards (Technical + Linting)/scripts/generateTestReport.ts\"",
+    "posttest": "tsx \"../Standards (Technical + Linting)/scripts/generateTestReport.ts\" && npm run test:ui5",
+    "test:ui5": "tsx \"../Standards (Technical + Linting)/scripts/runUi5Gate.ts\" --row \"app/shared/util/**:100:100\"",
     "generate-key": "tsx scripts/generateKey.ts",
     "lint": "eslint . &&npm run lint:ui5 && npm run lint:i18n && npm run lint:annotations && npm run lint:filenames && npm run lint:tracking-ids && npm run lint:default-attrs && npm run lint:test-data && npm run lint:test-structure && npm run lint:test-cql && npm run lint:grouped-constants && npm run lint:frontend-constants && npm run lint:domain-types && npm run lint:comment-length && npm run lint:mapper-methods && npm run lint:messaging && npm run lint:frontend-data-access && npm run lint:frontend-controller-shape && npm run lint:control-ids && npm run lint:event-handlers && npm run lint:handler-event-types && npm run lint:facades && npm run lint:design-counts && npm run lint:doc-claims",
     "lint:ui5": "cd app/admin-master-data && ui5lint",
@@ -61,7 +62,7 @@
     "@ui5/linter": "^1.20.18",
     "@ui5/ts-interface-generator": "^0.11.1",
     "cds-plugin-ui5": "^0.17.4",
-    "ui5-tooling-transpile": "^3.11.3"
+    "ui5-tooling-transpile": "3.14.0"
   },
   "cds": {
     "requires": {
