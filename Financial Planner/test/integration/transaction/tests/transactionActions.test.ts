@@ -89,6 +89,7 @@ import {
   buildSuggestionQueries,
   buildTransactionActions,
   buildTransactionService,
+  buildTransactionSplitService,
   countLearnedPatternsForVendor,
   keyedRequest,
   countSplitsForTransaction,
@@ -141,7 +142,7 @@ beforeAll(seedSplitShareEditScenario);
 describe("Transaction actions against SQLite", () => {
   /** A percentage split must round-trip the schema — myShareAmount is amount × pct, computed and persisted for the budget engine. */
   it("splits a transaction by percentage and stores the computed share", async () => {
-    const service = buildTransactionService();
+    const service = buildTransactionSplitService();
 
     const result = await service.splitTransaction(
       actionRequest({
@@ -161,7 +162,7 @@ describe("Transaction actions against SQLite", () => {
 
   /** Re-splitting a transaction that already has a split must replace that one row, not add a second — the schema has no unique key on transaction, so a regressed insert would silently duplicate. */
   it("replaces the existing split rather than adding a second row", async () => {
-    const service = buildTransactionService();
+    const service = buildTransactionSplitService();
 
     await service.splitTransaction(
       actionRequest({
@@ -180,7 +181,7 @@ describe("Transaction actions against SQLite", () => {
 
   /** Splitting a non-existent transaction must report an error and write nothing — the data layer's not-found path must degrade safely, not throw. */
   it("reports an error when the transaction does not exist", async () => {
-    const service = buildTransactionService();
+    const service = buildTransactionSplitService();
     const request = actionRequest({
       transactionId: MISSING_SPLIT_TXN_ID,
       mySharePct: 0.5,
@@ -394,7 +395,7 @@ describe("Transaction actions against SQLite", () => {
 
   /** hasSplit is a hand-written case over split.myShareAmount driving the list's split indicator — invert it and every row shows the wrong flag with no test failing. */
   it("flags hasSplit on the projection once a split exists", async () => {
-    const service = buildTransactionService();
+    const service = buildTransactionSplitService();
     await service.splitTransaction(
       actionRequest(SPLIT_ACTION_PAYLOAD) as never,
     );

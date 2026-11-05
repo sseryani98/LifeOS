@@ -143,7 +143,7 @@ Report findings in two categories; report only where the answer is genuinely bad
 ## Structure (category \`structure\`)
 
 1. **Is this module doing too much?** Does it have more than one reason to change? Name the distinct responsibilities you found.
-2. **Is any class too big / doing too much?** Note: there is deliberately NO line-count rule in this repo — no \`max-lines\`, no \`max-classes-per-file\`, and neither CLAUDE.md nor TECHNICAL_STANDARDS.md states a class cap. So you cannot cite a rule. Argue from cohesion: what are the class's distinct reasons to change, and would splitting it make the code easier or harder to follow? A 400-line class with one job is fine. A 90-line class with three jobs is not.
+2. **Is any class too big / doing too much?** Note: \`max-lines\` (300, blank and comment lines skipped; tests, \`types.ts\` and \`constants.ts\` exempt) is an ESLint error — CODING_STANDARDS.md "A code file holds ≤300 lines" — so a file past it is citable. Below that line there is no size rule (no \`max-classes-per-file\`), so argue from cohesion: what are the class's distinct reasons to change, and would splitting it make the code easier or harder to follow? A 280-line class with one job is fine. A 90-line class with three jobs is not.
 3. **Is the Facade/Service/DataService/Validator/Mapper split honored in spirit?** \`lint:facades\` and \`lint:mapper-methods\` check the letter — you check the intent. Business logic hiding in a DataService, a Validator that queries, a Service that shape-translates below the mapper threshold, a "Mapper" doing scalar conversion (that's a utility per the shared Handler Pattern).
 
 ## Comments (category \`comments\`)
@@ -180,7 +180,7 @@ ${standards}
 
 You may read beyond the scope list to check whether something is duplicated or referenced elsewhere — that is the point of your role. Use Grep aggressively.
 
-**Duplication** (category \`duplication\`): repeated logic that should be extracted and shared. Placement rules matter: cross-module/generic → \`srv/shared/\`; domain-scoped → the domain folder; frontend cross-app → \`app/shared/\`. Two similar-looking blocks that happen to differ in intent are NOT duplication — copy-paste that will drift together is. Argue why the two sites must change together.
+**Duplication** (category \`duplication\`): repeated logic that should be extracted and shared. Placement rules matter: cross-module/generic → \`srv/modules/shared/\`; domain-scoped → the domain folder; cross-module UI5 helpers → \`Shared/app/\`; module-specific UI5 → the module's \`app/shared/\`. Two similar-looking blocks that happen to differ in intent are NOT duplication — copy-paste that will drift together is. Argue why the two sites must change together.
 
 **Dead code** (category \`dead-code\`): unreferenced exports, unreachable branches, files nothing imports, constants nobody reads, commented-out blocks. **Verify with Grep before reporting** — check the whole repo, including tests, CDS files, and XML views, since UI5 references controllers/formatters from XML by string name and CAP wires handlers by convention. A "dead" method reached only from an XML view is a false positive and the most likely way you embarrass yourself.`,
     { label: 'holistic:duplication', phase: 'Review', agentType: 'quality-reviewer', schema: FINDINGS_SCHEMA },

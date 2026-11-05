@@ -1,7 +1,7 @@
 import BasePageController from "com/financialplanner/shared/BasePageController";
 import ConnectionService from "com/financialplanner/connectionmanager/model/ConnectionService";
-import DialogManager from "com/financialplanner/shared/DialogManager";
-import Messaging from "com/financialplanner/shared/Messaging";
+import DialogManager from "com/lifeos/shared/DialogManager";
+import Messaging from "com/lifeos/shared/Messaging";
 import JSONModel from "sap/ui/model/json/JSONModel";
 import type { Table$SelectionChangeEvent } from "sap/fe/macros/table/Table";
 import type View from "sap/ui/core/mvc/View";

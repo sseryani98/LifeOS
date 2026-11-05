@@ -18,5 +18,5 @@ Checks that found real defects when mapping SPEC-nn rules to tests:
 
 Added 2026-11-04 (transaction / recurring-split run):
 
-- **Pre-filled dialogs: tests cover the untouched confirm, not the edited one.** `TransactionActions._resolveSplitAmount` decides "user overrode the suggestion" vs "untouched" by comparing to the stored suggestion; the QUnit suite only confirmed untouched suggestions. Look for the edited-field branch on any suggestion/seed flow.
+- **Pre-filled dialogs: tests cover the untouched confirm, not the edited one.** `SplitTerms.resolveShares` decides "user overrode the suggestion" vs "untouched" by comparing to the stored suggestion; the QUnit suite only confirmed untouched suggestions. Look for the edited-field branch on any suggestion/seed flow.
 - **`db/data/` holds no Transaction or TransactionSplit CSVs** (checked 2026-11-04), and journeys seed only from `db/data`. A FRM-001 split/suggestion journey therefore needs a `db/` seed change first: `needsSourceChange: true`.

@@ -1,0 +1,5 @@
+node_modules/
+coverage-ui5/
+report-ui5/
+.nyc_output-ui5/
+*.tsbuildinfo

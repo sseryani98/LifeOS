@@ -4,11 +4,10 @@ import { VerbError } from "../../../../mcp/verbs/shared/verbError.js";
 import {
   ACTOR_FIXTURE,
   CHAIN_FIXTURE,
-  FINISHED_CHAIN,
-  FIXTURE_STORY_ID,
   GUARD_KEYS,
   OPEN_BUILD_STEPS,
   SUBTASK_FIXTURE,
+  UNSTAMPED_ROWS,
 } from "../data/verbFixtures.js";
 import { buildRecordingRunner } from "../support/fakeRunner.js";
 
@@ -124,27 +123,12 @@ describe("stage guards", () => {
     expect(StageGuards.buildOpenSubtaskWarnings([])).toEqual([]);
   });
 
-  /** An unknown code must list what is addressable, or the caller guesses at the next call. */
-  it("lists the addressable codes when a stage or a step does not resolve", () => {
-    expect(StageGuards.resolveStage(CHAIN_FIXTURE, "commit")).toBe(COMMIT);
-    expect(() => StageGuards.resolveStage(CHAIN_FIXTURE, "nope")).toThrow(VerbError);
-    expect(StageGuards.resolveSubtask(SUBTASK_FIXTURE, "handoff").ID).toBe("sub-handoff");
-    expect(() => StageGuards.resolveSubtask(SUBTASK_FIXTURE, "smoke")).toThrow(VerbError);
-  });
+  /** A row whose timestamp was never stamped must still be refused by name, not with "null" in the message. */
+  it("refuses an already-closed or running row even when its timestamp is missing", () => {
+    const named = (code: string) => expect.objectContaining({ code, message: expect.not.stringContaining("null") });
 
-  /** A blank list read "Valid codes: ." — a template fault, not the fact that nothing is addressable. */
-  it("says none when the stage or the chain has nothing to address", () => {
-    expect(() => StageGuards.resolveSubtask([], "gate")).toThrow(/Valid codes: none\./);
-    expect(() => StageGuards.resolveStage([], "commit")).toThrow(/Valid codes: none\./);
-  });
-
-  /** The next action is the first incomplete stage regardless of kind, and null once none remains. */
-  it("resolves the next action in position order, and null on a finished chain", () => {
-    const next = StageGuards.resolveNextAction(CHAIN_FIXTURE, FIXTURE_STORY_ID);
-
-    expect(next?.stepCode).toBe("human-review");
-    expect(next?.driver).toBe("/human-review-loop");
-    expect(next?.storyId).toBe(FIXTURE_STORY_ID);
-    expect(StageGuards.resolveNextAction(FINISHED_CHAIN, FIXTURE_STORY_ID)).toBeNull();
+    expect(() => StageGuards.assertStageNotComplete(UNSTAMPED_ROWS.COMPLETE_STAGE)).toThrow(named(GUARD_KEYS.ALREADY_COMPLETE));
+    expect(() => StageGuards.assertStageNotInProgress(UNSTAMPED_ROWS.RUNNING_STAGE)).toThrow(named("wfl.stage.alreadyStarted"));
+    expect(() => StageGuards.assertSubtaskNotComplete(UNSTAMPED_ROWS.COMPLETE_STEP)).toThrow(named("wfl.subtask.alreadyComplete"));
   });
 });

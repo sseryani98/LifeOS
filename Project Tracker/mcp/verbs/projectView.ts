@@ -5,7 +5,7 @@ import { MilestoneStatus } from "../../srv/modules/tracker/milestoneStatus.js";
 import { HTTP, READ_LIMITS, VERB_KEYS } from "./shared/constants.js";
 import { Envelope } from "./shared/envelope.js";
 import { VerbRunner } from "./shared/runVerb.js";
-import { StageGuards } from "./shared/stageGuards.js";
+import { TargetResolver } from "./shared/targetResolver.js";
 import type { TrackerGateway } from "./shared/trackerGateway.js";
 import type {
   ComposedInitiative,
@@ -133,7 +133,7 @@ export class ProjectViewVerb implements VerbDefinition {
   ): NextAction | null {
     for (const initiative of initiatives) {
       for (const story of initiative.milestones) {
-        const resolved = StageGuards.resolveNextAction(
+        const resolved = TargetResolver.resolveNextAction(
           story.chain,
           story.storyId,
         );
@@ -155,7 +155,7 @@ export class ProjectViewVerb implements VerbDefinition {
     gateway: TrackerGateway,
     slug?: string,
   ): Promise<WorkspaceRow> {
-    if (slug?.trim()) return StageGuards.resolveWorkspace(gateway, slug);
+    if (slug?.trim()) return TargetResolver.resolveWorkspace(gateway, slug);
     const workspaces = await gateway.readWorkspaces();
     if (workspaces.length === 0) {
       Envelope.rejectVerb(HTTP.NOT_FOUND, VERB_KEYS.TARGET_NOT_FOUND, [

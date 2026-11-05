@@ -17,6 +17,7 @@
 | 2026-02-20 | Claude          | SPEC-21 amendment: `app/trophy-case/` changed from Freestyle to Fiori Elements ALP + Object Page (D-279).                                                                                                                                                               |
 | 2026-02-20 | Claude          | Status → Approved. Step 12 complete — all 21 specs approved.                                                                                                                                                                                                            |
 | 2026-07-15 | Sandro & Claude | Restructure — project is now an npm workspace package in the Life OS monorepo. §7: shared ESLint config, tsconfig.base.json, and lint + test-report scripts moved to Standards (Technical + Linting)/; shared devDeps and the only lockfile at the workspace root.      |
+| 2026-11-05 | Claude          | refresh-docs: Shared/ lifeos-shared helpers, max-lines, file splits.                                                                                                                                                                                                    |
 
 ---
 
@@ -141,6 +142,7 @@ Life OS/
 │   ├── eslint.config.mjs                    ← The shared ESLint rules (§10 of TECHNICAL_STANDARDS.md)
 │   ├── tsconfig.base.json                   ← Shared compilerOptions (§4.1 of TECHNICAL_STANDARDS.md)
 │   └── scripts/                             ← Shared lint scripts + generateTestReport.ts
+├── Shared/                                  ← lifeos-shared UI5 helpers (DialogManager, Messaging, I18n), served at /lifeos-shared
 └── Financial Planner/                       ← This project — tree below
 ```
 
@@ -190,13 +192,17 @@ Financial Planner/
 │   ├── modules/
 │   │   ├── shared/
 │   │   │   ├── constants.ts                 ← App-wide constants
-│   │   │   ├── BaseFacade.ts                ← wrapHandler, logging
-│   │   │   ├── BaseService.ts               ← connectAndRun pattern
-│   │   │   ├── Logger.ts                    ← Structured logging with file output
-│   │   │   └── MessagingUtility.ts          ← i18n message helper for req.error/reject
+│   │   │   ├── baseFacade.ts                ← wrapHandler, logging
+│   │   │   ├── baseService.ts               ← connectAndRun pattern
+│   │   │   ├── logger.ts                    ← Structured logging with file output
+│   │   │   ├── messagingUtility.ts          ← i18n message helper for req.error/reject
+│   │   │   ├── encryptionUtility.ts
+│   │   │   ├── dateTimeUtility.ts
+│   │   │   └── currencyUtility.ts
 │   │   ├── transaction/
 │   │   │   ├── transactionFacade.ts
 │   │   │   ├── transactionService.ts
+│   │   │   ├── transactionSplitService.ts
 │   │   │   ├── transactionDataService.ts
 │   │   │   ├── transactionValidator.ts
 │   │   │   └── transactionMapper.ts
@@ -221,22 +227,27 @@ Financial Planner/
 │   │   │   ├── RecommendationFacade.ts
 │   │   │   ├── RecommendationService.ts
 │   │   │   └── RecommendationValidator.ts
-│   │   └── integration/
-│   │       ├── SimpleFINIntegrationService.ts   ← INT-001
-│   │       ├── CSVImportService.ts              ← INT-002
-│   │       └── SchedulingService.ts             ← Cron jobs
-│   └── util/
-│       ├── EncryptionUtility.ts
-│       ├── DateTimeUtility.ts
-│       └── CurrencyUtility.ts
+│   │   └── ingestion/
+│   │       ├── simpleFinService.ts              ← INT-001
+│   │       ├── simpleFinIngestionService.ts     ← INT-001
+│   │       ├── simpleFinAlertService.ts         ← INT-001
+│   │       ├── csvImportService.ts              ← INT-002
+│   │       └── schedulingService.ts             ← Cron jobs
 ├── app/
-│   ├── shared/                              ← Shared across freestyle apps
+│   ├── shared/                              ← Shared across freestyle apps (DialogManager, Messaging, I18n: repo-root Shared/app/)
 │   │   ├── BaseController.ts
+│   │   ├── BasePageController.ts
+│   │   ├── constants.ts
 │   │   ├── controls/
 │   │   │   ├── VizFrameCard.ts
 │   │   │   └── ApexChartCard.ts
+│   │   ├── css/
+│   │   │   └── theme-overrides.css
 │   │   └── util/
-│   │       └── formatter.ts                 ← Shared formatters (currency, date, status)
+│   │       ├── formatter.ts                 ← Shared formatters (currency, date, status)
+│   │       ├── Navigation.ts
+│   │       ├── ObjectPageParser.ts
+│   │       └── PercentFractionType.ts
 │   ├── transactions/                        ← FRM-001 (Fiori Elements List Report)
 │   │   ├── webapp/
 │   │   │   ├── manifest.json
@@ -255,7 +266,7 @@ Financial Planner/
 │   ├── card-onboarding/                     ← FRM-006 (Freestyle Wizard)
 │   ├── income/                              ← FRM-007 (Fiori Elements)
 │   ├── goals/                               ← FRM-008 (Fiori Elements)
-│   ├── master-data/                         ← FRM-009 (Fiori Elements)
+│   ├── admin-master-data/                   ← FRM-009 (Fiori Elements)
 │   ├── connections/                         ← FRM-010 (Fiori Elements)
 │   ├── financial-picture/                   ← FRM-011 (Fiori Elements)
 │   ├── churnboard/                          ← RPT-001 (Freestyle Dashboard)

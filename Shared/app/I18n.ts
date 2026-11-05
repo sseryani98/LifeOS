@@ -1,4 +1,4 @@
-import type { I18nModelSource } from "com/financialplanner/shared/types";
+import type { I18nModelSource } from "com/lifeos/shared/types";
 import type ResourceBundle from "sap/base/i18n/ResourceBundle";
 import type ResourceModel from "sap/ui/model/resource/ResourceModel";
 
@@ -16,7 +16,11 @@ export default class I18n {
    * @param args values for the text's {0}, {1}… placeholders
    * @returns the resolved text, or "" when the key is missing
    */
-  public static getText(source: I18nModelSource, key: string, args?: string[]): string {
+  public static getText(
+    source: I18nModelSource,
+    key: string,
+    args?: string[],
+  ): string {
     const model = source.getModel("i18n") as ResourceModel;
     const bundle = model.getResourceBundle() as ResourceBundle;
     return bundle.getText(key, args) ?? "";

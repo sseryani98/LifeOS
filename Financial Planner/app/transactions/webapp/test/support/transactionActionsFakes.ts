@@ -1,8 +1,8 @@
-// Drives TransactionActions with no FE or backend: a ListReport ExtensionAPI stand-in
+// Drives the Transactions action classes with no FE or backend: a ListReport ExtensionAPI stand-in
 // and prototype stubs on the collaborators it news up per call. The real DialogManager
 // runs, so dialog ids and fragment names are exercised.
 
-import Messaging from "com/financialplanner/shared/Messaging";
+import Messaging from "com/lifeos/shared/Messaging";
 import TransactionsService from "com/financialplanner/transactions/model/TransactionsService";
 import type { SplitSuggestion } from "com/financialplanner/transactions/model/types";
 import type ExtensionAPI from "sap/fe/templates/ListReport/ExtensionAPI";
@@ -128,7 +128,7 @@ export const buildTwoDecimalPercents = (): string[] => {
 
 /**
  * Replaces the Messaging and TransactionsService prototypes with recorders, so the
- * instances TransactionActions builds per call are observable. Call restore() in afterEach.
+ * instances an action class builds are observable. Call restore() in afterEach.
  * The recurring split suggestion and the row's own split default to none.
  * @returns the recorded calls, failure and suggestion switches, and restore()
  */

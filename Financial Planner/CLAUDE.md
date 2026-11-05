@@ -33,6 +33,7 @@ Personal financial management system for a Canadian credit card churner. TypeScr
     eslint.config.mjs        The shared rules — this module's eslint.config.mjs re-exports them
     tsconfig.base.json       Shared compilerOptions — this module's tsconfig.json extends it
     scripts/                 The shared lint scripts + generateTestReport.ts, called by path
+  Shared/                    lifeos-shared UI5 helpers (DialogManager, Messaging, I18n) — a devDependency served at /lifeos-shared
 db/                          CDS entity models (9 domain folders)
   common/                    Shared aspects + enums.cds (all enum types)
   reference/schema.cds       26 reference entities

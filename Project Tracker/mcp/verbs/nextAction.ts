@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { VerbRunner } from "./shared/runVerb.js";
-import { StageGuards } from "./shared/stageGuards.js";
+import { TargetResolver } from "./shared/targetResolver.js";
 import type { TrackerGateway } from "./shared/trackerGateway.js";
 import type {
   NextAction,
@@ -44,13 +44,13 @@ export class NextActionVerb implements VerbDefinition {
   async run(ctx: VerbContext, input: NextActionInput): Promise<VerbResult> {
     return VerbRunner.runReadVerb(ctx, async gateway => {
       if (input.story?.trim()) {
-        const { milestone } = await StageGuards.resolveStoryContext(
+        const { milestone } = await TargetResolver.resolveStoryContext(
           gateway,
           input.story,
         );
         const chain = await gateway.readChain(milestone.ID);
         return {
-          nextAction: StageGuards.resolveNextAction(chain, milestone.storyId),
+          nextAction: TargetResolver.resolveNextAction(chain, milestone.storyId),
         };
       }
       return { nextAction: await this._selectCandidateAction(gateway) };
@@ -69,7 +69,7 @@ export class NextActionVerb implements VerbDefinition {
     for (const workspace of await gateway.readWorkspaces()) {
       for (const milestone of await gateway.readMilestones(workspace.ID)) {
         const chain = await gateway.readChain(milestone.ID);
-        const resolved = StageGuards.resolveNextAction(chain, milestone.storyId);
+        const resolved = TargetResolver.resolveNextAction(chain, milestone.storyId);
         if (resolved) return resolved;
       }
     }

@@ -11,6 +11,7 @@ import { DeduplicationService } from "./modules/ingestion/deduplicationService.j
 import { TransactionDataService } from "./modules/transaction/transactionDataService.js";
 import { TransactionFacade } from "./modules/transaction/transactionFacade.js";
 import { TransactionService as TransactionEngine } from "./modules/transaction/transactionService.js";
+import { TransactionSplitService } from "./modules/transaction/transactionSplitService.js";
 
 /** TransactionService — Transaction ingestion, categorization, splitting, listing. */
 export default class TransactionService extends cds.ApplicationService {
@@ -35,12 +36,11 @@ export default class TransactionService extends cds.ApplicationService {
       csvImportService,
       csvImportSaveService,
     ).registerHandlers();
+    const transactionDataService = new TransactionDataService();
     new TransactionFacade(
       this,
-      new TransactionEngine(
-        new TransactionDataService(),
-        categorizationService,
-      ),
+      new TransactionEngine(transactionDataService, categorizationService),
+      new TransactionSplitService(transactionDataService),
     ).registerHandlers();
     return super.init();
   }

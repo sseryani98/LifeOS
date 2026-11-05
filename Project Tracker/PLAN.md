@@ -640,7 +640,7 @@ valid Actor codes, or map `23503` on the actor FK to that error. **Severity: hig
 2026-11-03, while fixing item 7.
 
 **11. FIXED 2026-11-03 — The story-not-found message lists the workspace slug as the valid codes.**
-`mcp/verbs/shared/stageGuards.ts:361`: `resolveStoryContext` passes `workspace.slug` as the
+`mcp/verbs/shared/targetResolver.ts:118`: `resolveStoryContext` passes `workspace.slug` as the
 `{2}` "Valid codes" argument of `verb.target.notFound`, so the message reads
 `Valid codes: scratch-ws.` **Fix:** pass the workspace's story ids, or a message key that names the
 workspace instead of listing codes. **Severity: low.** Found 2026-11-03, while fixing item 6.
@@ -669,7 +669,7 @@ one story in the zod input shape, update `test/protocol/data/toolSurface.ts`, an
 `No defect named "<id>". Valid codes: .` **Fix:** use a key that does not promise a code list
 (defects are addressed by UUID). **Severity: low.** Found 2026-11-03.
 
-**16. FIXED 2026-11-03 — A subtask named under the wrong stage lists nothing.** `mcp/verbs/shared/stageGuards.ts:400`
+**16. FIXED 2026-11-03 — A subtask named under the wrong stage lists nothing.** `mcp/verbs/shared/targetResolver.ts:141`
 `resolveSubtask`: `complete_subtask(stage "code-quality", subtask "gate")` returns
 `No step named "gate". Valid codes: .`, because `code-quality` has no subtasks. **Fix:** render
 "none" through `formatValidCodes`, as item 11 did, or say the stage has no subtasks.
@@ -1466,7 +1466,7 @@ Sandro ruled it a defect.
   theatre. **The cross-module debt is wider than D-143 said (D-147)**: the shared standards mandate
   `Messaging`, `BasePageController` and `DialogManager`, which live in the
   **`com.financialplanner.shared`** library — so the dependency reaches `app/shared/` as well as the
-  shell, and it is forced by the standards rather than chosen. **`ObjectPageLayout`, not a card grid
+  shell, and it is forced by the standards rather than chosen. (2026-11-05: Messaging and DialogManager since moved to `com.lifeos.shared`, `Shared/app/`.) **`ObjectPageLayout`, not a card grid
   (D-148)** — the four Reports are not peer cards, because one of them is a page header.
 - **Two stated "none"s, both rulings on D-134's precedent.** **No charts (D-150)**: the grep across the
   four UI specs matches 7 lines, **five of which are the word `paragraph`** matching on `graph`, and

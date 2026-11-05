@@ -7,6 +7,7 @@ import { ACTIVITY_KINDS, HTTP, VERB_KEYS } from "./shared/constants.js";
 import { Envelope } from "./shared/envelope.js";
 import { VerbRunner } from "./shared/runVerb.js";
 import { StageGuards } from "./shared/stageGuards.js";
+import { TargetResolver } from "./shared/targetResolver.js";
 import type {
   ReopenStageInput,
   VerbContext,
@@ -48,12 +49,12 @@ export class ReopenStageVerb implements VerbDefinition {
    */
   async run(ctx: VerbContext, input: ReopenStageInput): Promise<VerbResult> {
     return VerbRunner.runWriteVerb(ctx, async (gateway, timestamp) => {
-      const { workspace, milestone } = await StageGuards.resolveStoryContext(
+      const { workspace, milestone } = await TargetResolver.resolveStoryContext(
         gateway,
         input.story,
       );
       const chain = await gateway.readChain(milestone.ID);
-      const task = StageGuards.resolveStage(chain, input.stage);
+      const task = TargetResolver.resolveStage(chain, input.stage);
       // The stage's state outranks the reason: a caller reopening the wrong
       // stage learns that before being asked to explain itself.
       StageGuards.assertStageComplete(task);
@@ -81,7 +82,7 @@ export class ReopenStageVerb implements VerbDefinition {
       );
       const updated = await gateway.readChain(milestone.ID);
       return {
-        nextAction: StageGuards.resolveNextAction(updated, milestone.storyId),
+        nextAction: TargetResolver.resolveNextAction(updated, milestone.storyId),
       };
     });
   }

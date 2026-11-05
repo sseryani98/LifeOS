@@ -128,6 +128,16 @@ export const OPEN_BUILD_STEPS = ["brief", "red", "implement", "gate"].map(
   }),
 );
 
+/**
+ * A closed stage, a running stage and a closed step whose timestamp was never
+ * stamped, so a guard that prints the raw null into its rejection shows.
+ */
+export const UNSTAMPED_ROWS = {
+  COMPLETE_STAGE: { ...CHAIN_FIXTURE[0], completedAt: null },
+  RUNNING_STAGE: { ...CHAIN_FIXTURE[0], status_code: "inProgress", startedAt: null },
+  COMPLETE_STEP: { ...SUBTASK_FIXTURE[0], completedAt: null },
+};
+
 /** The story identifier the resolver stamps onto a next action. */
 export const FIXTURE_STORY_ID = "CNV-001";
 

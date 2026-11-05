@@ -6,6 +6,7 @@ import { Addressing } from "./shared/addressing.js";
 import { ACTIVITY_KINDS } from "./shared/constants.js";
 import { VerbRunner } from "./shared/runVerb.js";
 import { StageGuards } from "./shared/stageGuards.js";
+import { TargetResolver } from "./shared/targetResolver.js";
 import type {
   CompleteStageInput,
   VerbContext,
@@ -47,12 +48,12 @@ export class CompleteStageVerb implements VerbDefinition {
    */
   async run(ctx: VerbContext, input: CompleteStageInput): Promise<VerbResult> {
     return VerbRunner.runWriteVerb(ctx, async (gateway, timestamp) => {
-      const { workspace, milestone } = await StageGuards.resolveStoryContext(
+      const { workspace, milestone } = await TargetResolver.resolveStoryContext(
         gateway,
         input.story,
       );
       const chain = await gateway.readChain(milestone.ID);
-      const task = StageGuards.resolveStage(chain, input.stage);
+      const task = TargetResolver.resolveStage(chain, input.stage);
       // The order is the answer, not the set: where more than one condition
       // holds, the first to fire is what the caller is told.
       StageGuards.assertStageNotBlocked(chain, task);
@@ -83,7 +84,7 @@ export class CompleteStageVerb implements VerbDefinition {
       );
       const updated = await gateway.readChain(milestone.ID);
       return {
-        nextAction: StageGuards.resolveNextAction(updated, milestone.storyId),
+        nextAction: TargetResolver.resolveNextAction(updated, milestone.storyId),
         warnings,
       };
     });

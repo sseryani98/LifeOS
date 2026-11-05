@@ -12,6 +12,7 @@ export default {
     loader: {
       paths: {
         "com/financialplanner/shared": "/shared/",
+        "com/lifeos/shared": "/lifeos-shared/",
       },
     },
   },

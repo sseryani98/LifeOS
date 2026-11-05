@@ -6,6 +6,7 @@ import { Addressing } from "./shared/addressing.js";
 import { ACTIVITY_KINDS } from "./shared/constants.js";
 import { VerbRunner } from "./shared/runVerb.js";
 import { StageGuards } from "./shared/stageGuards.js";
+import { TargetResolver } from "./shared/targetResolver.js";
 import type {
   CompleteSubtaskInput,
   VerbContext,
@@ -43,14 +44,14 @@ export class CompleteSubtaskVerb implements VerbDefinition {
    */
   async run(ctx: VerbContext, input: CompleteSubtaskInput): Promise<VerbResult> {
     return VerbRunner.runWriteVerb(ctx, async (gateway, timestamp) => {
-      const { workspace, milestone } = await StageGuards.resolveStoryContext(
+      const { workspace, milestone } = await TargetResolver.resolveStoryContext(
         gateway,
         input.story,
       );
       const chain = await gateway.readChain(milestone.ID);
-      const task = StageGuards.resolveStage(chain, input.stage);
+      const task = TargetResolver.resolveStage(chain, input.stage);
       const subtasks = await gateway.readSubtasks(task.ID);
-      const subtask = StageGuards.resolveSubtask(subtasks, input.subtask);
+      const subtask = TargetResolver.resolveSubtask(subtasks, input.subtask);
       StageGuards.assertSubtaskStageStarted(task, subtask);
       StageGuards.assertSubtaskNotBlocked(subtasks, subtask);
       StageGuards.assertSubtaskNotComplete(subtask);
@@ -73,7 +74,7 @@ export class CompleteSubtaskVerb implements VerbDefinition {
         timestamp,
       );
       return {
-        nextAction: StageGuards.resolveNextAction(chain, milestone.storyId),
+        nextAction: TargetResolver.resolveNextAction(chain, milestone.storyId),
       };
     });
   }

@@ -1,8 +1,9 @@
-import TransactionActions from "com/financialplanner/transactions/ext/TransactionActions";
+import CategorizationActions from "com/financialplanner/transactions/ext/CategorizationActions";
+import SplitActions from "com/financialplanner/transactions/ext/SplitActions";
 import type ExtensionAPI from "sap/fe/templates/ListReport/ExtensionAPI";
 
 /**
- * FE custom-action handler surface for the Transactions ListReport. 
+ * FE custom-action handler surface for the Transactions ListReport.
  */
 export default {
   /**
@@ -10,7 +11,7 @@ export default {
    * @returns resolves once the dialog is open
    */
   onApplyCategories(this: ExtensionAPI): Promise<void> {
-    return TransactionActions.resolveInstance().openApplyDialog(this);
+    return CategorizationActions.resolveForPage(this).openApplyDialog();
   },
 
   /**
@@ -18,7 +19,7 @@ export default {
    * @returns resolves once the re-run completes
    */
   onReCategorize(this: ExtensionAPI): Promise<void> {
-    return TransactionActions.resolveInstance().runReCategorization(this);
+    return CategorizationActions.resolveForPage(this).runReCategorization();
   },
 
   /**
@@ -26,6 +27,6 @@ export default {
    * @returns resolves once the dialog is open
    */
   onSplit(this: ExtensionAPI): Promise<void> {
-    return TransactionActions.resolveInstance().openSplitDialog(this);
+    return SplitActions.resolveForPage(this).openSplitDialog();
   },
 };

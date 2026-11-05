@@ -1,16 +1,13 @@
 import BaseController from "com/financialplanner/shared/BaseController";
-import ClearPropagation from "com/financialplanner/csvimportwizard/model/ClearPropagation";
 import CsvImportWizardService from "com/financialplanner/csvimportwizard/model/CsvImportWizardService";
-import DialogManager from "com/financialplanner/shared/DialogManager";
-import Messaging from "com/financialplanner/shared/Messaging";
-import JSONModel from "sap/ui/model/json/JSONModel";
+import ReviewState from "com/financialplanner/csvimportwizard/model/ReviewState";
+import DialogManager from "com/lifeos/shared/DialogManager";
+import Messaging from "com/lifeos/shared/Messaging";
 import {
   CONTROL_ID,
   CREATE_DIALOG,
   CREATE_DIALOG_FRAGMENT,
-  DEDUP_OUTCOME,
   DUPLICATE_DECISION,
-  PERCENT_MAX,
 } from "com/financialplanner/csvimportwizard/model/constants";
 import type { Button$PressEvent } from "sap/m/Button";
 import type Table from "sap/m/Table";
@@ -18,31 +15,30 @@ import type Wizard from "sap/m/Wizard";
 import type View from "sap/ui/core/mvc/View";
 import type UIComponent from "sap/ui/core/UIComponent";
 import type Context from "sap/ui/model/Context";
+import type JSONModel from "sap/ui/model/json/JSONModel";
 import type ODataModel from "sap/ui/model/odata/v4/ODataModel";
 import type { FileUploader$ChangeEvent } from "sap/ui/unified/FileUploader";
 import type {
   ClassifiedRow,
   DuplicateRow,
   ExcludedEditRow,
-  ExcludedRow,
   ImportSummary,
   NewRow,
-  ParseResult,
   ParsedFile,
-  SaveRow,
 } from "com/financialplanner/csvimportwizard/model/types";
 
 /**
  * CSV Import Wizard controller. Drives the three-step flow: upload + card
  * selection, tabbed review (New / Potential Duplicates / Excluded) with batch
- * categorization, and confirm + save. 
+ * categorization, and confirm + save. The review buckets themselves live in
+ * ReviewState; this controller routes events to it.
  *
  * @namespace com.financialplanner.csvimportwizard.controller
  */
 export default class CsvImportWizard extends BaseController {
+  private _review!: ReviewState;
   private _service!: CsvImportWizardService;
   private _createEntitySet = "";
-  private readonly _clearing = new ClearPropagation();
   private readonly _dialogs = new DialogManager(this);
   private readonly _messages = new Messaging(this);
 
@@ -51,9 +47,11 @@ export default class CsvImportWizard extends BaseController {
    */
   public onInit(): void {
     const view = this.getView() as View;
-    view.setModel(this._buildInitialState(), "ui");
+    const state = ReviewState.buildInitialModel();
+    view.setModel(state, "ui");
     const model = (this.getOwnerComponent() as UIComponent).getModel() as ODataModel;
     this._service = new CsvImportWizardService(model);
+    this._review = new ReviewState(state, this._service);
     this._setupDropZone();
   }
 
@@ -89,9 +87,7 @@ export default class CsvImportWizard extends BaseController {
    * @param event the press event from the row's Clear button
    */
   public onButtonClearRowPress(event: Button$PressEvent): void {
-    const row = this._getRowContext(event).getObject() as NewRow;
-    this._clearing.clearRow(row, this._getState().getProperty("/newRows") as NewRow[]);
-    this._refreshNewRows();
+    this._review.clearRow(this._getRowContext(event).getObject() as NewRow);
   }
 
   /**
@@ -100,9 +96,7 @@ export default class CsvImportWizard extends BaseController {
    * @param event the press event from the row's Undo button
    */
   public onButtonUndoRowPress(event: Button$PressEvent): void {
-    const row = this._getRowContext(event).getObject() as NewRow;
-    this._clearing.restoreRow(row);
-    this._refreshNewRows();
+    this._review.restoreRow(this._getRowContext(event).getObject() as NewRow);
   }
 
   /**
@@ -110,18 +104,7 @@ export default class CsvImportWizard extends BaseController {
    * @param event the press event from the row's Clear-Matching button
    */
   public onButtonClearMatchingPress(event: Button$PressEvent): void {
-    const row = this._getRowContext(event).getObject() as NewRow;
-    const rows = this._getState().getProperty("/newRows") as NewRow[];
-    rows
-      .filter(
-        candidate =>
-          candidate.rawDescription === row.rawDescription &&
-          this._clearing.isCategorized(candidate),
-      )
-      .forEach(candidate => {
-        candidate.cleared = true;
-      });
-    this._refreshNewRows();
+    this._review.clearMatchingRows(this._getRowContext(event).getObject() as NewRow);
   }
 
   /**
@@ -134,14 +117,10 @@ export default class CsvImportWizard extends BaseController {
       this._messages.showWarning("msgSelectAtLeastTwo");
       return;
     }
-    const source = contexts[0].getObject() as NewRow;
-    contexts.slice(1).forEach(context => {
-      const target = context.getObject() as NewRow;
-      target.vendor_ID = source.vendor_ID;
-      target.purchaseType_ID = source.purchaseType_ID;
-      target.earningCategory_ID = source.earningCategory_ID;
-    });
-    this._refreshNewRows();
+    this._review.copyCategorization(
+      contexts[0].getObject() as NewRow,
+      contexts.slice(1).map(context => context.getObject() as NewRow),
+    );
   }
 
   /**
@@ -228,7 +207,7 @@ export default class CsvImportWizard extends BaseController {
    */
   public onButtonSaveImportPress(): void {
     const state = this._getState();
-    const rows = this._buildSaveRows();
+    const rows = this._review.buildSaveRows();
     if (rows.length === 0) {
       this._messages.showWarning("msgNothingToImport");
       return;
@@ -268,51 +247,6 @@ export default class CsvImportWizard extends BaseController {
   }
 
   /**
-   * Builds the initial UI-state model with empty review buckets.
-   * @returns the seeded "ui" JSON model
-   */
-  private _buildInitialState(): JSONModel {
-    return new JSONModel({
-      selectedCard: "",
-      hasSuppCards: false,
-      files: [],
-      fileNames: "",
-      canParse: false,
-      parsed: false,
-      configName: "",
-      newRows: [],
-      duplicateRows: [],
-      excludedRows: [],
-      newCount: 0,
-      duplicateCount: 0,
-      excludedCount: 0,
-      clearedCount: 0,
-      skippedCount: 0,
-      totalAmount: 0,
-      progressPercent: 0,
-      newRefName: "",
-      saving: false,
-      summary: null,
-    });
-  }
-
-  /**
-   * Gathers every cleared New row and every duplicate marked for import into the
-   * save payload.
-   * @returns the rows to persist
-   */
-  private _buildSaveRows(): SaveRow[] {
-    const state = this._getState();
-    const newRows = (state.getProperty("/newRows") as NewRow[])
-      .filter(row => row.cleared)
-      .map(row => this._toSaveRow(row));
-    const overrides = (state.getProperty("/duplicateRows") as DuplicateRow[])
-      .filter(row => row.decision === DUPLICATE_DECISION.IMPORT)
-      .map(row => this._toSaveRow(this._toNewRow(row.csv)));
-    return [...newRows, ...overrides];
-  }
-
-  /**
    * Opens the shared create-reference dialog for the given entity set.
    * @param entitySet the OData entity-set path to create into
    * @param titleKey the i18n key for the dialog title
@@ -341,7 +275,7 @@ export default class CsvImportWizard extends BaseController {
         this._messages.showWarning("msgNoFormatConfig");
         return;
       }
-      await this._applyParseResult(result);
+      await this._review.applyParseResult(result);
       this._getState().setProperty("/parsed", true);
       (this.byId(CONTROL_ID.WIZARD) as Wizard).nextStep();
     } catch {
@@ -350,56 +284,8 @@ export default class CsvImportWizard extends BaseController {
   }
 
   /**
-   * Maps a parse result into the New / Potential-Duplicates / Excluded buckets,
-   * loading the matched existing transactions for the side-by-side view.
-   * @param result the merged parse result
-   */
-  private async _applyParseResult(result: ParseResult): Promise<void> {
-    const state = this._getState();
-    const newRows = result.newRows.map(row => this._toNewRow(row));
-    const duplicateRows = await this._buildDuplicateRows(
-      result.potentialDuplicates,
-    );
-    const excludedRows = result.excludedRows.map(row => this._toExcludedRow(row));
-    this._clearing.reset();
-    state.setProperty("/newRows", newRows);
-    state.setProperty("/duplicateRows", duplicateRows);
-    state.setProperty("/excludedRows", excludedRows);
-    state.setProperty("/configName", result.configName ?? "");
-    state.setProperty("/skippedCount", result.skippedCount);
-    state.setProperty(
-      "/hasSuppCards",
-      newRows.some(row => row.cardholderName !== null),
-    );
-    this._refreshNewRows();
-  }
-
-  /**
-   * Pairs each potential duplicate with the existing transaction it matched.
-   * @param duplicates the potential-duplicate classified rows
-   * @returns the paired duplicate rows for review
-   */
-  private async _buildDuplicateRows(
-    duplicates: ClassifiedRow[],
-  ): Promise<DuplicateRow[]> {
-    const ids = duplicates.map(row => row.matchedTransactionId ?? "");
-    const matches = await this._service.loadMatchedTransactions(ids);
-    return duplicates.map(row => {
-      const existing = matches[row.matchedTransactionId ?? ""] ?? null;
-      return {
-        csv: row,
-        existingPostedAt: existing?.postedAt ?? "",
-        existingAmount: existing?.amount ?? 0,
-        existingDescription: existing?.rawDescription ?? "",
-        decision: "",
-      };
-    });
-  }
-
-  /**
-   * Re-decodes a corrected Excluded row on the server and routes it like any
-   * parsed row — New tab, or Potential Duplicates when it matches an existing one.
-   * A correction that still fails to parse stays in the Excluded tab.
+   * Re-decodes a corrected Excluded row on the server and hands it to the review
+   * buckets. A correction that still fails to parse stays in the Excluded tab.
    * @param excluded the corrected excluded row
    */
   private async _moveExcludedRow(excluded: ExcludedEditRow): Promise<void> {
@@ -425,24 +311,7 @@ export default class CsvImportWizard extends BaseController {
       this._messages.showError("msgCorrectionFailed");
       return;
     }
-    if (classified.dedupOutcome === DEDUP_OUTCOME.POTENTIAL_DUPLICATE) {
-      state.setProperty("/duplicateRows", [
-        ...(state.getProperty("/duplicateRows") as DuplicateRow[]),
-        ...(await this._buildDuplicateRows([classified])),
-      ]);
-    } else {
-      state.setProperty("/newRows", [
-        ...(state.getProperty("/newRows") as NewRow[]),
-        this._toNewRow(classified),
-      ]);
-    }
-    state.setProperty(
-      "/excludedRows",
-      (state.getProperty("/excludedRows") as ExcludedEditRow[]).filter(
-        row => row.rowNumber !== excluded.rowNumber,
-      ),
-    );
-    this._refreshNewRows();
+    await this._review.moveCorrectedRow(classified);
   }
 
   /**
@@ -461,41 +330,13 @@ export default class CsvImportWizard extends BaseController {
   }
 
   /**
-   * Recomputes counts, cleared totals, and the progress percentage after any
-   * change to the review buckets, then refreshes the bound model.
-   */
-  private _refreshNewRows(): void {
-    const state = this._getState();
-    const newRows = state.getProperty("/newRows") as NewRow[];
-    const cleared = newRows.filter(row => row.cleared);
-    const total = cleared.reduce((sum, row) => sum + Number(row.amount), 0);
-    state.setProperty("/newCount", newRows.length);
-    state.setProperty("/clearedCount", cleared.length);
-    state.setProperty("/totalAmount", Math.round(total * 100) / 100);
-    state.setProperty(
-      "/duplicateCount",
-      (state.getProperty("/duplicateRows") as DuplicateRow[]).length,
-    );
-    state.setProperty(
-      "/excludedCount",
-      (state.getProperty("/excludedRows") as ExcludedEditRow[]).length,
-    );
-    state.setProperty(
-      "/progressPercent",
-      newRows.length ? (cleared.length / newRows.length) * PERCENT_MAX : 0,
-    );
-    state.refresh(true);
-  }
-
-  /**
    * Records the user's decision on the potential duplicate under the event.
    * @param event the press event from a duplicate action button
    * @param decision the decision to record ("skip" or "import")
    */
   private _setDuplicateDecision(event: Button$PressEvent, decision: string): void {
-    const context = this._getRowContext(event);
-    (context.getObject() as DuplicateRow).decision = decision;
-    this._getState().refresh(true);
+    const row = this._getRowContext(event).getObject() as DuplicateRow;
+    this._review.setDuplicateDecision(row, decision);
   }
 
   /**
@@ -506,53 +347,6 @@ export default class CsvImportWizard extends BaseController {
     this._getState().setProperty("/summary", summary);
     this._messages.showToast("msgImportComplete");
   }
-
-  /**
-   * Maps a classified row to a New-tab row, pre-filling the categorization value
-   * helps from the engine's suggestion for the user to accept or change.
-   * @param row the classified row from the parse result
-   * @returns the New-tab row
-   */
-  private _toNewRow(row: ClassifiedRow): NewRow {
-    return {
-      ...row,
-      vendor_ID: row.suggestedVendor_ID,
-      purchaseType_ID: row.suggestedPurchaseType_ID,
-      earningCategory_ID: row.suggestedEarningCategory_ID,
-      cleared: false,
-    };
-  }
-
-  /**
-   * Maps an excluded row to an editable Excluded-tab row.
-   * @param row the excluded row from the parse result
-   * @returns the editable excluded row
-   */
-  private _toExcludedRow(row: ExcludedRow): ExcludedEditRow {
-    return {
-      ...row,
-      editedValue: row.errorValue,
-      rawJoined: row.rawCells.join(", "),
-    };
-  }
-
-  /**
-   * Maps a reviewed New row to the save payload shape.
-   * @param row the reviewed New row
-   * @returns the save-row payload
-   */
-  private _toSaveRow(row: NewRow): SaveRow {
-    return {
-      postedAt: row.postedAt,
-      amount: Number(row.amount),
-      rawDescription: row.rawDescription,
-      cardInstance_ID: row.cardInstance_ID,
-      vendor_ID: row.vendor_ID,
-      purchaseType_ID: row.purchaseType_ID,
-      earningCategory_ID: row.earningCategory_ID,
-    };
-  }
-
 
   /**
    * Resolves the "ui" model binding context of the row under an event.

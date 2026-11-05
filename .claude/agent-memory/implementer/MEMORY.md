@@ -10,7 +10,7 @@
 - `lint:comment-length` caps JSDoc prose at 5 lines — long rationale JSDoc on a Service method is the usual hit.
 - Istanbul counts every `??` as a two-way branch but not `?.`. A small `*Service.ts` (~11 branches) fell to 72% on three defensive `?? fallback`s; move the null-normalising to the Mapper and look up with `?.`. Validators are 100/100, so a spec rule with no test (e.g. a fatal 400 guard) belongs in the Service as `req.reject`, not in the Validator.
 - A method name fixed by the spec/test contract but outside the verb list (`reconcile`) needs `// eslint-disable-next-line @typescript-eslint/naming-convention` with a reason line.
-- `lint:tracking-ids` also bans `BR-18`/`SPEC-02 §4.2` in source comments — briefs cite them, so paraphrase the rule instead (hit in app/transactions ext/TransactionActions.ts).
+- `lint:tracking-ids` also bans `BR-18`/`SPEC-02 §4.2` in source comments — briefs cite them, so paraphrase the rule instead (hit in app/transactions ext/SplitActions.ts).
 - `lint:tracking-ids` scans only `.ts .js .cds .xml .properties .css .html`. Ledger data full of story/defect IDs can live in a `.json` beside the domain (SPEC-03 snapshot); plain `import x from "./x.json"` works in tsc (Node16 rejects `with {type:"json"}`), ts-jest and tsx.
 - Module `scripts/*.ts` sit outside the type-aware ESLint project until `scripts/**/*.ts` is in the module `tsconfig.json` `include`.
 

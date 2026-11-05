@@ -1,4 +1,4 @@
-import I18n from "com/financialplanner/shared/util/i18n";
+import I18n from "com/lifeos/shared/I18n";
 import { SYNC_STATUS } from "com/financialplanner/connectionmanager/model/constants";
 import type ManagedObject from "sap/ui/base/ManagedObject";
 

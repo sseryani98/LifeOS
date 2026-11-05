@@ -9,6 +9,9 @@
     "paths": {
       "com/financialplanner/shared/*": [
         "./*"
+      ],
+      "com/lifeos/shared/*": [
+        "../../../Shared/app/*"
       ]
     },
     "types": [

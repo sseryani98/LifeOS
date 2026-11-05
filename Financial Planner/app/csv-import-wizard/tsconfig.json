@@ -12,6 +12,9 @@
       ],
       "com/financialplanner/shared/*": [
         "../shared/*"
+      ],
+      "com/lifeos/shared/*": [
+        "../../../Shared/app/*"
       ]
     },
     "types": [

@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "target": "es2022",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "skipLibCheck": true,
+    "noImplicitReturns": true,
+    "paths": {
+      "com/lifeos/shared/*": ["./app/*"]
+    },
+    "types": ["@sapui5/types"]
+  },
+  "include": ["app/**/*.ts"],
+  "exclude": ["node_modules"]
+}

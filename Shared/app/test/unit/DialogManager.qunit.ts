@@ -1,10 +1,15 @@
 /// <reference types="qunit" />
-import DialogManager from "com/financialplanner/shared/DialogManager";
+import DialogManager from "com/lifeos/shared/DialogManager";
 
-import { FRAGMENT, FRAGMENT_INSTANCE_IDS } from "../data/constants";
+import {
+  DIALOG_MODEL,
+  FRAGMENT,
+  FRAGMENT_INSTANCE_IDS,
+} from "../data/constants";
 import {
   buildClassHandlerHome,
   buildDialogHost,
+  buildEventInside,
   copyControllerAsFe,
 } from "../support/sharedFakes";
 
@@ -47,7 +52,8 @@ QUnit.module("DialogManager — loading", () => {
       await new DialogManager(fake.host).open(FRAGMENT.EDIT, handlerHome);
 
       assert.strictEqual(
-        copyControllerAsFe(fake.loads[0].controller).onButtonSavePress !== undefined,
+        copyControllerAsFe(fake.loads[0].controller).onButtonSavePress !==
+          undefined,
         true,
       );
     },
@@ -157,6 +163,74 @@ QUnit.module("DialogManager — closing", () => {
       assert.notStrictEqual(editDialog, applyDialog);
       assert.strictEqual(fake.dialogs[1].closeCount, 1);
       assert.strictEqual(fake.dialogs[0].closeCount, 0);
+    },
+  );
+});
+
+QUnit.module("DialogManager — dialog models", () => {
+  /** A dialog's inputs bind to a named model; opening must give them the caller's data. */
+  QUnit.test(
+    "openWithModel opens the dialog with the given data",
+    async assert => {
+      const fake = buildDialogHost(false, PREFIXED_ID);
+      const manager = new DialogManager(fake.host);
+
+      const dialog = await manager.openWithModel(
+        FRAGMENT.EDIT,
+        DIALOG_MODEL.NAME,
+        DIALOG_MODEL.FIRST_DATA,
+      );
+
+      assert.deepEqual(
+        dialog.getModel(DIALOG_MODEL.NAME)?.getProperty("/"),
+        DIALOG_MODEL.FIRST_DATA,
+      );
+      assert.strictEqual(fake.dialogs[0].openCount, 1);
+    },
+  );
+
+  /** A cached dialog keeps its model; a reopen that kept the old data would show the last run's entries. */
+  QUnit.test(
+    "openWithModel resets the same model on a reopen",
+    async assert => {
+      const fake = buildDialogHost(false, PREFIXED_ID);
+      const manager = new DialogManager(fake.host);
+      const first = await manager.openWithModel(
+        FRAGMENT.EDIT,
+        DIALOG_MODEL.NAME,
+        DIALOG_MODEL.FIRST_DATA,
+      );
+      const firstModel = first.getModel(DIALOG_MODEL.NAME);
+
+      const second = await manager.openWithModel(
+        FRAGMENT.EDIT,
+        DIALOG_MODEL.NAME,
+        DIALOG_MODEL.RESET_DATA,
+      );
+
+      assert.strictEqual(second.getModel(DIALOG_MODEL.NAME), firstModel);
+      assert.deepEqual(firstModel?.getProperty("/"), DIALOG_MODEL.RESET_DATA);
+    },
+  );
+
+  /** A fragment handler has only its event; it must reach the dialog's data however deep the control sits. */
+  QUnit.test(
+    "readModel finds the enclosing dialog's model from a nested control",
+    async assert => {
+      const fake = buildDialogHost(false, PREFIXED_ID);
+      const manager = new DialogManager(fake.host);
+      const dialog = await manager.openWithModel(
+        FRAGMENT.EDIT,
+        DIALOG_MODEL.NAME,
+        DIALOG_MODEL.FIRST_DATA,
+      );
+
+      const model = manager.readModel(
+        buildEventInside(fake.dialogs[0]),
+        DIALOG_MODEL.NAME,
+      );
+
+      assert.strictEqual(model, dialog.getModel(DIALOG_MODEL.NAME));
     },
   );
 });

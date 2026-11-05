@@ -13,6 +13,7 @@ export default {
       paths: {
         "com/financialplanner/connectionmanager": "../",
         "com/financialplanner/shared": "/shared/",
+        "com/lifeos/shared": "/lifeos-shared/",
       },
     },
   },

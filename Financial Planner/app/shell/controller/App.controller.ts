@@ -1,5 +1,5 @@
 import BaseController from "com/financialplanner/shared/BaseController";
-import I18n from "com/financialplanner/shared/util/i18n";
+import I18n from "com/lifeos/shared/I18n";
 import NavConfig from "com/financialplanner/shell/controller/NavConfig";
 import ComponentContainer, {
   type ComponentContainer$ComponentCreatedEvent,

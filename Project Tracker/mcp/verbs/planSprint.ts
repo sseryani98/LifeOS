@@ -12,7 +12,7 @@ import {
 } from "./shared/constants.js";
 import { Envelope } from "./shared/envelope.js";
 import { VerbRunner } from "./shared/runVerb.js";
-import { StageGuards } from "./shared/stageGuards.js";
+import { TargetResolver } from "./shared/targetResolver.js";
 import type { TrackerGateway } from "./shared/trackerGateway.js";
 import type {
   InitiativeRow,
@@ -75,7 +75,7 @@ export class PlanSprintVerb implements VerbDefinition {
    */
   async run(ctx: VerbContext, input: PlanSprintInput): Promise<VerbResult> {
     return VerbRunner.runWriteVerb(ctx, async (gateway, timestamp) => {
-      const workspace = await StageGuards.resolveWorkspace(
+      const workspace = await TargetResolver.resolveWorkspace(
         gateway,
         input.workspace,
       );

@@ -5,6 +5,7 @@ import { ACTIVITY_KINDS, HTTP, VERB_KEYS } from "./shared/constants.js";
 import { Envelope } from "./shared/envelope.js";
 import { VerbRunner } from "./shared/runVerb.js";
 import { StageGuards } from "./shared/stageGuards.js";
+import { TargetResolver } from "./shared/targetResolver.js";
 import type { TrackerGateway } from "./shared/trackerGateway.js";
 import type {
   RecordTestRunInput,
@@ -155,12 +156,12 @@ export class RecordTestRunVerb implements VerbDefinition {
       Envelope.rejectVerb(HTTP.BAD_REQUEST, VERB_KEYS.TESTRUN_SCOPE_REQUIRED);
     }
     if (storyMode) {
-      const { workspace, milestone } = await StageGuards.resolveStoryContext(
+      const { workspace, milestone } = await TargetResolver.resolveStoryContext(
         gateway,
         input.story as string,
       );
       const chain = await gateway.readChain(milestone.ID);
-      const task = StageGuards.resolveStage(chain, input.stage as string);
+      const task = TargetResolver.resolveStage(chain, input.stage as string);
       StageGuards.assertTestRunStageStarted(task);
       return {
         workspaceId: workspace.ID,
@@ -173,7 +174,7 @@ export class RecordTestRunVerb implements VerbDefinition {
         ),
       };
     }
-    const { workspace, initiative } = await StageGuards.resolveActiveSprint(
+    const { workspace, initiative } = await TargetResolver.resolveActiveSprint(
       gateway,
       input.workspace as string,
     );

@@ -40,6 +40,8 @@ Life OS/
   Project Tracker/                 Module (workspace package) — same four config files
     PLAN.md                        Continuity document — read first
     design/ research/              Plan-phase artifacts
+  Shared/                          Shared library (workspace package `lifeos-shared`) — code every module runs
+    app/                           UI5 helpers, `com.lifeos.shared`: DialogManager, Messaging, I18n
   Standards (Documents)/           Written cross-module standards — CODING_STANDARDS.md lives here
   Standards (Technical + Linting)/ Executable standards
     eslint.config.mjs              The shared ESLint rules — single source for all modules
@@ -246,6 +248,8 @@ not invent an answer — ask.
 - Add a module-specific path or name to a shared linter — it serves every module.
 - Declare shared tooling (eslint, tsx, typescript, jest) in a module's `package.json` —
   it belongs at the root, where every module inherits one version.
-- Put anything at the repo root that is not a module or a Standards folder. If npm does
-  not pin it there, it belongs inside one of them.
+- Put anything at the repo root that is not a module, `Shared/` or a Standards folder. If npm
+  does not pin it there, it belongs inside one of them. `Shared/` holds runtime code more than one
+  module runs (UI5 helpers today, CAP later); a module consumes it as the `lifeos-shared`
+  devDependency, which cds-plugin-ui5 serves at `/lifeos-shared`.
 - Generalize from the planner alone. One module is not a pattern.

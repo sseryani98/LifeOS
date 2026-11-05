@@ -1,4 +1,4 @@
-// Named inputs for the TransactionActions unit tests: selected-row ids and the
+// Named inputs for the CategorizationActions and SplitActions unit tests: selected-row ids and the
 // values a user enters in the Apply Categories and Split dialogs. Dialog inputs
 // are strings because the fragments bind `type="Number"` Inputs, which yield text.
 

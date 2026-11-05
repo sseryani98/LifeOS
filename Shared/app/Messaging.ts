@@ -1,18 +1,17 @@
 import MessageToast from "sap/m/MessageToast";
 import MessageBox from "sap/m/MessageBox";
-import I18n from "com/financialplanner/shared/util/i18n";
-import type { MessagingHost } from "com/financialplanner/shared/types";
+import I18n from "com/lifeos/shared/I18n";
+import type { I18nModelSource, MessagingHost } from "com/lifeos/shared/types";
 
 /**
- * Messaging — shared user-messaging helper for all controller types. The host
- * only needs a getView() returning something that carries the "i18n" model, so
- * a controller and an FE ExtensionAPI stand-in both satisfy it.
+ * Messaging — the Life OS user-messaging helper. Takes its host as-is: a
+ * Controller resolves i18n through its view, an FE ExtensionAPI directly.
  */
 export default class Messaging {
   private readonly _host: MessagingHost;
 
   /**
-   * @param host the owning controller or view provider (carries the i18n model)
+   * @param host the owning Controller or FE ExtensionAPI
    */
   public constructor(host: MessagingHost) {
     this._host = host;
@@ -34,7 +33,8 @@ export default class Messaging {
   public showConfirm(key: string): Promise<boolean> {
     return new Promise(resolve => {
       MessageBox.confirm(this._resolveText(key), {
-        onClose: (action: string | null) => resolve(action === MessageBox.Action.OK),
+        onClose: (action: string | null) =>
+          resolve(action === MessageBox.Action.OK),
       });
     });
   }
@@ -65,13 +65,21 @@ export default class Messaging {
   }
 
   /**
-   * Resolves an i18n key against the host view's "i18n" model.
+   * Resolves an i18n key against the host's "i18n" model.
    * @param key the i18n message key
    * @param args values for the text's placeholders
-   * @returns the resolved text, or "" when the key is missing
+   * @returns the resolved text, or "" when the key is missing or the view is gone
    */
   private _resolveText(key: string, args?: string[]): string {
-    const view = this._host.getView();
-    return view ? I18n.getText(view, key, args) : "";
+    const source = this._readI18nSource();
+    return source ? I18n.getText(source, key, args) : "";
+  }
+
+  /**
+   * Picks what carries the "i18n" model: a Controller's view, else the host itself.
+   * @returns the i18n source, or null when a Controller's view is gone
+   */
+  private _readI18nSource(): I18nModelSource | null | undefined {
+    return "getView" in this._host ? this._host.getView() : this._host;
   }
 }

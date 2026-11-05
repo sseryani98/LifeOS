@@ -39,6 +39,17 @@ export const SYNC_DEFAULTS = {
   BACKOFF_BASE_MS: 2000,
 } as const;
 
+/** The zeroed result a sync reports when it never reached the provider. */
+export const SYNC_RESULTS = {
+  FAILED: {
+    created: 0,
+    duplicates: 0,
+    accountsProcessed: 0,
+    unmapped: 0,
+    status: "error",
+  },
+} as const;
+
 /** Daily-sync schedule bounds and default fire time (HH:MM, 24h). */
 export const SCHEDULE = {
   DEFAULT_TIME: "20:00",

@@ -1,5 +1,5 @@
 import Controller from "sap/ui/core/mvc/Controller";
-import I18n from "com/financialplanner/shared/util/i18n";
+import I18n from "com/lifeos/shared/I18n";
 import Navigation from "com/financialplanner/shared/util/Navigation";
 import type View from "sap/ui/core/mvc/View";
 import type UIComponent from "sap/ui/core/UIComponent";

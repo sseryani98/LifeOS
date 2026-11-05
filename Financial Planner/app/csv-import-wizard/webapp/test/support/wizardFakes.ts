@@ -5,8 +5,8 @@
 import CsvImportWizard from "com/financialplanner/csvimportwizard/controller/CsvImportWizard.controller";
 import CsvImportWizardService from "com/financialplanner/csvimportwizard/model/CsvImportWizardService";
 import type { ParsedFile } from "com/financialplanner/csvimportwizard/model/types";
-import DialogManager from "com/financialplanner/shared/DialogManager";
-import Messaging from "com/financialplanner/shared/Messaging";
+import DialogManager from "com/lifeos/shared/DialogManager";
+import Messaging from "com/lifeos/shared/Messaging";
 import type Dialog from "sap/m/Dialog";
 import type { Button$PressEvent } from "sap/m/Button";
 import type { FileUploader$ChangeEvent } from "sap/ui/unified/FileUploader";

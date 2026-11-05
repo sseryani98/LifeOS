@@ -1,5 +1,5 @@
 /// <reference types="qunit" />
-import Messaging from "com/financialplanner/shared/Messaging";
+import Messaging from "com/lifeos/shared/Messaging";
 
 import { CONFIRM_ACTION, I18N, I18N_TEXTS } from "../data/constants";
 import { buildI18nSource, stubMessageBoxes } from "../support/sharedFakes";
@@ -42,11 +42,14 @@ QUnit.module("Messaging — with a view", hooks => {
   );
 
   /** A backend refusal is shown inside an i18n frame, so the warning must pass its args to the bundle. */
-  QUnit.test("showWarning fills the text's placeholders from the args", assert => {
-    state.messaging.showWarning(I18N.PARAM_KEY, [I18N.ARG]);
+  QUnit.test(
+    "showWarning fills the text's placeholders from the args",
+    assert => {
+      state.messaging.showWarning(I18N.PARAM_KEY, [I18N.ARG]);
 
-    assert.deepEqual(state.stubs.calls.warnings, [I18N.FILLED_TEXT]);
-  });
+      assert.deepEqual(state.stubs.calls.warnings, [I18N.FILLED_TEXT]);
+    },
+  );
 
   /** A destructive action proceeds only on an explicit OK. */
   QUnit.test(
@@ -94,4 +97,23 @@ QUnit.module("Messaging — without a view", hooks => {
 
     assert.deepEqual(state.stubs.calls.toasts, [""]);
   });
+});
+
+QUnit.module("Messaging — with an ExtensionAPI host", hooks => {
+  hooks.beforeEach(() => {
+    state.stubs = stubMessageBoxes();
+  });
+  hooks.afterEach(() => {
+    state.stubs.restore();
+  });
+
+  /** An FE ExtensionAPI carries the i18n model itself; it is passed as-is, never wrapped in a getView stand-in. */
+  QUnit.test(
+    "resolves text through a host that carries the i18n model",
+    assert => {
+      new Messaging(buildI18nSource(I18N_TEXTS).source).showToast(I18N.KEY);
+
+      assert.deepEqual(state.stubs.calls.toasts, [I18N.TEXT]);
+    },
+  );
 });

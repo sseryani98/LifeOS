@@ -608,7 +608,7 @@ step is avoided by ruling, not solved. The overall row lives in the module's `ui
 
 | Band                   | Line | Branch | This module's folders                                                                                           |
 | ---------------------- | ---- | ------ | --------------------------------------------------------------------------------------------------------------- |
-| **Shared UI5 helpers** | 100% | 100%   | **None — this module owns no `app/shared/`.** It consumes Financial Planner's (D-147), whose UI5 gate counts it |
+| **Shared UI5 helpers** | 100% | 100%   | **None — this module owns no `app/shared/`.** It consumes Financial Planner's `app/shared/` and repo-root `Shared/app/` (D-147), both counted in Financial Planner's UI5 gate |
 | **Overall `app/**`**   | 85%  | 80%    | `./app/{app}/webapp/**/*.ts` — the one FPM page (§15)                                                           |
 
 QUnit and journeys both feed the number (same runner, same instrumentation). **The band lands with the
@@ -799,7 +799,7 @@ tier tests **one logic class at a time**, with no backend:
 | --------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
 | Every intent method of the app's `model/{App}Service.ts`, against a stubbed model | The FPM page's rendering. That belongs to the journey (§15.3)                                                        |
 | Every ext **logic class** a lifecycle extension or action handler delegates to    | The thin `ext/` handler module or the `ControllerExtension` itself. These are wiring, excluded from coverage (§13.2) |
-| Any custom control or formatter the page adds                                     | Anything in Financial Planner's `app/shared/`. Its own gate tests that (D-147)                                       |
+| Any custom control or formatter the page adds                                     | Anything in Financial Planner's `app/shared/` or repo-root `Shared/app/`. Financial Planner's UI5 gate tests both (D-147) |
 
 **Extensions delegate (D-263).** A lifecycle `ControllerExtension` hook delegates to a plain logic
 class, the same way a custom-action handler already delegates (`CODING_STANDARDS.md` §SAPUI5,
@@ -820,7 +820,7 @@ journey (§15.3) still applies.
 | **Shell → page route** | Not here. It crosses modules, so it is the E2E tier's (§15.6)                                                                                                                                                                                            |
 
 **One dependency still unmeasured.** The page depends on Financial Planner's `app/shared/` at
-`/shared` (D-147). A direct launch under this module's own `cds-serve` must still resolve `/shared`
+`/shared` and on repo-root `Shared/app/` at `/lifeos-shared` (D-147). A direct launch under this module's own `cds-serve` must still resolve `/shared`
 without booting that module's process. Financial Planner's run cannot answer it, because there
 `/shared` is the module's own app. It is measured by the story that lands this module's leg.
 
@@ -1054,7 +1054,7 @@ above. Each one is executed, re-owned, or resolved by a ruling:
 | **UI5-pack R5, R6** | The runner recreates `coverage/`; it runs `npm install -g` at runtime                                  | **Executed:** `coverage-ui5/`, `report-ui5/` in `ui5-test-runner.json`; `--no-npm-install` from `runUi5Gate.ts` (§15.5) |
 | **UI5-pack R7**     | The runner has a single maintainer                                                                     | Pinned at 5.14.2. **Owner:** whoever raises the Node pin. Revisit when Node moves to 24                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | **UI5-pack R8**     | A merged UI5 + Jest threshold                                                                          | **Avoided by ruling (D-260):** a separate gate                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| **UI5-pack R9**     | Whether `/shared/` is instrumented                                                                     | **Closed** (FP D-332): instrumented at `ui5-tooling-transpile` 3.14.0. For this module, `app/shared/**` is Financial Planner's and is counted in that module's UI5 gate (§13.1) |
+| **UI5-pack R9**     | Whether `/shared/` is instrumented                                                                     | **Closed** (FP D-332): instrumented at `ui5-tooling-transpile` 3.14.0. For this module, Financial Planner's `app/shared/**` and repo-root `Shared/app/**` are both counted in Financial Planner's UI5 gate (§13.1) |
 
 ---
 

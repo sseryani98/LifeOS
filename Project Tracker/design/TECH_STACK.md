@@ -498,7 +498,7 @@ Inherited from the exemplar in full; nothing here is a new choice.
 | Per-app files  | `package.json`, `ui5.yaml`, `tsconfig.json` per app folder                                                   |
 | Runtime        | SAPUI5 **1.136.16** from `https://ui5.sap.com/1.136.16/…`, pinned in Financial Planner's `app/index.html:16` |
 | Framework      | Fiori Elements FPM, `sap.fe.core` + `sap.fe.macros` per component (DS-001 §4)                                |
-| Shared library | `Financial Planner/app/shared` at `/shared` — a cross-module dependency D-147 already priced                 |
+| Shared library | Two: `Financial Planner/app/shared` at `/shared/` and `Shared/app` (`com.lifeos.shared`) at `/lifeos-shared/` — a cross-module dependency D-147 already priced |
 
 **One finding.** `@sapui5/types` is declared `^1.136.16` in **both** modules and resolves to
 **1.150.0** — fourteen minor versions ahead of the pinned runtime. The compiler would therefore accept

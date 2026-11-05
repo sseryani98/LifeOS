@@ -87,24 +87,6 @@ export const ELEMENT_TYPE = {
   BUTTON: "sap.m.Button",
 } as const;
 
-/** Fragment names and the dialog control ids they declare. */
-export const FRAGMENT = {
-  EDIT: "com.financialplanner.sample.fragment.EditDialog",
-  EDIT_SHORT_NAME: "EditDialog",
-  EDIT_DIALOG_ID: "idEditDialog",
-  OTHER_DIALOG_ID: "idOtherDialog",
-  APPLY: "com.financialplanner.sample.fragment.ApplyDialog",
-  APPLY_SHORT_NAME: "ApplyDialog",
-  APPLY_DIALOG_ID: "idApplyDialog",
-  VIEW_PREFIX: "application-view",
-} as const;
-
-/** The MessageBox close actions a confirmation can end with. */
-export const CONFIRM_ACTION = {
-  OK: "OK",
-  CANCEL: "CANCEL",
-} as const;
-
 /** Chart card sizing, style classes and declared defaults. */
 export const CHART_CARD = {
   WIDTH: "50%",
@@ -137,10 +119,4 @@ export const ELEMENT_TREE = {
 /** A JSON model name a freestyle controller binds UI state to, apart from the default model. */
 export const MODEL = {
   UI_NAME: "ui",
-} as const;
-
-/** Instance ids an ExtensionAPI host gives each fragment dialog: namespace, then the declared id. */
-export const FRAGMENT_INSTANCE_IDS = {
-  [FRAGMENT.EDIT]: `${FRAGMENT.EDIT_SHORT_NAME}--${FRAGMENT.EDIT_DIALOG_ID}`,
-  [FRAGMENT.APPLY]: `${FRAGMENT.APPLY_SHORT_NAME}--${FRAGMENT.APPLY_DIALOG_ID}`,
 } as const;

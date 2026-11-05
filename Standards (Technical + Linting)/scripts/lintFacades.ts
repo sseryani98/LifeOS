@@ -1,4 +1,4 @@
-import { readdirSync, readFileSync } from "fs";
+import { existsSync, readdirSync, readFileSync } from "fs";
 import { join, relative } from "path";
 
 const ROOT_DIR = process.cwd();
@@ -43,6 +43,8 @@ function blankNonCode(source: string): string {
  * Recursively collects every *Facade.ts under srv/, minus the exempt infrastructure.
  */
 function findFacades(): string[] {
+  // A package with no srv/ (Shared, a fresh scaffold) has no facades to police.
+  if (!existsSync(SRV_DIR)) return [];
   return readdirSync(SRV_DIR, { recursive: true, encoding: "utf8" })
     .filter(entry => entry.endsWith("Facade.ts"))
     .filter(entry => !EXEMPT_FILES.includes(entry.split(/[\\/]/).pop() ?? ""))

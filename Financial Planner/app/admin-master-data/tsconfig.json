@@ -7,11 +7,24 @@
     "skipLibCheck": true,
     "noImplicitReturns": true,
     "paths": {
-      "com/financialplanner/adminmasterdata/*": ["./webapp/*"],
-      "com/financialplanner/shared/*": ["../shared/*"]
+      "com/financialplanner/adminmasterdata/*": [
+        "./webapp/*"
+      ],
+      "com/financialplanner/shared/*": [
+        "../shared/*"
+      ],
+      "com/lifeos/shared/*": [
+        "../../../Shared/app/*"
+      ]
     },
-    "types": ["@sapui5/types"]
+    "types": [
+      "@sapui5/types"
+    ]
   },
-  "include": ["webapp/**/*.ts"],
-  "exclude": ["node_modules"]
+  "include": [
+    "webapp/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

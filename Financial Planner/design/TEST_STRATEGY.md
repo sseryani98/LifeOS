@@ -20,6 +20,7 @@
 | 2026-11-04 | Sandro & Claude | Amendment — UI5 testing becomes a gate. D-80 reversed by D-321; D-322 to D-329 logged. §9 rewritten; §2, §3.2, §4.1, §4.2, §8.4, §10 Wave 1, §11, §12.6 and §13 updated. Gate mechanics provisional until Sprint 2 story 1 closes R1. Status Approved → Draft pending re-approval. |
 | 2026-11-04 | Sandro          | **Status → Approved.** UI5-testing amendment approved by Sandro; gate mechanics stay provisional until Sprint 2 story 1 closes R1.                                                                                                                                                 |
 | 2026-11-04 | Sandro & Claude | Sprint 2 story 1 executes the gate. R1 and R9 closed; D-331 … D-334 logged. §3, §8.4, §9, §11 and §12.6 now state measured mechanics, not provisional ones.                                                                                                                     |
+| 2026-11-05 | Claude          | refresh-docs: Shared/ lifeos-shared helpers, max-lines, file splits.                                                                                                                                                                                                               |
 
 ---
 
@@ -32,7 +33,7 @@
 | **Unit targets**         | Validators (100%), Services + ENH engines (90%), Utilities (100%). Facades skipped.                                                                                                         |
 | **Integration**          | `cds.test()` + SQLite. One test file per CDS service. Scenarios under `integration/scenarios/`.                                                                                             |
 | **Test data**            | Hybrid factories + named constants. Canonical test world for integration. Semantic naming.                                                                                                  |
-| **Coverage**             | Jest: Validators/Utilities 100%/100%, Services 90%/85%, Overall 85%/80%. UI5, a separate gate (D-327): `app/shared/util/**` 100%/100%, overall `app/**` 85%/80%.                            |
+| **Coverage**             | Jest: Validators/Utilities 100%/100%, Services 90%/85%, Overall 85%/80%. UI5, a separate gate (D-327): `app/shared/util/**` 100%/100%, `../Shared/app/**` 100%/100%, overall `app/**` 85%/80%. |
 | **Frontend**             | A gate on every app (D-321). QUnit on every logic class; at least one OPA5 contract journey per FE app (D-325); journeys launch through the shell (D-324). Gate mechanics executed (D-331). |
 | **Development workflow** | Test-driven development (D-230). Primary definition in [Technical Standards](TECHNICAL_STANDARDS.md) §13.                                                                                   |
 
@@ -413,6 +414,7 @@ Coverage report runs on every `npm test` execution. Not a separate step.
 | Scope                   | Folder                                         | Line | Branch | Rationale               |
 | ----------------------- | ---------------------------------------------- | ---- | ------ | ----------------------- |
 | **Shared pure helpers** | `app/shared/util/**`, including `formatter.ts` | 100% | 100%   | Mirrors Utilities       |
+| **Life OS UI5 helpers** | `../Shared/app/**`                             | 100% | 100%   | Mirrors Utilities       |
 | **Overall UI5**         | `app/**`                                       | 85%  | 80%    | Mirrors Overall project |
 
 | Excluded from UI5 coverage                                            | Why                                                                 |
@@ -421,7 +423,7 @@ Coverage report runs on every `npm test` execution. Not a separate step.
 | Lifecycle `ControllerExtension`s (e.g. `ObjectPageExt.controller.ts`) | Wiring once they delegate (D-323); proven by journeys               |
 | `*.gen.d.ts`                                                          | Generated declarations                                              |
 
-**Enforced (D-331, D-333).** The overall row is `coverageCheckLines`/`coverageCheckBranches` in `ui5-test-runner.json`. The `app/shared/util/**` row is the `--row` argument of the `test:ui5` script, which `runUi5Gate.ts` checks with `nyc check-coverage --include`. The exclusions are the transpile `coverage.exclude` list in each app's `ui5-test.yaml`. Both rows are on at these numbers from day one, so the leg stays red until the backfill lands (D-333).
+**Enforced (D-331, D-333).** The overall row is `coverageCheckLines`/`coverageCheckBranches` in `ui5-test-runner.json`. The `app/shared/util/**` and `../Shared/app/**` rows are the two `--row` arguments of the `test:ui5` script, which `runUi5Gate.ts` checks with `nyc check-coverage --include` (the `../` row with nyc's cwd moved up a level). The exclusions are the transpile `coverage.exclude` list in each app's `ui5-test.yaml`. Both rows are on at these numbers from day one, so the leg stays red until the backfill lands (D-333).
 
 ---
 
@@ -456,15 +458,16 @@ UI5 tests are written by a dedicated `ui5-test-author` agent, selected by the bu
 
 | Surface                      | Apps (measured)                                                                                                       | UI5 unit (QUnit)                                                                                  | UI5 journey (OPA5)                                                                                       | Excluded from UI5 coverage                                                                                                                         |
 | ---------------------------- | --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **FE ListReport/ObjectPage** | `admin-master-data` (one `ControllerExtension`), `transactions` (two `ControllerExtension`s in `ext/controller/`; `ext/` logic class + handler modules) | Every logic class — e.g. `ext/TransactionActions.ts` — and `model/{App}Service.ts` intent methods | At least one **contract journey** per app via `sap.fe.test` (D-325)                                      | The thin `ext/` handler module (`TransactionsListActions.ts`); the `ControllerExtension` (`ObjectPageExt.controller.ts`) once it delegates (D-323) |
+| **FE ListReport/ObjectPage** | `admin-master-data` (one `ControllerExtension`), `transactions` (two `ControllerExtension`s in `ext/controller/`; `ext/` logic class + handler modules) | Every logic class — e.g. `ext/SplitActions.ts`, `ext/CategorizationActions.ts` — and `model/{App}Service.ts` intent methods | At least one **contract journey** per app via `sap.fe.test` (D-325)                                      | The thin `ext/` handler module (`TransactionsListActions.ts`); the `ControllerExtension` (`ObjectPageExt.controller.ts`) once it delegates (D-323) |
 | **FE FPM custom page**       | `connection-manager` (`sap.fe.core.fpm`, `controller/ConnectionManager.controller.ts`)                                | Every logic class — e.g. `model/ConnectionService.ts`                                             | At least one contract journey, with **plain OPA5 page objects** — `sap.fe.test` has none for FPM (D-322) | None                                                                                                                                               |
 | **Freestyle**                | `csv-import-wizard` (`controller/CsvImportWizard.controller.ts`)                                                      | Controller logic and every `model/` class                                                         | Freestyle flows, plain OPA5 page objects                                                                 | None                                                                                                                                               |
 | **Shell**                    | `shell` (`sap.tnt.ToolPage`, `controller/App.controller.ts`; **no `webapp/` folder**)                                 | Controller logic                                                                                  | Hosts every journey's start: a custom Shell page object at the shell route (D-324)                       | None                                                                                                                                               |
-| **Shared library**           | `shared/` (14 `.ts` files, two of them `*.gen.d.ts`; namespace `com.financialplanner.shared`, served at `/shared`)    | `util/**` including `formatter.ts`, custom controls, base classes                                 | None of its own — it hosts the shared page objects                                                       | `*.gen.d.ts`                                                                                                                                       |
+| **Shared library**           | `shared/` (11 non-test `.ts` files, two of them `*.gen.d.ts`; namespace `com.financialplanner.shared`, served at `/shared`)    | `util/**` including `formatter.ts`, custom controls, base classes                                 | None of its own — it hosts the shared page objects                                                       | `*.gen.d.ts`                                                                                                                                       |
+| **Life OS shared helpers**   | repo-root `Shared/app/` (4 `.ts` files — `DialogManager`, `Messaging`, `I18n`, `types`; workspace `lifeos-shared`, namespace `com.lifeos.shared`, served at `/lifeos-shared`) | Every class                                                                                       | None                                                                                                     | None                                                                                                                                               |
 
 **The contract journey (D-325).** It asserts that the app's columns, filters, actions and extensions render **as declared** — the annotation contract, the UI5 analogue of asserting `@assert.range`. It never asserts FE's generic behaviour: sorting, paging, draft machinery, variant management. That is the framework, and testing it stays forbidden.
 
-**Lifecycle extensions delegate (D-323).** A `ControllerExtension` hook delegates to a plain logic class, the twin of the custom-action rule (`TransactionsListActions` → `TransactionActions`). The extension becomes wiring like a Facade: excluded from UI5 coverage, proven by the journey tier. The logic class is QUnit-tested. The rule lives in `CODING_STANDARDS.md` §SAPUI5, enforced by `lint:frontend-controller-shape`.
+**Lifecycle extensions delegate (D-323).** A `ControllerExtension` hook delegates to a plain logic class, the twin of the custom-action rule (`TransactionsListActions` → `CategorizationActions`/`SplitActions`). The extension becomes wiring like a Facade: excluded from UI5 coverage, proven by the journey tier. The logic class is QUnit-tested. The rule lives in `CODING_STANDARDS.md` §SAPUI5, enforced by `lint:frontend-controller-shape`.
 
 ### 9.3 Journey Launch
 
@@ -487,7 +490,7 @@ app/
 │   │   └── pages/                ← extend the FPM base page object
 │   └── data/
 ├── transactions/webapp/test/
-│   ├── unit/                     ← TransactionActions, TransactionsService, VirtualStateCarrier
+│   ├── unit/                     ← CategorizationActions, SplitActions, TransactionsService, VirtualStateCarrier
 │   ├── integration/
 │   │   └── pages/
 │   └── data/
@@ -504,13 +507,18 @@ app/
 └── shared/test/                  ← no webapp/ folder
     ├── unit/                     ← util/**, controls, base classes
     └── (shared page objects)     ← FP Shell page object, FPM base page object
+
+Shared/app/test/                  ← repo root (lifeos-shared), outside app/
+├── unit/                         ← DialogManager, Messaging, I18n
+├── data/
+└── support/
 ```
 
-The gate passes **one `url` per app testsuite** in `ui5-test-runner.json`. Today that is five: `shared`, `shell`, `transactions`, `connection-manager`, `csv-import-wizard` (2026-11-04 backfill); `admin-master-data` has no logic class yet. A new app suite adds its `testsuite.qunit.html` to that list.
+The gate passes **one `url` per app testsuite** in `ui5-test-runner.json`. Today that is six: `lifeos-shared` first, then `shared`, `shell`, `transactions`, `connection-manager`, `csv-import-wizard` (2026-11-04 backfill); `admin-master-data` has no logic class yet. A new app suite adds its `testsuite.qunit.html` to that list.
 
 ### 9.5 Coverage
 
-UI5 coverage is a **separate gate** from Jest's, never merged into one number (D-327). Thresholds and exclusions: §8.4. Each surface in §9.2 counts toward the overall `app/**` row; `app/shared/util/**` carries the 100/100 row as well, which makes `/shared/` instrumentation (R9) load-bearing.
+UI5 coverage is a **separate gate** from Jest's, never merged into one number (D-327). Thresholds and exclusions: §8.4. Each surface in §9.2 counts toward the overall `app/**` row; `app/shared/util/**` and `../Shared/app/**` each carry a 100/100 row as well, which makes `/shared/` instrumentation (R9) load-bearing.
 
 ### 9.6 Browser FUTs
 
@@ -653,24 +661,62 @@ test/
 │   │       └── simplefin.ts
 │   └── support/
 ├── unit/
+│   ├── categorization/
+│   │   ├── data/
+│   │   │   ├── corrections.ts
+│   │   │   ├── patterns.ts
+│   │   │   └── recategorization.ts
+│   │   ├── support/
+│   │   │   └── categorizationMocks.ts
+│   │   └── tests/
+│   │       ├── categorizationContext.test.ts
+│   │       ├── categorizationMapper.test.ts
+│   │       └── categorizationService.test.ts
+│   ├── csv-import-wizard/
+│   │   ├── data/
+│   │   │   └── clearPropagation.ts
+│   │   └── tests/
+│   │       └── clearPropagation.test.ts
 │   ├── ingestion/
 │   │   ├── data/
+│   │   │   ├── csvImportSave.ts
+│   │   │   ├── csvReclassify.ts
+│   │   │   ├── csvRowReader.ts
+│   │   │   ├── simplefin.ts
 │   │   │   └── transactions.ts          ← used only by unit dedup specs
 │   │   ├── support/
 │   │   │   ├── csvImportMocks.ts
+│   │   │   ├── csvImportSaveMocks.ts
 │   │   │   ├── deduplicationMocks.ts
 │   │   │   ├── schedulingMocks.ts
 │   │   │   └── simplefinMocks.ts
 │   │   └── tests/
 │   │       ├── csvFieldParser.test.ts
 │   │       ├── csvImportMapper.test.ts
+│   │       ├── csvImportSaveMapper.test.ts
+│   │       ├── csvImportSaveService.test.ts
+│   │       ├── csvImportSaveValidator.test.ts
 │   │       ├── csvImportService.test.ts
 │   │       ├── csvImportValidator.test.ts
+│   │       ├── csvRowReaderService.test.ts
 │   │       ├── deduplicationService.test.ts
 │   │       ├── deduplicationValidator.test.ts
 │   │       ├── schedulingService.test.ts
+│   │       ├── simpleFinAlertService.test.ts
+│   │       ├── simpleFinIngestionService.test.ts
+│   │       ├── simpleFinMapper.test.ts
 │   │       ├── simpleFinService.test.ts
 │   │       └── simpleFinValidator.test.ts
+│   ├── transaction/
+│   │   ├── data/
+│   │   │   └── splits.ts
+│   │   ├── support/
+│   │   │   └── transactionMocks.ts
+│   │   └── tests/
+│   │       ├── transactionMapper.test.ts
+│   │       ├── transactionService.test.ts
+│   │       ├── transactionSplitService.test.ts
+│   │       └── transactionValidator.test.ts
 │   └── shared/
 │       ├── data/
 │       ├── support/

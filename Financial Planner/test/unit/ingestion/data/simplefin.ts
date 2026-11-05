@@ -88,3 +88,12 @@ export const RESPONSE_UNPOSTED_ONLY: SimpleFINResponse = {
 export const CONFIG_LOOKBACK_FIVE_DAYS: Record<string, string> = {
   SIMPLEFIN_LOOKBACK_DAYS: "5",
 };
+
+/** Title and body handed to the alert raiser; opaque to it, so any text serves. */
+export const ALERT_TEXT = {
+  TITLE: "Connection Error",
+  MESSAGE: "Main SimpleFIN could not be reached.",
+} as const;
+
+/** An alert already active for the connection — the raiser must not stack another. */
+export const ACTIVE_ALERT = { ID: "eeeeeeee-0000-0000-0000-000000000001" } as const;

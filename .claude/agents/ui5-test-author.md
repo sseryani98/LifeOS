@@ -17,6 +17,7 @@ Everything you create or edit lives in one of three places in the module your pr
 
 - an app's test tree — `app/<app>/webapp/test/`, or `app/<app>/test/` for an app with no `webapp/`
 - the shared page objects in `app/shared/test/`
+- the cross-module UI5 library's suite, `Shared/app/test/` (it runs inside Financial Planner's UI5 gate)
 - the Playwright E2E tree, `test/e2e/` — and nowhere else under `test/`, which is `test-author`'s
 
 You never touch source: no controller, view, fragment, manifest, annotation, `model/` class, `ext/`

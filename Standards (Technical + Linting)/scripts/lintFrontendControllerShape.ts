@@ -180,8 +180,8 @@ function main(): void {
       `the SAP object surface but must delegate all logic to a class. A lifecycle ` +
       `\`ControllerExtension\` is wiring: no if/for/while/switch/try in it — each ` +
       `hook delegates to a plain logic class that QUnit can test. Move shared ` +
-      `behaviour into a helper class (e.g. app/shared/DialogManager.ts, ` +
-      `app/shared/Messaging.ts) held as a class field.`,
+      `behaviour into a helper class (e.g. Shared/app/DialogManager.ts, ` +
+      `Shared/app/Messaging.ts) held as a class field.`,
   );
 }
 

@@ -14,9 +14,9 @@ updated the same day when Sprint 2 story 1 landed the `app/**/test/**` ESLint bl
   `const outcome = await promise.then(() => "resolved", () => "rejected"); assert.strictEqual(outcome, "rejected");`
   Same trap for **`assert.true`/`assert.false`** (added in 2.11): use `assert.strictEqual(x, true)`.
 - **`assert.true`/`assert.false` do not exist either** (added in QUnit 2.11); `tsc` accepts them. Use `assert.ok`/`strictEqual`.
-- **`lint:messaging` scans test trees too**, and its import regex matches `import type` as well. To stub MessageToast or
+- **`lint:ui-helpers` (was `lint:messaging`) scans test trees too for banned imports** — its dialog/shim patterns are source-only, and its import regex matches `import type` as well. To stub MessageToast or
   MessageBox, take the loaded module with a sync probe: `sap.ui.require("sap/m/MessageBox") as MessageBoxShape` (shape in
-  `support/types.ts`). It is loaded because `Messaging` imports it. Example: FP `app/shared/test/support/sharedFakes.ts`.
+  `support/types.ts`). It is loaded because `Messaging` imports it. Example: `Shared/app/test/support/sharedFakes.ts`.
 - **Navigation stubs:** patch `History.getInstance().getPreviousHash` and `window.history.go` as own properties, and
   restore with `Reflect.deleteProperty`. A real `history.go(-1)` would navigate the test page away.
 - **Mutating source for a red with `perl -pi`:** the sources are CRLF, so a pattern ending in `\n` silently misses.
@@ -46,7 +46,7 @@ updated the same day when Sprint 2 story 1 landed the `app/**/test/**` ESLint bl
   regex** (`Standards (Technical + Linting)/eslint.config.mjs`, `methodVerbRegex`) before writing tests to it — D-028's
   `suggestRecurringSplit` failed and was renamed `findRecurringSplitSuggestion` mid-task; the rule is rename, not extend.
 - **Never `prettier --write` the test tree, not even your own edited files** — the committed specs are not
-  Prettier-clean (HEAD `TransactionActions.qunit.ts` fails `--check`), so a write reformats lines you did not author.
+  guaranteed Prettier-clean, so a write reformats lines you did not author.
   `npm run lint` does not run Prettier; leave formatting by hand.
 - **QUnit globals:** `/// <reference types="qunit" />` atop each `*.qunit.ts` (ruled per file, FP D-334 — the app
   `tsconfig.json` keeps `types: ["@sapui5/types"]` so production source cannot see them).

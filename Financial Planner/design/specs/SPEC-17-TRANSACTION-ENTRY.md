@@ -13,6 +13,7 @@
 | Date       | Author          | Description                         |
 | ---------- | --------------- | ----------------------------------- |
 | 2026-02-20 | Sandro & Claude | Initial creation — workshop output. |
+| 2026-11-05 | Claude          | refresh-docs: Shared/ lifeos-shared helpers, max-lines, file splits. |
 
 ---
 
@@ -34,7 +35,7 @@ Fiori Elements Object Page for creating manual transactions and editing any tran
 | --------------- | -------------------------------------------------------------------------- |
 | **CDS Service** | TransactionService (`/service/transactionSvcs`)                            |
 | **Module**      | `srv/modules/transaction/`                                                 |
-| **Files**       | `TransactionFacade.ts`, `TransactionService.ts`, `TransactionValidator.ts` |
+| **Files**       | `transactionFacade.ts`, `transactionService.ts`, `transactionSplitService.ts`, `transactionValidator.ts` |
 
 ### 2.4 Consumers
 

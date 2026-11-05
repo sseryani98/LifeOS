@@ -1,4 +1,4 @@
-// Shapes of the TransactionActions unit-test fakes.
+// Shapes of the CategorizationActions and SplitActions unit-test fakes.
 
 import type ExtensionAPI from "sap/fe/templates/ListReport/ExtensionAPI";
 import type FormElement from "sap/ui/layout/form/FormElement";

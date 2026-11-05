@@ -1,5 +1,6 @@
 {
   "url": [
+    "http://localhost:4104/lifeos-shared/test/testsuite.qunit.html",
     "http://localhost:4104/shared/test/testsuite.qunit.html",
     "http://localhost:4104/shell/test/testsuite.qunit.html",
     "http://localhost:4104/transactions/webapp/test/testsuite.qunit.html",
@@ -12,7 +13,7 @@
     "PORT=4104",
     "CDS_ENV=development,journey",
     "CDS_TYPESCRIPT=true",
-    "CDS_PLUGIN_UI5_MODULES={\"admin-master-data\":{\"configFile\":\"ui5-test.yaml\"},\"connection-manager\":{\"configFile\":\"ui5-test.yaml\"},\"csv-import-wizard\":{\"configFile\":\"ui5-test.yaml\"},\"shared\":{\"configFile\":\"ui5-test.yaml\"},\"shell\":{\"configFile\":\"ui5-test.yaml\"},\"transactions\":{\"configFile\":\"ui5-test.yaml\"}}"
+    "CDS_PLUGIN_UI5_MODULES={\"admin-master-data\":{\"configFile\":\"ui5-test.yaml\"},\"connection-manager\":{\"configFile\":\"ui5-test.yaml\"},\"csv-import-wizard\":{\"configFile\":\"ui5-test.yaml\"},\"shared\":{\"configFile\":\"ui5-test.yaml\"},\"shell\":{\"configFile\":\"ui5-test.yaml\"},\"transactions\":{\"configFile\":\"ui5-test.yaml\"},\"lifeos-shared\":{\"configFile\":\"ui5-test.yaml\"}}"
   ],
   "browser": "$/playwright.js",
   "ci": true,

@@ -1,5 +1,12 @@
-import { readdirSync, readFileSync } from "fs";
+import { existsSync, readdirSync, readFileSync } from "fs";
 import { join, relative } from "path";
+
+import {
+  type EntityUiBlock,
+  type Violation,
+  findFieldBlocks,
+  findUiBlocks,
+} from "./lib/annotationBlocks.js";
 
 const APP_DIR = join(process.cwd(), "app");
 
@@ -14,114 +21,16 @@ const TECHNICAL_FIELDS = [
   "modifiedBy",
 ];
 
-interface Violation {
-  filePath: string;
-  line: number;
-  rule: string;
-  message: string;
-}
-
 /**
  * Finds all CDS annotation files recursively under the given directory.
  */
 function findCdsAnnotationFiles(rootDir: string): string[] {
+  if (!existsSync(rootDir)) return [];
   const entries = readdirSync(rootDir, { recursive: true, encoding: "utf8" });
   return entries
     .filter(entry => entry.includes("annotations") && entry.endsWith(".cds"))
     .map(entry => join(rootDir, entry))
     .sort();
-}
-
-/**
- * Parses annotation blocks from a CDS file.
- * Returns entity UI blocks (with @UI:) and entity field blocks (with @UI.Hidden).
- */
-interface EntityUiBlock {
-  entityName: string;
-  startLine: number;
-  endLine: number;
-  content: string;
-}
-
-/**
- * Extracts the content between matched braces starting at the given position.
- */
-function extractBracedBlock(
-  text: string,
-  openIndex: number,
-): { content: string; endIndex: number } | null {
-  let depth = 0;
-  for (let i = openIndex; i < text.length; i++) {
-    if (text[i] === "{") depth++;
-    else if (text[i] === "}") {
-      depth--;
-      if (depth === 0) {
-        return { content: text.slice(openIndex, i + 1), endIndex: i };
-      }
-    }
-  }
-  return null;
-}
-
-/**
- * Finds all `annotate svc.EntityName with @UI: { ... }` blocks.
- */
-function findUiBlocks(content: string): EntityUiBlock[] {
-  const blocks: EntityUiBlock[] = [];
-  const regex = /annotate\s+svc\.(\w+)\s+with\s+@UI\s*:\s*\{/g;
-  let match: RegExpExecArray | null;
-
-  while ((match = regex.exec(content)) !== null) {
-    const entityName = match[1];
-    const braceStart = match.index + match[0].length - 1;
-    const result = extractBracedBlock(content, braceStart);
-    if (result) {
-      const startLine = content.slice(0, match.index).split("\n").length;
-      const endLine = content.slice(0, result.endIndex).split("\n").length;
-      blocks.push({
-        entityName,
-        startLine,
-        endLine,
-        content: result.content,
-      });
-    }
-  }
-
-  return blocks;
-}
-
-/**
- * Finds all `annotate svc.EntityName with { ... }` field-label blocks.
- */
-function findFieldBlocks(content: string): EntityUiBlock[] {
-  const blocks: EntityUiBlock[] = [];
-  const regex = /annotate\s+svc\.(\w+)\s+with\s*\{/g;
-  let match: RegExpExecArray | null;
-
-  while ((match = regex.exec(content)) !== null) {
-    // Skip @UI: blocks (already handled)
-    const beforeBrace = content.slice(
-      Math.max(0, match.index - 10),
-      match.index + match[0].length,
-    );
-    if (beforeBrace.includes("@UI")) continue;
-
-    const entityName = match[1];
-    const braceStart = match.index + match[0].length - 1;
-    const result = extractBracedBlock(content, braceStart);
-    if (result) {
-      const startLine = content.slice(0, match.index).split("\n").length;
-      const endLine = content.slice(0, result.endIndex).split("\n").length;
-      blocks.push({
-        entityName,
-        startLine,
-        endLine,
-        content: result.content,
-      });
-    }
-  }
-
-  return blocks;
 }
 
 /**

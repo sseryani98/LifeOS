@@ -3,6 +3,7 @@ import cds from "@sap/cds";
 import { BaseFacade } from "../shared/baseFacade.js";
 
 import type { TransactionService } from "./transactionService.js";
+import type { TransactionSplitService } from "./transactionSplitService.js";
 import type {
   BulkCategorizeResult,
   ReCategorizeResult,
@@ -16,15 +17,22 @@ import type {
  */
 export class TransactionFacade extends BaseFacade {
   private readonly service: TransactionService;
+  private readonly splitService: TransactionSplitService;
 
   /**
-   * Creates the facade bound to a CDS service and the transaction engine.
+   * Creates the facade bound to a CDS service and the transaction engines.
    * @param srv CDS application service to register handlers on.
-   * @param service Transaction engine the handlers delegate to.
+   * @param service Categorization engine the categorization and draft handlers delegate to.
+   * @param splitService Split engine the split handlers delegate to.
    */
-  constructor(srv: cds.ApplicationService, service: TransactionService) {
+  constructor(
+    srv: cds.ApplicationService,
+    service: TransactionService,
+    splitService: TransactionSplitService,
+  ) {
     super(srv, "transaction");
     this.service = service;
+    this.splitService = splitService;
   }
 
   /** Registers the transaction action handlers and the inline-edit learning hook. */
@@ -148,7 +156,7 @@ export class TransactionFacade extends BaseFacade {
    */
   private _handleSplitTransaction = (
     req: cds.Request,
-  ): Promise<SplitResult | undefined> => this.service.splitTransaction(req);
+  ): Promise<SplitResult | undefined> => this.splitService.splitTransaction(req);
 
   /**
    * Suggests the vendor's recurring split terms for the Split dialog.
@@ -158,7 +166,7 @@ export class TransactionFacade extends BaseFacade {
   private _handleSuggestRecurringSplit = (
     req: cds.Request,
   ): Promise<SplitSuggestion | null | undefined> =>
-    this.service.findRecurringSplitSuggestion(req);
+    this.splitService.findRecurringSplitSuggestion(req);
 
   /**
    * Applies one vendor + taxonomy across the selected transactions.
@@ -202,7 +210,7 @@ export class TransactionFacade extends BaseFacade {
    * @returns Resolves once the patch is completed or refused.
    */
   private _handleApplySplitShareEdit = (req: cds.Request): Promise<void> =>
-    this.service.applySplitShareEdit(req);
+    this.splitService.applySplitShareEdit(req);
 
   /**
    * Fills the object page's matched pattern and confidence.

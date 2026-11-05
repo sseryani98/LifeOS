@@ -14,6 +14,7 @@
 | 2026-02-21 | Sandro & Claude | Initial creation — Step 15 in progress.                                                                                                                          |
 | 2026-02-21 | Sandro          | Approved. All 7 sections complete — cross-sprint contracts, CLAUDE.md update, scaffold prompt, sprint checklists, prompt playbook (32 prompts), quick reference. |
 | 2026-11-05 | Claude          | Doc refresh, prose left as approved. Superseded since: FRM-001 "inline editing" lines (list is read-only, edits on the object page — D-336); single-file `srv/{service}.cds` paths (now shells, members in `srv/{service}/` — `lint:cds-layout`). |
+| 2026-11-05 | Claude          | refresh-docs: Shared/ lifeos-shared helpers, max-lines, file splits. |
 
 ---
 
@@ -1021,7 +1022,7 @@ Implement INT-001 (SimpleFIN Sync) and FRM-010 (Connection Manager) per SPEC-01 
 Read SPEC-01 §4.1 (INT-001) and §4.5 (FRM-010) for full details.
 
 **Backend — INT-001:**
-Create `srv/modules/ingestion/SimpleFINService.ts`:
+Create `srv/modules/ingestion/simpleFinService.ts`:
 - `syncTransactions(connectionId)` — calls SimpleFIN Bridge API via axios
 - Parses response, normalizes descriptions, maps accounts to CardInstances
 - Calls DeduplicationService.evaluate() for each transaction
@@ -1225,8 +1226,8 @@ Implement ENH-009 (Transaction Splits) and FRM-001 (Transaction List) per SPEC-0
 Read SPEC-02 §4.2 (ENH-009 splits) and §4.3 (FRM-001 list).
 
 **Backend — ENH-009:**
-Create `srv/modules/transaction/TransactionService.ts`:
-- `splitTransaction(transactionId, splits)` — creates TransactionSplit records
+Create `srv/modules/transaction/transactionService.ts`:
+- `splitTransaction(transactionId, splits)` — creates TransactionSplit records (split logic now in `transactionSplitService.ts`)
 - Each split has mySharePct and myShareAmount (budget uses myShareAmount; churning uses parent Transaction.amount per D-08)
 - Remainder calculation per D-119
 - Validation: splits must sum to 100%, minimum 2 splits
@@ -1237,12 +1238,12 @@ Expose through TransactionService CDS definition (`srv/transaction-service.cds`)
 - Actions: splitTransaction, bulkCategorize, correctCategorization
 
 Create transaction handler files:
-- `srv/modules/transaction/TransactionFacade.ts`
-- `srv/modules/transaction/TransactionService.ts`
-- `srv/modules/transaction/TransactionValidator.ts`
+- `srv/modules/transaction/transactionFacade.ts`
+- `srv/modules/transaction/transactionService.ts`
+- `srv/modules/transaction/transactionValidator.ts`
 
 **Frontend — FRM-001:**
-Create `app/transaction-list/` — Fiori Elements List Report + Object Page:
+Create `app/transactions/` — Fiori Elements List Report + Object Page:
 - List: all transactions with filters (date range, card, categorization status, purchase type, earning category)
 - Inline editing for vendor, purchase type, earning category
 - Object page: transaction detail with splits section

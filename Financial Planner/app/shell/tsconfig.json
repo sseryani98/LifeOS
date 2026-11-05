@@ -7,11 +7,24 @@
     "skipLibCheck": true,
     "noImplicitReturns": true,
     "paths": {
-      "com/financialplanner/shell/*": ["./*"],
-      "com/financialplanner/shared/*": ["../shared/*"]
+      "com/financialplanner/shell/*": [
+        "./*"
+      ],
+      "com/financialplanner/shared/*": [
+        "../shared/*"
+      ],
+      "com/lifeos/shared/*": [
+        "../../../Shared/app/*"
+      ]
     },
-    "types": ["@sapui5/types"]
+    "types": [
+      "@sapui5/types"
+    ]
   },
-  "include": ["**/*.ts"],
-  "exclude": ["node_modules"]
+  "include": [
+    "**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

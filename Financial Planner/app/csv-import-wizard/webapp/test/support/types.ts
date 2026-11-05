@@ -1,6 +1,7 @@
 // Shapes of the CSV Import Wizard unit-test fakes.
 
 import type CsvImportWizard from "com/financialplanner/csvimportwizard/controller/CsvImportWizard.controller";
+import type ReviewState from "com/financialplanner/csvimportwizard/model/ReviewState";
 import type {
   ClassifiedRow,
   CreatedEntity,
@@ -73,4 +74,12 @@ export interface WizardHarness {
   renderView(): void;
   buildRowPress(path: string): Button$PressEvent;
   restore(): void;
+}
+
+/** A ReviewState on a fresh "ui" model, its service reduced to a matched-transaction lookup. */
+export interface ReviewHarness {
+  review: ReviewState;
+  state: JSONModel;
+  matchedLookups: string[][];
+  matches: Record<string, MatchedTransaction>;
 }

@@ -11,7 +11,7 @@ import {
 } from "./shared/constants.js";
 import { Envelope } from "./shared/envelope.js";
 import { VerbRunner } from "./shared/runVerb.js";
-import { StageGuards } from "./shared/stageGuards.js";
+import { TargetResolver } from "./shared/targetResolver.js";
 import type { TrackerGateway } from "./shared/trackerGateway.js";
 import type {
   LogDefectInput,
@@ -126,7 +126,7 @@ export class LogDefectVerb implements VerbDefinition {
       Envelope.rejectVerb(HTTP.BAD_REQUEST, VERB_KEYS.DEFECT_SCOPE_REQUIRED);
     }
     if (hasStory) {
-      const { workspace, milestone } = await StageGuards.resolveStoryContext(
+      const { workspace, milestone } = await TargetResolver.resolveStoryContext(
         gateway,
         input.story as string,
       );
@@ -136,10 +136,10 @@ export class LogDefectVerb implements VerbDefinition {
         milestoneId: milestone.ID,
         initiativeId: null,
         target: Addressing.buildActivityTarget(workspace.slug, milestone.storyId),
-        nextAction: StageGuards.resolveNextAction(chain, milestone.storyId),
+        nextAction: TargetResolver.resolveNextAction(chain, milestone.storyId),
       };
     }
-    const { workspace, initiative } = await StageGuards.resolveActiveSprint(
+    const { workspace, initiative } = await TargetResolver.resolveActiveSprint(
       gateway,
       input.workspace as string,
     );

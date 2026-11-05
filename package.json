@@ -6,7 +6,8 @@
   "type": "module",
   "workspaces": [
     "Financial Planner",
-    "Project Tracker"
+    "Project Tracker",
+    "Shared"
   ],
   "scripts": {
     "lint": "npm run lint:harness && npm run lint:standards && npm run lint --workspaces --if-present",

@@ -4,7 +4,7 @@ import { Addressing } from "./shared/addressing.js";
 import { ACTIVITY_KINDS, HTTP, VERB_KEYS } from "./shared/constants.js";
 import { Envelope } from "./shared/envelope.js";
 import { VerbRunner } from "./shared/runVerb.js";
-import { StageGuards } from "./shared/stageGuards.js";
+import { TargetResolver } from "./shared/targetResolver.js";
 import type { TrackerGateway } from "./shared/trackerGateway.js";
 import type {
   RecordDecisionInput,
@@ -121,7 +121,7 @@ export class RecordDecisionVerb implements VerbDefinition {
     target: string;
   }> {
     const { workspaceSlug, innerName } = Addressing.parseDecisionTarget(target);
-    const workspace = await StageGuards.resolveWorkspace(gateway, workspaceSlug);
+    const workspace = await TargetResolver.resolveWorkspace(gateway, workspaceSlug);
     if (!innerName) {
       return {
         workspaceId: workspace.ID,

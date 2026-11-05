@@ -16,6 +16,7 @@
 | ---------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | 2026-02-16 | Sandro & Claude | Initial creation — workshop complete. D-92 through D-106 logged.                                                                                                                                                                     |
 | 2026-02-20 | Claude          | OI-06 resolved — all 21 specs complete. Alert Type seed count updated from 10 to 14 (added: offers_pending_approval via SPEC-13, af_approaching + cancel_reminder via SPEC-03, review_overdue via SPEC-15). Cross-spec note updated. |
+| 2026-11-05 | Claude          | refresh-docs: Shared/ lifeos-shared helpers, max-lines, file splits. |
 
 ---
 
@@ -94,7 +95,7 @@ Updated enum: `MAX_CONCURRENT` · `APPS_IN_WINDOW` · `PRODUCT_COOLDOWN` · `ISS
 
 ### 4.1 FRM-009 — Master Data Maintenance [Form]
 
-**Type:** Fiori Elements, AdminService. `app/master-data/`.
+**Type:** Fiori Elements, AdminService. `app/admin-master-data/`.
 
 **Layout:** Master-detail (D-92). Left panel: grouped `sap.m.List` of entity types with search box. Right panel: selected entity's table.
 

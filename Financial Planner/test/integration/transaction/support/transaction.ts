@@ -7,6 +7,7 @@ import { CategorizationService } from "../../../../srv/modules/categorization/ca
 import { TransactionDataService } from "../../../../srv/modules/transaction/transactionDataService.js";
 import { TransactionFacade } from "../../../../srv/modules/transaction/transactionFacade.js";
 import { TransactionService } from "../../../../srv/modules/transaction/transactionService.js";
+import { TransactionSplitService } from "../../../../srv/modules/transaction/transactionSplitService.js";
 
 import type { SplitSuggestion } from "../../../../srv/modules/transaction/types.js";
 
@@ -179,6 +180,11 @@ export const buildTransactionService = (): TransactionService => {
   );
 };
 
+/** The real split engine wired to the in-memory DB. */
+export const buildTransactionSplitService = (): TransactionSplitService => {
+  return new TransactionSplitService(new TransactionDataService());
+};
+
 /** Wraps an action payload as a request with a no-op error() collaborator. */
 export const actionRequest = (data: unknown): { data: unknown; error: () => void } => {
   return { data, error: () => undefined };
@@ -222,7 +228,11 @@ export const seedTransactionProcessing = async (): Promise<void> => {
  */
 export const registerTransactionHandlers = async (): Promise<void> => {
   const srv = (await cds.connect.to(SERVICE_NAME)) as cds.ApplicationService;
-  new TransactionFacade(srv, buildTransactionService()).registerHandlers();
+  new TransactionFacade(
+    srv,
+    buildTransactionService(),
+    buildTransactionSplitService(),
+  ).registerHandlers();
 };
 
 /**

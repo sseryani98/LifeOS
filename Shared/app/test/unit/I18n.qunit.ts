@@ -1,5 +1,5 @@
 /// <reference types="qunit" />
-import I18n from "com/financialplanner/shared/util/i18n";
+import I18n from "com/lifeos/shared/I18n";
 
 import { I18N, I18N_TEXTS } from "../data/constants";
 import { buildI18nSource } from "../support/sharedFakes";
@@ -19,7 +19,10 @@ QUnit.module("I18n", () => {
   QUnit.test("fills the text's placeholders from the args", assert => {
     const fake = buildI18nSource(I18N_TEXTS);
 
-    assert.strictEqual(I18n.getText(fake.source, I18N.PARAM_KEY, [I18N.ARG]), I18N.FILLED_TEXT);
+    assert.strictEqual(
+      I18n.getText(fake.source, I18N.PARAM_KEY, [I18N.ARG]),
+      I18N.FILLED_TEXT,
+    );
   });
 
   /** A key missing from the bundle yields "" so a toast or label shows nothing rather than "undefined". */

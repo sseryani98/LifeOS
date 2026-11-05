@@ -1,8 +1,9 @@
-// Wires the TransactionService to a mocked data layer and categorization engine
+// Wires both transaction engines to a mocked data layer and categorization engine
 // with the real validator and mapper; the request helpers carry a spy error() so
 // specs stay arrange-act-assert.
 
 import { TransactionService } from "../../../../srv/modules/transaction/transactionService.js";
+import { TransactionSplitService } from "../../../../srv/modules/transaction/transactionSplitService.js";
 
 import type { CategorizationService } from "../../../../srv/modules/categorization/categorizationService.js";
 import type { TransactionDataService } from "../../../../srv/modules/transaction/transactionDataService.js";
@@ -11,9 +12,10 @@ export interface TransactionMocks {
   data: jest.Mocked<TransactionDataService>;
   categorization: jest.Mocked<CategorizationService>;
   service: TransactionService;
+  splitService: TransactionSplitService;
 }
 
-/** Builds a fresh TransactionService with its data and categorization layers mocked. */
+/** Builds fresh transaction engines with their data and categorization layers mocked. */
 export const buildTransactionMocks = (): TransactionMocks => {
   const data = {
     loadTransactionAmount: jest.fn(async () => null),
@@ -42,7 +44,8 @@ export const buildTransactionMocks = (): TransactionMocks => {
   } as unknown as jest.Mocked<CategorizationService>;
 
   const service = new TransactionService(data, categorization);
-  return { data, categorization, service };
+  const splitService = new TransactionSplitService(data);
+  return { data, categorization, service, splitService };
 };
 
 /** Wraps an action payload as a request with a spy error() collaborator. */

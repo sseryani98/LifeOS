@@ -17,7 +17,7 @@ const MAX_CONTEXT_CHARS = 4_000;
 const CHECKS = [
   { test: /[.]ts$/i, eslint: true, scripts: ["lintCommentLength", "lintNoTrackingIds", "lintFilenames", "lintGroupedConstants", "lintDomainTypes"] },
   { test: /^(srv|mcp)[/].*[.]ts$/i, scripts: ["lintFacades", "lintMapperMethods", "lintHandlerEventTypes"] },
-  { test: /^app[/].*[.]ts$/i, scripts: ["lintMessaging", "lintFrontendDataAccess", "lintFrontendControllerShape", "lintFrontendConstants"] },
+  { test: /^app[/].*[.]ts$/i, scripts: ["lintUiHelpers", "lintFrontendDataAccess", "lintFrontendControllerShape", "lintFrontendConstants"] },
   { test: /^test[/].*[.]ts$/i, scripts: ["lintTestData", "lintTestStructure", "lintTestCqlAccess"] },
   { test: /[.]cds$/i, scripts: ["lintAnnotations", "lintI18n", "lintFilenames", "lintCdsServiceLayout"] },
   { test: /^app[/].*[.]xml$/i, scripts: ["lintControlIds", "lintNoDefaultAttributes", "lintEventHandlers", "lintI18n"] },

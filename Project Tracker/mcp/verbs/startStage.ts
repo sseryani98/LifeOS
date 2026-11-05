@@ -6,6 +6,7 @@ import { Addressing } from "./shared/addressing.js";
 import { ACTIVITY_KINDS } from "./shared/constants.js";
 import { VerbRunner } from "./shared/runVerb.js";
 import { StageGuards } from "./shared/stageGuards.js";
+import { TargetResolver } from "./shared/targetResolver.js";
 import type {
   StartStageInput,
   VerbContext,
@@ -43,12 +44,12 @@ export class StartStageVerb implements VerbDefinition {
    */
   async run(ctx: VerbContext, input: StartStageInput): Promise<VerbResult> {
     return VerbRunner.runWriteVerb(ctx, async (gateway, timestamp) => {
-      const { workspace, milestone } = await StageGuards.resolveStoryContext(
+      const { workspace, milestone } = await TargetResolver.resolveStoryContext(
         gateway,
         input.story,
       );
       const chain = await gateway.readChain(milestone.ID);
-      const task = StageGuards.resolveStage(chain, input.stage);
+      const task = TargetResolver.resolveStage(chain, input.stage);
       StageGuards.assertStageNotBlocked(chain, task);
       StageGuards.assertStageNotInProgress(task);
       StageGuards.assertStageNotComplete(task);
@@ -73,7 +74,7 @@ export class StartStageVerb implements VerbDefinition {
       // The stage's conditional steps were settled when the chain was made, so
       // the start is where the caller learns which ones this story carries.
       return {
-        nextAction: StageGuards.resolveNextAction(updated, milestone.storyId),
+        nextAction: TargetResolver.resolveNextAction(updated, milestone.storyId),
         extra: { subtasks: await gateway.readSubtasks(task.ID) },
       };
     });

@@ -135,6 +135,9 @@ const tsRules = {
     "warn",
     { max: 50, skipBlankLines: true, skipComments: true },
   ],
+  // A file past this holds more than one job — TransactionActions reached 611 lines
+  // before review caught it. Tests and the types/constants data files are exempt below.
+  "max-lines": ["error", { max: 300, skipBlankLines: true, skipComments: true }],
 
   "@typescript-eslint/naming-convention": [
     "error",
@@ -385,7 +388,7 @@ export default [
         {
           selector: "CallExpression[callee.property.name='getResourceBundle']",
           message:
-            "Resolve i18n via the shared getText helper (app/shared/util/i18n), not getResourceBundle directly.",
+            "Resolve i18n via the shared `I18n.getText` in Shared/app/I18n.ts (com/lifeos/shared/I18n), not getResourceBundle directly.",
         },
         // The base classes wrap these chains; calling around them re-hand-rolls
         // the shortcut. The :matches covers the `(… as View)` cast form too.
@@ -431,6 +434,7 @@ export default [
       "jsdoc/require-jsdoc": "off",
       // A QUnit.module callback holds the whole module, as a Jest describe does.
       "max-lines-per-function": "off",
+      "max-lines": "off",
       "no-restricted-syntax": ["error", ...restrictedSyntax, ...noFunctionKeyword],
     },
   },
@@ -440,6 +444,7 @@ export default [
   {
     files: ["**/types.ts", "**/constants.ts", "**/*.d.ts", "*.config.ts"],
     rules: {
+      "max-lines": "off",
       "no-restricted-syntax": ["error", ...restrictedSyntax, ...noFunctionKeyword],
     },
   },

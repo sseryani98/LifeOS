@@ -13,6 +13,7 @@ export default {
       paths: {
         "com/financialplanner/csvimportwizard": "../",
         "com/financialplanner/shared": "/shared/",
+        "com/lifeos/shared": "/lifeos-shared/",
       },
     },
   },

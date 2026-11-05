@@ -15,6 +15,7 @@
 | 2026-02-20 | Sandro & Claude | Added §13 — Test-Driven Development workflow (D-230).                         |
 | 2026-02-20 | Claude          | Status → Approved. Step 12 complete — all 21 specs approved.                  |
 | 2026-07-15 | Sandro & Claude | Life OS restructure — §4.1 and §10 now point at the shared Standards configs. |
+| 2026-11-05 | Claude          | refresh-docs: Shared/ lifeos-shared helpers, max-lines, file splits.          |
 
 ---
 
@@ -420,6 +421,7 @@ The rules below live in `Standards (Technical + Linting)/eslint.config.mjs`, sha
 | Type safety (no-explicit-any, no-console, eqeqeq)                   | `error`  |
 | Style (import order, private-methods-at-bottom, prefer-const)       | `error`  |
 | Complexity (max-depth, max-params, complexity)                      | `warn`   |
+| File size (max-lines)                                               | `error`  |
 
 ### 10.3 Rules
 
@@ -440,11 +442,13 @@ The rules below live in `Standards (Technical + Linting)/eslint.config.mjs`, sha
 
 **Complexity:**
 
-| Rule         | Severity | Threshold |
-| ------------ | -------- | --------- |
-| `max-depth`  | `warn`   | 4         |
-| `max-params` | `warn`   | 5         |
-| `complexity` | `warn`   | 10        |
+| Rule                     | Severity | Threshold                                                                                         |
+| ------------------------ | -------- | ------------------------------------------------------------------------------------------------- |
+| `max-depth`              | `warn`   | 4                                                                                                 |
+| `max-params`             | `warn`   | 5                                                                                                 |
+| `complexity`             | `warn`   | 10                                                                                                |
+| `max-lines-per-function` | `warn`   | 50 (skip blank lines and comments)                                                                |
+| `max-lines`              | `error`  | 300 (skip blank lines and comments); off for app tests, `types.ts`, `constants.ts`, `*.d.ts`, `*.config.ts` |
 
 **Naming:**
 
@@ -452,7 +456,7 @@ The rules below live in `Standards (Technical + Linting)/eslint.config.mjs`, sha
 | -------------------------------------- | -------- | ------------------------------------------------------------- |
 | `@typescript-eslint/naming-convention` | `error`  | PascalCase classes, camelCase methods, `_` prefix for private |
 | `camelcase`                            | `error`  | General camelCase enforcement                                 |
-| `id-length`                            | `warn`   | Min 2, exceptions: `i`, `j`, `k`, `n`, `x`, `y`, `_`          |
+| `id-length`                            | `error`  | Min 3, exceptions: `i`, `id` only; object keys exempt         |
 
 **Import Ordering:**
 
@@ -555,12 +559,21 @@ Applied to `app/**/*.ts` (D-315). The frontend **shares the backend `tsRules` ve
 ```
 app/shared/
 ├── BaseController.ts
+├── BasePageController.ts
+├── constants.ts
 ├── controls/
 │   ├── VizFrameCard.ts
 │   └── ApexChartCard.ts
+├── css/
+│   └── theme-overrides.css
 └── util/
-    └── formatter.ts          ← shared formatters (currency, date, status)
+    ├── formatter.ts          ← shared formatters (currency, date, status)
+    ├── Navigation.ts
+    ├── ObjectPageParser.ts
+    └── PercentFractionType.ts
 ```
+
+`DialogManager`, `Messaging` and `I18n` live in repo-root `Shared/app/` (workspace `lifeos-shared`, namespace `com.lifeos.shared`, served at `/lifeos-shared`), shared across Life OS modules.
 
 ---
 

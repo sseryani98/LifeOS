@@ -5,7 +5,7 @@
 import ConnectionManager from "com/financialplanner/connectionmanager/controller/ConnectionManager.controller";
 import ConnectionService from "com/financialplanner/connectionmanager/model/ConnectionService";
 import formatter from "com/financialplanner/connectionmanager/model/formatter";
-import Messaging from "com/financialplanner/shared/Messaging";
+import Messaging from "com/lifeos/shared/Messaging";
 import PageController from "sap/fe/core/PageController";
 import type { Table$SelectionChangeEvent } from "sap/fe/macros/table/Table";
 import type ManagedObject from "sap/ui/base/ManagedObject";

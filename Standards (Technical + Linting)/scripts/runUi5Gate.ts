@@ -5,11 +5,13 @@
 //
 // Usage (from a module): tsx "../Standards (Technical + Linting)/scripts/runUi5Gate.ts"
 //   [--row "<glob>:<lines>:<branches>"]...
+// A glob may climb out of the module ("../Shared/app/**"): nyc drops files outside its cwd, so
+// that row is checked with cwd moved up by the leading "../" segments.
 
 import { spawnSync } from "child_process";
 import { existsSync, readFileSync } from "fs";
 import { createRequire } from "module";
-import { join } from "path";
+import { join, resolve } from "path";
 
 const require = createRequire(import.meta.url);
 const CONFIG_FILE = join(process.cwd(), "ui5-test-runner.json");
@@ -53,14 +55,17 @@ if (!existsSync(mergedDir)) {
 const nyc = require.resolve("nyc/bin/nyc.js");
 const failedRows = rows.filter(row => {
   console.log(`\nUI5 coverage row ${row.glob}: lines ${row.lines}%, branches ${row.branches}%`);
+  const climb = /^(?:\.\.\/)*/.exec(row.glob)?.[0] ?? "";
   return (
     runNode([
       nyc,
       "check-coverage",
+      "--cwd",
+      resolve(process.cwd(), climb || "."),
       "--temp-dir",
       mergedDir,
       "--include",
-      row.glob,
+      row.glob.slice(climb.length),
       "--lines",
       row.lines,
       "--branches",
