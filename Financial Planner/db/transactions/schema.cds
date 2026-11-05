@@ -12,27 +12,35 @@ using {
     com.financialplanner.Vendor,
     com.financialplanner.PurchaseType,
     com.financialplanner.EarningCategory,
+    com.financialplanner.CategorizationStatusType,
+    com.financialplanner.TransactionSourceType,
     com.financialplanner.PatternSource,
     com.financialplanner.ConfidenceLevel
 } from '../reference/schema';
 
 entity Transaction : cuid, managed {
-    cardInstance         : Association to CardInstance                            @Common.Label: '{i18n>Transaction.cardInstance}';
-    providerAccount      : Association to ProviderAccount                         @Common.Label: '{i18n>Transaction.providerAccount}';
-    externalId           : String(255)                                            @Common.Label: '{i18n>Transaction.externalId}';
-    source               : TransactionSource not null                             @mandatory  @Common.Label: '{i18n>Transaction.source}';
-    amount               : Decimal(15, 2) not null                                @mandatory  @Common.Label: '{i18n>Transaction.amount}';
-    postedAt             : Date not null                                          @mandatory  @Common.Label: '{i18n>Transaction.postedAt}';
-    transactedAt         : Date                                                   @Common.Label: '{i18n>Transaction.transactedAt}';
-    rawDescription       : String(1000) not null                                  @mandatory  @Common.Label: '{i18n>Transaction.rawDescription}';
-    vendor               : Association to Vendor                                  @Common.Label: '{i18n>Transaction.vendor}';
-    purchaseType         : Association to PurchaseType                            @Common.Label: '{i18n>Transaction.purchaseType}';
-    earningCategory      : Association to EarningCategory                         @Common.Label: '{i18n>Transaction.earningCategory}';
-    categorizationStatus : CategorizationStatus not null default 'uncategorized'  @mandatory  @Common.Label: '{i18n>Transaction.categorizationStatus}';
-    isExcluded           : Boolean not null default false                         @mandatory  @Common.Label: '{i18n>Transaction.isExcluded}';
-    notes                : String(1000)                                           @Common.Label: '{i18n>Transaction.notes}';
-    split                : Composition of one TransactionSplit
-                               on split.transaction = $self;
+    cardInstance             : Association to CardInstance                            @Common.Label: '{i18n>Transaction.cardInstance}';
+    providerAccount          : Association to ProviderAccount                         @Common.Label: '{i18n>Transaction.providerAccount}';
+    externalId               : String(255)                                            @Common.Label: '{i18n>Transaction.externalId}';
+    source                   : TransactionSource not null                             @mandatory  @Common.Label: '{i18n>Transaction.source}';
+    sourceType               : Association to TransactionSourceType
+                                   on sourceType.code = source
+                                                                                      @Common.Label: '{i18n>Transaction.source}';
+    amount                   : Decimal(15, 2) not null                                @mandatory  @Common.Label: '{i18n>Transaction.amount}';
+    postedAt                 : Date not null                                          @mandatory  @Common.Label: '{i18n>Transaction.postedAt}';
+    transactedAt             : Date                                                   @Common.Label: '{i18n>Transaction.transactedAt}';
+    rawDescription           : String(1000) not null                                  @mandatory  @Common.Label: '{i18n>Transaction.rawDescription}';
+    vendor                   : Association to Vendor                                  @Common.Label: '{i18n>Transaction.vendor}';
+    purchaseType             : Association to PurchaseType                            @Common.Label: '{i18n>Transaction.purchaseType}';
+    earningCategory          : Association to EarningCategory                         @Common.Label: '{i18n>Transaction.earningCategory}';
+    categorizationStatus     : CategorizationStatus not null default 'uncategorized'  @mandatory  @Common.Label: '{i18n>Transaction.categorizationStatus}';
+    categorizationStatusType : Association to CategorizationStatusType
+                                   on categorizationStatusType.code = categorizationStatus
+                                                                                      @Common.Label: '{i18n>Transaction.categorizationStatus}';
+    isExcluded               : Boolean not null default false                         @mandatory  @Common.Label: '{i18n>Transaction.isExcluded}';
+    notes                    : String(1000)                                           @Common.Label: '{i18n>Transaction.notes}';
+    split                    : Composition of one TransactionSplit
+                                   on split.transaction = $self;
 }
 
 // The user's "my share" of a shared expense. At most one per Transaction.

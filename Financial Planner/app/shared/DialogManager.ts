@@ -72,13 +72,39 @@ export default class DialogManager {
    * @returns the loaded dialog
    */
   private async _loadFragment(fragmentName: string, controller?: object): Promise<Dialog> {
-    const base = controller ? { name: fragmentName, controller } : { name: fragmentName };
+    const base = controller
+      ? { name: fragmentName, controller: this._buildHandlerMap(controller) }
+      : { name: fragmentName };
     const settings = this._host.getView
       ? base
       : { id: this._deriveNamespace(fragmentName), ...base };
     const dialog = (await this._host.loadFragment(settings)) as Dialog;
     this._opened.set(dialog.getId(), dialog);
     return dialog;
+  }
+
+  /**
+   * FE's ExtensionAPI.loadFragment copies the controller with for…in, which
+   * skips a class's prototype methods, so a class-instance controller wires no
+   * handlers. Flattening them into own properties, bound to it, survives the copy.
+   * @param controller the fragment's event-handler home
+   * @returns a plain object holding every method of the controller, bound to it
+   */
+  private _buildHandlerMap(controller: object): Record<string, unknown> {
+    const handlers: Record<string, unknown> = {};
+    const source = controller as Record<string, unknown>;
+    let level: object | null = controller;
+    while (level && level !== Object.prototype) {
+      for (const name of Object.getOwnPropertyNames(level)) {
+        const member = source[name];
+        if (name !== "constructor" && !(name in handlers) && typeof member === "function") {
+          handlers[name] = (...args: unknown[]) =>
+            (source[name] as (...params: unknown[]) => unknown)(...args);
+        }
+      }
+      level = Object.getPrototypeOf(level) as object | null;
+    }
+    return handlers;
   }
 
   /**

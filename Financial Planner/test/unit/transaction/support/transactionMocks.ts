@@ -17,13 +17,22 @@ export interface TransactionMocks {
 export const buildTransactionMocks = (): TransactionMocks => {
   const data = {
     loadTransactionAmount: jest.fn(async () => null),
+    loadDraftSplitTransactionId: jest.fn(async () => null),
+    loadDraftSplitPct: jest.fn(async () => null),
     findSplitByTransaction: jest.fn(async () => null),
     insertSplit: jest.fn(async () => undefined),
     updateSplit: jest.fn(async () => undefined),
-    loadStoredVendor: jest.fn(async () => null),
+    loadStoredCategorization: jest.fn(async () => null),
+    loadDraftCategorization: jest.fn(async () => null),
+    loadTopCategoryCombo: jest.fn(async () => null),
+    loadTransactionMatchSource: jest.fn(async () => null),
+    loadTransactionForSuggestion: jest.fn(async () => null),
+    findLatestRecurringSplit: jest.fn(async () => null),
+    findMissingReferences: jest.fn(async () => []),
   } as unknown as jest.Mocked<TransactionDataService>;
 
   const categorization = {
+    buildContext: jest.fn(async () => ({ findMatch: jest.fn(() => null) })),
     correctCategorization: jest.fn(async () => true),
     applyAssignmentLearning: jest.fn(async () => undefined),
     applyReCategorization: jest.fn(async () => ({
@@ -47,4 +56,18 @@ export const requestWithKey = (
   id: string,
 ): { data: Record<string, unknown>; params: unknown[]; error: jest.Mock } => {
   return { data, params: [{ ID: id }], error: jest.fn() };
+};
+
+/** Wraps a READ result's request: the columns the client selected. */
+export const requestSelecting = (
+  columns: Array<{ ref: string[] }>,
+): { query: { SELECT: { columns: Array<{ ref: string[] }> } } } => {
+  return { query: { SELECT: { columns } } };
+};
+
+/** Builds a matching context whose matcher always returns the given pattern. */
+export const buildMatchContext = (
+  pattern: unknown,
+): { findMatch: jest.Mock } => {
+  return { findMatch: jest.fn(() => pattern) };
 };

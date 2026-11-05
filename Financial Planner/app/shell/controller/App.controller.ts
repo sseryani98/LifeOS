@@ -4,7 +4,6 @@ import NavConfig from "com/financialplanner/shell/controller/NavConfig";
 import ComponentContainer, {
   type ComponentContainer$ComponentCreatedEvent,
 } from "sap/ui/core/ComponentContainer";
-import HashChanger from "sap/ui/core/routing/HashChanger";
 import JSONModel from "sap/ui/model/json/JSONModel";
 import type Page from "sap/m/Page";
 import type { SideNavigation$ItemSelectEvent } from "sap/tnt/SideNavigation";
@@ -21,7 +20,8 @@ import type UIComponent from "sap/ui/core/UIComponent";
 export default class App extends BaseController {
   private _componentContainers: Record<string, ComponentContainer> = {};
   private _components: Record<string, UIComponent> = {};
-  private _pendingRoute: string | null = null;
+  private readonly _pendingRoutes = new Map<string, string>();
+  private readonly _hashChangeListener = (): void => this._restoreFromHash();
 
   /**
    * Initialises the shell view model and restores navigation from the hash.
@@ -36,6 +36,13 @@ export default class App extends BaseController {
     this.setModel(shellModel, "shellView");
     this._restoreFromHash();
     this._attachHashChangeHandler();
+  }
+
+  /**
+   * Detaches the window hash listener, so a destroyed shell stops reacting.
+   */
+  public onExit(): void {
+    window.removeEventListener("hashchange", this._hashChangeListener);
   }
 
   /**
@@ -60,7 +67,9 @@ export default class App extends BaseController {
    * Handles side navigation item selection.
    * @param event the itemSelect event
    */
-  public onSideNavigationItemSelect(event: SideNavigation$ItemSelectEvent): void {
+  public onSideNavigationItemSelect(
+    event: SideNavigation$ItemSelectEvent,
+  ): void {
     const key = event.getParameter("item")?.getKey();
     if (!key) {
       return;
@@ -70,12 +79,11 @@ export default class App extends BaseController {
 
   /**
    * Re-runs hash restoration on every hash change — a hash typed or pasted
-   * while the shell is open must switch apps too, not only the one at load.
+   * while the shell is open must switch apps too. The window event, not the
+   * HashChanger's: that one stays silent until some app's router initialises.
    */
   private _attachHashChangeHandler(): void {
-    HashChanger.getInstance().attachEvent("hashChanged", () =>
-      this._restoreFromHash(),
-    );
+    window.addEventListener("hashchange", this._hashChangeListener);
   }
 
   /**
@@ -100,14 +108,17 @@ export default class App extends BaseController {
    * Loads an app component into the shell content area. Caches
    * ComponentContainers by component name and navigates the inner router.
    * @param componentName the UI5 component name
-   * @param route the target route within the component
+   * @param route the target route within the component, or undefined to leave
+   * the current hash to the component's own router
    */
-  private _loadAppComponent(componentName: string, route: string): void {
+  private _loadAppComponent(
+    componentName: string,
+    route: string | undefined,
+  ): void {
     const page = this.byId("idAppContentPage") as Page;
     page.removeAllContent();
 
     if (!this._componentContainers[componentName]) {
-      this._pendingRoute = route;
       this._componentContainers[componentName] = new ComponentContainer({
         name: componentName,
         async: true,
@@ -116,14 +127,22 @@ export default class App extends BaseController {
         componentCreated: (event: ComponentContainer$ComponentCreatedEvent) => {
           const component = event.getParameter("component") as UIComponent;
           this._components[componentName] = component;
-          if (this._pendingRoute) {
-            component.getRouter().navTo(this._pendingRoute, {}, true);
-            this._pendingRoute = null;
+          // Keyed per component: a second pick while this one loads must win, not the first.
+          const pendingRoute = this._pendingRoutes.get(componentName);
+          this._pendingRoutes.delete(componentName);
+          if (pendingRoute) {
+            component.getRouter().navTo(pendingRoute, {}, true);
           }
         },
       });
+    }
+
+    if (!route) {
+      this._pendingRoutes.delete(componentName);
     } else if (this._components[componentName]) {
       this._components[componentName].getRouter().navTo(route, {}, true);
+    } else {
+      this._pendingRoutes.set(componentName, route);
     }
 
     page.addContent(this._componentContainers[componentName]);
@@ -133,14 +152,19 @@ export default class App extends BaseController {
    * Navigates to a nav key — loads its component, selects the side nav item,
    * and shows the back button.
    * @param key the NavConfig key
+   * @param keepHash true when the hash names a record or sub-page, which the
+   * app's router opens itself; routing to the list would overwrite it
    */
-  private _navigateToKey(key: string): void {
+  private _navigateToKey(key: string, keepHash = false): void {
     const config = NavConfig.getEntry(key);
     if (!config) {
       return;
     }
 
-    this._loadAppComponent(config.component, config.route);
+    this._loadAppComponent(
+      config.component,
+      keepHash ? undefined : config.route,
+    );
     const shellModel = this._getShellModel();
     shellModel.setProperty("/selectedKey", key);
     // The owner component, not the view: a deep link lands here from onInit,
@@ -167,7 +191,7 @@ export default class App extends BaseController {
     const navKey = NavConfig.getNavKeyForHash(hashPart);
     const shellModel = this._getShellModel();
     if (navKey && navKey !== shellModel.getProperty("/selectedKey")) {
-      this._navigateToKey(navKey);
+      this._navigateToKey(navKey, hash !== hashPart);
     }
   }
 

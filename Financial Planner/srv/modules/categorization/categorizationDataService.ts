@@ -130,19 +130,19 @@ export class CategorizationDataService {
     transactionIds: string[],
   ): Promise<TransactionRecategorizationRow[]> {
     const rows = (await SELECT.from(ENTITIES.TRANSACTION)
-      .columns("ID", "rawDescription", "amount", "categorizationStatus")
-      .where({ ID: { in: transactionIds } })) as Array<{
-        ID: string;
-        rawDescription: string;
-        amount: number | string;
-        categorizationStatus: string;
-      }>;
-    return rows.map(row => ({
-      ID: row.ID,
-      rawDescription: row.rawDescription,
-      amount: Number(row.amount),
-      categorizationStatus: row.categorizationStatus,
-    }));
+      .columns(
+        "ID",
+        "rawDescription",
+        "amount",
+        "categorizationStatus",
+        "vendor_ID",
+        "purchaseType_ID",
+        "earningCategory_ID",
+      )
+      .where({ ID: { in: transactionIds } })) as Array<
+        Omit<TransactionRecategorizationRow, "amount"> & { amount: number | string }
+      >;
+    return rows.map(row => ({ ...row, amount: Number(row.amount) }));
   }
 
   /**

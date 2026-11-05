@@ -1,8 +1,8 @@
 # Theme
 
 **Document ID:** TH-001
-**Version:** 1.4
-**Date:** 2026-11-04
+**Version:** 1.6
+**Date:** 2026-11-05
 **Status:** Approved
 
 ---
@@ -19,6 +19,9 @@
 | 2026-11-03 | Claude          | D-320: label text → Driftwood `#6B6259`, replacing Horizon slate `#556B82` (D-018). §7.1 recounted.                                                                                                                   |
 | 2026-11-04 | Claude          | Refresh against the file: §6.3 load mechanism re-read from `Component.ts`; §3.7 and §8 gain the D-320 rows; Summary and §7.3 counts, §6.4 examples, two stale body-text hexes and the ghost-button borders corrected. |
 | 2026-11-04 | Sandro          | Re-approved after the refresh. Status stays Approved.                                                                                                                                                                 |
+| 2026-11-04 | Claude          | §5.13 Favicon added. Summary gains the Favicon row.                                                                                                                                                                   |
+| 2026-11-05 | Claude          | D-090: ObjectPage cards take the 3rem XL gutter their headings use. D-091: IconTabBar header radii (anchor-bar expand icon, overflow, selected bar, focus rings) set to 0. §4.4, §7.2 and the Summary recounted.      |
+| 2026-11-05 | Claude          | Doc refresh: §7.1 gains the Switch On-State block (defect D-035, 9 `--sapButton_Track/Handle_Selected_*` properties); Summary, §6, §7.1 and §7.4 recounted to 111 properties.                                          |
 
 ---
 
@@ -43,7 +46,8 @@ Custom visual identity layered on top of `sap_horizon` (Horizon Light). Targeted
 | **Side Nav**        | Soft Ash `#E8E5E2` — tinted for three-column depth (D-317)    |
 | **Override Method** | Single CSS file after Horizon, CSS custom properties (D-312)  |
 | **Illustrations**   | Amber ramp, Obsidian outlines, Taupe greys (D-319)            |
-| **Total Overrides** | 102 custom properties + 29 targeted rules, 49 selectors (§7)  |
+| **Favicon**         | Amber bars on an Obsidian square, `app/favicon.svg` (§5.13)   |
+| **Total Overrides** | 111 custom properties + 33 targeted rules, 73 selectors (§7)  |
 | **Amends**          | D-60, D-308, D-309, D-313 (replaced by D-317 palette)         |
 
 ---
@@ -220,7 +224,7 @@ Six CSS custom property overrides:
 }
 ```
 
-The tokens do not reach every corner. Horizon 1.136.16 hardcodes radii on ObjectPage blocks (12px), floating footers (12px), the DynamicPage collapse and pin buttons (8px), the split button frame (8px), the focused wizard step (8px), navigation items (6px) and the input focus ring (4px). Each gets a targeted rule (§7.2). The exceptions in §4.3 don't need explicit overrides — they use their own CSS classes and are not affected by these parameters.
+The tokens do not reach every corner. Horizon 1.136.16 hardcodes radii on ObjectPage blocks (12px), floating footers (12px), the DynamicPage collapse and pin buttons (8px), the split button frame (8px), the segmented button's end corners at compact density (8px), tokens (6px, 8px focused), the focused wizard step (8px), navigation items (6px), the input focus ring (4px), the button focus ring (6px), and the IconTabBar header — the ObjectPage anchor bar among them — on its expand icon (4px), overflow buttons (12px), selected bar (2px) and focus rings (D-091). Each gets a targeted rule (§7.2). The exceptions in §4.3 don't need explicit overrides — they use their own CSS classes and are not affected by these parameters.
 
 ---
 
@@ -367,6 +371,10 @@ Every `IllustratedMessage` scene in 1.136.16 paints from `--sapContent_Illustrat
 
 Skin tones, hair, red, green, teal (`Color9`, `Color17`) and magenta (`Color1`, `Color11`) are not SAP blue and stay. The artwork is decorative, so no contrast bar applies to it.
 
+### 5.13 Favicon
+
+`app/favicon.svg`, linked from `app/index.html` as `<link rel="icon" type="image/svg+xml">`. Three rising bars in Amber `#C8973E` on an Obsidian `#2A2725` square with a 7/32 corner radius. It reads as the ShellBar in miniature. The icon is browser chrome, not a UI5 container, so the zero-radius rule in §4 does not apply to it. It is a static SVG with no PNG or `.ico` fallback, because every evergreen browser renders SVG favicons.
+
 ---
 
 ## 6. Override Strategy
@@ -405,7 +413,7 @@ The CSS file contains two layers:
 
 | Layer                     | Mechanism                                           | Purpose                                                                                                                                                     |
 | ------------------------- | --------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **1. Custom properties**  | `:root { --sapBrandColor: #C8973E; ... }`           | Colors, fonts, border radii — 102 of the file's 131 blocks. All components referencing these properties update automatically.                               |
+| **1. Custom properties**  | `:root { --sapBrandColor: #C8973E; ... }`           | Colors, fonts, border radii — 111 of the file's 144 blocks. All components referencing these properties update automatically.                               |
 | **2. Targeted selectors** | `.sapMIBar.sapMTB.sapMOTB.sapTntToolHeader { ... }` | Component-specific tweaks where Horizon hardcodes a value instead of reading a token (the ToolHeader ignores `--sapShellColor`; hardcoded radii and greys). |
 
 Layer 1 always comes first. Layer 2 is the escape hatch — used sparingly and only when needed.
@@ -437,7 +445,7 @@ Layer 1 always comes first. Layer 2 is the escape hatch — used sparingly and o
 
 ### 7.1 Layer 1 — CSS Custom Properties
 
-All values set via `:root { }` block — **102 properties**, grouped as in the file. The Horizon Default column was re-read on 2026-10-30 from the `:root` block of `sap/ui/core/themes/sap_horizon/library.css` at 1.136.16.
+All values set via `:root { }` block — **111 properties**, grouped as in the file. The Horizon Default column was re-read on 2026-10-30 from the `:root` block of `sap/ui/core/themes/sap_horizon/library.css` at 1.136.16.
 
 #### Typography
 
@@ -548,6 +556,22 @@ Every family token points at `var(--sapFontFamily)`, so one line carries the bra
 | `--sapButton_Selected_Hover_Background`  | `#D9EAFF`       | `#F5EDD8` | Gold Mist  |
 | `--sapButton_Selected_Hover_BorderColor` | `#0064D9`       | `#7A5E1B` | Deep Gold  |
 
+#### Switch — On State
+
+The pill track is exempt from zero radius (§4.3), not from the palette (D-035).
+
+| CSS Custom Property                             | Horizon Default         | Override                | Notes                           |
+| ----------------------------------------------- | ----------------------- | ----------------------- | ------------------------------- |
+| `--sapButton_Track_Selected_Background`         | `#0064D9`               | `#8E6A24`               | Burnt Gold — matches Emphasized |
+| `--sapButton_Track_Selected_BorderColor`        | `#0064D9`               | `#8E6A24`               | Burnt Gold                      |
+| `--sapButton_Track_Selected_Hover_Background`   | `#0058BF`               | `#7A5E1B`               | Deep Gold                       |
+| `--sapButton_Track_Selected_Hover_BorderColor`  | `#0058BF`               | `#7A5E1B`               | Deep Gold                       |
+| `--sapButton_Handle_Selected_Background`        | `#EDF5FF`               | `#F5EDD8`               | Gold Mist                       |
+| `--sapButton_Handle_Selected_BorderColor`       | `#EDF5FF`               | `#F5EDD8`               | Gold Mist                       |
+| `--sapButton_Handle_Selected_Hover_Background`  | `#EDF5FF`               | `#F5EDD8`               | Gold Mist                       |
+| `--sapButton_Handle_Selected_Hover_BorderColor` | `rgba(237,245,255,0.5)` | `rgba(245,237,216,0.5)` | Gold Mist at half alpha         |
+| `--sapButton_Handle_Selected_TextColor`         | `#0064D9`               | `#7A5E1B`               | Deep Gold — the check mark      |
+
 #### Buttons — Transparent (Lite)
 
 | CSS Custom Property                   | Horizon Default | Override  | Notes      |
@@ -620,43 +644,47 @@ Thirteen `--sapContent_Illustrative_ColorN` tokens, listed with their Horizon va
 
 ### 7.2 Layer 2 — Targeted Selectors
 
-**29 rules, 49 selectors** (the typography rule alone lists 12). Each exists because Horizon 1.136.16 hardcodes the value instead of reading a token. Verified against the running DOM on 2026-10-30; each carries a comment in the CSS file.
+**33 rules, 73 selectors** (the typography rule alone lists 12). Each exists because Horizon 1.136.16 hardcodes the value instead of reading a token. Verified against the running DOM on 2026-10-30; each carries a comment in the CSS file.
 
-| Selector                                                                     | Override                                 | Reason                                                                          |
-| ---------------------------------------------------------------------------- | ---------------------------------------- | ------------------------------------------------------------------------------- |
-| `.sapUiBody`                                                                 | `font-family`                            | Body font                                                                       |
-| `.sapUiBody .sapMText, ...` (12 selectors)                                   | `font-family`                            | Horizon bakes `"72"` into compiled CSS instead of referencing `--sapFontFamily` |
-| `.sapMWizardProgressNavStepTitle`                                            | `font-weight: bold`                      | Weight came from the `72-Bold` face                                             |
-| `.sapFDynamicPageTitleMainHeadingInner .sapMTitle`                           | `font-weight: bold`                      | Weight came from the `72Black` face; `.sapMTitle` resets it to normal           |
-| `.sapUxAPObjectPageHeaderStickied ... .sapMTitle`                            | `font-family`                            | Stuck ObjectPage title hardcodes `"72Black"`                                    |
-| `.sapMIBar.sapMTB.sapMOTB.sapTntToolHeader`                                  | background, color, `box-shadow`, z-index | ToolHeader ignores `--sapShellColor`; the shadow is the §5.1 separator          |
-| `.sapTntToolHeader .sapMTitle`, `.sapTntToolHeader > .sapUiIcon`             | `color`                                  | Title and icon default to dark text on the dark bar                             |
-| `... .sapTntToolHeader .sapMBtnInner`, `.sapMBtnIcon`, `:hover` (3 rules)    | color, hover background                  | Transparent buttons inherit dark text on the dark bar                           |
-| `.sapTntToolPageMain`                                                        | `background-color`                       | Hardcoded cool grey `#F5F6F7` → Warm Stone                                      |
-| `.sapUxAPObjectPageWrapper`                                                  | `background-color`                       | ObjectPage scroll area, same cool grey                                          |
-| `.sapFDynamicPage .sapFDynamicPageContentWrapperStandard > ...Content`       | `background`                             | List-report content, same cool grey                                             |
-| `.sapFDynamicPageHeader`, snapped header wrapper                             | `background`                             | Filter-bar band hardcodes white → `--sapObjectHeader_Background`                |
-| DynamicPage collapse and pin `.sapMBtnInner`, `.sapMSB .sapMSBText`          | `border-radius: 0`                       | Hardcoded 8px                                                                   |
-| `.sapUxAPObjectPageSection ... .sapUxAPBlockContainer`                       | `background`, `border-radius: 0`         | Hardcoded white and 12px                                                        |
-| `.sapUxAPObjectPageFloatingFooter`, `.sapFDynamicPageActualFooterControl`    | `border-radius: 0`                       | Floating draft footers hardcode 12px                                            |
-| `.sapMFocus.sapMInputBase .sapMInputBaseContentWrapper::before`              | `border-radius: 0`                       | Input focus ring hardcodes 4px                                                  |
-| `.sapMWizardProgressNavStep:focus .sapMWizardProgressNavStepContainer`       | `border-radius: 0`                       | Focused step hardcodes 8px; circles keep 50% (§4.3)                             |
-| `.sapUiFup .sapMBtnHoverable:hover`                                          | `background-color`                       | FileUploader button hardcodes hover grey `#EAECEE`                              |
-| `.sapUiFup .sapMBtnInner:active`                                             | background, border, color                | Pressed state hardcodes white and blue `#0064D9`                                |
-| `html.sap-desktop .sapUiFup .sapMFocusable:focus`, `:active` (2 selectors)   | `outline-color`                          | Dotted outline hardcodes `#0032A5`                                              |
-| `.sapTntToolPageAsideContent`                                                | `background-color`                       | Soft Ash (`#E8E5E2`) aside                                                      |
-| `.sapTntSideNavigation`                                                      | `background: transparent`                | Nav hardcodes white over the aside                                              |
-| `.sapTntNLI`, `.sapTntNLGroup`                                               | transparent, `border-radius: 0`          | Items hardcode white and 6px                                                    |
-| `.sapTntNLI:not(...):hover`                                                  | `background-color`                       | Hover hardcodes grey → Gold Mist                                                |
-| `.sapTntNLI.sapTntNLISelected`, `.sapTntNLISelected.sapTntNLISecondLevel...` | `background` (composite)                 | Blue bar and tint → Burnt Gold bar on Gold Mist; second level has its own rule  |
-| `.sapTntNLI.sapTntNLISelected a`                                             | `background-color`                       | Inner anchor's blue tint → Gold Mist                                            |
-| `.sapTntNL .sapTntNLI:not(...)[tabindex]:focus::after` (2 selectors)         | `border-color`, `border-radius: 0`       | Focus ring is a hardcoded `#0032A5` border, not `--sapContent_FocusColor`       |
+| Selector                                                                                                                               | Override                                 | Reason                                                                                          |
+| -------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `.sapUiBody`                                                                                                                           | `font-family`                            | Body font                                                                                       |
+| `.sapUiBody .sapMText, ...` (12 selectors)                                                                                             | `font-family`                            | Horizon bakes `"72"` into compiled CSS instead of referencing `--sapFontFamily`                 |
+| `.sapMWizardProgressNavStepTitle`                                                                                                      | `font-weight: bold`                      | Weight came from the `72-Bold` face                                                             |
+| `.sapFDynamicPageTitleMainHeadingInner .sapMTitle`                                                                                     | `font-weight: bold`                      | Weight came from the `72Black` face; `.sapMTitle` resets it to normal                           |
+| `.sapUxAPObjectPageHeaderStickied ... .sapMTitle`                                                                                      | `font-family`                            | Stuck ObjectPage title hardcodes `"72Black"`                                                    |
+| `.sapMIBar.sapMTB.sapMOTB.sapTntToolHeader`                                                                                            | background, color, `box-shadow`, z-index | ToolHeader ignores `--sapShellColor`; the shadow is the §5.1 separator                          |
+| `.sapTntToolHeader .sapMTitle`, `.sapTntToolHeader > .sapUiIcon`                                                                       | `color`                                  | Title and icon default to dark text on the dark bar                                             |
+| `... .sapTntToolHeader .sapMBtnInner`, `.sapMBtnIcon`, `:hover` (3 rules)                                                              | color, hover background                  | Transparent buttons inherit dark text on the dark bar                                           |
+| `.sapTntToolPageMain`                                                                                                                  | `background-color`                       | Hardcoded cool grey `#F5F6F7` → Warm Stone                                                      |
+| `.sapUxAPObjectPageWrapper`                                                                                                            | `background-color`                       | ObjectPage scroll area, same cool grey                                                          |
+| `.sapFDynamicPage .sapFDynamicPageContentWrapperStandard > ...Content`                                                                 | `background`                             | List-report content, same cool grey                                                             |
+| `.sapFDynamicPageHeader`, snapped header wrapper                                                                                       | `background`                             | Filter-bar band hardcodes white → `--sapObjectHeader_Background`                                |
+| DynamicPage collapse and pin `.sapMBtnInner`, `.sapMSB .sapMSBText`                                                                    | `border-radius: 0`                       | Hardcoded 8px                                                                                   |
+| Compact `.sapMSegBBtn` first/last `.sapMSegBBtnInner` (+ focus `::after`), `.sapMToken` states                                         | `border-radius: 0`                       | Segmented-button ends hardcode 8px at compact density; tokens 6px, 8px focused (D-053)          |
+| `.sapUxAPObjectPageSection ... .sapUxAPBlockContainer`                                                                                 | `background`, `border-radius: 0`         | Hardcoded white and 12px                                                                        |
+| XL `.sapUxAPObjectPageSection ... .sapUxAPBlockContainer`                                                                              | `margin-left`, `margin-right: 3rem`      | XL widens the heading gutter to 3rem but keeps the cards at 2rem (D-090)                        |
+| `.sapUxAPObjectPageFloatingFooter`, `.sapFDynamicPageActualFooterControl`                                                              | `border-radius: 0`                       | Floating draft footers hardcode 12px                                                            |
+| `.sapMFocus.sapMInputBase .sapMInputBaseContentWrapper::before`                                                                        | `border-radius: 0`                       | Input focus ring hardcodes 4px                                                                  |
+| `.sapMBtn:focus-visible>.sapMFocusable::before`, `html.sap-desktop .sapMBtn:focus>…::before` (4 selectors)                             | `border-radius: 0`                       | Button focus ring hardcodes 6px (D-069)                                                         |
+| `.sapMITBFilterExpandIcon`, `.sapMITHStart/EndOverflow .sapMITBItem`, `.sapMITBContentArrow::after`, tab focus `::after` (8 selectors) | `border-radius: 0`                       | IconTabBar and anchor-bar expand icon 4px, overflow 12px, selected bar 2px, focus rings (D-091) |
+| `.sapMWizardProgressNavStep:focus .sapMWizardProgressNavStepContainer`                                                                 | `border-radius: 0`                       | Focused step hardcodes 8px; circles keep 50% (§4.3)                                             |
+| `.sapUiFup .sapMBtnHoverable:hover`                                                                                                    | `background-color`                       | FileUploader button hardcodes hover grey `#EAECEE`                                              |
+| `.sapUiFup .sapMBtnInner:active`                                                                                                       | background, border, color                | Pressed state hardcodes white and blue `#0064D9`                                                |
+| `html.sap-desktop .sapUiFup .sapMFocusable:focus`, `:active` (2 selectors)                                                             | `outline-color`                          | Dotted outline hardcodes `#0032A5`                                                              |
+| `.sapTntToolPageAsideContent`                                                                                                          | `background-color`                       | Soft Ash (`#E8E5E2`) aside                                                                      |
+| `.sapTntSideNavigation`                                                                                                                | `background: transparent`                | Nav hardcodes white over the aside                                                              |
+| `.sapTntNLI`, `.sapTntNLGroup`                                                                                                         | transparent, `border-radius: 0`          | Items hardcode white and 6px                                                                    |
+| `.sapTntNLI:not(...):hover`                                                                                                            | `background-color`                       | Hover hardcodes grey → Gold Mist                                                                |
+| `.sapTntNLI.sapTntNLISelected`, `.sapTntNLISelected.sapTntNLISecondLevel...`                                                           | `background` (composite)                 | Blue bar and tint → Burnt Gold bar on Gold Mist; second level has its own rule                  |
+| `.sapTntNLI.sapTntNLISelected a`                                                                                                       | `background-color`                       | Inner anchor's blue tint → Gold Mist                                                            |
+| `.sapTntNL .sapTntNLI:not(...)[tabindex]:focus::after` (2 selectors)                                                                   | `border-color`, `border-radius: 0`       | Focus ring is a hardcoded `#0032A5` border, not `--sapContent_FocusColor`                       |
 
 ### 7.3 Note on Horizon Defaults
 
 Horizon default values listed above were read from the `sap_horizon` 1.136.16 `:root` parameter block on the CDN on 2026-10-30. Before that pass several were wrong, among them `--sapBackgroundColor` (`#F5F6F7`, not `#FAFAFA`), `--sapActiveColor`, `--sapShell_TextColor`, `--sapShell_Hover_Background`, `--sapButton_Emphasized_Active_Background` and three radius tokens. The override values are final — Horizon defaults are documented here for reference, not as contractual values.
 
-The two counts — 102 properties in §7.1, 29 rules in §7.2 — are counts of the file as it stands. Recount them whenever the file changes, rather than adjusting the number by hand.
+The two counts — 111 properties in §7.1, 33 rules in §7.2 — are counts of the file as it stands. Recount them whenever the file changes, rather than adjusting the number by hand.
 
 ---
 

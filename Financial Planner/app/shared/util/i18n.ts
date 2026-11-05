@@ -13,11 +13,12 @@ export default class I18n {
    * bound control, an FE ExtensionAPI).
    * @param source the view/control/API carrying the propagated "i18n" model
    * @param key the i18n message key
+   * @param args values for the text's {0}, {1}… placeholders
    * @returns the resolved text, or "" when the key is missing
    */
-  public static getText(source: I18nModelSource, key: string): string {
+  public static getText(source: I18nModelSource, key: string, args?: string[]): string {
     const model = source.getModel("i18n") as ResourceModel;
     const bundle = model.getResourceBundle() as ResourceBundle;
-    return bundle.getText(key) ?? "";
+    return bundle.getText(key, args) ?? "";
   }
 }

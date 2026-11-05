@@ -203,7 +203,8 @@ export default class CsvImportWizardService {
     id: string,
   ): Promise<MatchedTransaction | null> {
     const context = this._model.bindContext(`${ODATA_PATH.TRANSACTIONS}(${id})`);
-    const object = (await context.requestObject()) as MatchedTransaction | null;
+    // One unreadable match (deleted since the parse) must not sink the whole duplicate lookup.
+    const object = (await context.requestObject().catch(() => null)) as MatchedTransaction | null;
     return object ?? null;
   }
 

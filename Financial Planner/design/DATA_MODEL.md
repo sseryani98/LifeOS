@@ -527,8 +527,8 @@ When forecast items exist, Goal.target_amount = SUM(estimated_amount), computed 
 | vendor_id             | FK → Vendor           | no       | Assigned by ENH-001 or user                             |
 | purchase_type_id      | FK → Purchase Type    | no       | Budget category                                         |
 | earning_category_id   | FK → Earning Category | no       | Churning category                                       |
-| categorization_status | enum                  | yes      | `auto` · `user_corrected` · `uncategorized`             |
-| source                | enum                  | yes      | `simplefin` · `csv` · `manual` (D-254, SPEC-17)         |
+| categorization_status | enum                  | yes      | `auto` · `user_corrected` · `uncategorized`; labels from the `CategorizationStatusType` code list (defects D-036, D-046) |
+| source                | enum                  | yes      | `simplefin` · `csv` · `manual` (D-254, SPEC-17); labels from the `TransactionSourceType` code list (defect D-051) |
 | is_excluded           | boolean               | yes      | Exclude from all computation                            |
 | goal_id               | FK → Goal             | no       | Links spending to a goal (D-11)                         |
 | notes                 | text                  | no       |                                                         |

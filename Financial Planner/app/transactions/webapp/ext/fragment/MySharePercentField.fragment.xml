@@ -1,0 +1,25 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+>
+    <VBox>
+        <ObjectNumber
+            number="{ path: 'mySharePct', type: 'com.financialplanner.shared.util.PercentFractionType' }"
+            unit="{i18n>splitPctUnit}"
+            emphasized="false"
+            emptyIndicatorMode="On"
+            visible="{= !${ui>/isEditable} }"
+        />
+        <Input
+            core:require="{ handler: 'com/financialplanner/transactions/ext/MySharePercentFieldHandlers' }"
+            value="{ path: 'mySharePct', type: 'com.financialplanner.shared.util.PercentFractionType' }"
+            type="Number"
+            textAlign="End"
+            placeholder="{i18n>splitPctEmptyPlaceholder}"
+            description="{i18n>splitPctUnit}"
+            fieldWidth="70%"
+            visible="{ui>/isEditable}"
+            change="handler.onInputMySharePercentChange"
+        />
+    </VBox>
+</core:FragmentDefinition>

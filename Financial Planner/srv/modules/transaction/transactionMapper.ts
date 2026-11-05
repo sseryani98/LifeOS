@@ -1,8 +1,12 @@
 import type {
   BulkCategorizeCommand,
+  CategoryReferences,
   CorrectionCommand,
   ReCategorizeCommand,
+  RecurringSplitTemplate,
+  RecurringSplitTemplateRow,
   SplitCommand,
+  SplitSuggestion,
 } from "./types.js";
 
 /**
@@ -21,6 +25,19 @@ export class TransactionMapper {
       myShareAmount: this._toNullableNumber(data?.myShareAmount),
       splitDescription: (data?.splitDescription ?? null) as string | null,
       isRecurring: (data?.isRecurring ?? false) as boolean,
+    };
+  }
+
+  /**
+   * Maps a saved transaction row to the vendor and taxonomy ids it assigns.
+   * @param data The saved row.
+   * @returns The three category reference ids, null where unset.
+   */
+  static toCategoryReferences(data: Record<string, unknown>): CategoryReferences {
+    return {
+      vendor_ID: (data.vendor_ID ?? null) as string | null,
+      purchaseType_ID: (data.purchaseType_ID ?? null) as string | null,
+      earningCategory_ID: (data.earningCategory_ID ?? null) as string | null,
     };
   }
 
@@ -66,6 +83,40 @@ export class TransactionMapper {
       vendor_ID: (data?.vendor_ID ?? null) as string | null,
       purchaseType_ID: (data?.purchaseType_ID ?? null) as string | null,
       earningCategory_ID: (data?.earningCategory_ID ?? null) as string | null,
+    };
+  }
+
+  /**
+   * Normalises a recurring split row's decimals; a null percentage must stay
+   * null so a dollar template is not read as 0%.
+   * @param row The template row as read.
+   * @returns The template with numeric shares.
+   */
+  static toRecurringSplitTemplate(
+    row: RecurringSplitTemplateRow,
+  ): RecurringSplitTemplate {
+    return {
+      mySharePct: this._toNullableNumber(row.mySharePct),
+      myShareAmount: Number(row.myShareAmount),
+      splitDescription: row.splitDescription,
+    };
+  }
+
+  /**
+   * Shapes a template and its share for the new charge into the suggestion DTO.
+   * @param template The recurring split being copied.
+   * @param myShareAmount The dollar share for the new charge.
+   * @returns The suggestion the Split dialog pre-fills from.
+   */
+  static toSplitSuggestion(
+    template: RecurringSplitTemplate,
+    myShareAmount: number,
+  ): SplitSuggestion {
+    return {
+      mySharePct: template.mySharePct,
+      myShareAmount,
+      splitDescription: template.splitDescription,
+      isRecurring: true,
     };
   }
 

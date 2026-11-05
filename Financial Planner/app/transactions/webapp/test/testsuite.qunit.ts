@@ -18,5 +18,8 @@ export default {
   },
   tests: {
     "unit/unitTests": { title: "Unit tests for the Transactions app" },
+    "integration/TransactionsJourney": {
+      title: "Journey for the Transaction List split and categorize dialogs",
+    },
   },
 } satisfies SuiteConfiguration;

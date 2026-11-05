@@ -856,7 +856,7 @@ All decisions made during the discovery and design phases. Each decision is refe
 
 - **Context:** SPEC-02 workshop — defining the interaction model for the Transaction List & Review screen.
 - **Decision:** Four sub-decisions:
-  - **Inline editing on list:** Vendor (value help), Purchase Type (dropdown), Earning Category (dropdown), Notes (text). All other fields require object page navigation.
+  - **Inline editing on list:** Vendor (value help), Purchase Type (dropdown), Earning Category (dropdown), Notes (text). All other fields require object page navigation. **Superseded by D-336** — the list is read-only; these four are edited on the object page.
   - **Split action:** Button on list toolbar. Select row → popover/dialog with split fields. Pre-populated with recurring suggestion if applicable.
   - **Bulk apply:** Multi-select rows → "Apply Categories" → set vendor, PT, EC once → applied to all selected. Learning mechanism fires per unique `raw_description`.
   - **Re-categorize:** Action on list toolbar. Re-runs ENH-001 on selected rows. Skips `user_corrected` transactions to respect user intent.
@@ -2278,3 +2278,27 @@ All decisions made during the discovery and design phases. Each decision is refe
   - QUnit types come from `/// <reference types="qunit" />` atop each spec, not the app `tsconfig.json`, so production source cannot see the test globals.
   - The ESLint `app/**/test/**` block takes the backend `test/**` exemptions and no more: class-only off, keyword ban kept.
 - **Consequences:** QUnit assertions are limited to the 2.3.2 API; `assert.rejects` is unavailable. The 1.150 typings still offer what the runtime lacks, which the `@sapui5/types` range causes (memory `feedback_ui5_version`); repinning it is its own change.
+
+## D-335: Recurring Split Suggestion Contract (Fixes Defect D-028)
+
+- **Context:** 2026-11-04. SPEC-02 BR-17/BR-23 and FUT-011 require the FRM-001 Split dialog to open pre-populated with the vendor's recurring split, but no backend surface returned one (defect D-028). Sandro ruled the fix into the UI5 coverage backfill session. A percentage suggestion fills both the % and $ fields, and `TransactionValidator.validateSplit` rejects a split carrying both (`ENTER_ONE_INPUT`), so confirming an untouched suggestion would always fail.
+- **Decision:**
+  - Unbound read-only CAP function `suggestRecurringSplit(transactionId)` on TransactionService returns `SplitSuggestion { mySharePct, myShareAmount, splitDescription, isRecurring }` or null. Template: the most recent (`modifiedAt` desc) `isRecurring = true` split on another transaction of the same vendor. Percentage templates recompute the share on the new amount; dollar templates keep the amount (D-120). Unknown transaction → 404; no vendor or no template → null; never writes (BR-18).
+  - Service method names follow the ESLint verb list: `findRecurringSplitSuggestion` in `srv/` and in `app/transactions/webapp/model/TransactionsService.ts`. The OData function keeps the spec's name.
+  - `openSplitDialog` seeds the dialog from the suggestion; a null or failed lookup opens it blank. On confirm, when a % is entered and the amount still equals the suggested amount, only the % is sent, so the split stays percentage-based. Any other combination is sent as entered, so a manual both-fields entry is still refused.
+- **Consequences:** The QUnit test that pinned the blank dialog now asserts blank only when no suggestion exists. SPEC-02 §6 should adopt two app-tier guards: a failed lookup opens the dialog blank, and an untouched % suggestion saves the % alone.
+
+## D-336: FRM-001 Editing Moves to the Object Page (Amends D-121)
+
+- **Context:** 2026-11-04. `/functional-test` FRM-001 failed FUT-012 and FUT-015 step 2: the Fiori Elements List Report has no inline-editable cells, so the D-121 inline edit of Vendor, Purchase Type, Earning Category and Notes on the list cannot execute. Object-page editing works and fires the same learning hook.
+- **Decision:** Sandro ruled a spec amendment, not a build. The list is read-only. Vendor, Purchase Type, Earning Category and Notes are edited on the object page (Edit → Save), which fires the BR-25 learning. Bulk Apply Categories and the Split and Re-categorize toolbar actions stay on the list. D-121's inline-edit sub-decision is superseded; its other three sub-decisions stand.
+- **Consequences:** SPEC-02 §4.3 List Report columns are all non-editable. BR-21, BR-25, FUT-012 and FUT-015 are rewritten for object-page editing, and the §6 on-the-fly vendor row is relabelled for the object page. Defect D-021 no longer needs an editable Notes column, only a displayed one.
+
+## D-337: FRM-001 Split and Bulk-Apply Defaults Confirmed (Amends SPEC-02 BR-12, BR-23, BR-24)
+
+- **Context:** 2026-11-05. `/functional-test` FRM-001 found three behaviours SPEC-02 is silent on. Each was fixed to an orchestrator default and the defect closed pending Sandro's confirmation; `/pm-update` reopened them until he ruled.
+- **Decision:** Sandro confirmed all three defaults as built.
+  - **BR-24 (defect D-055):** a PT or EC left blank in Apply Categories leaves each row's existing value unchanged, mirroring BR-06's never-overwrite rule. Single-row `correctCategorization` keeps explicit-null semantics.
+  - **BR-23 (defect D-065):** Split on a row that already has a split opens pre-populated with that split's share, description and recurring flag; the vendor's recurring suggestion applies only to a row with no split.
+  - **BR-12 (defect D-076):** in the Split dialog, editing the amount clears the %, and editing the % recomputes the amount, on both the fresh and the suggestion path, matching the object page (D-063).
+- **Consequences:** SPEC-02 BR-12, BR-23 and BR-24 carry the rulings. Defects D-055, D-065 and D-076 stay Closed; their existing tests pin the behaviour.

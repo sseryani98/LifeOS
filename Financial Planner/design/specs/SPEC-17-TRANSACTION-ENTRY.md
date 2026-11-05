@@ -159,7 +159,7 @@ On vendor selection (D-254):
 3. Earning Category auto-fills (overridable)
 4. If EC + amount present → ENH-002 fires → recommendation panel updates
 
-On edit/correction of any transaction (D-266): same ENH-001 learning as FRM-001 inline edits (SPEC-02 BR-08/BR-09).
+On edit/correction of any transaction (D-266): same ENH-001 learning as FRM-001 object-page edits (D-336) (SPEC-02 BR-08/BR-09).
 
 ---
 

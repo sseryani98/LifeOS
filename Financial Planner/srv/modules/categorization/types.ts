@@ -50,8 +50,9 @@ export interface CategorizationResult {
 export interface CorrectionRequest {
   transactionId: string;
   vendor_ID: string;
-  purchaseType_ID: string | null;
-  earningCategory_ID: string | null;
+  /** Null clears the field; undefined leaves the stored value in place. */
+  purchaseType_ID?: string | null;
+  earningCategory_ID?: string | null;
 }
 
 /** The transaction fields the correction flow reads before learning. */
@@ -90,8 +91,8 @@ export interface MerchantPatternInsert {
  */
 export interface TransactionCategorizationPatch {
   vendor_ID: string;
-  purchaseType_ID: string | null;
-  earningCategory_ID: string | null;
+  purchaseType_ID?: string | null;
+  earningCategory_ID?: string | null;
   categorizationStatus: string;
 }
 
@@ -102,6 +103,9 @@ export interface TransactionRecategorizationRow {
   amount: number;
   /** Current categorizationStatus — user_corrected rows are skipped. */
   categorizationStatus: string;
+  vendor_ID: string | null;
+  purchaseType_ID: string | null;
+  earningCategory_ID: string | null;
 }
 
 /** Outcome of a re-categorize batch: rows re-matched vs rows left untouched. */

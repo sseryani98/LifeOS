@@ -13,6 +13,7 @@
 | ---------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 2026-02-21 | Sandro & Claude | Initial creation — Step 15 in progress.                                                                                                                          |
 | 2026-02-21 | Sandro          | Approved. All 7 sections complete — cross-sprint contracts, CLAUDE.md update, scaffold prompt, sprint checklists, prompt playbook (32 prompts), quick reference. |
+| 2026-11-05 | Claude          | Doc refresh, prose left as approved. Superseded since: FRM-001 "inline editing" lines (list is read-only, edits on the object page — D-336); single-file `srv/{service}.cds` paths (now shells, members in `srv/{service}/` — `lint:cds-layout`). |
 
 ---
 

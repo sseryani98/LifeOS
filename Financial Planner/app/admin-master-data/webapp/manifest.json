@@ -54,7 +54,7 @@
     "routing": {
       "routes": [
         {
-          "pattern": "Issuers:?query:",
+          "pattern": "IssuersList:?query:",
           "name": "IssuersList",
           "target": "IssuersList"
         },
@@ -64,7 +64,7 @@
           "target": "IssuersDetail"
         },
         {
-          "pattern": "RewardsPrograms:?query:",
+          "pattern": "RewardsProgramsList:?query:",
           "name": "RewardsProgramsList",
           "target": "RewardsProgramsList"
         },
@@ -74,7 +74,7 @@
           "target": "RewardsProgramsDetail"
         },
         {
-          "pattern": "PurchaseCategories:?query:",
+          "pattern": "PurchaseCategoriesList:?query:",
           "name": "PurchaseCategoriesList",
           "target": "PurchaseCategoriesList"
         },
@@ -84,7 +84,7 @@
           "target": "PurchaseCategoriesDetail"
         },
         {
-          "pattern": "EarningCategories:?query:",
+          "pattern": "EarningCategoriesList:?query:",
           "name": "EarningCategoriesList",
           "target": "EarningCategoriesList"
         },
@@ -94,7 +94,7 @@
           "target": "EarningCategoriesDetail"
         },
         {
-          "pattern": "IssuerApplicationRules:?query:",
+          "pattern": "IssuerApplicationRulesList:?query:",
           "name": "IssuerApplicationRulesList",
           "target": "IssuerApplicationRulesList"
         },
@@ -104,7 +104,7 @@
           "target": "IssuerApplicationRulesDetail"
         },
         {
-          "pattern": "CsvFormatConfigs:?query:",
+          "pattern": "CsvFormatConfigsList:?query:",
           "name": "CsvFormatConfigsList",
           "target": "CsvFormatConfigsList"
         },
@@ -114,7 +114,7 @@
           "target": "CsvFormatConfigsDetail"
         },
         {
-          "pattern": "SystemConfigs:?query:",
+          "pattern": "SystemConfigsList:?query:",
           "name": "SystemConfigsList",
           "target": "SystemConfigsList"
         },
@@ -124,7 +124,7 @@
           "target": "SystemConfigsDetail"
         },
         {
-          "pattern": "BudgetAllocations:?query:",
+          "pattern": "BudgetAllocationsList:?query:",
           "name": "BudgetAllocationsList",
           "target": "BudgetAllocationsList"
         },
@@ -134,7 +134,7 @@
           "target": "BudgetAllocationsDetail"
         },
         {
-          "pattern": "RecurrentExpenses:?query:",
+          "pattern": "RecurrentExpensesList:?query:",
           "name": "RecurrentExpensesList",
           "target": "RecurrentExpensesList"
         },
@@ -144,7 +144,7 @@
           "target": "RecurrentExpensesDetail"
         },
         {
-          "pattern": "FinancialAccountTypes:?query:",
+          "pattern": "FinancialAccountTypesList:?query:",
           "name": "FinancialAccountTypesList",
           "target": "FinancialAccountTypesList"
         },
@@ -154,7 +154,7 @@
           "target": "FinancialAccountTypesDetail"
         },
         {
-          "pattern": "IncomeSourceTypes:?query:",
+          "pattern": "IncomeSourceTypesList:?query:",
           "name": "IncomeSourceTypesList",
           "target": "IncomeSourceTypesList"
         },
@@ -164,7 +164,7 @@
           "target": "IncomeSourceTypesDetail"
         },
         {
-          "pattern": "PerkTypes:?query:",
+          "pattern": "PerkTypesList:?query:",
           "name": "PerkTypesList",
           "target": "PerkTypesList"
         },
@@ -174,7 +174,7 @@
           "target": "PerkTypesDetail"
         },
         {
-          "pattern": "AdjustmentTypes:?query:",
+          "pattern": "AdjustmentTypesList:?query:",
           "name": "AdjustmentTypesList",
           "target": "AdjustmentTypesList"
         },
@@ -184,7 +184,7 @@
           "target": "AdjustmentTypesDetail"
         },
         {
-          "pattern": "RedemptionTypes:?query:",
+          "pattern": "RedemptionTypesList:?query:",
           "name": "RedemptionTypesList",
           "target": "RedemptionTypesList"
         },
@@ -194,7 +194,7 @@
           "target": "RedemptionTypesDetail"
         },
         {
-          "pattern": "ScrapeMappings:?query:",
+          "pattern": "ScrapeMappingsList:?query:",
           "name": "ScrapeMappingsList",
           "target": "ScrapeMappingsList"
         },

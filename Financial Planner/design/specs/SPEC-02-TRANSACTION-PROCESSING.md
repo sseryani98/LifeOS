@@ -17,6 +17,8 @@
 | 2026-02-17 | Sandro & Claude | Initial creation — workshop complete. D-114 through D-122 logged. |
 | 2026-11-04 | Claude          | Doc refresh: DM-001 amendments marked applied; ENH-007 notes retargeted SPEC-09 → SPEC-05; FRM-001 Goal field points at D-152 (SPEC-09's PT-picker amendment). No rule changed. |
 | 2026-11-04 | Claude          | §6 adopts two guards the code already enforced (Apply Categories needs a vendor; Split needs exactly one row), found by the first UI5 test run. Defect D-029. |
+| 2026-11-05 | Claude          | Doc refresh: D-336 amendment recorded (list read-only; §4.3 columns, BR-21, BR-25, FUT-012, FUT-015 and the §6 vendor row now describe object-page editing). D-335: Recurring Splits table names the `suggestRecurringSplit` surface and template order; §6 adopts its two app-tier guards. |
+| 2026-11-05 | Sandro & Claude | D-337: BR-12, BR-23 and BR-24 state the three defaults Sandro confirmed (defects D-076, D-065, D-055). |
 
 ---
 
@@ -24,7 +26,7 @@
 
 Transaction processing is the heart of the weekly review session. Transactions arrive via SPEC-01's ingestion pipeline, then ENH-001 normalizes raw merchant descriptions to known vendors and assigns dual categories (Purchase Type for budget, Earning Category for churning). ENH-009 handles shared expenses with "my share" splits, ensuring churning uses full amounts while budget uses the user's portion. FRM-001 is the main review surface where the user approves auto-categorizations, corrects exceptions, initiates splits, and attributes supplementary card transactions.
 
-Key decisions: D-05 (two taxonomies), D-08 (splits), D-32 (in-house categorization), D-43 (count-based ranking), D-114 (matching algorithm), D-115 (no auto-vendor creation), D-116 (learning mechanism), D-117 (computed usage counts), D-118 (amount on Merchant Pattern), D-119 (split remainder Reimbursable), D-120 (recurring split suggestions), D-121 (FRM-001 inline editing & actions), D-122 (vendor merge on FRM-009).
+Key decisions: D-05 (two taxonomies), D-08 (splits), D-32 (in-house categorization), D-43 (count-based ranking), D-114 (matching algorithm), D-115 (no auto-vendor creation), D-116 (learning mechanism), D-117 (computed usage counts), D-118 (amount on Merchant Pattern), D-119 (split remainder Reimbursable), D-120 (recurring split suggestions), D-121 (FRM-001 list actions; inline editing superseded by D-336), D-122 (vendor merge on FRM-009).
 
 ---
 
@@ -191,7 +193,8 @@ A fully reimbursed transaction is a split with `my_share_pct = 0`, `my_share_amo
 | Element          | Detail                                                          |
 | ---------------- | --------------------------------------------------------------- |
 | Matching key     | `vendor_id` — same vendor triggers suggestion                   |
-| Template         | Most recent `is_recurring = true` split for the vendor          |
+| Surface          | `suggestRecurringSplit(transactionId)` → `SplitSuggestion` or null; read-only, unknown transaction → 404 (D-335) |
+| Template         | Most recent (`modifiedAt` desc) `is_recurring = true` split on another transaction of the same vendor (D-335) |
 | Percentage-based | Recalculates on new amount (`$120 × 20% = $24`)                 |
 | Dollar-based     | Keeps fixed amount regardless of transaction amount             |
 | Auto-apply       | Never — suggestion only. User confirms during review (FRM-001). |
@@ -215,15 +218,17 @@ A fully reimbursed transaction is a split with `my_share_pct = 0`, `my_share_amo
 | ---------------- | ---------------------------------- | -------- | ------------------------------------------------------------------------- |
 | Date             | `posted_at`                        | No       | Default sort descending                                                   |
 | Description      | `raw_description`                  | No       | Full bank text                                                            |
-| Vendor           | `vendor.name`                      | Yes      | Value help with fuse.js fuzzy search, on-the-fly creation                 |
+| Vendor           | `vendor.name`                      | No       | Value help with fuse.js fuzzy search, on-the-fly creation                 |
 | Amount           | `amount`                           | No       | Formatted CAD, negative = charge                                          |
-| Purchase Type    | `purchase_type.name`               | Yes      | Dropdown with subtypes indented                                           |
-| Earning Category | `earning_category.name`            | Yes      | Dropdown                                                                  |
+| Purchase Type    | `purchase_type.name`               | No       | Dropdown with subtypes indented                                           |
+| Earning Category | `earning_category.name`            | No       | Dropdown                                                                  |
 | Card             | `card_instance → market_card.name` | No       | Short name                                                                |
 | Status           | `categorization_status`            | No       | ObjectStatus: auto (green), user_corrected (blue), uncategorized (orange) |
 | Split            | indicator                          | No       | Icon if Transaction Split exists                                          |
 | Source           | `source`                           | No       | simplefin / csv                                                           |
-| Notes            | `notes`                            | Yes      | Free text                                                                 |
+| Notes            | `notes`                            | No       | Free text                                                                 |
+
+The list is read-only (D-336): categorization is edited on the Object Page, or across a selection with Apply Categories.
 
 **Default filter:** `categorization_status = uncategorized` + date range = last 7 days.
 
@@ -308,7 +313,7 @@ Helps the user understand why the system suggested what it did and pick alternat
 | BR-03 | Remaining ties broken by: confidence level (high > medium > low) → longer pattern → higher vendor transaction count (computed).                                                                                                                  |
 | BR-04 | Only the top-scoring match is used. No ambiguity resolution.                                                                                                                                                                                     |
 | BR-05 | No match → transaction stays `uncategorized`, no vendor assigned. ENH-001 never auto-creates vendors.                                                                                                                                            |
-| BR-06 | Once vendor matched, PT and EC suggested from Vendor Category Stats CDS view, ranked by usage count. Top combo auto-assigned.                                                                                                                    |
+| BR-06 | Once vendor matched, PT and EC suggested from Vendor Category Stats CDS view, ranked by usage count. Top combo auto-assigned. On the FRM-001 object page, selecting a vendor fills PT and EC from the same top combo — empty fields only, never overwriting a value already set (2026-11-04, FRM-001 functional test). |
 | BR-07 | `categorization_status` set to `auto` when ENH-001 assigns vendor + categories. `uncategorized` when no match.                                                                                                                                   |
 | BR-08 | On user correction of an unmatched transaction: auto-create Merchant Pattern — `pattern` = full `raw_description` (trimmed), `match_type` = exact, `pattern_source` = learned, `confidence_level` = medium, `amount` = null, `is_active` = true. |
 | BR-09 | On user correction where description already matched a different vendor: auto-created pattern includes `amount` as discriminator.                                                                                                                |
@@ -319,7 +324,7 @@ Helps the user understand why the system suggested what it did and pick alternat
 
 | Rule  | Description                                                                                                                                                                                                            |
 | ----- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| BR-12 | User enters either `my_share_pct` or `my_share_amount` — not both.                                                                                                                                                     |
+| BR-12 | User enters either `my_share_pct` or `my_share_amount` — not both. In the Split dialog, as on the object page (D-063), editing the amount clears the %, and editing the % recomputes the amount, so the screen always shows what will be saved (D-337). |
 | BR-13 | `my_share_amount` always populated. If percentage entered, computed as `amount × my_share_pct`.                                                                                                                        |
 | BR-14 | Churning metrics (points, MSR progress) always use full `transaction.amount`.                                                                                                                                          |
 | BR-15 | Budget uses `my_share_amount` under the transaction's Purchase Type. Remainder (`amount - my_share_amount`) is implicitly Reimbursable (excluded from budget via D-97).                                                |
@@ -333,11 +338,11 @@ Helps the user understand why the system suggested what it did and pick alternat
 | ----- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | BR-19 | Fiori Elements List Report + Object Page. TransactionService.                                                                                                                |
 | BR-20 | Default filter: `categorization_status = uncategorized` + date range = last 7 days.                                                                                          |
-| BR-21 | Inline-editable on list: Vendor (value help), Purchase Type (dropdown), Earning Category (dropdown), Notes (text).                                                           |
+| BR-21 | The list is read-only. Vendor (value help), Purchase Type (dropdown), Earning Category (dropdown) and Notes (text) are edited on the object page (D-336, amends D-121).      |
 | BR-22 | Object page: full transaction detail, split section, goal linking, card reassignment, excluded toggle.                                                                       |
-| BR-23 | Split action button on list toolbar. Popover/dialog with: my share %, my share amount, description, recurring toggle. Pre-populated with recurring suggestion if applicable. |
-| BR-24 | Bulk action: multi-select rows → "Apply Categories" → set vendor, PT, EC once → applied to all selected.                                                                     |
-| BR-25 | On save (inline or object page): learning mechanism fires — Merchant Pattern created per BR-08/BR-09.                                                                        |
+| BR-23 | Split action button on list toolbar. Popover/dialog with: my share %, my share amount, description, recurring toggle. Pre-populated with recurring suggestion if applicable. A row that already has a split opens pre-populated with its own split (share, description, recurring flag) ahead of any suggestion, so an untouched save loses nothing (D-337). |
+| BR-24 | Bulk action: multi-select rows → "Apply Categories" → set vendor, PT, EC once → applied to all selected. A PT or EC left blank leaves each row's existing value unchanged, mirroring BR-06's never-overwrite rule (D-337). |
+| BR-25 | On object-page save or Apply Categories: learning mechanism fires — Merchant Pattern created per BR-08/BR-09.                                                                |
 | BR-26 | Re-categorize action on list toolbar: re-runs ENH-001 on selected rows. Skips `user_corrected` transactions.                                                                 |
 | BR-27 | Categorization suggestions section on object page: shows matched pattern, confidence, and alternative (PT, EC) combos.                                                       |
 
@@ -357,14 +362,19 @@ Helps the user understand why the system suggested what it did and pick alternat
 | Vendor value help: no match for typed text                 | Show "Create new vendor" option                   | `transaction.vendor.createNew`         |
 | Split: both percentage and amount entered                  | Validation error — enter one or the other         | `transaction.split.enterOneInput`      |
 | Split: percentage outside 0–1 fraction range               | Validation error                                  | `@assert.range` on `mySharePct`        |
+| Split: neither percentage nor amount entered               | Validation error — enter one                      | `transaction.split.noInput`            |
+| Split: my_share_amount below zero                          | Validation error                                  | `transaction.split.amountNegative`     |
 | Split: my_share_amount exceeds transaction amount          | Validation error                                  | `transaction.split.amountExceedsTotal` |
+| Categorize: vendor, PT or EC id names no row               | Validation error on that field                    | `transaction.categorize.unknownReference` |
 | Re-categorize: no rows selected                            | Warning — select at least one row                 | `transaction.recategorize.noSelection` |
 | Apply Categories: confirmed with no vendor chosen          | Warning — dialog stays open, nothing applied      | `msgVendorRequired` (UI5 app tier)     |
 | Split: zero or several rows selected                       | Warning — dialog does not open                    | `msgSplitOneRow` (UI5 app tier)        |
+| Split: recurring-suggestion lookup fails                   | Dialog opens blank (D-335)                        | — (UI5 app tier)                       |
+| Split: % suggestion confirmed with the amount untouched     | Only the % is sent, so the split stays percentage-based (D-335) | — (UI5 app tier)          |
 | Vendor merge: target has same ID as source                 | Validation error                                  | `admin.vendor.mergeSameVendor`         |
 | Vendor merge: source vendor has 0 transactions             | Warning — nothing to merge (allow delete instead) | `admin.vendor.mergeEmpty`              |
 | Goal linking: goal is inactive                             | Validation error — select an active goal          | `transaction.goal.inactive`            |
-| Inline edit: vendor created on the fly with duplicate name | Warning with existing vendor suggestion           | `transaction.vendor.duplicateName`     |
+| Object page: vendor created on the fly with duplicate name | Warning with existing vendor suggestion           | `transaction.vendor.duplicateName`     |
 
 ---
 
@@ -602,7 +612,7 @@ Helps the user understand why the system suggested what it did and pick alternat
 
 ---
 
-### FUT-012: Inline editing on list report
+### FUT-012: Editing a transaction on the object page
 
 **Covers:** FRM-001
 
@@ -612,15 +622,15 @@ Helps the user understand why the system suggested what it did and pick alternat
 
 **Steps:**
 
-1. Click into Vendor cell on first row, type "Star" → fuse.js suggests "Starbucks"
-2. Select Starbucks → PT auto-fills Dining, EC auto-fills Dining
+1. Open the first row's object page and click Edit
+2. In Vendor, type "Star" → value help suggests "Starbucks"; select it → PT and EC auto-fill from Starbucks' top Vendor Category Stats combo (BR-06)
 3. Add note "morning coffee"
 4. Save
 
 **Expected Result:**
 
 - Transaction updated: vendor, PT, EC, notes assigned
-- `categorization_status = auto` (ENH-001 suggestion accepted) or `user_corrected` (if user changed from suggestion)
+- `categorization_status = user_corrected` — an object-page save that sets vendor, PT or EC is a human correction, even when the auto-filled PT/EC are kept (a notes-only save leaves the status unchanged)
 - Merchant Pattern created per BR-08
 
 ---
@@ -684,7 +694,7 @@ Helps the user understand why the system suggested what it did and pick alternat
 **Steps:**
 
 1. Open FRM-001, default filter shows 5 uncategorized
-2. Inline-edit 3 (vendor + categories)
+2. Edit 3 on the object page (vendor + categories)
 3. Bulk apply categories on 2 (same vendor)
 4. Clear filter, find Padel Haus → confirm recurring split suggestion
 5. Spot-check 2 auto-categorized transactions → correct one (wrong EC)
@@ -692,7 +702,7 @@ Helps the user understand why the system suggested what it did and pick alternat
 **Expected Result:**
 
 - 0 uncategorized remaining
-- 5 new Merchant Patterns created (3 inline + 2 bulk)
+- 5 new Merchant Patterns created (3 object-page edits + 2 bulk)
 - 1 split confirmed
 - 1 transaction status changed to `user_corrected`
 - Total review time: ~10-15 minutes
@@ -713,4 +723,4 @@ Helps the user understand why the system suggested what it did and pick alternat
 
 ---
 
-_This spec traces to [Business Architecture](../BUSINESS_ARCHITECTURE.md) objects ENH-001, ENH-009, FRM-001 and [Data Model](../DATA_MODEL.md) entities listed in §3. New decisions D-114–D-122 logged in [Decisions Log](../user-profile/DECISIONS_LOG.md)._
+_This spec traces to [Business Architecture](../BUSINESS_ARCHITECTURE.md) objects ENH-001, ENH-009, FRM-001 and [Data Model](../DATA_MODEL.md) entities listed in §3. New decisions D-114–D-122 logged, amended by D-335, D-336 and D-337 in [Decisions Log](../user-profile/DECISIONS_LOG.md)._

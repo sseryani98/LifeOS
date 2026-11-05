@@ -5,15 +5,22 @@
 >
     <Dialog
         id="idApplyCategoriesDialog"
+        contentWidth="24rem"
         title="{i18n>applyDialogTitle}"
     >
         <content>
             <form:SimpleForm editable="true">
-                <Label text="{i18n>applyVendor}" />
+                <Label
+                    text="{i18n>applyVendor}"
+                    required="true"
+                />
                 <ComboBox
                     id="idVendorsApplyComboBox"
                     selectedKey="{applyModel>/vendor_ID}"
+                    valueState="{applyModel>/vendorState}"
+                    valueStateText="{applyModel>/vendorStateText}"
                     items="{path: '/Vendors', sorter: {path: 'name'}}"
+                    selectionChange=".onComboBoxVendorSelectionChange"
                 >
                     <core:Item
                         key="{ID}"
@@ -46,7 +53,7 @@
         </content>
         <beginButton>
             <Button
-                id="idApplyConfirmButton"
+                id="idApplyCategoriesConfirmButton"
                 text="{i18n>apply}"
                 type="Emphasized"
                 press=".onButtonApplyConfirmPress"

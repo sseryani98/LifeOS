@@ -3,8 +3,10 @@
     xmlns:core="sap.ui.core"
     xmlns:form="sap.ui.layout.form"
 >
+    <!-- loadFragment templates this fragment first, and that pass resolves a binding type by module name only, never by a core:require alias. -->
     <Dialog
         id="idSplitDialog"
+        contentWidth="24rem"
         title="{i18n>splitDialogTitle}"
     >
         <content>
@@ -13,14 +15,24 @@
                 <Input
                     id="idMySharePctSplitInput"
                     value="{splitModel>/mySharePct}"
+                    valueState="{splitModel>/mySharePctState}"
+                    valueStateText="{splitModel>/mySharePctStateText}"
                     type="Number"
+                    textAlign="End"
+                    placeholder="{i18n>splitPctEmptyPlaceholder}"
                     description="{i18n>splitPctUnit}"
+                    change=".onInputSplitPercentChange"
                 />
                 <Label text="{i18n>splitMyShareAmount}" />
                 <Input
                     id="idMyShareAmountSplitInput"
-                    value="{splitModel>/myShareAmount}"
+                    value="{ path: 'splitModel>/myShareAmount', type: 'sap.ui.model.type.Float', formatOptions: { minFractionDigits: 2, maxFractionDigits: 2, groupingEnabled: false, emptyString: null } }"
+                    valueState="{splitModel>/myShareAmountState}"
+                    valueStateText="{splitModel>/myShareAmountStateText}"
                     type="Number"
+                    textAlign="End"
+                    description="{i18n>splitAmountUnit}"
+                    change=".onInputSplitAmountChange"
                 />
                 <Label text="{i18n>splitDescription}" />
                 <Input
@@ -28,16 +40,17 @@
                     value="{splitModel>/splitDescription}"
                 />
                 <Label text="{i18n>splitRecurring}" />
-                <Switch
-                    id="idSplitRecurringSwitch"
-                    state="{splitModel>/isRecurring}"
+                <!-- A CheckBox, not a Switch: FE renders the object page's Recurring only as one. -->
+                <CheckBox
+                    id="idSplitRecurringCheckBox"
+                    selected="{splitModel>/isRecurring}"
                 />
             </form:SimpleForm>
         </content>
         <beginButton>
             <Button
                 id="idSaveSplitButton"
-                text="{i18n>save}"
+                text="{i18n>saveSplit}"
                 type="Emphasized"
                 press=".onButtonSplitConfirmPress"
             />

@@ -57,4 +57,18 @@ describe("CategorizationMapper", () => {
     expect(insert.matchType).toBe("contains");
     expect(insert.amount).toBe(3.99);
   });
+
+  /** A bulk apply that leaves PT/EC empty passes them as absent; writing them as null would wipe each row's own taxonomy. */
+  it("leaves absent taxonomy ids out of the correction patch", () => {
+    const patch = CategorizationMapper.toCategorizationPatch(
+      AMAZON_VENDOR_ID,
+      undefined,
+      undefined,
+    );
+
+    expect(patch).toStrictEqual({
+      vendor_ID: AMAZON_VENDOR_ID,
+      categorizationStatus: "user_corrected",
+    });
+  });
 });

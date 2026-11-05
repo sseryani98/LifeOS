@@ -14,7 +14,8 @@
 
 ### In Progress
 
-_None_
+| Story | Type | Description | Status |
+| --- | --- | --- | --- |
 
 ### Done
 
@@ -22,7 +23,7 @@ _None_
 | --- | --- | --- | --- |
 | ENH-001 | Enhancement | Categorization engine: three-pass matching pipeline (exact → starts-with → contains) returning vendor + dual taxonomy; user correction auto-creates MerchantPattern (learning). MerchantPattern entity + VendorCategoryStats CDS view. Wires FRM-003 pre-fill. | Done |
 | ENH-009 | Enhancement | Split logic: TransactionSplit with mySharePct/myShareAmount (either/or, share ≤ total, reimbursed = 0). splitTransaction / bulkCategorize / correctCategorization actions on TransactionService; bulk learning dedupes per description. 4-file transaction module + Mapper, unit + SQLite integration tests. | Done |
-| FRM-001 | Form | Transaction List: Fiori Elements List Report + Object Page — inline edit (vendor/PT/EC/notes), Split dialog, Apply Categories bulk, Re-categorize action, splits section, filters. Spec gaps carried as D-021 … D-027. | Done |
+| FRM-001 | Form | Transaction List: Fiori Elements List Report + Object Page — read-only list, object-page edit of vendor/PT/EC/notes (D-336), Split dialog, Apply Categories bulk, Re-categorize action, splits section, filters. Reopened 2026-11-04; functional + UX test rounds 1–13 and Human Review done 2026-11-05 (D-023 … D-100 closed except carried, none blocking Done: D-027 waits on FRM-009's Vendors page; D-025, D-026 await Sandro's design pick; D-042 is shared-library cleanup; D-055, D-065, D-076 defaults confirmed by Sandro 2026-11-05). | Done |
 
 ---
 

@@ -74,7 +74,7 @@ describe("TransactionValidator", () => {
       expect(errors[0].messageKey).toBe("transaction.split.enterOneInput");
     });
 
-    /** Supplying neither input must fail — there is nothing to split. */
+    /** Supplying neither input must fail with its own message — "not both" would tell a user who entered nothing that they entered too much. */
     it("rejects when neither input is given", () => {
       const errors = TransactionValidator.validateSplit(
         NEITHER_INPUT_SPLIT,
@@ -82,10 +82,10 @@ describe("TransactionValidator", () => {
         ZERO_SHARE,
       );
 
-      expect(errors[0].messageKey).toBe("transaction.split.enterOneInput");
+      expect(errors[0].messageKey).toBe("transaction.split.noInput");
     });
 
-    /** A negative dollar share must fail — a share below zero is nonsensical. */
+    /** A negative dollar share must fail as negative — "cannot exceed the total" names the wrong bound. */
     it("rejects a negative dollar share", () => {
       const errors = TransactionValidator.validateSplit(
         NEGATIVE_DOLLAR_SPLIT,
@@ -93,7 +93,7 @@ describe("TransactionValidator", () => {
         NEGATIVE_SHARE,
       );
 
-      expect(errors[0].messageKey).toBe("transaction.split.amountExceedsTotal");
+      expect(errors[0].messageKey).toBe("transaction.split.amountNegative");
     });
 
     /** A dollar share larger than the transaction must fail — the share caps at the total. */

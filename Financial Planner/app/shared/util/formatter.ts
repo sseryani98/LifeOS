@@ -38,7 +38,13 @@ export default {
     if (!date) {
       return "";
     }
-    return new Date(date).toLocaleDateString("en-CA", {
+    // A date-only string parses as UTC midnight, the day before west of UTC;
+    // reading its parts as a local date keeps the calendar day.
+    const dateOnly = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date);
+    const parsed = dateOnly
+      ? new Date(Number(dateOnly[1]), Number(dateOnly[2]) - 1, Number(dateOnly[3]))
+      : new Date(date);
+    return parsed.toLocaleDateString("en-CA", {
       year: "numeric",
       month: "short",
       day: "numeric",

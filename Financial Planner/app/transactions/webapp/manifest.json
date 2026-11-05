@@ -26,6 +26,18 @@
         "sap.fe.templates": {}
       }
     },
+    "extends": {
+      "extensions": {
+        "sap.ui.controllerExtensions": {
+          "sap.fe.templates.ListReport.ListReportController": {
+            "controllerName": "com.financialplanner.transactions.ext.controller.ListReportExt"
+          },
+          "sap.fe.templates.ObjectPage.ObjectPageController": {
+            "controllerName": "com.financialplanner.transactions.ext.controller.ObjectPageExt"
+          }
+        }
+      }
+    },
     "models": {
       "": {
         "dataSource": "TransactionService",
@@ -46,7 +58,7 @@
     "routing": {
       "routes": [
         {
-          "pattern": "Transactions:?query:",
+          "pattern": "TransactionsList:?query:",
           "name": "TransactionsList",
           "target": "TransactionsList"
         },
@@ -68,6 +80,22 @@
               "initialLoad": "Enabled",
               "controlConfiguration": {
                 "@com.sap.vocabularies.UI.v1.LineItem": {
+                  "columns": {
+                    "DataField::hasSplit": {
+                      "availability": "Hidden"
+                    },
+                    "SplitIndicator": {
+                      "header": "{i18n>split}",
+                      "template": "com.financialplanner.transactions.ext.fragment.SplitIndicatorColumn",
+                      "position": {
+                        "anchor": "DataField::categorizationStatus",
+                        "placement": "After"
+                      },
+                      "width": "4%",
+                      "horizontalAlign": "Center",
+                      "properties": ["hasSplit"]
+                    }
+                  },
                   "actions": {
                     "ReCategorize": {
                       "press": "com.financialplanner.transactions.ext.TransactionsListActions.onReCategorize",
@@ -83,6 +111,20 @@
                       "press": "com.financialplanner.transactions.ext.TransactionsListActions.onSplit",
                       "text": "{i18n>split}",
                       "requiresSelection": true
+                    }
+                  }
+                },
+                "@com.sap.vocabularies.UI.v1.SelectionFields": {
+                  "filterFields": {
+                    "postedAt": {
+                      "settings": {
+                        "defaultValues": [
+                          {
+                            "operator": "LASTDAYS",
+                            "values": [7]
+                          }
+                        ]
+                      }
                     }
                   }
                 }
@@ -104,7 +146,21 @@
           "options": {
             "settings": {
               "contextPath": "/Transactions",
-              "editableHeaderContent": false
+              "editableHeaderContent": false,
+              "controlConfiguration": {
+                "split/@com.sap.vocabularies.UI.v1.FieldGroup#General": {
+                  "fields": {
+                    "MySharePercent": {
+                      "label": "{i18n>splitMySharePct}",
+                      "template": "com.financialplanner.transactions.ext.fragment.MySharePercentField",
+                      "position": {
+                        "anchor": "DataField::myShareAmount",
+                        "placement": "Before"
+                      }
+                    }
+                  }
+                }
+              }
             }
           }
         }

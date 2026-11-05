@@ -50,20 +50,22 @@ export class CategorizationMapper {
 
   /**
    * Builds the transaction categorization fields written on a user correction.
+   * An absent (undefined) taxonomy id is left out of the patch, so a bulk apply
+   * that names only the vendor never clears the row's PT/EC.
    * @param vendorId The assigned vendor id.
-   * @param purchaseTypeId The assigned purchase type id, or null.
-   * @param earningCategoryId The assigned earning category id, or null.
+   * @param purchaseTypeId The assigned purchase type id, null to clear, undefined to keep.
+   * @param earningCategoryId The assigned earning category id, null to clear, undefined to keep.
    * @returns The transaction categorization patch.
    */
   static toCategorizationPatch(
     vendorId: string,
-    purchaseTypeId: string | null,
-    earningCategoryId: string | null,
+    purchaseTypeId: string | null | undefined,
+    earningCategoryId: string | null | undefined,
   ): TransactionCategorizationPatch {
     return {
       vendor_ID: vendorId,
-      purchaseType_ID: purchaseTypeId,
-      earningCategory_ID: earningCategoryId,
+      ...(purchaseTypeId === undefined ? {} : { purchaseType_ID: purchaseTypeId }),
+      ...(earningCategoryId === undefined ? {} : { earningCategory_ID: earningCategoryId }),
       categorizationStatus: CATEGORIZATION_STATUS.USER_CORRECTED,
     };
   }

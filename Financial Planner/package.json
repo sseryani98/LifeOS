@@ -14,11 +14,12 @@
     "posttest": "tsx \"../Standards (Technical + Linting)/scripts/generateTestReport.ts\" && npm run test:ui5",
     "test:ui5": "tsx \"../Standards (Technical + Linting)/scripts/runUi5Gate.ts\" --row \"app/shared/util/**:100:100\"",
     "generate-key": "tsx scripts/generateKey.ts",
-    "lint": "eslint . &&npm run lint:ui5 && npm run lint:i18n && npm run lint:annotations && npm run lint:filenames && npm run lint:tracking-ids && npm run lint:default-attrs && npm run lint:test-data && npm run lint:test-structure && npm run lint:test-cql && npm run lint:grouped-constants && npm run lint:frontend-constants && npm run lint:domain-types && npm run lint:comment-length && npm run lint:mapper-methods && npm run lint:messaging && npm run lint:frontend-data-access && npm run lint:frontend-controller-shape && npm run lint:control-ids && npm run lint:event-handlers && npm run lint:handler-event-types && npm run lint:facades && npm run lint:design-counts && npm run lint:doc-claims",
+    "lint": "eslint . &&npm run lint:ui5 && npm run lint:i18n && npm run lint:annotations && npm run lint:filenames && npm run lint:cds-layout && npm run lint:tracking-ids && npm run lint:default-attrs && npm run lint:test-data && npm run lint:test-structure && npm run lint:test-cql && npm run lint:grouped-constants && npm run lint:frontend-constants && npm run lint:domain-types && npm run lint:comment-length && npm run lint:mapper-methods && npm run lint:messaging && npm run lint:frontend-data-access && npm run lint:frontend-controller-shape && npm run lint:control-ids && npm run lint:event-handlers && npm run lint:handler-event-types && npm run lint:facades && npm run lint:design-counts && npm run lint:doc-claims",
     "lint:ui5": "cd app/admin-master-data && ui5lint",
     "lint:i18n": "tsx \"../Standards (Technical + Linting)/scripts/lintI18n.ts\"",
     "lint:annotations": "tsx \"../Standards (Technical + Linting)/scripts/lintAnnotations.ts\"",
     "lint:filenames": "tsx \"../Standards (Technical + Linting)/scripts/lintFilenames.ts\"",
+    "lint:cds-layout": "tsx \"../Standards (Technical + Linting)/scripts/lintCdsServiceLayout.ts\"",
     "lint:tracking-ids": "tsx \"../Standards (Technical + Linting)/scripts/lintNoTrackingIds.ts\"",
     "lint:default-attrs": "tsx \"../Standards (Technical + Linting)/scripts/lintNoDefaultAttributes.ts\"",
     "lint:test-data": "tsx \"../Standards (Technical + Linting)/scripts/lintTestData.ts\"",
@@ -105,6 +106,17 @@
             "password": null,
             "database": null
           }
+        }
+      }
+    },
+    "[journey]": {
+      "requires": {
+        "db": {
+          "data": [
+            "db/data",
+            "db/seed",
+            "test/journey/data"
+          ]
         }
       }
     }

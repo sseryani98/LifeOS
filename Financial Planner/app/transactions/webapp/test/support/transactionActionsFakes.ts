@@ -4,9 +4,13 @@
 
 import Messaging from "com/financialplanner/shared/Messaging";
 import TransactionsService from "com/financialplanner/transactions/model/TransactionsService";
+import type { SplitSuggestion } from "com/financialplanner/transactions/model/types";
 import type ExtensionAPI from "sap/fe/templates/ListReport/ExtensionAPI";
 import type UI5Event from "sap/ui/base/Event";
 import type JSONModel from "sap/ui/model/json/JSONModel";
+import ResourceModel from "sap/ui/model/resource/ResourceModel";
+
+import { I18N_BUNDLE, PERCENT_SWEEP, ROW_AMOUNT } from "../data/constants";
 
 import type {
   CollaboratorCalls,
@@ -14,6 +18,7 @@ import type {
   FakeDialog,
   FakePage,
   FragmentLoad,
+  SuggestionSwitch,
 } from "./types";
 
 /**
@@ -51,12 +56,14 @@ export const buildFakePage = (): FakePage => {
   const loads: FragmentLoad[] = [];
   const dialogs = new Map<string, FakeDialog>();
   let selectedIds: readonly string[] = [];
+  const i18nModel = new ResourceModel({ bundleName: I18N_BUNDLE.NAME });
   const api = {
     getSelectedContexts: () =>
       selectedIds.map(rowId => ({
-        getProperty: (path: string) => (path === "ID" ? rowId : undefined),
+        getProperty: (path: string) =>
+          path === "ID" ? rowId : ROW_AMOUNT[rowId],
       })),
-    getModel: () => ({}),
+    getModel: (name?: string) => (name === "i18n" ? i18nModel : {}),
     loadFragment: async (settings: FragmentLoad) => {
       loads.push(settings);
       const shortName = settings.name.split(".").pop() as string;
@@ -102,25 +109,53 @@ export const enterDialogInput = (
 };
 
 /**
+ * Lists every two-decimal percentage from 0.01 to 100.00 as the text a user types.
+ * @returns the typed percentages, in order
+ */
+export const buildTwoDecimalPercents = (): string[] => {
+  const percents: string[] = [];
+  for (
+    let hundredths = PERCENT_SWEEP.FIRST_HUNDREDTHS;
+    hundredths <= PERCENT_SWEEP.LAST_HUNDREDTHS;
+    hundredths++
+  ) {
+    percents.push(
+      (hundredths / PERCENT_SWEEP.HUNDREDTHS_PER_PERCENT).toFixed(2),
+    );
+  }
+  return percents;
+};
+
+/**
  * Replaces the Messaging and TransactionsService prototypes with recorders, so the
  * instances TransactionActions builds per call are observable. Call restore() in afterEach.
- * @returns the recorded calls, a one-shot failure switch, and restore()
+ * The recurring split suggestion and the row's own split default to none.
+ * @returns the recorded calls, failure and suggestion switches, and restore()
  */
 export const stubCollaborators = (): CollaboratorStubs => {
   const calls: CollaboratorCalls = {
     bulkApplied: [],
+    existingSplits: [],
     reCategorized: [],
     splits: [],
+    suggestions: [],
     toasts: [],
+    warningArgs: [],
     warnings: [],
   };
-  const failure: { message: string | null } = { message: null };
+  const failure: { message: string | null; target?: string } = {
+    message: null,
+  };
   const settle = (): Promise<void> => {
-    const message = failure.message;
+    const { message, target } = failure;
     failure.message = null;
+    failure.target = undefined;
+    // A V4 action failure carries the OData error body, and its target, on `error`.
     return message === null
       ? Promise.resolve()
-      : Promise.reject(new Error(message));
+      : Promise.reject(
+          Object.assign(new Error(message), { error: { target } }),
+        );
   };
   const restoreMessaging = stubMessaging(calls);
   const service = TransactionsService.prototype;
@@ -137,14 +172,36 @@ export const stubCollaborators = (): CollaboratorStubs => {
     calls.splits.push(args);
     return settle();
   };
+  const suggestion: SuggestionSwitch = { result: null, failure: null };
+  service.findRecurringSplitSuggestion = (transactionId: string) => {
+    calls.suggestions.push(transactionId);
+    return suggestion.failure === null
+      ? Promise.resolve(suggestion.result)
+      : Promise.reject(new Error(suggestion.failure));
+  };
+  const existing: { split: SplitSuggestion | null } = { split: null };
+  service.findExistingSplit = (transactionId: string) => {
+    calls.existingSplits.push(transactionId);
+    return Promise.resolve(existing.split);
+  };
   return {
     calls,
-    rejectNextServiceCall: message => {
+    rejectNextServiceCall: (message, target) => {
       failure.message = message;
+      failure.target = target;
+    },
+    rejectSuggestion: message => {
+      suggestion.failure = message;
     },
     restore: () => {
       restoreMessaging();
       Object.assign(service, originals);
+    },
+    setExistingSplit: split => {
+      existing.split = split;
+    },
+    setSuggestion: result => {
+      suggestion.result = result;
     },
   };
 };
@@ -163,8 +220,9 @@ const stubMessaging = (calls: CollaboratorCalls): (() => void) => {
   messaging.showToast = (key: string) => {
     calls.toasts.push(key);
   };
-  messaging.showWarning = (key: string) => {
+  messaging.showWarning = (key: string, args?: string[]) => {
     calls.warnings.push(key);
+    calls.warningArgs.push(args ?? []);
   };
   return () => {
     Object.assign(messaging, originals);
@@ -180,9 +238,15 @@ const pickServiceMethods = (
   service: TransactionsService,
 ): Pick<
   TransactionsService,
-  "applyBulkCategories" | "runReCategorization" | "splitTransaction"
+  | "applyBulkCategories"
+  | "findExistingSplit"
+  | "findRecurringSplitSuggestion"
+  | "runReCategorization"
+  | "splitTransaction"
 > => ({
   applyBulkCategories: service.applyBulkCategories,
+  findExistingSplit: service.findExistingSplit,
+  findRecurringSplitSuggestion: service.findRecurringSplitSuggestion,
   runReCategorization: service.runReCategorization,
   splitTransaction: service.splitTransaction,
 });

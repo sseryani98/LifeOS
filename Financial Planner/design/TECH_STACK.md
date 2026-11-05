@@ -164,7 +164,7 @@ Financial Planner/
 │   └── error.log                            ← ERROR entries only
 ├── db/
 │   ├── common/                              ← Shared aspects + enums.cds (all enum types)
-│   ├── reference/schema.cds                 ← 24 reference data entities
+│   ├── reference/schema.cds                 ← 26 reference data entities
 │   ├── cards/schema.cds                     ← MarketCard, Offer, OfferTranche, CardInstance, EarningMultiplier, SoftPerkDefinition, CardPerk
 │   ├── transactions/schema.cds              ← Transaction, TransactionSplit, MerchantPattern, VendorCategoryStats (view)
 │   ├── points/schema.cds                    ← PointsAdjustment, Redemption
@@ -174,13 +174,15 @@ Financial Planner/
 │   ├── alerts/schema.cds                    ← Alert
 │   └── seed/                                ← CSV seed data for CNV-002
 ├── srv/
-│   ├── transaction-service.cds              ← TransactionService definition
+│   ├── transaction-service.cds              ← TransactionService shell (members in transaction/)
+│   ├── transaction/                         ← entities, types, actions, calculations .cds
 │   ├── transaction-service.ts               ← TransactionService entry point
 │   ├── churning-service.cds                 ← ChurningService definition
 │   ├── churning-service.ts                  ← ChurningService entry point
 │   ├── budget-service.cds                   ← BudgetService definition
 │   ├── budget-service.ts                    ← BudgetService entry point
-│   ├── admin-service.cds                    ← AdminService definition
+│   ├── admin-service.cds                    ← AdminService shell (members in admin/)
+│   ├── admin/                               ← entities, actions .cds
 │   ├── admin-service.ts                     ← AdminService entry point
 │   ├── _i18n/
 │   │   ├── i18n.properties                  ← CDS field labels (PascalCase)

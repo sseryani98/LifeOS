@@ -12,4 +12,8 @@ export const OBJECT_PAGE = {
 export const PERCENT = {
   /** Divisor converting an entered 0–100 percentage to its 0–1 fraction. */
   DIVISOR: 100,
+  /** Decimals a stored fraction shown as a percentage keeps (0.3333 → 33.33). */
+  SHOWN_DECIMALS: 2,
+  /** Decimals the stored fraction holds — the column is Decimal(5,4). */
+  STORED_DECIMALS: 4,
 } as const;

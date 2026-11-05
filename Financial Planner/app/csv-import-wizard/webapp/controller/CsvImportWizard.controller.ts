@@ -247,11 +247,18 @@ export default class CsvImportWizard extends BaseController {
   }
 
   /**
-   * Reads dropped OS files into the pending upload set.
+   * Reads picked or dropped OS files into the pending upload set. One unreadable
+   * file aborts the whole pick, so no partial set lands.
    * @param files the files dropped onto the drop zone
    */
   private async _addFiles(files: File[]): Promise<void> {
-    const parsed = await Promise.all(files.map(file => this._readFile(file)));
+    let parsed: ParsedFile[];
+    try {
+      parsed = await Promise.all(files.map(file => this._readFile(file)));
+    } catch {
+      this._messages.showError("msgFileUnreadable");
+      return;
+    }
     const state = this._getState();
     const existing = state.getProperty("/files") as ParsedFile[];
     const merged = [...existing, ...parsed];

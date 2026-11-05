@@ -14,6 +14,7 @@
 | 2026-02-13 | Sandro & Claude | Initial creation — sprint methodology, persona operations, sprint plan, meeting format. |
 | 2026-02-20 | Claude          | Status → Approved. Step 12 complete — all 21 specs approved.                            |
 | 2026-11-04 | Claude          | `/pm-update`: Sprint Board, Defect Log and checkpoint templates aligned to the files as kept (tables, no Review lane, 6-column log, `-checkpoint.md`). |
+| 2026-11-05 | Claude          | `/pm-update`: Defect Log template allows a dated blocker note in an Open defect's Resolution (Sandro). |
 
 ---
 
@@ -246,7 +247,8 @@ Running log maintained by the Defect Tracker persona:
 ```
 
 The Description names the FRICEW object and where it was found; the Resolution names the fix commit
-and root cause once Closed.
+and root cause once Closed. An Open defect's Resolution is `—`, or a dated note of what it waits on
+(a decision, a blocking story).
 
 Severities: **Critical** (blocks sprint), **High** (must fix next sprint), **Medium** (fix within wave), **Low** (backlog).
 

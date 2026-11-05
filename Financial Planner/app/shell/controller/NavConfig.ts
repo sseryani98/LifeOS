@@ -16,14 +16,17 @@ export default class NavConfig {
   }
 
   /**
-   * Resolves the nav key whose entry deep-links to a hash fragment.
-   * @param hash the hash fragment (e.g. "Issuers")
+   * Resolves the nav key whose list or record hashes start with a fragment.
+   * @param hash the hash fragment (e.g. "IssuersList", or "Issuers" from a record)
    * @returns the nav key (e.g. "MD_ISSUERS"), or undefined when none matches
    */
   public static getNavKeyForHash(hash: string): string | undefined {
     const hashToNavKey = Object.entries(NAV_CONFIG).reduce(
       (map: Record<string, string>, [key, conf]) => {
         map[conf.hash] = key;
+        if (conf.recordHash) {
+          map[conf.recordHash] = key;
+        }
         return map;
       },
       {},

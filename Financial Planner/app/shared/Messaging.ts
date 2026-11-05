@@ -58,18 +58,20 @@ export default class Messaging {
   /**
    * Opens a warning dialog for the given i18n key.
    * @param key the i18n message key
+   * @param args values for the text's placeholders, such as a backend's reason
    */
-  public showWarning(key: string): void {
-    MessageBox.warning(this._resolveText(key));
+  public showWarning(key: string, args?: string[]): void {
+    MessageBox.warning(this._resolveText(key, args));
   }
 
   /**
    * Resolves an i18n key against the host view's "i18n" model.
    * @param key the i18n message key
+   * @param args values for the text's placeholders
    * @returns the resolved text, or "" when the key is missing
    */
-  private _resolveText(key: string): string {
+  private _resolveText(key: string, args?: string[]): string {
     const view = this._host.getView();
-    return view ? I18n.getText(view, key) : "";
+    return view ? I18n.getText(view, key, args) : "";
   }
 }

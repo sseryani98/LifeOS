@@ -27,6 +27,14 @@ entity CardSegment : CodeList {
   key code : String(20);
 }
 
+entity CategorizationStatusType : CodeList {
+  key code : String(20);
+}
+
+entity TransactionSourceType : CodeList {
+  key code : String(20);
+}
+
 @assert.unique: {name: [name]}
 entity Issuer : cuid, managed {
   name      : String(100) not null  @mandatory  @Common.Label: '{i18n>Issuer.name}';

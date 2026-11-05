@@ -4,6 +4,8 @@ import {
   EMPTY_STRING_PCT_PAYLOAD,
   MINIMAL_SPLIT_PAYLOAD,
   PADEL_TXN_ID,
+  PG_DOLLAR_TEMPLATE_ROW,
+  PG_PCT_TEMPLATE_ROW,
 } from "../data/splits.js";
 
 describe("TransactionMapper", () => {
@@ -36,6 +38,29 @@ describe("TransactionMapper", () => {
 
       expect(command.transactionIds).toEqual([]);
       expect(command.vendor_ID).toBeNull();
+    });
+  });
+
+  describe("toRecurringSplitTemplate", () => {
+    /** Postgres returns decimals as strings; a template must reach the Split dialog as numbers, or it pre-fills "0.2000" and the share maths breaks. */
+    it("coerces a percentage template's string decimals to numbers", () => {
+      const template = TransactionMapper.toRecurringSplitTemplate(
+        PG_PCT_TEMPLATE_ROW,
+      );
+
+      expect(template.mySharePct).toBe(0.2);
+      expect(template.myShareAmount).toBe(22);
+      expect(template.splitDescription).toBe("Padel with friends");
+    });
+
+    /** A dollar template's null percentage must stay null, not Number(null) = 0, or the dialog opens a fixed share as a 0% reimbursement. */
+    it("keeps a dollar template's null percentage and coerces its amount", () => {
+      const template = TransactionMapper.toRecurringSplitTemplate(
+        PG_DOLLAR_TEMPLATE_ROW,
+      );
+
+      expect(template.mySharePct).toBeNull();
+      expect(template.myShareAmount).toBe(42.5);
     });
   });
 });

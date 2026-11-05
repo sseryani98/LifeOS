@@ -8,10 +8,15 @@ import { TransactionDataService } from "../../../../srv/modules/transaction/tran
 import { TransactionFacade } from "../../../../srv/modules/transaction/transactionFacade.js";
 import { TransactionService } from "../../../../srv/modules/transaction/transactionService.js";
 
+import type { SplitSuggestion } from "../../../../srv/modules/transaction/types.js";
+
 import cds from "@sap/cds";
 
 import { LEARNED_PATTERN_SOURCE } from "../../../shared/data/reference.js";
 import {
+  AUTO_EDIT_TRANSACTION,
+  BULK_KEEP_TRANSACTION,
+  CAFE_NERO_VENDOR,
   BULK_TRANSACTIONS,
   CORRECTION_TRANSACTION,
   EXISTING_SPLIT,
@@ -19,10 +24,17 @@ import {
   RECAT_CORRECTED_TRANSACTIONS,
   RECAT_UNCATEGORIZED_TRANSACTIONS,
   RESPLIT_TRANSACTION,
+  SHARE_EDIT_SPLITS,
+  SHARE_EDIT_TRANSACTIONS,
   SPLIT_TRANSACTION,
   STARBUCKS_VENDOR,
+  SUGGESTION_SPLITS,
+  SUGGESTION_TRANSACTIONS,
+  SUGGESTION_VENDORS,
   UBER_EATS_PATTERN,
   UBER_EATS_VENDOR,
+  VENDOR_FILL_TRANSACTIONS,
+  OBJECT_PAGE_HEADER_TRANSACTIONS,
 } from "../data/transaction.js";
 
 const VENDOR = "com.financialplanner.Vendor";
@@ -44,6 +56,8 @@ export interface SplitRow {
 /** A transaction's categorization state, in the shape the spec asserts on. */
 export interface TransactionStateRow {
   vendor_ID: string | null;
+  purchaseType_ID: string | null;
+  earningCategory_ID: string | null;
   categorizationStatus: string;
 }
 
@@ -170,6 +184,21 @@ export const actionRequest = (data: unknown): { data: unknown; error: () => void
   return { data, error: () => undefined };
 };
 
+/** Wraps a draft patch as a request keyed to its row, for the in-process engine. */
+export const keyedRequest = (
+  data: Record<string, unknown>,
+  id: string,
+): { data: Record<string, unknown>; params: unknown[] } => {
+  return { data, params: [{ ID: id }] };
+};
+
+/** Wraps a READ's selected columns as a request, for the in-process engine. */
+export const selectingRequest = (
+  columns: Array<{ ref: string[] }>,
+): { query: { SELECT: { columns: Array<{ ref: string[] }> } } } => {
+  return { query: { SELECT: { columns } } };
+};
+
 /**
  * Seeds the bulk vendor, the split transaction, the bulk transactions, and the
  * re-split, inline-edit and correction rows that own their own state.
@@ -181,6 +210,8 @@ export const seedTransactionProcessing = async (): Promise<void> => {
   await INSERT.into(TRANSACTION).entries(RESPLIT_TRANSACTION);
   await INSERT.into(TRANSACTION).entries(INLINE_EDIT_TRANSACTION);
   await INSERT.into(TRANSACTION).entries(CORRECTION_TRANSACTION);
+  await INSERT.into(TRANSACTION).entries(AUTO_EDIT_TRANSACTION);
+  await INSERT.into(TRANSACTION).entries(BULK_KEEP_TRANSACTION);
   await INSERT.into(TRANSACTION_SPLIT).entries(EXISTING_SPLIT);
 };
 
@@ -195,30 +226,65 @@ export const registerTransactionHandlers = async (): Promise<void> => {
 };
 
 /**
- * Drives the draft edit → patch vendor → activate flow for an existing
- * transaction, firing the real before-SAVE learning hook the inline-edit UI
- * relies on. Bound to the cds.test POST/PATCH handles.
+ * Drives the object page's draft edit → patch → activate flow for an existing
+ * transaction, firing the real before-SAVE hook. Bound to the cds.test
+ * POST/PATCH handles.
  */
-export const buildInlineEditFlow = (
+export const buildDraftSaveFlow = (
   post: PostFn,
   patch: PatchFn,
-): (transactionId: string, vendorId: string) => Promise<void> => {
+): (transactionId: string, changes: Record<string, unknown>) => Promise<void> => {
   const draftUrl = (transactionId: string, active: boolean): string =>
     `${SERVICE_PATH}/Transactions(ID=${transactionId},IsActiveEntity=${active})`;
 
   return async (
     transactionId: string,
-    vendorId: string,
+    changes: Record<string, unknown>,
   ): Promise<void> => {
     await post(
       `${draftUrl(transactionId, true)}/${SERVICE_NAME}.draftEdit`,
       { PreserveChanges: true },
     );
-    await patch(draftUrl(transactionId, false), { vendor_ID: vendorId });
+    await patch(draftUrl(transactionId, false), changes);
     await post(
       `${draftUrl(transactionId, false)}/${SERVICE_NAME}.draftActivate`,
       {},
     );
+  };
+};
+
+/** Binds the draft-save flow to a vendor-only edit, the inline-edit UI's path. */
+export const buildInlineEditFlow = (
+  post: PostFn,
+  patch: PatchFn,
+): (transactionId: string, vendorId: string) => Promise<void> => {
+  const saveDraft = buildDraftSaveFlow(post, patch);
+  return (transactionId: string, vendorId: string): Promise<void> =>
+    saveDraft(transactionId, { vendor_ID: vendorId });
+};
+
+/** Binds the draft-save flow to a save expected to be refused, returning its status and code. */
+export const buildRefusedDraftSaveFlow = (
+  post: PostFn,
+  patch: PatchFn,
+): (transactionId: string, changes: Record<string, unknown>) => Promise<SuggestionRejection> => {
+  const saveDraft = buildDraftSaveFlow(post, patch);
+  return async (
+    transactionId: string,
+    changes: Record<string, unknown>,
+  ): Promise<SuggestionRejection> => {
+    try {
+      await saveDraft(transactionId, changes);
+    } catch (error: unknown) {
+      const response = (
+        error as { response?: { status: number; data?: { error?: { code?: string } } } }
+      ).response;
+      return {
+        status: response?.status ?? 0,
+        code: response?.data?.error?.code ?? "",
+      };
+    }
+    throw new Error("Expected the draft save to be refused");
   };
 };
 
@@ -272,11 +338,11 @@ export const readSplitByTransaction = async (
     .columns("mySharePct", "myShareAmount", "splitDescription", "isRecurring")
     .where({ transaction_ID: transactionId })) as
     | {
-        mySharePct: number | string | null;
-        myShareAmount: number | string;
-        splitDescription: string | null;
-        isRecurring: boolean;
-      }
+      mySharePct: number | string | null;
+      myShareAmount: number | string;
+      splitDescription: string | null;
+      isRecurring: boolean;
+    }
     | undefined;
   if (!row) {
     return null;
@@ -295,7 +361,7 @@ export const readTransactionState = async (
 ): Promise<TransactionStateRow | null> => {
   const row = (await SELECT.one
     .from(TRANSACTION)
-    .columns("vendor_ID", "categorizationStatus")
+    .columns("vendor_ID", "purchaseType_ID", "earningCategory_ID", "categorizationStatus")
     .where({ ID: transactionId })) as TransactionStateRow | undefined;
   return row ?? null;
 };
@@ -324,4 +390,277 @@ export const countLearnedPatternsForVendor = async (
       patternSource_ID: LEARNED_PATTERN_SOURCE.ID,
     })) as Array<{ ID: string }>;
   return rows.length;
+};
+
+/** The suggestRecurringSplit function's OData response. */
+export interface SuggestionFunctionResponse {
+  status: number;
+  data: SplitSuggestion;
+}
+
+/** A rejected suggestRecurringSplit call — the HTTP status and the error code. */
+export interface SuggestionRejection {
+  status: number;
+  code: string;
+}
+
+type GetFn = <TResponse>(url: string) => Promise<TResponse>;
+
+/** Seeds the recurring-suggestion vendors, charges and prior splits. */
+export const seedRecurringSuggestionScenario = async (): Promise<void> => {
+  await INSERT.into(VENDOR).entries(SUGGESTION_VENDORS);
+  await INSERT.into(TRANSACTION).entries(SUGGESTION_TRANSACTIONS);
+  await INSERT.into(TRANSACTION_SPLIT).entries(SUGGESTION_SPLITS);
+};
+
+/**
+ * Binds the suggestRecurringSplit function callers to a cds.test GET handle, so
+ * the facade binding and the CDS function signature are under test.
+ */
+export const buildSuggestionQueries = (
+  get: GetFn,
+): {
+  getSplitSuggestion: (transactionId: string) => Promise<SuggestionFunctionResponse>;
+  getSplitSuggestionRejection: (transactionId: string) => Promise<SuggestionRejection>;
+} => {
+  const urlFor = (transactionId: string): string =>
+    `${SERVICE_PATH}/suggestRecurringSplit(transactionId=${transactionId})`;
+
+  /** Invokes suggestRecurringSplit over OData. */
+  const getSplitSuggestion = async (
+    transactionId: string,
+  ): Promise<SuggestionFunctionResponse> => {
+    return get<SuggestionFunctionResponse>(urlFor(transactionId));
+  };
+
+  /** Invokes suggestRecurringSplit expecting a refusal, returning its status and code. */
+  const getSplitSuggestionRejection = async (
+    transactionId: string,
+  ): Promise<SuggestionRejection> => {
+    try {
+      await get(urlFor(transactionId));
+    } catch (error: unknown) {
+      const response = (
+        error as { response?: { status: number; data?: { error?: { code?: string } } } }
+      ).response;
+      return {
+        status: response?.status ?? 0,
+        code: response?.data?.error?.code ?? "",
+      };
+    }
+    throw new Error("Expected suggestRecurringSplit to refuse the call");
+  };
+
+  return { getSplitSuggestion, getSplitSuggestionRejection };
+};
+
+/**
+ * Reads a row's categorization status label the way the ListReport column
+ * does: the code plus its text association, expanded over OData.
+ */
+export const readCategorizationStatusLabel = async (
+  get: GetFn,
+  transactionId: string,
+): Promise<string | undefined> => {
+  const response = await get<{ data: { categorizationStatusType?: { name?: string } } }>(
+    `${SERVICE_PATH}/Transactions(ID=${transactionId},IsActiveEntity=true)` +
+    "?$select=categorizationStatus&$expand=categorizationStatusType($select=name)",
+  );
+  return response.data.categorizationStatusType?.name;
+};
+
+/** The vendor-category alternatives the object page lists, ranked by count. */
+export interface CategoryAlternativeRow {
+  purchaseTypeName: string | null;
+  earningCategoryName: string | null;
+  usageCount: number;
+}
+
+/** Seeds Cafe Nero's history and the rows its object-page pick fills. */
+export const seedVendorFillScenario = async (): Promise<void> => {
+  await INSERT.into(VENDOR).entries(CAFE_NERO_VENDOR);
+  await INSERT.into(TRANSACTION).entries(VENDOR_FILL_TRANSACTIONS);
+};
+
+/** Reads the TransactionService $metadata document, where annotation labels resolve. */
+export const readServiceMetadata = async (get: GetFn): Promise<string> => {
+  const response = await get<{ data: string }>(`${SERVICE_PATH}/$metadata`);
+  return response.data;
+};
+
+/** Reads the $metadata annotations block one target carries, empty when it has none. */
+export const readAnnotationBlock = async (get: GetFn, target: string): Promise<string> => {
+  const metadata = await readServiceMetadata(get);
+  const start = metadata.indexOf(`<Annotations Target="${target}">`);
+  if (start < 0) {
+    return "";
+  }
+  return metadata.slice(start, metadata.indexOf("</Annotations>", start));
+};
+
+/** Reads a row's source label the way the object page does: the code's text association. */
+export const readSourceLabel = async (
+  get: GetFn,
+  transactionId: string,
+): Promise<string | undefined> => {
+  const response = await get<{ data: { sourceType?: { name?: string } } }>(
+    `${SERVICE_PATH}/Transactions(ID=${transactionId},IsActiveEntity=true)` +
+    "?$select=source&$expand=sourceType($select=name)",
+  );
+  return response.data.sourceType?.name;
+};
+
+/** Seeds the refund and the charge the object-page header colours apart. */
+export const seedObjectPageHeaderScenario = async (): Promise<void> => {
+  await INSERT.into(TRANSACTION).entries(OBJECT_PAGE_HEADER_TRANSACTIONS);
+};
+
+/**
+ * Binds object-page draft steps to the cds.test handles: open a draft, patch it,
+ * and read selected fields of the active row or of the draft.
+ */
+export const buildObjectPageDraft = (
+  get: GetFn,
+  post: PostFn,
+  patch: PatchFn,
+): {
+  openDraft: (transactionId: string) => Promise<void>;
+  patchDraft: (transactionId: string, changes: Record<string, unknown>) => Promise<void>;
+  readFields: (
+    transactionId: string,
+    fields: string[],
+    active: boolean,
+  ) => Promise<Record<string, unknown>>;
+} => {
+  const rowUrl = (transactionId: string, active: boolean): string =>
+    `${SERVICE_PATH}/Transactions(ID=${transactionId},IsActiveEntity=${active})`;
+  return {
+    openDraft: async (transactionId: string): Promise<void> => {
+      await post(`${rowUrl(transactionId, true)}/${SERVICE_NAME}.draftEdit`, {
+        PreserveChanges: true,
+      });
+    },
+    patchDraft: async (
+      transactionId: string,
+      changes: Record<string, unknown>,
+    ): Promise<void> => {
+      await patch(rowUrl(transactionId, false), changes);
+    },
+    readFields: async (
+      transactionId: string,
+      fields: string[],
+      active: boolean,
+    ): Promise<Record<string, unknown>> => {
+      const response = await get<{ data: Record<string, unknown> }>(
+        `${rowUrl(transactionId, active)}?$select=${fields.join(",")}`,
+      );
+      return response.data;
+    },
+  };
+};
+
+/** Reads the object page's category alternatives for a transaction, ranked by count. */
+export const readCategoryAlternatives = async (
+  get: GetFn,
+  transactionId: string,
+): Promise<CategoryAlternativeRow[]> => {
+  const response = await get<{
+    data: {
+      value: Array<{
+        usageCount: number | string;
+        purchaseType?: { name?: string } | null;
+        earningCategory?: { name?: string } | null;
+      }>;
+    };
+  }>(
+    `${SERVICE_PATH}/Transactions(ID=${transactionId},IsActiveEntity=true)/categoryAlternatives` +
+    "?$orderby=usageCount desc&$expand=purchaseType($select=name),earningCategory($select=name)",
+  );
+  return response.data.value.map(row => ({
+    purchaseTypeName: row.purchaseType?.name ?? null,
+    earningCategoryName: row.earningCategory?.name ?? null,
+    usageCount: Number(row.usageCount),
+  }));
+};
+
+/** Seeds the charges whose 50% splits the object page re-edits. */
+export const seedSplitShareEditScenario = async (): Promise<void> => {
+  await INSERT.into(TRANSACTION).entries(SHARE_EDIT_TRANSACTIONS);
+  await INSERT.into(TRANSACTION_SPLIT).entries(SHARE_EDIT_SPLITS);
+};
+
+/** A refused draft patch's status and error code. */
+export interface DraftPatchRejection {
+  status: number;
+  code: string;
+}
+
+/**
+ * Binds the object page's split-section edits to the cds.test handles: patch the
+ * draft's split through its parent, read the draft split back, and activate.
+ */
+export const buildSplitShareEdit = (
+  get: GetFn,
+  post: PostFn,
+  patch: PatchFn,
+): {
+  patchSplit: (transactionId: string, changes: Record<string, unknown>) => Promise<void>;
+  patchSplitExpectingRefusal: (
+    transactionId: string,
+    changes: Record<string, unknown>,
+  ) => Promise<DraftPatchRejection>;
+  readDraftSplit: (transactionId: string) => Promise<SplitRow>;
+  activate: (transactionId: string) => Promise<void>;
+} => {
+  const rowUrl = (transactionId: string, active: boolean): string =>
+    `${SERVICE_PATH}/Transactions(ID=${transactionId},IsActiveEntity=${active})`;
+  const patchSplit = async (
+    transactionId: string,
+    changes: Record<string, unknown>,
+  ): Promise<void> => {
+    await patch(`${rowUrl(transactionId, false)}/split`, changes);
+  };
+  return {
+    patchSplit,
+    patchSplitExpectingRefusal: async (
+      transactionId: string,
+      changes: Record<string, unknown>,
+    ): Promise<DraftPatchRejection> => {
+      try {
+        await patchSplit(transactionId, changes);
+      } catch (error: unknown) {
+        const response = (
+          error as { response?: { status: number; data?: { error?: { code?: string } } } }
+        ).response;
+        return {
+          status: response?.status ?? 0,
+          code: response?.data?.error?.code ?? "",
+        };
+      }
+      throw new Error("Expected the split patch to be refused");
+    },
+    readDraftSplit: async (transactionId: string): Promise<SplitRow> => {
+      const response = await get<{
+        data: {
+          mySharePct: number | string | null;
+          myShareAmount: number | string;
+          splitDescription: string | null;
+          isRecurring: boolean;
+        };
+      }>(
+        `${rowUrl(transactionId, false)}/split` +
+        "?$select=mySharePct,myShareAmount,splitDescription,isRecurring",
+      );
+      const row = response.data;
+      return {
+        mySharePct: row.mySharePct === null ? null : Number(row.mySharePct),
+        myShareAmount: Number(row.myShareAmount),
+        splitDescription: row.splitDescription,
+        isRecurring: row.isRecurring,
+      };
+    },
+    activate: async (transactionId: string): Promise<void> => {
+      await post(`${rowUrl(transactionId, false)}/${SERVICE_NAME}.draftActivate`, {});
+    },
+  };
 };

@@ -34,11 +34,20 @@ export class TransactionValidator {
     if (pctGiven === amountGiven) {
       errors.push({
         field: "mySharePct",
-        messageKey: SPLIT_MESSAGE.ENTER_ONE_INPUT,
+        messageKey: pctGiven
+          ? SPLIT_MESSAGE.ENTER_ONE_INPUT
+          : SPLIT_MESSAGE.NO_INPUT,
       });
       return errors;
     }
-    if (share < 0 || share > absAmount) {
+    if (share < 0) {
+      errors.push({
+        field: "myShareAmount",
+        messageKey: SPLIT_MESSAGE.AMOUNT_NEGATIVE,
+      });
+      return errors;
+    }
+    if (share > absAmount) {
       errors.push({
         field: "myShareAmount",
         messageKey: SPLIT_MESSAGE.AMOUNT_EXCEEDS_TOTAL,

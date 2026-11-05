@@ -10,6 +10,7 @@ import type {
   CorrectionRequest,
   ReCategorizeOutcome,
   TransactionCategorizationRow,
+  TransactionRecategorizationRow,
 } from "./types.js";
 
 /**
@@ -122,7 +123,7 @@ export class CategorizationService extends BaseService {
         continue;
       }
       const result = context.categorize(row.rawDescription, row.amount);
-      if (result.vendor_ID === null) {
+      if (result.vendor_ID === null || this._isAlreadyMatched(row, result)) {
         skippedCount += 1;
         continue;
       }
@@ -137,6 +138,25 @@ export class CategorizationService extends BaseService {
       skippedCount,
     });
     return { recategorizedCount, skippedCount };
+  }
+
+  /**
+   * Tells whether an auto row already carries the match a re-run produced, so a
+   * repeat re-run neither rewrites it nor counts it as re-categorized.
+   * @param row The stored transaction.
+   * @param result The fresh categorization.
+   * @returns True when writing the result would change nothing.
+   */
+  private _isAlreadyMatched(
+    row: TransactionRecategorizationRow,
+    result: CategorizationResult,
+  ): boolean {
+    return (
+      row.categorizationStatus === CATEGORIZATION_STATUS.AUTO &&
+      row.vendor_ID === result.vendor_ID &&
+      row.purchaseType_ID === result.purchaseType_ID &&
+      row.earningCategory_ID === result.earningCategory_ID
+    );
   }
 
   /**

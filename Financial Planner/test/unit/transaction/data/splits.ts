@@ -1,12 +1,16 @@
 // Named test data for the transaction-processing module (splits, bulk
 // categorize, corrections). UPPER_SNAKE_CASE constants — no inline payloads.
 
+import type { MerchantPatternRecord } from "../../../../srv/modules/categorization/types.js";
 import type {
   BulkCategorizeCommand,
+  CategoryPair,
+  CategoryReferences,
   CorrectionCommand,
   ReCategorizeCommand,
   SplitCommand,
   TransactionAmountRow,
+  TransactionMatchSource,
 } from "../../../../srv/modules/transaction/types.js";
 
 export const PADEL_TXN_ID = "ca5e0001-0000-0000-0000-000000000001";
@@ -149,6 +153,36 @@ export const TXN_B_ID = "ca5e0002-0000-0000-0000-000000000002";
 export const VENDOR_ID = "ca5e0003-0000-0000-0000-000000000001";
 export const PURCHASE_TYPE_ID = "ca5e0004-0000-0000-0000-000000000001";
 export const EARNING_CATEGORY_ID = "ca5e0005-0000-0000-0000-000000000001";
+export const OTHER_PURCHASE_TYPE_ID = "ca5e0004-0000-0000-0000-000000000002";
+export const OTHER_EARNING_CATEGORY_ID = "ca5e0005-0000-0000-0000-000000000002";
+
+/** The stored vendor + taxonomy of an auto-categorized row the object page edits. */
+export const STORED_AUTO_CATEGORIZATION: CategoryReferences = {
+  vendor_ID: VENDOR_ID,
+  purchaseType_ID: PURCHASE_TYPE_ID,
+  earningCategory_ID: EARNING_CATEGORY_ID,
+};
+
+/** An object-page save of that row that swaps only the purchase type. */
+export const PURCHASE_TYPE_ONLY_SAVE: Record<string, unknown> = {
+  ...STORED_AUTO_CATEGORIZATION,
+  purchaseType_ID: OTHER_PURCHASE_TYPE_ID,
+  categorizationStatus: "auto",
+};
+
+/** An object-page save of that row that swaps only the earning category. */
+export const EARNING_CATEGORY_ONLY_SAVE: Record<string, unknown> = {
+  ...STORED_AUTO_CATEGORIZATION,
+  earningCategory_ID: OTHER_EARNING_CATEGORY_ID,
+  categorizationStatus: "auto",
+};
+
+/** An object-page save of that row that changes only the notes. */
+export const NOTES_ONLY_SAVE: Record<string, unknown> = {
+  ...STORED_AUTO_CATEGORIZATION,
+  notes: "morning coffee",
+  categorizationStatus: "auto",
+};
 
 /** A deliberately-set status on an inline patch — the stamp must not overwrite it. */
 export const AUTO_STATUS = "auto";
@@ -159,6 +193,12 @@ export const BULK_APPLY: BulkCategorizeCommand = {
   vendor_ID: VENDOR_ID,
   purchaseType_ID: PURCHASE_TYPE_ID,
   earningCategory_ID: EARNING_CATEGORY_ID,
+};
+
+/** The same two rows, with row A selected twice. */
+export const DUPLICATE_ID_BULK_APPLY: BulkCategorizeCommand = {
+  ...BULK_APPLY,
+  transactionIds: [TXN_A_ID, TXN_B_ID, TXN_A_ID],
 };
 
 /** No rows selected — must be rejected before any write. */
@@ -210,3 +250,140 @@ export const MISSING_TXN_CORRECTION: CorrectionCommand = {
   purchaseType_ID: PURCHASE_TYPE_ID,
   earningCategory_ID: EARNING_CATEGORY_ID,
 };
+
+export const PADEL_VENDOR_ID = "ca5e0003-0000-0000-0000-000000000002";
+export const PADEL_NEW_TXN_ID = "ca5e0001-0000-0000-0000-000000000004";
+
+/** A new $120 Padel Haus charge the Split dialog opens on. */
+export const PADEL_NEW_SUGGESTION_ROW = {
+  ID: PADEL_NEW_TXN_ID,
+  amount: -120,
+  vendor_ID: PADEL_VENDOR_ID,
+};
+
+/** An $85 Padel Haus charge — 35% of it drifts to 29.749999999999996 in IEEE-754. */
+export const PADEL_DRIFTING_SUGGESTION_ROW = {
+  ID: PADEL_NEW_TXN_ID,
+  amount: -85,
+  vendor_ID: PADEL_VENDOR_ID,
+};
+
+/** A charge not yet assigned to any vendor — the matching key is absent. */
+export const NO_VENDOR_SUGGESTION_ROW = {
+  ID: PADEL_NEW_TXN_ID,
+  amount: -120,
+  vendor_ID: null,
+};
+
+/** The last recurring Padel split: 20%, so a $120 charge suggests $24.00. */
+export const PCT_RECURRING_TEMPLATE = {
+  mySharePct: 0.2,
+  myShareAmount: 22,
+  splitDescription: "Padel with friends",
+};
+
+/** A recurring 35% template — exercises the cents rounding on the new amount. */
+export const DRIFTING_PCT_RECURRING_TEMPLATE = {
+  mySharePct: 0.35,
+  myShareAmount: 35,
+  splitDescription: "Court rental",
+};
+
+/** A recurring flat $42.50 template — the share must not scale with the amount. */
+export const DOLLAR_RECURRING_TEMPLATE = {
+  mySharePct: null,
+  myShareAmount: 42.5,
+  splitDescription: "Monthly court share",
+};
+
+/** A recurring 0% template — a reimbursed charge, distinct from a dollar template's null. */
+export const REIMBURSED_RECURRING_TEMPLATE = {
+  mySharePct: 0,
+  myShareAmount: 0,
+  splitDescription: "Paid for a friend",
+};
+
+/** A percentage template as Postgres returns it — Decimal(5,4) and Decimal(15,2) arrive as strings. */
+export const PG_PCT_TEMPLATE_ROW = {
+  mySharePct: "0.2000",
+  myShareAmount: "22.00",
+  splitDescription: "Padel with friends",
+};
+
+/** A dollar template as Postgres returns it — the null percentage must survive as null. */
+export const PG_DOLLAR_TEMPLATE_ROW = {
+  mySharePct: null,
+  myShareAmount: "42.50",
+  splitDescription: "Monthly court share",
+};
+
+/** The vendor's top (PT, EC) combo from the stats view. */
+export const TOP_COMBO: CategoryPair = {
+  purchaseType_ID: PURCHASE_TYPE_ID,
+  earningCategory_ID: EARNING_CATEGORY_ID,
+};
+
+/** A draft with neither taxonomy field chosen yet. */
+export const EMPTY_DRAFT: CategoryPair = {
+  purchaseType_ID: null,
+  earningCategory_ID: null,
+};
+
+/** A draft whose purchase type the user already chose. */
+export const PRESET_PT_DRAFT: CategoryPair = {
+  purchaseType_ID: OTHER_PURCHASE_TYPE_ID,
+  earningCategory_ID: null,
+};
+
+/** The draft patch an object-page vendor pick sends. */
+export const VENDOR_PICK_PATCH: Record<string, unknown> = { vendor_ID: VENDOR_ID };
+
+/** A vendor pick whose patch also clears the purchase type explicitly. */
+export const VENDOR_PICK_WITH_PT_PATCH: Record<string, unknown> = {
+  vendor_ID: VENDOR_ID,
+  purchaseType_ID: null,
+};
+
+/** The columns the object page's suggestions section selects. */
+export const MATCH_COLUMNS = [{ ref: ["matchedPattern"] }, { ref: ["matchConfidence"] }, { ref: ["ID"] }];
+
+/** The columns a list read selects: no matcher-filled column. */
+export const LIST_COLUMNS = [{ ref: ["rawDescription"] }, { ref: ["ID"] }];
+
+/** The description + amount the matcher explains a row from. */
+export const MATCH_SOURCE: TransactionMatchSource = {
+  rawDescription: "UBER EATS CA #1",
+  amount: -18.5,
+};
+
+/** The active pattern that matches MATCH_SOURCE. */
+export const UBER_EATS_PATTERN_RECORD: MerchantPatternRecord = {
+  ID: "ca5e0006-0000-0000-0000-000000000001",
+  vendor_ID: VENDOR_ID,
+  vendorName: "Uber Eats",
+  pattern: "UBER EATS",
+  matchType: "contains",
+  confidenceName: "High",
+  amount: null,
+};
+
+/** The object page's My Share % edit on a split draft: 20%. */
+export const SHARE_PCT_PATCH = { mySharePct: 0.2 };
+
+/** The object page's My Share Amount edit on a split draft: $42.50. */
+export const SHARE_AMOUNT_PATCH = { myShareAmount: 42.5 };
+
+/** Both share inputs in one draft patch — BR-12 allows one. */
+export const SHARE_BOTH_PATCH = { mySharePct: 0.2, myShareAmount: 42.5 };
+
+/** A split-draft patch that touches neither share input. */
+export const SHARE_DESCRIPTION_PATCH = { splitDescription: "Court fees" };
+
+/** The object page's My Share Amount cleared on a split draft — the field is optional (BR-12). */
+export const SHARE_AMOUNT_CLEAR_PATCH = { myShareAmount: null };
+
+/** The draft split's stored percentage when it is 20%-based, and when it is dollar-based. */
+export const DRAFT_SPLIT_PCT = {
+  PERCENT_BASED: 0.2,
+  DOLLAR_BASED: null,
+} as const;

@@ -128,6 +128,19 @@
   --sapButton_Selected_Hover_Background: #f5edd8;
   --sapButton_Selected_Hover_BorderColor: #7a5e1b;
 
+  /* --- Switch (on state) --- */
+  /* The track keeps its rounded pill but not Horizon's blue fill. Burnt Gold
+     matches the Emphasized button, and the handle and check mark leave blue too. */
+  --sapButton_Track_Selected_Background: #8e6a24;
+  --sapButton_Track_Selected_BorderColor: #8e6a24;
+  --sapButton_Track_Selected_Hover_Background: #7a5e1b;
+  --sapButton_Track_Selected_Hover_BorderColor: #7a5e1b;
+  --sapButton_Handle_Selected_Background: #f5edd8;
+  --sapButton_Handle_Selected_BorderColor: #f5edd8;
+  --sapButton_Handle_Selected_Hover_Background: #f5edd8;
+  --sapButton_Handle_Selected_Hover_BorderColor: rgba(245, 237, 216, 0.5);
+  --sapButton_Handle_Selected_TextColor: #7a5e1b;
+
   /* --- Buttons: Transparent (Lite) --- */
   --sapButton_Lite_TextColor: #2a2725;
   --sapButton_Lite_Hover_Background: #f5edd8;
@@ -140,7 +153,8 @@
      Hover is not required to reach 3:1 and keeps the brand Amber. */
   --sapField_Focus_BorderColor: #a67c2e;
   --sapField_Hover_BorderColor: #c8973e;
-  --sapField_Hover_BackgroundStyle: 0 100% / 100% 0.0625rem no-repeat linear-gradient(0deg, #c8973e, #c8973e) border-box;
+  --sapField_Hover_BackgroundStyle: 0 100% / 100% 0.0625rem no-repeat
+    linear-gradient(0deg, #c8973e, #c8973e) border-box;
   --sapField_Active_BorderColor: #a67c2e;
 
   /* --- Lists & Tables --- */
@@ -227,7 +241,12 @@
   font-weight: bold;
 }
 
-.sapUxAPObjectPageHeaderStickied .sapFDynamicPageTitleMain>.sapFDynamicPageTitleMainInner .sapFDynamicPageTitleMainHeading .sapFDynamicPageTitleMainHeadingInner .sapMTitle {
+.sapUxAPObjectPageHeaderStickied
+  .sapFDynamicPageTitleMain
+  > .sapFDynamicPageTitleMainInner
+  .sapFDynamicPageTitleMainHeading
+  .sapFDynamicPageTitleMainHeadingInner
+  .sapMTitle {
   font-family: var(--sapFontFamily);
 }
 
@@ -245,7 +264,7 @@
 /* ToolHeader title & icon — Title and Icon controls default to --sapTextColor
    (dark), must inherit shell text color on the dark header bar.  (SAPUI5 1.136.16) */
 .sapTntToolHeader .sapMTitle,
-.sapTntToolHeader>.sapUiIcon {
+.sapTntToolHeader > .sapUiIcon {
   color: var(--sapShell_TextColor);
 }
 
@@ -279,14 +298,18 @@
 
 /* DynamicPage content — the list report's content area hardcodes the same cool
    grey. Selector copied from Horizon to match its specificity.  (SAPUI5 1.136.16) */
-.sapFDynamicPage .sapFDynamicPageContentWrapperStandard>.sapFDynamicPageContent {
+.sapFDynamicPage
+  .sapFDynamicPageContentWrapperStandard
+  > .sapFDynamicPageContent {
   background: var(--sapBackgroundColor);
 }
 
 /* DynamicPage header — the filter bar's band hardcodes white instead of reading
    the object-header token, so it would sit apart from the Parchment title above.  (SAPUI5 1.136.16) */
 .sapFDynamicPageHeader,
-.sapFDynamicPageTitleWrapper.sapFDynamicPageTitleSnapped+.sapFDynamicPageContentWrapper>.sapFDynamicPageHeaderWrapper {
+.sapFDynamicPageTitleWrapper.sapFDynamicPageTitleSnapped
+  + .sapFDynamicPageContentWrapper
+  > .sapFDynamicPageHeaderWrapper {
   background: var(--sapObjectHeader_Background);
 }
 
@@ -298,22 +321,103 @@
   border-radius: 0;
 }
 
+/* Segmented button ends and tokens — compact density hardcodes 8px end corners on
+   the segmented button, and tokens hardcode 6px (8px when focused), so neither
+   reads the radius tokens. Selectors copied from Horizon to match specificity.  (SAPUI5 1.136.16) */
+.sapUiSizeCompact .sapMSegBBtn:first-child .sapMSegBBtnInner,
+.sapUiSizeCompact .sapMSegBBtn.sapMSegBtnLastVisibleButton .sapMSegBBtnInner,
+html.sap-desktop .sapMSegBBtnFocusable:focus .sapMSegBBtnInner::after,
+html.sap-desktop
+  .sapMSegBBtn:first-child.sapMSegBBtnFocusable:focus
+  .sapMSegBBtnInner::after,
+html.sap-desktop
+  .sapMSegBBtn.sapMSegBtnLastVisibleButton.sapMSegBBtnFocusable:focus
+  .sapMSegBBtnInner::after,
+html.sap-desktop
+  .sapMSegB.sapMSegBIcons
+  .sapMSegBBtn.sapMSegBBtnFocusable:not(.sapMSegBtnLastVisibleButton):focus
+  .sapMSegBBtnInner::after,
+.sapMToken,
+.sapMTokenSelected,
+.sapMToken.sapMTokenReadOnly.sapMTokenSelected,
+html.sap-desktop
+  .sapMToken:not(.sapMTokenSelected):not(.sapMTokenReadOnly):not(:focus):hover,
+html.sap-desktop .sapMToken:focus {
+  border-radius: 0;
+}
+
 /* ObjectPage section blocks — hardcoded white and 12px corners. Four-class
    selector matches Horizon's, so its transparent-background variants still win.  (SAPUI5 1.136.16) */
-.sapUxAPObjectPageSection .sapUxAPObjectPageSectionContainer .sapUxAPObjectPageSubSection .sapUxAPBlockContainer {
+.sapUxAPObjectPageSection
+  .sapUxAPObjectPageSectionContainer
+  .sapUxAPObjectPageSubSection
+  .sapUxAPBlockContainer {
   background: var(--sapGroup_ContentBackground);
   border-radius: 0;
 }
 
+/* ObjectPage section blocks at XL — Horizon widens the title, section and sub-section
+   heading gutter to 3rem there but keeps the block margin at 2rem, so every card sat
+   16px left of its heading. Same four-class selector, scoped to XL.  (SAPUI5 1.136.16) */
+.sapUxAPObjectPageLayout-Std-Desktop-XL
+  .sapUxAPObjectPageSection
+  .sapUxAPObjectPageSectionContainer
+  .sapUxAPObjectPageSubSection
+  .sapUxAPBlockContainer {
+  margin-left: 3rem;
+  margin-right: 3rem;
+}
+
+/* IconTabBar headers, the ObjectPage anchor bar among them — the expand icon (4px),
+   overflow buttons (12px), selected bar (2px) and focus rings hardcode corners the
+   radius tokens never reach. Selectors copied from Horizon to match specificity.  (SAPUI5 1.136.16) */
+.sapMITBFilterExpandBtn .sapMITBFilterExpandIcon,
+.sapMITH .sapMITHEndOverflow .sapMITBItem,
+.sapMITH .sapMITHStartOverflow .sapMITBItem,
+.sapMITBContentArrow::after,
+html.sap-desktop
+  .sapMITBTextOnly
+  .sapMITBHead
+  .sapMITBItem:not(.sapUiDnDDragging):focus
+  .sapMITBText::after,
+html.sap-desktop .sapMITBItem:not(.sapUiDnDDragging):focus.sapMITBAll::after,
+html.sap-desktop
+  .sapMITHStartOverflow
+  .sapMITBItem:not(.sapUiDnDDragging):focus::after,
+html.sap-desktop
+  .sapMITHEndOverflow
+  .sapMITBItem:not(.sapUiDnDDragging):focus::after {
+  border-radius: 0;
+}
+
 /* Floating draft footers — both page types hardcode 12px corners on the bar.  (SAPUI5 1.136.16) */
-.sapUxAPObjectPageLayout .sapUxAPObjectPageFooter .sapUxAPObjectPageFloatingFooter,
+.sapUxAPObjectPageLayout
+  .sapUxAPObjectPageFooter
+  .sapUxAPObjectPageFloatingFooter,
 .sapFDynamicPageFooter .sapFDynamicPageActualFooterControl.sapMIBar {
   border-radius: 0;
 }
 
 /* Input focus ring — drawn as a ::before with hardcoded 4px corners, so a square
    field would carry a rounded ring.  (SAPUI5 1.136.16) */
-.sapMFocus.sapMInputBase .sapMInputBaseContentWrapper:not(.sapMInputBaseDisabledWrapper)::before {
+.sapMFocus.sapMInputBase
+  .sapMInputBaseContentWrapper:not(.sapMInputBaseDisabledWrapper)::before {
+  border-radius: 0;
+}
+
+/* Button focus ring — drawn as a ::before with hardcoded 6px corners, so a square
+   button would carry a rounded ring. Selectors copied from Horizon to match specificity.  (SAPUI5 1.136.16) */
+.sapMBtn:focus-visible > .sapMFocusable:not(.sapMBadgeIndicator)::before,
+html.sap-desktop
+  .sapMBtn:focus
+  > .sapMFocusable:not(.sapMBadgeIndicator)::before,
+html.sap-desktop
+  .sapMBtn:focus
+  > .sapMBtnAdditionalTextContent.sapMFocusable:not(
+    .sapMBadgeIndicator
+  )::before,
+.sapMSB.sapMSBEmphasized:focus
+  .sapMBtnActive.sapMFocusable:not(.sapMBadgeIndicator)::before {
   border-radius: 0;
 }
 
@@ -360,8 +464,10 @@ html.sap-desktop .sapUiFup .sapMFocusable:active {
 }
 
 /* Hover is a hardcoded grey; selector copied from Horizon to match specificity.  (SAPUI5 1.136.16) */
-.sapTntNLI:not(.sapTntNLIDisabled,
-  .sapTntNLIFirstLevel.sapTntNLIInPopover.sapTntNLIUnselectable):hover {
+.sapTntNLI:not(
+    .sapTntNLIDisabled,
+    .sapTntNLIFirstLevel.sapTntNLIInPopover.sapTntNLIUnselectable
+  ):hover {
   background-color: var(--sapList_Hover_Background);
 }
 
@@ -372,7 +478,8 @@ html.sap-desktop .sapUiFup .sapMFocusable:active {
 .sapTntNLI.sapTntNLISelected,
 .sapTntNLISelected.sapTntNLISecondLevel.sapTntNLI {
   background:
-    linear-gradient(0deg, var(--sapSelectedColor), var(--sapSelectedColor)) no-repeat 0px 100% / 3px 100%,
+    linear-gradient(0deg, var(--sapSelectedColor), var(--sapSelectedColor))
+      no-repeat 0px 100% / 3px 100%,
     #f5edd8;
 }
 
@@ -384,8 +491,13 @@ html.sap-desktop .sapUiFup .sapMFocusable:active {
 
 /* Navigation List focus ring — drawn as a hardcoded blue ::after border, not from
    --sapContent_FocusColor. Selector copied from Horizon to match its specificity.  (SAPUI5 1.136.16) */
-.sapTntNL .sapTntNLI:not(.sapTntNLIFirstLevel.sapTntNLIInPopover.sapTntNLIUnselectable)[tabindex]:focus::after,
-.sapTntNL .sapTntNLI:not(.sapTntNLIFirstLevel.sapTntNLIInPopover.sapTntNLIUnselectable) [tabindex]:focus::after {
+.sapTntNL
+  .sapTntNLI:not(
+    .sapTntNLIFirstLevel.sapTntNLIInPopover.sapTntNLIUnselectable
+  )[tabindex]:focus::after,
+.sapTntNL
+  .sapTntNLI:not(.sapTntNLIFirstLevel.sapTntNLIInPopover.sapTntNLIUnselectable)
+  [tabindex]:focus::after {
   border-color: var(--sapContent_FocusColor);
   border-radius: 0;
 }

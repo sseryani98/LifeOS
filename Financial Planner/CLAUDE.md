@@ -35,7 +35,7 @@ Personal financial management system for a Canadian credit card churner. TypeScr
     scripts/                 The shared lint scripts + generateTestReport.ts, called by path
 db/                          CDS entity models (9 domain folders)
   common/                    Shared aspects + enums.cds (all enum types)
-  reference/schema.cds       24 reference entities
+  reference/schema.cds       26 reference entities
   cards/schema.cds           7 card entities
   transactions/schema.cds    3 transaction entities + 1 view
   points/schema.cds          2 points entities
@@ -45,7 +45,8 @@ db/                          CDS entity models (9 domain folders)
   alerts/schema.cds          1 alert entity
   seed/                      CSV seed data (CNV-002, CNV-003)
 srv/
-  {service-name}.cds         CDS service definitions (4 services)
+  {service-name}.cds         CDS service shells (4 services) — using lines + empty service body
+  {service-name}/            Service members by kind: entities/types/actions/calculations/annotations.cds (lint:cds-layout)
   {service-name}.ts          Service entry points
   _i18n/
     i18n.properties          CDS field labels (PascalCase keys)
@@ -69,6 +70,7 @@ test/
     tests/                   The *.test.ts specs
   integration/{module}/      Same data/support/tests split, per CDS service / domain
   integration/scenarios/     FUT multi-step scenario tests
+  journey/data/              Seed rows for the [journey] cds profile (UI5 OPA5 journeys)
                              ({module}: ingestion=CSV/SimpleFIN/Scheduling/Dedup, shared=utilities, admin, …)
 project/
   SPRINT_BOARD.md            Current sprint status

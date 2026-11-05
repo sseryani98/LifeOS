@@ -1,0 +1,3 @@
+ID,transaction_ID,mySharePct,myShareAmount,splitDescription,isRecurring
+7e5d0003-0000-4000-8000-000000000001,7e5d0002-0000-4000-8000-000000000001,0.2,22.00,Padel with friends,true
+7e5d0003-0000-4000-8000-000000000002,7e5d0002-0000-4000-8000-000000000003,,30.00,Court booking,false

@@ -19,6 +19,8 @@ import {
   SUBSCRIPTIONS_PT,
 } from "../data/patterns.js";
 import {
+  RECAT_AUTO_CURRENT_ID,
+  RECAT_AUTO_CURRENT_ROW,
   RECAT_AUTO_ID,
   RECAT_AUTO_ROW,
   RECAT_UNCATEGORIZED_ID,
@@ -188,6 +190,24 @@ describe("CategorizationService", () => {
 
       const outcome = await mocks.service.applyReCategorization([
         RECAT_USER_CORRECTED_ID,
+      ]);
+
+      expect(outcome.recategorizedCount).toBe(0);
+      expect(outcome.skippedCount).toBe(1);
+      expect(mocks.updateTransactionCategorization).not.toHaveBeenCalled();
+    });
+
+    /** A repeat re-run must not report rows it left as they were — the toast count would claim work that never happened. */
+    it("skips auto rows already holding the fresh match without writing", async () => {
+      const mocks = buildCategorizationMocks();
+      mocks.loadTransactionsForRecategorization.mockResolvedValue([
+        RECAT_AUTO_CURRENT_ROW,
+      ]);
+      mocks.loadActivePatterns.mockResolvedValue([NETFLIX_EXACT_PATTERN]);
+      mocks.loadStatsByVendor.mockResolvedValue(STATS_BY_VENDOR);
+
+      const outcome = await mocks.service.applyReCategorization([
+        RECAT_AUTO_CURRENT_ID,
       ]);
 
       expect(outcome.recategorizedCount).toBe(0);
