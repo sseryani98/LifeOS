@@ -7,8 +7,8 @@ twelve Approved**; `IA-001`, `DS-001`, `TH-001`, `DM-001`, `TS-001` and `TST-001
 `BP-001` **Approved**). **All five open items are closed; R1 is executed and R9's proxy
 residual is executed.** **Build is under way: `S-00 Module Bootstrap` and `SPEC-01 MCP Intent-Verb
 Layer` are both DONE (2026-08-16) — the module has a model, a service and eleven verbs — `SPEC-02`
-is committed (`c7d29bb`), and `SPEC-03` is committed (`354dfd8`), closing `PT-W1`. The `PT-W1` boundary checkpoint passed 2026-11-05 against the real store (§8). `PT-W2` is under way: `SPEC-04` is built, UX-tested and human-reviewed (2026-11-05), uncommitted — `/commit-diff` next.** Decisions run **D-01 … D-269**.
-**Last updated:** 2026-11-05
+is committed (`c7d29bb`), and `SPEC-03` is committed (`354dfd8`), closing `PT-W1`. The `PT-W1` boundary checkpoint passed 2026-11-05 against the real store (§8). `PT-W2` is under way: `SPEC-04` is committed (`3599f6d`, 2026-11-06). Next: `SPEC-05`.** Decisions run **D-01 … D-269**.
+**Last updated:** 2026-11-06
 **Purpose:** The continuity document. Anyone (or any fresh chat) picking up Project Tracker
 starts here. Read this, then `design/PROBLEM_STATEMENT_AND_VISION.md` (PSV-001),
 `design/BUSINESS_ARCHITECTURE.md` (BA-001) and `design/DECISIONS_LOG.md` for the full
@@ -81,7 +81,7 @@ this stage's opening) rules **Fiori Elements FPM for all six UI-bearing objects 
 enablement OFF** (D-144), the answer the Data Model stage was waiting for, and names the **browser
 read path** nobody had ever specified (D-145). `IA-001` is **Approved**.
 
-Project Tracker has a PRD, `design/PROBLEM_STATEMENT_AND_VISION.md` (PSV-001, **Draft**),
+Project Tracker has a PRD, `design/PROBLEM_STATEMENT_AND_VISION.md` (PSV-001, **Approved** 2026-11-06),
 `design/BUSINESS_ARCHITECTURE.md` (BA-001 v1.15, **Approved** — 22 objects in 3 waves, grouped into
 12 specs), a `research/` pack of seven documents, a decisions log, a wired module folder,
 **twelve written specs — `SPEC-01` … `SPEC-12`, all twelve Approved** (`SPEC-01` flipped from Draft at
@@ -149,7 +149,7 @@ mechanism needs a construction step.
 | 10  | Tech Stack         | `/generate-tech-stack` → `doc-writer`               | Authored     | **Done** — 2026-08-15. `TS-001` **Approved**; **the proxy executed**, the loader ruled, the credential homed, **R11 minted** (D-176 … D-185)                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | 11  | Test Strategy      | `/generate-test-strategy` → `doc-writer`            | Authored     | **Done** — 2026-08-15. `TST-001` **Approved**; **the harness question executed and the exemplar's belief reversed**; 181 FUTs classified (D-186 … D-197)                                                                                                                                                                                                                                                                                                                                                                                                             |
 | 12  | Project Planning   | `/generate-build-plan` → `doc-writer`               | Authored     | **Done** — 2026-08-15. `BP-001` **Approved**; **13 stories, 3 sprints**; story zero resolves the eight "first build story" items (D-198 … D-209)                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| 13  | Build              | `/build` + chain                                    | Exists       | **In progress** — `S-00` **Done** 2026-08-16 (D-210 … D-217); `SPEC-01` **Done** 2026-08-16 (D-218 … D-230), with **§5's chain run retroactively 2026-08-25 → 26** — stages 2, 3 and 4 closed, 5 skipped, **6 Human Review now closed** (D-232 … D-238); `SPEC-02` committed `c7d29bb`; `SPEC-03` committed `354dfd8` (D-249 … D-256), closing `PT-W1` — boundary checkpoint passed 2026-11-05; **`SPEC-04` in progress** in sprint `PT-W2` — stages 1–6 run, `/commit-diff` next (D-257 … D-266; BP-001 §3, §6) |
+| 13  | Build              | `/build` + chain                                    | Exists       | **In progress** — `S-00` **Done** 2026-08-16 (D-210 … D-217); `SPEC-01` **Done** 2026-08-16 (D-218 … D-230), with **§5's chain run retroactively 2026-08-25 → 26** — stages 2, 3 and 4 closed, 5 skipped, **6 Human Review now closed** (D-232 … D-238); `SPEC-02` committed `c7d29bb`; `SPEC-03` committed `354dfd8` (D-249 … D-256), closing `PT-W1` — boundary checkpoint passed 2026-11-05; `SPEC-04` committed `3599f6d` 2026-11-06 (D-257 … D-269); **`SPEC-05` next** in sprint `PT-W2` (BP-001 §3, §6) |
 | 14  | **Rewire tooling** | `lintNoMarkdownState` + PreToolUse hook             | Not authored | Not started                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | 15  | Cutover            | —                                                   | —            | Not started                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | 16  | Back to FP         | —                                                   | —            | Blocked on cutover                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
@@ -690,6 +690,17 @@ Sandro ruled it a defect.
 ---
 
 ## 8. Session log
+
+### 2026-11-06 — `SPEC-04` committed (`3599f6d`): docs refreshed, three rulings, UI5 gate inside `npm test`
+
+- **`/refresh-docs`:** about 115 stale facts across 26 docs (statuses, counts, line references, a few
+  contradictions). No business rule changed.
+- **Rulings:** D-267 (`posttest` chains `test:ui5`), D-268 (the page depends on `com.lifeos.shared`
+  only, narrowing D-147), D-269 (`SPEC-05` registers the page in the shared shell).
+- **Gate:** `npm test` green end to end: 48 suites / 449 tests, then `test:ui5` 7/7 journeys and
+  18/18 unit over `app/**` 85/80.
+- **Left for later:** SPEC-08 §3's rewiring tables are re-baselined at SPEC-08's own build.
+- **Next:** `SPEC-05`.
 
 ### 2026-11-05 — `SPEC-04` UX Test (stage 5) done: two runs, no High left
 

@@ -3,7 +3,7 @@
 **Document ID:** PSV-001
 **Version:** 1.0
 **Date:** 2026-07-26
-**Status:** Draft
+**Status:** Approved
 
 ---
 
@@ -14,6 +14,7 @@
 | 2026-07-26 | Sandro & Claude | Initial creation from the Ideate interview. Records D-01 through D-18 and OI-01 through OI-05.                                                                                                     |
 | 2026-07-26 | Sandro & Claude | §2 corrected during the Scope stage: the defect log holds four defects (one Open), not none; 11 of 12 stories are Done, not 12. Both errors were found by scouting the repo against this document. |
 | 2026-11-05 | Claude          | `/refresh-docs`: §7 OI-01 … OI-04 marked closed (D-31, D-29/D-30, D-35, D-70). |
+| 2026-11-06 | Claude          | **Status → Approved** at `/pm-update` (Sandro delegated the call). Ideate closed 2026-07-26 and every downstream stage built on this document; Draft was a status nobody had been asked to flip. |
 
 ---
 
