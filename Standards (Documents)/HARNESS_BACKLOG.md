@@ -95,7 +95,7 @@ cited bare, and a record older than the file it measures is a gap. Still open, a
 
 ## H-04 Domain-expert roles/agents to chat with
 
-**Already in place.** 11 agents, nearly all _stage workers_ (one `doc-writer` for every Plan and Design document, plus testers, reviewers and the build chain).
+**Already in place.** 12 agents, nearly all _stage workers_ (one `doc-writer` for every Plan and Design document, plus testers, reviewers and the build chain).
 Two skills already behave like domain critics: `mcp-surface-critic`, `cap-annotation-hunter`.
 
 **Open question for Sandro.** Which domains? (e.g. CAP backend, UI5/Fiori, testing,

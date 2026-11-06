@@ -3,21 +3,36 @@ import cds from "@sap/cds";
 import { BaseFacade } from "../shared/baseFacade.js";
 import { ENTITIES } from "../shared/constants.js";
 
+import type { ProjectViewService } from "./projectViewService.js";
 import type { TrackerService } from "./trackerService.js";
-import type { MilestoneRow } from "./types.js";
+import type {
+  CompletedItemList,
+  CompletedItemRow,
+  MilestoneRow,
+  ProjectViewRow,
+  QueueItemRow,
+  SectionQuery,
+} from "./types.js";
 
 /** Handler wiring for TrackerService. Registration only, no logic. */
 export class TrackerFacade extends BaseFacade {
   private readonly service: TrackerService;
+  private readonly sections: ProjectViewService;
 
   /**
-   * Creates the facade bound to a CDS service and the tracker logic layer.
+   * Creates the facade bound to a CDS service and the tracker logic layers.
    * @param srv CDS application service to register handlers on.
-   * @param service Tracker logic layer every handler delegates to.
+   * @param service Tracker logic layer the write guards and derivations delegate to.
+   * @param sections Project-view sections layer the section collections delegate to.
    */
-  constructor(srv: cds.ApplicationService, service: TrackerService) {
+  constructor(
+    srv: cds.ApplicationService,
+    service: TrackerService,
+    sections: ProjectViewService,
+  ) {
     super(srv, "tracker");
     this.service = service;
+    this.sections = sections;
   }
 
   /** Registers every handler this facade owns. */
@@ -41,7 +56,7 @@ export class TrackerFacade extends BaseFacade {
     );
   }
 
-  /** Registers the two handlers that fill derived elements on read. */
+  /** Registers the handlers that fill derived elements on read. */
   private _registerReadDerivations(): void {
     this.srv.after(
       "READ",
@@ -60,6 +75,41 @@ export class TrackerFacade extends BaseFacade {
         this._handleReadProjectView,
         "after-READ",
         "ProjectView",
+        "tracker.handler.failed",
+      ),
+    );
+    this._registerSectionReads();
+  }
+
+  /** Registers the handlers that rank and page the project view's section reads. */
+  private _registerSectionReads(): void {
+    this.srv.before(
+      "READ",
+      [ENTITIES.TASK_QUEUE_ITEM, ENTITIES.COMPLETED_TASK_ITEM],
+      this.wrapHandler(
+        this._handleDetachSectionPage,
+        "before-READ",
+        "ProjectViewSections",
+        "tracker.handler.failed",
+      ),
+    );
+    this.srv.after(
+      "READ",
+      ENTITIES.TASK_QUEUE_ITEM,
+      this.wrapHandler(
+        this._handleReadTaskQueueItems,
+        "after-READ",
+        "TaskQueueItems",
+        "tracker.handler.failed",
+      ),
+    );
+    this.srv.after(
+      "READ",
+      ENTITIES.COMPLETED_TASK_ITEM,
+      this.wrapHandler(
+        this._handleReadCompletedTaskItems,
+        "after-READ",
+        "CompletedTaskItems",
         "tracker.handler.failed",
       ),
     );
@@ -144,9 +194,49 @@ export class TrackerFacade extends BaseFacade {
    * @returns Resolves once the derived elements are filled.
    */
   private _handleReadProjectView = (
-    rows: Record<string, unknown> | Record<string, unknown>[],
+    rows: ProjectViewRow | ProjectViewRow[],
   ): Promise<void> =>
-    this.service.applyProjectViewDerivations(Array.isArray(rows) ? rows : [rows]);
+    this.service.applyProjectViewDerivations(
+      Array.isArray(rows) ? rows : [rows],
+    );
+
+  /**
+   * Lifts a section read's page so the rows are ranked whole before it is cut.
+   * @param req The section read.
+   * @returns Nothing; the page is held for the after-READ.
+   */
+  private _handleDetachSectionPage = (req: cds.Request): void =>
+    this.sections.detachSectionPage(req, req.query as SectionQuery);
+
+  /**
+   * Fills the tier and blocker of every queue row a read returned, and orders them.
+   * @param rows The queue rows read.
+   * @param req The read, carrying any lifted page.
+   * @returns Resolves once the rows are filled and ordered.
+   */
+  private _handleReadTaskQueueItems = (
+    rows: QueueItemRow | QueueItemRow[],
+    req: cds.Request,
+  ): Promise<void> =>
+    this.sections.applyQueueDerivations(
+      Array.isArray(rows) ? rows : [rows],
+      req,
+    );
+
+  /**
+   * Orders and caps the recently completed rows a read returned, naming each completer.
+   * @param rows The completed rows read.
+   * @param req The read, carrying any lifted page.
+   * @returns Resolves once the rows are filled, ordered and capped.
+   */
+  private _handleReadCompletedTaskItems = (
+    rows: CompletedItemRow | CompletedItemList,
+    req: cds.Request,
+  ): Promise<void> =>
+    this.sections.applyCompletionDerivations(
+      Array.isArray(rows) ? rows : [rows],
+      req,
+    );
 
   /**
    * Applies the Defect scope rule.

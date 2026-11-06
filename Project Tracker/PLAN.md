@@ -7,7 +7,7 @@ twelve Approved**; `IA-001`, `DS-001`, `TH-001`, `DM-001`, `TS-001` and `TST-001
 `BP-001` **Approved**). **All five open items are closed; R1 is executed and R9's proxy
 residual is executed.** **Build is under way: `S-00 Module Bootstrap` and `SPEC-01 MCP Intent-Verb
 Layer` are both DONE (2026-08-16) — the module has a model, a service and eleven verbs — `SPEC-02`
-is committed (`c7d29bb`), and `SPEC-03` is committed (`354dfd8`), closing `PT-W1`. The `PT-W1` boundary checkpoint passed 2026-11-05 against the real store (§8). Next: `PT-W2` from `SPEC-04`.** Decisions run **D-01 … D-264**.
+is committed (`c7d29bb`), and `SPEC-03` is committed (`354dfd8`), closing `PT-W1`. The `PT-W1` boundary checkpoint passed 2026-11-05 against the real store (§8). `PT-W2` is under way: `SPEC-04` is built, UX-tested and human-reviewed (2026-11-05), uncommitted — `/commit-diff` next.** Decisions run **D-01 … D-269**.
 **Last updated:** 2026-11-05
 **Purpose:** The continuity document. Anyone (or any fresh chat) picking up Project Tracker
 starts here. Read this, then `design/PROBLEM_STATEMENT_AND_VISION.md` (PSV-001),
@@ -83,7 +83,7 @@ read path** nobody had ever specified (D-145). `IA-001` is **Approved**.
 
 Project Tracker has a PRD, `design/PROBLEM_STATEMENT_AND_VISION.md` (PSV-001, **Draft**),
 `design/BUSINESS_ARCHITECTURE.md` (BA-001 v1.15, **Approved** — 22 objects in 3 waves, grouped into
-12 specs), a `research/` pack of six documents, a decisions log, a wired module folder,
+12 specs), a `research/` pack of seven documents, a decisions log, a wired module folder,
 **twelve written specs — `SPEC-01` … `SPEC-12`, all twelve Approved** (`SPEC-01` flipped from Draft at
 the `SPEC-12` workshop, discharging D-93 — D-136) — and the
 Plan-phase skills installed in `.claude/`. Ideate, Scope and Research ran
@@ -103,7 +103,7 @@ becomes the first real test of the new system.
 
 ## 2. Decisions already made
 
-Full rationale in `design/DECISIONS_LOG.md` (D-01 … **D-256**; D-19 … D-27 were added at Scope,
+Full rationale in `design/DECISIONS_LOG.md` (D-01 … **D-269**; D-19 … D-27 were added at Scope,
 D-28 … D-32 at Research, D-33 … D-36 at Scaffold, D-37 … D-39 at the Workshops grouping,
 D-40 … D-46 at the `SPEC-01` workshop, D-47 … D-57 at the `SPEC-02` workshop, D-58 … D-65 at the
 `SPEC-03` workshop, D-66 … D-69 at the `SPEC-04` workshop, D-70 … D-75 at the `SPEC-05` workshop and
@@ -149,7 +149,7 @@ mechanism needs a construction step.
 | 10  | Tech Stack         | `/generate-tech-stack` → `doc-writer`               | Authored     | **Done** — 2026-08-15. `TS-001` **Approved**; **the proxy executed**, the loader ruled, the credential homed, **R11 minted** (D-176 … D-185)                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | 11  | Test Strategy      | `/generate-test-strategy` → `doc-writer`            | Authored     | **Done** — 2026-08-15. `TST-001` **Approved**; **the harness question executed and the exemplar's belief reversed**; 181 FUTs classified (D-186 … D-197)                                                                                                                                                                                                                                                                                                                                                                                                             |
 | 12  | Project Planning   | `/generate-build-plan` → `doc-writer`               | Authored     | **Done** — 2026-08-15. `BP-001` **Approved**; **13 stories, 3 sprints**; story zero resolves the eight "first build story" items (D-198 … D-209)                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| 13  | Build              | `/build` + chain                                    | Exists       | **In progress** — `S-00` **Done** 2026-08-16 (D-210 … D-217); `SPEC-01` **Done** 2026-08-16 (D-218 … D-230), with **§5's chain run retroactively 2026-08-25 → 26** — stages 2, 3 and 4 closed, 5 skipped, **6 Human Review now closed** (D-232 … D-238); `SPEC-02` committed `c7d29bb`; **`SPEC-03` in progress** in sprint `PT-W1` — built, `/functional-test` 12/12 on 2026-11-04 (one repeat-call finding, accepted as D-252), Human Review done 2026-11-04, `/refresh-docs` and `/pm-update` run 2026-11-04 (D-249 … D-256), `/commit-diff` next (BP-001 §3, §6) |
+| 13  | Build              | `/build` + chain                                    | Exists       | **In progress** — `S-00` **Done** 2026-08-16 (D-210 … D-217); `SPEC-01` **Done** 2026-08-16 (D-218 … D-230), with **§5's chain run retroactively 2026-08-25 → 26** — stages 2, 3 and 4 closed, 5 skipped, **6 Human Review now closed** (D-232 … D-238); `SPEC-02` committed `c7d29bb`; `SPEC-03` committed `354dfd8` (D-249 … D-256), closing `PT-W1` — boundary checkpoint passed 2026-11-05; **`SPEC-04` in progress** in sprint `PT-W2` — stages 1–6 run, `/commit-diff` next (D-257 … D-266; BP-001 §3, §6) |
 | 14  | **Rewire tooling** | `lintNoMarkdownState` + PreToolUse hook             | Not authored | Not started                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | 15  | Cutover            | —                                                   | —            | Not started                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | 16  | Back to FP         | —                                                   | —            | Blocked on cutover                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
@@ -189,8 +189,7 @@ applied in the same session** — `stories[]` gains **`shipsUi`** (D-76) and the
 **`workspace`** input (D-77). `SPEC-02` §6's four rows, `SPEC-03` §6's one and `SPEC-04` §6's two are
 struck through. **`SPEC-01` still owes nothing** — the claim held when it was made, was then falsified
 by two gaps found at the `SPEC-06` workshop, and holds again because both were applied rather than
-recorded as owed. It stays **Draft**, which is a status with no outstanding work behind it —
-approving it is a decision nobody has been asked for rather than a blocked one.
+recorded as owed. It is now **Approved** (at the `SPEC-12` workshop, D-136).
 
 **`SPEC-05` (`design/specs/SPEC-05-WORKSPACE-HEADER-AND-HEALTH.md`, **Approved** 2026-07-30) is 37
 business rules, 14 FUTs, one new attribute and one new code list, D-70 … D-75 — and **OI-04 is
@@ -298,7 +297,7 @@ holds a **tracked `.gitkeep`** that would outlive its contents. `SPEC-10` BR-28'
 **ordered sequence with a proof step** (D-131), because a `PreToolUse` deny beats `bypassPermissions`
 and no hook has ever fired in this repo.
 
-**Workshops is complete.** Twelve specs, twelve Approved. **Information Architecture is complete too** — `design/INFORMATION_ARCHITECTURE.md` (IA-001, **Approved** 2026-08-06), D-137 … D-143, with **R9 executed and closed**. **Design System is complete** — `design/DESIGN_SYSTEM.md` (DS-001, **Approved**), D-144 … D-152: **FE FPM for all six objects, drafts OFF**, one `ObjectPageLayout`, 17 semantic-role mappings, no charts, and the browser read path named as a **SPEC-01 amendment**. **Theme is complete** — `design/THEME.md` (TH-001, **Draft**), D-153 … D-159: the module **inherits Financial Planner's theme wholesale and writes no CSS**, and DS-001 §9's 17 roles resolve onto **5** Horizon custom properties measured against the pinned runtime. **Next is stage 9, Data Model** — it owns **OI-05** and **R1**, plus D-145's read-path requirement.
+**Workshops is complete.** Twelve specs, twelve Approved. **Information Architecture is complete too** — `design/INFORMATION_ARCHITECTURE.md` (IA-001, **Approved** 2026-08-06), D-137 … D-143, with **R9 executed and closed**. **Design System is complete** — `design/DESIGN_SYSTEM.md` (DS-001, **Approved**), D-144 … D-152: **FE FPM for all six objects, drafts OFF**, one `ObjectPageLayout`, 17 semantic-role mappings, no charts, and the browser read path named as a **SPEC-01 amendment**. **Theme is complete** — `design/THEME.md` (TH-001, **Approved** 2026-08-15), D-153 … D-159: the module **inherits Financial Planner's theme wholesale and writes no CSS**, and DS-001 §9's 17 roles resolve onto **5** Horizon custom properties measured against the pinned runtime. Stage 9, Data Model, followed and is **Done** (2026-08-15) — it closed **OI-05** (D-161) and **R1** (D-170), and carried D-145's read-path requirement.
 
 **Still open:** none — OI-05 closed by D-161 at Data Model. **OI-03 is closed by D-35 and
 OI-04 by D-70.** Research risks: R2 is closed
@@ -333,9 +332,9 @@ and in SPEC-11 §6, on `SPEC-10`'s precedent for R10. The other two:
   entirely and the manifest fetch itself is blocked, and an absolute `http://` dataSource URI
   **crashes CAP at boot** (`@sap/cds-fiori/app/routes.js:68`). **Ruling: one origin behind a reverse
   proxy (D-141)**, which keeps every manifest's relative `/service/…` URI unchanged; the proxy itself
-  is untested and its execution belongs to **Tech Stack**. D-69's prediction held exactly — R9 changed
+  was then executed at **Tech Stack** (D-184). D-69's prediction held exactly — R9 changed
   no business rule and no FUT anywhere — so **`SPEC-04` … `SPEC-07` are no longer provisional on R9**
-  (all four remain provisional on R1). D-82's widening to the two Forms was vindicated and sharpened:
+  (R1 has since closed too, D-170). D-82's widening to the two Forms was vindicated and sharpened:
   the preflight does decide it, but it fails on the request **header**, not the method.
 
 ### Carried forward from Scaffold
@@ -408,7 +407,7 @@ stages 4 and 5 name the commands D-35 authored rather than the bare agents. D-47
 conditional on `shipsUi`, not on `FRM-*`** — `.claude/commands/ux-test.md:10-12` tests whether a story
 ships UI, and slice 1's four Reports all ship pages, so the prefix rule would have omitted UX Test
 from the entire project view; and **two of the seven subtasks carry kinds of their own**, since
-`build.js:597` runs Coverage only on a shortfall and `:666` runs Smoke only for a frontend story.
+`build.js:849` runs Coverage only on a shortfall and `:960` runs Smoke only for a story whose `layers` include `ui5`.
 
 **This table is no longer `CNV-001`'s only source, despite what this section used to claim.**
 `.claude/skills/human-review-loop/SKILL.md:11-13` states the same nine stages in the same order
@@ -446,7 +445,7 @@ gitignore-respecting library at all.
 | --------------------------------------------------------------- | ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `.claude/skills/pm-update/SKILL.md`                             | 4     | Mostly retired — see below                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | `.claude/workflows/build.js`                                    | 3     | Per-story board handoff → `complete_subtask` / `complete_stage`. **All three refs are prose inside agent-prompt template literals** — a Workflow script has no filesystem and no Node API, so it instructs and never writes (D-94)                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `Standards (Technical + Linting)/scripts/generateTestReport.ts` | 2     | Stops writing markdown; emits a `TestRun`. **And it moves** to `Project Tracker/scripts/recordTestRun.ts` (D-103) — `process.chdir` before requiring `@sap/cds` hardcodes a module name, which a shared linter may not do. **Four `.md` files name its old path and none was ever measured** — `CLAUDE.md:48` (**the repo root, in no surface measurement at all**), `Financial Planner/CLAUDE.md:35` (a _different_ line from the `project/` block INT-002 already owns), and `Financial Planner/design/TECH_STACK.md:143` + `TEST_STRATEGY.md:539,546`, which are D-12 markdown and go to the `/refresh-docs` sweep. The two `CLAUDE.md` lines are agent instructions under D-23 and are **owed to SPEC-08** |
+| `Standards (Technical + Linting)/scripts/generateTestReport.ts` | 2     | Stops writing markdown; emits a `TestRun`. **And it moves** to `Project Tracker/scripts/recordTestRun.ts` (D-103) — `process.chdir` before requiring `@sap/cds` hardcodes a module name, which a shared linter may not do. **Four `.md` files name its old path and none was ever measured** — `CLAUDE.md:50` (**the repo root, in no surface measurement at all**), `Financial Planner/CLAUDE.md:35` (a _different_ line from the `project/` block INT-002 already owns), and `Financial Planner/design/TECH_STACK.md:143` + `TEST_STRATEGY.md:539,546`, which are D-12 markdown and go to the `/refresh-docs` sweep. The two `CLAUDE.md` lines are agent instructions under D-23 and are **owed to SPEC-08** |
 | `.claude/commands/build.md`                                     | 2     | Instructions repointed at MCP verbs                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | `.claude/agents/build-briefer.md`                               | 2     | Reads board state via `project_view` instead of parsing                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | `.claude/workflows/test-quality.js`                             | 1     | Repoint                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
@@ -504,7 +503,7 @@ ratchet it shut afterward.** The rewiring above is still real work.
 **2. `lintNoMarkdownState.ts` — instruction enforcement.** _"Nothing tells you to do the wrong
 thing."_
 
-- Joins the existing **21**-linter suite in `Standards (Technical + Linting)/scripts/`. Scans for
+- Joins the existing **23**-linter suite in `Standards (Technical + Linting)/scripts/`. Scans for
   references to retired paths and fails `npm run lint`, which is already in the gate. ~~**The glob
   this document used to state — `.claude/**` and `Standards/**` — reaches neither
   `Standards (Documents)/METHODOLOGY_BLUEPRINT.md` nor `Financial Planner/CLAUDE.md`** (D-100).
@@ -513,7 +512,7 @@ thing."_
   `Standards (Technical + Linting)/`, the repo-root `CLAUDE.md`, every module's `CLAUDE.md`, and
   `Project Tracker/scripts/` — and BR-16 derives the repo root from `import.meta.dirname` rather than
   `process.cwd()`, on `lintDocClaims.ts:15`'s precedent (D-110). A missing root is skipped (D-36), which
-  matters immediately: the third root does not exist yet.
+  mattered then; all six roots exist now (`Project Tracker/scripts/` since `SPEC-01`, D-224).
 - Catches what the hook structurally cannot see: a skill file still _instructing_ an agent to
   edit the board.
 
@@ -524,8 +523,8 @@ would block legitimate Financial Planner work. They are the final act of stage 1
 
 ### Repo-first note
 
-`.claude/settings.json` currently contains **permissions only — no hooks are configured**. This
-is a new pattern for the repo, so expect to establish the convention (where hook scripts live,
+`.claude/settings.json` now carries one `PostToolUse` hook (the per-edit linter, registered by
+`installHooks.mjs`, 2026-11-04) — the `PreToolUse` guard is still new for the repo, so expect to establish the convention (where hook scripts live,
 how they're tested) as part of this stage. And per §9, the Cowork bridge cannot write into
 `.claude/` — the hook config stages like the skills did.
 
@@ -691,6 +690,23 @@ Sandro ruled it a defect.
 ---
 
 ## 8. Session log
+
+### 2026-11-05 — `SPEC-04` UX Test (stage 5) done: two runs, no High left
+
+- **Run 1** (`ux-tester`, `app/project-view/`): 1 High, 5 Medium, 3 Low. The High: the Open Task
+  Queue's Kind cell carried Recommended vs Required by colour alone (THEME §5.4, DS-001 §10).
+- **Fixed in the tree, uncommitted:** the queue Kind cell now uses `formatKindIcon`; the card reads
+  "Driver:" (was "Run:") and "Stage: Sprint Build (sprint-build)". Test-first (QUnit + journey). Gate
+  green: tsc ×2, lint, **48 suites / 449 tests**, `test:ui5` 7/7 journeys + 18/18 unit at 100%, cds build.
+- **Run 2:** both fixes confirmed; no High or Medium; three Low suggestions (card status/kind
+  unlabelled, card line spacing, stock empty-state text on Recently Completed).
+- **Deferred:** `?story=` route parameter → `SPEC-07` (RPT-003, IA-001 §4); Blocked By stage name
+  needs a `blockerStepName` virtual (a `DM-001` §11.1 amendment).
+- **Needs Sandro:** Recently Completed shows no "(0)" — `sap.ui.mdc.Table` hides a zero count, so
+  DS-001 §8.7 `:384` is amended or a count virtual is added; plus eight Design System gaps (known
+  list in `.claude/defect-sweep/ledger.md`).
+- **Human Review done 2026-11-05.**
+- **Position:** `SPEC-04` stages 1–6 run; **`/commit-diff` next**.
 
 ### 2026-11-05 — `PT-W1` boundary checkpoint: the real store was empty, now loaded and verified by query
 
@@ -2441,7 +2457,7 @@ stores them under the user's home directory, which the bridge cannot access.
 | `Project Tracker/design/PROBLEM_STATEMENT_AND_VISION.md` | PSV-001 — the traceability root: problems P1–P5, scope, boundary.                                                                                                                                                                                                 |
 | `Project Tracker/design/BUSINESS_ARCHITECTURE.md`        | BA-001 v1.15 — the FRICEW catalogue and the story backlog. 22 objects, 3 waves, deferred items in §3, **the 12-spec grouping in §11**.                                                                                                                            |
 | `Project Tracker/design/specs/`                          | The twelve functional specs, written in `SPEC-01` → `SPEC-12` order. Grouping and membership are BA-001 §11. **12 of 12 written, all Approved.**                                                                                                                  |
-| `Project Tracker/research/`                              | Six research documents plus `README.md` — the index, assumption ledger, open risks and gate verdict. All **Draft**.                                                                                                                                               |
+| `Project Tracker/research/`                              | Seven research documents plus `README.md` — the index, assumption ledger, open risks and gate verdict. All **Draft**.                                                                                                                                               |
 | `Project Tracker/design/INFORMATION_ARCHITECTURE.md`     | IA-001 — page and route decomposition, navigation, shell placement and origin. **Approved.**                                                                                                                                                                      |
 | `Project Tracker/design/DESIGN_SYSTEM.md`                | DS-001 — build technology, theme, density, layout, controls, semantic roles, status indicators, state conventions. **Approved.**                                                                                                                                  |
 | `Project Tracker/design/THEME.md`                        | TH-001 — theme ownership, the inherited palette, semantic token resolution, border radius, contrast and the CSS contract. **Approved.**                                                                                                                           |
@@ -2455,7 +2471,7 @@ stores them under the user's home directory, which the bridge cannot access.
 | `Project Tracker/design/BUILD_PLAN.md`                   | BP-001 — the story list, story zero, the sprint plan, the definition of done, per-story test obligations, cross-story contracts, the deferred change docket, progress tracking and enforcement. **Approved.**                                                     |
 | `Project Tracker/design/BUILD_PLAN.md` §4                | Story zero — the eight things three documents assigned to "the first build story", each resolved to `S-00` or to a named human prerequisite.                                                                                                                      |
 | `Project Tracker/design/BUILD_PLAN.md` §12               | The deferred change docket — eight owed changes, four of them sharing one unblocking event that is downstream of this plan.                                                                                                                                       |
-| `Project Tracker/design/DECISIONS_LOG.md`                | D-01 … D-197 with full rationale. (`IDEATE_KICKOFF.md` was scratch — absorbed and deleted 2026-07-26.)                                                                                                                                                            |
+| `Project Tracker/design/DECISIONS_LOG.md`                | D-01 … D-269 with full rationale. (`IDEATE_KICKOFF.md` was scratch — absorbed and deleted 2026-07-26.)                                                                                                                                                            |
 | `Standards (Documents)/METHODOLOGY_BLUEPRINT.md`         | The methodology→tooling map. **§7 is partly superseded** — the module is real, not a generator, and it writes rather than only reads.                                                                                                                             |
 | `Financial Planner/design/`                              | The artifact set this module's design phase mirrors.                                                                                                                                                                                                              |
 | `Financial Planner/design/DESIGN_PHASE_TIMELINE.md`      | How the design phase actually ran, step by step.                                                                                                                                                                                                                  |

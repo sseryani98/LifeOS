@@ -1,0 +1,199 @@
+<mvc:View
+    controllerName="com.lifeos.projecttracker.projectview.controller.ProjectView"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:core="sap.ui.core"
+    xmlns="sap.m"
+    xmlns:uxap="sap.uxap"
+    xmlns:f="sap.f"
+    xmlns:card="sap.f.cards"
+    xmlns:macros="sap.fe.macros"
+    xmlns:mtable="sap.fe.macros.table"
+    displayBlock="true"
+>
+    <uxap:ObjectPageLayout
+        id="idProjectViewObjectPageLayout"
+        busy="{ui>/busy}"
+        upperCaseAnchorBar="false"
+    >
+        <uxap:headerTitle>
+            <uxap:ObjectPageDynamicHeaderTitle
+                id="idProjectViewObjectPageDynamicHeaderTitle"
+            >
+                <uxap:heading>
+                    <Title
+                        id="idNameTitle"
+                        text="{name}"
+                    />
+                </uxap:heading>
+            </uxap:ObjectPageDynamicHeaderTitle>
+        </uxap:headerTitle>
+        <uxap:headerContent>
+            <MessageStrip
+                id="idCouldNotReadTheProjectViewMessageStrip"
+                text="{i18n>readFailed}"
+                type="Error"
+                showIcon="true"
+                visible="{ui>/readFailed}"
+            />
+        </uxap:headerContent>
+        <uxap:sections>
+            <uxap:ObjectPageSection
+                id="idNextActionObjectPageSection"
+                title="{i18n>nextActionSectionTitle}"
+                titleUppercase="false"
+            >
+                <uxap:subSections>
+                    <uxap:ObjectPageSubSection
+                        id="idNextActionObjectPageSubSection"
+                        title="{i18n>nextActionTitle}"
+                        titleUppercase="false"
+                        showTitle="false"
+                    >
+                        <VBox id="idNextActionVBox">
+                            <f:Card
+                                id="idNextActionCard"
+                                visible="{= !!${path: 'nextActionStory', targetType: 'any'} }"
+                            >
+                                <f:header>
+                                    <card:Header
+                                        id="idNextActionLabelHeader"
+                                        core:require="{ formatter: 'com/lifeos/projecttracker/projectview/model/formatter' }"
+                                        title="{nextActionLabel}"
+                                        subtitle="{nextActionStory}"
+                                        statusText="{ path: 'nextActionTier', targetType: 'any', formatter: 'formatter.formatTierText.bind($control)' }"
+                                    />
+                                </f:header>
+                                <f:content>
+                                    <VBox
+                                        id="idNextActionDetailsVBox"
+                                        class="sapUiSmallMargin"
+                                    >
+                                        <Text
+                                            id="idNextActionDescriptionText"
+                                            text="{nextActionDescription}"
+                                        />
+                                        <ObjectAttribute
+                                            id="idNextActionStepCodeObjectAttribute"
+                                            core:require="{ formatter: 'com/lifeos/projecttracker/projectview/model/formatter' }"
+                                            title="{i18n>nextActionStage}"
+                                            text="{ parts: [ 'nextActionLabel', 'nextActionStepCode' ], formatter: 'formatter.formatStageText.bind($control)' }"
+                                        />
+                                        <ObjectAttribute
+                                            id="idNextActionDriverObjectAttribute"
+                                            title="{i18n>nextActionDriver}"
+                                            text="{nextActionDriver}"
+                                        />
+                                        <HBox id="idNextActionStatusHBox">
+                                            <ObjectStatus
+                                                id="idNextActionStatusObjectStatus"
+                                                core:require="{ formatter: 'com/lifeos/projecttracker/projectview/model/formatter' }"
+                                                class="sapUiSmallMarginEnd"
+                                                text="{ path: 'nextActionStatus', formatter: 'formatter.formatStatusText.bind($control)' }"
+                                                state="{ path: 'nextActionStatus', formatter: 'formatter.formatStatusState' }"
+                                                icon="{ path: 'nextActionStatus', formatter: 'formatter.formatStatusIcon' }"
+                                            />
+                                            <ObjectStatus
+                                                id="idNextActionKindObjectStatus"
+                                                core:require="{ formatter: 'com/lifeos/projecttracker/projectview/model/formatter' }"
+                                                class="sapUiSmallMarginEnd"
+                                                text="{ path: 'nextActionKind', formatter: 'formatter.formatKindText.bind($control)' }"
+                                                state="{ path: 'nextActionKind', formatter: 'formatter.formatKindState' }"
+                                                icon="{ path: 'nextActionKind', formatter: 'formatter.formatKindIcon' }"
+                                            />
+                                            <ObjectStatus
+                                                id="idHumanOnlyObjectStatus"
+                                                text="{i18n>nextActionHumanOnly}"
+                                                state="Warning"
+                                                icon="sap-icon://person-placeholder"
+                                                visible="{= ${nextActionRequiresHuman} === true }"
+                                            />
+                                        </HBox>
+                                    </VBox>
+                                </f:content>
+                            </f:Card>
+                            <Text
+                                id="idNothingLeftToDoText"
+                                text="{i18n>nextActionNone}"
+                                visible="{= !${path: 'nextActionStory', targetType: 'any'} }"
+                            />
+                        </VBox>
+                    </uxap:ObjectPageSubSection>
+                    <uxap:ObjectPageSubSection
+                        id="idTaskQueueObjectPageSubSection"
+                        title="{i18n>taskQueueTitle}"
+                        titleUppercase="false"
+                        showTitle="false"
+                    >
+                        <macros:Table
+                            id="idTaskQueueTable"
+                            contextPath="/ProjectView"
+                            metaPath="taskQueue/@com.sap.vocabularies.UI.v1.LineItem"
+                            header="{i18n>taskQueueTitle}"
+                            threshold="1000"
+                            selectionMode="None"
+                            personalization="false"
+                            variantManagement="None"
+                            isSearchable="false"
+                            enableExport="false"
+                        >
+                            <macros:columns>
+                                <mtable:Column
+                                    key="statusColumn"
+                                    header="{i18n>columnStatus}"
+                                    width="9rem"
+                                >
+                                    <ObjectStatus
+                                        core:require="{ formatter: 'com/lifeos/projecttracker/projectview/model/formatter' }"
+                                        text="{ path: 'statusCode', formatter: 'formatter.formatStatusText.bind($control)' }"
+                                        state="{ path: 'statusCode', formatter: 'formatter.formatStatusState' }"
+                                        icon="{ path: 'statusCode', formatter: 'formatter.formatStatusIcon' }"
+                                    />
+                                </mtable:Column>
+                                <mtable:Column
+                                    key="kindColumn"
+                                    header="{i18n>columnKind}"
+                                    width="9rem"
+                                >
+                                    <ObjectStatus
+                                        core:require="{ formatter: 'com/lifeos/projecttracker/projectview/model/formatter' }"
+                                        text="{ path: 'kindCode', formatter: 'formatter.formatKindText.bind($control)' }"
+                                        state="{ path: 'kindCode', formatter: 'formatter.formatKindState' }"
+                                        icon="{ path: 'kindCode', formatter: 'formatter.formatKindIcon' }"
+                                    />
+                                </mtable:Column>
+                                <mtable:Column
+                                    key="blockerColumn"
+                                    header="{i18n>columnBlocker}"
+                                    width="10rem"
+                                >
+                                    <ObjectStatus
+                                        text="{blockerStepCode}"
+                                        state="Warning"
+                                    />
+                                </mtable:Column>
+                            </macros:columns>
+                        </macros:Table>
+                    </uxap:ObjectPageSubSection>
+                    <uxap:ObjectPageSubSection
+                        id="idRecentCompletionsObjectPageSubSection"
+                        title="{i18n>recentCompletionsTitle}"
+                        titleUppercase="false"
+                        showTitle="false"
+                    >
+                        <macros:Table
+                            id="idRecentCompletionsTable"
+                            contextPath="/ProjectView"
+                            metaPath="recentCompletions/@com.sap.vocabularies.UI.v1.LineItem"
+                            header="{i18n>recentCompletionsTitle}"
+                            selectionMode="None"
+                            personalization="false"
+                            variantManagement="None"
+                            isSearchable="false"
+                            enableExport="false"
+                        />
+                    </uxap:ObjectPageSubSection>
+                </uxap:subSections>
+            </uxap:ObjectPageSection>
+        </uxap:sections>
+    </uxap:ObjectPageLayout>
+</mvc:View>

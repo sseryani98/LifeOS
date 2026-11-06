@@ -10,12 +10,21 @@ export interface VerbContext {
 /** Anything that can run a CQL statement — the service, or a transaction on it. */
 export type QueryRunner = Pick<cds.Service, "run">;
 
-/** The resolved next incomplete stage of a story. */
+/**
+ * The resolved next incomplete stage of a story. Status and kind are codes;
+ * status names the verb that moves it on, and requiresHuman says up front when
+ * an agent cannot close it.
+ */
 export interface NextAction {
-  storyId: string;
+  story: string;
   stepCode: string;
-  label: string;
+  name: string;
+  description: string;
+  kind: string;
   driver: string;
+  requiresHuman: boolean;
+  status: string;
+  tier: number;
 }
 
 /** A non-blocking condition reported alongside a success. */
@@ -107,6 +116,19 @@ export interface ChainRow {
   requiresHuman: boolean;
 }
 
+/** A chain row as the gateway reads it, carrying the step description a next action hands back. */
+export interface DescribedChainRow extends ChainRow {
+  stepDescription: string;
+}
+
+/** A story as the workspace-wide next action ranks it. */
+export interface CandidateChain {
+  storyId: string;
+  initiativePosition: number;
+  milestonePosition: number;
+  tasks: DescribedChainRow[];
+}
+
 /** A Subtask with its methodology step flattened on. */
 export interface SubtaskRow {
   ID: string;
@@ -177,7 +199,7 @@ export interface VerbOutcome {
 }
 
 /** A stage of the composed project-view tree, with its steps nested on. */
-export interface ComposedStage extends ChainRow {
+export interface ComposedStage extends DescribedChainRow {
   subtasks: SubtaskRow[];
 }
 

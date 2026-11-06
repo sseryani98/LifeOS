@@ -53,7 +53,7 @@ export class ProjectViewVerb implements VerbDefinition {
     return VerbRunner.runReadVerb(ctx, async gateway => {
       const workspace = await this._selectWorkspace(gateway, input.workspace);
       const initiatives = await this._buildInitiatives(gateway, workspace.ID);
-      const nextAction = this._selectFirstNextAction(initiatives);
+      const nextAction = this._resolveNextAction(workspace.slug, initiatives);
       const [taskQueue, defects, decisions, activities] = await Promise.all([
         gateway.readTaskQueue(workspace.ID),
         gateway.readDefects(workspace.ID),
@@ -124,23 +124,27 @@ export class ProjectViewVerb implements VerbDefinition {
   }
 
   /**
-   * Picks the first story in the composed tree that still has work in it.
+   * Resolves the workspace's next action from the composed tree, through the
+   * same engine and payload as next_action.
+   * @param workspaceSlug The workspace the tree belongs to.
    * @param initiatives The composed sprint tree.
    * @returns The next action, or null when nothing is incomplete.
    */
-  private _selectFirstNextAction(
+  private _resolveNextAction(
+    workspaceSlug: string,
     initiatives: ComposedInitiative[],
   ): NextAction | null {
-    for (const initiative of initiatives) {
-      for (const story of initiative.milestones) {
-        const resolved = TargetResolver.resolveNextAction(
-          story.chain,
-          story.storyId,
-        );
-        if (resolved) return resolved;
-      }
-    }
-    return null;
+    return TargetResolver.resolveCandidateAction(
+      workspaceSlug,
+      initiatives.flatMap(initiative =>
+        initiative.milestones.map(story => ({
+          storyId: story.storyId,
+          initiativePosition: initiative.position,
+          milestonePosition: story.position,
+          tasks: story.chain,
+        })),
+      ),
+    );
   }
 
   /**

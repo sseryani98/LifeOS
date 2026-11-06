@@ -14,6 +14,7 @@
 | 2026-08-06 | Sandro & Claude | Initial creation from the Design System stage. Build technology ruled **Fiori Elements FPM** for all 6 UI-bearing objects with **drafts off**; the browser read path named; theme and density recorded as inherited; one `ObjectPageLayout` in 4 regions; **17** domain-to-role mappings; charts answered **none**. Records D-144 through D-152. |
 | 2026-08-06 | Sandro          | Approved at the opening of the Theme stage. Status Draft → Approved.                                                                                                                                                                                                                                                                             |
 | 2026-11-04 | Claude          | `/refresh-docs` after SPEC-03 build: the slice-1 volume in the chart ruling is 27 Defects (7 open), not 4 (SPEC-03 re-baseline, D-249). No ruling changed. |
+| 2026-11-05 | Claude          | `/refresh-docs`: Financial Planner `index.html` line refs re-measured (`:18`, `:26`, `:47`). |
 
 ---
 
@@ -39,7 +40,7 @@ link and no concrete visual value.
 | **Annotation-UX rules** | Bind **partially** — `@UI.LineItem` + `CssDefaults`, `PresentationVariant`, `@UI.Hidden`, `@Common.Text`/`ValueList` bind; **`@UI.SelectionFields` does not** (D-144) |
 | **Table standards**     | Widths sum to 100%, title with count. **3 deliberate departures** from Financial Planner's DS-001 §9.1.1 — no search, no personalization, no variant management       |
 | **Theme boundary**      | Roles here; every concrete value at stage 8. The shared-shell CSS collision is **named, not solved** (D-152)                                                          |
-| **Cross-module debt**   | Widened: the dependency reaches `Financial Planner/app/shared/` (base controllers) and repo-root `Shared/app/` (DialogManager, Messaging, I18n) as well as the shell. Same owner as D-143 (D-147)                                                                       |
+| **Cross-module debt**   | Narrowed by D-268: the built page reaches repo-root `Shared/app/` (`com.lifeos.shared`) and the shell, not `Financial Planner/app/shared/`. Same owner as D-143 (D-147)                                                                       |
 | **Risks assigned here** | **None** — register checked, not assumed. RSH-003's only live risk was R9, executed and closed (D-140)                                                                |
 | **Spec amendments**     | **6** recorded across SPEC-01, SPEC-04, SPEC-05, SPEC-06, SPEC-07 and SPEC-11                                                                                         |
 | **Decisions logged**    | **D-144 through D-152** (9 decisions)                                                                                                                                 |
@@ -214,10 +215,10 @@ component into `Financial Planner/app/index.html`. Measured there this session:
 
 | Measurement           | Value                                                    | Location |
 | --------------------- | -------------------------------------------------------- | -------- |
-| Theme attribute       | `data-sap-ui-theme="sap_horizon"`                        | `:17`    |
-| Density               | `<body class="sapUiBody sapUiSizeCompact" id="content">` | `:45`    |
-| Preloaded libraries   | `sap.m, sap.tnt, sap.f, sap.ui.layout, sap.uxap`         | `:24`    |
-| CSS custom properties | `data-sap-ui-xx-cssVariables="true"`                     | `:24`    |
+| Theme attribute       | `data-sap-ui-theme="sap_horizon"`                        | `:18`    |
+| Density               | `<body class="sapUiBody sapUiSizeCompact" id="content">` | `:47`    |
+| Preloaded libraries   | `sap.m, sap.tnt, sap.f, sap.ui.layout, sap.uxap`         | `:26`    |
+| CSS custom properties | `data-sap-ui-xx-cssVariables="true"`                     | `:26`    |
 
 Both the theme attribute and the density class are **page-global** — one `<body>`, one theme, for
 every hosted component. **A second theme or a second density is not expressible in that page.** Dark
@@ -243,7 +244,7 @@ would fork a lint-enforced shared helper into two versions that drift.
 
 **Ruling: accept it for slice 1, and attach it to the owner D-143 already named** — whoever builds
 the third module's UI, or the first cross-module shell navigation, whichever comes first. One debt,
-one owner, now correctly sized.
+one owner, now correctly sized. _(Amended 2026-11-06, D-268: the page as built extends `sap/fe/core/PageController` and imports only `com.lifeos.shared`; the `com.financialplanner.shared` half of this dependency is not taken.)_
 
 ---
 
@@ -261,7 +262,7 @@ three Reports are anchor-bar sections in resume order.**
 
 ### 7.1 Why `sap.uxap`
 
-- It is **already preloaded page-globally** (`Financial Planner/app/index.html:24`), so the page
+- It is **already preloaded page-globally** (`Financial Planner/app/index.html:26`), so the page
   shell costs no new library.
 - Its **snapping header** is exactly the shape of a header read on arrival and scrolled past.
 - Its **anchor bar** gives in-page jumps, which is **in-page disclosure, not navigation** —
@@ -566,7 +567,7 @@ Stage 8 has real work: no concrete value in this module has been decided.
 
 **And it inherits a question Financial Planner's own Theme stage never had to answer.** D-146 puts
 this module inside **one `<body>` at one origin**, with `data-sap-ui-xx-cssVariables="true"` set
-page-globally (`Financial Planner/app/index.html:24`) and
+page-globally (`Financial Planner/app/index.html:26`) and
 `Financial Planner/app/shared/css/theme-overrides.css` loaded once for the whole page. **Two THEME
 documents writing CSS custom properties into that one page would collide.**
 
@@ -633,8 +634,8 @@ artifacts if you need them to be true.
 | --------- | ------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **D-144** | Fiori Elements FPM for all six surfaces, on non-draft entity sets                          | Uniform across all 6 objects. **Drafts off** — measured against the repo's only FPM app, which runs on a non-draft entity set. Closes SPEC-11 BR-06's open clause.                        |
 | **D-145** | The browser read path is a read-only OData projection of `project_view`                    | INT-001 is MCP stdio and a browser cannot call it. One handler, two transports; the projection is read-only, so D-05 stands. Places a real requirement on Data Model.                     |
-| **D-146** | Theme and density are inherited, not chosen                                                | `sap_horizon` + Compact. One `<body>`, one theme attribute (`Financial Planner/app/index.html:17`, `:45`). A second theme is not expressible in that page.                                |
-| **D-147** | The shared UI5 library dependency extends D-143's shell dependency                         | The shared standards mandate the `Messaging`/`DialogManager` helpers, now in `com.lifeos.shared` (`Shared/app`); `BaseController`/`BasePageController` stay in `com.financialplanner.shared`. Accepted for slice 1, attached to D-143's existing owner.                                     |
+| **D-146** | Theme and density are inherited, not chosen                                                | `sap_horizon` + Compact. One `<body>`, one theme attribute (`Financial Planner/app/index.html:18`, `:47`). A second theme is not expressible in that page.                                |
+| **D-147** | The shared UI5 library dependency extends D-143's shell dependency                         | The shared standards mandate the `Messaging`/`DialogManager` helpers, now in `com.lifeos.shared` (`Shared/app`); `BaseController`/`BasePageController` stay in `com.financialplanner.shared`. Accepted for slice 1, attached to D-143's existing owner. **Narrowed by D-268:** no `com.financialplanner.shared` import.                                     |
 | **D-148** | The project view is one `ObjectPageLayout` — RPT-001 as header, 3 sections in resume order | `sap.uxap` is already preloaded. A `GridContainer` grid was rejected: the four Reports are not peer cards, because one of them is a page header.                                          |
 | **D-149** | Project Tracker owns its domain vocabulary over the shared semantic states                 | 17 mappings, 2 stated "none". The grammar aligns with Financial Planner's DS-001 §6 on all five states, which is what makes an own-vocabulary ruling safe in one shell.                   |
 | **D-150** | No charts — a stated "none"                                                                | No spec specifies a chart; the 2 hits across the 4 UI specs are deferral sentences. Recorded on D-134's precedent rather than dropped.                                                    |

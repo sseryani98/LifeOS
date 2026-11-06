@@ -19,6 +19,7 @@ D-113); **R6 is confirmed closed** by D-32; **R10 is mitigated, not proven, and 
 | 2026-08-04 | Sandro & Claude | Initial creation from the SPEC-10 workshop. Records **D-109 … D-119**. **Third Wave 3 spec** and the **third standalone** one. The only object in slice 1 that writes no project state and reads none, so **§2 places no Data Model requirement** — a first. **SPEC-10 resolves no OI** and **mints no error key**, the sixth spec running to mint none but the first where none is structurally possible (§5). **Not provisional on R1** (D-119) — also a first. [SPEC-09](SPEC-09-TEST-REPORT-TO-TESTRUN.md) flipped to **Approved** in the same session (**D-109**), discharging its dangling change-history citation. [SPEC-08](SPEC-08-CONSUMER-REWIRING.md) §6's owed glob row and SPEC-09 §6's owed third-root row are both discharged by BR-17. **[SPEC-08](SPEC-08-CONSUMER-REWIRING.md) BR-02 is amended** in-session — its four literal strings are provably incomplete against the files they are scoped to, and the shared list supersedes them (**D-117**). Five BA-001 corrections applied in-session, listed in §6. |
 | 2026-08-04 | Sandro & Claude | **BR-28 amended in-session at the SPEC-12 workshop (D-131).** Its "single act" becomes an **ordered sequence with a proof step** — lint leg, installer, then one hook run under `claude --debug-file` — ordered by revertibility, because a `PreToolUse` deny beats `bypassPermissions` (§5, D-112) and R10 records that no hook has ever fired in this repo. A single act would have left R10 unproven at the exact moment the guard went live, which would leave the object that _owns_ R10 discharging nothing. **BR-25, BR-26, BR-27 and FUT-014 are untouched** — [SPEC-12](SPEC-12-DECOMMISSION.md) BR-16 depends on FUT-014 reading exactly as it does today, and re-runs it expecting the enablement pair to invert. Nothing about _what_ is enabled changes. Status stays **Approved**; this is the fifth in-session amendment to an Approved spec in this module (D-67, D-72, D-104, D-117). |
 | 2026-08-04 | Sandro & Claude | **Status → Approved** on the same day it was written, the normal path for this module — only [SPEC-01](SPEC-01-MCP-INTENT-VERB-LAYER.md) is held in Draft by a decision (D-93). It owes nothing: both §6 rows addressed to it are discharged, and every correction it raised against BA-001, [SPEC-08](SPEC-08-CONSUMER-REWIRING.md), `PLAN.md` §6 and D-23 was applied in-session rather than left owed. |
+| 2026-11-05 | Claude          | `/refresh-docs`: DM-001 existence annotated; FUT path `modules/transactions/` → `modules/transaction/`. |
 
 ---
 
@@ -40,7 +41,7 @@ module's cwd without naming one.
 
 ## 2. Data Model References
 
-**There is no DM-001 yet.** Workshops is stage 5 and Data Model is stage 9, so this section is an
+**There is no DM-001 yet.** _(Annotated 2026-11-05: DM-001 now exists — [`design/DATA_MODEL.md`](../DATA_MODEL.md).)_ Workshops is stage 5 and Data Model is stage 9, so this section is an
 **input to** the data model rather than a reference to it (D-43). Every entity and attribute a spec
 declares here is a requirement it places on the Data Model stage.
 
@@ -359,7 +360,7 @@ carries the sprint-board record with its `verb` (BR-01, BR-02).
 **Preconditions:** FUT-001's.
 **Steps:**
 
-1. Feed a `Write` to `Financial Planner/srv/modules/transactions/transactionService.ts`.
+1. Feed a `Write` to `Financial Planner/srv/modules/transaction/transactionService.ts`.
 
 **Expected Result:**
 

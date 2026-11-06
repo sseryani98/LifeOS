@@ -11,6 +11,7 @@
 
 | Date       | Author          | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | ---------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-11-05 | Claude          | `/refresh-docs` during SPEC-04: the UI5 leg and `app/project-view/` exist; journeys boot the `[journey]` profile; spec-file count 48; controller-shape linter committed. |
 | 2026-11-04 | Sandro & Claude | **v1.4 — amended at the UI5-testing Test Strategy run (D-257 … D-263). D-195 is reversed:** UI5 is a build gate. §15 rewritten; §2, §3, §5, §11, §12, §13, §14.3, §16, §17, §18, §19, §21 amended for the UI5 unit, UI5 journey and E2E tiers. **Every gate-mechanics statement is provisional** until Sprint 2 story 1 closes UI5-pack R1. No FUT count, Jest threshold or Jest tier changes. Status → **Draft**, pending Sandro's re-approval.                                                                                          |
 | 2026-11-04 | Sandro          | **Status → Approved.** UI5-testing amendment approved by Sandro; gate mechanics stay provisional until Sprint 2 story 1 closes R1.                                                                                                                                                                                                                                                                                                                                                                                                        |
 | 2026-11-04 | Sandro & Claude | **Gate mechanics executed** in Financial Planner by Sprint 2 story 1 (FP D-331 … D-334): UI5-pack R1 and R9 closed. §3.1, §11, §13, §15, §16.4, §17 and §19.1 restate what was measured. This module's own leg still lands with its first `app/` source. |
@@ -44,7 +45,7 @@ module's sequence and not this one's.
 | **Utilities**          | **None** — this module encrypts nothing and schedules nothing, so the exemplar's 100/100 Utilities band has no target here (D-193)                                                                                                                                    |
 | **UI5 coverage**       | **A separate gate, never merged with Jest.** Overall `app/**` 85/80; the shared-util 100/100 band has **no target here** — this module owns no `app/shared/` (D-260)                                                                                                  |
 | **FUT contract**       | All **181** FUTs classified: **59** script, **60** verb, **41** OData, **10** browser, **7** one-time, **4** protocol (D-194). Each of the **10** browser FUTs also gets a journey when SQLite-observable, else an E2E spec (D-261)                                   |
-| **Frontend**           | **A gated in-repo suite — D-195 reversed (D-257).** QUnit on every logic class, plus **one** contract journey on the FPM page (D-259), launched directly, never through Financial Planner's shell (D-258). Not built yet: `app/` is empty                             |
+| **Frontend**           | **A gated in-repo suite — D-195 reversed (D-257).** QUnit on every logic class, plus **one** contract journey on the FPM page (D-259), launched directly, never through Financial Planner's shell (D-258). Built with `SPEC-04`: `app/project-view/` (uncommitted)                             |
 | **Gate mechanics**     | **Executed** in Financial Planner (FP D-331); this module adopts them when its leg lands. Silent-pass mode: coverage not instrumented → suites **pass** at zero coverage (§15.5)                                                                                                                     |
 | **Recording a run**    | Destination **and** transition. The `posttest` hook **cannot record a failing run**, so both gate sites call it explicitly (D-196)                                                                                                                                    |
 | **Enforcement**        | **3** live test `lint:*` scripts (of **7** enforced rules). Coverage mapping, tier boundaries, the FUT contract, the lever and the whole UI5 test tree are enforced by **nothing** (§17)                                                                              |
@@ -243,7 +244,7 @@ UI5 and E2E rows are rulings (D-257, D-262); how the gate runs them is §15.5, m
 | **Protocol**            | Jest + MCP SDK in-memory pair                                          | `mcp/server.ts`                                                   | SQLite `:memory:`                 | The tool list, JSON-RPC framing, the stdout guard, the `zod` input boundary                                                    | Re-assert verb behaviour the integration tier already proves                                                                           |
 | **Script**              | Jest                                                                   | a Node entry point, or none                                       | varies                            | A script's observable effect: files written, exit codes, denials, rows recorded                                                | Assume a CAP server it did not start                                                                                                   |
 | **UI5 unit**            | QUnit 2 via `ui5-test-runner` 5.14.2                                   | UI5 in a headless browser, no backend                             | **none** — OData mocked or absent | One logic class: a `model/{App}Service.ts` intent method against a stubbed model, an ext logic class, a custom control (§15.2) | Boot `cds-serve`; assert FE/UI5 framework behaviour; render a whole app                                                                |
-| **UI5 journey**         | OPA5 — a plain OPA5 page object for the FPM page — via the same runner | `cds-serve`, `[development]` profile, seeded from `db/data/` CSVs | SQLite `:memory:`                 | The page's annotation contract and extensions as rendered; SQLite-observable browser FUTs (§14.3)                              | FE generic behaviour; anything whose mechanism is Postgres; cross-module routing                                                       |
+| **UI5 journey**         | OPA5 — a plain OPA5 page object for the FPM page — via the same runner | `cds-serve`, `[journey]` profile, seeded from `db/data/` + the page's `test/data/journey` CSVs | SQLite `:memory:`                 | The page's annotation contract and extensions as rendered; SQLite-observable browser FUTs (§14.3)                              | FE generic behaviour; anything whose mechanism is Postgres; cross-module routing                                                       |
 | **E2E**                 | Playwright (`@playwright/test`)                                        | Postgres + both modules' CAP processes + `serveOneOrigin.mjs`     | Postgres                          | Postgres-dependent and cross-module browser FUTs; the shell → this module's route                                              | Run per story; count in coverage; gate `npm test`                                                                                      |
 | _Browser_               | **`/functional-test`** — a stage, not a tier in `npm test`             | the real servers behind the proxy                                 | throwaway Postgres                | ~~What is on screen (§15)~~ The story's FUTs, plus exploratory probing (§15)                                                   | Be counted in coverage, or gate `npm test`; ~~be the only browser assertion~~ be the only regression net — since D-261 it no longer is |
 | _One-time verification_ | **a person, once**                                                     | —                                                                 | —                                 | That a cutover step happened (§14.3)                                                                                           | Be a re-runnable test at all                                                                                                           |
@@ -500,7 +501,7 @@ here.
 **Inherited wholesale**, and already enforced: `lint:test-structure` runs in this module's `lint`
 block today and passes over the empty tree (measured this session — "Scanning 0 test file(s)", exit
 0), which is D-36's missing-folder rule working as intended. _Annotated 2026-11-04:_ the tree is no
-longer empty — it holds 42 spec files, and the linter still passes over them.
+longer empty — it holds 48 spec files, and the linter still passes over them.
 
 | Role folder | Holds                                                     | Rule                                                |
 | ----------- | --------------------------------------------------------- | --------------------------------------------------- |
@@ -608,7 +609,7 @@ step is avoided by ruling, not solved. The overall row lives in the module's `ui
 
 | Band                   | Line | Branch | This module's folders                                                                                           |
 | ---------------------- | ---- | ------ | --------------------------------------------------------------------------------------------------------------- |
-| **Shared UI5 helpers** | 100% | 100%   | **None — this module owns no `app/shared/`.** It consumes Financial Planner's `app/shared/` and repo-root `Shared/app/` (D-147), both counted in Financial Planner's UI5 gate |
+| **Shared UI5 helpers** | 100% | 100%   | **None — this module owns no `app/shared/`.** It consumes repo-root `Shared/app/` only (D-268), counted in Financial Planner's UI5 gate |
 | **Overall `app/**`**   | 85%  | 80%    | `./app/{app}/webapp/**/*.ts` — the one FPM page (§15)                                                           |
 
 QUnit and journeys both feed the number (same runner, same instrumentation). **The band lands with the
@@ -706,6 +707,11 @@ Three consequences, each deliberate:
 > and the stage still has to produce an output. Re-read this when the first UI story reaches stage 4:
 > if `/functional-test` drives the browser there, the scenarios tier may have nothing to add.
 
+> **`SPEC-04`'s split, ruled 2026-11-05 (D-266):** FUT-001 … FUT-010 are Verb (A), through
+> `next_action` and the write verbs' `nextAction`. FUT-011 … FUT-016 are OData (B), through one
+> `GET ProjectView?$expand=taskQueue,recentCompletions` per read. Verb calls in FUT-013 and FUT-014
+> are arrange steps.
+
 **Two findings the table makes unavoidable.**
 
 **The script tier holds 59 of 181 — the largest single destination until `SPEC-02` FUT-019 put verb
@@ -768,13 +774,13 @@ transfer.**
 ## 15. Frontend Testing (D-257 … D-263)
 
 **A gated in-repo suite: QUnit unit tests and OPA5 journeys inside `npm test`, plus a Playwright E2E
-tier at each sprint boundary. This reverses D-195 (D-257).** Nothing is built yet. `app/` is empty
-(only `.gitkeep`), so this section states what the page will owe when it is built. No test exists.
+tier at each sprint boundary. This reverses D-195 (D-257).** _(Annotated 2026-11-05: built since — `app/project-view/` with six `*.qunit.ts` and one journey.)_ When written, nothing was built. `app/` was empty
+(only `.gitkeep`), so this section states what the page owes.
 
 **The gate mechanics are measured, in Financial Planner.** Sprint 2 story 1 ran the chain three times
 there and showed a deliberately failing threshold fails the leg (FP D-331). §15.5 states the shape this
-module adopts. Its own leg does not exist yet: there is no `app/` source to gate. One question stays
-open for this module alone: whether its `cds-serve` resolves `/shared` (§15.3).
+module adopts. Its own leg landed with `SPEC-04` (`test:ui5`, `ui5-test-runner.json`). One question stays
+open for this module alone: whether its `cds-serve` resolves `/shared` (§15.3) — moot since D-268.
 
 `R1` … `R9` in this section are the UI5 research pack's risks
 (`Standards (Documents)/research/README.md` §Open risks), not this module's `research/README.md` §5
@@ -799,7 +805,7 @@ tier tests **one logic class at a time**, with no backend:
 | --------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
 | Every intent method of the app's `model/{App}Service.ts`, against a stubbed model | The FPM page's rendering. That belongs to the journey (§15.3)                                                        |
 | Every ext **logic class** a lifecycle extension or action handler delegates to    | The thin `ext/` handler module or the `ControllerExtension` itself. These are wiring, excluded from coverage (§13.2) |
-| Any custom control or formatter the page adds                                     | Anything in Financial Planner's `app/shared/` or repo-root `Shared/app/`. Financial Planner's UI5 gate tests both (D-147) |
+| Any custom control or formatter the page adds                                     | Anything in repo-root `Shared/app/`. Financial Planner's UI5 gate tests it (D-268) |
 
 **Extensions delegate (D-263).** A lifecycle `ControllerExtension` hook delegates to a plain logic
 class, the same way a custom-action handler already delegates (`CODING_STANDARDS.md` §SAPUI5,
@@ -813,7 +819,7 @@ journey (§15.3) still applies.
 | Ruling                 | Detail                                                                                                                                                                                                                                                   |
 | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Page object**        | A hand-written **plain OPA5 page object** for the FPM page, in `integration/pages/`. Same runner, same coverage as QUnit                                                                                                                                 |
-| **Boots**              | `cds-serve` in the `[development]` profile: in-memory SQLite, seeded from the `db/data/` CSVs                                                                                                                                                            |
+| **Boots**              | `cds-serve` in the `[journey]` profile (`CDS_ENV=journey`): in-memory SQLite, seeded from `db/data/` + `app/project-view/webapp/test/data/journey`                                                                                                                                                            |
 | **Launch**             | **The component directly** (`iStartMyUIComponent`), **never** Financial Planner's shell (D-258). This module's gate must not boot that module's CAP process or `serveOneOrigin.mjs` (D-29). A red Financial Planner would otherwise red-line this module |
 | **What it owes**       | **At least one contract journey**: the page's annotation-declared columns, filters, actions and extensions render as declared (D-259). Plus one journey per SQLite-observable browser FUT (§14.3, D-261)                                                 |
 | **May not**            | Assert FE's generic behaviour: sorting, paging, draft machinery, variant management. That is the framework (§5.1)                                                                                                                                        |
@@ -822,7 +828,7 @@ journey (§15.3) still applies.
 **One dependency still unmeasured.** The page depends on Financial Planner's `app/shared/` at
 `/shared` and on repo-root `Shared/app/` at `/lifeos-shared` (D-147). A direct launch under this module's own `cds-serve` must still resolve `/shared`
 without booting that module's process. Financial Planner's run cannot answer it, because there
-`/shared` is the module's own app. It is measured by the story that lands this module's leg.
+`/shared` is the module's own app. It is measured by the story that lands this module's leg. _(Settled 2026-11-06, D-268: the built page references no `/shared` at all, only `/lifeos-shared`, which the journey run resolves.)_
 
 ### 15.4 Layout (D-263)
 
@@ -844,7 +850,7 @@ Measured in Financial Planner (FP D-331); this module copies the shape when its 
 | Coverage source              | A test-only `ui5-test.yaml` per app (`ui5.yaml` + transpile `coverage`), selected by `CDS_PLUGIN_UI5_MODULES` keyed by **app folder name**. `scanUi5Coverage.cjs` adds unloaded files to the denominator |
 | Threshold check              | Overall row: `coverageCheckLines`/`coverageCheckBranches` in `ui5-test-runner.json`. Per-folder rows: `runUi5Gate.ts --row "<glob>:<lines>:<branches>"` (`nyc check-coverage --include`)               |
 | Inside `npm test`            | `posttest`, after the Jest report. A failing Jest run skips it, so the build gate runs `test:ui5` itself                                                                                                |
-| When this module's leg lands | With the story that creates the first `.ts` under `app/`. Until then there is no leg (D-186's reasoning)                                                                                                |
+| When this module's leg lands | With the story that creates the first `.ts` under `app/`. Landed with `SPEC-04` (D-186's reasoning)                                                                                                |
 
 **The failure mode is a silent pass, and it must be named.** Suppose the transpile `coverage` option
 is not switched on for the test run, or a served source tree is not instrumented (UI5-pack R9). The
@@ -951,13 +957,13 @@ is which is this section's whole job.**
 | The coverage **numbers** (§13.1)                                | `jest` `coverageThreshold`       | **Live** — `test` script and `coverageThreshold` since `S-00`                                                  |
 | Facades hold zero logic (§6, §13.2)                             | `lint:facades`                   | **Live**                                                                                                       |
 | No FUT ID in a journey or E2E title (§14.3, D-261)              | `lint:tracking-ids`              | **Live** — scans `app/` and `test/`; only a `/test/…/data/` path is exempt                                     |
-| A lifecycle extension delegates to a logic class (§15.2, D-263) | `lint:frontend-controller-shape` | **Extended in-session by the host** (uncommitted when this was written). Nothing in `app/` yet for it to check |
+| A lifecycle extension delegates to a logic class (§15.2, D-263) | `lint:frontend-controller-shape` | **Extended in-session by the host** (committed `947c200`). `app/project-view/` is what it checks |
 
 All five are already wired; three were verified running against this module's empty `test/` tree this
-session, which is D-36's rule holding. _Annotated 2026-11-04:_ `test/` is no longer empty (42 spec files).
+session, which is D-36's rule holding. _Annotated 2026-11-04:_ `test/` is no longer empty (48 spec files).
 _v1.4:_ two rows added, `lint:tracking-ids` and `lint:frontend-controller-shape`. Since Sprint 2
 story 1, `lint:test-structure`, `lint:test-data` and an ESLint `app/**/test/**` block also reach every
-app test tree and `test/e2e/` (FP D-334); with no `app/` source here yet, they scan nothing in this
+app test tree and `test/e2e/` (FP D-334); they now scan `app/project-view/` in this
 module.
 
 ### 17.2 Enforced by nothing
@@ -1047,7 +1053,7 @@ above. Each one is executed, re-owned, or resolved by a ruling:
 
 | Risk                | What it is                                                                                             | Disposition                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | ------------------- | ------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **UI5-pack R1**     | The gate chain is unexecuted: runner, `cds-serve`, transpile coverage and thresholds in one `npm test` | **Closed** by Sprint 2 story 1 in Financial Planner (FP D-331): three runs green, a deliberate threshold failure red. This module's own leg lands with its first `app/` source |
+| **UI5-pack R1**     | The gate chain is unexecuted: runner, `cds-serve`, transpile coverage and thresholds in one `npm test` | **Closed** by Sprint 2 story 1 in Financial Planner (FP D-331): three runs green, a deliberate threshold failure red. This module's own leg landed with `SPEC-04` |
 | **UI5-pack R2**     | `sap.fe.test.Shell` assumes FLP                                                                        | **Sidestepped (D-258).** This module never launches through the shell. Financial Planner's custom Shell page object is that module's                                                                                                                                                                                                                                                                                                                                                                                                    |
 | **UI5-pack R3**     | No `sap.fe.test` page object exists for an FPM custom page, and this module's only page is FPM         | **Resolved by ruling (D-257):** a plain OPA5 page object                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 | **UI5-pack R4**     | Unit-testing a `ControllerExtension` in isolation is undocumented                                      | **Resolved by ruling (D-263):** the delegation standard plus `lint:frontend-controller-shape`. No fake-`base` spike is needed                                                                                                                                                                                                                                                                                                                                                                                                           |

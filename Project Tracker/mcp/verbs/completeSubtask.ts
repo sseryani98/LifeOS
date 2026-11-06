@@ -74,7 +74,11 @@ export class CompleteSubtaskVerb implements VerbDefinition {
         timestamp,
       );
       return {
-        nextAction: TargetResolver.resolveNextAction(chain, milestone.storyId),
+        nextAction: TargetResolver.resolveNextAction(
+          chain,
+          workspace.slug,
+          milestone.storyId,
+        ),
       };
     });
   }

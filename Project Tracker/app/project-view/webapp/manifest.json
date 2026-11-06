@@ -1,0 +1,74 @@
+{
+  "_version": "2.0.0",
+  "sap.app": {
+    "id": "com.lifeos.projecttracker.projectview",
+    "type": "application",
+    "title": "{{appTitle}}",
+    "description": "{{appDescription}}",
+    "applicationVersion": {
+      "version": "1.0.0"
+    },
+    "dataSources": {
+      "TrackerService": {
+        "uri": "/service/trackerSvcs/",
+        "type": "OData",
+        "settings": {
+          "odataVersion": "4.0"
+        }
+      }
+    }
+  },
+  "sap.ui5": {
+    "dependencies": {
+      "minUI5Version": "1.136.16",
+      "libs": {
+        "sap.m": {},
+        "sap.ui.core": {},
+        "sap.f": {},
+        "sap.uxap": {},
+        "sap.fe.core": {},
+        "sap.fe.macros": {}
+      }
+    },
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "com.lifeos.projecttracker.projectview.i18n.i18n"
+        }
+      },
+      "": {
+        "dataSource": "TrackerService",
+        "preload": true,
+        "settings": {
+          "operationMode": "Server",
+          "autoExpandSelect": true,
+          "earlyRequests": true
+        }
+      }
+    },
+    "routing": {
+      "routes": [
+        {
+          "pattern": ":?query:",
+          "name": "ProjectView",
+          "target": "ProjectView"
+        }
+      ],
+      "targets": {
+        "ProjectView": {
+          "type": "Component",
+          "id": "ProjectView",
+          "name": "sap.fe.core.fpm",
+          "options": {
+            "settings": {
+              "viewName": "com.lifeos.projecttracker.projectview.view.ProjectView",
+              "contextPath": "/ProjectView",
+              "navigation": {}
+            }
+          }
+        }
+      }
+    }
+  }
+}

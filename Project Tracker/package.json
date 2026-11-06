@@ -13,6 +13,8 @@
     "install-mcp": "node scripts/installMcpServer.mjs",
     "migrate-financial-planner": "tsx scripts/migrateFinancialPlanner.ts",
     "test": "jest --json --outputFile=coverage/test-results.json --coverage",
+    "posttest": "npm run test:ui5",
+    "test:ui5": "tsx \"../Standards (Technical + Linting)/scripts/runUi5Gate.ts\" --row \"app/**:85:80\"",
     "lint": "eslint . &&npm run lint:i18n && npm run lint:annotations && npm run lint:filenames && npm run lint:cds-layout && npm run lint:tracking-ids && npm run lint:default-attrs && npm run lint:test-data && npm run lint:test-structure && npm run lint:test-cql && npm run lint:grouped-constants && npm run lint:frontend-constants && npm run lint:domain-types && npm run lint:comment-length && npm run lint:mapper-methods && npm run lint:ui-helpers && npm run lint:frontend-data-access && npm run lint:frontend-controller-shape && npm run lint:control-ids && npm run lint:event-handlers && npm run lint:handler-event-types && npm run lint:facades && npm run lint:design-counts && npm run lint:doc-claims",
     "lint:i18n": "tsx \"../Standards (Technical + Linting)/scripts/lintI18n.ts\"",
     "lint:annotations": "tsx \"../Standards (Technical + Linting)/scripts/lintAnnotations.ts\"",
@@ -53,6 +55,7 @@
     "@sapui5/types": "^1.136.16",
     "@ui5/cli": "^4.0.57",
     "cds-plugin-ui5": "^0.17.4",
+    "lifeos-shared": "*",
     "ui5-tooling-transpile": "^3.11.3"
   },
   "cds": {
@@ -91,6 +94,26 @@
             "password": null,
             "database": null
           }
+        }
+      }
+    },
+    "[journey]": {
+      "requires": {
+        "db": {
+          "kind": "sqlite",
+          "impl": "@cap-js/sqlite",
+          "credentials": {
+            "url": ":memory:",
+            "host": null,
+            "port": null,
+            "user": null,
+            "password": null,
+            "database": null
+          },
+          "data": [
+            "db/data",
+            "app/project-view/webapp/test/data/journey"
+          ]
         }
       }
     }

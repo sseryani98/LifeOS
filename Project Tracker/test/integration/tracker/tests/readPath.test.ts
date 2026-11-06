@@ -59,7 +59,7 @@ import { seedExtraStory } from "../support/seedExtraStory.js";
 interface ProjectViewRow {
   slug: string;
   health: string | null;
-  nextActionStoryId: string | null;
+  nextActionStory: string | null;
   gateTotal: number | null;
   initiatives: { milestones: { status: string }[] }[];
   defects: unknown[];
@@ -99,6 +99,8 @@ describe("the browser read path", () => {
 
   /** The list is a hand-kept mirror of the view's virtuals, so the read itself has to hold it honest. */
   it("carries every derived scalar the constant names as empty rather than missing", async () => {
+    await setChainStates(world.milestoneId, WHOLE_CHAIN_COMPLETE);
+
     const rows = await readCollection(PATHS.PROJECT_VIEW);
 
     for (const key of DERIVED_SCALARS) {

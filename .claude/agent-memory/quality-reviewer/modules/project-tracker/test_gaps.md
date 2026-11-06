@@ -51,6 +51,12 @@ metadata:
   first-only `.find` or a dropped driver dedupe on one blocker. Guard-order tables in SPEC-02 §5 (reopen: notComplete
   → empty reason) need a fixture where both conditions hold at once.
 
+- **SPEC-04 twin paths (2026-11-05):** project_view's *verb* re-sorts its queue (`mcp/verbs/projectView.ts`
+  `_sortQueueByTier`) separately from the OData `projectViewService.applyQueueDerivations`; `projectViewQueue.test.ts`
+  reads OData only, so the verb sort can be deleted green. A "page == verb" parity spec proves nothing about
+  tie-breaks when its world has one tier-1 candidate — check the parity world forces the tie. Also grep
+  `expect.stringMatching(/\S/)` placeholders: next-action `description` was pinned only by that.
+
 **Why:** these were the only real gaps a 99.5%-coverage suite still had; the numbers point elsewhere.
 **How to apply:** on any Project Tracker test-quality run, start from the facade registrations and TEST_STRATEGY §9's
 contract list, not from the coverage table.
@@ -59,6 +65,11 @@ contract list, not from the coverage table.
   `require(join(...))`s srv/ so red-phase suites type-check before the domain exists; after green it makes the
   support re-declare srv types (`registerValidator.ts` vs `migration/types.ts`) and drift goes uncaught by `tsc`.
   Grep `require(join` under test/ on every domain review; other suites import srv directly.
+  **Recurred SPEC-04 (2026-11-05):** `test/unit/tracker/support/nextActionResolverModule.ts` — the test-author
+  re-creates this pattern every TDD-red story, so expect it on every post-build review.
+- **Verb copies of OData-derived fields** (SPEC-04, D-266): `project_view` verb reads `TrackerService.TaskQueueItems`
+  through the gateway so the after-READ fills `tier`; D-266 says that copy is "proven by the single handler", but no
+  verb spec asserts it — a NaN comparator sort is silent. Check verb payloads that reuse a read handler's virtuals.
 - **A file missing from the coverage table was never loaded by any test** (2026-11-04, SPEC-03): `scripts/` has no
   band until SPEC-09, so `scripts/migrateFinancialPlanner.ts` (call order, `process.exitCode = 1`) sat at 0% with the
   suite green; its scenario FUTs run one layer in, at `MigrationService`. The spawn pattern for a script-tier spec is
@@ -77,3 +88,25 @@ contract list, not from the coverage table.
   refusals are unreachable unless a spec tampers the *store* first (e.g. rename a sprint so `_resolveSprints` misses).
   `position` is `not null` + `@assert.unique`, so BR-33a's ordering failure is untamperable under SQLite — it needs a
   pure unit test of `ReconciliationFindings`. The scenario FUTs call the service, not `scripts/migrateFinancialPlanner.ts`.
+
+- **A `scenarios`-module review of a UI story is empty by design** (2026-11-05, SPEC-04): D-238's scenarios tier is
+  for no-UI stories only, and D-266 rules SPEC-04 gets no `integration/scenarios/` spec (FUTs live in
+  `test/integration/tracker/tests/nextAction*.test.ts` / `projectView*.test.ts`). The brief still lists scenarios files
+  + SPEC-04 source. Check `git status test/integration/scenarios` and the story's D-nn tier ruling first; only flag a
+  scenarios spec the change broke (e.g. `futHarness.ts nextStepOf` reads `stepCode` only, so the payload rename
+  `storyId→story`, `label→name` was invisible there — pinned instead in `readNextAction.ts`).
+
+- **SPEC-04 seams (2026-11-05):** the OData `ProjectView` headline is filled by `ProjectViewMapper.toNextActionFields`, a
+  path separate from the verb payload — the verb-path `toEqual` and the "view equals next_action" test (verb `view.nextAction`)
+  never read the flat `nextAction*` virtuals the page binds. Also: `ProjectViewService` sorts/splices queue and
+  completions *after* the DB read, and every spec reads via `$expand`; the page's `macros:Table` reads the nav path paged
+  (`$count`/`$top`), which no spec exercises. And `app/project-view/` shipped `.ts` with no UI5 leg (no
+  `ui5-test-runner.json`, no `webapp/test/`) — check `ls app/*/webapp/test` on every UI story.
+
+## MCP gateway reads run through srv READ handlers (structure review)
+
+`TrackerGateway` runs CQL on `ctx.service` (`mcp/verbs/shared/runVerb.ts`), so a SELECT on a service entity fires the
+srv after-READ handlers — virtuals arrive filled and rows arrive in the handler's order. A gateway-side `.sort()` on such a
+read can silently undo that order, and a verb then re-sorts to recover it. Seen: `readTaskQueue` re-sorted by `QUEUE.ORDER`
+over `TaskQueueItems` (handler orders by tier rank), then `projectView._sortQueueByTier` restored it. Check every gateway
+sort against the entity's read handler before accepting it.

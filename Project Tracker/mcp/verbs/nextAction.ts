@@ -4,6 +4,7 @@ import { VerbRunner } from "./shared/runVerb.js";
 import { TargetResolver } from "./shared/targetResolver.js";
 import type { TrackerGateway } from "./shared/trackerGateway.js";
 import type {
+  CandidateChain,
   NextAction,
   NextActionInput,
   VerbContext,
@@ -22,9 +23,11 @@ export class NextActionVerb implements VerbDefinition {
     "Resolve the next incomplete stage, for one story or overall.",
     "",
     "Call this before writing, to find what to work on. With no story it",
-    "scans in sprint then story order and answers with the first story that",
-    "still has work. A null answer is a success meaning nothing is",
-    "incomplete in scope, not an error.",
+    "ranks every story with work left: resuming started work (tier 1) first,",
+    "then fresh work (tier 2), then optional work only (tier 3), each in sprint",
+    "then story order. status names the verb to call next; requiresHuman says",
+    "an agent cannot close the stage. A null answer is a success meaning",
+    "nothing is incomplete in scope, not an error.",
     "Not for rendering a page — that is project_view.",
   ].join("\n");
   readonly inputShape = {
@@ -44,13 +47,15 @@ export class NextActionVerb implements VerbDefinition {
   async run(ctx: VerbContext, input: NextActionInput): Promise<VerbResult> {
     return VerbRunner.runReadVerb(ctx, async gateway => {
       if (input.story?.trim()) {
-        const { milestone } = await TargetResolver.resolveStoryContext(
-          gateway,
-          input.story,
-        );
+        const { workspace, milestone } =
+          await TargetResolver.resolveStoryContext(gateway, input.story);
         const chain = await gateway.readChain(milestone.ID);
         return {
-          nextAction: TargetResolver.resolveNextAction(chain, milestone.storyId),
+          nextAction: TargetResolver.resolveNextAction(
+            chain,
+            workspace.slug,
+            milestone.storyId,
+          ),
         };
       }
       return { nextAction: await this._selectCandidateAction(gateway) };
@@ -58,8 +63,8 @@ export class NextActionVerb implements VerbDefinition {
   }
 
   /**
-   * Selects a story before resolving within it, in sprint then story position
-   * order, and answers with the first story that still has work in it.
+   * Ranks every story of each workspace and walks the winner, taking the first
+   * workspace in slug order that still has work anywhere in it.
    * @param gateway The gateway the reads run through.
    * @returns The next action, or null when nothing is incomplete anywhere.
    */
@@ -67,11 +72,22 @@ export class NextActionVerb implements VerbDefinition {
     gateway: TrackerGateway,
   ): Promise<NextAction | null> {
     for (const workspace of await gateway.readWorkspaces()) {
+      const initiatives = await gateway.readInitiatives(workspace.ID);
+      const positions = new Map(initiatives.map(row => [row.ID, row.position]));
+      const stories: CandidateChain[] = [];
       for (const milestone of await gateway.readMilestones(workspace.ID)) {
-        const chain = await gateway.readChain(milestone.ID);
-        const resolved = TargetResolver.resolveNextAction(chain, milestone.storyId);
-        if (resolved) return resolved;
+        stories.push({
+          storyId: milestone.storyId,
+          initiativePosition: Number(positions.get(milestone.initiative_ID)),
+          milestonePosition: milestone.position,
+          tasks: await gateway.readChain(milestone.ID),
+        });
       }
+      const resolved = TargetResolver.resolveCandidateAction(
+        workspace.slug,
+        stories,
+      );
+      if (resolved) return resolved;
     }
     return null;
   }

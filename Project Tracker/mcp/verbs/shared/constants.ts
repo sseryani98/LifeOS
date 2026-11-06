@@ -1,4 +1,4 @@
-import { CODES } from "../../../srv/modules/shared/constants.js";
+import { CODES, REFERENCE } from "../../../srv/modules/shared/constants.js";
 
 /** Runtime message keys the verb layer rejects and warns with. */
 export const VERB_KEYS = {
@@ -54,17 +54,7 @@ export const GUARD = {
 } as const;
 
 /** Activity kinds the write verbs emit, one per verb. */
-export const ACTIVITY_KINDS = {
-  DECISION_RECORDED: "decisionRecorded",
-  DEFECT_LOGGED: "defectLogged",
-  DEFECT_RESOLVED: "defectResolved",
-  SPRINT_PLANNED: "sprintPlanned",
-  STAGE_COMPLETED: "stageCompleted",
-  STAGE_REOPENED: "stageReopened",
-  STAGE_STARTED: "stageStarted",
-  SUBTASK_COMPLETED: "subtaskCompleted",
-  TEST_RUN_RECORDED: "testRunRecorded",
-} as const;
+export const ACTIVITY_KINDS = CODES.ACTIVITY_KINDS;
 
 /** The six FRICEW type codes a planned story may carry. */
 export const FRICEW_TYPES = CODES.FRICEW_TYPES;
@@ -134,17 +124,9 @@ export const CONNECTION = {
 } as const;
 
 /** Reference-string separators the addressing forms use. */
-export const ADDRESSING = {
-  STORY_SEPARATOR: "/",
-  STAGE_SEPARATOR: "#",
-} as const;
+export const ADDRESSING = REFERENCE;
 
 /** The length of an ISO timestamp up to and including its whole seconds. */
 export const TIMESTAMP = {
   SECOND_PRECISION_LENGTH: 19,
-} as const;
-
-/** The columns the task queue is ordered by, outermost first. */
-export const QUEUE = {
-  ORDER: ["initiativePosition", "milestonePosition", "stepPosition"],
 } as const;

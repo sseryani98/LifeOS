@@ -20,6 +20,7 @@ reads the database. **R9 is ruled OUT** (D-101's precedent).
 | 2026-08-06 | Sandro & Claude | **BR-06's open clause is closed at the Design System stage (D-144).** It read "whether any becomes so is **not yet decided**", citing SPEC-05 §3 and SPEC-06 §3's deferral. Design System ruled **Fiori Elements FPM with draft enablement OFF**, so **no entity in this module is draft-enabled and none will be**. **BR-06's rule text is unchanged** — it was written to be true either way, and it stays an unconditional filter rather than a description of the model. Recorded correction: D-138's own consequence wording said BR-06 "becomes vacuous only if stage 7 rules freestyle"; that was wrong, since it is vacuous because drafts are off, which FPM permits. No business rule and no FUT changes. Status stays **Approved**.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | 2026-11-04 | Claude          | Doc refresh: R1 marked executed and closed (D-170) in the header and wherever this spec gated on it; CDS Service named (`TrackerService`). No rule, FUT or count changed. Status unchanged. |
 | 2026-11-04 | Claude          | `/refresh-docs` after SPEC-03 build: FUT-005's precondition now cites 27 seeded Defects with D-021 … D-027 Open, and resolves D-021 (SPEC-03 re-baseline, D-249). No rule changed. |
+| 2026-11-05 | Claude          | `/refresh-docs`: §2's "no DM-001 yet" annotated — DM-001 exists. |
 
 ---
 
@@ -37,7 +38,7 @@ restores, CSV diffs.
 
 ## 2. Data Model References
 
-**There is no DM-001 yet.** Workshops is stage 5 and Data Model is stage 9, so this section is an
+**There is no DM-001 yet.** _(Annotated 2026-11-05: DM-001 now exists — [`design/DATA_MODEL.md`](../DATA_MODEL.md).)_ Workshops is stage 5 and Data Model is stage 9, so this section is an
 **input to** the data model rather than a reference to it (D-43). Every entity and attribute below is
 a requirement this spec places on the Data Model stage.
 

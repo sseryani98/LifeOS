@@ -25,7 +25,18 @@ Checks that caught real defects in a test-quality review (ingestion, 2026-11-02)
 - **UI5: prototype-stubbing a model/ service hides the controller→service wiring.** When `{App}Service.prototype` methods are replaced, the model `onInit` hands the service is never read; `new Service(view.getModel("ui"))` passes. Check one test reads `controller["_service"]["_model"]`.
 - **The tree may churn mid-review** (parallel agents/formatters). Before reporting a data↔assertion mismatch, `ls --time-style=full-iso` the files; a seconds-old mtime means it is in flux — drop it.
 
+- **`$expand`-only specs miss the handlers a FE `macros:Table` actually hits.** A table with `metaPath="nav/@UI.LineItem"` under a bound context issues its own `Parent(id)/nav?$count=true&$top=…` GET, which fires the *target* entity's after-READ, not the parent's. PT SPEC-04 (2026-11-05): every queue/completions spec read `ProjectView?$expand=…`, so the two new TaskQueueItems/CompletedTaskItems registrations and the `$count` clamp (projectViewService.ts:51, the only uncovered line) were untested. Grep view XML for `metaPath="<nav>/` and check a spec reads that nav path.
+
 **Why:** these are judgment-layer gaps that coverage and the lint suite report as green.
 **How to apply:** run these greps first in any test-quality pass, before reading tests one by one.
 
 - **`as unknown as { method }` contracts outlive red phase in both tiers.** FP transaction 2026-11-04: `suggestRecurringSplitOn` (unit mocks), `suggestRecurringSplitFor` (integration support), and UI5 `RecurringSplitSource` in `app/transactions/webapp/test/support/types.ts` all cast to a hand-written copy of a method that now exists (copy already drifted: `splitDescription: string` vs real `string | null`). Grep `as unknown as {` and `as unknown as Recurring|Source` in support/ on every post-build review.
+
+- **After-READ handlers that sort/cap/fill a collection: check how the page actually reads it.** An FE `macros:Table`
+  with a relative `metaPath` (`taskQueue/@UI.LineItem`) issues its own navigation GET with `$count=true&$top=n`, firing
+  the *target's* after-READ handler on one page only. PT SPEC-04 (2026-11-05): every spec read via `$expand`, so the
+  `CompletedTaskItems` facade registration and the `$count` clamp (the one cold line) were unproven, and an in-page
+  sort cannot fix the head of a queue longer than `$top`. Grep the view XML `metaPath` against the spec's read paths.
+- **`toContain` where the neighbour asserts `toEqual` is a tell the author hit nondeterminism.** PT `completedAt` is
+  second-precision `DateTime`, so stages closed through verbs within one second tie and "newest first" falls back to DB
+  order; `projectViewCompletions.test.ts` dodged it with `toContain`. Check the column precision behind any time sort.

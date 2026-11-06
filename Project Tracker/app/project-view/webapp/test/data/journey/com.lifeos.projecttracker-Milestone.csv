@@ -1,0 +1,3 @@
+ID;storyId;fricewType_code;description;shipsUi;position;initiative_ID
+5e0d0005-0000-4000-8000-000000000001;STORY-1;Report;A story whose every stage is closed;true;1;5e0d0004-0000-4000-8000-000000000001
+5e0d0005-0000-4000-8000-000000000002;STORY-2;Report;A story resumed mid-chain;true;2;5e0d0004-0000-4000-8000-000000000001

@@ -74,7 +74,11 @@ export class StartStageVerb implements VerbDefinition {
       // The stage's conditional steps were settled when the chain was made, so
       // the start is where the caller learns which ones this story carries.
       return {
-        nextAction: TargetResolver.resolveNextAction(updated, milestone.storyId),
+        nextAction: TargetResolver.resolveNextAction(
+          updated,
+          workspace.slug,
+          milestone.storyId,
+        ),
         extra: { subtasks: await gateway.readSubtasks(task.ID) },
       };
     });

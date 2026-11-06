@@ -59,3 +59,10 @@ metadata:
   "startedAt = reopen time".
 - Library edits (driver/kind) are SQL on `..._methodologystep`; do last and restore. Frozen-chain probes work as raw
   SQL UPDATE on `..._methodologystep` (kind_code/position/requireshuman) then a verb call; restore from a pre-edit snapshot.
+
+## SPEC-04 run facts (2026-11-05)
+
+- Fastest full fixture: scratch DB + `npx cds deploy` + `npm run migrate-financial-planner` (env DB override) gives CNV-001 (8 tasks) and ENH-001 (0 tasks) exactly as the FUT preconditions; `plan_sprint` adds W1-S4 (stories id/type(Report|Enhancement|Workflow..)/description/shipsUi). Task status codes are `notStarted|inProgress|complete` (OData/verbs return codes, not labels).
+- HTTP server for OData/UI: `PORT=.. npx cds serve --port 4177` (log line shows scratch DB), anonymous; app at `/project-view/webapp/index.html`; ProjectView via `ProjectView?$expand=taskQueue,recentCompletions`. Queue table pages 10 at a time: DOM `.click()` on the grow trigger does nothing, use `registry` Table `_oGrowingDelegate.requestNewPage()`.
+- Sprint-build subtasks are 7 (incl. Conditional `smoke`); `handoff` is blocked until `smoke` is completed.
+- Probes that caught defects: `TaskQueueItems/$count` -> 500 (after-READ handler reads `.tier` of undefined); UI formatters (`formatStatusText/KindText/TierText`) throw `source.getModel is not a function` so Status/Kind cells render empty.

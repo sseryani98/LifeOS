@@ -27,6 +27,7 @@ Architecture stage, 2026-08-06 (D-140, D-141).** ~~**Not Approved-for-build unti
 | 2026-11-04 | Claude          | Doc refresh: R1 marked executed and closed (D-170) in the header and wherever this spec gated on it; CDS Service named (`TrackerService`). No rule, FUT or count changed. Status unchanged. |
 | 2026-11-04 | Claude          | `/refresh-docs` after SPEC-03 build: the seeded Open defect D-004 → D-021 … D-027 in the seeded-health table, the page narrative and the FUTs (SPEC-03 re-baseline, D-249). The Workspace reason string and W1-S3's `openDefect` item are left as written — pending decision. No rule changed. |
 | 2026-11-04 | Sandro & Claude | **D-253:** at 27 seeded Defects a node carries one `openDefect` reason item per Open Defect, worst severity first then by ID; a header summarises them as a count per severity. §3's worked example re-baselined to D-021 … D-027. No BR changes — BR-15's shape already admits a multi-item reason. |
+| 2026-11-05 | Claude          | `/refresh-docs`: §2's "no DM-001 yet" annotated — DM-001 exists. |
 
 ---
 
@@ -50,7 +51,7 @@ makes health a function of `now`, and this module schedules nothing
 
 ## 2. Data Model References
 
-**There is no DM-001 yet.** Workshops is stage 5 and Data Model is stage 9, so this section is an
+**There is no DM-001 yet.** _(Annotated 2026-11-05: DM-001 now exists — [`design/DATA_MODEL.md`](../DATA_MODEL.md).)_ Workshops is stage 5 and Data Model is stage 9, so this section is an
 **input to** the data model rather than a reference to it (D-43). Every entity and attribute below is
 a requirement this spec places on the Data Model stage.
 

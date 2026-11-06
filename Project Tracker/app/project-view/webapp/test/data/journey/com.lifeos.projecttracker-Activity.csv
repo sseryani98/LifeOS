@@ -1,0 +1,3 @@
+ID;kind_code;actor_code;target;occurredAt;workspace_ID
+5e0d0007-0000-4000-8000-000000000001;stageCompleted;implementer;journey-board/STORY-1#sprint-build;2026-11-01T10:00:00Z;5e0d0003-0000-4000-8000-000000000001
+5e0d0007-0000-4000-8000-000000000002;stageCompleted;sandro;journey-board/STORY-1#code-quality;2026-11-02T10:00:00Z;5e0d0003-0000-4000-8000-000000000001

@@ -3,6 +3,7 @@ export const ENTITIES = {
   ACTIVITY: "TrackerService.Activities",
   ACTOR: "TrackerService.Actor",
   AREA: "TrackerService.Areas",
+  COMPLETED_TASK_ITEM: "TrackerService.CompletedTaskItems",
   DEFECT: "TrackerService.Defects",
   DECISION: "TrackerService.Decisions",
   ENGAGEMENT: "TrackerService.Engagements",
@@ -19,6 +20,17 @@ export const ENTITIES = {
 
 /** Code-list values the handler and verb layers branch on. */
 export const CODES = {
+  ACTIVITY_KINDS: {
+    DECISION_RECORDED: "decisionRecorded",
+    DEFECT_LOGGED: "defectLogged",
+    DEFECT_RESOLVED: "defectResolved",
+    SPRINT_PLANNED: "sprintPlanned",
+    STAGE_COMPLETED: "stageCompleted",
+    STAGE_REOPENED: "stageReopened",
+    STAGE_STARTED: "stageStarted",
+    SUBTASK_COMPLETED: "subtaskCompleted",
+    TEST_RUN_RECORDED: "testRunRecorded",
+  },
   ACTOR_KIND: { HUMAN: "human" },
   DEFECT_STATUS: { OPEN: "Open", CLOSED: "Closed" },
   FRICEW_TYPES: [
@@ -74,10 +86,15 @@ export const TEST_RUN_COUNT_FIELDS = [
  */
 export const DERIVED_SCALARS = [
   "health",
-  "nextActionStoryId",
+  "nextActionStory",
   "nextActionStepCode",
   "nextActionLabel",
+  "nextActionDescription",
+  "nextActionKind",
   "nextActionDriver",
+  "nextActionRequiresHuman",
+  "nextActionStatus",
+  "nextActionTier",
   "gateTotal",
   "gatePassed",
   "gateFailed",
@@ -85,6 +102,16 @@ export const DERIVED_SCALARS = [
   "gateBranchesPct",
   "gateExecutedAt",
 ] as const;
+
+/**
+ * How a story and a stage inside it are written as one reference. The verbs
+ * address with these and the schema's `story` columns concatenate the same
+ * story separator, so this is the one definition.
+ */
+export const REFERENCE = {
+  STORY_SEPARATOR: "/",
+  STAGE_SEPARATOR: "#",
+} as const;
 
 /** Runtime message keys the handler layer rejects with. */
 export const HANDLER_KEYS = {

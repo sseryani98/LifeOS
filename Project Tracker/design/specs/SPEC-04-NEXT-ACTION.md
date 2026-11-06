@@ -22,7 +22,9 @@ rule and no FUT here, exactly as D-69 predicted. ~~**Not Approved-for-build unti
 | 2026-07-30 | Sandro & Claude | §6's cross-spec row addressed to SPEC-06 is **struck through as applied** — BR-34's Milestone-position rule is carried by SPEC-06 BR-16, which resolves the row order at save (SPEC-06 BR-29) and adds the Add Story case. No rule changed; status stays **Approved**.                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
 | 2026-08-06 | Sandro & Claude | **R9 executed and discharged** at the Information Architecture stage (D-140, D-141) — the spec is now provisional on **R1 alone**. R9's stated premise was wrong: cross-origin composition fails under `cds watch` too, not only under `NODE_ENV=production`. Layout, routing and navigation deferred by BR-33 are settled in `INFORMATION_ARCHITECTURE.md` (D-137); RPT-002's story rows gain click navigation selecting RPT-003's chain.                                                                                                                                                                                                                                                                                      |
 | 2026-08-06 | Sandro & Claude | **BR-33 is discharged in full at the Design System stage (D-144, D-148, D-150).** It deferred four things; navigation and section arrangement were answered at Information Architecture the same day, and **layout and chart types are answered here** — RPT-002 is section 1 of one `sap.uxap.ObjectPageLayout`, and **there is no chart**, because no spec specifies one and none is adopted. Build technology is **Fiori Elements FPM with drafts OFF**, so RPT-002's two collections render as `sap.fe.macros.Table` with the default sort and personalization toolbar **explicitly disabled** — BR-31 rules those out and FPM's defaults disagree with it. No business rule and no FUT changes. Status stays **Approved**. |
+| 2026-11-05 | Claude          | **Two build blockers ruled, at Sandro's direction.** RPT-002's data surface is DM-001 v1.4 (D-265): BR-11 flat on `ProjectView`, queue rows carrying kind, `requiresHuman`, tier and blocker, and a `CompletedTaskItem` view behind a `recentCompletions` navigation. FUT tiers (D-266): FUT-001 … FUT-010 Verb, FUT-011 … FUT-016 OData, one `$expand` GET per read. No rule, FUT or count changed. Status unchanged. |
 | 2026-11-04 | Claude          | Doc refresh: R1 marked executed and closed (D-170) in the header and wherever this spec gated on it; CDS Service named (`TrackerService`). No rule, FUT or count changed. Status unchanged. |
+| 2026-11-05 | Claude          | `/refresh-docs`: §2's "no DM-001 yet" annotated — DM-001 exists. |
 
 ---
 
@@ -47,7 +49,7 @@ noted; see §6.~~ **R9 was executed at the Information Architecture stage and is
 
 ## 2. Data Model References
 
-**There is no DM-001 yet.** Workshops is stage 5 and Data Model is stage 9, so this section is an
+**There is no DM-001 yet.** _(Annotated 2026-11-05: DM-001 now exists — [`design/DATA_MODEL.md`](../DATA_MODEL.md).)_ Workshops is stage 5 and Data Model is stage 9, so this section is an
 **input to** the data model rather than a reference to it (D-43). Every entity and attribute below is
 a requirement this spec places on the Data Model stage.
 

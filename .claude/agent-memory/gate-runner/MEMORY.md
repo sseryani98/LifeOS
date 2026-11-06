@@ -6,4 +6,5 @@
 - `test:ui5` with `--row "<glob>:…"` still prints the whole-app nyc table (every file, `All files` row); the row arg only adds the `UI5 coverage row …` line. Paste the full table, not the row.
 - A red `test:ui5` prints only the test name (`…🐞 28/29`) and `undefined` on stdout. The expected/actual pair lives in `<module>/report-ui5/job.js` (search the test name; `logs[].expected`/`actual`/`source`). Quote that for `detail`.
 - `test:ui5` can print `listen EADDRINUSE :::4104` when a stale server holds the port; the tests then run against whatever owns it. Note it in the report; it is environmental, not a test result.
+- A red `npm test` on a first-run story is ~650KB and the Bash tool persists it to a tool-results file. Don't re-run it: grep the persisted file for `^(FAIL|PASS) `, `^  ● `, `^Tests:`, `threshold`, and the `at … .ts:NN` lines, after an ANSI-strip into scratchpad.
 - Exit code after a pipe is the last command's: `npm test | sed ...; echo $?` reports sed (0) even when Jest fails. Redirect to a file first, then read `$?`, or use `${PIPESTATUS[0]}`.

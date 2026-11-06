@@ -11,6 +11,7 @@
 
 | Date       | Author          | Description                                                                                                                                                                                                                                                                                                                                                                                                           |
 | ---------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-11-05 | Claude          | `/refresh-docs` during SPEC-04: three read projections in §5; `app/project-view/` exists; Financial Planner `index.html` line refs re-measured. |
 | 2026-11-04 | Claude          | `/refresh-docs` after SPEC-03 build: §7.2 gains the `scripts/migrateFinancialPlanner.ts` row and its `cds.test` row is annotated settled (D-187); the Postgres role and the empty-source-folder claims annotated as no longer true; the deploy step is `npx cds deploy` (no `deploy` script exists). No ruling changed. |
 | 2026-11-02 | Sandro & Claude | **v1.1 — amended at `SPEC-02`'s build (D-239, D-240).** §12: `db/data/` holds the code-list **and** methodology library seeds, as hand-written CSVs loaded by `cds deploy`, and they belong to `CNV-001`, not `CNV-002`. Status stays **Approved**. |
 | 2026-08-15 | Sandro          | **Status → Approved.** All twelve Phase 5 coverage checks met; the approval gate at step 0 of Phase 6 was answered before the stage closed — the second stage running, after `DM-001`.                                                                                                                                                                                                                                |
@@ -58,7 +59,7 @@ table** — a version nothing holds is a shared, silent lever, which is the less
 | **`@sap/cds-compiler`** | — (transitive)     | 6.9.3        | `@sap/cds` 9.8.4                                                                                                   |
 | **TypeScript**          | `^5`               | 5.9.3        | Caret — floats within 5.x                                                                                          |
 | **`tsx`**               | `^4`               | 4.23.1       | Caret                                                                                                              |
-| **SAPUI5 runtime**      | —                  | **1.136.16** | The CDN URL at `Financial Planner/app/index.html:16`, and `minUI5Version` in **5 of the 6** manifests under `app/` |
+| **SAPUI5 runtime**      | —                  | **1.136.16** | The CDN URL at `Financial Planner/app/index.html:17`, and `minUI5Version` in **5 of the 6** manifests under `app/` |
 | **`@sapui5/types`**     | `^1.136.16`        | **1.150.0**  | Caret — **14 minors ahead of the runtime**. See §13                                                                |
 | **`@cap-js/postgres`**  | `^2`               | 2.3.0        | Caret                                                                                                              |
 | **`@cap-js/sqlite`**    | `^2.2.0`           | 2.4.0        | Caret                                                                                                              |
@@ -124,10 +125,10 @@ lasting five seconds cannot answer it and neither can a document.
 
 | Service          | Path                   | Exposes                                                                                                                                    | Serves                       |
 | ---------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------- |
-| `TrackerService` | `/service/trackerSvcs` | `ProjectView` and `TaskQueueItem` read-only (DM-001 §11); `Initiative`, `Milestone`, `Workspace` writable for D-79's shared create-handler | Every UI object, and INT-001 |
+| `TrackerService` | `/service/trackerSvcs` | `ProjectView`, `TaskQueueItem` and `CompletedTaskItems` read-only (DM-001 §11); `Initiative`, `Milestone`, `Workspace` writable for D-79's shared create-handler | Every UI object, and INT-001 |
 
 **The Exposes column names the UI-relevant surface, not the compiled service (D-230, `SPEC-01`).** The
-service exposes **all 25 entities** plus both read projections, because a verb reaches the real
+service exposes **all 25 entities** plus the three read projections, because a verb reaches the real
 handlers only through an entity the service exposes, and the two uniqueness guards and three
 cross-field rules `DM-001` §9 makes handlers would otherwise be bypassed by every verb write. D-05's
 escape hatch is the **tool** surface — still eleven verbs, asserted by `SPEC-01` FUT-001.
@@ -441,7 +442,7 @@ write it left unproven is now measured green in the profile that previously prod
 
 ## 12. Project Structure
 
-**Every source folder is still empty** (D-160). _Annotated 2026-11-04: only `app/` is still empty._ The tree below is the **destination**, not a
+**Every source folder is still empty** (D-160). _Annotated 2026-11-04: only `app/` is still empty._ _(Annotated 2026-11-05: `app/project-view/` now exists, built by `SPEC-04`.)_ The tree below is the **destination**, not a
 description — it says where the first build story puts things.
 
 ```text
@@ -496,9 +497,9 @@ Inherited from the exemplar in full; nothing here is a new choice.
 | Transpile      | `ui5-tooling-transpile` (Babel) → classic `sap.ui.define` AMD, at serve/build                                |
 | Plugin         | `cds-plugin-ui5`                                                                                             |
 | Per-app files  | `package.json`, `ui5.yaml`, `tsconfig.json` per app folder                                                   |
-| Runtime        | SAPUI5 **1.136.16** from `https://ui5.sap.com/1.136.16/…`, pinned in Financial Planner's `app/index.html:16` |
+| Runtime        | SAPUI5 **1.136.16** from `https://ui5.sap.com/1.136.16/…`, pinned in Financial Planner's `app/index.html:17` |
 | Framework      | Fiori Elements FPM, `sap.fe.core` + `sap.fe.macros` per component (DS-001 §4)                                |
-| Shared library | Two: `Financial Planner/app/shared` at `/shared/` and `Shared/app` (`com.lifeos.shared`) at `/lifeos-shared/` — a cross-module dependency D-147 already priced |
+| Shared library | One: `Shared/app` (`com.lifeos.shared`) at `/lifeos-shared/`. D-147 also priced `Financial Planner/app/shared` at `/shared/`; the built page does not use it (D-268) |
 
 **One finding.** `@sapui5/types` is declared `^1.136.16` in **both** modules and resolves to
 **1.150.0** — fourteen minor versions ahead of the pinned runtime. The compiler would therefore accept

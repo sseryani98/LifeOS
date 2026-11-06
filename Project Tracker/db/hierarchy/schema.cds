@@ -46,28 +46,31 @@ entity Engagement : cuid, managed {
   'ID'
 ]
 entity Workspace : cuid, managed {
-  slug         : String(30) not null                 @mandatory  @Common.Label: '{i18n>Workspace.slug}';
-  name         : String(60) not null                 @mandatory  @Common.Label: '{i18n>Workspace.name}';
-  currentFocus : LargeString                         @Common.Label: '{i18n>Workspace.currentFocus}';
-  engagement   : Association to Engagement not null  @mandatory  @Common.Label: '{i18n>Workspace.engagement}';
-  initiatives  : Association to many Initiative
-                   on initiatives.workspace = $self
-                                                     @Common.Label: '{i18n>Workspace.initiatives}';
-  defects      : Association to many Defect
-                   on defects.workspace = $self
-                                                     @Common.Label: '{i18n>Workspace.defects}';
-  decisions    : Association to many Decision
-                   on decisions.workspace = $self
-                                                     @Common.Label: '{i18n>Workspace.decisions}';
-  activities   : Association to many Activity
-                   on activities.workspace = $self
-                                                     @Common.Label: '{i18n>Workspace.activities}';
-  testRuns     : Association to many TestRun
-                   on testRuns.workspace = $self
-                                                     @Common.Label: '{i18n>Workspace.testRuns}';
-  taskQueue    : Association to many TaskQueueItem
-                   on taskQueue.workspaceId = ID
-                                                     @Common.Label: '{i18n>Workspace.taskQueue}';
+  slug              : String(30) not null                 @mandatory  @Common.Label: '{i18n>Workspace.slug}';
+  name              : String(60) not null                 @mandatory  @Common.Label: '{i18n>Workspace.name}';
+  currentFocus      : LargeString                         @Common.Label: '{i18n>Workspace.currentFocus}';
+  engagement        : Association to Engagement not null  @mandatory  @Common.Label: '{i18n>Workspace.engagement}';
+  initiatives       : Association to many Initiative
+                        on initiatives.workspace = $self
+                                                          @Common.Label: '{i18n>Workspace.initiatives}';
+  defects           : Association to many Defect
+                        on defects.workspace = $self
+                                                          @Common.Label: '{i18n>Workspace.defects}';
+  decisions         : Association to many Decision
+                        on decisions.workspace = $self
+                                                          @Common.Label: '{i18n>Workspace.decisions}';
+  activities        : Association to many Activity
+                        on activities.workspace = $self
+                                                          @Common.Label: '{i18n>Workspace.activities}';
+  testRuns          : Association to many TestRun
+                        on testRuns.workspace = $self
+                                                          @Common.Label: '{i18n>Workspace.testRuns}';
+  taskQueue         : Association to many TaskQueueItem
+                        on taskQueue.workspaceId = ID
+                                                          @Common.Label: '{i18n>Workspace.taskQueue}';
+  recentCompletions : Association to many CompletedTaskItem
+                        on recentCompletions.workspaceId = ID
+                                                          @Common.Label: '{i18n>Workspace.recentCompletions}';
 }
 
 @assert.unique : {
@@ -171,44 +174,77 @@ entity Subtask : cuid, managed {
 // The queue the browser binds: incomplete Tasks with the owning workspace
 // flattened onto the row, so the collection hangs off a Workspace in one hop
 // rather than through a four-level path no `on` condition can express.
-entity TaskQueueItem as
+entity TaskQueueItem     as
   select from Task {
     key ID,
 
         @Common.Label: '{i18n>TaskQueueItem.stepCode}'
-        step.code                         as stepCode           : String(30),
+        step.code                                                       as stepCode           : String(30),
 
         @Common.Label: '{i18n>TaskQueueItem.stepName}'
-        step.name                         as stepName           : String(60),
+        step.name                                                       as stepName           : String(60),
 
         @Common.Label: '{i18n>TaskQueueItem.stepPosition}'
-        position                          as stepPosition       : Integer,
+        position                                                        as stepPosition       : Integer,
 
         @Common.Label: '{i18n>TaskQueueItem.driver}'
-        step.driver                       as driver             : String(30),
+        step.driver                                                     as driver             : String(30),
+
+        @Common.Label: '{i18n>TaskQueueItem.kindCode}'
+        kind.code                                                       as kindCode           : String(30),
+
+        @Common.Label: '{i18n>TaskQueueItem.requiresHuman}'
+        requiresHuman,
 
         @Common.Label: '{i18n>TaskQueueItem.statusCode}'
-        status.code                       as statusCode         : String(30),
+        status.code                                                     as statusCode         : String(30),
 
         startedAt,
 
         @Common.Label: '{i18n>TaskQueueItem.milestoneId}'
-        milestone.ID                      as milestoneId        : UUID,
+        milestone.ID                                                    as milestoneId        : UUID,
 
         @Common.Label: '{i18n>TaskQueueItem.storyId}'
-        milestone.storyId                 as storyId            : String(30),
+        milestone.storyId                                               as storyId            : String(30),
+
+        // '/' must match REFERENCE.STORY_SEPARATOR in srv/modules/shared/constants.ts.
+        @Common.Label: '{i18n>TaskQueueItem.story}'
+        milestone.initiative.workspace.slug || '/' || milestone.storyId as story              : String(61),
 
         @Common.Label: '{i18n>TaskQueueItem.milestonePosition}'
-        milestone.position                as milestonePosition  : Integer,
+        milestone.position                                              as milestonePosition  : Integer,
 
         @Common.Label: '{i18n>TaskQueueItem.initiativeId}'
-        milestone.initiative.ID           as initiativeId       : UUID,
+        milestone.initiative.ID                                         as initiativeId       : UUID,
 
         @Common.Label: '{i18n>TaskQueueItem.initiativePosition}'
-        milestone.initiative.position     as initiativePosition : Integer,
+        milestone.initiative.position                                   as initiativePosition : Integer,
 
         @Common.Label: '{i18n>TaskQueueItem.workspaceId}'
-        milestone.initiative.workspace.ID as workspaceId        : UUID
+        milestone.initiative.workspace.ID                               as workspaceId        : UUID
   }
   where
     status.code <> 'complete';
+
+entity CompletedTaskItem as
+  select from Task {
+    key ID,
+
+        // '/' must match REFERENCE.STORY_SEPARATOR in srv/modules/shared/constants.ts.
+        @Common.Label: '{i18n>CompletedTaskItem.story}'
+        milestone.initiative.workspace.slug || '/' || milestone.storyId as story       : String(61),
+
+        @Common.Label: '{i18n>CompletedTaskItem.stepCode}'
+        step.code                                                       as stepCode    : String(30),
+
+        @Common.Label: '{i18n>CompletedTaskItem.stepName}'
+        step.name                                                       as stepName    : String(60),
+
+        @Common.Label: '{i18n>CompletedTaskItem.completedAt}'
+        completedAt,
+
+        @Common.Label: '{i18n>CompletedTaskItem.workspaceId}'
+        milestone.initiative.workspace.ID                               as workspaceId : UUID
+  }
+  where
+    completedAt is not null;

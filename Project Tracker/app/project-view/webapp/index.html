@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Project View</title>
+
+  <!-- Boots the component on its own: the shared shell is Financial Planner's, and joining it is a later story. -->
+  <script id="sap-ui-bootstrap" src="https://ui5.sap.com/1.136.16/resources/sap-ui-core.js"
+    data-sap-ui-theme="sap_horizon" data-sap-ui-compatVersion="edge" data-sap-ui-async="true" data-sap-ui-resourceroots='{
+      "com.lifeos.projecttracker.projectview": "./",
+      "com.lifeos.shared": "../../lifeos-shared/"
+    }' data-sap-ui-xx-cssVariables="true" data-sap-ui-libs="sap.m, sap.f, sap.uxap"
+    data-sap-ui-oninit="module:sap/ui/core/ComponentSupport"></script>
+
+  <style>
+    html,
+    body,
+    #content {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+</head>
+
+<body class="sapUiBody sapUiSizeCompact" id="content">
+  <div data-sap-ui-component data-name="com.lifeos.projecttracker.projectview" data-id="projectViewContainer"
+    data-height="100%" data-settings='{ "id": "projectView" }' style="height: 100%"></div>
+</body>
+
+</html>

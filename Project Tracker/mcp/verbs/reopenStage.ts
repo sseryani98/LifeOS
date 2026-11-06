@@ -82,7 +82,11 @@ export class ReopenStageVerb implements VerbDefinition {
       );
       const updated = await gateway.readChain(milestone.ID);
       return {
-        nextAction: TargetResolver.resolveNextAction(updated, milestone.storyId),
+        nextAction: TargetResolver.resolveNextAction(
+          updated,
+          workspace.slug,
+          milestone.storyId,
+        ),
       };
     });
   }

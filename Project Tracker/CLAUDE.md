@@ -14,8 +14,8 @@ Sandro is the user. The agents are instruments writing into it, not users (D-04)
 **Build is under way. Which story is where lives in [PLAN.md](PLAN.md)'s Status line only** — it is
 not restated here, because three copies of it drifted apart within a day. The module now has a CDS model, one CAP service, a read
 projection and an MCP verb server, plus a one-time migration (`srv/modules/migration/`, run by
-`npm run migrate-financial-planner`, D-251). It still has **no UI** — `app/` is empty by design and
-`SPEC-04` fills it.
+`npm run migrate-financial-planner`, D-251). Its first UI5 app, `app/project-view/`, is built by
+`SPEC-04` (uncommitted).
 
 What this means concretely:
 
@@ -27,14 +27,14 @@ What this means concretely:
   referential integrity is **live and measured**: an unseeded code is rejected with Postgres `23503`
   (D-229). **The methodology library and all twelve code lists are seeded** from `db/data/*.csv` by
   `cds deploy` (`SPEC-02` CNV-001); the migrated workspace is loaded by `npm run migrate-financial-planner`
-  (`SPEC-03`, uncommitted).
+  (`SPEC-03`, committed `354dfd8`).
 - **`npm test` is green**, across five tiers: unit, integration (both
   entry points), protocol, script, and the `scenarios` tier that executes the functional units of
   `SPEC-01` (16), `SPEC-02` (19) and `SPEC-03` (12) through a real MCP client (D-238). Coverage carries the global band plus **three** per-layer bands
   — Validators 100/100, Services 90/85, verbs 90/85. `./scripts/**/*.ts` still has none, and lands
   with `SPEC-09` (D-215, D-224) — though a `.ts` now sits under that glob (`migrateFinancialPlanner.ts`,
   D-251) with no band yet.
-- **`npm run lint` checks real code now.** Twenty-three linters over `srv/`, `mcp/`, `scripts/` and the
+- **`npm run lint` checks real code now.** Twenty-three linters over `srv/`, `mcp/`, `scripts/`, `app/` and the
   test tree. `mcp/` was invisible to four of them until `SPEC-01` added it (D-225) — and to ESLint
   itself until 2026-10-30, when the leg became `eslint .` (that claim was phantom until then).
 - **The verb server runs as its own process.** `npm run install-mcp` writes the gitignored
@@ -78,7 +78,7 @@ Planner only (D-11).
 
 ## Folder Structure
 
-`app/` is still empty and the stage that fills it is named, because a folder tree that looks
+`app/` holds one app and the stage that built it is named, because a folder tree that looks
 populated when it is not is the thing most likely to mislead the next agent here.
 
 ```text
@@ -95,7 +95,7 @@ jest.config.ts               The runner config; setupFiles carries the CDS_TYPES
 PLAN.md                      Continuity document — where the module is, what happens next
 PRD.md                       Full product design; slice 1 is a small fraction of it
 design/                      PSV, BUSINESS_ARCHITECTURE, specs/, IA, DESIGN_SYSTEM, THEME, DATA_MODEL, TECH_STACK, TEST_STRATEGY, DECISIONS_LOG
-research/                    Six research docs + README.md (pack index, risk register, gate verdict)
+research/                    Seven research docs + README.md (pack index, risk register, gate verdict)
 dashboard/                   The v1 HTML generator. Deleted by CNV-005 at cutover (D-02) — not yet
 db/                          One folder per domain, same layout as Financial Planner. No story after SPEC-01 adds an entity (D-205)
   common/common.cds          The local CodeList aspect
@@ -109,7 +109,7 @@ srv/
   tracker-service.ts         Entry point; registers the facade
   _i18n/                     i18n.properties (labels) + messages.properties (runtime keys)
   modules/shared/            baseFacade, logger, messagingUtility, constants
-  modules/tracker/           Facade / Service / DataService / Validator / Mapper + milestoneStatus
+  modules/tracker/           Facade / Service / DataService / Validator / Mapper + milestoneStatus, nextActionResolver, projectView{Service,DataService,Mapper}, constants
   modules/migration/         Service / DataService / Validator / Mapper + the embedded Financial Planner snapshot (D-251)
 mcp/                         A SIBLING of srv/, not under it (D-44)
   server.ts                  Bootstrap, stdout guard, tool registration, transport. Excluded from coverage
@@ -117,7 +117,7 @@ mcp/                         A SIBLING of srv/, not under it (D-44)
 scripts/
   installMcpServer.mjs       Writes the gitignored .mcp.json registration (D-224)
   migrateFinancialPlanner.ts The one-time CNV-002 → 003 → 004 load (D-251)
-app/                         (empty)  ← SPEC-04 builds the one FPM page
+app/project-view/            The one FPM page (SPEC-04): annotations/, webapp/, ui5.yaml, ui5-test.yaml
 test/                        setEnv.ts (the lever) + {unit,integration,protocol,script,shared}/ — TST-001 §12
   integration/scenarios/     One spec per functional unit, named by its identifier. Stage 4's evidence (D-238)
 ```
@@ -128,9 +128,9 @@ Where this module departs from what Financial Planner does, and why.
 
 - **No UI5 linter script, and no `@ui5/linter` dependency.** The planner's is `cd
 app/admin-master-data && ui5lint` — a named app folder sitting inside a block the root `CLAUDE.md`
-  describes as already module-relative. There is no app to point it at yet. Both return with the
-  first UI5 app.
-- **A `test` script but no `posttest`, and no `record-test-run` yet.** `posttest` cannot record a
+  describes as already module-relative. The first UI5 app (`app/project-view/`) now exists and neither has
+  returned yet.
+- **`posttest` runs only the UI5 gate (D-267), and there is no `record-test-run` yet.** `posttest` cannot record a
   failing run — npm skips a `post` script when the main one exits non-zero (D-107, D-196) — so both
   gate call sites will invoke `record-test-run` explicitly instead, from `SPEC-09`, which is also when
   the `scripts/recordTestRun.ts` it points at exists (D-213).

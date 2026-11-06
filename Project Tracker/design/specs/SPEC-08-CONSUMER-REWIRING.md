@@ -23,6 +23,7 @@ first spec to rule it out rather than inherit it. ~~**Not Approved-for-build unt
 | 2026-11-04 | Claude          | Doc refresh: R1 marked executed and closed (D-170) in the header and wherever this spec gated on it; CDS Service named (`TrackerService`). No rule, FUT or count changed. Status unchanged. |
 | 2026-11-04 | Claude          | `/refresh-docs` after SPEC-03 build: seeded Defect count four → 27 (D-001 … D-027) in one FUT precondition (SPEC-03 re-baseline, D-249). No rule changed. |
 | 2026-11-05 | Claude          | `/refresh-docs`: §3 `test-quality.js` row, BR-13a and BR-13b follow the workflow's UI5 gate change — its full run is `npx jest --coverage` plus a separate `test:ui5`, not `npm test`. The record-after-full-run-only rule is unchanged. |
+| 2026-11-05 | Claude          | `/refresh-docs`: §2's "no DM-001 yet" annotated — DM-001 exists. |
 
 ---
 
@@ -57,7 +58,7 @@ the chain is new instruction rather than a repoint (D-102, BR-11a).
 
 ## 2. Data Model References
 
-**There is no DM-001 yet.** Workshops is stage 5 and Data Model is stage 9, so this section is an
+**There is no DM-001 yet.** _(Annotated 2026-11-05: DM-001 now exists — [`design/DATA_MODEL.md`](../DATA_MODEL.md).)_ Workshops is stage 5 and Data Model is stage 9, so this section is an
 **input to** the data model rather than a reference to it (D-43). Every entity and attribute below is
 a requirement this spec places on the Data Model stage.
 
@@ -201,8 +202,8 @@ header**. `.claude/skills/human-review-loop/SKILL.md:122` reads
   SPEC-05 BR-20 (the Active Initiative with the highest `position`).
 
 Ad-hoc mode is what the tenth SPEC-01 amendment exists for. That `log_defect` demands a story the
-Sprint-scoped record never had was found at the SPEC-03 workshop (`DECISIONS_LOG.md:389`,
-`SPEC-03:34`) and answered for the **migration only** — D-58 routed it through the CAP service layer,
+Sprint-scoped record never had was found at the SPEC-03 workshop (`DECISIONS_LOG.md:391`,
+`SPEC-03:39`) and answered for the **migration only** — D-58 routed it through the CAP service layer,
 which is correct for a one-time Conversion and silent about every caller after it (D-96).
 
 **Identity — `sandro`** (D-99). `/human-review-loop` calls `log_defect` under identity **`sandro`**, on
@@ -238,7 +239,7 @@ half — ESLint rule, custom linter, hook, memory file — is unchanged and writ
 - **BR-10** `/build` with a non-empty argument resolves it against `project_view`'s Milestone list. One match wins; otherwise the command asks.
 - **BR-11** Handoff calls **`complete_subtask` on `handoff` first, then `complete_stage` on `sprint-build`** — in that order, at both call sites (the Handoff agent's prompt and `implementer.md`'s Handoff mode). The reverse order would leave `handoff` open and turn SPEC-01 BR-11's subtask warning into the normal case.
 - **BR-11a** The workflow calls **`start_stage` on `sprint-build`** before its first phase, and each completing phase calls **`complete_subtask`** on its own slug — `brief`, `red`, `implement`, `gate`, `coverage`, `smoke`, `handoff` (SPEC-02 §3.1). Without both, BR-11's Handoff pair is refused: SPEC-02 BR-24 rejects `complete_subtask` under a Not Started parent, and SPEC-02 BR-25 rejects it while an earlier blocking Subtask is open.
-- **BR-11b** `smoke` is completed **only on a story where it was materialised** — SPEC-02 §3.1 makes it Conditional on `shipsUi`, and `build.js:666` already runs the phase only for a frontend story, so the two predicates are the same one (D-47, D-48). A backend story's chain has six Subtasks, not seven.
+- **BR-11b** `smoke` is completed **only on a story where it was materialised** — SPEC-02 §3.1 makes it Conditional on `shipsUi`, and `build.js:960` already runs the phase only for a frontend story, so the two predicates are the same one (D-47, D-48). A backend story's chain has six Subtasks, not seven.
 - **BR-12** The rewired call-site identities are **`implementer`** (the Handoff agent, the Implementer, and the workflow's own `start_stage` / `complete_subtask` calls), **`build-briefer`** (the briefer) and **`gate-runner`** (the test-quality gate agent). `/pm-update` calls `project_view` under **`pm-update`**; `/human-review-loop` calls `log_defect` under **`sandro`** (BR-25).
 - **BR-13** `test-quality.js`'s gate agent is instructed to take coverage numbers from the **console table**, and no longer to read a markdown report under `project/test-reports/`. When the table is truncated it reads **`coverage/coverage-summary.json`** — the same file `recordTestRun.ts` itself reads ([SPEC-09](SPEC-09-TEST-REPORT-TO-TESTRUN.md) BR-04), so the fallback is the source of truth rather than a rendering of it, and `gate-runner`'s existing `Read` grant covers it. **The `TestRun` is not a source here and cannot be**: `posttest` fires after `npm test` exits, so at the moment the gate agent reports, its own run's `TestRun` does not yet exist (D-107). **The `TestRun` write is INT-004's, not this spec's.**
 - **BR-13a** Both gate call sites invoke **`npm run record-test-run`** after their full test run — `npm test` in `build.js`, `npx jest --coverage` in `test-quality.js` (amended 2026-11-05: the workflow runs `test:ui5` as its own leg rather than through `posttest`) — **without regard to whether the suite passed**. `posttest` alone cannot carry INT-004: npm skips a `post` script when the main script exits non-zero, so a failing run — the one worth recording — would never be written, and `build.js`'s phase-3 gate is deliberately red. The double write on a passing run is absorbed by [SPEC-09](SPEC-09-TEST-REPORT-TO-TESTRUN.md) BR-20's idempotence, not by a conditional an instruction could get wrong. The run is written under **INT-004's own identity** (SPEC-09 BR-17), not the invoking agent's (D-107).
@@ -297,8 +298,8 @@ input there is nothing to resolve and no row to attempt, so the entity-level at-
 SPEC-03 BR-21 is unreachable from this path. **Added to SPEC-01 §5 by this spec's tenth amendment**
 (D-96), alongside the amended `log_defect` signature and SPEC-01 BR-18a.
 
-**The gap it closes was already on the record.** `DECISIONS_LOG.md:389` (D-58's Context) names it
-verbatim — "`log_defect` requires a `story` and the defect log records only a Sprint" — and `SPEC-03:34`
+**The gap it closes was already on the record.** `DECISIONS_LOG.md:391` (D-58's Context) names it
+verbatim — "`log_defect` requires a `story` and the defect log records only a Sprint" — and `SPEC-03:39`
 repeats it. D-58 routed **around** it for the migration alone, which is a legitimate ruling for a
 one-time Conversion but left the ongoing path unfixed; INT-005 is the first object to walk into it
 (D-96).

@@ -1,4 +1,5 @@
 import { CODES } from "../../../srv/modules/shared/constants.js";
+import { NextActionResolver } from "../../../srv/modules/tracker/nextActionResolver.js";
 
 import { GUARD, HTTP, VERB_KEYS, WFL_KEYS } from "./constants.js";
 import { Envelope } from "./envelope.js";
@@ -108,12 +109,10 @@ export class StageGuards {
    * @param task The stage the caller addressed.
    */
   static assertStageNotBlocked(chain: ChainRow[], task: ChainRow): void {
-    const blocking = chain.filter(row =>
-      StageGuards._isOpenBlocker(
-        row,
-        task.stepPosition,
-        CODES.TASK_STATUS.COMPLETE,
-      ),
+    const blocking = NextActionResolver.listOpenBlockers(
+      chain,
+      task.stepPosition,
+      CODES.TASK_STATUS.COMPLETE,
     );
     if (blocking.length === 0) return;
     Envelope.rejectVerb(
@@ -191,12 +190,10 @@ export class StageGuards {
     subtasks: SubtaskRow[],
     subtask: SubtaskRow,
   ): void {
-    const blocking = subtasks.filter(row =>
-      StageGuards._isOpenBlocker(
-        row,
-        subtask.stepPosition,
-        CODES.SUBTASK_STATUS.COMPLETE,
-      ),
+    const blocking = NextActionResolver.listOpenBlockers(
+      subtasks,
+      subtask.stepPosition,
+      CODES.SUBTASK_STATUS.COMPLETE,
     );
     if (blocking.length === 0) return;
     Envelope.rejectVerb(
@@ -299,28 +296,5 @@ export class StageGuards {
       blocking.map(row => row.step_code).join(", "),
       drivers.join(", "),
     ]);
-  }
-
-  /**
-   * The blocking rule, named once so stages and steps cannot drift: an
-   * earlier row blocks unless it is Recommended or already complete.
-   * @param row The candidate blocker.
-   * @param position The library position of the row being transitioned.
-   * @param completeCode The status code that means the row is done.
-   * @returns Whether the row blocks the transition.
-   */
-  private static _isOpenBlocker(
-    row: Pick<
-      ChainRow | SubtaskRow,
-      "stepPosition" | "stepKind" | "status_code"
-    >,
-    position: number,
-    completeCode: string,
-  ): boolean {
-    return (
-      row.stepPosition < position &&
-      row.stepKind !== CODES.STEP_KIND.RECOMMENDED &&
-      row.status_code !== completeCode
-    );
   }
 }

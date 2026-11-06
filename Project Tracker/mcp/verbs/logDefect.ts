@@ -136,7 +136,11 @@ export class LogDefectVerb implements VerbDefinition {
         milestoneId: milestone.ID,
         initiativeId: null,
         target: Addressing.buildActivityTarget(workspace.slug, milestone.storyId),
-        nextAction: TargetResolver.resolveNextAction(chain, milestone.storyId),
+        nextAction: TargetResolver.resolveNextAction(
+          chain,
+          workspace.slug,
+          milestone.storyId,
+        ),
       };
     }
     const { workspace, initiative } = await TargetResolver.resolveActiveSprint(

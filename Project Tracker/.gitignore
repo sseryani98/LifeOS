@@ -20,3 +20,8 @@ default-env.json
 project_tracker
 project_tracker-shm
 project_tracker-wal
+
+# UI5 test leg artifacts (runUi5Gate.ts, ui5-test-runner.json)
+coverage-ui5/
+report-ui5/
+.nyc_output-ui5/

@@ -2,11 +2,10 @@ import { randomUUID } from "node:crypto";
 
 import { CODES, ENTITIES } from "../../../srv/modules/shared/constants.js";
 
-import { QUEUE } from "./constants.js";
 import type {
   ActivityEvent,
-  ChainRow,
   DefectRow,
+  DescribedChainRow,
   InitiativeRow,
   MilestoneRow,
   QueryRunner,
@@ -186,7 +185,7 @@ export class TrackerGateway {
    * @param milestoneId The milestone whose chain is wanted.
    * @returns The chain in its instantiated position order.
    */
-  async readChain(milestoneId: string): Promise<ChainRow[]> {
+  async readChain(milestoneId: string): Promise<DescribedChainRow[]> {
     const rows = (await this.runner.run(
       SELECT.from(ENTITIES.TASK)
         .columns(
@@ -197,13 +196,14 @@ export class TrackerGateway {
           "notes",
           "step_code",
           "step.name as stepName",
+          "step.description as stepDescription",
           "position as stepPosition",
           "kind_code as stepKind",
           "step.driver as driver",
           "requiresHuman",
         )
         .where({ milestone_ID: milestoneId }),
-    )) as ChainRow[];
+    )) as DescribedChainRow[];
     return rows.sort((left, right) => left.stepPosition - right.stepPosition);
   }
 
@@ -323,23 +323,17 @@ export class TrackerGateway {
   }
 
   /**
-   * Reads a workspace's incomplete stages, in resolution order.
+   * Reads a workspace's incomplete stages, in resolution order: the service's
+   * read handler fills each tier and sorts the rows, so nothing re-sorts here.
    * @param workspaceId The workspace to read.
    * @returns The queue rows.
    */
   async readTaskQueue(workspaceId: string): Promise<Record<string, unknown>[]> {
-    const rows = (await this.runner.run(
+    return (await this.runner.run(
       SELECT.from(ENTITIES.TASK_QUEUE_ITEM).where({
         workspaceId,
       }),
     )) as Record<string, unknown>[];
-    return rows.sort((left, right) => {
-      for (const key of QUEUE.ORDER) {
-        const delta = Number(left[key]) - Number(right[key]);
-        if (delta !== 0) return delta;
-      }
-      return 0;
-    });
   }
 
   /**

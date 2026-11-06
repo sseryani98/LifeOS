@@ -133,7 +133,7 @@ Authored in TypeScript, transpiled to classic `sap.ui.define` AMD at serve/build
 
 - **Playwright MCP** (`.mcp.json` at the Life OS root) validates all frontend work — after UI changes, navigate, screenshot, and verify rendering before marking done
 - `browser_evaluate` to inspect DOM/CSS variables/computed styles; `browser_snapshot` + `browser_click` for interaction
-- Local dev server: `npx cds watch` (Postgres per the `cds` block in `package.json`) at `http://localhost:4004`. Shell app: `http://localhost:4004/index.html` (Financial Planner; Project Tracker has no UI until SPEC-04)
+- Local dev server: `npx cds watch` (Postgres per the `cds` block in `package.json`) at `http://localhost:4004`. Shell app: `http://localhost:4004/index.html` (Financial Planner; Project Tracker serves `app/project-view/` from `npm start` on port 4005)
 
 ## Do NOT
 

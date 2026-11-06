@@ -223,7 +223,7 @@ export const ACTIVITY_EVENTS = {
   },
 } as const;
 
-/** Queue rows out of order, so a sort has something to do. */
+/** Queue rows out of position order, so a re-sort would show. */
 export const QUEUE_ROWS = [
   {
     ID: "queue-b",

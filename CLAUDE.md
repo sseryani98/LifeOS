@@ -17,7 +17,7 @@ test strategy are decided once here and inherited by every module.
 | Investment Assistant  | —                    | Planned                                          |
 | Wellness              | —                    | Planned — habits, journalling                    |
 
-The list is open-ended. Two modules exist, and the second is four stories into its build — so
+The list is open-ended. Two modules exist, and the second has four stories committed and a fifth (`SPEC-04`) built — so
 the conventions below are proven on one module and have only just _survived contact_
 with a second. Where Project Tracker has already falsified something, it is corrected in
 place below rather than carved out in the module.

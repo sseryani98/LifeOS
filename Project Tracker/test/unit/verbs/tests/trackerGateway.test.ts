@@ -75,13 +75,13 @@ describe("the verb layer's data access", () => {
     expect(milestones.map(row => row.storyId)).toEqual([...MILESTONE_ORDER]);
   });
 
-  /** The queue drives what to do next, so its order is the answer rather than a presentation detail. */
-  it("orders the queue by sprint, then story, then stage", async () => {
+  /** The service's read handler owns the queue's tier order; a re-sort here would throw the tiers away. */
+  it("keeps the queue in the order the service returned it", async () => {
     const gateway = new TrackerGateway(buildRecordingRunner([QUEUE_ROWS]));
 
     const queue = await gateway.readTaskQueue("workspace-1");
 
-    expect(queue.map(row => row.ID)).toEqual(["queue-a", "queue-c", "queue-b"]);
+    expect(queue.map(row => row.ID)).toEqual(["queue-b", "queue-c", "queue-a"]);
   });
 
   /** The candidate resolver walks workspaces in a fixed order, so the answer cannot depend on insert order. */

@@ -294,8 +294,8 @@ defect status `Open | Closed`.
 When promoted to a real module, Project Tracker follows the same "Adding a Module" checklist
 and inherits the shared stack, lint suite, and standards. The v1 generator's parser becomes
 the ingestion layer; the HTML views become UI5 views over an OData model. Namespace is
-**undecided** (`CLAUDE.md` §Undecided) — do not assume `com.lifeos.projecttracker` until
-Sandro rules on the cross-module namespace question.
+**`com.lifeos.projecttracker`** — settled by Project Tracker D-03 (root `CLAUDE.md` §Cross-Module
+Rulings).
 
 ---
 

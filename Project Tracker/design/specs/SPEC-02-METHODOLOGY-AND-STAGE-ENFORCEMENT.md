@@ -24,6 +24,7 @@ SQLite only. Approved as a design; **not Approved-for-build until R1 clears**.~~
 | 2026-11-02 | Sandro & Claude | **Creation status named and re-instantiation made structural** after the `/build` briefer blocked the spec a second time, on two holes: no document said how a caller of the Milestone create-handler states "created Done" — `db/schema.cds` has no status column and the service's `status` is read-only — and FUT-007's re-instantiation attempt had no reachable entry point, because BR-09 fires only on creation and a second create of the same `storyId` is refused first. Records **D-244 … D-246**. **BR-37 added**: creation status is carried by a create-only virtual `createdDone` on `TrackerService.Milestones`; §2 amendment 8, §3.2's Inputs row and Algorithm step 1 (D-244). **`wfl.chain.alreadyInstantiated` withdrawn**: BR-09, BR-13 and BR-31 amended, the Algorithm loses its step 2, §5 loses the row (D-245). **`storyId` is unique within the Workspace**, and the built per-Initiative check is a defect this spec's build fixes — §2 amendment 9 (D-246). **FUT-004 and FUT-007 amended.** 19 FUTs and 37 rules. Status stays **Approved**.                                                                                                   |
 | 2026-11-03 | Sandro & Claude | **FUT-017's precondition corrected** at the `/functional-test` re-run: it now requires `sprint-build` and `code-quality` Complete (BR-19). No rule or count change. |
 | 2026-11-04 | Claude          | Doc refresh: R1 marked closed (D-170) in the header, §1, §6 and the footer; CDS Service named (`TrackerService`); DM-001 noted as existing; OI-04/OI-05 resolutions cited (D-70, D-161); line and rule citations corrected (SKILL.md, build.js, SPEC-09 BR-12, FUT-004's fixture path); §2 amendment 9 marked fixed. **§2 amendment 10 added** (Sandro): `Task`/`Subtask` gain frozen `kind`, `position`, `requiresHuman`, matching DM-001 v1.3. No rule or FUT changed. Status stays **Approved**. |
+| 2026-11-05 | Claude          | `/refresh-docs`: §3.1 coverage citation re-cited `build.js:937` → `:1035`. |
 
 ---
 
@@ -141,7 +142,7 @@ Three seeding notes:
 
 - **`red` stays `red`** despite not being self-evident. `build.js`, `PLAN.md` §5 and BA-001 all call
   it that; a seed renaming it disagrees with all three.
-- **`coverage` is Required, not Conditional.** `build.js:937` always yields a coverage outcome — it
+- **`coverage` is Required, not Conditional.** `build.js:1035` always yields a coverage outcome — it
   returns `'thresholds met without a coverage phase'` when it skips the phase — so there is always
   something true to record (D-48).
 - **`gate` is one step.** `runGate` executes up to five times per story (at red, once per repair round

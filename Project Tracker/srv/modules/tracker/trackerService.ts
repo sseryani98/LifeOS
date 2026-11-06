@@ -12,6 +12,7 @@ import {
 import { PayloadList } from "../shared/payloadList.js";
 
 import { MilestoneStatus } from "./milestoneStatus.js";
+import { ProjectViewService } from "./projectViewService.js";
 import { TrackerDataService } from "./trackerDataService.js";
 import { TrackerMapper } from "./trackerMapper.js";
 import { TrackerValidator } from "./trackerValidator.js";
@@ -21,6 +22,7 @@ import type {
   LibraryStepRow,
   MilestonePayload,
   MilestoneRow,
+  ProjectViewRow,
   SubtaskInsertRow,
   TaskInsertRow,
   TestRunPayload,
@@ -36,11 +38,17 @@ import type {
 export class TrackerService {
   private readonly data: TrackerDataService;
   private readonly validator: TrackerValidator;
+  private readonly sections: ProjectViewService;
 
-  /** Wires the layer with its own data access and validator. */
-  constructor() {
+  /**
+   * Wires the layer with its own data access and validator.
+   * @param sections The project-view sections layer, shared with the handlers
+   *   that read the two section collections directly.
+   */
+  constructor(sections: ProjectViewService = new ProjectViewService()) {
     this.data = new TrackerDataService();
     this.validator = new TrackerValidator();
+    this.sections = sections;
   }
 
   /**
@@ -59,21 +67,19 @@ export class TrackerService {
   }
 
   /**
-   * Fills the derived scalars and the nested Milestone statuses of a read of the
-   * project view. The scalars stay null here: health and the next action are
-   * computed by engines that land in later stories, and this handler is the seam
-   * they fill rather than a second read path they would have to add.
+   * Fills the derived scalars, the nested Milestone statuses and the report's
+   * sections of a read of the project view. Every scalar starts null, so one no
+   * engine fills yet (health, the gate) reads as not computed rather than missing.
    * @param rows The project-view rows a read returned.
    */
-  async applyProjectViewDerivations(
-    rows: Record<string, unknown>[],
-  ): Promise<void> {
+  async applyProjectViewDerivations(rows: ProjectViewRow[]): Promise<void> {
     for (const row of rows) {
       for (const element of DERIVED_SCALARS) row[element] ??= null;
     }
     await this.applyMilestoneStatuses(
       TrackerMapper.listExpandedMilestones(rows),
     );
+    await this.sections.applyProjectViewSections(rows);
   }
 
   /**

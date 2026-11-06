@@ -1,11 +1,13 @@
-import { CODES } from "../../../srv/modules/shared/constants.js";
+import { NextActionResolver } from "../../../srv/modules/tracker/nextActionResolver.js";
 
 import { Addressing } from "./addressing.js";
 import { HTTP, VERB_KEYS } from "./constants.js";
 import { Envelope } from "./envelope.js";
 import type { TrackerGateway } from "./trackerGateway.js";
 import type {
+  CandidateChain,
   ChainRow,
+  DescribedChainRow,
   InitiativeRow,
   MilestoneRow,
   NextAction,
@@ -45,26 +47,45 @@ export class TargetResolver {
   }
 
   /**
-   * Resolves the next incomplete stage of a story, in library position order and
-   * regardless of kind. Null is a success: it means the chain is finished.
-   * @param chain The story's chain in library position order.
+   * Resolves a workspace's next action: the engine ranks the stories, then
+   * walks the winner. Null is a success: nothing is open in the workspace.
+   * @param workspaceSlug The workspace the stories belong to.
+   * @param stories Every story of the workspace with its positions and chain.
+   * @returns The next action, or null when no story holds an open stage.
+   */
+  static resolveCandidateAction(
+    workspaceSlug: string,
+    stories: CandidateChain[],
+  ): NextAction | null {
+    const resolved = NextActionResolver.resolveAcrossStories(stories);
+    if (!resolved) return null;
+    return TargetResolver._buildNextAction(
+      resolved.task,
+      resolved.tier,
+      Addressing.buildActivityTarget(workspaceSlug, resolved.story.storyId),
+    );
+  }
+
+  /**
+   * Resolves the next open stage of one story alone. Null is a success: the
+   * chain is finished, or the story never had one.
+   * @param chain The story's chain.
+   * @param workspaceSlug The workspace the story belongs to.
    * @param storyId The story the chain belongs to.
    * @returns The next action, or null when no stage remains.
    */
   static resolveNextAction(
-    chain: ChainRow[],
+    chain: DescribedChainRow[],
+    workspaceSlug: string,
     storyId: string,
   ): NextAction | null {
-    const next = chain.find(
-      row => row.status_code !== CODES.TASK_STATUS.COMPLETE,
+    const resolved = NextActionResolver.resolveStory(chain);
+    if (!resolved) return null;
+    return TargetResolver._buildNextAction(
+      resolved.task,
+      resolved.tier,
+      Addressing.buildActivityTarget(workspaceSlug, storyId),
     );
-    if (!next) return null;
-    return {
-      storyId,
-      stepCode: next.step_code,
-      label: next.stepName,
-      driver: next.driver,
-    };
   }
 
   /**
@@ -171,5 +192,31 @@ export class TargetResolver {
       );
     }
     return workspace;
+  }
+
+  /**
+   * Shapes a resolved stage into the payload every next-action consumer hands
+   * back. The driver is read live from the seeded step, never written here.
+   * @param task The resolved stage.
+   * @param tier Its story's tier.
+   * @param story The qualified story reference.
+   * @returns The next action.
+   */
+  private static _buildNextAction(
+    task: DescribedChainRow,
+    tier: number,
+    story: string,
+  ): NextAction {
+    return {
+      story,
+      stepCode: task.step_code,
+      name: task.stepName,
+      description: task.stepDescription,
+      kind: task.stepKind,
+      driver: task.driver,
+      requiresHuman: task.requiresHuman,
+      status: task.status_code,
+      tier,
+    };
   }
 }

@@ -80,3 +80,118 @@ export interface TestRunPayload {
   failed?: number | null;
   pending?: number | null;
 }
+
+/** A stage as the next-action engine reads it: its code, state, kind and place in the chain. */
+export interface StageFacts {
+  step_code: string;
+  status_code: string;
+  stepKind: string;
+  stepPosition: number;
+}
+
+/** A story as the candidate selector reads it: where it sits, and its stages. */
+export interface CandidateStory<T extends StageFacts = StageFacts> {
+  initiativePosition: number;
+  milestonePosition: number;
+  tasks: T[];
+}
+
+/** The engine's answer: the winning story, the stage within it, and the story's tier. */
+export interface CandidateResolution<S extends CandidateStory> {
+  story: S;
+  task: S["tasks"][number];
+  tier: number;
+}
+
+/** One stage of a workspace with everything the project-view sections render or order by. */
+export interface StageFactRow extends StageFacts {
+  ID: string;
+  milestone_ID: string;
+  requiresHuman: boolean;
+  completedAt: string | null;
+  stepName: string;
+  stepDescription: string;
+  driver: string;
+  storyId: string;
+  milestonePosition: number;
+  initiativePosition: number;
+  workspaceId: string;
+  workspaceSlug: string;
+}
+
+/** One story's chain as the project-view sections rank it. */
+export interface StoryStages extends CandidateStory<StageFactRow> {
+  milestoneId: string;
+}
+
+/** The project view's flat next-action elements. */
+export interface NextActionFields {
+  nextActionStory: string;
+  nextActionStepCode: string;
+  nextActionLabel: string;
+  nextActionDescription: string;
+  nextActionKind: string;
+  nextActionDriver: string;
+  nextActionRequiresHuman: boolean;
+  nextActionStatus: string;
+  nextActionTier: number;
+}
+
+/** A project-view row as its after-READ handler sees it, the two sections present only when expanded. */
+export interface ProjectViewRow {
+  ID?: string;
+  taskQueue?: QueueItemRow[];
+  recentCompletions?: CompletedItemList;
+  [element: string]: unknown;
+}
+
+/** An open task queue row; the tier and blocker are filled on read. */
+export interface QueueItemRow {
+  ID: string;
+  tier?: number | null;
+  blockerStepCode?: string | null;
+  [element: string]: unknown;
+}
+
+/** A recently completed row; the completer is filled on read. */
+export interface CompletedItemRow {
+  ID: string;
+  completedBy?: string | null;
+  [element: string]: unknown;
+}
+
+/** A read's recently completed rows, with the total a counted read carries. */
+export type CompletedItemList = CompletedItemRow[] & { $count?: number };
+
+/** A stage completion event as the completer lookup reads it. */
+export interface CompletionEventRow {
+  target: string;
+  actor_code: string;
+}
+
+/** The page a section read asked for, lifted off the query so the rows can be ranked whole first. */
+export interface SectionPage {
+  top?: number;
+  skip: number;
+}
+
+/** The slice of a section read's query that carries its page and its columns. */
+export interface SectionQuery {
+  SELECT?: {
+    limit?: { rows?: { val?: number }; offset?: { val?: number } };
+    columns?: { func?: string; as?: string }[];
+  };
+}
+
+/** The one row a bare `$count` read returns in place of the section's rows. */
+export interface SectionCountRow {
+  $count: number;
+}
+
+/** Where one open stage lands in the queue, and what it carries there. */
+export interface QueuePlacement {
+  rank: number;
+  position: number;
+  tier: number | null;
+  blockerStepCode: string | null;
+}

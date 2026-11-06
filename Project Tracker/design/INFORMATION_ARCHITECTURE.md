@@ -13,6 +13,7 @@
 | ---------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 2026-08-06 | Sandro & Claude | Initial creation from the Information Architecture stage. 6 UI-bearing objects onto 1 route with 1 optional parameter; 8 navigation links mapped; shell placement ruled; risk **R9 executed** and regraded `Inferred` → `Verified`. Records D-137 through D-143.                                                                                                                      |
 | 2026-08-06 | Sandro & Claude | **Status → Approved.** No amendment. The IA session ended without asking for approval, which was the one thing it left owed; Sandro approved it at the opening of the Design System stage. §5's deferral of build technology to stage 7 is discharged the same day by **D-144** — Fiori Elements FPM, drafts off — so this document's only forward-looking ruling now has its answer. |
+| 2026-11-05 | Claude          | `/refresh-docs`: Financial Planner shell measurements re-cited (`index.html` lines, 7 resource roots, `NAV_CONFIG` now in `shell/constants.ts`, `App.controller.ts:109-143`). |
 
 ---
 
@@ -215,18 +216,18 @@ in the existing shell**, not its own shell. Measured on disk this session:
 | Measurement                                       | Value                                                                                                                                                                                                                                                      |
 | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `Financial Planner/app/` directories              | **6** — `admin-master-data`, `connection-manager`, `csv-import-wizard`, `transactions`, `shell`, `shared`: **4** hosted app components, **1** shell, **1** shared library                                                                                  |
-| `Financial Planner/app/index.html` resource roots | **6** (`:18-23`), all **relative** (`./…`)                                                                                                                                                                                                                 |
-| UI5 runtime                                       | `https://ui5.sap.com/1.136.16/resources/sap-ui-core.js` (`:16`) — pinned **1.136.16**, matched by `minUI5Version` in **5 of the 6** manifests under `app/` — the sixth is `app/shared/manifest.json`, a `"type": "library"` with no `sap.ui5` block at all |
-| `app/shell/controller/NavConfig.ts`               | **18** entries, counted as object-literal keys, mapping to **4** distinct components                                                                                                                                                                       |
+| `Financial Planner/app/index.html` resource roots | **7** (`:19-25`), all **relative** (`./…`)                                                                                                                                                                                                                 |
+| UI5 runtime                                       | `https://ui5.sap.com/1.136.16/resources/sap-ui-core.js` (`:17`) — pinned **1.136.16**, matched by `minUI5Version` in **5 of the 6** manifests under `app/` — the sixth is `app/shared/manifest.json`, a `"type": "library"` with no `sap.ui5` block at all |
+| `app/shell/constants.ts` (`NAV_CONFIG`)          | **18** entries, counted as object-literal keys, mapping to **4** distinct components                                                                                                                                                                       |
 | `app/shell/view/App.view.xml`                     | **2** top-level nav groups (Transactions, Admin) and **18** leaf entries                                                                                                                                                                                   |
 | Project Tracker adds                              | A **third** group with **one** entry                                                                                                                                                                                                                       |
 
-A `grep -c "component:"` over `NavConfig.ts` returns **19** because the `NavEntry` interface declares
-the field at `NavConfig.ts:6`. The literal count is **18**; the grep figure is recorded here only so
+A `grep -c "component:"` over `NavConfig.ts` returned **19** because the `NavEntry` interface declared
+the field at `NavConfig.ts:6` _(Annotated 2026-11-05: the map now lives in `app/shell/constants.ts:12` and `NavEntry` in `app/shell/types.ts`.)_ The literal count is **18**; the grep figure is recorded here only so
 the next reader does not "correct" the right number.
 
 **Mount mechanism.** A `sap.ui.core.ComponentContainer` per component, cached, then
-`component.getRouter().navTo(route, {}, true)` — `app/shell/controller/App.controller.ts:87-112`. The
+`component.getRouter().navTo(route, {}, true)` — `app/shell/controller/App.controller.ts:109-143`. The
 shell itself has **no router**; routing is delegated to each hosted component. Project Tracker's
 component supplies its own router and its own `project-view` route, which is what §4's parameter
 lives on.
@@ -235,7 +236,7 @@ lives on.
 
 Measured: the shell is namespaced `com.financialplanner.shell` throughout — `app/shell/manifest.json:3`,
 `app/shell/package.json:2`, `app/shell/Component.ts:8`, `app/shell/tsconfig.json:10`, and both
-references in `app/index.html` (`:18`, `:46`). Nothing outside Financial Planner references it.
+references in `app/index.html` (`:19`, `:48`). Nothing outside Financial Planner references it.
 
 **Ruling: the shell stays where it is.** Project Tracker registers its component into
 `Financial Planner/app/index.html`'s resource roots and into `NavConfig.ts`.

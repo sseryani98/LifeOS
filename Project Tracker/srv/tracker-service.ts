@@ -1,5 +1,6 @@
 import cds from "@sap/cds";
 
+import { ProjectViewService } from "./modules/tracker/projectViewService.js";
 import { TrackerFacade } from "./modules/tracker/trackerFacade.js";
 import { TrackerService as TrackerLogic } from "./modules/tracker/trackerService.js";
 
@@ -10,7 +11,12 @@ export default class TrackerService extends cds.ApplicationService {
    * @returns Resolves once base service initialization completes.
    */
   async init(): Promise<void> {
-    new TrackerFacade(this, new TrackerLogic()).registerHandlers();
+    const sections = new ProjectViewService();
+    new TrackerFacade(
+      this,
+      new TrackerLogic(sections),
+      sections,
+    ).registerHandlers();
     return super.init();
   }
 }

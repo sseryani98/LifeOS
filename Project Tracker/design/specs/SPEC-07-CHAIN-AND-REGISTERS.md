@@ -23,6 +23,7 @@ Architecture stage, 2026-08-06 (D-140, D-141).** ~~**Not Approved-for-build unti
 | 2026-11-04 | Claude          | Doc refresh: R1 marked executed and closed (D-170) in the header and wherever this spec gated on it; CDS Service named (`TrackerService`). No rule, FUT or count changed. Status unchanged. |
 | 2026-11-04 | Claude          | `/refresh-docs` after SPEC-03 build: Defect counts four → 27 and the seeded Open defect D-004 → D-021 … D-027 in §2 Day one and FUT-008 … FUT-010 and the scope FUT (SPEC-03 re-baseline, D-249). BR-20 and BR-33 left as written — pending decision. No rule changed. |
 | 2026-11-04 | Sandro & Claude | **D-254, D-255:** BR-33 (no register controls) and BR-20 (`description` on expansion) both stand at 27 Defects; their rationale is re-grounded, since the 4-row volume and D-004's product fork no longer hold. |
+| 2026-11-05 | Claude          | `/refresh-docs`: §2's "no DM-001 yet" annotated — DM-001 exists. |
 
 ---
 
@@ -44,7 +45,7 @@ refused (D-89).
 
 ## 2. Data Model References
 
-**There is no DM-001 yet.** Workshops is stage 5 and Data Model is stage 9, so this section is an
+**There is no DM-001 yet.** _(Annotated 2026-11-05: DM-001 now exists — [`design/DATA_MODEL.md`](../DATA_MODEL.md).)_ Workshops is stage 5 and Data Model is stage 9, so this section is an
 **input to** the data model rather than a reference to it (D-43). Every entity and attribute below is
 a requirement this spec places on the Data Model stage.
 

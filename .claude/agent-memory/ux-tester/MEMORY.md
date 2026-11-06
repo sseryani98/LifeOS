@@ -77,3 +77,7 @@ the findings likely to repeat there.
 - FE column alignment is type-derived (timestamps/numbers end-align, text begin-aligns) — not a
   defect unless a design doc specifies otherwise. A D-020 "Last Sync right-aligned" finding led to a
   manifest override that Human Review reverted (2026-11-04); `lint:default-attrs` now bans it.
+
+## Project Tracker
+- `app/project-view/webapp/index.html` boots the component standalone (no shell), so FP `theme-overrides.css` is NOT loaded: card radius 16px, canvas `#F5F6F7`, font 72. Theme (THEME.md §7) cannot be judged there; report it as unverifiable, not as defects. Server port is 4005 (`npm start`), URL `/project-view/webapp/index.html`.
+- Force UI state for review via `sap.ui.getCore().byId(layoutId).getModel('ui').setProperty('/readFailed', true)`; the OData context is read-only (setProperty throws). The error MessageStrip sits in ObjectPage `headerContent`, so it vanishes when the header snaps.

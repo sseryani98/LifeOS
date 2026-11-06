@@ -13,6 +13,7 @@ export const EXPECTED_STAGE_STEPS = [
   {
     code: "sprint-build",
     name: "Sprint Build",
+    description: "Build the story end to end: brief, red tests, implementation, gate and coverage",
     position: 10,
     kind_code: "Required",
     conditional: null,
@@ -58,6 +59,7 @@ export const EXPECTED_STAGE_STEPS = [
   {
     code: "human-review",
     name: "Human Review",
+    description: "Sandro reads the diff and every finding is fixed and prevented",
     position: 60,
     kind_code: "Required",
     conditional: null,

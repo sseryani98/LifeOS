@@ -39,7 +39,8 @@
   "ui5": {
     "ui5parser": {
       "proxyWorkspaces": [
-        "Financial Planner"
+        "Financial Planner",
+        "Project Tracker"
       ]
     }
   }

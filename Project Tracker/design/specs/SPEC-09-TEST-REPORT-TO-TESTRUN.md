@@ -17,6 +17,7 @@ precedent). ~~**Not Approved-for-build until R1 clears.**~~ **R1 executed and cl
 | 2026-07-30 | Sandro & Claude | Initial creation from the SPEC-09 workshop. Records **D-103 … D-108**. **Second Wave 3 spec** and the **second standalone** one. [SPEC-01](SPEC-01-MCP-INTENT-VERB-LAYER.md)'s **eleventh** amendment applied in-session by the main thread (D-104, D-105, D-106): `record_test_run` gains a `workspace` mode, **BR-20a** and **BR-20b**, `verb.testrun.scopeRequired`, `startTime` → `executedAt`, and `location` dropped from the per-failure shape. [SPEC-02](SPEC-02-METHODOLOGY-AND-STAGE-ENFORCEMENT.md) BR-29 and its §3.1 guard row scoped to story mode; [SPEC-05](SPEC-05-WORKSPACE-HEADER-AND-HEALTH.md) §2 amendment 1 corrected to **not null**; [SPEC-08](SPEC-08-CONSUMER-REWIRING.md) BR-13 amended and **BR-13a … BR-13c** added, and SPEC-08 flipped to **Approved** (D-103). [SPEC-03](SPEC-03-FINANCIAL-PLANNER-MIGRATION-LOAD.md) §6's and SPEC-05 §6's rows to SPEC-09 discharged, and SPEC-08's raised row discharged. **SPEC-09 resolves no OI.** **Provisional on R1**; **R9 ruled out**. Two BA-001 corrections applied in-session, listed in §6. |
 | 2026-08-04 | Sandro & Claude | **Status → Approved** at the SPEC-10 workshop (**D-109**). It owed nothing at writing, was reviewed line-by-line after the writer returned, and no decision held it in Draft — [D-93](../DECISIONS_LOG.md)'s Draft ruling is scoped to [SPEC-01](SPEC-01-MCP-INTENT-VERB-LAYER.md) alone. Its §6 row owed to SPEC-10 is discharged in the same session; amending an Approved spec in-session is the established path ([SPEC-02](SPEC-02-METHODOLOGY-AND-STAGE-ENFORCEMENT.md), [SPEC-03](SPEC-03-FINANCIAL-PLANNER-MIGRATION-LOAD.md) and [SPEC-05](SPEC-05-WORKSPACE-HEADER-AND-HEALTH.md) each carry one), so approval costs the amendment nothing. |
 | 2026-11-04 | Claude          | Doc refresh: R1 marked executed and closed (D-170) in the header and wherever this spec gated on it; CDS Service named (`TrackerService`). No rule, FUT or count changed. Status unchanged. |
+| 2026-11-05 | Claude          | `/refresh-docs`: §2's "no DM-001 yet" annotated — DM-001 exists. |
 
 ---
 
@@ -34,7 +35,7 @@ and the Jest JSON mapping.
 
 ## 2. Data Model References
 
-**There is no DM-001 yet.** Workshops is stage 5 and Data Model is stage 9, so this section is an
+**There is no DM-001 yet.** _(Annotated 2026-11-05: DM-001 now exists — [`design/DATA_MODEL.md`](../DATA_MODEL.md).)_ Workshops is stage 5 and Data Model is stage 9, so this section is an
 **input to** the data model rather than a reference to it (D-43). Every entity and attribute below is
 a requirement this spec places on the Data Model stage.
 
